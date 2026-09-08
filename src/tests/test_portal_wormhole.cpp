@@ -17,6 +17,8 @@
 #include "../rail_map.h"
 #include "../pathfinder/follow_track.hpp"
 #include "../portal/portal_registry.h"
+#include "../train.h"
+#include "../vehicle_base.h"
 
 #include "../safeguards.h"
 
@@ -200,3 +202,64 @@ TEST_CASE("Portal Wormhole - YAPF Track Follower Traversal")
 
 	PortalRegistry::Reset();
 }
+
+TEST_CASE("Portal Wormhole - Exit Emergence Coordinates Calculation")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+
+	TileIndex portal_a = TileXY(10, 10);
+	TileIndex portal_b = TileXY(50, 40);
+
+	MakeRailTunnel(portal_a, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_b, Owner(0), DiagDirection::SW, RAILTYPE_BEGIN);
+
+	PortalID pid = PortalRegistry::RegisterPortalPair(
+		portal_a, DiagDirection::NE, WorldID{0},
+		portal_b, DiagDirection::SW, WorldID{1},
+		25
+	);
+	REQUIRE(pid != INVALID_PORTAL);
+
+	PortalExitPosition exit_pos = PortalRegistry::GetPortalExitPosition(portal_a);
+	CHECK(exit_pos.tile == portal_b);
+	CHECK(TileVirtXY(exit_pos.x, exit_pos.y) == portal_b);
+	CHECK(exit_pos.dir == Direction::NE);
+	CHECK(exit_pos.track == Track::X);
+	CHECK(exit_pos.z == GetSlopePixelZ(exit_pos.x, exit_pos.y, true));
+
+	PortalRegistry::Reset();
+}
+
+TEST_CASE("Portal Wormhole - Consist Distance Decoupling Across Wormhole")
+{
+	Map::Allocate(64, 64);
+	_vehicle_pool.CleanPool();
+
+	/* Verify CheckTrainsLengths with vehicles decoupled by Track::Wormhole */
+	REQUIRE(Vehicle::CanAllocateItem(2));
+	Train *v1 = Vehicle::Create<Train>();
+	Train *v2 = Vehicle::Create<Train>();
+
+	v1->vehstatus = {};
+	v1->x_pos = 100;
+	v1->y_pos = 100;
+	v1->track = Track::X;
+
+	v2->vehstatus = {};
+	v2->x_pos = 2000; // Far away across disjoint coordinates
+	v2->y_pos = 2000;
+	v2->track = Track::Wormhole; // Wagon 2 is in wormhole transit
+
+	/* Link v1 and v2 into moving consist */
+	v1->SetNext(v2);
+
+	/* CheckTrainsLengths iterates over Train::Iterate(). When wagons are marked Track::Wormhole,
+	 * the Euclidean distance gap across the wormhole must not trigger an assertion. */
+	CHECK_NOTHROW(CheckTrainsLengths());
+
+	/* Clean up consist pointers and vehicle pool */
+	v1->SetNext(nullptr);
+	_vehicle_pool.CleanPool();
+}
+

@@ -85,8 +85,8 @@ void CheckTrainsLengths()
 	for (const Train *v : Train::Iterate()) {
 		if (v->First() == v && !v->vehstatus.Test(VehState::Crashed)) {
 			for (const Train *u = v->GetMovingFront(), *w = v->GetMovingNext(); w != nullptr; u = w, w = w->GetMovingNext()) {
-				if (u->track != Track::Depot) {
-					if ((w->track != Track::Depot &&
+				if (u->track != Track::Depot && u->track != Track::Wormhole) {
+					if ((w->track != Track::Depot && w->track != Track::Wormhole &&
 							std::max(abs(u->x_pos - w->x_pos), abs(u->y_pos - w->y_pos)) != u->CalcNextVehicleOffset()) ||
 							(w->track == Track::Depot && TicksToLeaveDepot(u) <= 0)) {
 						ShowErrorMessage(GetEncodedString(STR_BROKEN_VEHICLE_LENGTH, v->index, v->owner), {}, WarningLevel::Critical);

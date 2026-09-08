@@ -12,6 +12,7 @@
 
 #include "../tile_type.h"
 #include "../direction_type.h"
+#include "../track_type.h"
 #include "../core/strong_typedef_type.hpp"
 #include <cstdint>
 
@@ -24,6 +25,16 @@ using PortalID = StrongType::Typedef<uint32_t, struct PortalIDTag, StrongType::C
 static constexpr PortalID INVALID_PORTAL = PortalID{ (uint32_t)-1 };
 static constexpr WorldID INVALID_WORLD   = WorldID{ (uint32_t)-1 };
 static constexpr WorldID DEFAULT_WORLD   = WorldID{ 0 };
+
+/** Vehicle emergence position upon exiting a portal wormhole gate. */
+struct PortalExitPosition {
+	TileIndex tile = INVALID_TILE;
+	int x = 0;
+	int y = 0;
+	int z = 0;
+	Direction dir = Direction::N;
+	Track track = Track::Begin;
+};
 
 /** Endpoint of a portal wormhole gate. */
 struct PortalEndpoint {

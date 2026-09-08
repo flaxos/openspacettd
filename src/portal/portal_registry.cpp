@@ -9,6 +9,10 @@
 
 #include "../stdafx.h"
 #include "portal_registry.h"
+#include "../tunnelbridge_map.h"
+#include "../tile_map.h"
+#include "../landscape.h"
+#include "../direction_func.h"
 
 std::unordered_map<TileIndex, PortalID> PortalRegistry::tile_to_portal;
 std::unordered_map<uint32_t, PortalLink> PortalRegistry::portal_links;
@@ -70,6 +74,48 @@ TileIndex PortalRegistry::GetOtherPortalEnd(TileIndex tile)
 
 	const PortalEndpoint *opp = link->GetOpposite(tile);
 	return opp != nullptr ? opp->tile : INVALID_TILE;
+}
+
+PortalExitPosition PortalRegistry::GetPortalExitPosition(TileIndex entry_tile)
+{
+	PortalExitPosition pos;
+	TileIndex exit_tile = GetOtherPortalEnd(entry_tile);
+	if (exit_tile == INVALID_TILE) return pos;
+
+	DiagDirection enter_dir = GetTunnelBridgeDirection(exit_tile);
+	DiagDirection exit_vdir = ReverseDiagDir(enter_dir);
+
+	/* OpenTTD tunnel visibility frames: NE=12, SE=8, SW=8, NW=12 */
+	static constexpr DiagDirectionIndexArray<uint8_t> tunnel_vis_frame{12, 8, 8, 12};
+	uint8_t frame = TILE_SIZE - tunnel_vis_frame[enter_dir];
+
+	int offset_x = 8;
+	int offset_y = 8;
+
+	switch (exit_vdir) {
+		case DiagDirection::NE:
+			offset_x = TILE_SIZE - 1 - frame;
+			break;
+		case DiagDirection::SE:
+			offset_y = frame;
+			break;
+		case DiagDirection::SW:
+			offset_x = frame;
+			break;
+		case DiagDirection::NW:
+			offset_y = TILE_SIZE - 1 - frame;
+			break;
+		default:
+			break;
+	}
+
+	pos.tile = exit_tile;
+	pos.x = TileX(exit_tile) * TILE_SIZE + offset_x;
+	pos.y = TileY(exit_tile) * TILE_SIZE + offset_y;
+	pos.z = GetSlopePixelZ(pos.x, pos.y, true);
+	pos.dir = DiagDirToDir(exit_vdir);
+	pos.track = DiagDirToDiagTrack(exit_vdir);
+	return pos;
 }
 
 uint32_t PortalRegistry::GetPortalVirtualLength(TileIndex tile)

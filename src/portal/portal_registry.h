@@ -61,6 +61,13 @@ public:
 	static TileIndex GetOtherPortalEnd(TileIndex tile);
 
 	/**
+	 * Calculate the vehicle emergence position and direction at the exit portal.
+	 * @param entry_tile The source portal tile the vehicle entered.
+	 * @return PortalExitPosition containing tile, x, y, z, direction, and track.
+	 */
+	static PortalExitPosition GetPortalExitPosition(TileIndex entry_tile);
+
+	/**
 	 * Get the virtual traversal length (in tiles) for the portal containing the given tile.
 	 * @param tile The portal tile.
 	 * @return Virtual length (defaults to 1 if not a portal).
