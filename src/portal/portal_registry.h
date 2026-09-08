@@ -11,6 +11,7 @@
 #define PORTAL_REGISTRY_H
 
 #include "portal_type.h"
+#include "../vehicle_type.h"
 #include <vector>
 #include <unordered_map>
 #include <optional>
@@ -94,6 +95,26 @@ public:
 	static size_t Count();
 
 	/**
+	 * Advance the transit progress counter for a vehicle traveling through a portal wormhole.
+	 * @param veh_id The vehicle ID.
+	 * @return The updated progress distance in movement units.
+	 */
+	static uint32_t AdvancePortalTransit(VehicleID veh_id);
+
+	/**
+	 * Get the current transit progress counter for a vehicle.
+	 * @param veh_id The vehicle ID.
+	 * @return Progress distance in movement units (or 0 if not tracked).
+	 */
+	static uint32_t GetPortalTransitProgress(VehicleID veh_id);
+
+	/**
+	 * Clear the transit progress counter for a vehicle upon emergence or deletion.
+	 * @param veh_id The vehicle ID.
+	 */
+	static void ClearPortalTransit(VehicleID veh_id);
+
+	/**
 	 * Clear all registered portals (for test isolation and new game setup).
 	 */
 	static void Reset();
@@ -101,6 +122,7 @@ public:
 private:
 	static std::unordered_map<TileIndex, PortalID> tile_to_portal;
 	static std::unordered_map<uint32_t, PortalLink> portal_links;
+	static std::unordered_map<uint32_t, uint32_t> vehicle_portal_progress;
 	static uint32_t next_portal_id;
 };
 

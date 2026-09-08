@@ -44,6 +44,9 @@
 #include "table/strings.h"
 #include "table/train_sprites.h"
 
+#include "portal/portal_registry.h"
+#include "portal/planet_manager.h"
+
 #include "safeguards.h"
 
 static Track ChooseTrainTrack(Train *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks, bool force_res, bool *got_reservation, bool mark_stuck);
@@ -86,7 +89,12 @@ void CheckTrainsLengths()
 		if (v->First() == v && !v->vehstatus.Test(VehState::Crashed)) {
 			for (const Train *u = v->GetMovingFront(), *w = v->GetMovingNext(); w != nullptr; u = w, w = w->GetMovingNext()) {
 				if (u->track != Track::Depot && u->track != Track::Wormhole) {
-					if ((w->track != Track::Depot && w->track != Track::Wormhole &&
+					/* Skip Euclidean distance check if either vehicle is in a portal wormhole,
+					 * or if the vehicles span across different worlds or portal endpoints. */
+					bool cross_portal = (u->tile != INVALID_TILE && w->tile != INVALID_TILE) &&
+						(PlanetManager::GetTileWorld(u->tile) != PlanetManager::GetTileWorld(w->tile) ||
+						 PortalRegistry::IsPortalTile(u->tile) || PortalRegistry::IsPortalTile(w->tile));
+					if ((w->track != Track::Depot && w->track != Track::Wormhole && !cross_portal &&
 							std::max(abs(u->x_pos - w->x_pos), abs(u->y_pos - w->y_pos)) != u->CalcNextVehicleOffset()) ||
 							(w->track == Track::Depot && TicksToLeaveDepot(u) <= 0)) {
 						ShowErrorMessage(GetEncodedString(STR_BROKEN_VEHICLE_LENGTH, v->index, v->owner), {}, WarningLevel::Critical);
@@ -3495,6 +3503,10 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 						} else {
 							chosen_track = prev->track;
 						}
+					} else if (IsTunnel(gp.new_tile)) {
+						/* When entering a tunnel (including a portal wormhole where prev may already have
+						 * reached the opposite end on another world), choose the track into the tunnel. */
+						chosen_track = bits;
 					} else {
 						/* Choose the track that leads to the tile where prev is.
 						 * This case is active if 'prev' is already on the second next tile, when 'v' just enters the next tile.
@@ -3577,7 +3589,32 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 				}
 			}
 		} else {
-			if (IsTileType(gp.new_tile, TileType::TunnelBridge) && VehicleEnterTile(v, gp.new_tile, gp.x, gp.y).Test(VehicleEnterTileState::EnteredWormhole)) {
+			if (PortalRegistry::IsPortalTile(v->tile)) {
+				uint32_t progress = PortalRegistry::AdvancePortalTransit(v->index);
+				uint32_t target = PortalRegistry::GetPortalVirtualLength(v->tile) * TILE_SIZE;
+				if (progress >= target) {
+					PortalExitPosition exit = PortalRegistry::GetPortalExitPosition(v->tile);
+					PortalRegistry::ClearPortalTransit(v->index);
+
+					v->tile = exit.tile;
+					v->track = exit.track;
+					v->direction = exit.dir;
+					v->z_pos = exit.z;
+					v->vehstatus.Reset(VehState::Hidden);
+
+					gp.x = exit.x;
+					gp.y = exit.y;
+					gp.old_tile = GetOtherTunnelBridgeEnd(exit.tile);
+					gp.new_tile = exit.tile;
+
+					if (v->IsMovingFront()) {
+						TryReserveRailTrack(exit.tile, exit.track);
+						CheckNextTrainTile(first);
+					}
+				} else {
+					continue;
+				}
+			} else if (IsTileType(gp.new_tile, TileType::TunnelBridge) && VehicleEnterTile(v, gp.new_tile, gp.x, gp.y).Test(VehicleEnterTileState::EnteredWormhole)) {
 				/* Perform look-ahead on tunnel exit. */
 				if (v->IsMovingFront()) {
 					TryReserveRailTrack(gp.new_tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(gp.new_tile)));
@@ -3640,7 +3677,7 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 		}
 
 		/* Do not check on every tick to save some computing time. */
-		if (v->IsMovingFront() && first->tick_counter % _settings_game.pf.path_backoff_interval == 0) CheckNextTrainTile(first);
+		if (v->IsMovingFront() && _settings_game.pf.path_backoff_interval > 0 && first->tick_counter % _settings_game.pf.path_backoff_interval == 0) CheckNextTrainTile(first);
 	}
 
 	if (direction_changed) first->tcache.cached_max_curve_speed = first->GetCurveSpeedLimit();

@@ -16,6 +16,7 @@
 
 std::unordered_map<TileIndex, PortalID> PortalRegistry::tile_to_portal;
 std::unordered_map<uint32_t, PortalLink> PortalRegistry::portal_links;
+std::unordered_map<uint32_t, uint32_t> PortalRegistry::vehicle_portal_progress;
 uint32_t PortalRegistry::next_portal_id = 1;
 
 PortalID PortalRegistry::RegisterPortalPair(
@@ -138,6 +139,22 @@ const PortalLink *PortalRegistry::GetPortalLinkByID(PortalID id)
 	return &it->second;
 }
 
+uint32_t PortalRegistry::AdvancePortalTransit(VehicleID veh_id)
+{
+	return ++vehicle_portal_progress[veh_id.base()];
+}
+
+uint32_t PortalRegistry::GetPortalTransitProgress(VehicleID veh_id)
+{
+	auto it = vehicle_portal_progress.find(veh_id.base());
+	return it != vehicle_portal_progress.end() ? it->second : 0;
+}
+
+void PortalRegistry::ClearPortalTransit(VehicleID veh_id)
+{
+	vehicle_portal_progress.erase(veh_id.base());
+}
+
 size_t PortalRegistry::Count()
 {
 	return portal_links.size();
@@ -147,5 +164,6 @@ void PortalRegistry::Reset()
 {
 	tile_to_portal.clear();
 	portal_links.clear();
+	vehicle_portal_progress.clear();
 	next_portal_id = 1;
 }

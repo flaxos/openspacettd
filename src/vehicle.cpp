@@ -64,6 +64,8 @@
 
 #include "table/strings.h"
 
+#include "portal/portal_registry.h"
+
 #include "safeguards.h"
 
 /** @{
@@ -826,6 +828,8 @@ void Vehicle::HandlePathfindingResult(bool path_found)
 /** Destroy all stuff that (still) needs the virtual functions to work properly */
 void Vehicle::PreDestructor()
 {
+	PortalRegistry::ClearPortalTransit(this->index);
+
 	if (CleaningPool()) return;
 
 	if (Station::IsValidID(this->last_station_visited)) {
