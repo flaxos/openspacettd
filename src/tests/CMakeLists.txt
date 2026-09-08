@@ -16,6 +16,7 @@ add_test_files(
     string_func.cpp
     test_main.cpp
     test_network_crypto.cpp
+    test_placement_restrictions.cpp
     test_planet_manager.cpp
     test_portal_wormhole.cpp
     test_script_admin.cpp

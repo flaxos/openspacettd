@@ -10,6 +10,7 @@
 #include "../stdafx.h"
 #include "planet_manager.h"
 #include "../map_func.h"
+#include "../table/strings.h"
 
 std::vector<PlanetRegion> PlanetManager::regions;
 std::unordered_map<uint32_t, size_t> PlanetManager::id_to_region_index;
@@ -137,4 +138,42 @@ size_t PlanetManager::Count()
 const std::vector<PlanetRegion> &PlanetManager::GetAllRegions()
 {
 	return regions;
+}
+
+CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing)
+{
+	if (Count() == 0) return CommandCost();
+
+	WorldID world = GetTileWorld(tile);
+	if (world == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase1_Core && is_raw) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_CORE_WORLD);
+	}
+	if (phase == WorldPhase::Phase3_Frontier && is_processing) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+	}
+
+	return CommandCost();
+}
+
+CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype)
+{
+	if (Count() == 0) return CommandCost();
+
+	WorldID world = GetTileWorld(tile);
+	if (world == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	WorldPhase phase = GetTilePhase(tile);
+	/* Tier 3 Vac-Train/Maglev depots cannot be constructed on Phase 3 Frontier worlds */
+	if (phase == WorldPhase::Phase3_Frontier && railtype == RAILTYPE_MAGLEV) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+	}
+
+	return CommandCost();
 }

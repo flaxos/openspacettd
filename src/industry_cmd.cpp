@@ -48,6 +48,7 @@
 #include "map_func.h"
 #include "script/api/script_event_types.hpp"
 #include "timer/timer.h"
+#include "portal/planet_manager.h"
 #include "timer/timer_game_calendar.h"
 #include "timer/timer_game_economy.h"
 #include "timer/timer_game_tick.h"
@@ -1575,11 +1576,16 @@ static CommandCost CheckIfIndustryTileSlopes(TileIndex tile, const IndustryTileL
  */
 static CommandCost CheckIfIndustryIsAllowed(TileIndex tile, IndustryType type, const Town *t)
 {
-	if (GetIndustrySpec(type)->behaviour.Test(IndustryBehaviour::Town1200More) && t->cache.population < 1200) {
+	const IndustrySpec *spec = GetIndustrySpec(type);
+
+	CommandCost planet_res = PlanetManager::CheckIndustryPlacement(tile, spec->IsRawIndustry(), spec->IsProcessingIndustry());
+	if (planet_res.Failed()) return planet_res;
+
+	if (spec->behaviour.Test(IndustryBehaviour::Town1200More) && t->cache.population < 1200) {
 		return CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200);
 	}
 
-	if (GetIndustrySpec(type)->behaviour.Test(IndustryBehaviour::OnlyNearTown) && DistanceMax(t->xy, tile) > 9) {
+	if (spec->behaviour.Test(IndustryBehaviour::OnlyNearTown) && DistanceMax(t->xy, tile) > 9) {
 		return CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_NEAR_TOWN_CENTER);
 	}
 

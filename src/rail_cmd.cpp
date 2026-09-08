@@ -37,6 +37,7 @@
 #include "table/strings.h"
 #include "table/railtypes.h"
 #include "table/track_land.h"
+#include "portal/planet_manager.h"
 
 #include "safeguards.h"
 
@@ -970,8 +971,14 @@ CommandCost CmdRemoveRailroadTrack(DoCommandFlags flags, TileIndex end_tile, Til
  */
 CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType railtype, DiagDirection dir)
 {
-	/* check railtype and valid direction for depot (0 through 3), 4 in total */
-	if (!ValParamRailType(railtype) || !IsValidDiagDirection(dir)) return CMD_ERROR;
+	/* check valid direction for depot (0 through 3), 4 in total */
+	if (!IsValidDiagDirection(dir)) return CMD_ERROR;
+
+	CommandCost planet_res = PlanetManager::CheckDepotPlacement(tile, railtype);
+	if (planet_res.Failed()) return planet_res;
+
+	/* check railtype */
+	if (!ValParamRailType(railtype)) return CMD_ERROR;
 
 	Slope tileh = GetTileSlope(tile);
 

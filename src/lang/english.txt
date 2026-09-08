@@ -5141,6 +5141,9 @@ STR_ERROR_TREE_PLANT_LIMIT_REACHED                              :tree planting l
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :name must be unique
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{STRING} in the way
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :not allowed while paused
+STR_ERROR_CANNOT_BUILD_ON_CORE_WORLD                            :cannot construct raw extraction or bio-farms on a Core World
+STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD                        :cannot construct advanced processing or vac-train facilities on a Frontier World
+STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE                            :cannot build in inter-planetary void buffer space
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{TOWN} local authority refuses to allow this

@@ -12,6 +12,8 @@
 
 #include "planet_type.h"
 #include "../tile_type.h"
+#include "../command_type.h"
+#include "../rail_type.h"
 #include <vector>
 #include <unordered_map>
 #include <array>
@@ -73,6 +75,23 @@ public:
 	 * @return The WorldPhase of the tile (defaults to Phase3_Frontier if invalid).
 	 */
 	static WorldPhase GetTilePhase(TileIndex tile);
+
+	/**
+	 * Check if an industry is permitted on the world at the given tile.
+	 * @param tile Tile location for the proposed industry.
+	 * @param is_raw Whether the industry is an extractive or organic raw producer (e.g. Bio-Farm, Mine).
+	 * @param is_processing Whether the industry is a processing facility (e.g. Factory, Refinery).
+	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
+	 */
+	static CommandCost CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing);
+
+	/**
+	 * Check if a rail depot of the specified railtype is permitted on the world at the given tile.
+	 * @param tile Tile location for the proposed depot.
+	 * @param railtype Rail type of the depot.
+	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
+	 */
+	static CommandCost CheckDepotPlacement(TileIndex tile, RailType railtype);
 
 	/** Get the total number of registered planet regions. */
 	static size_t Count();
