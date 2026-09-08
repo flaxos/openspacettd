@@ -1,0 +1,92 @@
+/*
+ * This file is part of OpenSpaceTTD.
+ * OpenSpaceTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenSpaceTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenSpaceTTD.
+ */
+
+/** @file planet_manager.h Central manager and spatial index for planetary world regions. */
+
+#ifndef PLANET_MANAGER_H
+#define PLANET_MANAGER_H
+
+#include "planet_type.h"
+#include "../tile_type.h"
+#include <vector>
+#include <unordered_map>
+#include <array>
+
+/**
+ * Spatial manager and query engine for planetary worlds.
+ * Maintains registered planet regions, bounding boxes, and an accelerated spatial lookup table.
+ */
+class PlanetManager {
+public:
+	static constexpr uint32_t CELL_SHIFT = 6;                          ///< 64x64 tiles per spatial cell (2^6).
+	static constexpr uint32_t MAX_CELLS_PER_AXIS = 4096 >> CELL_SHIFT; ///< 64 cells along X and Y for a 4096-wide map.
+	static constexpr uint32_t TOTAL_CELLS = MAX_CELLS_PER_AXIS * MAX_CELLS_PER_AXIS;
+
+	static constexpr WorldID MIXED_WORLD = WorldID{ (uint32_t)-2 };    ///< Spatial cell spans across multiple regions/boundaries.
+
+	/** Reset and clear all registered planet regions and spatial acceleration structures. */
+	static void Reset();
+
+	/**
+	 * Register a new planetary world region.
+	 * @param region The planet configuration and bounding box.
+	 * @return true if registered successfully; false if overlapping with an existing region or invalid.
+	 */
+	static bool RegisterRegion(const PlanetRegion &region);
+
+	/**
+	 * Retrieve a planet region by its unique WorldID.
+	 * @param world The world identifier.
+	 * @return Pointer to the PlanetRegion, or nullptr if not found.
+	 */
+	static const PlanetRegion *GetRegion(WorldID world);
+
+	/**
+	 * Retrieve the planet region containing the given tile.
+	 * @param tile Tile to query.
+	 * @return Pointer to the PlanetRegion containing the tile, or nullptr if in void/buffer space.
+	 */
+	static const PlanetRegion *GetRegionByTile(TileIndex tile);
+
+	/**
+	 * Retrieve the planet region containing coordinate (x, y).
+	 * @param x Tile X coordinate.
+	 * @param y Tile Y coordinate.
+	 * @return Pointer to the PlanetRegion containing (x, y), or nullptr if in void/buffer space.
+	 */
+	static const PlanetRegion *GetRegionByCoord(uint32_t x, uint32_t y);
+
+	/**
+	 * Get the WorldID for a given tile in O(1) time.
+	 * @param tile Tile to query.
+	 * @return The WorldID of the tile, or INVALID_WORLD if in void/buffer space.
+	 */
+	static WorldID GetTileWorld(TileIndex tile);
+
+	/**
+	 * Get the WorldPhase for a given tile.
+	 * @param tile Tile to query.
+	 * @return The WorldPhase of the tile (defaults to Phase3_Frontier if invalid).
+	 */
+	static WorldPhase GetTilePhase(TileIndex tile);
+
+	/** Get the total number of registered planet regions. */
+	static size_t Count();
+
+	/** Get all registered regions. */
+	static const std::vector<PlanetRegion> &GetAllRegions();
+
+private:
+	static std::vector<PlanetRegion> regions;
+	static std::unordered_map<uint32_t, size_t> id_to_region_index;
+	static std::array<WorldID, TOTAL_CELLS> spatial_grid;
+
+	static void RebuildSpatialGrid();
+	static uint32_t CoordToCellIndex(uint32_t x, uint32_t y);
+};
+
+#endif /* PLANET_MANAGER_H */

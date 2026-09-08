@@ -372,6 +372,9 @@ add_files(
     picker_func.h
     picker_gui.cpp
     picker_gui.h
+    portal/planet_manager.cpp
+    portal/planet_manager.h
+    portal/planet_type.h
     portal/portal_registry.cpp
     portal/portal_registry.h
     portal/portal_type.h
