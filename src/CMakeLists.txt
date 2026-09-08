@@ -378,6 +378,8 @@ add_files(
     portal/portal_registry.cpp
     portal/portal_registry.h
     portal/portal_type.h
+    portal/world_gen.cpp
+    portal/world_gen.h
     progress.cpp
     progress.h
     provider_manager.h

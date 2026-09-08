@@ -131,10 +131,9 @@ inline bool IsInnerTile(Tile tile)
 inline void SetTileType(Tile tile, TileType type)
 {
 	assert(tile < Map::Size());
-	/* VOID tiles (and no others) are exactly allowed at the lower left and right
-	 * edges of the map. If _settings_game.construction.freeform_edges is true,
-	 * the upper edges of the map are also VOID tiles. */
-	assert(IsInnerTile(tile) == (type != TileType::Void));
+	/* Outer edge tiles must always be VOID tiles. Inner tiles may be any type,
+	 * including VOID tiles for interplanetary buffer zones in OpenSpaceTTD. */
+	assert(IsInnerTile(tile) || type == TileType::Void);
 	SB(tile.type(), 4, TILE_TYPE_BITS, to_underlying(type));
 }
 

@@ -42,6 +42,7 @@
 #include "string_func.h"
 #include "thread.h"
 #include "tgp.h"
+#include "portal/world_gen.h"
 
 #include "table/strings.h"
 
@@ -145,6 +146,9 @@ static void _GenerateWorld()
 			_settings_game.game_creation.snow_line_height = DEF_SNOWLINE_HEIGHT;
 		} else {
 			GenerateClearTile();
+			if (MultiWorldGen::IsEnabled()) {
+				MultiWorldGen::GenerateMultiWorldLayout(Map::SizeX(), Map::SizeY());
+			}
 			Map::CountLandTiles();
 
 			/* Only generate towns, tree and industries in newgame mode. */

@@ -65,7 +65,7 @@
 	/* Count number of tiles that are land. */
 	Map::initial_land_count = 0;
 	for (const auto tile : Map::Iterate()) {
-		Map::initial_land_count += IsWaterTile(tile) ? 0 : 1;
+		Map::initial_land_count += (IsWaterTile(tile) || IsTileType(tile, TileType::Void)) ? 0 : 1;
 	}
 
 	/* Compensate for default values being set for (or users are most familiar with) at least
