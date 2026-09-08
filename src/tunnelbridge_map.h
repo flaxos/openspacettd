@@ -12,6 +12,7 @@
 
 #include "bridge_map.h"
 #include "tunnel_map.h"
+#include "portal/portal_registry.h"
 
 
 /**
@@ -77,6 +78,7 @@ inline void SetTunnelBridgeSnowOrDesert(Tile t, bool snow_or_desert)
  */
 inline TileIndex GetOtherTunnelBridgeEnd(Tile t)
 {
+	if (PortalRegistry::IsPortalTile(t)) return PortalRegistry::GetOtherPortalEnd(t);
 	assert(IsTileType(t, TileType::TunnelBridge));
 	return IsTunnel(t) ? GetOtherTunnelEnd(t) : GetOtherBridgeEnd(t);
 }

@@ -12,6 +12,7 @@
 
 #include "map_func.h"
 #include "tile_map.h"
+#include "portal/portal_registry.h"
 
 void MarkBridgeDirty(TileIndex begin, TileIndex end, DiagDirection direction, uint bridge_height);
 void MarkBridgeDirty(TileIndex tile);
@@ -24,6 +25,9 @@ void MarkBridgeDirty(TileIndex tile);
  */
 inline uint GetTunnelBridgeLength(TileIndex begin, TileIndex end)
 {
+	if (PortalRegistry::IsPortalTile(begin)) return PortalRegistry::GetPortalVirtualLength(begin);
+	if (PortalRegistry::IsPortalTile(end)) return PortalRegistry::GetPortalVirtualLength(end);
+
 	int x1 = TileX(begin);
 	int y1 = TileY(begin);
 	int x2 = TileX(end);

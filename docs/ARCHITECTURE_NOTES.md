@@ -84,7 +84,7 @@ OpenTTD models tunnels and bridges as **wormholes**: vehicles entering a tunnel 
   - `MakeRailTunnel`: Encodes tunnel entrance metadata onto the tile.
 
 > **Relevance to OpenSpaceTTD Portals:**
-> Inter-world railway wormholes can directly leverage the existing `Track::Wormhole` vehicle state and extend `GetOtherTunnelBridgeEnd` or create an explicit portal pairing table to connect distant coordinates across logical map regions without requiring physical intermediate track tiles.
+> Inter-world railway wormholes directly leverage OpenTTD's existing `Track::Wormhole` vehicle state and extend `GetOtherTunnelBridgeEnd` via `PortalRegistry` in [src/portal/](file:///home/flax/games/openspacettd/src/portal/) to connect distant coordinates across logical map regions without requiring physical intermediate track tiles. See [docs/PORTAL_WORMHOLE_SPIKE.md](file:///home/flax/games/openspacettd/docs/PORTAL_WORMHOLE_SPIKE.md) for full architecture analysis and spike results.
 
 ---
 
