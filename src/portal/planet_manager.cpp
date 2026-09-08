@@ -11,6 +11,8 @@
 #include "planet_manager.h"
 #include "../map_func.h"
 #include "../table/strings.h"
+#include <cmath>
+#include <cstdlib>
 
 std::vector<PlanetRegion> PlanetManager::regions;
 std::unordered_map<uint32_t, size_t> PlanetManager::id_to_region_index;
@@ -176,4 +178,42 @@ CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype
 	}
 
 	return CommandCost();
+}
+
+uint32_t PlanetManager::GetInterplanetaryBonusPercent(TileIndex src_tile, TileIndex dest_tile)
+{
+	if (Count() == 0) return 0;
+	if (src_tile == INVALID_TILE || dest_tile == INVALID_TILE) return 0;
+
+	WorldID src_world = GetTileWorld(src_tile);
+	WorldID dest_world = GetTileWorld(dest_tile);
+
+	if (src_world == INVALID_WORLD || dest_world == INVALID_WORLD) return 0;
+	if (src_world == dest_world) return 0;
+
+	/* Base interplanetary trade premium: +50% */
+	uint32_t bonus = 50;
+
+	/* Phase tier difference gradient bonus: +25% per phase tier step */
+	WorldPhase src_phase = GetTilePhase(src_tile);
+	WorldPhase dest_phase = GetTilePhase(dest_tile);
+	int phase_diff = std::abs(static_cast<int>(src_phase) - static_cast<int>(dest_phase));
+	bonus += static_cast<uint32_t>(phase_diff * 25);
+
+	/* High-demand Core world market bonus: +25% if delivered into Phase 1 Core world */
+	if (dest_phase == WorldPhase::Phase1_Core) {
+		bonus += 25;
+	}
+
+	return bonus;
+}
+
+Money PlanetManager::GetInterplanetaryCargoProfit(Money base_profit, TileIndex src_tile, TileIndex dest_tile)
+{
+	if (base_profit <= 0) return base_profit;
+
+	uint32_t bonus_pct = GetInterplanetaryBonusPercent(src_tile, dest_tile);
+	if (bonus_pct == 0) return base_profit;
+
+	return base_profit + (base_profit * bonus_pct) / 100;
 }

@@ -206,6 +206,15 @@ public:
 	}
 
 	/**
+	 * Gets the origin tile coordinates where the cargo was loaded.
+	 * @return TileIndex.
+	 */
+	inline TileIndex GetSourceXY() const
+	{
+		return this->source_xy;
+	}
+
+	/**
 	 * Get the current distance the cargo has traveled.
 	 *
 	 * @param current_tile Current tile of the cargo.

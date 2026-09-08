@@ -48,6 +48,7 @@
 #include "game/game.hpp"
 #include "cargomonitor.h"
 #include "goal_base.h"
+#include "portal/planet_manager.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -1082,7 +1083,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
  * @return Revenue for delivering cargo
  * @note The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery
  */
-static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, uint distance, uint16_t periods_in_transit, Company *company, Source src)
+static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, uint distance, uint16_t periods_in_transit, Company *company, Source src, TileIndex src_tile = INVALID_TILE)
 {
 	assert(num_pieces > 0);
 
@@ -1125,6 +1126,19 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 			default: profit *= 4; break;
 		}
 	}
+
+	if (src_tile == INVALID_TILE) {
+		if (src.type == SourceType::Industry) {
+			const Industry *i = Industry::GetIfValid(src.ToIndustryID());
+			if (i != nullptr) src_tile = i->location.tile;
+		} else if (src.type == SourceType::Town) {
+			const Town *t = Town::GetIfValid(src.ToTownID());
+			if (t != nullptr) src_tile = t->xy;
+		}
+	}
+
+	/* Apply interplanetary trade premium */
+	profit = PlanetManager::GetInterplanetaryCargoProfit(profit, src_tile, st->xy);
 
 	return profit;
 }
@@ -1214,7 +1228,7 @@ CargoPayment::~CargoPayment()
 void CargoPayment::PayFinalDelivery(CargoType cargo, const CargoPacket *cp, uint count, TileIndex current_tile)
 {
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, cargo, this->current_station, cp->GetDistance(current_tile), cp->GetPeriodsInTransit(), Company::Get(this->front->owner), cp->GetSource());
+	Money profit = DeliverGoods(count, cargo, this->current_station, cp->GetDistance(current_tile), cp->GetPeriodsInTransit(), Company::Get(this->front->owner), cp->GetSource(), cp->GetSourceXY());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -1233,11 +1247,15 @@ Money CargoPayment::PayTransfer(CargoType cargo, const CargoPacket *cp, uint cou
 {
 	/* Pay transfer vehicle the difference between the payment for the journey from
 	 * the source to the current point, and the sum of the previous transfer payments */
-	Money profit = -cp->GetFeederShare(count) + GetTransportedGoodsIncome(
+	Money income = GetTransportedGoodsIncome(
 			count,
 			cp->GetDistance(current_tile),
 			cp->GetPeriodsInTransit(),
 			cargo);
+
+	income = PlanetManager::GetInterplanetaryCargoProfit(income, cp->GetSourceXY(), current_tile);
+
+	Money profit = -cp->GetFeederShare(count) + income;
 
 	profit = profit * _settings_game.economy.feeder_payment_share / 100;
 

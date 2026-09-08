@@ -14,6 +14,7 @@
 #include "../tile_type.h"
 #include "../command_type.h"
 #include "../rail_type.h"
+#include "../economy_type.h"
 #include <vector>
 #include <unordered_map>
 #include <array>
@@ -92,6 +93,27 @@ public:
 	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
 	 */
 	static CommandCost CheckDepotPlacement(TileIndex tile, RailType railtype);
+
+	/**
+	 * Calculate the percentage bonus applied to an interplanetary cargo shipment.
+	 * Returns 0 if intra-world or either tile is invalid/in void space.
+	 * @param src_tile Tile where cargo originated.
+	 * @param dest_tile Tile where cargo was delivered.
+	 * @return Bonus percentage (e.g. 75 for +75%, 125 for +125%).
+	 */
+	static uint32_t GetInterplanetaryBonusPercent(TileIndex src_tile, TileIndex dest_tile);
+
+	/**
+	 * Calculate the interplanetary profit adjustment for cargo delivered between two tiles.
+	 * If the cargo traveled between different planetary worlds, applies an interplanetary
+	 * trade premium based on phase gradients and high-demand Core world markets.
+	 *
+	 * @param base_profit The base profit calculated from distance and transit time.
+	 * @param src_tile Tile where the cargo was loaded.
+	 * @param dest_tile Tile where the cargo was delivered.
+	 * @return Adjusted profit incorporating interplanetary trade premiums.
+	 */
+	static Money GetInterplanetaryCargoProfit(Money base_profit, TileIndex src_tile, TileIndex dest_tile);
 
 	/** Get the total number of registered planet regions. */
 	static size_t Count();

@@ -21,6 +21,7 @@ add_test_files(
     test_portal_wormhole.cpp
     test_consist_traversal.cpp
     test_world_gen.cpp
+    test_interplanetary_cargo.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp
