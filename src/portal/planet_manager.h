@@ -159,12 +159,14 @@ public:
 	/** Get all registered regions. */
 	static const std::vector<PlanetRegion> &GetAllRegions();
 
+	/** Rebuild the spatial grid acceleration structure from registered regions. */
+	static void RebuildSpatialGrid();
+
 private:
 	static std::vector<PlanetRegion> regions;
 	static std::unordered_map<uint32_t, size_t> id_to_region_index;
 	static std::array<WorldID, TOTAL_CELLS> spatial_grid;
 
-	static void RebuildSpatialGrid();
 	static uint32_t CoordToCellIndex(uint32_t x, uint32_t y);
 };
 

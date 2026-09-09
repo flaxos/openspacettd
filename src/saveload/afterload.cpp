@@ -67,6 +67,9 @@
 #include "../timer/timer_game_tick.h"
 #include "../picker_func.h"
 
+#include "../portal/planet_manager.h"
+#include "../video/video_driver.hpp"
+
 #include "saveload_internal.h"
 
 #include <signal.h>
@@ -247,7 +250,9 @@ static void InitializeWindowsAndCaches()
 {
 	/* Initialize windows */
 	ResetWindowSystem();
-	SetupColoursAndInitialWindow();
+	if (VideoDriver::GetInstance() != nullptr && VideoDriver::GetInstance()->HasGUI()) {
+		SetupColoursAndInitialWindow();
+	}
 
 	/* Update coordinates of the signs. */
 	ClearAllCachedNames();
@@ -799,8 +804,10 @@ bool AfterLoadGame()
 	}
 
 	/* Load the sprites */
-	GfxLoadSprites();
-	LoadStringWidthTable();
+	if (VideoDriver::GetInstance() != nullptr) {
+		GfxLoadSprites();
+		LoadStringWidthTable();
+	}
 
 	/* Copy temporary data to Engine pool */
 	CopyTempEngineData();
@@ -3441,6 +3448,10 @@ bool AfterLoadGame()
 	ResetSignalHandlers();
 
 	AfterLoadLinkGraphs();
+
+	if (PlanetManager::Count() > 0) {
+		PlanetManager::RebuildSpatialGrid();
+	}
 
 	CheckGroundVehiclesAtCorrectZ();
 

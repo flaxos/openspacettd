@@ -160,7 +160,10 @@ void FixTitleGameZoom(int zoom_adjust)
 {
 	if (_game_mode != GameMode::Menu) return;
 
-	Viewport &vp = *GetMainWindow()->viewport;
+	Window *w = FindWindowById(WindowClass::MainWindow, 0);
+	if (w == nullptr || w->viewport == nullptr) return;
+
+	Viewport &vp = *w->viewport;
 
 	/* Adjust the zoom in/out.
 	 * Can't simply add, since operator+ is not defined on the ZoomLevel type. */

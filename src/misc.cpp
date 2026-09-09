@@ -33,6 +33,8 @@
 #include "viewport_kdtree.h"
 #include "newgrf_profiling.h"
 #include "3rdparty/monocypher/monocypher.h"
+#include "portal/planet_manager.h"
+#include "portal/portal_registry.h"
 
 #include "safeguards.h"
 
@@ -125,6 +127,9 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 
 	LinkGraphSchedule::Clear();
 	PoolBase::Clean(PoolType::Normal);
+
+	PlanetManager::Reset();
+	PortalRegistry::Reset();
 
 	RebuildStationKdtree();
 	RebuildTownKdtree();

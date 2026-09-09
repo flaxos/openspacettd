@@ -115,6 +115,30 @@ public:
 	static void ClearPortalTransit(VehicleID veh_id);
 
 	/**
+	 * Get all registered portal links.
+	 */
+	static const std::unordered_map<uint32_t, PortalLink> &GetAllPortals();
+
+	/**
+	 * Get all vehicles currently in portal transit.
+	 */
+	static const std::unordered_map<uint32_t, uint32_t> &GetAllVehicleTransit();
+
+	/**
+	 * Directly restore a portal link (for savegame loading).
+	 * @param link The portal link to restore.
+	 * @return True if restored successfully.
+	 */
+	static bool RestorePortalLink(const PortalLink &link);
+
+	/**
+	 * Set the transit progress for a vehicle (for savegame loading).
+	 * @param veh_id The vehicle ID.
+	 * @param progress The transit progress distance.
+	 */
+	static void SetVehicleTransitProgress(VehicleID veh_id, uint32_t progress);
+
+	/**
 	 * Clear all registered portals (for test isolation and new game setup).
 	 */
 	static void Reset();

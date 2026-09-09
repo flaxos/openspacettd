@@ -333,6 +333,8 @@ void CheckBlitter()
 /** Initialise and load all the sprites. */
 void GfxLoadSprites()
 {
+	if (VideoDriver::GetInstance() == nullptr) return;
+
 	Debug(sprite, 2, "Loading sprite set {}", _settings_game.game_creation.landscape);
 
 	SwitchNewGRFBlitter();

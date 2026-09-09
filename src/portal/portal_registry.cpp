@@ -155,6 +155,35 @@ void PortalRegistry::ClearPortalTransit(VehicleID veh_id)
 	vehicle_portal_progress.erase(veh_id.base());
 }
 
+const std::unordered_map<uint32_t, PortalLink> &PortalRegistry::GetAllPortals()
+{
+	return portal_links;
+}
+
+const std::unordered_map<uint32_t, uint32_t> &PortalRegistry::GetAllVehicleTransit()
+{
+	return vehicle_portal_progress;
+}
+
+bool PortalRegistry::RestorePortalLink(const PortalLink &link)
+{
+	if (!link.IsValid()) return false;
+
+	portal_links[link.id.base()] = link;
+	tile_to_portal[link.end_a.tile] = link.id;
+	tile_to_portal[link.end_b.tile] = link.id;
+
+	if (link.id.base() >= next_portal_id) {
+		next_portal_id = link.id.base() + 1;
+	}
+	return true;
+}
+
+void PortalRegistry::SetVehicleTransitProgress(VehicleID veh_id, uint32_t progress)
+{
+	vehicle_portal_progress[veh_id.base()] = progress;
+}
+
 size_t PortalRegistry::Count()
 {
 	return portal_links.size();

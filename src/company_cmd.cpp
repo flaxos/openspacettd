@@ -1432,6 +1432,7 @@ void ResetFaces()
  */
 uint GetNumCompanyManagerFaceStyles()
 {
+	if (_faces.empty()) ResetFaces();
 	return static_cast<uint>(std::size(_faces));
 }
 
@@ -1442,6 +1443,7 @@ uint GetNumCompanyManagerFaceStyles()
  */
 const FaceSpec *GetCompanyManagerFaceSpec(uint style_index)
 {
+	if (_faces.empty()) ResetFaces();
 	if (style_index < GetNumCompanyManagerFaceStyles()) return &_faces[style_index];
 	return nullptr;
 }
@@ -1453,6 +1455,7 @@ const FaceSpec *GetCompanyManagerFaceSpec(uint style_index)
  */
 std::optional<uint> FindCompanyManagerFaceLabel(std::string_view label)
 {
+	if (_faces.empty()) ResetFaces();
 	auto it = std::ranges::find(_faces, label, &FaceSpec::label);
 	if (it == std::end(_faces)) return std::nullopt;
 
@@ -1480,7 +1483,7 @@ FaceVars GetCompanyManagerFaceVars(uint style)
 void SetCompanyManagerFaceStyle(CompanyManagerFace &cmf, uint style)
 {
 	const FaceSpec *spec = GetCompanyManagerFaceSpec(style);
-	assert(spec != nullptr);
+	if (spec == nullptr) return;
 
 	cmf.style = style;
 	cmf.style_label = spec->label;
@@ -1494,7 +1497,9 @@ void SetCompanyManagerFaceStyle(CompanyManagerFace &cmf, uint style)
  */
 void RandomiseCompanyManagerFace(CompanyManagerFace &cmf, Randomizer &randomizer)
 {
-	SetCompanyManagerFaceStyle(cmf, randomizer.Next(GetNumCompanyManagerFaceStyles()));
+	uint num_styles = GetNumCompanyManagerFaceStyles();
+	if (num_styles == 0) return;
+	SetCompanyManagerFaceStyle(cmf, randomizer.Next(num_styles));
 	RandomiseCompanyManagerFaceBits(cmf, GetCompanyManagerFaceVars(cmf.style), randomizer);
 }
 
