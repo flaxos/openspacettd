@@ -49,6 +49,8 @@
 #include "cargomonitor.h"
 #include "goal_base.h"
 #include "portal/planet_manager.h"
+#include "portal/spaceport_manager.h"
+#include "portal/edge_conduit.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -1098,6 +1100,9 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 	/* Update station statistics */
 	if (accepted_total > 0) {
 		st->goods[cargo_type].status.Set({GoodsEntry::State::EverAccepted, GoodsEntry::State::CurrentMonth, GoodsEntry::State::AcceptedBigtick});
+		if (SpaceportManager::IsSpaceport(dest)) {
+			SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
+		}
 	}
 
 	/* Update company statistics */
@@ -1995,6 +2000,15 @@ static const IntervalTimer<TimerGameEconomy> _economy_companies_monthly({ TimerG
 	CompaniesGenStatistics();
 	CompaniesPayInterest();
 	HandleEconomyFluctuations();
+});
+
+/**
+ * Monthly update for OpenSpaceTTD spaceport off-world trade and edge conduit extraction.
+ */
+static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthly({ TimerGameEconomy::Trigger::Month, TimerGameEconomy::Priority::None }, [](auto)
+{
+	SpaceportManager::ProcessOffWorldTrade();
+	EdgeConduitManager::ProduceAllConduits();
 });
 
 static void DoAcquireCompany(Company *c, bool hostile_takeover)

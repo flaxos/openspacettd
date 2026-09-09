@@ -13,6 +13,8 @@
 #include "../command_type.h"
 #include "../direction_type.h"
 #include "../rail_type.h"
+#include "../station_type.h"
+#include "../cargo_type.h"
 
 /**
  * Build a single unlinked portal gate head on a tile.
@@ -58,9 +60,43 @@ CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirec
  */
 CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demolish_both);
 
+/**
+ * Designate/upgrade an airport station as an interplanetary spaceport.
+ *
+ * @param flags Command flags.
+ * @param station Station ID to designate as spaceport.
+ * @return Command cost or failure.
+ */
+CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station);
+
+/**
+ * Build an edge extraction conduit on a world perimeter tile adjacent to void space.
+ *
+ * @param flags Command flags.
+ * @param tile Tile to build conduit on.
+ * @param dir Direction the conduit portal/drillhead faces.
+ * @param cargo Type of mineral to extract.
+ * @param railtype Rail type for direct freight connection.
+ * @return Command cost or failure.
+ */
+CommandCost CmdBuildEdgeConduit(DoCommandFlags flags, TileIndex tile, DiagDirection dir, CargoType cargo, RailType railtype);
+
+/**
+ * Demolish an edge extraction conduit.
+ *
+ * @param flags Command flags.
+ * @param tile Tile of the conduit to demolish.
+ * @return Command cost or failure.
+ */
+CommandCost CmdDestroyEdgeConduit(DoCommandFlags flags, TileIndex tile);
+
 DEF_CMD_TRAIT(Commands::BuildPortalGate,   CmdBuildPortalGate,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::LinkPortalGates,  CmdLinkPortalGates,   {},                                                      CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::BuildPortalPair,   CmdBuildPortalPair,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::DestroyPortalGate, CmdDestroyPortalGate, CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
+
+DEF_CMD_TRAIT(Commands::DesignateSpaceport, CmdDesignateSpaceport, {},                                                   CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::BuildEdgeConduit,   CmdBuildEdgeConduit,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::DestroyEdgeConduit, CmdDestroyEdgeConduit, CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 
 #endif /* PORTAL_CMD_H */

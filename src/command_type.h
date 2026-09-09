@@ -385,6 +385,10 @@ enum class Commands : uint8_t {
 	BuildPortalPair, ///< build and link two portal gates atomically across worlds
 	DestroyPortalGate, ///< demolish a portal gate
 
+	DesignateSpaceport, ///< certify or upgrade an airport station as an interplanetary spaceport
+	BuildEdgeConduit, ///< build an edge mineral extraction conduit on a world perimeter
+	DestroyEdgeConduit, ///< demolish an edge mineral extraction conduit
+
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

@@ -11,6 +11,7 @@
 #define POOL_TYPE_HPP
 
 #include "enum_type.hpp"
+#include <functional>
 
 /** Various types of a pool. */
 enum class PoolType : uint8_t {
@@ -85,6 +86,15 @@ template <typename T> requires std::is_base_of_v<PoolIDBase, T>
 constexpr auto operator+(const std::integral auto &val, const T &pool_id) { return pool_id + val; }
 template <typename Te, typename Tp> requires std::is_enum_v<Te> && std::is_base_of_v<PoolIDBase, Tp>
 constexpr auto operator+(const Te &val, const Tp &pool_id) { return pool_id + to_underlying(val); }
+
+/** Specialization of std::hash for PoolID. */
+template <typename TBaseType, typename TTag, TBaseType TEnd, TBaseType TInvalid>
+struct std::hash<PoolID<TBaseType, TTag, TEnd, TInvalid>> {
+	std::size_t operator()(const PoolID<TBaseType, TTag, TEnd, TInvalid> &id) const noexcept
+	{
+		return std::hash<TBaseType>()(id.base());
+	}
+};
 
 /** Base class for base of all pools. */
 struct PoolBase {

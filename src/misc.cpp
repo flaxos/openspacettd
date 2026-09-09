@@ -35,6 +35,8 @@
 #include "3rdparty/monocypher/monocypher.h"
 #include "portal/planet_manager.h"
 #include "portal/portal_registry.h"
+#include "portal/spaceport_manager.h"
+#include "portal/edge_conduit.h"
 
 #include "safeguards.h"
 
@@ -130,6 +132,8 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
+	SpaceportManager::Reset();
+	EdgeConduitManager::Reset();
 
 	RebuildStationKdtree();
 	RebuildTownKdtree();

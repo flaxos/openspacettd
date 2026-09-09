@@ -12,6 +12,8 @@
 #include "saveload.h"
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
+#include "../portal/spaceport_manager.h"
+#include "../portal/edge_conduit.h"
 
 #include "../safeguards.h"
 
@@ -240,14 +242,150 @@ struct PRTXChunkHandler : ChunkHandler {
 	}
 };
 
+/** Temporary storage for Spaceport serialization. */
+struct SlSpaceport {
+	uint32_t station_id;
+	uint32_t world_id;
+	uint32_t supplies_received;
+	uint8_t offworld_trade_tier;
+	uint32_t total_cargo_generated;
+};
+
+static const SaveLoad _spaceport_desc[] = {
+	SLE_VAR(SlSpaceport, station_id,            VarTypes::U32),
+	SLE_VAR(SlSpaceport, world_id,              VarTypes::U32),
+	SLE_VAR(SlSpaceport, supplies_received,     VarTypes::U32),
+	SLE_VAR(SlSpaceport, offworld_trade_tier,   VarTypes::U8),
+	SLE_VAR(SlSpaceport, total_cargo_generated, VarTypes::U32),
+};
+
+/** Chunk handler for interplanetary spaceports (SPRT). */
+struct SPRTChunkHandler : ChunkHandler {
+	SPRTChunkHandler() : ChunkHandler("SPRT", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_spaceport_desc);
+
+		int i = 0;
+		for (const auto &[st_id, info] : SpaceportManager::GetAllSpaceports()) {
+			SlSpaceport sl_sp{
+				.station_id = info.station_id.base(),
+				.world_id = info.world_id.base(),
+				.supplies_received = info.supplies_received,
+				.offworld_trade_tier = info.offworld_trade_tier,
+				.total_cargo_generated = info.total_offworld_cargo_generated,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&sl_sp, _spaceport_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		SpaceportManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_spaceport_desc);
+
+		SlSpaceport sl_sp{};
+		while (SlIterateArray() != -1) {
+			sl_sp = {};
+			SlObject(&sl_sp, slt);
+			SpaceportInfo info{
+				.station_id = StationID{static_cast<uint16_t>(sl_sp.station_id)},
+				.world_id = WorldID{sl_sp.world_id},
+				.supplies_received = sl_sp.supplies_received,
+				.offworld_trade_tier = sl_sp.offworld_trade_tier,
+				.total_offworld_cargo_generated = sl_sp.total_cargo_generated,
+			};
+			SpaceportManager::RestoreSpaceport(info);
+		}
+	}
+};
+
+/** Temporary storage for EdgeConduit serialization. */
+struct SlEdgeConduit {
+	uint32_t id;
+	uint32_t tile;
+	uint8_t dir;
+	uint32_t world_id;
+	uint8_t cargo_type;
+	uint32_t production_rate;
+	uint8_t owner;
+	uint32_t total_produced;
+};
+
+static const SaveLoad _edge_conduit_desc[] = {
+	SLE_VAR(SlEdgeConduit, id,              VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, tile,            VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, dir,             VarTypes::U8),
+	SLE_VAR(SlEdgeConduit, world_id,        VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, cargo_type,      VarTypes::U8),
+	SLE_VAR(SlEdgeConduit, production_rate, VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, owner,           VarTypes::U8),
+	SLE_VAR(SlEdgeConduit, total_produced,  VarTypes::U32),
+};
+
+/** Chunk handler for edge mineral extraction conduits (COND). */
+struct CONDChunkHandler : ChunkHandler {
+	CONDChunkHandler() : ChunkHandler("COND", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_edge_conduit_desc);
+
+		int i = 0;
+		for (const auto &[tile, conduit] : EdgeConduitManager::GetAllConduits()) {
+			SlEdgeConduit sl_cond{
+				.id = conduit.id,
+				.tile = conduit.tile.base(),
+				.dir = to_underlying(conduit.dir),
+				.world_id = conduit.world_id.base(),
+				.cargo_type = to_underlying(conduit.cargo_type),
+				.production_rate = conduit.production_rate,
+				.owner = conduit.owner.base(),
+				.total_produced = conduit.total_produced,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&sl_cond, _edge_conduit_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		EdgeConduitManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_edge_conduit_desc);
+
+		SlEdgeConduit sl_cond{};
+		while (SlIterateArray() != -1) {
+			sl_cond = {};
+			SlObject(&sl_cond, slt);
+			EdgeConduit cond{
+				.id = sl_cond.id,
+				.tile = TileIndex{sl_cond.tile},
+				.dir = static_cast<DiagDirection>(sl_cond.dir),
+				.world_id = WorldID{sl_cond.world_id},
+				.cargo_type = CargoType{sl_cond.cargo_type},
+				.production_rate = sl_cond.production_rate,
+				.owner = Owner{sl_cond.owner},
+				.total_produced = sl_cond.total_produced,
+			};
+			EdgeConduitManager::RestoreConduit(cond);
+		}
+	}
+};
+
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
+static const SPRTChunkHandler SPRT;
+static const CONDChunkHandler COND;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
 	PORT,
 	PRTX,
+	SPRT,
+	COND,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

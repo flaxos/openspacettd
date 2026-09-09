@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "tunnelbridge_map.h"
+#include "portal/edge_conduit.h"
 
 #include "safeguards.h"
 
@@ -22,7 +23,7 @@
 TileIndex GetOtherTunnelEnd(TileIndex tile)
 {
 	if (PortalRegistry::IsPortalTile(tile)) return PortalRegistry::GetOtherPortalEnd(tile);
-	if (PortalRegistry::IsUnlinkedGate(tile)) return INVALID_TILE;
+	if (PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile)) return INVALID_TILE;
 
 	DiagDirection dir = GetTunnelBridgeDirection(tile);
 	TileIndexDiff delta = TileOffsByDiagDir(dir);
@@ -59,7 +60,7 @@ bool IsTunnelInWayDir(TileIndex tile, int z, DiagDirection dir)
 		height = GetTileZ(tile);
 	} while (z < height);
 
-	return z == height && IsTunnelTile(tile) && GetTunnelBridgeDirection(tile) == dir;
+	return z == height && IsTunnelTile(tile) && GetTunnelBridgeDirection(tile) == dir && !PortalRegistry::IsPortalTile(tile) && !PortalRegistry::IsUnlinkedGate(tile) && !EdgeConduitManager::IsConduitTile(tile);
 }
 
 /**

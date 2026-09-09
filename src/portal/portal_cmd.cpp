@@ -11,6 +11,9 @@
 #include "portal_cmd.h"
 #include "portal_registry.h"
 #include "planet_manager.h"
+#include "spaceport_manager.h"
+#include "edge_conduit.h"
+#include "../station_base.h"
 #include "../command_func.h"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -287,6 +290,125 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 
 		DirtyCompanyInfrastructureWindows(owner);
 		if (v != nullptr) TryPathReserve(v);
+	}
+
+	return cost;
+}
+
+CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
+{
+	if (!Station::IsValidID(station)) return CMD_ERROR;
+
+	Station *st = Station::GetIfValid(station);
+	if (st == nullptr) return CMD_ERROR;
+
+	if (!st->facilities.Test(StationFacility::Airport) || st->airport.IsEmpty()) {
+		return CommandCost(STR_ERROR_CAN_T_BUILD_AIRPORT_HERE);
+	}
+
+	CommandCost ret_own = CheckOwnership(st->owner);
+	if (ret_own.Failed()) return ret_own;
+
+	if (SpaceportManager::IsSpaceport(station)) {
+		return CommandCost(STR_ERROR_ALREADY_BUILT);
+	}
+
+	WorldID world_id = PlanetManager::GetTileWorld(st->xy);
+	if (world_id == INVALID_WORLD) {
+		world_id = PlanetManager::GetTileWorld(st->airport.tile);
+	}
+
+	CommandCost cost(ExpensesType::Construction, _price[Price::BuildStationAirport] * 2);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		uint8_t tier = 1;
+		if (st->airport.type == AT_INTERCON) tier = 3;
+		else if (st->airport.type == AT_INTERNATIONAL || st->airport.type == AT_METROPOLITAN) tier = 2;
+
+		SpaceportManager::RegisterSpaceport(station, world_id, tier);
+	}
+
+	return cost;
+}
+
+CommandCost CmdBuildEdgeConduit(DoCommandFlags flags, TileIndex tile, DiagDirection dir, CargoType cargo, RailType railtype)
+{
+	if (!IsValidTile(tile)) return CMD_ERROR;
+	if (!ValParamRailType(railtype)) return CMD_ERROR;
+
+	if (!IsValidDiagDirection(dir)) {
+		auto [tileh, z] = GetTileSlopeZ(tile);
+		dir = GetInclinedSlopeDirection(tileh);
+		if (!IsValidDiagDirection(dir)) return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	}
+
+	CompanyID company = _current_company;
+	if (!Company::IsValidID(company) && company != OWNER_DEITY) return CMD_ERROR;
+
+	WorldID world_id = PlanetManager::GetTileWorld(tile);
+	if (world_id == INVALID_WORLD) return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+
+	if (!EdgeConduitManager::IsVoidAdjacent(tile)) {
+		return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	}
+
+	if (EdgeConduitManager::IsConduitTile(tile) || PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile)) {
+		return CommandCost(STR_ERROR_ALREADY_BUILT);
+	}
+
+	if (HasTileWaterGround(tile)) return CommandCost(STR_ERROR_CAN_T_BUILD_ON_WATER);
+
+	if (!IsValidCargoType(cargo)) {
+		cargo = EdgeConduitManager::GetPreferredMineralCargo();
+	}
+
+	CommandCost ret = Command<Commands::LandscapeClear>::Do(flags | DoCommandFlag::Auto, tile);
+	if (ret.Failed()) return ret;
+
+	CommandCost cost(ret);
+	cost.AddCost(_price[Price::BuildTunnel] * 4);
+	cost.AddCost(RailBuildCost(railtype));
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		Company *c = Company::GetIfValid(company);
+		if (c != nullptr) c->infrastructure.rail[railtype] += TUNNELBRIDGE_TRACKBIT_FACTOR;
+
+		MakeRailTunnel(tile, company, dir, railtype);
+		AddSideToSignalBuffer(tile, DiagDirection::Invalid, company);
+		YapfNotifyTrackLayoutChange(tile, DiagDirToDiagTrack(dir));
+		DirtyCompanyInfrastructureWindows(company);
+
+		EdgeConduitManager::RegisterConduit(tile, dir, world_id, cargo, company);
+	}
+
+	return cost;
+}
+
+CommandCost CmdDestroyEdgeConduit(DoCommandFlags flags, TileIndex tile)
+{
+	if (!IsValidTile(tile)) return CMD_ERROR;
+	if (!EdgeConduitManager::IsConduitTile(tile)) return CommandCost(STR_ERROR_MUST_DEMOLISH_TUNNEL_FIRST);
+
+	CommandCost ret_own = CheckOwnership(GetTileOwner(tile));
+	if (ret_own.Failed()) return ret_own;
+
+	CommandCost cost(ExpensesType::Construction, _price[Price::ClearTunnel]);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		DiagDirection dir = GetTunnelBridgeDirection(tile);
+		Track track = DiagDirToDiagTrack(dir);
+		Owner owner = GetTileOwner(tile);
+
+		Company *c = Company::GetIfValid(owner);
+		if (c != nullptr) {
+			c->infrastructure.rail[GetRailType(tile)] -= TUNNELBRIDGE_TRACKBIT_FACTOR;
+		}
+
+		EdgeConduitManager::UnregisterConduit(tile);
+		DoClearSquare(tile);
+		AddSideToSignalBuffer(tile, ReverseDiagDir(dir), owner);
+		YapfNotifyTrackLayoutChange(tile, track);
+		DirtyCompanyInfrastructureWindows(owner);
 	}
 
 	return cost;

@@ -372,6 +372,8 @@ add_files(
     picker_func.h
     picker_gui.cpp
     picker_gui.h
+    portal/edge_conduit.cpp
+    portal/edge_conduit.h
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h
@@ -380,6 +382,8 @@ add_files(
     portal/portal_registry.cpp
     portal/portal_registry.h
     portal/portal_type.h
+    portal/spaceport_manager.cpp
+    portal/spaceport_manager.h
     portal/world_gen.cpp
     portal/world_gen.h
     progress.cpp

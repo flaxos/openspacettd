@@ -144,7 +144,12 @@ inline Corner GetHighestSlopeCorner(Slope s)
 		case SLOPE_STEEP_E: return Corner::E;
 		case SLOPE_N:
 		case SLOPE_STEEP_N: return Corner::N;
-		default: NOT_REACHED();
+		default:
+			if (s & SLOPE_N) return Corner::N;
+			if (s & SLOPE_E) return Corner::E;
+			if (s & SLOPE_S) return Corner::S;
+			if (s & SLOPE_W) return Corner::W;
+			return Corner::N;
 	}
 }
 
