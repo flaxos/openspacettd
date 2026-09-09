@@ -57,7 +57,7 @@
 static const CargoSpec _default_cargo[] = {
 	MK(   0, CT_PASSENGERS,   152,  1, 0x400, 3185,  0,  24, false, TownAcceptanceEffect::Passengers,   PASSENGERS,    PASSENGER, STR_PASSENGERS, CargoClasses({CargoClass::Passengers})),
 	MK(   1, CT_COAL,           6, 16, 0x100, 5916,  7, 255,  true,       TownAcceptanceEffect::None,         COAL,         COAL,       STR_TONS, CargoClasses({CargoClass::Bulk, CargoClass::NonPotable})),
-	MK(   2, CT_MAIL,          15,  4, 0x200, 4550, 20,  90, false,       TownAcceptanceEffect::Mail,         MAIL,         MAIL,       STR_BAGS, CargoClasses({CargoClass::Mail})),
+	MK(   2, CT_MAIL,          15,  4, 0x200, 4550, 20,  90, false,       TownAcceptanceEffect::Mail,         MAIL,         MAIL, STR_QUANTITY_MAIL, CargoClasses({CargoClass::Mail})),
 	/* Oil in temperate and arctic */
 	MK(   3, CT_OIL,          174, 16, 0x100, 4437, 25, 255,  true,       TownAcceptanceEffect::None,          OIL,          OIL,     STR_LITERS, CargoClasses({CargoClass::Liquid, CargoClass::NonPotable})),
 	/* Oil in subtropic */

@@ -1942,7 +1942,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetRoadVehicleTypeForCargo(): 1
   Cargo 2
     IsValidCargo():          true
-    GetName():               'Mail'
+    GetName():               'Data Crystals'
     GetCargoLabel():         'MAIL'
     IsFreight():             false
     HasCargoClass():         false
@@ -2705,7 +2705,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 28
     IsValidEngine():    true
-    GetName():          Mail Van
+    GetName():          Data Van
     GetCargoType():     2
     CanRefitCargo():    false
     GetCapacity():      30
@@ -4577,7 +4577,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetAllRailTypes():  null
   Engine 126
     IsValidEngine():    true
-    GetName():          MPS Mail Truck
+    GetName():          MPS Data Courier
     GetCargoType():     2
     CanRefitCargo():    false
     GetCapacity():      22

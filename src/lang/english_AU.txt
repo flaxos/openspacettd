@@ -27,7 +27,7 @@ STR_JUST_NOTHING                                                :Nothing
 STR_CARGO_PLURAL_NOTHING                                        :
 STR_CARGO_PLURAL_PASSENGERS                                     :Passengers
 STR_CARGO_PLURAL_COAL                                           :Coal
-STR_CARGO_PLURAL_MAIL                                           :Mail
+STR_CARGO_PLURAL_MAIL                                           :Data Crystals
 STR_CARGO_PLURAL_OIL                                            :Oil
 STR_CARGO_PLURAL_LIVESTOCK                                      :Livestock
 STR_CARGO_PLURAL_GOODS                                          :Goods
@@ -61,7 +61,7 @@ STR_CARGO_PLURAL_FIZZY_DRINKS                                   :Soft Drinks
 STR_CARGO_SINGULAR_NOTHING                                      :
 STR_CARGO_SINGULAR_PASSENGER                                    :Passenger
 STR_CARGO_SINGULAR_COAL                                         :Coal
-STR_CARGO_SINGULAR_MAIL                                         :Mail
+STR_CARGO_SINGULAR_MAIL                                         :Data Crystal
 STR_CARGO_SINGULAR_OIL                                          :Oil
 STR_CARGO_SINGULAR_LIVESTOCK                                    :Livestock
 STR_CARGO_SINGULAR_GOODS                                        :Goods
@@ -95,7 +95,7 @@ STR_CARGO_SINGULAR_FIZZY_DRINK                                  :Soft Drink
 STR_QUANTITY_NOTHING                                            :
 STR_QUANTITY_PASSENGERS                                         :{COMMA}{NBSP}passenger{P "" s}
 STR_QUANTITY_COAL                                               :{WEIGHT_LONG} of coal
-STR_QUANTITY_MAIL                                               :{COMMA}{NBSP}bag{P "" s} of mail
+STR_QUANTITY_MAIL                                               :{COMMA}{NBSP}data crystal{P "" s}
 STR_QUANTITY_OIL                                                :{VOLUME_LONG} of oil
 STR_QUANTITY_LIVESTOCK                                          :{COMMA}{NBSP}item{P "" s} of livestock
 STR_QUANTITY_GOODS                                              :{COMMA}{NBSP}crate{P "" s} of goods
@@ -130,7 +130,7 @@ STR_QUANTITY_N_A                                                :N/A
 STR_ABBREV_NOTHING                                              :
 STR_ABBREV_PASSENGERS                                           :PS
 STR_ABBREV_COAL                                                 :CL
-STR_ABBREV_MAIL                                                 :ML
+STR_ABBREV_MAIL                                                 :DC
 STR_ABBREV_OIL                                                  :OL
 STR_ABBREV_LIVESTOCK                                            :LV
 STR_ABBREV_GOODS                                                :GD
@@ -2131,8 +2131,8 @@ STR_CONFIG_SETTING_LINKGRAPH_RECALC_TIME_HELPTEXT               :Time taken for 
 
 STR_CONFIG_SETTING_DISTRIBUTION_PAX                             :Distribution mode for passengers: {STRING}
 STR_CONFIG_SETTING_DISTRIBUTION_PAX_HELPTEXT                    :"Symmetric" means that roughly the same number of passengers will go from a station A to a station B as from B to A. "Asymmetric" means that arbitrary numbers of passengers can go in either direction. "Manual" means that no automatic distribution will take place for passengers
-STR_CONFIG_SETTING_DISTRIBUTION_MAIL                            :Distribution mode for mail: {STRING}
-STR_CONFIG_SETTING_DISTRIBUTION_MAIL_HELPTEXT                   :"Symmetric" means that roughly the same amount of mail will be sent from a station A to a station B as from B to A. "Asymmetric" means that arbitrary amounts of mail can be sent in either direction. "Manual" means that no automatic distribution will take place for mail
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL                            :Distribution mode for data crystals: {STRING}
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL_HELPTEXT                   :"Symmetric" means that roughly the same amount of data crystals will be sent from a station A to a station B as from B to A. "Asymmetric" means that arbitrary amounts of data crystals can be sent in either direction. "Manual" means that no automatic distribution will take place for data crystals
 STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED                        :Distribution mode for the ARMOURED cargo class: {STRING}
 STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_HELPTEXT               :The ARMOURED cargo class contains valuables in the temperate, diamonds in the subtropical, or gold in the subarctic climate. NewGRFs may change that. "Symmetric" means that roughly the same amount of that cargo will be sent from a station A to a station B as from B to A. "Asymmetric" means that arbitrary amounts of that cargo can be sent in either direction. "Manual" means that no automatic distribution will take place for that cargo. It is recommended to set this to asymmetric or manual when playing subarctic or subtropic, as banks only receive cargo in these climates. For temperate you can also choose symmetric as banks will send valuables back to the origin bank
 STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT                         :Distribution mode for other cargo classes: {STRING}
@@ -5723,7 +5723,7 @@ STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_40_ELECTRIC               :SH '40' (Electr
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_T_I_M_ELECTRIC               :'T.I.M.' (Electric)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_ASIASTAR_ELECTRIC            :'AsiaStar' (Electric)
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PASSENGER_CAR                 :Passenger Carriage
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_MAIL_VAN                      :Mail Van
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_MAIL_VAN                      :Data Van
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_COAL_CAR                      :Coal Truck
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_OIL_TANKER                    :Oil Tanker
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_LIVESTOCK_VAN                 :Livestock Van
@@ -5753,7 +5753,7 @@ STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_X2001_ELECTRIC           :'X2001' (Electr
 STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_MILLENNIUM_Z1_ELECTRIC   :'Millennium Z1' (Electric)
 STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_WIZZOWOW_Z99             :Wizzowow Z99
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PASSENGER_CAR             :Passenger Carriage
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_MAIL_VAN                  :Mail Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_MAIL_VAN                  :Data Van
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COAL_CAR                  :Coal Truck
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_OIL_TANKER                :Oil Tanker
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_LIVESTOCK_VAN             :Livestock Van
@@ -5785,7 +5785,7 @@ STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV3_PEGASUS_ELECTRIC      :Lev3 'Pegasus' 
 STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV4_CHIMAERA_ELECTRIC     :Lev4 'Chimaera' (Electric)
 STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_WIZZOWOW_ROCKETEER         :Wizzowow Rocketeer
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PASSENGER_CAR               :Passenger Carriage
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_MAIL_VAN                    :Mail Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_MAIL_VAN                    :Data Van
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COAL_CAR                    :Coal Truck
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_OIL_TANKER                  :Oil Tanker
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_LIVESTOCK_VAN               :Livestock Van
@@ -5823,12 +5823,12 @@ STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKIII_BUS              :Ploddyphut MkII
 STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_COAL_TRUCK                 :Balogh Coal Truck
 STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COAL_TRUCK                    :Uhl Coal Truck
 STR_VEHICLE_NAME_ROAD_VEHICLE_DW_COAL_TRUCK                     :DW Coal Truck
-STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_MAIL_TRUCK                    :MPS Mail Truck
-STR_VEHICLE_NAME_ROAD_VEHICLE_REYNARD_MAIL_TRUCK                :Reynard Mail Truck
-STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_MAIL_TRUCK                  :Perry Mail Truck
-STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_MAIL_TRUCK            :MightyMover Mail Truck
-STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_MAIL_TRUCK            :Powernaught Mail Truck
-STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_MAIL_TRUCK               :Wizzowow Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_MAIL_TRUCK                    :MPS Data Courier
+STR_VEHICLE_NAME_ROAD_VEHICLE_REYNARD_MAIL_TRUCK                :Reynard Data Courier
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_MAIL_TRUCK                  :Perry Data Courier
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_MAIL_TRUCK            :MightyMover Data Transporter
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_MAIL_TRUCK            :Powernaught Data Courier
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_MAIL_TRUCK               :Wizzowow Data Transporter
 STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_OIL_TANKER               :Witcombe Oil Tanker
 STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_OIL_TANKER                 :Foster Oil Tanker
 STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_OIL_TANKER                  :Perry Oil Tanker
