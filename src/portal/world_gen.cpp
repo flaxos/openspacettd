@@ -141,7 +141,9 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 				}
 			}
 			if (!in_world) {
+				uint height = TileHeight(TileXY(x, y));
 				MakeVoid(TileXY(x, y));
+				SetTileHeight(TileXY(x, y), height);
 			}
 		}
 	}
@@ -192,20 +194,16 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 
 			/* Construct gateway portal and lead track for world A */
 			MakeClear(t_a, ClearGround::Grass, 3);
-			SetTileHeight(t_a, 1);
 			MakeRailTunnel(t_a, OWNER_NONE, dir_a, RAILTYPE_BEGIN);
 
 			MakeClear(t_a_track, ClearGround::Grass, 3);
-			SetTileHeight(t_a_track, 1);
 			MakeRailNormal(t_a_track, OWNER_NONE, track_bits, RAILTYPE_BEGIN);
 
 			/* Construct gateway portal and lead track for world B */
 			MakeClear(t_b, ClearGround::Grass, 3);
-			SetTileHeight(t_b, 1);
 			MakeRailTunnel(t_b, OWNER_NONE, dir_b, RAILTYPE_BEGIN);
 
 			MakeClear(t_b_track, ClearGround::Grass, 3);
-			SetTileHeight(t_b_track, 1);
 			MakeRailNormal(t_b_track, OWNER_NONE, track_bits, RAILTYPE_BEGIN);
 
 			/* Register the bidirectional wormhole portal link */

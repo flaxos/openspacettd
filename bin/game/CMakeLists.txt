@@ -38,3 +38,36 @@ add_custom_target(gs_compat_files
 add_dependencies(openttd
     gs_compat_files
 )
+
+# Bundle the OpenSpaceTTD UAT/demo GameScript with development builds. The
+# script adds persistent Story Book guidance, goals, and map markers to the
+# deterministic three-world demo save.
+set(OPENSPACETTD_UAT_DEMO_SOURCE_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_uat/info.nut
+	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_uat/main.nut
+)
+
+foreach(OPENSPACETTD_UAT_DEMO_SOURCE_FILE IN LISTS OPENSPACETTD_UAT_DEMO_SOURCE_FILES)
+    string(REPLACE "${CMAKE_SOURCE_DIR}/bin/" "" OPENSPACETTD_UAT_DEMO_SOURCE_FILE_NAME "${OPENSPACETTD_UAT_DEMO_SOURCE_FILE}")
+    string(CONCAT OPENSPACETTD_UAT_DEMO_BINARY_FILE "${CMAKE_BINARY_DIR}/" "${OPENSPACETTD_UAT_DEMO_SOURCE_FILE_NAME}")
+
+    add_custom_command(OUTPUT ${OPENSPACETTD_UAT_DEMO_BINARY_FILE}
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    ${CMAKE_BINARY_DIR}/game/openspacettd_uat
+            COMMAND ${CMAKE_COMMAND} -E copy
+                    ${OPENSPACETTD_UAT_DEMO_SOURCE_FILE}
+                    ${OPENSPACETTD_UAT_DEMO_BINARY_FILE}
+            MAIN_DEPENDENCY ${OPENSPACETTD_UAT_DEMO_SOURCE_FILE}
+            COMMENT "Copying ${OPENSPACETTD_UAT_DEMO_SOURCE_FILE_NAME}"
+    )
+
+    list(APPEND OPENSPACETTD_UAT_DEMO_BINARY_FILES ${OPENSPACETTD_UAT_DEMO_BINARY_FILE})
+endforeach()
+
+add_custom_target(openspacettd_uat_demo_files
+        DEPENDS ${OPENSPACETTD_UAT_DEMO_BINARY_FILES}
+)
+
+add_dependencies(openttd
+    openspacettd_uat_demo_files
+)

@@ -17,6 +17,7 @@
 #include "../void_map.h"
 #include "../tunnel_map.h"
 #include "../rail_map.h"
+#include "../water_map.h"
 
 #include "../safeguards.h"
 
@@ -203,4 +204,35 @@ TEST_CASE("MultiWorldGen - Asymmetric Map Partitioning along X")
 	TileIndex track_w0 = TileXY(p0->max_x - 2, 32);
 	CHECK(IsPlainRailTile(track_w0));
 	CHECK(GetTrackBits(track_w0) == TrackBits{Track::X});
+}
+
+TEST_CASE("MultiWorldGen - Partitioning Preserves Terrain Heights and Shores")
+{
+	Map::Allocate(64, 64);
+
+	auto regions = MultiWorldGen::CalculateLayout(64, 64);
+	REQUIRE(regions.size() == 3);
+
+	/* A valid coast at the lower edge of the first world uses height points
+	 * that lie in the future void buffer. */
+	TileIndex shore = TileXY(10, regions[0].max_y);
+	SetTileHeight(TileXY(10, regions[0].max_y + 1), 1);
+	SetTileHeight(TileXY(11, regions[0].max_y + 1), 1);
+	MakeShore(shore);
+	REQUIRE(GetTileSlope(shore) == SLOPE_SE);
+
+	std::vector<uint8_t> heights;
+	heights.reserve(Map::Size());
+	for (TileIndex tile : Map::Iterate()) heights.push_back(TileHeight(tile));
+
+	REQUIRE(MultiWorldGen::GenerateMultiWorldLayout(64, 64));
+
+	uint changed_heights = 0;
+	for (TileIndex tile : Map::Iterate()) {
+		if (TileHeight(tile) != heights[tile.base()]) changed_heights++;
+	}
+
+	CHECK(changed_heights == 0);
+	CHECK(IsCoastTile(shore));
+	CHECK(GetTileSlope(shore) == SLOPE_SE);
 }

@@ -56,6 +56,71 @@ TEST_CASE("ConsistTraversal - Progress Tracking API")
 	CHECK(PortalRegistry::GetPortalTransitProgress(vid2) == 0);
 }
 
+TEST_CASE("ConsistTraversal - Following Wagon Enters Plain Rail Tile")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+
+	MockEnvironment &mock = MockEnvironment::Instance();
+	(void)mock;
+	_settings_game.pf.path_backoff_interval = 1;
+
+	REQUIRE(Company::CanAllocateItem());
+	Company *c = Company::Create();
+	REQUIRE(c != nullptr);
+
+	TileIndex previous_tile = TileXY(9, 10);
+	TileIndex new_tile = TileXY(10, 10);
+	TileIndex old_tile = TileXY(11, 10);
+	MakeRailNormal(previous_tile, Owner(0), TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailNormal(new_tile, Owner(0), TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailNormal(old_tile, Owner(0), TrackBits{Track::X}, RAILTYPE_BEGIN);
+
+	REQUIRE(Vehicle::CanAllocateItem(2));
+	Train *engine = Vehicle::Create<Train>();
+	Train *wagon = Vehicle::Create<Train>();
+
+	engine->SetFrontEngine();
+	wagon->ClearFrontEngine();
+	engine->owner = Owner(0);
+	wagon->owner = Owner(0);
+	engine->direction = Direction::NE;
+	wagon->direction = Direction::NE;
+	engine->tile = previous_tile;
+	wagon->tile = old_tile;
+	engine->track = Track::X;
+	wagon->track = Track::X;
+	engine->x_pos = TileX(previous_tile) * TILE_SIZE + 8;
+	engine->y_pos = TileY(previous_tile) * TILE_SIZE + 8;
+	wagon->x_pos = TileX(old_tile) * TILE_SIZE;
+	wagon->y_pos = TileY(old_tile) * TILE_SIZE + 8;
+	engine->z_pos = GetSlopePixelZ(engine->x_pos, engine->y_pos, true);
+	wagon->z_pos = GetSlopePixelZ(wagon->x_pos, wagon->y_pos, true);
+	engine->gcache.cached_veh_length = 8;
+	wagon->gcache.cached_veh_length = 8;
+	engine->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
+	wagon->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
+	engine->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
+	wagon->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
+	engine->railtypes = RailTypes{RAILTYPE_BEGIN};
+	wagon->railtypes = RailTypes{RAILTYPE_BEGIN};
+	engine->SetNext(wagon);
+
+	REQUIRE_FALSE(IsTunnelTile(new_tile));
+	CHECK(TrainController(wagon, nullptr));
+	CHECK(wagon->tile == new_tile);
+	CHECK(wagon->track == Track::X);
+
+	engine->SetNext(nullptr);
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
+}
+
 TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 {
 	Map::Allocate(64, 64);

@@ -429,15 +429,46 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
 - Complex electrical grid / power pole simulation.
 - Procedural alien language generation.
 - Dynamic climate change / planetary terraforming simulation.
-- More than 4 active worlds on a single map.
-
 ---
 
-## R. Recommended Next Sprint
+## S. Long-Term Roadmap: EPIC — Federated Multi-Server Universe
 
-### Next Immediate Action: **Spike 2 — Multi-Wagon Consist Wormhole Traversal**
-Before building the world region manager or UI, resolve the single remaining engine uncertainty:
-1. Create `src/tests/test_consist_portal.cpp`.
-2. Adapt `TrainController` / `CheckTrainsLengths` in `src/train_cmd.cpp` to decouple distance assertions for wagons marked `Track::Wormhole`.
-3. Implement virtual transit progress for multi-wagon consists crossing between non-contiguous portal coordinates.
-4. Verify with Catch2 tests that a 5-wagon train transitions cleanly without errors.
+For complete architectural specifications, authoritative handoff state machines, and persistent global identity schemas, see [FEDERATED_UNIVERSE_VISION.md](file:///home/flax/.gemini/antigravity/brain/527edc66-0f08-4ba7-b746-432d46a19837/FEDERATED_UNIVERSE_VISION.md).
+
+```text
+Current Sprints (1-9)        Federation Prep             Federation Prototype        Persistent Universe          Megacity Economy
+┌──────────────────────┐    ┌─────────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐    ┌──────────────────────┐
+│ Single-Map           │    │ Stable Global IDs   │    │ 2-Server Handoff     │    │ Persistent Player   │    │ Dedicated Phase 1    │
+│ Planetary Regions    │───>│ Consist Streamer    │───>│ Spike                │───>│ Accounts & Corporate│───>│ Core Worlds          │
+│ Wormhole Architecture│    │ Content Manifests   │    │ Universe Authority   │    │ Directory           │    │ Megacity Multi-World │
+│ Local Economy        │    │ Local/Global Split  │    │ Proof of Concept     │    │ Global Commodity    │    │ Logistics Networks   │
+└──────────────────────┘    └─────────────────────┘    └──────────────────────┘    └─────────────────────┘    └──────────────────────┘
+```
+
+### Phase F1: Federation Preparation (Architectural Decoupling)
+- **Goal:** Ensure near-term single-map codebase avoids blocking multi-server serialization.
+- **Tasks:**
+  - Wrap internal vehicle/station/company IDs in globally unique identifier schemas (`GlobalID`).
+  - Memory stream serializer for train consist snapshots.
+  - Define `Universe Content Manifest` schema.
+
+### Phase F2: Federation Prototype (Technical Spike)
+- **Goal:** Implement a 2-server handoff proof-of-concept.
+- **Tasks:**
+  - Build lightweight `Universe Authority` daemon.
+  - Implement inter-server transfer handoff state machine in `src/portal/federation_cmd.cpp`.
+  - Conduct 2-server local integration test (despawn on Server A $\rightarrow$ in-transit authority ledger $\rightarrow$ materialize on Server B).
+
+### Phase F3: Persistent Universe & Corporate Ledger
+- **Goal:** Multi-server persistent universe infrastructure.
+- **Tasks:**
+  - Registered player account authentication.
+  - Dynamic world server directory and player universe browser.
+  - Global commodity ledger and cross-server cargo balance tracking.
+
+### Phase F4: Megacity & Empire Economy
+- **Goal:** Scale individual Phase 1 Core Worlds to dedicated max-size (4096×4096) servers.
+- **Tasks:**
+  - Megacity sustained commodity demand mechanics.
+  - High-throughput inter-world freight corridors and wormhole congestion management.
+

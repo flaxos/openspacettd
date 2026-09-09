@@ -970,10 +970,14 @@ void DrawShoreTile(Slope tileh)
 		0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  5,  0, 10, 15,
 	};
 
-	assert(!IsHalftileSlope(tileh)); // Halftile slopes need to get handled earlier.
-	assert(tileh != SLOPE_FLAT);     // Shore is never flat
-
-	assert((tileh != SLOPE_EW) && (tileh != SLOPE_NS)); // No suitable sprites for current flooding behaviour
+	/* Multi-world maps made before terrain heights were preserved can contain
+	 * shoreline ground on a slope without a matching shore sprite. Render a
+	 * stable water fallback so those saves remain loadable. */
+	tileh = RemoveHalftileSlope(tileh);
+	if (tileh == SLOPE_FLAT || tileh == SLOPE_EW || tileh == SLOPE_NS) {
+		DrawGroundSprite(SPR_FLAT_WATER_TILE, PAL_NONE);
+		return;
+	}
 
 	DrawGroundSprite(SPR_SHORE_BASE + tileh_to_shoresprite[tileh], PAL_NONE);
 }

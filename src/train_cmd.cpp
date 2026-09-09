@@ -3503,7 +3503,7 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 						} else {
 							chosen_track = prev->track;
 						}
-					} else if (IsTunnel(gp.new_tile)) {
+					} else if (IsTunnelTile(gp.new_tile)) {
 						/* When entering a tunnel (including a portal wormhole where prev may already have
 						 * reached the opposite end on another world), choose the track into the tunnel. */
 						chosen_track = bits;
