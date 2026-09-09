@@ -27,6 +27,7 @@ inline uint GetTunnelBridgeLength(TileIndex begin, TileIndex end)
 {
 	if (PortalRegistry::IsPortalTile(begin)) return PortalRegistry::GetPortalVirtualLength(begin);
 	if (PortalRegistry::IsPortalTile(end)) return PortalRegistry::GetPortalVirtualLength(end);
+	if (begin == INVALID_TILE || end == INVALID_TILE) return 0;
 
 	int x1 = TileX(begin);
 	int y1 = TileY(begin);

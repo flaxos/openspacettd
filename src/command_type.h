@@ -380,6 +380,11 @@ enum class Commands : uint8_t {
 	UpdateLeagueTableElementScore, ///< update the score of a league table element
 	RemoveLeagueTableElement, ///< remove a league table element
 
+	BuildPortalGate, ///< build a single unlinked portal gate head
+	LinkPortalGates, ///< link two unlinked portal gates across worlds
+	BuildPortalPair, ///< build and link two portal gates atomically across worlds
+	DestroyPortalGate, ///< demolish a portal gate
+
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

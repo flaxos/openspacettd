@@ -141,6 +141,22 @@ struct PORTChunkHandler : ChunkHandler {
 			SlSetArrayIndex(i++);
 			SlObject(&sl_link, _portal_link_desc);
 		}
+
+		for (const auto &[tile, endpoint] : PortalRegistry::GetUnlinkedGates()) {
+			SlPortalLink sl_link{
+				.id = 0,
+				.tile_a = endpoint.tile.base(),
+				.dir_a = to_underlying(endpoint.enter_dir),
+				.world_a = endpoint.world_id.base(),
+				.tile_b = INVALID_TILE.base(),
+				.dir_b = 0,
+				.world_b = INVALID_WORLD.base(),
+				.virtual_length = 0,
+				.bidirectional = 0,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&sl_link, _portal_link_desc);
+		}
 	}
 
 	void Load() const override
@@ -152,22 +168,31 @@ struct PORTChunkHandler : ChunkHandler {
 		while (SlIterateArray() != -1) {
 			sl_link = {};
 			SlObject(&sl_link, slt);
-			PortalLink link;
-			link.id = PortalID{sl_link.id};
-			link.end_a = PortalEndpoint{
-				TileIndex{sl_link.tile_a},
-				static_cast<DiagDirection>(sl_link.dir_a),
-				WorldID{sl_link.world_a},
-			};
-			link.end_b = PortalEndpoint{
-				TileIndex{sl_link.tile_b},
-				static_cast<DiagDirection>(sl_link.dir_b),
-				WorldID{sl_link.world_b},
-			};
-			link.virtual_length = sl_link.virtual_length;
-			link.bidirectional = (sl_link.bidirectional != 0);
 
-			PortalRegistry::RestorePortalLink(link);
+			if (TileIndex{sl_link.tile_b} == INVALID_TILE) {
+				PortalRegistry::RegisterUnlinkedGate(
+					TileIndex{sl_link.tile_a},
+					static_cast<DiagDirection>(sl_link.dir_a),
+					WorldID{sl_link.world_a}
+				);
+			} else {
+				PortalLink link;
+				link.id = PortalID{sl_link.id};
+				link.end_a = PortalEndpoint{
+					TileIndex{sl_link.tile_a},
+					static_cast<DiagDirection>(sl_link.dir_a),
+					WorldID{sl_link.world_a},
+				};
+				link.end_b = PortalEndpoint{
+					TileIndex{sl_link.tile_b},
+					static_cast<DiagDirection>(sl_link.dir_b),
+					WorldID{sl_link.world_b},
+				};
+				link.virtual_length = sl_link.virtual_length;
+				link.bidirectional = (sl_link.bidirectional != 0);
+
+				PortalRegistry::RestorePortalLink(link);
+			}
 		}
 	}
 };

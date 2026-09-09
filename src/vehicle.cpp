@@ -583,7 +583,15 @@ CommandCost EnsureNoVehicleOnGround(TileIndex tile)
  */
 CommandCost TunnelBridgeIsFree(TileIndex tile, TileIndex endtile, const Vehicle *ignore)
 {
+	if (PortalRegistry::IsPortalTile(tile) && PortalRegistry::IsPortalInTransit(tile)) {
+		return CommandCost(STR_ERROR_TRAIN_IN_THE_WAY);
+	}
+	if (endtile != INVALID_TILE && PortalRegistry::IsPortalTile(endtile) && PortalRegistry::IsPortalInTransit(endtile)) {
+		return CommandCost(STR_ERROR_TRAIN_IN_THE_WAY);
+	}
+
 	for (TileIndex t : {tile, endtile}) {
+		if (t == INVALID_TILE) continue;
 		/* Value v is not safe in MP games, however, it is used to generate a local
 		 * error message only (which may be different for different machines).
 		 * Such a message does not affect MP synchronisation.

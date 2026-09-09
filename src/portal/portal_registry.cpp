@@ -13,9 +13,11 @@
 #include "../tile_map.h"
 #include "../landscape.h"
 #include "../direction_func.h"
+#include "../vehicle_base.h"
 
 std::unordered_map<TileIndex, PortalID> PortalRegistry::tile_to_portal;
 std::unordered_map<uint32_t, PortalLink> PortalRegistry::portal_links;
+std::unordered_map<TileIndex, PortalEndpoint> PortalRegistry::unlinked_gates;
 std::unordered_map<uint32_t, uint32_t> PortalRegistry::vehicle_portal_progress;
 uint32_t PortalRegistry::next_portal_id = 1;
 
@@ -34,6 +36,10 @@ PortalID PortalRegistry::RegisterPortalPair(
 	    tile_to_portal.find(tile_b) != tile_to_portal.end()) {
 		return INVALID_PORTAL;
 	}
+
+	/* Remove from unlinked gates if either was unlinked */
+	unlinked_gates.erase(tile_a);
+	unlinked_gates.erase(tile_b);
 
 	PortalID id{next_portal_id++};
 
@@ -60,6 +66,95 @@ bool PortalRegistry::UnregisterPortal(PortalID id)
 	tile_to_portal.erase(it->second.end_b.tile);
 	portal_links.erase(it);
 	return true;
+}
+
+bool PortalRegistry::UnregisterPortalByTile(TileIndex tile)
+{
+	if (tile == INVALID_TILE) return false;
+
+	auto it_un = unlinked_gates.find(tile);
+	if (it_un != unlinked_gates.end()) {
+		unlinked_gates.erase(it_un);
+		return true;
+	}
+
+	auto it = tile_to_portal.find(tile);
+	if (it == tile_to_portal.end()) return false;
+
+	return UnregisterPortal(it->second);
+}
+
+bool PortalRegistry::RegisterUnlinkedGate(TileIndex tile, DiagDirection dir, WorldID world_id)
+{
+	if (tile == INVALID_TILE) return false;
+	if (tile_to_portal.find(tile) != tile_to_portal.end()) return false;
+	if (unlinked_gates.find(tile) != unlinked_gates.end()) return false;
+
+	unlinked_gates[tile] = PortalEndpoint{tile, dir, world_id};
+	return true;
+}
+
+bool PortalRegistry::IsUnlinkedGate(TileIndex tile)
+{
+	if (tile == INVALID_TILE) return false;
+	return unlinked_gates.find(tile) != unlinked_gates.end();
+}
+
+const PortalEndpoint *PortalRegistry::GetUnlinkedGate(TileIndex tile)
+{
+	auto it = unlinked_gates.find(tile);
+	if (it == unlinked_gates.end()) return nullptr;
+	return &it->second;
+}
+
+const std::unordered_map<TileIndex, PortalEndpoint> &PortalRegistry::GetUnlinkedGates()
+{
+	return unlinked_gates;
+}
+
+PortalID PortalRegistry::LinkGates(TileIndex tile_a, TileIndex tile_b, uint32_t virtual_length, bool bidirectional)
+{
+	auto it_a = unlinked_gates.find(tile_a);
+	auto it_b = unlinked_gates.find(tile_b);
+	if (it_a == unlinked_gates.end() || it_b == unlinked_gates.end()) return INVALID_PORTAL;
+
+	PortalEndpoint end_a = it_a->second;
+	PortalEndpoint end_b = it_b->second;
+
+	unlinked_gates.erase(it_a);
+	unlinked_gates.erase(it_b);
+
+	return RegisterPortalPair(
+		end_a.tile, end_a.enter_dir, end_a.world_id,
+		end_b.tile, end_b.enter_dir, end_b.world_id,
+		virtual_length, bidirectional
+	);
+}
+
+bool PortalRegistry::IsPortalInTransit(TileIndex tile)
+{
+	if (tile == INVALID_TILE) return false;
+
+	const PortalLink *link = GetPortalLink(tile);
+	if (link == nullptr) {
+		for (const auto &[veh_id, progress] : vehicle_portal_progress) {
+			const Vehicle *v = Vehicle::GetIfValid(VehicleID{veh_id});
+			if (v != nullptr && v->tile == tile) return true;
+		}
+		return false;
+	}
+
+	TileIndex tile_a = link->end_a.tile;
+	TileIndex tile_b = link->end_b.tile;
+
+	for (const auto &[veh_id, progress] : vehicle_portal_progress) {
+		const Vehicle *v = Vehicle::GetIfValid(VehicleID{veh_id});
+		if (v != nullptr && (v->tile == tile_a || v->tile == tile_b)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool PortalRegistry::IsPortalTile(TileIndex tile)
@@ -193,6 +288,7 @@ void PortalRegistry::Reset()
 {
 	tile_to_portal.clear();
 	portal_links.clear();
+	unlinked_gates.clear();
 	vehicle_portal_progress.clear();
 	next_portal_id = 1;
 }

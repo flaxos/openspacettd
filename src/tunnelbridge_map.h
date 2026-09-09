@@ -79,6 +79,7 @@ inline void SetTunnelBridgeSnowOrDesert(Tile t, bool snow_or_desert)
 inline TileIndex GetOtherTunnelBridgeEnd(Tile t)
 {
 	if (PortalRegistry::IsPortalTile(t)) return PortalRegistry::GetOtherPortalEnd(t);
+	if (PortalRegistry::IsUnlinkedGate(t)) return INVALID_TILE;
 	assert(IsTileType(t, TileType::TunnelBridge));
 	return IsTunnel(t) ? GetOtherTunnelEnd(t) : GetOtherBridgeEnd(t);
 }

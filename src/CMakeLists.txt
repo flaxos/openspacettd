@@ -375,6 +375,8 @@ add_files(
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h
+    portal/portal_cmd.cpp
+    portal/portal_cmd.h
     portal/portal_registry.cpp
     portal/portal_registry.h
     portal/portal_type.h

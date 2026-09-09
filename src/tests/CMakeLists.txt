@@ -22,6 +22,7 @@ add_test_files(
     test_saveload_planet.cpp
     test_portal_wormhole.cpp
     test_consist_traversal.cpp
+    test_portal_construction.cpp
     test_world_gen.cpp
     test_interplanetary_cargo.cpp
     test_script_admin.cpp

@@ -48,6 +48,61 @@ public:
 	static bool UnregisterPortal(PortalID id);
 
 	/**
+	 * Unregister a portal gate by its tile (handles both linked portal links and unlinked gates).
+	 * If part of a linked portal, removes the link for both ends.
+	 * @param tile The portal tile to unregister.
+	 * @return True if found and removed.
+	 */
+	static bool UnregisterPortalByTile(TileIndex tile);
+
+	/**
+	 * Register an unlinked portal gate head on a tile.
+	 *
+	 * @param tile Entrance tile.
+	 * @param dir Vehicle entry direction into portal head.
+	 * @param world_id Logical world ID containing tile.
+	 * @return True if registered successfully, false if duplicate or invalid.
+	 */
+	static bool RegisterUnlinkedGate(TileIndex tile, DiagDirection dir, WorldID world_id);
+
+	/**
+	 * Check whether a given tile is a registered unlinked portal gate head.
+	 * @param tile The tile to query.
+	 * @return True if the tile is an unlinked portal gate.
+	 */
+	static bool IsUnlinkedGate(TileIndex tile);
+
+	/**
+	 * Get the unlinked portal endpoint for a tile.
+	 * @param tile The tile to query.
+	 * @return Pointer to PortalEndpoint or nullptr if not an unlinked gate.
+	 */
+	static const PortalEndpoint *GetUnlinkedGate(TileIndex tile);
+
+	/**
+	 * Get all currently unlinked portal gates.
+	 */
+	static const std::unordered_map<TileIndex, PortalEndpoint> &GetUnlinkedGates();
+
+	/**
+	 * Link two unlinked portal gates into an active bidirectional or directed wormhole link.
+	 *
+	 * @param tile_a Entrance tile A.
+	 * @param tile_b Entrance tile B.
+	 * @param virtual_length Number of virtual tiles/ticks for transit duration and YAPF cost.
+	 * @param bidirectional Whether vehicles can travel in both directions.
+	 * @return The assigned PortalID, or INVALID_PORTAL on failure.
+	 */
+	static PortalID LinkGates(TileIndex tile_a, TileIndex tile_b, uint32_t virtual_length = 1, bool bidirectional = true);
+
+	/**
+	 * Check whether any vehicle is currently in transit through the portal wormhole connecting to this tile.
+	 * @param tile Portal endpoint tile to check.
+	 * @return True if at least one vehicle is in transit through the portal link.
+	 */
+	static bool IsPortalInTransit(TileIndex tile);
+
+	/**
 	 * Check whether a given tile is a registered portal gate.
 	 * @param tile The tile to query.
 	 * @return True if the tile is registered as a portal endpoint.
@@ -146,6 +201,7 @@ public:
 private:
 	static std::unordered_map<TileIndex, PortalID> tile_to_portal;
 	static std::unordered_map<uint32_t, PortalLink> portal_links;
+	static std::unordered_map<TileIndex, PortalEndpoint> unlinked_gates;
 	static std::unordered_map<uint32_t, uint32_t> vehicle_portal_progress;
 	static uint32_t next_portal_id;
 };

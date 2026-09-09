@@ -22,6 +22,7 @@
 TileIndex GetOtherTunnelEnd(TileIndex tile)
 {
 	if (PortalRegistry::IsPortalTile(tile)) return PortalRegistry::GetOtherPortalEnd(tile);
+	if (PortalRegistry::IsUnlinkedGate(tile)) return INVALID_TILE;
 
 	DiagDirection dir = GetTunnelBridgeDirection(tile);
 	TileIndexDiff delta = TileOffsByDiagDir(dir);

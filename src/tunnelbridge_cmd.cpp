@@ -43,6 +43,8 @@
 #include "table/strings.h"
 #include "table/bridge_land.h"
 
+#include "portal/portal_registry.h"
+
 #include "safeguards.h"
 
 BridgeSpec _bridge[MAX_BRIDGES]; ///< The specification of all bridges.
@@ -888,9 +890,14 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 	}
 
 	Money base_cost = TunnelBridgeClearCost(tile, Price::ClearTunnel);
-	uint len = GetTunnelBridgeLength(tile, endtile) + 2; // Don't forget the end tiles.
+	uint len = (endtile != INVALID_TILE) ? (GetTunnelBridgeLength(tile, endtile) + 2) : 1;
 
 	if (flags.Test(DoCommandFlag::Execute)) {
+		bool is_portal_gate = PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile);
+		if (is_portal_gate) {
+			PortalRegistry::UnregisterPortalByTile(tile);
+		}
+
 		if (GetTunnelBridgeTransportType(tile) == TransportType::Rail) {
 			/* We first need to request values before calling DoClearSquare */
 			DiagDirection dir = GetTunnelBridgeDirection(tile);
@@ -909,14 +916,14 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 			}
 
 			DoClearSquare(tile);
-			DoClearSquare(endtile);
+			if (endtile != INVALID_TILE) DoClearSquare(endtile);
 
 			/* cannot use DiagDirection::Invalid for signal update because the tunnel doesn't exist anymore */
-			AddSideToSignalBuffer(tile,    ReverseDiagDir(dir), owner);
-			AddSideToSignalBuffer(endtile, dir,                 owner);
+			AddSideToSignalBuffer(tile, ReverseDiagDir(dir), owner);
+			if (endtile != INVALID_TILE) AddSideToSignalBuffer(endtile, dir, owner);
 
-			YapfNotifyTrackLayoutChange(tile,    track);
-			YapfNotifyTrackLayoutChange(endtile, track);
+			YapfNotifyTrackLayoutChange(tile, track);
+			if (endtile != INVALID_TILE) YapfNotifyTrackLayoutChange(endtile, track);
 
 			if (v != nullptr) TryPathReserve(v);
 		} else {
@@ -925,7 +932,7 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 			UpdateCompanyRoadInfrastructure(GetRoadTypeTram(tile), GetRoadOwner(tile, RoadTramType::Tram), -(int)(len * 2 * TUNNELBRIDGE_TRACKBIT_FACTOR));
 
 			DoClearSquare(tile);
-			DoClearSquare(endtile);
+			if (endtile != INVALID_TILE) DoClearSquare(endtile);
 		}
 	}
 
