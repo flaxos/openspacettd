@@ -43,6 +43,8 @@
 #include "town_cmd.h"
 #include "timer/timer.h"
 #include "timer/timer_game_calendar.h"
+#include "portal/planet_manager.h"
+#include "3rdparty/fmt/format.h"
 #include "timer/timer_window.h"
 #include "zoom_func.h"
 #include "hotkeys.h"
@@ -373,7 +375,16 @@ public:
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
-		if (widget == WID_TV_CAPTION) return GetString(this->town->larger_town ? STR_TOWN_VIEW_CITY_CAPTION : STR_TOWN_VIEW_TOWN_CAPTION, this->town->index);
+		if (widget == WID_TV_CAPTION) {
+			std::string cap = GetString(this->town->larger_town ? STR_TOWN_VIEW_CITY_CAPTION : STR_TOWN_VIEW_TOWN_CAPTION, this->town->index);
+			if (PlanetManager::Count() > 0) {
+				const PlanetRegion *region = PlanetManager::GetRegionByTile(this->town->xy);
+				if (region != nullptr) {
+					return fmt::format("{} [{}]", cap, region->name);
+				}
+			}
+			return cap;
+		}
 
 		return this->Window::GetWidgetString(widget, stringid);
 	}
@@ -394,6 +405,15 @@ public:
 
 		DrawString(tr, GetString(STR_TOWN_VIEW_POPULATION_HOUSES, this->town->cache.population, this->town->cache.num_houses));
 		tr.top += GetCharacterHeight(FontSize::Normal);
+
+		if (PlanetManager::Count() > 0) {
+			const PlanetRegion *region = PlanetManager::GetRegionByTile(this->town->xy);
+			if (region != nullptr) {
+				std::string world_str = fmt::format("World: {} ({})", region->name, PlanetManager::GetWorldPhaseName(region->phase));
+				DrawString(tr, world_str, TextColour::Gold);
+				tr.top += GetCharacterHeight(FontSize::Normal);
+			}
+		}
 
 		StringID str_last_period = TimerGameEconomy::UsingWallclockUnits() ? STR_TOWN_VIEW_CARGO_LAST_MINUTE_MAX : STR_TOWN_VIEW_CARGO_LAST_MONTH_MAX;
 
@@ -547,6 +567,8 @@ public:
 			aimed_height += GetCharacterHeight(FontSize::Normal);
 		}
 		aimed_height += GetCharacterHeight(FontSize::Normal);
+
+		if (PlanetManager::Count() > 0) aimed_height += GetCharacterHeight(FontSize::Normal);
 
 		if (_settings_game.economy.station_noise_level) aimed_height += GetCharacterHeight(FontSize::Normal);
 

@@ -35,6 +35,7 @@
 #include "misc_cmd.h"
 #include "timer/timer.h"
 #include "timer/timer_window.h"
+#include "portal/planet_manager.h"
 
 #include "saveload/saveload_func.h"
 
@@ -208,6 +209,10 @@ enum GlobalHotKeys : int32_t {
 	GHK_CHAT_SERVER,
 	GHK_CLOSE_NEWS,
 	GHK_CLOSE_ERROR,
+	GHK_PLANET_JUMP_1,
+	GHK_PLANET_JUMP_2,
+	GHK_PLANET_JUMP_3,
+	GHK_PLANET_JUMP_4,
 };
 
 struct MainWindow : Window
@@ -422,6 +427,15 @@ struct MainWindow : Window
 				if (!HideActiveErrorMessage()) return EventState::NotHandled;
 				break;
 
+			case GHK_PLANET_JUMP_1:
+			case GHK_PLANET_JUMP_2:
+			case GHK_PLANET_JUMP_3:
+			case GHK_PLANET_JUMP_4: {
+				WorldID wid{static_cast<uint32_t>(hotkey - GHK_PLANET_JUMP_1)};
+				if (PlanetManager::JumpToPlanet(wid)) return EventState::Handled;
+				break;
+			}
+
 			default: return EventState::NotHandled;
 		}
 		return EventState::Handled;
@@ -522,6 +536,10 @@ struct MainWindow : Window
 		Hotkey({WKC_CTRL | WKC_SHIFT | WKC_RETURN, WKC_CTRL | WKC_SHIFT | 'T'}, "chat_server", GHK_CHAT_SERVER),
 		Hotkey(WKC_SPACE, "close_news", GHK_CLOSE_NEWS),
 		Hotkey(WKC_SPACE, "close_error", GHK_CLOSE_ERROR),
+		Hotkey({'1' | WKC_CTRL | WKC_ALT, '1' | WKC_ALT}, "jump_planet_1", GHK_PLANET_JUMP_1),
+		Hotkey({'2' | WKC_CTRL | WKC_ALT, '2' | WKC_ALT}, "jump_planet_2", GHK_PLANET_JUMP_2),
+		Hotkey({'3' | WKC_CTRL | WKC_ALT, '3' | WKC_ALT}, "jump_planet_3", GHK_PLANET_JUMP_3),
+		Hotkey({'4' | WKC_CTRL | WKC_ALT, '4' | WKC_ALT}, "jump_planet_4", GHK_PLANET_JUMP_4),
 	}};
 };
 

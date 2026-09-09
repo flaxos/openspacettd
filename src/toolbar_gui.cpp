@@ -68,6 +68,8 @@
 #include "screensaver.h"
 
 #include "widgets/toolbar_widget.h"
+#include "portal/planet_manager.h"
+#include "3rdparty/fmt/format.h"
 
 #include "network/network.h"
 #include "network/network_gui.h"
@@ -446,6 +448,14 @@ static CallBackFunction ToolbarMapClick(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_EXTRA_VIEWPORT, MapMenuEntries::ShowExtraViewport));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_LINGRAPH_LEGEND, MapMenuEntries::ShowLinkGraph));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_SIGN_LIST, MapMenuEntries::ShowSignList));
+
+	if (PlanetManager::Count() > 0) {
+		for (const auto &r : PlanetManager::GetAllRegions()) {
+			std::string item_text = fmt::format("Jump to: {}", r.name);
+			list.push_back(std::make_unique<DropDownString<DropDownListItem>>(std::move(item_text), 100 + r.id.base(), false, false));
+		}
+	}
+
 	PopupMainToolbarMenu(w, WID_TN_SMALL_MAP, std::move(list), 0);
 	return CallBackFunction::None;
 }
@@ -458,6 +468,14 @@ static CallBackFunction ToolbarScenMapTownDir(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_SIGN_LIST, MapMenuEntries::ShowSignList));
 	list.push_back(MakeDropDownListStringItem(STR_TOWN_MENU_TOWN_DIRECTORY, MapMenuEntries::ShowTownDirectory));
 	list.push_back(MakeDropDownListStringItem(STR_INDUSTRY_MENU_INDUSTRY_DIRECTORY, MapMenuEntries::ShowIndustryDirectory));
+
+	if (PlanetManager::Count() > 0) {
+		for (const auto &r : PlanetManager::GetAllRegions()) {
+			std::string item_text = fmt::format("Jump to: {}", r.name);
+			list.push_back(std::make_unique<DropDownString<DropDownListItem>>(std::move(item_text), 100 + r.id.base(), false, false));
+		}
+	}
+
 	PopupMainToolbarMenu(w, WID_TE_SMALL_MAP, std::move(list), 0);
 	return CallBackFunction::None;
 }
@@ -470,6 +488,12 @@ static CallBackFunction ToolbarScenMapTownDir(Window *w)
  */
 static CallBackFunction MenuClickMap(int index)
 {
+	if (index >= 100) {
+		WorldID wid{static_cast<uint32_t>(index - 100)};
+		PlanetManager::JumpToPlanet(wid);
+		return CallBackFunction::None;
+	}
+
 	switch (MapMenuEntries(index)) {
 		case MapMenuEntries::ShowSmallMap: ShowSmallMap(); break;
 		case MapMenuEntries::ShowExtraViewport: ShowExtraViewportWindow(); break;

@@ -11,6 +11,12 @@
 #include "planet_manager.h"
 #include "../map_func.h"
 #include "../table/strings.h"
+#include "../window_func.h"
+#include "../window_gui.h"
+#include "../viewport_func.h"
+#include "../viewport_type.h"
+#include "../landscape.h"
+#include "../3rdparty/fmt/format.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -216,4 +222,74 @@ Money PlanetManager::GetInterplanetaryCargoProfit(Money base_profit, TileIndex s
 	if (bonus_pct == 0) return base_profit;
 
 	return base_profit + (base_profit * bonus_pct) / 100;
+}
+
+const char *PlanetManager::GetWorldPhaseName(WorldPhase phase)
+{
+	switch (phase) {
+		case WorldPhase::Phase1_Core:      return "Phase 1 (Core)";
+		case WorldPhase::Phase2_Developed: return "Phase 2 (Developed)";
+		case WorldPhase::Phase3_Frontier:  return "Phase 3 (Frontier)";
+		case WorldPhase::Phase4_Expansion: return "Phase 4 (Expansion)";
+		default:                           return "Unknown Phase";
+	}
+}
+
+const char *PlanetManager::GetWorldBiomeName(WorldBiome biome)
+{
+	switch (biome) {
+		case WorldBiome::Temperate:  return "Temperate";
+		case WorldBiome::SubArctic:  return "Sub-Arctic";
+		case WorldBiome::SubTropic:  return "Sub-Tropic";
+		case WorldBiome::AridDesert: return "Arid Desert";
+		case WorldBiome::Volcanic:   return "Volcanic";
+		case WorldBiome::Oceanic:    return "Oceanic";
+		default:                     return "Standard";
+	}
+}
+
+const PlanetRegion *PlanetManager::GetViewportCurrentPlanet(const Window *main_window)
+{
+	if (Count() == 0) return nullptr;
+
+	if (main_window == nullptr) {
+		main_window = FindWindowById(WindowClass::MainWindow, 0);
+	}
+	if (main_window == nullptr || main_window->viewport == nullptr) return nullptr;
+
+	const Viewport &vp = *main_window->viewport;
+	int center_x = vp.virtual_left + vp.virtual_width / 2;
+	int center_y = vp.virtual_top + vp.virtual_height / 2;
+	Point pt = InverseRemapCoords2(center_x, center_y, true);
+	TileIndex tile = TileVirtXYClampedToMap(pt.x, pt.y);
+
+	return GetRegionByTile(tile);
+}
+
+std::string PlanetManager::GetViewportStatusText(const Window *main_window)
+{
+	if (Count() == 0) return "";
+
+	const PlanetRegion *region = GetViewportCurrentPlanet(main_window);
+	if (region != nullptr) {
+		return fmt::format("[{}] {} | {}", region->name, GetWorldPhaseName(region->phase), GetWorldBiomeName(region->biome));
+	}
+
+	return "[Interplanetary Void]";
+}
+
+bool PlanetManager::JumpToPlanet(WorldID world_id)
+{
+	const PlanetRegion *region = GetRegion(world_id);
+	if (region == nullptr) return false;
+
+	uint center_x = (region->min_x + region->max_x) / 2;
+	uint center_y = (region->min_y + region->max_y) / 2;
+	TileIndex target = TileXY(center_x, center_y);
+
+	Window *main_window = FindWindowById(WindowClass::MainWindow, 0);
+	if (main_window != nullptr && main_window->viewport != nullptr) {
+		return ScrollMainWindowToTile(target);
+	}
+	return true;
 }

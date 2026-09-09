@@ -18,6 +18,7 @@ add_test_files(
     test_network_crypto.cpp
     test_placement_restrictions.cpp
     test_planet_manager.cpp
+    test_planet_ui.cpp
     test_portal_wormhole.cpp
     test_consist_traversal.cpp
     test_world_gen.cpp

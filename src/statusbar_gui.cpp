@@ -30,6 +30,8 @@
 #include "timer/timer_window.h"
 
 #include "widgets/statusbar_widget.h"
+#include "portal/planet_manager.h"
+#include "3rdparty/fmt/format.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -143,13 +145,25 @@ struct StatusBarWindow : Window {
 						InvalidateWindowData(WindowClass::Statusbar, 0, SBI_NEWS_DELETED);
 						if (Company::IsValidID(_local_company)) {
 							/* This is the default text */
-							DrawString(tr, GetString(STR_STATUSBAR_COMPANY_NAME, _local_company), TextColour::FromString, AlignmentH::Centre);
+							if (PlanetManager::Count() > 0) {
+								std::string status = fmt::format("{} - {}", GetString(STR_STATUSBAR_COMPANY_NAME, _local_company), PlanetManager::GetViewportStatusText());
+								DrawString(tr, status, TextColour::FromString, AlignmentH::Centre);
+							} else {
+								DrawString(tr, GetString(STR_STATUSBAR_COMPANY_NAME, _local_company), TextColour::FromString, AlignmentH::Centre);
+							}
 						}
 					}
 				} else {
 					if (Company::IsValidID(_local_company)) {
 						/* This is the default text */
-						DrawString(tr, GetString(STR_STATUSBAR_COMPANY_NAME, _local_company), TextColour::FromString, AlignmentH::Centre);
+						if (PlanetManager::Count() > 0) {
+							std::string status = fmt::format("{} - {}", GetString(STR_STATUSBAR_COMPANY_NAME, _local_company), PlanetManager::GetViewportStatusText());
+							DrawString(tr, status, TextColour::FromString, AlignmentH::Centre);
+						} else {
+							DrawString(tr, GetString(STR_STATUSBAR_COMPANY_NAME, _local_company), TextColour::FromString, AlignmentH::Centre);
+						}
+					} else if (PlanetManager::Count() > 0) {
+						DrawString(tr, PlanetManager::GetViewportStatusText(), TextColour::FromString, AlignmentH::Centre);
 					}
 				}
 

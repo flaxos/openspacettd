@@ -38,6 +38,8 @@
 
 #include "widgets/station_widget.h"
 #include "widgets/misc_widget.h"
+#include "portal/planet_manager.h"
+#include "3rdparty/fmt/format.h"
 
 #include "table/strings.h"
 
@@ -1513,7 +1515,14 @@ struct StationViewWindow : public Window {
 	{
 		if (widget == WID_SV_CAPTION) {
 			const Station *st = Station::Get(this->window_number);
-			return GetString(STR_STATION_VIEW_CAPTION, st->index, st->facilities);
+			std::string cap = GetString(STR_STATION_VIEW_CAPTION, st->index, st->facilities);
+			if (PlanetManager::Count() > 0) {
+				const PlanetRegion *region = PlanetManager::GetRegionByTile(st->xy);
+				if (region != nullptr) {
+					return fmt::format("{} [{}]", cap, region->name);
+				}
+			}
+			return cap;
 		}
 
 		return this->Window::GetWidgetString(widget, stringid);

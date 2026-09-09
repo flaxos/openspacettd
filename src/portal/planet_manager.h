@@ -18,6 +18,9 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
+#include <string>
+
+class Window;
 
 /**
  * Spatial manager and query engine for planetary worlds.
@@ -114,6 +117,41 @@ public:
 	 * @return Adjusted profit incorporating interplanetary trade premiums.
 	 */
 	static Money GetInterplanetaryCargoProfit(Money base_profit, TileIndex src_tile, TileIndex dest_tile);
+
+	/**
+	 * Get a user-friendly display name for a WorldPhase.
+	 * @param phase The WorldPhase.
+	 * @return Human-readable phase name.
+	 */
+	static const char *GetWorldPhaseName(WorldPhase phase);
+
+	/**
+	 * Get a user-friendly display name for a WorldBiome.
+	 * @param biome The WorldBiome.
+	 * @return Human-readable biome name.
+	 */
+	static const char *GetWorldBiomeName(WorldBiome biome);
+
+	/**
+	 * Resolve the planet region currently centered in the main game viewport.
+	 * @param main_window Optional pointer to the main window (defaults to FindWindowById(WindowClass::MainWindow, 0)).
+	 * @return Pointer to current PlanetRegion, or nullptr if in void space or no planets registered.
+	 */
+	static const PlanetRegion *GetViewportCurrentPlanet(const Window *main_window = nullptr);
+
+	/**
+	 * Format a status badge string describing the planet currently centered in the viewport.
+	 * @param main_window Optional pointer to the main window.
+	 * @return Formatted status text, e.g. "[Core Hub (Phase 1)] Phase 1 (Core) | Temperate", or empty if no planets.
+	 */
+	static std::string GetViewportStatusText(const Window *main_window = nullptr);
+
+	/**
+	 * Jump the main viewport center to the geometric center of the specified planetary world.
+	 * @param world_id The WorldID to jump to.
+	 * @return True if jump succeeded, false if world not found.
+	 */
+	static bool JumpToPlanet(WorldID world_id);
 
 	/** Get the total number of registered planet regions. */
 	static size_t Count();
