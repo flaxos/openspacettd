@@ -381,7 +381,7 @@ TEST_CASE("Edge Conduit - Frontier World Extraction Multiplier")
 
 TEST_CASE("Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)")
 {
-	const std::string test_save_file = "/tmp/test_openspacettd_sprint9.sav";
+	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_sprint9.sav").string();
 	std::filesystem::remove(test_save_file);
 
 	SetupSprint9Environment();
@@ -581,7 +581,7 @@ TEST_CASE("Edge Conduit - Logical boundary, phases and adjacent rail remain supp
 
 TEST_CASE("Edge Conduit - Constructed tile survives save, reload and signal refresh")
 {
-	const std::string save_file = "/tmp/test_openspacettd_edge_conduit_constructed.sav";
+	const std::string save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_edge_conduit_constructed.sav").string();
 	std::filesystem::remove(save_file);
 	SetupSprint9Environment();
 
