@@ -140,7 +140,7 @@ CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex
 	WorldID world_a = PlanetManager::GetTileWorld(tile_a);
 	WorldID world_b = PlanetManager::GetTileWorld(tile_b);
 	if (world_a == INVALID_WORLD || world_b == INVALID_WORLD || world_a == world_b) {
-		return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+		return CommandCost(STR_ERROR_PORTAL_GATES_DIFFERENT_WORLDS);
 	}
 
 	/* Virtual length is proportional to coordinate distance across worlds */
@@ -148,7 +148,7 @@ CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex
 	uint32_t virtual_length = std::max(2u, dist / 4);
 
 	/* Wormhole excitation and link stabilization cost */
-	CommandCost cost;
+	CommandCost cost(ExpensesType::Construction);
 	cost.AddCost(_price[Price::BuildTunnel] * 10);
 
 	if (flags.Test(DoCommandFlag::Execute)) {
@@ -270,7 +270,7 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 	}
 
 	Money base_cost = _price[Price::ClearTunnel] + RailClearCost(GetRailType(tile));
-	CommandCost cost;
+	CommandCost cost(ExpensesType::Construction);
 	cost.AddCost(base_cost * ((demolish_both && endtile != INVALID_TILE) ? 2 : 1));
 
 	if (flags.Test(DoCommandFlag::Execute)) {

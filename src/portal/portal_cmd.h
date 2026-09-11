@@ -90,6 +90,9 @@ CommandCost CmdBuildEdgeConduit(DoCommandFlags flags, TileIndex tile, DiagDirect
  */
 CommandCost CmdDestroyEdgeConduit(DoCommandFlags flags, TileIndex tile);
 
+/** GUI completion callback for portal gate linking. */
+CommandCallback CcPortalLink;
+
 DEF_CMD_TRAIT(Commands::BuildPortalGate,   CmdBuildPortalGate,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::LinkPortalGates,  CmdLinkPortalGates,   {},                                                      CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::BuildPortalPair,   CmdBuildPortalPair,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)

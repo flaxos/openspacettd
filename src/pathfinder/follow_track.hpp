@@ -16,6 +16,7 @@
 #include "../train.h"
 #include "../tunnelbridge.h"
 #include "../tunnelbridge_map.h"
+#include "../portal/edge_conduit.h"
 #include "../depot_map.h"
 #include "pathfinder_func.h"
 
@@ -228,8 +229,14 @@ protected:
 					this->is_bridge = true;
 					this->new_tile = GetOtherBridgeEnd(this->old_tile);
 				}
+				const bool traversing_portal = this->is_tunnel && PortalRegistry::IsPortalTile(this->old_tile);
+				if (this->new_tile >= Map::Size() || (traversing_portal && !IsTunnelTile(this->new_tile))) {
+					this->new_tile = INVALID_TILE;
+					this->err = ErrorCode::NoWay;
+					return;
+				}
 				this->tiles_skipped = GetTunnelBridgeLength(this->new_tile, this->old_tile);
-				if (PortalRegistry::IsPortalTile(this->old_tile)) {
+				if (traversing_portal) {
 					this->exitdir = ReverseDiagDir(GetTunnelBridgeDirection(this->new_tile));
 				}
 				return;
@@ -239,6 +246,10 @@ protected:
 
 		/* normal or station tile, do one step */
 		this->new_tile = TileAddByDiagDir(this->old_tile, this->exitdir);
+		if (this->new_tile >= Map::Size()) {
+			this->err = ErrorCode::NoWay;
+			return;
+		}
 
 		/* special handling for stations */
 		if (IsRailTT() && HasStationTileRail(this->new_tile)) {
@@ -254,6 +265,12 @@ protected:
 	 */
 	inline bool QueryNewTileTrackStatus()
 	{
+		if (this->new_tile >= Map::Size()) {
+			this->new_td_bits.Reset();
+			this->err = ErrorCode::NoWay;
+			return false;
+		}
+
 		if (IsRailTT() && IsPlainRailTile(this->new_tile)) {
 			this->new_td_bits = TrackBitsToTrackdirBits(GetTrackBits(this->new_tile));
 		} else if (IsRoadTT()) {
@@ -305,6 +322,14 @@ protected:
 	 */
 	inline bool CanEnterNewTile()
 	{
+		/* An unlinked portal gate or Edge Conduit is a one-ended tunnel head.
+		 * It remains visible as rail infrastructure, but cannot be routed through. */
+		if (IsRailTT() && IsTunnelTile(this->new_tile) &&
+				(PortalRegistry::IsUnlinkedGate(this->new_tile) || EdgeConduitManager::IsConduitTile(this->new_tile))) {
+			this->err = ErrorCode::NoWay;
+			return false;
+		}
+
 		if (IsRoadTT() && IsBayRoadStopTile(this->new_tile)) {
 			/* road stop can be entered from one direction only unless it's a drive-through stop */
 			DiagDirection exitdir = GetBayRoadStopDir(this->new_tile);

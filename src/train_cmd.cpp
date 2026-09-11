@@ -2425,6 +2425,16 @@ static bool CheckTrainStayInDepot(Train *v)
 }
 
 /**
+ * Test whether a tile is a valid rail tunnel or bridge head.
+ * @param tile Tile to validate.
+ * @return True when the tile can safely be used as a rail tunnel or bridge head.
+ */
+static bool IsValidRailTunnelBridgeTile(TileIndex tile)
+{
+	return tile < Map::Size() && IsTileType(tile, TileType::TunnelBridge) && GetTunnelBridgeTransportType(tile) == TransportType::Rail;
+}
+
+/**
  * Clear the reservation of \a tile that was just left by a wagon on \a track_dir.
  * @param v %Train owning the reservation.
  * @param tile Tile with reservation to clear.
@@ -2438,18 +2448,19 @@ static void ClearPathReservation(const Train *v, TileIndex tile, Trackdir track_
 		/* Are we just leaving a tunnel/bridge? */
 		if (GetTunnelBridgeDirection(tile) == ReverseDiagDir(dir)) {
 			TileIndex end = GetOtherTunnelBridgeEnd(tile);
+			const bool valid_end = IsValidRailTunnelBridgeTile(end);
 
-			if (TunnelBridgeIsFree(tile, end, v).Succeeded()) {
+			if (TunnelBridgeIsFree(tile, valid_end ? end : INVALID_TILE, v).Succeeded()) {
 				/* Free the reservation only if no other train is on the tiles. */
 				SetTunnelBridgeReservation(tile, false);
-				SetTunnelBridgeReservation(end, false);
+				if (valid_end) SetTunnelBridgeReservation(end, false);
 
 				if (_settings_client.gui.show_track_reservation) {
 					if (IsBridge(tile)) {
 						MarkBridgeDirty(tile);
 					} else {
 						MarkTileDirtyByTile(tile);
-						MarkTileDirtyByTile(end);
+						if (valid_end) MarkTileDirtyByTile(end);
 					}
 				}
 			}
@@ -3220,7 +3231,8 @@ uint Train::Crash(bool flooded)
 			if (IsTileType(v->tile, TileType::TunnelBridge)) {
 				/* ClearPathReservation will not free the wormhole exit
 				 * if the train has just entered the wormhole. */
-				SetTunnelBridgeReservation(GetOtherTunnelBridgeEnd(v->tile), false);
+				TileIndex end = GetOtherTunnelBridgeEnd(v->tile);
+				if (IsValidRailTunnelBridgeTile(end)) SetTunnelBridgeReservation(end, false);
 			}
 		}
 

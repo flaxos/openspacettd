@@ -11,6 +11,8 @@
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../map_func.h"
+#include "../command_func.h"
+#include "../landscape_cmd.h"
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
 #include "../portal/portal_cmd.h"
@@ -199,11 +201,14 @@ TEST_CASE("Portal Construction - Cross-World Gate Linking")
 	/* 1. Attempt same-world linking (tile_a on World 0 and tile_c on World 0): must fail */
 	CommandCost res_same_world = CmdLinkPortalGates({}, tile_a, tile_c);
 	CHECK(res_same_world.Failed());
-	CHECK(res_same_world.GetErrorMessage() == STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	CHECK(res_same_world.GetErrorMessage() == STR_ERROR_PORTAL_GATES_DIFFERENT_WORLDS);
 
 	/* 2. Successfully link gate A (World 0) and gate B (World 1) */
-	CommandCost res_link = CmdLinkPortalGates(DoCommandFlag::Execute, tile_a, tile_b);
+	CommandCost res_link = CmdLinkPortalGates({}, tile_a, tile_b);
 	CHECK(res_link.Succeeded());
+	CHECK(res_link.GetExpensesType() == ExpensesType::Construction);
+	CHECK(IsNetworkRegisteredCallback(&CcPortalLink));
+	REQUIRE(Command<Commands::LinkPortalGates>::Post(STR_ERROR_CAN_T_LINK_PORTAL_GATES, CcPortalLink, tile_a, tile_b));
 
 	/* Verify they transitioned from unlinked to active linked portal pair */
 	CHECK(!PortalRegistry::IsUnlinkedGate(tile_a));
@@ -329,6 +334,7 @@ TEST_CASE("Portal Construction - Partial Demolition Unlinking")
 	/* Demolish only gate A (demolish_both = false) */
 	CommandCost res_dem = CmdDestroyPortalGate(DoCommandFlag::Execute, tile_a, false);
 	CHECK(res_dem.Succeeded());
+	CHECK(res_dem.GetExpensesType() == ExpensesType::Construction);
 	UpdateSignalsInBuffer();
 
 	/* Tile A is cleared */
@@ -349,6 +355,42 @@ TEST_CASE("Portal Construction - Partial Demolition Unlinking")
 
 	CHECK(!IsTunnelTile(tile_b));
 	CHECK(!PortalRegistry::IsUnlinkedGate(tile_b));
+}
+
+TEST_CASE("Portal Construction - Area demolition safely removes a reserved linked pair")
+{
+	SetupTestWorlds();
+
+	TileIndex tile_a = TileXY(50, 50);
+	TileIndex tile_b = TileXY(180, 50);
+	REQUIRE(CmdBuildPortalPair(
+		DoCommandFlag::Execute,
+		tile_a, DiagDirection::NE,
+		tile_b, DiagDirection::SW,
+		RAILTYPE_BEGIN
+	).Succeeded());
+	UpdateSignalsInBuffer();
+
+	Company *company = Company::Get(_current_company);
+	REQUIRE(company != nullptr);
+	CHECK(company->infrastructure.rail[RAILTYPE_BEGIN] == 2 * TUNNELBRIDGE_TRACKBIT_FACTOR);
+
+	/* Reproduce the area-bulldozer path from the crash. Both heads can carry
+	 * the same tunnel reservation while the reserving train is elsewhere. */
+	SetTunnelBridgeReservation(tile_a, true);
+	SetTunnelBridgeReservation(tile_b, true);
+	CHECK(HasTunnelBridgeReservation(tile_a));
+	CHECK(HasTunnelBridgeReservation(tile_b));
+
+	auto [clear_result, money] = Command<Commands::ClearArea>::Do(DoCommandFlag::Execute, tile_a, tile_a, false);
+	REQUIRE(clear_result.Succeeded());
+	UpdateSignalsInBuffer();
+
+	CHECK(!PortalRegistry::IsPortalTile(tile_a));
+	CHECK(!PortalRegistry::IsPortalTile(tile_b));
+	CHECK(IsTileType(tile_a, TileType::Clear));
+	CHECK(IsTileType(tile_b, TileType::Clear));
+	CHECK(company->infrastructure.rail[RAILTYPE_BEGIN] == 0);
 }
 
 TEST_CASE("Portal Construction - Savegame Persistence of Unlinked and Linked Portals")

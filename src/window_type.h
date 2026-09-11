@@ -743,6 +743,9 @@ enum class WindowClass : uint16_t {
 	 */
 	Help,
 
+	/** Portal gate construction and linking picker. */
+	BuildPortal,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

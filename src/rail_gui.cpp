@@ -16,6 +16,7 @@
 #include "terraform_gui.h"
 #include "viewport_func.h"
 #include "command_func.h"
+#include "error.h"
 #include "waypoint_func.h"
 #include "newgrf_badge.h"
 #include "newgrf_badge_gui.h"
@@ -61,9 +62,19 @@
 static RailType _cur_railtype;               ///< Rail type of the current build-rail toolbar.
 static bool _remove_button_clicked;          ///< Flag whether 'remove' toggle-button is currently enabled
 static DiagDirection _build_depot_direction; ///< Currently selected depot direction
+static DiagDirection _build_portal_direction = DiagDirection::NE; ///< Currently selected portal gate direction.
 static bool _convert_signal_button;          ///< convert signal button in the signal GUI pressed
 static SignalVariant _cur_signal_variant;    ///< set the signal variant (for signal GUI)
 static SignalType _cur_signal_type;          ///< set the signal type (for signal GUI)
+
+/** Interaction mode of the portal-gate construction picker. */
+enum class PortalPlacementMode : uint8_t {
+	Build, ///< Build a new unlinked portal gate.
+	Link,  ///< Select two existing portal gates to link.
+};
+
+static PortalPlacementMode _portal_placement_mode = PortalPlacementMode::Build; ///< Current portal picker interaction mode.
+static TileIndex _pending_link_gate = INVALID_TILE; ///< First portal gate selected while linking.
 
 struct WaypointPickerSelection {
 	StationClassID sel_class; ///< Selected station class.
@@ -81,6 +92,7 @@ static StationPickerSelection _station_gui; ///< Settings of the station picker.
 
 static void HandleStationPlacement(TileIndex start, TileIndex end);
 static void ShowBuildTrainDepotPicker(Window *parent);
+static void ShowBuildPortalPicker(Window *parent);
 static void ShowBuildWaypointPicker(Window *parent);
 static Window *ShowStationBuilder(Window *parent);
 static void ShowSignalBuilder(Window *parent);
@@ -103,6 +115,27 @@ static bool IsStationAvailable(const StationSpec *statspec)
 void CcPlaySound_CONSTRUCTION_RAIL(Commands, const CommandCost &result, TileIndex tile)
 {
 	if (result.Succeeded() && _settings_client.sound.confirm) SndPlayTileFx(SND_20_CONSTRUCTION_RAIL, tile);
+}
+
+/** Clear the first gate selected by the portal-link tool. */
+static void ClearPendingPortalLink()
+{
+	_pending_link_gate = INVALID_TILE;
+	SetWindowDirty(WindowClass::BuildPortal, TransportType::Rail);
+}
+
+/**
+ * Handle completion of a portal-link command posted by the construction toolbar.
+ * @param command Executed command.
+ * @param result Command result.
+ * @param tile Second portal gate selected by the user.
+ */
+void CcPortalLink([[maybe_unused]] Commands command, const CommandCost &result, TileIndex tile)
+{
+	if (result.Failed()) return;
+
+	ClearPendingPortalLink();
+	if (_settings_client.sound.confirm) SndPlayTileFx(SND_20_CONSTRUCTION_RAIL, tile);
 }
 
 static void GenericPlaceRail(TileIndex tile, Track track)
@@ -461,6 +494,7 @@ struct BuildRailToolbarWindow : Window {
 
 	void Close([[maybe_unused]] int data = 0) override
 	{
+		_pending_link_gate = INVALID_TILE;
 		if (this->IsWidgetLowered(WID_RAT_BUILD_STATION)) SetViewportCatchmentStation(nullptr, true);
 		if (this->IsWidgetLowered(WID_RAT_BUILD_WAYPOINT)) SetViewportCatchmentWaypoint(nullptr, true);
 		if (_settings_client.gui.link_terraform_toolbar) CloseWindowById(WindowClass::ScenarioGenerateLandscape, 0, false);
@@ -485,7 +519,7 @@ struct BuildRailToolbarWindow : Window {
 
 			/* Update cursor and all sub windows. */
 			if (_thd.GetCallbackWnd() == this) SetCursor(this->GetCursorForWidget(this->last_user_action), PAL_NONE);
-			for (WindowClass cls : {WindowClass::BuildStation, WindowClass::BuildSignal, WindowClass::BuildWaypoint, WindowClass::BuildDepot}) {
+			for (WindowClass cls : {WindowClass::BuildStation, WindowClass::BuildSignal, WindowClass::BuildWaypoint, WindowClass::BuildDepot, WindowClass::BuildPortal}) {
 				SetWindowDirty(cls, TransportType::Rail);
 			}
 		}
@@ -502,6 +536,7 @@ struct BuildRailToolbarWindow : Window {
 			CloseWindowById(WindowClass::BuildSignal, TransportType::Rail);
 			CloseWindowById(WindowClass::BuildStation, TransportType::Rail);
 			CloseWindowById(WindowClass::BuildDepot, TransportType::Rail);
+			CloseWindowById(WindowClass::BuildPortal, TransportType::Rail);
 			CloseWindowById(WindowClass::BuildWaypoint, TransportType::Rail);
 			CloseWindowById(WindowClass::JoinStation, 0);
 		}
@@ -682,6 +717,14 @@ struct BuildRailToolbarWindow : Window {
 				}
 				break;
 			}
+
+			case WID_RAT_BUILD_PORTAL:
+				if (started) {
+					ShowBuildPortalPicker(this);
+				} else {
+					ClearPendingPortalLink();
+				}
+				break;
 		}
 
 		this->UpdateRemoveWidgetStatus(widget);
@@ -695,7 +738,7 @@ struct BuildRailToolbarWindow : Window {
 		return Window::OnHotkey(hotkey);
 	}
 
-	void OnPlaceObject([[maybe_unused]] Point pt, TileIndex tile) override
+	void OnPlaceObject(Point pt, TileIndex tile) override
 	{
 		switch (this->last_user_action) {
 			case WID_RAT_BUILD_NS:
@@ -751,16 +794,21 @@ struct BuildRailToolbarWindow : Window {
 				break;
 
 			case WID_RAT_BUILD_PORTAL: {
-				static TileIndex _pending_link_gate = INVALID_TILE;
-				if (PortalRegistry::IsUnlinkedGate(tile)) {
-					if (_pending_link_gate != INVALID_TILE && _pending_link_gate != tile && PortalRegistry::IsUnlinkedGate(_pending_link_gate)) {
-						Command<Commands::LinkPortalGates>::Post(STR_ERROR_CAN_T_BUILD_TUNNEL_HERE, _pending_link_gate, tile);
-						_pending_link_gate = INVALID_TILE;
-					} else {
-						_pending_link_gate = tile;
-					}
-				} else {
-					Command<Commands::BuildPortalGate>::Post(STR_ERROR_CAN_T_BUILD_TUNNEL_HERE, tile, DiagDirection::Invalid, _cur_railtype);
+				if (_portal_placement_mode == PortalPlacementMode::Build) {
+					Command<Commands::BuildPortalGate>::Post(STR_ERROR_CAN_T_BUILD_PORTAL_GATE, CcPlaySound_CONSTRUCTION_RAIL, tile, _build_portal_direction, _cur_railtype);
+					break;
+				}
+
+				if (!PortalRegistry::IsUnlinkedGate(tile)) {
+					ShowErrorMessage(GetEncodedString(STR_ERROR_CAN_T_LINK_PORTAL_GATES), GetEncodedString(STR_ERROR_PORTAL_SELECT_UNLINKED_GATE), WarningLevel::Info, pt.x, pt.y);
+					break;
+				}
+
+				if (_pending_link_gate == INVALID_TILE || !PortalRegistry::IsUnlinkedGate(_pending_link_gate)) {
+					_pending_link_gate = tile;
+					SetWindowDirty(WindowClass::BuildPortal, TransportType::Rail);
+				} else if (_pending_link_gate != tile) {
+					Command<Commands::LinkPortalGates>::Post(STR_ERROR_CAN_T_LINK_PORTAL_GATES, CcPortalLink, _pending_link_gate, tile);
 				}
 				break;
 			}
@@ -854,6 +902,7 @@ struct BuildRailToolbarWindow : Window {
 
 	void OnPlaceObjectAbort() override
 	{
+		_pending_link_gate = INVALID_TILE;
 		if (this->IsWidgetLowered(WID_RAT_BUILD_STATION)) SetViewportCatchmentStation(nullptr, true);
 		if (this->IsWidgetLowered(WID_RAT_BUILD_WAYPOINT)) SetViewportCatchmentWaypoint(nullptr, true);
 
@@ -864,6 +913,7 @@ struct BuildRailToolbarWindow : Window {
 		CloseWindowById(WindowClass::BuildSignal, TransportType::Rail);
 		CloseWindowById(WindowClass::BuildStation, TransportType::Rail);
 		CloseWindowById(WindowClass::BuildDepot, TransportType::Rail);
+		CloseWindowById(WindowClass::BuildPortal, TransportType::Rail);
 		CloseWindowById(WindowClass::BuildWaypoint, TransportType::Rail);
 		CloseWindowById(WindowClass::JoinStation, 0);
 		CloseWindowByClass(WindowClass::BuildBridge);
@@ -871,6 +921,10 @@ struct BuildRailToolbarWindow : Window {
 
 	void OnPlacePresize([[maybe_unused]] Point pt, TileIndex tile) override
 	{
+		if (this->last_user_action == WID_RAT_BUILD_PORTAL || this->last_user_action == WID_RAT_BUILD_CONDUIT) {
+			VpSetPresizeRange(tile, tile);
+			return;
+		}
 		Command<Commands::BuildTunnel>::Do(DoCommandFlag::Auto, tile, TransportType::Rail, _cur_railtype, INVALID_ROADTYPE);
 		VpSetPresizeRange(tile, _build_tunnel_endtile == INVALID_TILE ? tile : _build_tunnel_endtile);
 	}
@@ -905,7 +959,7 @@ struct BuildRailToolbarWindow : Window {
 
 		/* Update cursor and all sub windows. */
 		if (_thd.GetCallbackWnd() == this) SetCursor(this->GetCursorForWidget(this->last_user_action), PAL_NONE);
-		for (WindowClass cls : {WindowClass::BuildStation, WindowClass::BuildSignal, WindowClass::BuildWaypoint, WindowClass::BuildDepot}) {
+		for (WindowClass cls : {WindowClass::BuildStation, WindowClass::BuildSignal, WindowClass::BuildWaypoint, WindowClass::BuildDepot, WindowClass::BuildPortal}) {
 			SetWindowDirty(cls, TransportType::Rail);
 		}
 
@@ -1901,6 +1955,122 @@ static WindowDesc _build_depot_desc(
 static void ShowBuildTrainDepotPicker(Window *parent)
 {
 	new BuildRailDepotWindow(_build_depot_desc, parent);
+}
+
+/** Portal gate construction and linking picker. */
+struct BuildRailPortalWindow : public PickerWindowBase {
+	/**
+	 * Create a portal gate picker.
+	 * @param desc Window description.
+	 * @param parent Parent rail construction toolbar.
+	 */
+	BuildRailPortalWindow(WindowDesc &desc, Window *parent) : PickerWindowBase(desc, parent)
+	{
+		this->InitNested(TransportType::Rail);
+		this->OnInvalidateData();
+	}
+
+	void DrawWidget(const Rect &r, WidgetID widget) const override
+	{
+		if (widget != WID_BRP_STATUS) return;
+
+		std::string status;
+		if (_portal_placement_mode == PortalPlacementMode::Build) {
+			status = GetString(STR_BUILD_PORTAL_STATUS_BUILD);
+		} else if (_pending_link_gate == INVALID_TILE || !PortalRegistry::IsUnlinkedGate(_pending_link_gate)) {
+			status = GetString(STR_BUILD_PORTAL_STATUS_LINK_FIRST);
+		} else {
+			status = GetString(STR_BUILD_PORTAL_STATUS_LINK_SECOND, TileX(_pending_link_gate), TileY(_pending_link_gate));
+		}
+
+		DrawStringMultiLine(r.Shrink(WidgetDimensions::scaled.framerect), status, TextColour::Black, {AlignmentH::Centre, AlignmentV::Middle});
+	}
+
+	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
+	{
+		switch (widget) {
+			case WID_BRP_BUILD_MODE:
+				_portal_placement_mode = PortalPlacementMode::Build;
+				ClearPendingPortalLink();
+				break;
+
+			case WID_BRP_LINK_MODE:
+				_portal_placement_mode = PortalPlacementMode::Link;
+				break;
+
+			case WID_BRP_DIRECTION_NE:
+			case WID_BRP_DIRECTION_SE:
+			case WID_BRP_DIRECTION_SW:
+			case WID_BRP_DIRECTION_NW:
+				_build_portal_direction = static_cast<DiagDirection>(widget - WID_BRP_DIRECTION_NE);
+				_portal_placement_mode = PortalPlacementMode::Build;
+				ClearPendingPortalLink();
+				break;
+
+			default:
+				return;
+		}
+
+		SndClickBeep();
+		this->OnInvalidateData();
+		this->SetDirty();
+	}
+
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
+	{
+		if (!gui_scope) return;
+		if (_pending_link_gate != INVALID_TILE && !PortalRegistry::IsUnlinkedGate(_pending_link_gate)) {
+			_pending_link_gate = INVALID_TILE;
+		}
+
+		this->SetWidgetLoweredState(WID_BRP_BUILD_MODE, _portal_placement_mode == PortalPlacementMode::Build);
+		this->SetWidgetLoweredState(WID_BRP_LINK_MODE, _portal_placement_mode == PortalPlacementMode::Link);
+		for (WidgetID direction = WID_BRP_DIRECTION_NE; direction <= WID_BRP_DIRECTION_NW; direction++) {
+			this->SetWidgetLoweredState(direction, direction - WID_BRP_DIRECTION_NE == to_underlying(_build_portal_direction));
+			this->SetWidgetDisabledState(direction, _portal_placement_mode == PortalPlacementMode::Link);
+		}
+	}
+};
+
+/** Nested widget definition of the portal gate picker. */
+static constexpr std::initializer_list<NWidgetPart> _nested_build_portal_widgets = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, Colours::DarkGreen),
+		NWidget(WWT_CAPTION, Colours::DarkGreen), SetStringTip(STR_BUILD_PORTAL_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, Colours::DarkGreen),
+		NWidget(NWID_VERTICAL), SetPIP(0, WidgetDimensions::unscaled.vsep_normal, 0), SetPadding(WidgetDimensions::unscaled.picker),
+			NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
+				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_BUILD_MODE), SetFill(1, 0), SetStringTip(STR_BUILD_PORTAL_MODE_BUILD, STR_BUILD_PORTAL_MODE_BUILD_TOOLTIP),
+				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_LINK_MODE), SetFill(1, 0), SetStringTip(STR_BUILD_PORTAL_MODE_LINK, STR_BUILD_PORTAL_MODE_LINK_TOOLTIP),
+			EndContainer(),
+			NWidget(WWT_TEXT, Colours::Invalid), SetStringTip(STR_BUILD_PORTAL_ORIENTATION),
+			NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
+				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_DIRECTION_NW), SetStringTip(STR_BUILD_PORTAL_DIRECTION_NW, STR_BUILD_PORTAL_DIRECTION_TOOLTIP),
+				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_DIRECTION_NE), SetStringTip(STR_BUILD_PORTAL_DIRECTION_NE, STR_BUILD_PORTAL_DIRECTION_TOOLTIP),
+				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_DIRECTION_SW), SetStringTip(STR_BUILD_PORTAL_DIRECTION_SW, STR_BUILD_PORTAL_DIRECTION_TOOLTIP),
+				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_DIRECTION_SE), SetStringTip(STR_BUILD_PORTAL_DIRECTION_SE, STR_BUILD_PORTAL_DIRECTION_TOOLTIP),
+			EndContainer(),
+			NWidget(WWT_PANEL, Colours::DarkGreen, WID_BRP_STATUS), SetMinimalSize(300, 46), SetFill(1, 0), EndContainer(),
+		EndContainer(),
+	EndContainer(),
+};
+
+/** Window description for the portal gate picker. */
+static WindowDesc _build_portal_desc(
+	WindowPosition::Automatic, {}, 0, 0,
+	WindowClass::BuildPortal, WindowClass::BuildToolbar,
+	WindowDefaultFlag::Construction,
+	_nested_build_portal_widgets
+);
+
+/**
+ * Open the portal gate construction and linking picker.
+ * @param parent Parent rail construction toolbar.
+ */
+static void ShowBuildPortalPicker(Window *parent)
+{
+	new BuildRailPortalWindow(_build_portal_desc, parent);
 }
 
 class WaypointPickerCallbacks : public PickerCallbacksNewGRFClass<StationClass> {

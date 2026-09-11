@@ -96,6 +96,17 @@ enum BuildRailDepotWidgets : WidgetID {
 	WID_BRAD_DEPOT_NW, ///< Build a depot with the entrance in the north west.
 };
 
+/** Widgets of the portal gate construction window. */
+enum BuildRailPortalWidgets : WidgetID {
+	WID_BRP_BUILD_MODE,     ///< Build individual portal gate heads.
+	WID_BRP_LINK_MODE,      ///< Link two existing unlinked gate heads.
+	WID_BRP_DIRECTION_NE,   ///< Gate approach points northeast.
+	WID_BRP_DIRECTION_SE,   ///< Gate approach points southeast.
+	WID_BRP_DIRECTION_SW,   ///< Gate approach points southwest.
+	WID_BRP_DIRECTION_NW,   ///< Gate approach points northwest.
+	WID_BRP_STATUS,         ///< Current build/link workflow instructions.
+};
+
 /** Widgets of the #BuildRailWaypointWindow class. */
 enum BuildRailWaypointWidgets : WidgetID {
 	WID_BRW_FILTER,          ///< Text filter.

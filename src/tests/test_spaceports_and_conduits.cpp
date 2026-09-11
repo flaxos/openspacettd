@@ -28,6 +28,7 @@
 #include "../water_map.h"
 #include "../tunnelbridge_map.h"
 #include "../rail_map.h"
+#include "../pathfinder/follow_track.hpp"
 #include "../signal_func.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
@@ -460,11 +461,22 @@ TEST_CASE("Edge Conduit - One-ended head is safe for signal updates")
 {
 	SetupSprint9Environment();
 	const TileIndex tile = TileXY(51, 50);
+	const DiagDirection dir = DiagDirection::NE;
+	const TileIndex approach = TileAddByDiagDir(tile, ReverseDiagDir(dir));
 	MakeVoid(TileXY(50, 50));
-	REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, tile, DiagDirection::NE, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
+	MakeRailNormal(approach, _current_company, TrackBits{DiagDirToDiagTrack(dir)}, RAILTYPE_BEGIN);
+	REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, tile, dir, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
 	CHECK(GetOtherTunnelBridgeEnd(tile) == INVALID_TILE);
 	UpdateSignalsInBuffer();
 	CHECK(EdgeConduitManager::IsConduitTile(tile));
+
+	CHECK(GetTileTrackStatus(tile, TransportType::Rail, RoadTramType::Invalid, ReverseDiagDir(dir)).trackdirs.None());
+	CFollowTrackRail follower(_current_company, RailTypes{RAILTYPE_BEGIN});
+	CHECK_FALSE(follower.Follow(approach, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+	CHECK_FALSE(follower.Follow(tile, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.new_tile == INVALID_TILE);
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
 }
 
 TEST_CASE("Edge Conduit - Physical map edges and corners are coordinate-safe")

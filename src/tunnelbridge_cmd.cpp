@@ -891,15 +891,12 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 	}
 
 	Money base_cost = TunnelBridgeClearCost(tile, Price::ClearTunnel);
-	uint len = (endtile != INVALID_TILE) ? (GetTunnelBridgeLength(tile, endtile) + 2) : 1;
+	bool is_linked_portal = PortalRegistry::IsPortalTile(tile);
+	bool is_portal_gate = is_linked_portal || PortalRegistry::IsUnlinkedGate(tile);
+	bool is_edge_conduit = EdgeConduitManager::IsConduitTile(tile);
+	uint len = is_linked_portal ? 2 : ((endtile != INVALID_TILE) ? (GetTunnelBridgeLength(tile, endtile) + 2) : 1);
 
 	if (flags.Test(DoCommandFlag::Execute)) {
-		bool is_portal_gate = PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile);
-		if (is_portal_gate) {
-			PortalRegistry::UnregisterPortalByTile(tile);
-		}
-		if (EdgeConduitManager::IsConduitTile(tile)) EdgeConduitManager::UnregisterConduit(tile);
-
 		if (GetTunnelBridgeTransportType(tile) == TransportType::Rail) {
 			/* We first need to request values before calling DoClearSquare */
 			DiagDirection dir = GetTunnelBridgeDirection(tile);
@@ -911,6 +908,11 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 				v = GetTrainForReservation(tile, track);
 				if (v != nullptr) FreeTrainTrackReservation(v);
 			}
+
+			/* Reservation walking needs the portal/conduit registry to resolve the
+			 * non-standard tunnel end, so remove sidecar state only afterwards. */
+			if (is_portal_gate) PortalRegistry::UnregisterPortalByTile(tile);
+			if (is_edge_conduit) EdgeConduitManager::UnregisterConduit(tile);
 
 			if (Company::IsValidID(owner)) {
 				Company::Get(owner)->infrastructure.rail[GetRailType(tile)] -= len * TUNNELBRIDGE_TRACKBIT_FACTOR;
@@ -929,6 +931,9 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 
 			if (v != nullptr) TryPathReserve(v);
 		} else {
+			if (is_portal_gate) PortalRegistry::UnregisterPortalByTile(tile);
+			if (is_edge_conduit) EdgeConduitManager::UnregisterConduit(tile);
+
 			/* A full diagonal road tile has two road bits. */
 			UpdateCompanyRoadInfrastructure(GetRoadTypeRoad(tile), GetRoadOwner(tile, RoadTramType::Road), -(int)(len * 2 * TUNNELBRIDGE_TRACKBIT_FACTOR));
 			UpdateCompanyRoadInfrastructure(GetRoadTypeTram(tile), GetRoadOwner(tile, RoadTramType::Tram), -(int)(len * 2 * TUNNELBRIDGE_TRACKBIT_FACTOR));
@@ -1864,6 +1869,8 @@ static TrackStatus GetTileTrackStatus_TunnelBridge(TileIndex tile, TransportType
 {
 	TransportType transport_type = GetTunnelBridgeTransportType(tile);
 	if (transport_type != mode || (transport_type == TransportType::Road && !HasTileRoadType(tile, (RoadTramType)sub_mode))) return {};
+	if (mode == TransportType::Rail && side != DiagDirection::Invalid && IsTunnel(tile) &&
+			(PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile))) return {};
 
 	DiagDirection dir = GetTunnelBridgeDirection(tile);
 	if (side != DiagDirection::Invalid && side != ReverseDiagDir(dir)) return {};
@@ -1983,6 +1990,9 @@ static VehicleEnterTileStates VehicleEnterTile_TunnelBridge(Vehicle *v, TileInde
 	if (IsTunnel(tile)) {
 		if (v->type == VehicleType::Train) {
 			Train *t = Train::From(v);
+			if (dir == vdir && (PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile))) {
+				return VehicleEnterTileState::CannotEnter;
+			}
 
 			if (t->track != Track::Wormhole && dir == vdir) {
 				if (t->IsMovingFront() && frame == TUNNEL_SOUND_FRAME) {
