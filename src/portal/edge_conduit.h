@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 using ConduitID = uint32_t;
 static constexpr ConduitID INVALID_CONDUIT{UINT32_MAX};
@@ -34,6 +35,13 @@ struct EdgeConduit {
 	uint32_t total_produced{0};
 };
 
+/** Fully validated one-tile Edge Conduit footprint. */
+struct EdgeConduitPlacement {
+	DiagDirection dir{DiagDirection::Invalid};
+	TileIndex void_tile{INVALID_TILE};
+	TileIndex approach_tile{INVALID_TILE};
+};
+
 class EdgeConduitManager {
 public:
 	/**
@@ -41,6 +49,15 @@ public:
 	 * Edge conduits must be built on the boundary looking out into the void abyss.
 	 */
 	static bool IsVoidAdjacent(TileIndex tile);
+
+	/**
+	 * Resolve the void-facing direction and both derived neighbours without
+	 * allowing coordinate wraparound or an out-of-map TileIndex.
+	 * @param tile Proposed conduit head.
+	 * @param requested_dir Explicit direction, or Invalid for auto-selection.
+	 * @return Valid footprint, or no value when the site/orientation is invalid.
+	 */
+	static std::optional<EdgeConduitPlacement> ResolvePlacement(TileIndex tile, DiagDirection requested_dir);
 
 	/**
 	 * Register a new edge extraction conduit.

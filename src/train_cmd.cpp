@@ -3129,7 +3129,8 @@ static void TrainEnterStation(Train *consist, StationID station)
  */
 static inline bool CheckCompatibleRail(const Train *v, TileIndex tile, bool check_railtype)
 {
-	return IsTileOwner(tile, v->owner) &&
+	Owner tile_owner = GetTileOwner(tile);
+	return (tile_owner == v->owner || tile_owner == OWNER_NONE) &&
 			(!check_railtype || !v->IsFrontEngine() || v->compatible_railtypes.Test(GetRailType(tile)));
 }
 
@@ -3591,14 +3592,18 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 		} else {
 			if (PortalRegistry::IsPortalTile(v->tile)) {
 				uint32_t progress = PortalRegistry::AdvancePortalTransit(v->index);
-				uint32_t target = PortalRegistry::GetPortalVirtualLength(v->tile) * TILE_SIZE;
+				uint32_t target = PORTAL_TRANSIT_DISTANCE;
 				if (progress >= target) {
 					PortalExitPosition exit = PortalRegistry::GetPortalExitPosition(v->tile);
+					Debug(misc, 3, "Portal vehicle {} emerges from {} at {}, travelling {}, backwards={}",
+						v->index, v->tile, exit.tile, to_underlying(exit.dir), v->IsDrivingBackwards());
 					PortalRegistry::ClearPortalTransit(v->index);
 
 					v->tile = exit.tile;
 					v->track = exit.track;
-					v->direction = exit.dir;
+					/* Facing and travel direction differ when the consist is backing up. */
+					v->SetMovingDirection(exit.dir);
+					direction_changed = true;
 					v->z_pos = exit.z;
 					v->vehstatus.Reset(VehState::Hidden);
 

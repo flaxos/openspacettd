@@ -81,6 +81,14 @@ public:
 	static WorldPhase GetTilePhase(TileIndex tile);
 
 	/**
+	 * Validate the common base-tile requirements for world-aware construction.
+	 * Commands remain responsible for asset-specific footprint and Phase rules.
+	 * @param tile Proposed construction tile.
+	 * @return Success inside a registered logical world, otherwise a useful error.
+	 */
+	static CommandCost CheckConstructionPlacement(TileIndex tile);
+
+	/**
 	 * Check if an industry is permitted on the world at the given tile.
 	 * @param tile Tile location for the proposed industry.
 	 * @param is_raw Whether the industry is an extractive or organic raw producer (e.g. Bio-Farm, Mine).

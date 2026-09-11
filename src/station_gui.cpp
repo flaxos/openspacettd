@@ -39,6 +39,8 @@
 #include "widgets/station_widget.h"
 #include "widgets/misc_widget.h"
 #include "portal/planet_manager.h"
+#include "portal/portal_cmd.h"
+#include "portal/spaceport_manager.h"
 #include "3rdparty/fmt/format.h"
 
 #include "table/strings.h"
@@ -860,6 +862,13 @@ static constexpr std::initializer_list<NWidgetPart> _nested_station_view_widgets
 		NWidget(NWID_VSCROLLBAR, Colours::Grey, WID_SV_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Grey, WID_SV_ACCEPT_RATING_LIST), SetMinimalSize(249, 23), SetResize(1, 0), EndContainer(),
+	NWidget(NWID_SELECTION, Colours::Invalid, WID_SV_SPACEPORT_SEL),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_PANEL, Colours::Grey, WID_SV_SPACEPORT_STATUS), SetMinimalSize(249, 42), SetResize(1, 0), EndContainer(),
+			NWidget(WWT_TEXTBTN, Colours::Grey, WID_SV_SPACEPORT_ACTION), SetMinimalSize(249, 12), SetResize(1, 0), SetFill(1, 1),
+					SetStringTip(STR_SPACEPORT_DESIGNATE_BUTTON, STR_SPACEPORT_ACTION_TOOLTIP),
+		EndContainer(),
+	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
 		NWidget(WWT_PUSHTXTBTN, Colours::Grey, WID_SV_ACCEPTS_RATINGS), SetMinimalSize(46, 12), SetResize(1, 0), SetFill(1, 1),
 				SetStringTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
@@ -1360,6 +1369,7 @@ struct StationViewWindow : public Window {
 	{
 		this->CreateNestedTree();
 		this->GetWidget<NWidgetStacked>(WID_SV_CLOSE_AIRPORT_SEL)->SetDisplayedPlane(Station::Get(window_number)->facilities.Test(StationFacility::Airport) ? 0 : SZSP_NONE);
+		this->GetWidget<NWidgetStacked>(WID_SV_SPACEPORT_SEL)->SetDisplayedPlane(Station::Get(window_number)->facilities.Test(StationFacility::Airport) ? 0 : SZSP_NONE);
 		this->vscroll = this->GetScrollbar(WID_SV_SCROLLBAR);
 		/* Nested widget tree creation is done in two steps to ensure that this->GetWidget<NWidgetCore>(WID_SV_ACCEPTS_RATINGS) exists in UpdateWidgetSize(). */
 		this->FinishInitNested(window_number);
@@ -1448,6 +1458,10 @@ struct StationViewWindow : public Window {
 			case WID_SV_ACCEPT_RATING_LIST:
 				size.height = ((this->GetWidget<NWidgetCore>(WID_SV_ACCEPTS_RATINGS)->GetString() == STR_STATION_VIEW_RATINGS_BUTTON) ? this->accepts_lines : this->rating_lines) * GetCharacterHeight(FontSize::Normal) + padding.height;
 				break;
+
+			case WID_SV_SPACEPORT_STATUS:
+				size.height = 4 * GetCharacterHeight(FontSize::Normal) + padding.height;
+				break;
 		}
 	}
 
@@ -1467,6 +1481,12 @@ struct StationViewWindow : public Window {
 		this->SetWidgetDisabledState(WID_SV_PLANES,   !st->facilities.Test(StationFacility::Airport));
 		this->SetWidgetDisabledState(WID_SV_CLOSE_AIRPORT, !st->facilities.Test(StationFacility::Airport) || st->owner != _local_company || st->owner == OWNER_NONE); // Also consider SE, where _local_company == OWNER_NONE
 		this->SetWidgetLoweredState(WID_SV_CLOSE_AIRPORT, st->facilities.Test(StationFacility::Airport) && st->airport.blocks.Test(AirportBlock::AirportClosed));
+		bool has_airport = st->facilities.Test(StationFacility::Airport);
+		this->GetWidget<NWidgetStacked>(WID_SV_SPACEPORT_SEL)->SetDisplayedPlane(has_airport ? 0 : SZSP_NONE);
+		const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(st->index);
+		this->SetWidgetDisabledState(WID_SV_SPACEPORT_ACTION,
+				!has_airport || st->owner != _local_company || st->owner == OWNER_NONE ||
+				(spaceport != nullptr && spaceport->offworld_trade_tier >= 3));
 
 		extern const Station *_viewport_highlight_station;
 		this->SetWidgetDisabledState(WID_SV_CATCHMENT, st->facilities.None());
@@ -1511,6 +1531,36 @@ struct StationViewWindow : public Window {
 		}
 	}
 
+	void DrawWidget(const Rect &r, WidgetID widget) const override
+	{
+		if (widget != WID_SV_SPACEPORT_STATUS) return;
+
+		Rect tr = r.Shrink(WidgetDimensions::scaled.frametext);
+		const Station *st = Station::Get(this->window_number);
+		const SpaceportInfo *info = SpaceportManager::GetSpaceport(st->index);
+		if (info == nullptr) {
+			DrawString(tr, STR_SPACEPORT_STATUS_NOT_DESIGNATED, TextColour::Black, AlignmentH::Centre);
+			return;
+		}
+
+		std::string world_name = GetString(STR_SPACEPORT_UNKNOWN_WORLD);
+		const PlanetRegion *region = PlanetManager::GetRegion(info->world_id);
+		if (region != nullptr) world_name = region->name;
+
+		DrawString(tr, GetString(STR_SPACEPORT_STATUS_TITLE, info->offworld_trade_tier, world_name), TextColour::Black, AlignmentH::Centre);
+		tr.top += GetCharacterHeight(FontSize::Normal);
+		DrawString(tr, GetString(STR_SPACEPORT_STATUS_SUPPLIES, info->supplies_received), TextColour::Black, AlignmentH::Centre);
+		tr.top += GetCharacterHeight(FontSize::Normal);
+		CargoType cargo = SpaceportManager::GetPreferredOffWorldCargo();
+		if (IsValidCargoType(cargo)) {
+			DrawString(tr, GetString(STR_SPACEPORT_STATUS_MONTHLY_OUTPUT, cargo, SpaceportManager::CalculateTradeCargoProduction(*info)), TextColour::Black, AlignmentH::Centre);
+		} else {
+			DrawString(tr, STR_SPACEPORT_STATUS_NO_CARGO, TextColour::Black, AlignmentH::Centre);
+		}
+		tr.top += GetCharacterHeight(FontSize::Normal);
+		DrawString(tr, GetString(STR_SPACEPORT_STATUS_TOTAL_OUTPUT, info->total_offworld_cargo_generated), TextColour::Black, AlignmentH::Centre);
+	}
+
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
 		if (widget == WID_SV_CAPTION) {
@@ -1523,6 +1573,12 @@ struct StationViewWindow : public Window {
 				}
 			}
 			return cap;
+		}
+		if (widget == WID_SV_SPACEPORT_ACTION) {
+			const SpaceportInfo *info = SpaceportManager::GetSpaceport(static_cast<StationID>(this->window_number));
+			if (info == nullptr) return GetString(STR_SPACEPORT_DESIGNATE_BUTTON);
+			if (info->offworld_trade_tier < 3) return GetString(STR_SPACEPORT_UPGRADE_BUTTON, info->offworld_trade_tier + 1);
+			return GetString(STR_SPACEPORT_MAX_TIER_BUTTON);
 		}
 
 		return this->Window::GetWidgetString(widget, stringid);
@@ -2042,6 +2098,10 @@ struct StationViewWindow : public Window {
 
 			case WID_SV_CLOSE_AIRPORT:
 				Command<Commands::OpenCloseAirport>::Post(this->window_number);
+				break;
+
+			case WID_SV_SPACEPORT_ACTION:
+				Command<Commands::DesignateSpaceport>::Post(STR_ERROR_CAN_T_DESIGNATE_SPACEPORT, static_cast<StationID>(this->window_number));
 				break;
 
 			case WID_SV_TRAINS:   // Show list of scheduled trains to this station

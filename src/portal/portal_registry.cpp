@@ -279,6 +279,55 @@ void PortalRegistry::SetVehicleTransitProgress(VehicleID veh_id, uint32_t progre
 	vehicle_portal_progress[veh_id.base()] = progress;
 }
 
+size_t PortalRegistry::RepairLegacyGeneratedGateways()
+{
+	auto safe_adjacent_tile = [](TileIndex tile, DiagDirection dir) {
+		int dx = 0;
+		int dy = 0;
+		switch (dir) {
+			case DiagDirection::NE: dx = -1; break;
+			case DiagDirection::SE: dy = 1; break;
+			case DiagDirection::SW: dx = 1; break;
+			case DiagDirection::NW: dy = -1; break;
+			default: return INVALID_TILE;
+		}
+		return TileAddWrap(tile, dx, dy);
+	};
+
+	auto is_neutral_lead_track = [](TileIndex tile, Track expected_track) {
+		return IsValidTile(tile) && IsPlainRailTile(tile) && GetTileOwner(tile) == OWNER_NONE &&
+			GetTrackBits(tile).Test(expected_track);
+	};
+
+	size_t repaired = 0;
+	for (auto &[id, link] : portal_links) {
+		for (PortalEndpoint *endpoint : {&link.end_a, &link.end_b}) {
+			TileIndex tile = endpoint->tile;
+			if (!IsValidTile(tile) || !IsTunnelTile(tile) || GetTileOwner(tile) != OWNER_NONE) continue;
+
+			DiagDirection old_dir = GetTunnelBridgeDirection(tile);
+			DiagDirection new_dir = ReverseDiagDir(old_dir);
+			Track expected_track = DiagDirToDiagTrack(new_dir);
+			TileIndex old_forward_side = safe_adjacent_tile(tile, old_dir);
+			TileIndex correct_entry_side = safe_adjacent_tile(tile, new_dir);
+
+			/* The legacy generator put the lead track on old_forward_side. With
+			 * old_dir this is the far side of the tunnel head, so trains cannot
+			 * enter. Do not alter ambiguous portals that have track on both sides. */
+			if (!is_neutral_lead_track(old_forward_side, expected_track) ||
+					is_neutral_lead_track(correct_entry_side, expected_track)) {
+				continue;
+			}
+
+			SB(Tile(tile).m5(), 0, 2, to_underlying(new_dir));
+			endpoint->enter_dir = new_dir;
+			repaired++;
+		}
+	}
+
+	return repaired;
+}
+
 size_t PortalRegistry::Count()
 {
 	return portal_links.size();

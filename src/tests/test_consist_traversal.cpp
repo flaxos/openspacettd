@@ -19,6 +19,7 @@
 #include "../portal/planet_manager.h"
 #include "../train.h"
 #include "../vehicle_base.h"
+#include "../vehicle_func.h"
 #include "../company_base.h"
 #include "../settings_type.h"
 #include "../table/sprites.h"
@@ -121,8 +122,86 @@ TEST_CASE("ConsistTraversal - Following Wagon Enters Plain Rail Tile")
 	PlanetManager::Reset();
 }
 
+TEST_CASE("ConsistTraversal - Company Train Traverses Neutral Gateway")
+{
+	const bool driving_backwards = GENERATE(false, true);
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+
+	MockEnvironment &mock = MockEnvironment::Instance();
+	(void)mock;
+	_settings_game.pf.path_backoff_interval = 1;
+
+	REQUIRE(Company::CanAllocateItem());
+	Company *c = Company::Create();
+	REQUIRE(c != nullptr);
+
+	TileIndex owned_a = TileXY(18, 20);
+	TileIndex approach_a = TileXY(19, 20);
+	TileIndex portal_a = TileXY(20, 20);
+	/* The other endpoint is deliberately elsewhere on the map and rotated onto
+	 * the Y axis. A portal must not behave like a spatially aligned tunnel. */
+	TileIndex portal_b = TileXY(40, 40);
+	TileIndex approach_b = TileXY(40, 41);
+	TileIndex owned_b = TileXY(40, 42);
+
+	MakeRailNormal(owned_a, Owner{0}, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailNormal(approach_a, OWNER_NONE, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_a, OWNER_NONE, DiagDirection::SW, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_b, OWNER_NONE, DiagDirection::NW, RAILTYPE_BEGIN);
+	MakeRailNormal(approach_b, OWNER_NONE, TrackBits{Track::Y}, RAILTYPE_BEGIN);
+	MakeRailNormal(owned_b, Owner{0}, TrackBits{Track::Y}, RAILTYPE_BEGIN);
+
+	REQUIRE(PortalRegistry::RegisterPortalPair(
+		portal_a, DiagDirection::SW, WorldID{0},
+		portal_b, DiagDirection::NW, WorldID{1},
+		32
+	) != INVALID_PORTAL);
+	CHECK(PortalRegistry::GetPortalVirtualLength(portal_a) == 32);
+
+	REQUIRE(Vehicle::CanAllocateItem(1));
+	Train *train = Vehicle::Create<Train>();
+	train->SetFrontEngine();
+	train->owner = Owner{0};
+	train->vehicle_flags.Set(VehicleFlag::DrivingBackwards, driving_backwards);
+	train->SetMovingDirection(Direction::SW);
+	train->tile = owned_a;
+	train->track = Track::X;
+	train->x_pos = TileX(owned_a) * TILE_SIZE + TILE_SIZE - 1;
+	train->y_pos = TileY(owned_a) * TILE_SIZE + TILE_SIZE / 2;
+	train->z_pos = GetSlopePixelZ(train->x_pos, train->y_pos, true);
+	train->gcache.cached_veh_length = 8;
+	train->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
+	train->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
+	train->railtypes = RailTypes{RAILTYPE_BEGIN};
+
+	bool entered_wormhole = false;
+	bool reached_other_world = false;
+	for (uint step = 0; step < 128; step++) {
+		REQUIRE(TrainController(train, nullptr, false));
+		entered_wormhole |= train->track == Track::Wormhole;
+		if (train->tile == owned_b) {
+			reached_other_world = true;
+			break;
+		}
+	}
+
+	CHECK(entered_wormhole);
+	CHECK(reached_other_world);
+	CHECK(train->GetMovingDirection() == Direction::SE);
+
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
+}
+
 TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 {
+	const uint32_t saved_progress = GENERATE(0u, 15u, 165u);
 	Map::Allocate(64, 64);
 	PortalRegistry::Reset();
 	PlanetManager::Reset();
@@ -139,7 +218,7 @@ TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 
 	TileIndex portal_a = TileXY(10, 10);
 	TileIndex portal_b = TileXY(50, 50);
-	uint32_t virt_len = 2; // 32 units to traverse
+	uint32_t virt_len = 32; // Retained as route cost, not physical transit time.
 
 	MakeRailTunnel(portal_a, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
 	MakeRailTunnel(portal_b, Owner(0), DiagDirection::SW, RAILTYPE_BEGIN);
@@ -154,6 +233,7 @@ TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 		virt_len, true
 	);
 	REQUIRE(pid != INVALID_PORTAL);
+	CHECK(PortalRegistry::GetPortalVirtualLength(portal_a) == virt_len);
 
 	REQUIRE(Vehicle::CanAllocateItem(1));
 	Train *t = Vehicle::Create<Train>();
@@ -168,10 +248,13 @@ TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 	t->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
 	t->railtypes = RailTypes{RAILTYPE_BEGIN};
 
-	uint32_t target_units = virt_len * TILE_SIZE; // 32 units
+	uint32_t target_units = PORTAL_TRANSIT_DISTANCE;
+	CHECK(target_units == 16);
+	ResetVehicleHash();
+	PortalRegistry::SetVehicleTransitProgress(t->index, saved_progress);
 
 	/* Advance locomotive inside wormhole */
-	for (uint32_t step = 1; step < target_units; step++) {
+	for (uint32_t step = saved_progress + 1; step < target_units; step++) {
 		TrainController(t, nullptr);
 		CHECK(t->track == Track::Wormhole);
 		CHECK(t->tile == portal_a);
@@ -179,7 +262,7 @@ TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 		CHECK(PortalRegistry::GetPortalTransitProgress(t->index) == step);
 	}
 
-	/* Step 32: should trigger emergence at portal_b! */
+	/* Step 16: physical emergence is prompt despite the 32-tile route cost. */
 	TrainController(t, nullptr);
 
 	CHECK(t->tile == portal_b);
@@ -196,6 +279,88 @@ TEST_CASE("ConsistTraversal - Single Locomotive Portal Emergence")
 	CHECK(!t->vehstatus.Test(VehState::Hidden));
 
 	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
+}
+
+TEST_CASE("ConsistTraversal - Complete consist clears every portal orientation forwards and backwards")
+{
+	const auto dir_a = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	const auto dir_b = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	const bool reverse_link = GENERATE(false, true);
+	const bool driving_backwards = GENERATE(false, true);
+	CAPTURE(dir_a, dir_b, reverse_link, driving_backwards);
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	MockEnvironment::Instance();
+	ResetVehicleHash();
+	_settings_game.pf.path_backoff_interval = 1;
+	REQUIRE(Company::CanAllocateItem());
+	Company::Create();
+
+	const TileIndex portal_a = TileXY(16, 16);
+	const TileIndex portal_b = TileXY(48, 48);
+	MakeRailTunnel(portal_a, OWNER_NONE, dir_a, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_b, OWNER_NONE, dir_b, RAILTYPE_BEGIN);
+	for (auto [tile, dir] : {std::pair{portal_a, dir_a}, std::pair{portal_b, dir_b}}) {
+		for (uint i = 0; i < 7; i++) {
+			tile = TileAddByDiagDir(tile, ReverseDiagDir(dir));
+			MakeRailNormal(tile, OWNER_NONE, TrackBits{DiagDirToDiagTrack(dir)}, RAILTYPE_BEGIN);
+		}
+	}
+	REQUIRE(PortalRegistry::RegisterPortalPair(portal_a, dir_a, WorldID{0}, portal_b, dir_b, WorldID{1}, 32) != INVALID_PORTAL);
+	const TileIndex entry = reverse_link ? portal_b : portal_a;
+	const TileIndex exit = reverse_link ? portal_a : portal_b;
+	const auto entry_dir = reverse_link ? dir_b : dir_a;
+	const auto exit_dir = ReverseDiagDir(reverse_link ? dir_a : dir_b);
+	const TileIndex start = TileAddByDiagDir(TileAddByDiagDir(entry, ReverseDiagDir(entry_dir)), ReverseDiagDir(entry_dir));
+	const TileIndex behind = TileAddByDiagDir(start, ReverseDiagDir(entry_dir));
+	const int dx = static_cast<int>(TileX(behind)) - TileX(start);
+	const int dy = static_cast<int>(TileY(behind)) - TileY(start);
+
+	REQUIRE(Vehicle::CanAllocateItem(3));
+	Train *engine = Vehicle::Create<Train>();
+	engine->SetFrontEngine();
+	engine->SetNext(Vehicle::Create<Train>());
+	engine->Next()->SetNext(Vehicle::Create<Train>());
+	engine->vehicle_flags.Set(VehicleFlag::DrivingBackwards, driving_backwards);
+	uint i = 0;
+	for (Train *v = engine->GetMovingFront(); v != nullptr; v = v->GetMovingNext(), i++) {
+		v->owner = Owner{0};
+		v->SetMovingDirection(DiagDirToDir(entry_dir));
+		v->track = DiagDirToDiagTrack(entry_dir);
+		v->x_pos = TileX(start) * TILE_SIZE + 8 + dx * static_cast<int>(i) * 8;
+		v->y_pos = TileY(start) * TILE_SIZE + 8 + dy * static_cast<int>(i) * 8;
+		v->tile = TileVirtXY(v->x_pos, v->y_pos);
+		v->z_pos = GetSlopePixelZ(v->x_pos, v->y_pos, true);
+		v->gcache.cached_veh_length = 8;
+		v->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
+		v->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
+		v->railtypes = RailTypes{RAILTYPE_BEGIN};
+	}
+
+	/* Continue well past first emergence: every car must clear the head,
+	 * remain visible, and travel outwards without bouncing back into it. */
+	for (uint step = 0; step < 128; step++) REQUIRE(TrainController(engine->GetMovingFront(), nullptr, false));
+	for (Train *v = engine; v != nullptr; v = v->Next()) {
+		CHECK_FALSE(v->vehstatus.Test(VehState::Hidden));
+		CHECK(v->track == DiagDirToDiagTrack(exit_dir));
+		CHECK(v->GetMovingDirection() == DiagDirToDir(exit_dir));
+		CHECK(DistanceManhattan(v->tile, exit) >= 3);
+		CHECK(DistanceManhattan(v->tile, exit) <= 6);
+		CHECK(PortalRegistry::GetPortalTransitProgress(v->index) == 0);
+		if (v->Next() != nullptr) {
+			CHECK(abs(v->x_pos - v->Next()->x_pos) + abs(v->y_pos - v->Next()->y_pos) == 8);
+		}
+	}
+	CHECK(PortalRegistry::GetAllVehicleTransit().empty());
+	CHECK(GetTunnelBridgeLength(portal_a, portal_b) == 32);
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
 	_company_pool.CleanPool();
 	PortalRegistry::Reset();
 	PlanetManager::Reset();

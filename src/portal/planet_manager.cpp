@@ -77,6 +77,8 @@ void PlanetManager::RebuildSpatialGrid()
 bool PlanetManager::RegisterRegion(const PlanetRegion &region)
 {
 	if (region.id == INVALID_WORLD || region.id == MIXED_WORLD) return false;
+	if (region.phase != WorldPhase::Phase1_Core && region.phase != WorldPhase::Phase2_Developed &&
+			region.phase != WorldPhase::Phase3_Frontier && region.phase != WorldPhase::Phase4_Expansion) return false;
 	if (region.min_x > region.max_x || region.min_y > region.max_y) return false;
 	if (id_to_region_index.contains(region.id.base())) return false;
 
@@ -146,6 +148,21 @@ size_t PlanetManager::Count()
 const std::vector<PlanetRegion> &PlanetManager::GetAllRegions()
 {
 	return regions;
+}
+
+CommandCost PlanetManager::CheckConstructionPlacement(TileIndex tile)
+{
+	/* IsValidTile distinguishes usable terrain from TileType::Void, while
+	 * IsInnerTile excludes physical map-border cells that OpenTTD reserves. */
+	if (tile >= Map::Size() || !IsValidTile(tile) || !IsInnerTile(tile)) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	if (GetTileWorld(tile) == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	return CommandCost();
 }
 
 CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing)

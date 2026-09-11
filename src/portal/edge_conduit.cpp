@@ -15,6 +15,7 @@
 #include "../economy_func.h"
 #include "../station_base.h"
 #include "../station_func.h"
+#include "../window_func.h"
 #include "../table/strings.h"
 
 #include <algorithm>
@@ -26,26 +27,50 @@ ConduitID EdgeConduitManager::next_conduit_id = 1;
 
 bool EdgeConduitManager::IsVoidAdjacent(TileIndex tile)
 {
-	if (!IsValidTile(tile)) return false;
+	return ResolvePlacement(tile, DiagDirection::Invalid).has_value();
+}
 
-	uint x = TileX(tile);
-	uint y = TileY(tile);
+static TileIndex GetAdjacentMapTile(TileIndex tile, DiagDirection dir)
+{
+	if (tile >= Map::Size() || !IsValidDiagDirection(dir)) return INVALID_TILE;
 
-	/* Check outer map boundaries */
-	if (x <= 1 || x >= Map::MaxX() - 1 || y <= 1 || y >= Map::MaxY() - 1) return true;
-
-	/* Check orthogonal neighbors for void buffer space */
-	for (DiagDirection d : {DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW}) {
-		TileIndex nb = TileAddByDiagDir(tile, d);
-		if (nb < Map::Size() && IsTileType(nb, TileType::Void)) return true;
+	int x = static_cast<int>(TileX(tile));
+	int y = static_cast<int>(TileY(tile));
+	switch (dir) {
+		case DiagDirection::NE: --x; break;
+		case DiagDirection::SE: ++y; break;
+		case DiagDirection::SW: ++x; break;
+		case DiagDirection::NW: --y; break;
+		default: return INVALID_TILE;
 	}
 
-	return false;
+	if (x < 0 || y < 0 || x > static_cast<int>(Map::MaxX()) || y > static_cast<int>(Map::MaxY())) return INVALID_TILE;
+	return TileXY(x, y);
+}
+
+std::optional<EdgeConduitPlacement> EdgeConduitManager::ResolvePlacement(TileIndex tile, DiagDirection requested_dir)
+{
+	if (tile >= Map::Size() || !IsValidTile(tile) || !IsInnerTile(tile)) return std::nullopt;
+
+	auto resolve_direction = [tile](DiagDirection dir) -> std::optional<EdgeConduitPlacement> {
+		TileIndex void_tile = GetAdjacentMapTile(tile, dir);
+		TileIndex approach_tile = GetAdjacentMapTile(tile, ReverseDiagDir(dir));
+		if (void_tile == INVALID_TILE || void_tile >= Map::Size() || !IsTileType(void_tile, TileType::Void)) return std::nullopt;
+		if (approach_tile == INVALID_TILE || !IsValidTile(approach_tile)) return std::nullopt;
+		return EdgeConduitPlacement{dir, void_tile, approach_tile};
+	};
+
+	if (IsValidDiagDirection(requested_dir)) return resolve_direction(requested_dir);
+	for (DiagDirection candidate : DIAGDIRECTIONS_ALL) {
+		if (auto placement = resolve_direction(candidate); placement.has_value()) return placement;
+	}
+	return std::nullopt;
 }
 
 ConduitID EdgeConduitManager::RegisterConduit(TileIndex tile, DiagDirection dir, WorldID world_id, CargoType cargo, Owner owner, uint32_t base_production)
 {
-	if (!IsValidTile(tile)) return INVALID_CONDUIT;
+	if (!ResolvePlacement(tile, dir).has_value()) return INVALID_CONDUIT;
+	if (world_id == INVALID_WORLD || PlanetManager::GetTileWorld(tile) != world_id) return INVALID_CONDUIT;
 
 	ConduitID id = next_conduit_id++;
 	EdgeConduit conduit{
@@ -65,6 +90,8 @@ ConduitID EdgeConduitManager::RegisterConduit(TileIndex tile, DiagDirection dir,
 
 void EdgeConduitManager::RestoreConduit(const EdgeConduit &conduit)
 {
+	if (conduit.id == INVALID_CONDUIT || !ResolvePlacement(conduit.tile, conduit.dir).has_value()) return;
+	if (conduit.world_id == INVALID_WORLD || PlanetManager::GetTileWorld(conduit.tile) != conduit.world_id) return;
 	conduits[conduit.tile] = conduit;
 	if (conduit.id >= next_conduit_id) {
 		next_conduit_id = conduit.id + 1;
@@ -137,6 +164,7 @@ uint32_t EdgeConduitManager::CalculateProduction(const EdgeConduit &conduit)
 
 void EdgeConduitManager::ProduceAllConduits()
 {
+	bool produced = false;
 	for (auto &[tile, conduit] : conduits) {
 		uint32_t amount = CalculateProduction(conduit);
 
@@ -145,8 +173,10 @@ void EdgeConduitManager::ProduceAllConduits()
 		if (!stations.empty()) {
 			MoveGoodsToStation(conduit.cargo_type, amount, {static_cast<SourceID>(conduit.id & 0xFFFF), SourceType::Industry}, stations);
 			conduit.total_produced += amount;
+			produced = true;
 		}
 	}
+	if (produced) InvalidateWindowData(WindowClass::LandInfo, 0, 1);
 }
 
 void EdgeConduitManager::Reset()

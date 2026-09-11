@@ -36,9 +36,38 @@
 #include "../table/strings.h"
 #include "../safeguards.h"
 
+static TileIndex GetPortalAdjacentTile(TileIndex tile, DiagDirection dir)
+{
+	if (tile >= Map::Size() || !IsValidDiagDirection(dir)) return INVALID_TILE;
+
+	int x = static_cast<int>(TileX(tile));
+	int y = static_cast<int>(TileY(tile));
+	switch (dir) {
+		case DiagDirection::NE: --x; break;
+		case DiagDirection::SE: ++y; break;
+		case DiagDirection::SW: ++x; break;
+		case DiagDirection::NW: --y; break;
+		default: return INVALID_TILE;
+	}
+	if (x < 0 || y < 0 || x > static_cast<int>(Map::MaxX()) || y > static_cast<int>(Map::MaxY())) return INVALID_TILE;
+	return TileXY(x, y);
+}
+
+static CommandCost ValidatePortalGateFootprint(TileIndex tile, DiagDirection dir, WorldID world_id)
+{
+	TileIndex portal_side = GetPortalAdjacentTile(tile, dir);
+	TileIndex approach = GetPortalAdjacentTile(tile, ReverseDiagDir(dir));
+	if (portal_side == INVALID_TILE) return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	if (!IsValidTile(approach) || PlanetManager::GetTileWorld(approach) != world_id) {
+		return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	}
+	return CommandCost();
+}
+
 CommandCost CmdBuildPortalGate(DoCommandFlags flags, TileIndex tile, DiagDirection dir, RailType railtype)
 {
-	if (!IsValidTile(tile)) return CMD_ERROR;
+	CommandCost placement = PlanetManager::CheckConstructionPlacement(tile);
+	if (placement.Failed()) return placement;
 	if (!ValParamRailType(railtype)) return CMD_ERROR;
 	if (!IsValidDiagDirection(dir)) {
 		/* If direction is invalid, attempt to infer from slope */
@@ -52,7 +81,9 @@ CommandCost CmdBuildPortalGate(DoCommandFlags flags, TileIndex tile, DiagDirecti
 
 	/* Verify tile is within a valid logical planetary world */
 	WorldID world_id = PlanetManager::GetTileWorld(tile);
-	if (world_id == INVALID_WORLD) return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	assert(world_id != INVALID_WORLD);
+	placement = ValidatePortalGateFootprint(tile, dir, world_id);
+	if (placement.Failed()) return placement;
 
 	/* Cannot build on an already existing portal gate */
 	if (PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile)) {
@@ -133,7 +164,11 @@ CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex
 
 CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirection dir_a, TileIndex tile_b, DiagDirection dir_b, RailType railtype)
 {
-	if (!IsValidTile(tile_a) || !IsValidTile(tile_b) || tile_a == tile_b) return CMD_ERROR;
+	if (tile_a == tile_b) return CMD_ERROR;
+	CommandCost placement_a = PlanetManager::CheckConstructionPlacement(tile_a);
+	if (placement_a.Failed()) return placement_a;
+	CommandCost placement_b = PlanetManager::CheckConstructionPlacement(tile_b);
+	if (placement_b.Failed()) return placement_b;
 	if (!ValParamRailType(railtype)) return CMD_ERROR;
 
 	if (!IsValidDiagDirection(dir_a)) {
@@ -155,6 +190,10 @@ CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirec
 	if (world_a == INVALID_WORLD || world_b == INVALID_WORLD || world_a == world_b) {
 		return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
 	}
+	placement_a = ValidatePortalGateFootprint(tile_a, dir_a, world_a);
+	if (placement_a.Failed()) return placement_a;
+	placement_b = ValidatePortalGateFootprint(tile_b, dir_b, world_b);
+	if (placement_b.Failed()) return placement_b;
 
 	if (PortalRegistry::IsPortalTile(tile_a) || PortalRegistry::IsUnlinkedGate(tile_a) ||
 	    PortalRegistry::IsPortalTile(tile_b) || PortalRegistry::IsUnlinkedGate(tile_b)) {
@@ -309,23 +348,28 @@ CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
 	CommandCost ret_own = CheckOwnership(st->owner);
 	if (ret_own.Failed()) return ret_own;
 
-	if (SpaceportManager::IsSpaceport(station)) {
-		return CommandCost(STR_ERROR_ALREADY_BUILT);
-	}
+	const SpaceportInfo *existing = SpaceportManager::GetSpaceport(station);
+	if (existing != nullptr && existing->offworld_trade_tier >= 3) return CommandCost(STR_ERROR_SPACEPORT_MAX_TIER);
 
 	WorldID world_id = PlanetManager::GetTileWorld(st->xy);
 	if (world_id == INVALID_WORLD) {
 		world_id = PlanetManager::GetTileWorld(st->airport.tile);
 	}
 
-	CommandCost cost(ExpensesType::Construction, _price[Price::BuildStationAirport] * 2);
+	CommandCost cost(ExpensesType::Construction, _price[Price::BuildStationAirport] * (existing == nullptr ? 2 : existing->offworld_trade_tier + 1));
 
 	if (flags.Test(DoCommandFlag::Execute)) {
-		uint8_t tier = 1;
-		if (st->airport.type == AT_INTERCON) tier = 3;
-		else if (st->airport.type == AT_INTERNATIONAL || st->airport.type == AT_METROPOLITAN) tier = 2;
+		if (existing == nullptr) {
+			uint8_t tier = 1;
+			if (st->airport.type == AT_INTERCON) tier = 3;
+			else if (st->airport.type == AT_INTERNATIONAL || st->airport.type == AT_METROPOLITAN) tier = 2;
 
-		SpaceportManager::RegisterSpaceport(station, world_id, tier);
+			SpaceportManager::RegisterSpaceport(station, world_id, tier);
+		} else {
+			SpaceportInfo *spaceport = SpaceportManager::GetSpaceportMutable(station);
+			spaceport->offworld_trade_tier++;
+		}
+		SetWindowDirty(WindowClass::StationView, station);
 	}
 
 	return cost;
@@ -333,24 +377,22 @@ CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
 
 CommandCost CmdBuildEdgeConduit(DoCommandFlags flags, TileIndex tile, DiagDirection dir, CargoType cargo, RailType railtype)
 {
-	if (!IsValidTile(tile)) return CMD_ERROR;
+	CommandCost placement_result = PlanetManager::CheckConstructionPlacement(tile);
+	if (placement_result.Failed()) return placement_result;
 	if (!ValParamRailType(railtype)) return CMD_ERROR;
-
-	if (!IsValidDiagDirection(dir)) {
-		auto [tileh, z] = GetTileSlopeZ(tile);
-		dir = GetInclinedSlopeDirection(tileh);
-		if (!IsValidDiagDirection(dir)) return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
-	}
 
 	CompanyID company = _current_company;
 	if (!Company::IsValidID(company) && company != OWNER_DEITY) return CMD_ERROR;
 
 	WorldID world_id = PlanetManager::GetTileWorld(tile);
-	if (world_id == INVALID_WORLD) return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	assert(world_id != INVALID_WORLD);
 
-	if (!EdgeConduitManager::IsVoidAdjacent(tile)) {
-		return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	std::optional<EdgeConduitPlacement> footprint = EdgeConduitManager::ResolvePlacement(tile, dir);
+	if (!footprint.has_value()) return CommandCost(STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID);
+	if (PlanetManager::GetTileWorld(footprint->approach_tile) != world_id) {
+		return CommandCost(STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID);
 	}
+	dir = footprint->dir;
 
 	if (EdgeConduitManager::IsConduitTile(tile) || PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile)) {
 		return CommandCost(STR_ERROR_ALREADY_BUILT);

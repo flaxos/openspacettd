@@ -18,7 +18,64 @@
 #include "../tile_map.h"
 #include "../map_func.h"
 #include <algorithm>
+#include <cstdlib>
 #include <vector>
+
+namespace {
+
+static TileIndex GetAdjacentWorldTile(TileIndex tile, DiagDirection dir, const PlanetRegion &region)
+{
+	if (tile >= Map::Size() || !IsValidDiagDirection(dir)) return INVALID_TILE;
+	int x = static_cast<int>(TileX(tile));
+	int y = static_cast<int>(TileY(tile));
+	switch (dir) {
+		case DiagDirection::NE: --x; break;
+		case DiagDirection::SE: ++y; break;
+		case DiagDirection::SW: ++x; break;
+		case DiagDirection::NW: --y; break;
+		default: return INVALID_TILE;
+	}
+	if (x < 0 || y < 0 || x > static_cast<int>(Map::MaxX()) || y > static_cast<int>(Map::MaxY())) return INVALID_TILE;
+	if (!region.ContainsCoord(x, y)) return INVALID_TILE;
+	return TileXY(x, y);
+}
+
+/**
+ * Find the nearest clear, level two-tile site for a generated gateway head and
+ * its world-side lead. This keeps the local rail transition physically valid
+ * without constraining the remote endpoint to any matching coordinate or axis.
+ */
+static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex nominal, DiagDirection enter_dir)
+{
+	int nominal_x = TileX(nominal);
+	int nominal_y = TileY(nominal);
+	int max_radius = std::max(region.max_x - region.min_x, region.max_y - region.min_y);
+
+	for (int radius = 0; radius <= max_radius; radius++) {
+		for (int dy = -radius; dy <= radius; dy++) {
+			for (int dx = -radius; dx <= radius; dx++) {
+				if (std::max(std::abs(dx), std::abs(dy)) != radius) continue;
+				int x = nominal_x + dx;
+				int y = nominal_y + dy;
+				if (x < static_cast<int>(region.min_x) || x > static_cast<int>(region.max_x) ||
+						y < static_cast<int>(region.min_y) || y > static_cast<int>(region.max_y)) continue;
+
+				TileIndex tile = TileXY(x, y);
+				TileIndex lead = GetAdjacentWorldTile(tile, ReverseDiagDir(enter_dir), region);
+				if (!IsValidTile(lead)) continue;
+				if (!IsTileType(tile, TileType::Clear) || !IsTileType(lead, TileType::Clear)) continue;
+				if (GetTileSlope(tile) != SLOPE_FLAT || GetTileSlope(lead) != SLOPE_FLAT) continue;
+				if (TileHeight(tile) != TileHeight(lead)) continue;
+
+				return tile;
+			}
+		}
+	}
+
+	return INVALID_TILE;
+}
+
+} // namespace
 
 bool MultiWorldGen::enabled = true;
 
@@ -159,7 +216,6 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 		PortalRegistry::Reset();
 
 		bool split_y = (size_y >= size_x);
-		uint32_t cross_center = (split_y ? size_x : size_y) / 2;
 
 		for (size_t i = 0; i < regions.size() - 1; i++) {
 			const auto &reg_a = regions[i];
@@ -168,43 +224,57 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 			TileIndex t_a, t_a_track;
 			TileIndex t_b, t_b_track;
 			DiagDirection dir_a, dir_b;
-			TrackBits track_bits;
+			TrackBits track_bits_a;
+			TrackBits track_bits_b;
 
-			if (split_y) {
-				t_a = TileXY(cross_center, reg_a.max_y - 1);
-				t_a_track = TileXY(cross_center, reg_a.max_y - 2);
-				dir_a = DiagDirection::NW;
+			/* Place the two heads well inside their worlds, at different X/Y
+			 * coordinates and on perpendicular axes. Generated gateways must visibly
+			 * demonstrate arbitrary wormhole endpoints rather than resemble a long
+			 * straight tunnel across the void buffer. */
+			uint32_t span_a_x = reg_a.max_x - reg_a.min_x;
+			uint32_t span_a_y = reg_a.max_y - reg_a.min_y;
+			uint32_t span_b_x = reg_b.max_x - reg_b.min_x;
+			uint32_t span_b_y = reg_b.max_y - reg_b.min_y;
 
-				t_b = TileXY(cross_center, reg_b.min_y + 1);
-				t_b_track = TileXY(cross_center, reg_b.min_y + 2);
-				dir_b = DiagDirection::SE;
+			if ((i & 1) == 0) {
+				t_a = TileXY(reg_a.min_x + 3 * span_a_x / 4, reg_a.min_y + span_a_y / 3);
+				dir_a = DiagDirection::SW;
+				track_bits_a = TrackBits{Track::X};
 
-				track_bits = TrackBits{Track::Y};
+				t_b = TileXY(reg_b.min_x + span_b_x / 4, reg_b.min_y + 2 * span_b_y / 3);
+				dir_b = DiagDirection::NW;
+				track_bits_b = TrackBits{Track::Y};
 			} else {
-				t_a = TileXY(reg_a.max_x - 1, cross_center);
-				t_a_track = TileXY(reg_a.max_x - 2, cross_center);
-				dir_a = DiagDirection::NE;
+				t_a = TileXY(reg_a.min_x + 3 * span_a_x / 4, reg_a.min_y + 2 * span_a_y / 3);
+				dir_a = DiagDirection::SE;
+				track_bits_a = TrackBits{Track::Y};
 
-				t_b = TileXY(reg_b.min_x + 1, cross_center);
-				t_b_track = TileXY(reg_b.min_x + 2, cross_center);
-				dir_b = DiagDirection::SW;
-
-				track_bits = TrackBits{Track::X};
+				t_b = TileXY(reg_b.min_x + span_b_x / 4, reg_b.min_y + span_b_y / 3);
+				dir_b = DiagDirection::NE;
+				track_bits_b = TrackBits{Track::X};
 			}
+
+			t_a = FindGeneratedGatewaySite(reg_a, t_a, dir_a);
+			t_b = FindGeneratedGatewaySite(reg_b, t_b, dir_b);
+			if (t_a == INVALID_TILE || t_b == INVALID_TILE) return false;
+
+			t_a_track = GetAdjacentWorldTile(t_a, ReverseDiagDir(dir_a), reg_a);
+			t_b_track = GetAdjacentWorldTile(t_b, ReverseDiagDir(dir_b), reg_b);
+			if (!IsValidTile(t_a_track) || !IsValidTile(t_b_track)) return false;
 
 			/* Construct gateway portal and lead track for world A */
 			MakeClear(t_a, ClearGround::Grass, 3);
 			MakeRailTunnel(t_a, OWNER_NONE, dir_a, RAILTYPE_BEGIN);
 
 			MakeClear(t_a_track, ClearGround::Grass, 3);
-			MakeRailNormal(t_a_track, OWNER_NONE, track_bits, RAILTYPE_BEGIN);
+			MakeRailNormal(t_a_track, OWNER_NONE, track_bits_a, RAILTYPE_BEGIN);
 
 			/* Construct gateway portal and lead track for world B */
 			MakeClear(t_b, ClearGround::Grass, 3);
 			MakeRailTunnel(t_b, OWNER_NONE, dir_b, RAILTYPE_BEGIN);
 
 			MakeClear(t_b_track, ClearGround::Grass, 3);
-			MakeRailNormal(t_b_track, OWNER_NONE, track_bits, RAILTYPE_BEGIN);
+			MakeRailNormal(t_b_track, OWNER_NONE, track_bits_b, RAILTYPE_BEGIN);
 
 			/* Register the bidirectional wormhole portal link */
 			uint32_t virt_dist = split_y ? (reg_b.min_y - reg_a.max_y - 1) : (reg_b.min_x - reg_a.max_x - 1);

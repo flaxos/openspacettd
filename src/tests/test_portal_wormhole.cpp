@@ -203,6 +203,132 @@ TEST_CASE("Portal Wormhole - YAPF Track Follower Traversal")
 	PortalRegistry::Reset();
 }
 
+TEST_CASE("Portal Wormhole - Routing follows every exit orientation with rail turns disabled")
+{
+	const auto dir_a = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	const auto dir_b = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	CAPTURE(dir_a, dir_b);
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	const TileIndex a = TileXY(16, 16);
+	const TileIndex b = TileXY(48, 48);
+	MakeRailTunnel(a, OWNER_NONE, dir_a, RAILTYPE_BEGIN);
+	MakeRailTunnel(b, OWNER_NONE, dir_b, RAILTYPE_BEGIN);
+	for (auto [tile, dir] : {std::pair{a, dir_a}, std::pair{b, dir_b}}) {
+		MakeRailNormal(TileAddByDiagDir(tile, ReverseDiagDir(dir)), OWNER_NONE, TrackBits{DiagDirToDiagTrack(dir)}, RAILTYPE_BEGIN);
+	}
+	REQUIRE(PortalRegistry::RegisterPortalPair(a, dir_a, WorldID{0}, b, dir_b, WorldID{1}, 32) != INVALID_PORTAL);
+	for (auto [entry, exit, dir] : {std::tuple{a, b, dir_a}, std::tuple{b, a, dir_b}}) {
+		CFollowTrackRailNo90 follower(Owner{0}, RailTypes{RAILTYPE_BEGIN});
+		REQUIRE(follower.Follow(entry, DiagDirToDiagTrackdir(dir)));
+		CHECK(follower.new_tile == exit);
+		CHECK(follower.tiles_skipped == 32);
+		const auto exit_dir = ReverseDiagDir(GetTunnelBridgeDirection(exit));
+		CHECK(follower.new_td_bits == TrackdirBits{DiagDirToDiagTrackdir(exit_dir)});
+		REQUIRE(follower.Follow(exit, FindFirstTrackdir(follower.new_td_bits)));
+		CHECK(follower.new_tile == TileAddByDiagDir(exit, exit_dir));
+	}
+	PortalRegistry::Reset();
+}
+
+TEST_CASE("Portal Wormhole - Neutral Generated Gateway Is Shared Rail")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+
+	constexpr Owner company{0};
+	TileIndex owned_a = TileXY(18, 20);
+	TileIndex approach_a = TileXY(19, 20);
+	TileIndex portal_a = TileXY(20, 20);
+	TileIndex portal_b = TileXY(40, 20);
+	TileIndex approach_b = TileXY(41, 20);
+	TileIndex owned_b = TileXY(42, 20);
+
+	MakeRailNormal(owned_a, company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailNormal(approach_a, OWNER_NONE, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_a, OWNER_NONE, DiagDirection::SW, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_b, OWNER_NONE, DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeRailNormal(approach_b, OWNER_NONE, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailNormal(owned_b, company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+
+	REQUIRE(PortalRegistry::RegisterPortalPair(
+		portal_a, DiagDirection::SW, WorldID{0},
+		portal_b, DiagDirection::NE, WorldID{1},
+		18
+	) != INVALID_PORTAL);
+
+	CFollowTrackRail follower(company, RailTypes{RAILTYPE_BEGIN});
+	Trackdir southwest = DiagDirToDiagTrackdir(DiagDirection::SW);
+	REQUIRE(follower.Follow(owned_a, southwest));
+	CHECK(follower.new_tile == approach_a);
+	REQUIRE(follower.Follow(approach_a, southwest));
+	CHECK(follower.new_tile == portal_a);
+	REQUIRE(follower.Follow(portal_a, southwest));
+	CHECK(follower.new_tile == portal_b);
+	REQUIRE(follower.Follow(portal_b, southwest));
+	CHECK(follower.new_tile == approach_b);
+	REQUIRE(follower.Follow(approach_b, southwest));
+	CHECK(follower.new_tile == owned_b);
+
+	Trackdir northeast = DiagDirToDiagTrackdir(DiagDirection::NE);
+	REQUIRE(follower.Follow(owned_b, northeast));
+	CHECK(follower.new_tile == approach_b);
+	REQUIRE(follower.Follow(approach_b, northeast));
+	CHECK(follower.new_tile == portal_b);
+	REQUIRE(follower.Follow(portal_b, northeast));
+	CHECK(follower.new_tile == portal_a);
+	REQUIRE(follower.Follow(portal_a, northeast));
+	CHECK(follower.new_tile == approach_a);
+	REQUIRE(follower.Follow(approach_a, northeast));
+	CHECK(follower.new_tile == owned_a);
+
+	TileIndex owned_control = TileXY(18, 22);
+	TileIndex competitor_track = TileXY(19, 22);
+	MakeRailNormal(owned_control, company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailNormal(competitor_track, Owner{1}, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	CHECK_FALSE(follower.Follow(owned_control, southwest));
+
+	PortalRegistry::Reset();
+}
+
+TEST_CASE("Portal Wormhole - Legacy Generated Gateway Direction Repair")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+
+	TileIndex portal_a = TileXY(20, 20);
+	TileIndex lead_a = TileXY(19, 20);
+	TileIndex portal_b = TileXY(40, 20);
+	TileIndex lead_b = TileXY(41, 20);
+
+	/* Early generated saves stored directions opposite to the world-side lead
+	 * tracks: NE points left at A and SW points right at B. */
+	MakeRailNormal(lead_a, OWNER_NONE, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_a, OWNER_NONE, DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeRailTunnel(portal_b, OWNER_NONE, DiagDirection::SW, RAILTYPE_BEGIN);
+	MakeRailNormal(lead_b, OWNER_NONE, TrackBits{Track::X}, RAILTYPE_BEGIN);
+
+	REQUIRE(PortalRegistry::RegisterPortalPair(
+		portal_a, DiagDirection::NE, WorldID{0},
+		portal_b, DiagDirection::SW, WorldID{1},
+		18
+	) != INVALID_PORTAL);
+
+	CHECK(PortalRegistry::RepairLegacyGeneratedGateways() == 2);
+	CHECK(GetTunnelBridgeDirection(portal_a) == DiagDirection::SW);
+	CHECK(GetTunnelBridgeDirection(portal_b) == DiagDirection::NE);
+
+	const PortalLink *link = PortalRegistry::GetPortalLink(portal_a);
+	REQUIRE(link != nullptr);
+	CHECK(link->end_a.enter_dir == DiagDirection::SW);
+	CHECK(link->end_b.enter_dir == DiagDirection::NE);
+
+	/* A second pass must leave already-corrected data unchanged. */
+	CHECK(PortalRegistry::RepairLegacyGeneratedGateways() == 0);
+
+	PortalRegistry::Reset();
+}
+
 TEST_CASE("Portal Wormhole - Exit Emergence Coordinates Calculation")
 {
 	Map::Allocate(64, 64);
@@ -262,4 +388,3 @@ TEST_CASE("Portal Wormhole - Consist Distance Decoupling Across Wormhole")
 	v1->SetNext(nullptr);
 	_vehicle_pool.CleanPool();
 }
-

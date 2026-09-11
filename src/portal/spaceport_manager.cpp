@@ -15,6 +15,7 @@
 #include "../cargotype.h"
 #include "../economy_func.h"
 #include "../town.h"
+#include "../window_func.h"
 #include "../table/strings.h"
 
 #include <algorithm>
@@ -108,6 +109,7 @@ void SpaceportManager::RecordSupplyDelivery(StationID station, CargoType cargo, 
 
 	if (is_supply) {
 		info->supplies_received += amount;
+		SetWindowDirty(WindowClass::StationView, station);
 	}
 }
 
@@ -164,6 +166,7 @@ void SpaceportManager::ProcessOffWorldTrade()
 
 		info.total_offworld_cargo_generated += amount;
 		info.supplies_received /= 2; // Decay for next month
+		SetWindowDirty(WindowClass::StationView, station_id);
 	}
 }
 

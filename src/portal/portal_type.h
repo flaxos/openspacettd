@@ -26,6 +26,12 @@ static constexpr PortalID INVALID_PORTAL = PortalID{ (uint32_t)-1 };
 static constexpr WorldID INVALID_WORLD   = WorldID{ (uint32_t)-1 };
 static constexpr WorldID DEFAULT_WORLD   = WorldID{ 0 };
 
+/**
+ * Physical distance a vehicle spends hidden while crossing a portal.
+ * Portal route cost remains independently represented by PortalLink::virtual_length.
+ */
+static constexpr uint32_t PORTAL_TRANSIT_DISTANCE = TILE_SIZE;
+
 /** Vehicle emergence position upon exiting a portal wormhole gate. */
 struct PortalExitPosition {
 	TileIndex tile = INVALID_TILE;
@@ -53,7 +59,7 @@ struct PortalLink {
 	PortalID id = INVALID_PORTAL;
 	PortalEndpoint end_a;              ///< Primary endpoint (e.g. World A)
 	PortalEndpoint end_b;              ///< Secondary endpoint (e.g. World B)
-	uint32_t virtual_length = 1;       ///< Virtual length in tiles for traversal time & YAPF routing penalty.
+	uint32_t virtual_length = 1;       ///< Virtual route length in tiles for YAPF; physical transit time is fixed.
 	bool bidirectional = true;         ///< Whether vehicles can traverse in both directions.
 
 	constexpr bool IsValid() const

@@ -2843,6 +2843,8 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Build ra
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Build signal on railway. Ctrl+Click to build the alternate signal style{}Click+Drag to fill the selected section of rail with signals at the chosen spacing. Ctrl+Click+Drag to fill signals up to the next junction, station, or signal. Also press Shift to show cost estimate only
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Build railway bridge. Also press Shift to show cost estimate only
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Build railway tunnel. Also press Shift to show cost estimate only
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_PORTAL_GATE                      :{BLACK}Build or link an interplanetary Portal Gate. Select two gate heads to link them
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_EDGE_CONDUIT                     :{BLACK}Build an Edge Conduit on a world tile beside the void. Select an existing conduit to remove it
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toggle build/remove for railway track, signals, waypoints and stations. Ctrl+Click to also remove the rail of waypoints and stations
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Convert/Upgrade the type of rail. Also press Shift to show cost estimate only
 
@@ -3215,6 +3217,11 @@ STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Airport 
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{RAW_STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Cargo accepted: {LTBLUE}{RAW_STRING}
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT                          :{BLACK}Structure: {LTBLUE}Edge Conduit
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_WORLD                    :{BLACK}World: {LTBLUE}{RAW_STRING}
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_OUTPUT                   :{BLACK}Effective monthly extraction: {LTBLUE}{CARGO_LONG}
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_NO_CARGO                 :{BLACK}Effective monthly extraction: {LTBLUE}No compatible mineral cargo
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL                    :{BLACK}Total minerals extracted: {LTBLUE}{COMMA}
 STR_LANG_AREA_INFORMATION_RAIL_TYPE                             :{BLACK}Rail type: {LTBLUE}{STRING}
 STR_LANG_AREA_INFORMATION_ROAD_TYPE                             :{BLACK}Road type: {LTBLUE}{STRING}
 STR_LANG_AREA_INFORMATION_TRAM_TYPE                             :{BLACK}Tram type: {LTBLUE}{STRING}
@@ -3981,6 +3988,18 @@ STR_STATION_VIEW_EDIT_STATION_SIGN                              :{WHITE}Edit sta
 
 STR_STATION_VIEW_CLOSE_AIRPORT                                  :{BLACK}Close airport
 STR_STATION_VIEW_CLOSE_AIRPORT_TOOLTIP                          :{BLACK}Prevent aircraft from landing on this airport
+
+STR_SPACEPORT_DESIGNATE_BUTTON                                 :{BLACK}Designate Spaceport
+STR_SPACEPORT_UPGRADE_BUTTON                                   :{BLACK}Upgrade Spaceport to Tier {NUM}
+STR_SPACEPORT_MAX_TIER_BUTTON                                  :{BLACK}Spaceport Tier 3 (maximum)
+STR_SPACEPORT_ACTION_TOOLTIP                                   :{BLACK}Designate this airport for off-world trade, or upgrade its trade tier
+STR_SPACEPORT_STATUS_NOT_DESIGNATED                            :{BLACK}This airport is not designated as a Spaceport
+STR_SPACEPORT_STATUS_TITLE                                     :{BLACK}Spaceport Tier {NUM} - {LTBLUE}{RAW_STRING}
+STR_SPACEPORT_STATUS_SUPPLIES                                  :{BLACK}Life-support supplies held: {LTBLUE}{COMMA}
+STR_SPACEPORT_STATUS_MONTHLY_OUTPUT                            :{BLACK}Next monthly off-world trade: {LTBLUE}{CARGO_LONG}
+STR_SPACEPORT_STATUS_NO_CARGO                                  :{BLACK}No compatible off-world cargo is available
+STR_SPACEPORT_STATUS_TOTAL_OUTPUT                              :{BLACK}Total off-world cargo generated: {LTBLUE}{COMMA}
+STR_SPACEPORT_UNKNOWN_WORLD                                    :Unknown world
 
 # Waypoint/buoy view window
 STR_WAYPOINT_VIEW_CAPTION                                       :{WHITE}{WAYPOINT}
@@ -5144,6 +5163,11 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :not allowed whi
 STR_ERROR_CANNOT_BUILD_ON_CORE_WORLD                            :cannot construct raw extraction or bio-farms on a Core World
 STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD                        :cannot construct advanced processing or vac-train facilities on a Frontier World
 STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE                            :cannot build in inter-planetary void buffer space
+STR_ERROR_CAN_T_DESIGNATE_SPACEPORT                             :Can't designate or upgrade Spaceport...
+STR_ERROR_SPACEPORT_MAX_TIER                                   :Spaceport is already at maximum Tier 3
+STR_ERROR_CAN_T_BUILD_EDGE_CONDUIT                              :Can't build Edge Conduit here...
+STR_ERROR_CAN_T_REMOVE_EDGE_CONDUIT                             :Can't remove Edge Conduit...
+STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID                            :Edge Conduit must be placed on a world boundary tile directly beside the void
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{TOWN} local authority refuses to allow this

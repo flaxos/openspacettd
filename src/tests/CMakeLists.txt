@@ -2,6 +2,7 @@ add_test_files(
     alternating_iterator.cpp
     bitmath_func.cpp
     enum_over_optimisation.cpp
+    test_error_gui.cpp
     flatset_type.cpp
     history_func.cpp
     landscape_partial_pixel_z.cpp

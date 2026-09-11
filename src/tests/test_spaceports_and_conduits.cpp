@@ -20,11 +20,15 @@
 #include "../town.h"
 #include "../company_base.h"
 #include "../company_func.h"
+#include "../command_func.h"
+#include "../landscape_cmd.h"
 #include "../vehicle_base.h"
 #include "../clear_map.h"
 #include "../void_map.h"
+#include "../water_map.h"
 #include "../tunnelbridge_map.h"
 #include "../rail_map.h"
+#include "../signal_func.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
@@ -39,6 +43,7 @@
 
 static void SetupSprint9Environment(uint32_t map_w = 256, uint32_t map_h = 256)
 {
+	UpdateSignalsInBuffer();
 	Map::Allocate(map_w, map_h);
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
@@ -62,6 +67,7 @@ static void SetupSprint9Environment(uint32_t map_w = 256, uint32_t map_h = 256)
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);
 	_current_company = c->index;
+	c->money = 1'000'000'000;
 	c->avail_railtypes.Set(RAILTYPE_BEGIN);
 	c->avail_railtypes.Set(RAILTYPE_ELECTRIC);
 	c->clear_limit = 1000 << 16;
@@ -118,6 +124,32 @@ static void SetupSprint9Environment(uint32_t map_w = 256, uint32_t map_h = 256)
 			MakeClear(t, ClearGround::Grass, 0);
 		}
 	}
+}
+
+static void SetupMapEdgeWorld(WorldPhase phase = WorldPhase::Phase3_Frontier)
+{
+	SetupSprint9Environment(64, 64);
+	for (uint i = 0; i <= Map::MaxX(); ++i) {
+		MakeVoid(TileXY(i, 0));
+		MakeVoid(TileXY(i, Map::MaxY()));
+	}
+	for (uint i = 0; i <= Map::MaxY(); ++i) {
+		MakeVoid(TileXY(0, i));
+		MakeVoid(TileXY(Map::MaxX(), i));
+	}
+	PlanetManager::Reset();
+	PlanetRegion edge_world{
+		.id = WorldID{0},
+		.name = "Map Edge Test World",
+		.phase = phase,
+		.biome = WorldBiome::Temperate,
+		.min_x = 1,
+		.min_y = 1,
+		.max_x = Map::MaxX() - 1,
+		.max_y = Map::MaxY() - 1,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(edge_world));
+	PlanetManager::RebuildSpatialGrid();
 }
 
 TEST_CASE("Spaceport Manager - Lifecycle and Trade Calculation")
@@ -192,7 +224,7 @@ TEST_CASE("Spaceport Command - CmdDesignateSpaceport")
 	st->airport.tile = airport_tile;
 	st->airport.w = 5;
 	st->airport.h = 5;
-	st->airport.type = AT_INTERCON; // Should certify as Tier 3 spaceport
+	st->airport.type = AT_SMALL; // Starts at Tier 1 and can be upgraded through the station UI
 
 	/* Test test-mode execution */
 	res = CmdDesignateSpaceport(DoCommandFlags{}, sid);
@@ -207,12 +239,25 @@ TEST_CASE("Spaceport Command - CmdDesignateSpaceport")
 	const SpaceportInfo *sp = SpaceportManager::GetSpaceport(sid);
 	REQUIRE(sp != nullptr);
 	CHECK(sp->world_id == WorldID{0});
-	CHECK(sp->offworld_trade_tier == 3);
+	CHECK(sp->offworld_trade_tier == 1);
 
-	/* Duplicate designation must fail */
-	CommandCost res_dup = CmdDesignateSpaceport(DoCommandFlag::Execute, sid);
-	CHECK(res_dup.Failed());
-	CHECK(res_dup.GetErrorMessage() == STR_ERROR_ALREADY_BUILT);
+	/* Repeating the command upgrades without losing operating counters. */
+	SpaceportManager::GetSpaceportMutable(sid)->supplies_received = 80;
+	SpaceportManager::GetSpaceportMutable(sid)->total_offworld_cargo_generated = 150;
+	REQUIRE(CmdDesignateSpaceport(DoCommandFlag::Execute, sid).Succeeded());
+	sp = SpaceportManager::GetSpaceport(sid);
+	REQUIRE(sp != nullptr);
+	CHECK(sp->offworld_trade_tier == 2);
+	CHECK(sp->supplies_received == 80);
+	CHECK(sp->total_offworld_cargo_generated == 150);
+
+	REQUIRE(CmdDesignateSpaceport(DoCommandFlag::Execute, sid).Succeeded());
+	CHECK(SpaceportManager::GetSpaceport(sid)->offworld_trade_tier == 3);
+
+	/* Tier 3 is the hard maximum. */
+	CommandCost res_max = CmdDesignateSpaceport(DoCommandFlag::Execute, sid);
+	CHECK(res_max.Failed());
+	CHECK(res_max.GetErrorMessage() == STR_ERROR_SPACEPORT_MAX_TIER);
 
 	/* Foreign company designation must fail */
 	_current_company = CompanyID{1};
@@ -235,9 +280,10 @@ TEST_CASE("Edge Conduit - Boundary Void Adjacency Rules")
 	CHECK(EdgeConduitManager::IsVoidAdjacent(adjacent_tile));
 	CHECK(!EdgeConduitManager::IsVoidAdjacent(interior_tile));
 
-	/* Map perimeter inner tiles (x=1 or y=1 or x=MaxX-1 or y=MaxY-1) are also void adjacent */
+	/* A coordinate near the map perimeter is not sufficient by itself; the
+	 * neighbouring in-map tile must actually be TileType::Void. */
 	TileIndex edge_tile = TileXY(1, 50);
-	CHECK(EdgeConduitManager::IsVoidAdjacent(edge_tile));
+	CHECK(!EdgeConduitManager::IsVoidAdjacent(edge_tile));
 }
 
 TEST_CASE("Edge Conduit - Construction and Demolition Commands")
@@ -254,11 +300,12 @@ TEST_CASE("Edge Conduit - Construction and Demolition Commands")
 	/* Attempting to build conduit on interior tile must fail */
 	CommandCost res_int = CmdBuildEdgeConduit(DoCommandFlag::Execute, interior_tile, DiagDirection::NE, CargoType{0}, RAILTYPE_BEGIN);
 	CHECK(res_int.Failed());
-	CHECK(res_int.GetErrorMessage() == STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	CHECK(res_int.GetErrorMessage() == STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID);
 
 	/* Building conduit on void-adjacent tile must succeed */
 	CommandCost res_build = CmdBuildEdgeConduit(DoCommandFlag::Execute, conduit_tile, DiagDirection::NE, CargoType{0}, RAILTYPE_BEGIN);
 	CHECK(res_build.Succeeded());
+	UpdateSignalsInBuffer();
 	CHECK(EdgeConduitManager::IsConduitTile(conduit_tile));
 
 	const EdgeConduit *c = EdgeConduitManager::GetConduit(conduit_tile);
@@ -276,9 +323,28 @@ TEST_CASE("Edge Conduit - Construction and Demolition Commands")
 	/* Demolish conduit */
 	CommandCost res_dem = CmdDestroyEdgeConduit(DoCommandFlag::Execute, conduit_tile);
 	CHECK(res_dem.Succeeded());
+	UpdateSignalsInBuffer();
 	CHECK(!EdgeConduitManager::IsConduitTile(conduit_tile));
 	CHECK(EdgeConduitManager::GetConduit(conduit_tile) == nullptr);
 	CHECK(IsTileType(conduit_tile, TileType::Clear));
+
+	/* The GUI sends an invalid direction for automatic void-facing placement. */
+	TileIndex auto_void = TileXY(60, 60);
+	TileIndex auto_tile = TileXY(61, 60);
+	MakeVoid(auto_void);
+	CommandCost res_auto = CmdBuildEdgeConduit(DoCommandFlag::Execute, auto_tile, DiagDirection::Invalid, INVALID_CARGO, RAILTYPE_BEGIN);
+	REQUIRE(res_auto.Succeeded());
+	UpdateSignalsInBuffer();
+	const EdgeConduit *auto_conduit = EdgeConduitManager::GetConduit(auto_tile);
+	REQUIRE(auto_conduit != nullptr);
+	CHECK(auto_conduit->dir == DiagDirection::NE);
+
+	/* Ordinary OpenTTD dynamite must also remove the sidecar registry entry. */
+	CommandCost res_clear = Command<Commands::LandscapeClear>::Do(DoCommandFlag::Execute, auto_tile);
+	REQUIRE(res_clear.Succeeded());
+	UpdateSignalsInBuffer();
+	CHECK(!EdgeConduitManager::IsConduitTile(auto_tile));
+	CHECK(IsTileType(auto_tile, TileType::Clear));
 }
 
 TEST_CASE("Edge Conduit - Frontier World Extraction Multiplier")
@@ -296,6 +362,7 @@ TEST_CASE("Edge Conduit - Frontier World Extraction Multiplier")
 	MakeVoid(void_w2);
 	TileIndex tile_frontier = TileXY(51, 150);
 	REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, tile_frontier, DiagDirection::NE, CargoType{0}, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
 
 	const EdgeConduit *c_core = EdgeConduitManager::GetConduit(tile_core);
 	const EdgeConduit *c_frontier = EdgeConduitManager::GetConduit(tile_frontier);
@@ -332,10 +399,11 @@ TEST_CASE("Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)")
 
 	/* 2. Register an Edge Conduit */
 	TileIndex cond_t = TileXY(61, 60);
+	MakeVoid(TileXY(60, 60));
 	EdgeConduit cond_orig{
 		.id = 7,
 		.tile = cond_t,
-		.dir = DiagDirection::SE,
+		.dir = DiagDirection::NE,
 		.world_id = WorldID{0},
 		.cargo_type = CargoType{0},
 		.production_rate = 50,
@@ -380,10 +448,154 @@ TEST_CASE("Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)")
 	CHECK(restored_cond->id == 7);
 	CHECK(restored_cond->tile == cond_t);
 	CHECK(restored_cond->world_id == WorldID{0});
-	CHECK(restored_cond->dir == DiagDirection::SE);
+	CHECK(restored_cond->dir == DiagDirection::NE);
 	CHECK(restored_cond->owner == _current_company);
 	CHECK(restored_cond->production_rate == 50);
 	CHECK(restored_cond->total_produced == 200);
 
 	std::filesystem::remove(test_save_file);
+}
+
+TEST_CASE("Edge Conduit - One-ended head is safe for signal updates")
+{
+	SetupSprint9Environment();
+	const TileIndex tile = TileXY(51, 50);
+	MakeVoid(TileXY(50, 50));
+	REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, tile, DiagDirection::NE, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
+	CHECK(GetOtherTunnelBridgeEnd(tile) == INVALID_TILE);
+	UpdateSignalsInBuffer();
+	CHECK(EdgeConduitManager::IsConduitTile(tile));
+}
+
+TEST_CASE("Edge Conduit - Physical map edges and corners are coordinate-safe")
+{
+	struct Case {
+		uint x;
+		uint y;
+		DiagDirection dir;
+	};
+	const Case cases[] = {
+		{1, 32, DiagDirection::NE},
+		{62, 32, DiagDirection::SW},
+		{32, 1, DiagDirection::NW},
+		{32, 62, DiagDirection::SE},
+		{1, 1, DiagDirection::NE},
+		{62, 1, DiagDirection::SW},
+		{1, 62, DiagDirection::NE},
+		{62, 62, DiagDirection::SW},
+	};
+
+	for (const Case &test : cases) {
+		SetupMapEdgeWorld();
+		TileIndex tile = TileXY(test.x, test.y);
+		INFO("map-edge tile (" << test.x << "," << test.y << ")");
+		auto footprint = EdgeConduitManager::ResolvePlacement(tile, test.dir);
+		REQUIRE(footprint.has_value());
+		CHECK(footprint->void_tile < Map::Size());
+		CHECK(IsTileType(footprint->void_tile, TileType::Void));
+		CHECK(IsValidTile(footprint->approach_tile));
+
+		CommandCost query = CmdBuildEdgeConduit({}, tile, test.dir, INVALID_CARGO, RAILTYPE_BEGIN);
+		REQUIRE(query.Succeeded());
+		CHECK(!EdgeConduitManager::IsConduitTile(tile));
+		CHECK(!IsTunnelTile(tile));
+
+		REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, tile, test.dir, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
+		UpdateSignalsInBuffer();
+		CHECK(EdgeConduitManager::IsConduitTile(tile));
+		CHECK(GetOtherTunnelBridgeEnd(tile) == INVALID_TILE);
+
+		REQUIRE(CmdDestroyEdgeConduit(DoCommandFlag::Execute, tile).Succeeded());
+		UpdateSignalsInBuffer();
+		CHECK(!EdgeConduitManager::IsConduitTile(tile));
+	}
+}
+
+TEST_CASE("Edge Conduit - Invalid boundaries, orientation and terrain fail atomically")
+{
+	SetupMapEdgeWorld();
+
+	for (TileIndex invalid : {INVALID_TILE, TileIndex{Map::Size()}, TileIndex{Map::Size() + 123}}) {
+		CHECK(CmdBuildEdgeConduit(DoCommandFlag::Execute, invalid, DiagDirection::NE, INVALID_CARGO, RAILTYPE_BEGIN).Failed());
+	}
+	UpdateSignalsInBuffer();
+	CHECK(EdgeConduitManager::Count() == 0);
+
+	TileIndex edge = TileXY(1, 32);
+	CHECK(CmdBuildEdgeConduit(DoCommandFlag::Execute, edge, DiagDirection::SW, INVALID_CARGO, RAILTYPE_BEGIN).Failed());
+	CHECK(IsTileType(edge, TileType::Clear));
+	CHECK(EdgeConduitManager::Count() == 0);
+	UpdateSignalsInBuffer();
+
+	TileIndex water = TileXY(32, Map::MaxY() - 1);
+	MakeSea(water);
+	CommandCost water_result = CmdBuildEdgeConduit(DoCommandFlag::Execute, water, DiagDirection::SE, INVALID_CARGO, RAILTYPE_BEGIN);
+	CHECK(water_result.Failed());
+	CHECK(water_result.GetErrorMessage() == STR_ERROR_CAN_T_BUILD_ON_WATER);
+	CHECK(IsTileType(water, TileType::Water));
+	CHECK(!EdgeConduitManager::IsConduitTile(water));
+	UpdateSignalsInBuffer();
+}
+
+TEST_CASE("Edge Conduit - Logical boundary, phases and adjacent rail remain supported")
+{
+	for (WorldPhase phase : {WorldPhase::Phase1_Core, WorldPhase::Phase2_Developed,
+			WorldPhase::Phase3_Frontier, WorldPhase::Phase4_Expansion}) {
+		SetupMapEdgeWorld(phase);
+		TileIndex tile = TileXY(1, 24);
+		TileIndex approach = TileXY(2, 24);
+		MakeRailNormal(approach, _current_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+		REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, tile, DiagDirection::NE, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
+		UpdateSignalsInBuffer();
+		CHECK(EdgeConduitManager::GetConduit(tile)->world_id == WorldID{0});
+		CHECK(IsTileType(approach, TileType::Railway));
+	}
+
+	SetupSprint9Environment();
+	TileIndex logical_void = TileXY(50, 50);
+	TileIndex logical_edge = TileXY(51, 50);
+	TileIndex approach = TileXY(52, 50);
+	MakeVoid(logical_void);
+	MakeRailNormal(approach, _current_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, logical_edge, DiagDirection::Invalid, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+	CHECK(EdgeConduitManager::GetConduit(logical_edge)->dir == DiagDirection::NE);
+
+	TileIndex ordinary_interior = TileXY(30, 30);
+	CHECK(CmdBuildEdgeConduit(DoCommandFlag::Execute, ordinary_interior, DiagDirection::Invalid, INVALID_CARGO, RAILTYPE_BEGIN).Failed());
+	CHECK(IsTileType(ordinary_interior, TileType::Clear));
+	UpdateSignalsInBuffer();
+}
+
+TEST_CASE("Edge Conduit - Constructed tile survives save, reload and signal refresh")
+{
+	const std::string save_file = "/tmp/test_openspacettd_edge_conduit_constructed.sav";
+	std::filesystem::remove(save_file);
+	SetupSprint9Environment();
+
+	TileIndex void_tile = TileXY(50, 50);
+	TileIndex conduit_tile = TileXY(51, 50);
+	TileIndex approach_tile = TileXY(52, 50);
+	MakeVoid(void_tile);
+	MakeRailNormal(approach_tile, _current_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	REQUIRE(CmdBuildEdgeConduit(DoCommandFlag::Execute, conduit_tile, DiagDirection::NE, INVALID_CARGO, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+
+	REQUIRE(SaveOrLoad(save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(EdgeConduitManager::IsConduitTile(conduit_tile));
+	CHECK(IsTunnelTile(conduit_tile));
+	CHECK(GetOtherTunnelBridgeEnd(conduit_tile) == INVALID_TILE);
+
+	AddSideToSignalBuffer(conduit_tile, DiagDirection::Invalid, _current_company);
+	UpdateSignalsInBuffer();
+	REQUIRE(CmdDestroyEdgeConduit(DoCommandFlag::Execute, conduit_tile).Succeeded());
+	UpdateSignalsInBuffer();
+	CHECK(!EdgeConduitManager::IsConduitTile(conduit_tile));
+
+	REQUIRE(SaveOrLoad(save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	CHECK(!EdgeConduitManager::IsConduitTile(conduit_tile));
+	CHECK(!IsTunnelTile(conduit_tile));
+	std::filesystem::remove(save_file);
 }

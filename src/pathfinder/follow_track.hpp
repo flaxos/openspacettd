@@ -165,7 +165,9 @@ struct CFollowTrackT {
 
 			return false;
 		}
-		if ((!IsRailTT() && !Allow90degTurns()) || (IsRailTT() && Rail90DegTurnDisallowed(GetTileRailType(this->old_tile), GetTileRailType(this->new_tile), !Allow90degTurns()))) {
+		/* A portal reorients the train at its remote head; this is not a rail curve. */
+		bool traversed_portal = this->is_tunnel && PortalRegistry::IsPortalTile(this->old_tile);
+		if (!traversed_portal && ((!IsRailTT() && !Allow90degTurns()) || (IsRailTT() && Rail90DegTurnDisallowed(GetTileRailType(this->old_tile), GetTileRailType(this->new_tile), !Allow90degTurns())))) {
 			this->new_td_bits.Reset(TrackdirCrossesTrackdirs(this->old_td));
 			if (this->new_td_bits.None()) {
 				this->err = ErrorCode::SharpTurn;
@@ -227,6 +229,9 @@ protected:
 					this->new_tile = GetOtherBridgeEnd(this->old_tile);
 				}
 				this->tiles_skipped = GetTunnelBridgeLength(this->new_tile, this->old_tile);
+				if (PortalRegistry::IsPortalTile(this->old_tile)) {
+					this->exitdir = ReverseDiagDir(GetTunnelBridgeDirection(this->new_tile));
+				}
 				return;
 			}
 			assert(ReverseDiagDir(enterdir) == this->exitdir);
@@ -339,8 +344,11 @@ protected:
 			}
 		}
 
-		/* rail transport is possible only on tiles with the same owner as vehicle */
-		if (IsRailTT() && GetTileOwner(this->new_tile) != this->veh_owner) {
+		/* Neutral railway is shared infrastructure. This is used by generated
+		 * interplanetary gateways and their approach tracks, which exist before
+		 * a player company is created. Competitor-owned railway remains private. */
+		Owner tile_owner = GetTileOwner(this->new_tile);
+		if (IsRailTT() && tile_owner != this->veh_owner && tile_owner != OWNER_NONE) {
 			/* different owner */
 			this->err = ErrorCode::NoWay;
 			return false;

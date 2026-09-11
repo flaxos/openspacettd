@@ -393,7 +393,9 @@ static SigFlags ExploreSegment(Owner owner)
 				} else { // NOT incoming from the wormhole!
 					if (ReverseDiagDir(enterdir) != dir) continue;
 					if (!flags.Test(SigFlag::Train) && HasVehicleOnTile(tile, IsTrainAndNotInDepot)) flags.Set(SigFlag::Train);
-					tile = GetOtherTunnelBridgeEnd(tile); // just skip to exit tile
+					TileIndex other = GetOtherTunnelBridgeEnd(tile);
+					if (!IsValidTile(other)) continue; // one-ended OpenSpace rail head
+					tile = other; // just skip to exit tile
 					enterdir = DiagDirection::Invalid;
 					exitdir = DiagDirection::Invalid;
 				}
@@ -510,7 +512,12 @@ static SigSegState UpdateSignalsInBuffer(Owner owner)
 				assert(GetTunnelBridgeTransportType(tile) == TransportType::Rail);
 				assert(dir == DiagDirection::Invalid || dir == ReverseDiagDir(GetTunnelBridgeDirection(tile)));
 				_tbdset.Add(tile, DiagDirection::Invalid);  // we can safely start from wormhole centre
-				_tbdset.Add(GetOtherTunnelBridgeEnd(tile), DiagDirection::Invalid);
+				/* Unlinked Portal Gates and Edge Conduits deliberately have no
+				 * second end. Treat them as terminal rail heads rather than
+				 * queueing INVALID_TILE for signal traversal. */
+				if (TileIndex other = GetOtherTunnelBridgeEnd(tile); IsValidTile(other)) {
+					_tbdset.Add(other, DiagDirection::Invalid);
+				}
 				break;
 
 			case TileType::Railway:

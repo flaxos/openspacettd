@@ -36,6 +36,8 @@
 #include "timer/timer.h"
 #include "timer/timer_window.h"
 #include "pathfinder/water_regions.h"
+#include "portal/edge_conduit.h"
+#include "portal/planet_manager.h"
 
 #include "widgets/misc_widget.h"
 
@@ -230,6 +232,23 @@ public:
 		/* Rail speed limit */
 		if (td.rail_speed != 0) {
 			this->landinfo_data.push_back(GetString(STR_LANG_AREA_INFORMATION_RAIL_SPEED_LIMIT, PackVelocity(td.rail_speed, VehicleType::Train)));
+		}
+
+		/* OpenSpaceTTD Edge Conduit operating status. Reuse the ordinary
+		 * land-information window so this infrastructure needs no bespoke UI. */
+		const EdgeConduit *conduit = EdgeConduitManager::GetConduit(this->tile);
+		if (conduit != nullptr) {
+			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT));
+			const PlanetRegion *region = PlanetManager::GetRegion(conduit->world_id);
+			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_WORLD,
+					region != nullptr ? region->name : GetString(STR_SPACEPORT_UNKNOWN_WORLD)));
+			if (IsValidCargoType(conduit->cargo_type)) {
+				this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_OUTPUT,
+						conduit->cargo_type, EdgeConduitManager::CalculateProduction(*conduit)));
+			} else {
+				this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_NO_CARGO));
+			}
+			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL, conduit->total_produced));
 		}
 
 		/* Road type name */

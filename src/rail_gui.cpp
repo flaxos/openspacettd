@@ -51,6 +51,7 @@
 
 #include "portal/portal_cmd.h"
 #include "portal/portal_registry.h"
+#include "portal/edge_conduit.h"
 
 #include "table/strings.h"
 
@@ -472,7 +473,7 @@ struct BuildRailToolbarWindow : Window {
 		WID_RAT_BUILD_NS, WID_RAT_BUILD_X, WID_RAT_BUILD_EW, WID_RAT_BUILD_Y, WID_RAT_AUTORAIL,
 		WID_RAT_BUILD_DEPOT, WID_RAT_BUILD_WAYPOINT, WID_RAT_BUILD_STATION, WID_RAT_BUILD_SIGNALS,
 		WID_RAT_BUILD_BRIDGE, WID_RAT_BUILD_TUNNEL, WID_RAT_CONVERT_RAIL,
-		WID_RAT_BUILD_PORTAL,
+		WID_RAT_BUILD_PORTAL, WID_RAT_BUILD_CONDUIT,
 	};
 
 	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
@@ -530,6 +531,7 @@ struct BuildRailToolbarWindow : Window {
 		this->GetWidget<NWidgetCore>(WID_RAT_CONVERT_RAIL)->SetSprite(rti->gui_sprites.convert_rail);
 		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_TUNNEL)->SetSprite(rti->gui_sprites.build_tunnel);
 		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_PORTAL)->SetSprite(rti->gui_sprites.build_tunnel);
+		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_CONDUIT)->SetSprite(rti->gui_sprites.build_tunnel);
 	}
 
 	/**
@@ -607,6 +609,7 @@ struct BuildRailToolbarWindow : Window {
 			case WID_RAT_BUILD_TUNNEL: return GetRailTypeInfo(_cur_railtype)->cursor.tunnel;
 			case WID_RAT_CONVERT_RAIL: return GetRailTypeInfo(_cur_railtype)->cursor.convert;
 			case WID_RAT_BUILD_PORTAL: return GetRailTypeInfo(_cur_railtype)->cursor.tunnel;
+			case WID_RAT_BUILD_CONDUIT: return GetRailTypeInfo(_cur_railtype)->cursor.tunnel;
 			default: NOT_REACHED();
 		}
 	}
@@ -633,6 +636,7 @@ struct BuildRailToolbarWindow : Window {
 			case WID_RAT_BUILD_TUNNEL: return HT_SPECIAL;
 			case WID_RAT_CONVERT_RAIL: return HT_RECT | HT_DIAGONAL;
 			case WID_RAT_BUILD_PORTAL: return HT_SPECIAL;
+			case WID_RAT_BUILD_CONDUIT: return HT_SPECIAL;
 			default: NOT_REACHED();
 		}
 	}
@@ -760,6 +764,14 @@ struct BuildRailToolbarWindow : Window {
 				}
 				break;
 			}
+
+			case WID_RAT_BUILD_CONDUIT:
+				if (EdgeConduitManager::IsConduitTile(tile)) {
+					Command<Commands::DestroyEdgeConduit>::Post(STR_ERROR_CAN_T_REMOVE_EDGE_CONDUIT, tile);
+				} else {
+					Command<Commands::BuildEdgeConduit>::Post(STR_ERROR_CAN_T_BUILD_EDGE_CONDUIT, tile, DiagDirection::Invalid, INVALID_CARGO, _cur_railtype);
+				}
+				break;
 
 			default: NOT_REACHED();
 		}
@@ -974,7 +986,9 @@ static constexpr std::initializer_list<NWidgetPart> _nested_build_rail_widgets =
 		NWidget(WWT_IMGBTN, Colours::DarkGreen, WID_RAT_CONVERT_RAIL),
 						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_CONVERT_RAIL, STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL),
 		NWidget(WWT_IMGBTN, Colours::DarkGreen, WID_RAT_BUILD_PORTAL),
-						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_TUNNEL_RAIL, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL),
+						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_TUNNEL_RAIL, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_PORTAL_GATE),
+		NWidget(WWT_IMGBTN, Colours::DarkGreen, WID_RAT_BUILD_CONDUIT),
+						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_TUNNEL_RAIL, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_EDGE_CONDUIT),
 	EndContainer(),
 };
 

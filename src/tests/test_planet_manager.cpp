@@ -76,6 +76,14 @@ TEST_CASE("PlanetManager - Registration and Validation")
 	r_inval.max_x = 1500;
 	CHECK_FALSE(PlanetManager::RegisterRegion(r_inval));
 
+	/* Unknown Phase metadata must never become an authoritative build world. */
+	PlanetRegion r_bad_phase = r1;
+	r_bad_phase.id = WorldID{3};
+	r_bad_phase.phase = static_cast<WorldPhase>(0xFF);
+	r_bad_phase.min_x = 1000;
+	r_bad_phase.max_x = 1500;
+	CHECK_FALSE(PlanetManager::RegisterRegion(r_bad_phase));
+
 	PlanetManager::Reset();
 }
 

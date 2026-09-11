@@ -16,6 +16,7 @@
 #include "../portal/portal_registry.h"
 #include "../void_map.h"
 #include "../tunnel_map.h"
+#include "../tunnelbridge_map.h"
 #include "../rail_map.h"
 #include "../water_map.h"
 
@@ -133,37 +134,46 @@ TEST_CASE("MultiWorldGen - Gateway Initialization and Pairing")
 	REQUIRE(p1 != nullptr);
 	REQUIRE(p2 != nullptr);
 
-	/* Gateway between World 0 and World 1 */
-	TileIndex gw_w0 = TileXY(32, p0->max_y - 1);
-	TileIndex gw_w1 = TileXY(32, p1->min_y + 1);
+	/* Gateway between World 0 and World 1. The endpoints are deliberately
+	 * non-collinear and use perpendicular local approach tracks. */
+	TileIndex gw_w0 = TileXY(p0->min_x + 3 * (p0->max_x - p0->min_x) / 4, p0->min_y + (p0->max_y - p0->min_y) / 3);
+	TileIndex gw_w1 = TileXY(p1->min_x + (p1->max_x - p1->min_x) / 4, p1->min_y + 2 * (p1->max_y - p1->min_y) / 3);
 
 	CHECK(PortalRegistry::IsPortalTile(gw_w0));
 	CHECK(PortalRegistry::IsPortalTile(gw_w1));
 	CHECK(IsTunnel(gw_w0));
 	CHECK(IsTunnel(gw_w1));
+	CHECK(GetTunnelBridgeDirection(gw_w0) == DiagDirection::SW);
+	CHECK(GetTunnelBridgeDirection(gw_w1) == DiagDirection::NW);
+	CHECK(TileX(gw_w0) != TileX(gw_w1));
+	CHECK(TileY(gw_w0) != TileY(gw_w1));
 
 	/* Cross-world resolution */
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w0) == gw_w1);
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w1) == gw_w0);
 
 	/* Gateway between World 1 and World 2 */
-	TileIndex gw_w1_s = TileXY(32, p1->max_y - 1);
-	TileIndex gw_w2_n = TileXY(32, p2->min_y + 1);
+	TileIndex gw_w1_s = TileXY(p1->min_x + 3 * (p1->max_x - p1->min_x) / 4, p1->min_y + 2 * (p1->max_y - p1->min_y) / 3);
+	TileIndex gw_w2_n = TileXY(p2->min_x + (p2->max_x - p2->min_x) / 4, p2->min_y + (p2->max_y - p2->min_y) / 3);
 
 	CHECK(PortalRegistry::IsPortalTile(gw_w1_s));
 	CHECK(PortalRegistry::IsPortalTile(gw_w2_n));
 	CHECK(IsTunnel(gw_w1_s));
 	CHECK(IsTunnel(gw_w2_n));
+	CHECK(GetTunnelBridgeDirection(gw_w1_s) == DiagDirection::SE);
+	CHECK(GetTunnelBridgeDirection(gw_w2_n) == DiagDirection::NE);
+	CHECK(TileX(gw_w1_s) != TileX(gw_w2_n));
+	CHECK(TileY(gw_w1_s) != TileY(gw_w2_n));
 
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w1_s) == gw_w2_n);
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w2_n) == gw_w1_s);
 
 	/* Check track approach tiles exist and have track */
-	TileIndex track_w0 = TileXY(32, p0->max_y - 2);
-	TileIndex track_w1 = TileXY(32, p1->min_y + 2);
+	TileIndex track_w0 = TileAddByDiagDir(gw_w0, DiagDirection::NE);
+	TileIndex track_w1 = TileAddByDiagDir(gw_w1, DiagDirection::SE);
 	CHECK(IsPlainRailTile(track_w0));
 	CHECK(IsPlainRailTile(track_w1));
-	CHECK(GetTrackBits(track_w0) == TrackBits{Track::Y});
+	CHECK(GetTrackBits(track_w0) == TrackBits{Track::X});
 	CHECK(GetTrackBits(track_w1) == TrackBits{Track::Y});
 }
 
@@ -193,17 +203,51 @@ TEST_CASE("MultiWorldGen - Asymmetric Map Partitioning along X")
 	CHECK(PlanetManager::GetTileWorld(tile_buf_x) == INVALID_WORLD);
 	CHECK(IsTileType(tile_buf_x, TileType::Void));
 
-	/* Check gateways along X have X track */
-	TileIndex gw_w0 = TileXY(p0->max_x - 1, 32);
-	TileIndex gw_w1 = TileXY(p1->min_x + 1, 32);
+	/* Gateways remain independent of the map partitioning axis. */
+	TileIndex gw_w0 = TileXY(p0->min_x + 3 * (p0->max_x - p0->min_x) / 4, p0->min_y + (p0->max_y - p0->min_y) / 3);
+	TileIndex gw_w1 = TileXY(p1->min_x + (p1->max_x - p1->min_x) / 4, p1->min_y + 2 * (p1->max_y - p1->min_y) / 3);
 
 	CHECK(PortalRegistry::IsPortalTile(gw_w0));
 	CHECK(PortalRegistry::IsPortalTile(gw_w1));
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w0) == gw_w1);
+	CHECK(GetTunnelBridgeDirection(gw_w0) == DiagDirection::SW);
+	CHECK(GetTunnelBridgeDirection(gw_w1) == DiagDirection::NW);
+	CHECK(TileX(gw_w0) != TileX(gw_w1));
+	CHECK(TileY(gw_w0) != TileY(gw_w1));
 
-	TileIndex track_w0 = TileXY(p0->max_x - 2, 32);
+	TileIndex track_w0 = TileAddByDiagDir(gw_w0, DiagDirection::NE);
 	CHECK(IsPlainRailTile(track_w0));
 	CHECK(GetTrackBits(track_w0) == TrackBits{Track::X});
+}
+
+TEST_CASE("MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain")
+{
+	Map::Allocate(64, 64);
+
+	auto regions = MultiWorldGen::CalculateLayout(64, 64);
+	REQUIRE(regions.size() == 3);
+	const PlanetRegion &p0 = regions[0];
+
+	TileIndex nominal = TileXY(p0.min_x + 3 * (p0.max_x - p0.min_x) / 4, p0.min_y + (p0.max_y - p0.min_y) / 3);
+	SetTileHeight(nominal, 1);
+	REQUIRE(GetTileSlope(nominal) != SLOPE_FLAT);
+
+	REQUIRE(MultiWorldGen::GenerateMultiWorldLayout(64, 64));
+
+	const PortalLink *alpha = nullptr;
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
+		if (link.end_a.world_id == WorldID{0} && link.end_b.world_id == WorldID{1}) {
+			alpha = &link;
+			break;
+		}
+	}
+
+	REQUIRE(alpha != nullptr);
+	CHECK(alpha->end_a.tile != nominal);
+	CHECK(GetTileSlope(alpha->end_a.tile) == SLOPE_FLAT);
+	TileIndex lead = TileAddByDiagDir(alpha->end_a.tile, ReverseDiagDir(alpha->end_a.enter_dir));
+	CHECK(GetTileSlope(lead) == SLOPE_FLAT);
+	CHECK(TileHeight(alpha->end_a.tile) == TileHeight(lead));
 }
 
 TEST_CASE("MultiWorldGen - Partitioning Preserves Terrain Heights and Shores")

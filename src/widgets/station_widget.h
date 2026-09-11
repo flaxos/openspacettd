@@ -25,6 +25,9 @@ enum StationViewWidgets : WidgetID {
 	WID_SV_RENAME,             ///< 'Rename' button.
 	WID_SV_CLOSE_AIRPORT,      ///< 'Close airport' button.
 	WID_SV_CLOSE_AIRPORT_SEL,  ///< Container for 'close airport' button, which can be hidden.
+	WID_SV_SPACEPORT_STATUS,   ///< Spaceport designation and production status panel.
+	WID_SV_SPACEPORT_ACTION,   ///< Designate or upgrade this airport as a spaceport.
+	WID_SV_SPACEPORT_SEL,      ///< Container for spaceport controls, hidden for non-airport stations.
 	WID_SV_TRAINS,             ///< List of scheduled trains button.
 	WID_SV_ROADVEHS,           ///< List of scheduled road vehs button.
 	WID_SV_SHIPS,              ///< List of scheduled ships button.

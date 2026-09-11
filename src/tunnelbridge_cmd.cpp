@@ -44,6 +44,7 @@
 #include "table/bridge_land.h"
 
 #include "portal/portal_registry.h"
+#include "portal/edge_conduit.h"
 
 #include "safeguards.h"
 
@@ -897,6 +898,7 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlags flags)
 		if (is_portal_gate) {
 			PortalRegistry::UnregisterPortalByTile(tile);
 		}
+		if (EdgeConduitManager::IsConduitTile(tile)) EdgeConduitManager::UnregisterConduit(tile);
 
 		if (GetTunnelBridgeTransportType(tile) == TransportType::Rail) {
 			/* We first need to request values before calling DoClearSquare */

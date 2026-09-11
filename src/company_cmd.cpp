@@ -413,7 +413,10 @@ CommandCost CheckOwnership(Owner owner, TileIndex tile)
 	if (IsLocalCompany()) {
 		auto params = GetParamsForOwnedBy(owner, tile);
 		error.SetEncodedMessage(GetEncodedStringWithArgs(STR_ERROR_OWNED_BY, params));
-		if (owner != OWNER_TOWN) error.SetErrorOwner(owner);
+		/* Only actual companies have a manager face. Pseudo owners such as
+		 * OWNER_NONE, OWNER_WATER, and OWNER_DEITY must not be passed to the
+		 * error window as CompanyIDs. */
+		if (Company::IsValidID(owner)) error.SetErrorOwner(owner);
 	}
 	return error;
 }

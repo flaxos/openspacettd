@@ -18,6 +18,7 @@
 #include "../tunnelbridge_map.h"
 #include "../tunnelbridge.h"
 #include "../rail_map.h"
+#include "../signal_func.h"
 #include "../clear_map.h"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -36,6 +37,7 @@
 
 static void SetupTestWorlds(uint32_t map_w = 256, uint32_t map_h = 256)
 {
+	UpdateSignalsInBuffer();
 	Map::Allocate(map_w, map_h);
 	PortalRegistry::Reset();
 	PlanetManager::Reset();
@@ -54,6 +56,7 @@ static void SetupTestWorlds(uint32_t map_w = 256, uint32_t map_h = 256)
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);
 	_current_company = c->index;
+	c->money = 1'000'000'000;
 	c->avail_railtypes.Set(RAILTYPE_BEGIN);
 	c->avail_railtypes.Set(RAILTYPE_ELECTRIC);
 	c->clear_limit = 1000 << 16;
@@ -118,6 +121,7 @@ TEST_CASE("Portal Construction - Unlinked Gate Lifecycle and Restrictions")
 	/* 2. Successfully construct unlinked portal gate on World 0 */
 	CommandCost res_build = CmdBuildPortalGate(DoCommandFlag::Execute, tile_w0, DiagDirection::NE, RAILTYPE_BEGIN);
 	CHECK(res_build.Succeeded());
+	UpdateSignalsInBuffer();
 	CHECK(IsTunnelTile(tile_w0));
 	CHECK(PortalRegistry::IsUnlinkedGate(tile_w0));
 	CHECK(!PortalRegistry::IsPortalTile(tile_w0)); // Not linked yet!
@@ -140,6 +144,44 @@ TEST_CASE("Portal Construction - Unlinked Gate Lifecycle and Restrictions")
 	CHECK(res_dup.GetErrorMessage() == STR_ERROR_ALREADY_BUILT);
 }
 
+TEST_CASE("Portal Construction - Authoritative world and Phase placement rules")
+{
+	SetupTestWorlds();
+	static_assert(to_underlying(Commands::BuildPortalGate) == 146);
+	static_assert(to_underlying(Commands::BuildEdgeConduit) == 151);
+
+	/* All currently modelled Phases permit a gate. The documented restriction
+	 * is registered-world membership, not a Phase 1/2/3 technology gate. */
+	for (TileIndex tile : {TileXY(30, 30), TileXY(170, 30), TileXY(30, 170)}) {
+		CommandCost query = CmdBuildPortalGate({}, tile, DiagDirection::NE, RAILTYPE_BEGIN);
+		REQUIRE(query.Succeeded());
+		CHECK(!PortalRegistry::IsUnlinkedGate(tile));
+		REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, tile, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
+		UpdateSignalsInBuffer();
+		CHECK(PortalRegistry::IsUnlinkedGate(tile));
+	}
+
+	TileIndex void_buffer = TileXY(120, 50);
+	CHECK(CmdBuildPortalGate(DoCommandFlag::Execute, void_buffer, DiagDirection::NE, RAILTYPE_BEGIN).Failed());
+	CHECK(!PortalRegistry::IsUnlinkedGate(void_buffer));
+	CHECK(CmdBuildPortalGate(DoCommandFlag::Execute, INVALID_TILE, DiagDirection::NE, RAILTYPE_BEGIN).Failed());
+
+	/* The gate can face any direction, but its rail approach must remain in the
+	 * same logical world. At the minimum-X boundary SW would put the approach
+	 * into the unregistered buffer, so the authoritative command rejects it. */
+	TileIndex boundary = TileXY(10, 50);
+	CHECK(CmdBuildPortalGate(DoCommandFlag::Execute, boundary, DiagDirection::SW, RAILTYPE_BEGIN).Failed());
+	CHECK(!PortalRegistry::IsUnlinkedGate(boundary));
+
+	TileIndex valid_pair_end = TileXY(40, 40);
+	TileIndex invalid_pair_end = TileXY(120, 60);
+	CHECK(CmdBuildPortalPair(DoCommandFlag::Execute, valid_pair_end, DiagDirection::NE,
+		invalid_pair_end, DiagDirection::SW, RAILTYPE_BEGIN).Failed());
+	CHECK(!PortalRegistry::IsUnlinkedGate(valid_pair_end));
+	CHECK(!IsTunnelTile(valid_pair_end));
+	UpdateSignalsInBuffer();
+}
+
 TEST_CASE("Portal Construction - Cross-World Gate Linking")
 {
 	SetupTestWorlds();
@@ -152,6 +194,7 @@ TEST_CASE("Portal Construction - Cross-World Gate Linking")
 	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, tile_a, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
 	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, tile_b, DiagDirection::SW, RAILTYPE_BEGIN).Succeeded());
 	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, tile_c, DiagDirection::SE, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
 
 	/* 1. Attempt same-world linking (tile_a on World 0 and tile_c on World 0): must fail */
 	CommandCost res_same_world = CmdLinkPortalGates({}, tile_a, tile_c);
@@ -198,6 +241,7 @@ TEST_CASE("Portal Construction - Atomic Pair Builder")
 		RAILTYPE_BEGIN
 	);
 	CHECK(res.Succeeded());
+	UpdateSignalsInBuffer();
 
 	CHECK(PortalRegistry::IsPortalTile(tile_w1));
 	CHECK(PortalRegistry::IsPortalTile(tile_w2));
@@ -218,6 +262,7 @@ TEST_CASE("Portal Construction - Demolition Safeguards While Consist In Transit"
 		tile_b, DiagDirection::SW,
 		RAILTYPE_BEGIN
 	).Succeeded());
+	UpdateSignalsInBuffer();
 
 	/* 1. When no train is in transit: free and can be demolished */
 	CHECK(!PortalRegistry::IsPortalInTransit(tile_a));
@@ -279,10 +324,12 @@ TEST_CASE("Portal Construction - Partial Demolition Unlinking")
 		tile_b, DiagDirection::SW,
 		RAILTYPE_BEGIN
 	).Succeeded());
+	UpdateSignalsInBuffer();
 
 	/* Demolish only gate A (demolish_both = false) */
 	CommandCost res_dem = CmdDestroyPortalGate(DoCommandFlag::Execute, tile_a, false);
 	CHECK(res_dem.Succeeded());
+	UpdateSignalsInBuffer();
 
 	/* Tile A is cleared */
 	CHECK(!IsTunnelTile(tile_a));
@@ -298,6 +345,7 @@ TEST_CASE("Portal Construction - Partial Demolition Unlinking")
 	/* Demolish the remaining unlinked gate B */
 	CommandCost res_dem_b = CmdDestroyPortalGate(DoCommandFlag::Execute, tile_b, false);
 	CHECK(res_dem_b.Succeeded());
+	UpdateSignalsInBuffer();
 
 	CHECK(!IsTunnelTile(tile_b));
 	CHECK(!PortalRegistry::IsUnlinkedGate(tile_b));
@@ -327,6 +375,7 @@ TEST_CASE("Portal Construction - Savegame Persistence of Unlinked and Linked Por
 		unlinked_tile, DiagDirection::SE,
 		RAILTYPE_BEGIN
 	).Succeeded());
+	UpdateSignalsInBuffer();
 
 	CHECK(PortalRegistry::Count() == 1);
 	CHECK(PortalRegistry::GetUnlinkedGates().size() == 1);

@@ -88,7 +88,10 @@ ErrorMessageData::ErrorMessageData(EncodedString &&summary_msg, EncodedString &&
 	detailed_msg(std::move(detailed_msg)),
 	extra_msg(std::move(extra_msg)),
 	position(x, y),
-	company(company)
+	/* Callers occasionally report pseudo owners (for example OWNER_NONE) via
+	 * CompanyID. Normalise those here so the face layout can never dereference
+	 * a non-existent Company pool item. */
+	company(Company::IsValidID(company) ? company : CompanyID::Invalid())
 {
 	assert(!this->summary_msg.empty());
 }
@@ -185,7 +188,8 @@ public:
 	{
 		switch (widget) {
 			case WID_EM_FACE: {
-				const Company *c = Company::Get(this->company);
+				const Company *c = Company::GetIfValid(this->company);
+				if (c == nullptr) break;
 				DrawCompanyManagerFace(c->face, c->colour, r);
 				break;
 			}

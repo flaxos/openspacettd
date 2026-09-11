@@ -68,6 +68,7 @@
 #include "../picker_func.h"
 
 #include "../portal/planet_manager.h"
+#include "../portal/portal_registry.h"
 #include "../video/video_driver.hpp"
 
 #include "saveload_internal.h"
@@ -3451,6 +3452,11 @@ bool AfterLoadGame()
 
 	if (PlanetManager::Count() > 0) {
 		PlanetManager::RebuildSpatialGrid();
+	}
+
+	size_t repaired_gateway_ends = PortalRegistry::RepairLegacyGeneratedGateways();
+	if (repaired_gateway_ends > 0) {
+		Debug(sl, 1, "Repaired {} legacy generated portal gateway endpoints", repaired_gateway_ends);
 	}
 
 	CheckGroundVehiclesAtCorrectZ();

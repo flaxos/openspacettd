@@ -30,7 +30,7 @@ public:
 	 * @param tile_b Entrance tile B.
 	 * @param dir_b Vehicle entry direction into portal head B.
 	 * @param world_b Logical world ID containing tile B.
-	 * @param virtual_length Number of virtual tiles/ticks for transit duration and YAPF cost.
+	 * @param virtual_length Virtual route length in tiles for YAPF cost.
 	 * @param bidirectional Whether vehicles can travel in both directions.
 	 * @return The assigned PortalID, or INVALID_PORTAL on failure (e.g. duplicate tile).
 	 */
@@ -89,7 +89,7 @@ public:
 	 *
 	 * @param tile_a Entrance tile A.
 	 * @param tile_b Entrance tile B.
-	 * @param virtual_length Number of virtual tiles/ticks for transit duration and YAPF cost.
+	 * @param virtual_length Virtual route length in tiles for YAPF cost.
 	 * @param bidirectional Whether vehicles can travel in both directions.
 	 * @return The assigned PortalID, or INVALID_PORTAL on failure.
 	 */
@@ -124,7 +124,7 @@ public:
 	static PortalExitPosition GetPortalExitPosition(TileIndex entry_tile);
 
 	/**
-	 * Get the virtual traversal length (in tiles) for the portal containing the given tile.
+	 * Get the virtual route length (in tiles) for the portal containing the given tile.
 	 * @param tile The portal tile.
 	 * @return Virtual length (defaults to 1 if not a portal).
 	 */
@@ -192,6 +192,14 @@ public:
 	 * @param progress The transit progress distance.
 	 */
 	static void SetVehicleTransitProgress(VehicleID veh_id, uint32_t progress);
+
+	/**
+	 * Repair generated neutral gateway heads from early multi-world saves where
+	 * the stored entry direction pointed away from the world-side lead track.
+	 * This operation is deterministic and idempotent.
+	 * @return Number of endpoint directions repaired.
+	 */
+	static size_t RepairLegacyGeneratedGateways();
 
 	/**
 	 * Clear all registered portals (for test isolation and new game setup).
