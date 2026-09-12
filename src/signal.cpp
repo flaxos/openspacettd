@@ -285,7 +285,7 @@ static SigFlags ExploreSegment(Owner owner)
 
 		switch (GetTileType(tile)) {
 			case TileType::Railway: {
-				if (GetTileOwner(tile) != owner) continue; // do not propagate signals on others' tiles (remove for tracksharing)
+				if (GetTileOwner(tile) != owner && GetTileOwner(tile) != OWNER_NONE) continue;
 
 				if (IsRailDepot(tile)) {
 					if (enterdir == DiagDirection::Invalid) { // from 'inside' - train just entered or left the depot
@@ -363,7 +363,7 @@ static SigFlags ExploreSegment(Owner owner)
 
 			case TileType::Station:
 				if (!HasStationRail(tile)) continue;
-				if (GetTileOwner(tile) != owner) continue;
+				if (GetTileOwner(tile) != owner && GetTileOwner(tile) != OWNER_NONE) continue;
 				if (DiagDirToAxis(enterdir) != GetRailStationAxis(tile)) continue; // different axis
 				if (IsStationTileBlocked(tile)) continue; // 'eye-candy' station tile
 
@@ -373,7 +373,7 @@ static SigFlags ExploreSegment(Owner owner)
 
 			case TileType::Road:
 				if (!IsLevelCrossing(tile)) continue;
-				if (GetTileOwner(tile) != owner) continue;
+				if (GetTileOwner(tile) != owner && GetTileOwner(tile) != OWNER_NONE) continue;
 				if (DiagDirToAxis(enterdir) == GetCrossingRoadAxis(tile)) continue; // different axis
 
 				if (!flags.Test(SigFlag::Train) && HasVehicleOnTile(tile, IsTrainAndNotInDepot)) flags.Set(SigFlag::Train);
@@ -381,7 +381,7 @@ static SigFlags ExploreSegment(Owner owner)
 				break;
 
 			case TileType::TunnelBridge: {
-				if (GetTileOwner(tile) != owner) continue;
+				if (GetTileOwner(tile) != owner && GetTileOwner(tile) != OWNER_NONE) continue;
 				if (GetTunnelBridgeTransportType(tile) != TransportType::Rail) continue;
 				DiagDirection dir = GetTunnelBridgeDirection(tile);
 
@@ -485,11 +485,11 @@ static inline void ResetSets()
  *
  * @param owner company whose signals we are updating
  * @return state of the first block from _globset
- * @pre Company::IsValidID(owner)
+ * @pre owner is a company or OWNER_NONE for shared OpenSpace infrastructure
  */
 static SigSegState UpdateSignalsInBuffer(Owner owner)
 {
-	assert(Company::IsValidID(owner));
+	assert(Company::IsValidID(owner) || owner == OWNER_NONE);
 
 	bool first = true;  // first block?
 	SigSegState state = SigSegState::Free; // value to return

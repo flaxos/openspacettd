@@ -1484,6 +1484,10 @@ struct StationViewWindow : public Window {
 		bool has_airport = st->facilities.Test(StationFacility::Airport);
 		this->GetWidget<NWidgetStacked>(WID_SV_SPACEPORT_SEL)->SetDisplayedPlane(has_airport ? 0 : SZSP_NONE);
 		const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(st->index);
+		Colours spaceport_colour = spaceport == nullptr ? Colours::Grey : Colours::DarkBlue;
+		this->GetWidget<NWidgetCore>(WID_SV_CAPTION)->colour = spaceport_colour;
+		this->GetWidget<NWidgetCore>(WID_SV_SPACEPORT_STATUS)->colour = spaceport_colour;
+		this->GetWidget<NWidgetCore>(WID_SV_SPACEPORT_ACTION)->colour = spaceport_colour;
 		this->SetWidgetDisabledState(WID_SV_SPACEPORT_ACTION,
 				!has_airport || st->owner != _local_company || st->owner == OWNER_NONE ||
 				(spaceport != nullptr && spaceport->offworld_trade_tier >= 3));
@@ -1565,7 +1569,10 @@ struct StationViewWindow : public Window {
 	{
 		if (widget == WID_SV_CAPTION) {
 			const Station *st = Station::Get(this->window_number);
-			std::string cap = GetString(STR_STATION_VIEW_CAPTION, st->index, st->facilities);
+			const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(st->index);
+			std::string cap = spaceport == nullptr
+				? GetString(STR_STATION_VIEW_CAPTION, st->index, st->facilities)
+				: GetString(STR_SPACEPORT_VIEW_CAPTION, spaceport->offworld_trade_tier, st->index, st->facilities);
 			if (PlanetManager::Count() > 0) {
 				const PlanetRegion *region = PlanetManager::GetRegionByTile(st->xy);
 				if (region != nullptr) {

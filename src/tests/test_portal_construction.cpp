@@ -11,14 +11,18 @@
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../map_func.h"
+#include "../command_func.h"
+#include "../landscape_cmd.h"
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
+#include "../portal/portal_terminal.h"
 #include "../portal/portal_cmd.h"
 #include "../tunnel_map.h"
 #include "../tunnelbridge_map.h"
 #include "../tunnelbridge.h"
 #include "../rail_map.h"
 #include "../signal_func.h"
+#include "../track_func.h"
 #include "../clear_map.h"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -144,6 +148,83 @@ TEST_CASE("Portal Construction - Unlinked Gate Lifecycle and Restrictions")
 	CHECK(res_dup.GetErrorMessage() == STR_ERROR_ALREADY_BUILT);
 }
 
+TEST_CASE("Portal Construction - High-capacity terminal topology and PBS directions")
+{
+	SetupTestWorlds();
+	TileIndex gate = TileXY(50, 50);
+
+	for (uint8_t value = to_underlying(DiagDirection::Begin); value < to_underlying(DiagDirection::End); ++value) {
+		DiagDirection dir = static_cast<DiagDirection>(value);
+		INFO("gate direction " << static_cast<uint>(value));
+		std::optional<PortalTerminalLayout> planned = PortalTerminal::Plan(gate, dir, WorldID{0});
+		REQUIRE(planned.has_value());
+		CHECK(planned->tiles.size() == 34);
+		CHECK(planned->GetTrackPieceCount() == 36);
+		CHECK(planned->signals.size() == 2);
+		CHECK(PlanetManager::GetTileWorld(planned->connection_tile) == WorldID{0});
+	}
+
+	std::optional<PortalTerminalLayout> terminal = PortalTerminal::Plan(gate, DiagDirection::NE, WorldID{0});
+	REQUIRE(terminal.has_value());
+	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, gate, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+
+	for (const PortalTerminalTile &part : terminal->tiles) {
+		CAPTURE(part.tile);
+		CHECK(IsPlainRailTile(part.tile));
+		CHECK(GetTrackBits(part.tile) == part.tracks);
+	}
+	for (const PortalTerminalSignal &signal : terminal->signals) {
+		CAPTURE(signal.tile);
+		CHECK(HasSignalOnTrack(signal.tile, signal.track));
+		CHECK(GetSignalType(signal.tile, signal.track) == SignalType::PathOneWay);
+		CHECK(GetPresentSignals(signal.tile) == SignalAlongTrackdir(DiagDirToDiagTrackdir(signal.travel_dir)));
+	}
+}
+
+TEST_CASE("Portal Construction - Terminal footprint rejection is atomic")
+{
+	SetupTestWorlds();
+
+	/* The gate head and immediate approach are legal, but the 18-tile terminal
+	 * would cross the logical world boundary. */
+	TileIndex boundary_gate = TileXY(20, 30);
+	CommandCost boundary = CmdBuildPortalGate(DoCommandFlag::Execute, boundary_gate, DiagDirection::SW, RAILTYPE_BEGIN);
+	CHECK(boundary.Failed());
+	CHECK(boundary.GetErrorMessage() == STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
+	CHECK(IsTileType(boundary_gate, TileType::Clear));
+	CHECK(!PortalRegistry::IsUnlinkedGate(boundary_gate));
+
+	/* Existing infrastructure anywhere in the bay rejects the whole build and
+	 * remains untouched. */
+	TileIndex gate = TileXY(50, 50);
+	auto terminal = PortalTerminal::Plan(gate, DiagDirection::NE, WorldID{0});
+	REQUIRE(terminal.has_value());
+	TileIndex obstruction = terminal->tiles.at(8).tile;
+	MakeRailNormal(obstruction, _current_company, TrackBits{Track::Y}, RAILTYPE_BEGIN);
+	CommandCost blocked = CmdBuildPortalGate(DoCommandFlag::Execute, gate, DiagDirection::NE, RAILTYPE_BEGIN);
+	CHECK(blocked.Failed());
+	CHECK(blocked.GetErrorMessage() == STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
+	CHECK(IsTileType(gate, TileType::Clear));
+	CHECK(IsPlainRailTile(obstruction));
+	CHECK(GetTrackBits(obstruction) == TrackBits{Track::Y});
+	CHECK(!PortalRegistry::IsUnlinkedGate(gate));
+
+	/* A blocked second terminal must not partially construct the first end. */
+	TileIndex pair_a = TileXY(50, 70);
+	TileIndex pair_b = TileXY(180, 70);
+	auto terminal_b = PortalTerminal::Plan(pair_b, DiagDirection::SW, WorldID{1});
+	REQUIRE(terminal_b.has_value());
+	TileIndex pair_obstruction = terminal_b->tiles.at(10).tile;
+	MakeRailNormal(pair_obstruction, _current_company, TrackBits{Track::Y}, RAILTYPE_BEGIN);
+	CHECK(CmdBuildPortalPair(DoCommandFlag::Execute, pair_a, DiagDirection::NE,
+			pair_b, DiagDirection::SW, RAILTYPE_BEGIN).Failed());
+	CHECK(IsTileType(pair_a, TileType::Clear));
+	CHECK(!PortalRegistry::IsPortalTile(pair_a));
+	CHECK(!PortalRegistry::IsPortalTile(pair_b));
+	CHECK(IsPlainRailTile(pair_obstruction));
+}
+
 TEST_CASE("Portal Construction - Authoritative world and Phase placement rules")
 {
 	SetupTestWorlds();
@@ -188,7 +269,7 @@ TEST_CASE("Portal Construction - Cross-World Gate Linking")
 
 	TileIndex tile_a = TileXY(50, 50);  // World 0
 	TileIndex tile_b = TileXY(180, 50); // World 1
-	TileIndex tile_c = TileXY(60, 60);  // World 0
+	TileIndex tile_c = TileXY(80, 80);  // World 0, clear of gate A's terminal
 
 	/* Construct 3 unlinked gates */
 	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, tile_a, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
@@ -199,11 +280,14 @@ TEST_CASE("Portal Construction - Cross-World Gate Linking")
 	/* 1. Attempt same-world linking (tile_a on World 0 and tile_c on World 0): must fail */
 	CommandCost res_same_world = CmdLinkPortalGates({}, tile_a, tile_c);
 	CHECK(res_same_world.Failed());
-	CHECK(res_same_world.GetErrorMessage() == STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+	CHECK(res_same_world.GetErrorMessage() == STR_ERROR_PORTAL_GATES_DIFFERENT_WORLDS);
 
 	/* 2. Successfully link gate A (World 0) and gate B (World 1) */
-	CommandCost res_link = CmdLinkPortalGates(DoCommandFlag::Execute, tile_a, tile_b);
+	CommandCost res_link = CmdLinkPortalGates({}, tile_a, tile_b);
 	CHECK(res_link.Succeeded());
+	CHECK(res_link.GetExpensesType() == ExpensesType::Construction);
+	CHECK(IsNetworkRegisteredCallback(&CcPortalLink));
+	REQUIRE(Command<Commands::LinkPortalGates>::Post(STR_ERROR_CAN_T_LINK_PORTAL_GATES, CcPortalLink, tile_a, tile_b));
 
 	/* Verify they transitioned from unlinked to active linked portal pair */
 	CHECK(!PortalRegistry::IsUnlinkedGate(tile_a));
@@ -329,6 +413,7 @@ TEST_CASE("Portal Construction - Partial Demolition Unlinking")
 	/* Demolish only gate A (demolish_both = false) */
 	CommandCost res_dem = CmdDestroyPortalGate(DoCommandFlag::Execute, tile_a, false);
 	CHECK(res_dem.Succeeded());
+	CHECK(res_dem.GetExpensesType() == ExpensesType::Construction);
 	UpdateSignalsInBuffer();
 
 	/* Tile A is cleared */
@@ -349,6 +434,45 @@ TEST_CASE("Portal Construction - Partial Demolition Unlinking")
 
 	CHECK(!IsTunnelTile(tile_b));
 	CHECK(!PortalRegistry::IsUnlinkedGate(tile_b));
+}
+
+TEST_CASE("Portal Construction - Area demolition safely removes a reserved linked pair")
+{
+	SetupTestWorlds();
+
+	TileIndex tile_a = TileXY(50, 50);
+	TileIndex tile_b = TileXY(180, 50);
+	REQUIRE(CmdBuildPortalPair(
+		DoCommandFlag::Execute,
+		tile_a, DiagDirection::NE,
+		tile_b, DiagDirection::SW,
+		RAILTYPE_BEGIN
+	).Succeeded());
+	UpdateSignalsInBuffer();
+
+	Company *company = Company::Get(_current_company);
+	REQUIRE(company != nullptr);
+	uint terminal_piece_count = 2 * 36;
+	CHECK(company->infrastructure.rail[RAILTYPE_BEGIN] == 2 * TUNNELBRIDGE_TRACKBIT_FACTOR + terminal_piece_count);
+
+	/* Reproduce the area-bulldozer path from the crash. Both heads can carry
+	 * the same tunnel reservation while the reserving train is elsewhere. */
+	SetTunnelBridgeReservation(tile_a, true);
+	SetTunnelBridgeReservation(tile_b, true);
+	CHECK(HasTunnelBridgeReservation(tile_a));
+	CHECK(HasTunnelBridgeReservation(tile_b));
+
+	auto [clear_result, money] = Command<Commands::ClearArea>::Do(DoCommandFlag::Execute, tile_a, tile_a, false);
+	REQUIRE(clear_result.Succeeded());
+	UpdateSignalsInBuffer();
+
+	CHECK(!PortalRegistry::IsPortalTile(tile_a));
+	CHECK(!PortalRegistry::IsPortalTile(tile_b));
+	CHECK(IsTileType(tile_a, TileType::Clear));
+	CHECK(IsTileType(tile_b, TileType::Clear));
+	/* Demolishing a head intentionally preserves its ordinary rail terminal so
+	 * players can reuse or alter the approaches without losing infrastructure. */
+	CHECK(company->infrastructure.rail[RAILTYPE_BEGIN] == terminal_piece_count);
 }
 
 TEST_CASE("Portal Construction - Savegame Persistence of Unlinked and Linked Portals")

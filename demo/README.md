@@ -16,7 +16,8 @@ three-world acceptance-test save generated with seed `9032026`.
 Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, and `Ctrl+Alt+3` to jump between worlds.
 The in-game Story Book contains the complete Data Crystals, Portal Gates and
 Sprint 10 Planetary Operations acceptance checklists, location buttons, and
-persistent goals.
+persistent goals. Sprint 11 adds automatic high-capacity rail terminals to
+newly constructed and newly generated Portal Gates.
 
 Sprint 10 adds two ready-to-use sites:
 
@@ -41,8 +42,11 @@ Follow the Story Book location links or the signs for Gateway Alpha. The
 on a north-south line at a different X and Y coordinate in World 2. This makes
 the arbitrary endpoint transition visibly distinct from an ordinary tunnel.
 
-Follow [SPRINT10-UAT.md](SPRINT10-UAT.md) for the new controls. The existing
-save-menu folder link `OpenSpaceTTD-Demos` points at this directory.
+Follow [SPRINT10-UAT.md](SPRINT10-UAT.md) for Planetary Operations and
+[SPRINT11-UAT.md](SPRINT11-UAT.md) for Portal Terminal acceptance. The existing
+save-menu folder link `OpenSpaceTTD-Demos` points at this directory. The v0.3
+save predates automatic terminal construction; use a newly generated game for
+the Sprint 11 terminal checks.
 
 ## Regenerate
 

@@ -10,6 +10,7 @@
 #include "../stdafx.h"
 #include "portal_cmd.h"
 #include "portal_registry.h"
+#include "portal_terminal.h"
 #include "planet_manager.h"
 #include "spaceport_manager.h"
 #include "edge_conduit.h"
@@ -64,6 +65,49 @@ static CommandCost ValidatePortalGateFootprint(TileIndex tile, DiagDirection dir
 	return CommandCost();
 }
 
+/**
+ * Validate and price a complete Portal Gate terminal without modifying the map.
+ *
+ * PortalTerminal::Build deliberately contains no fallible operations. Keeping
+ * every landscape check here makes direct command execution just as atomic as
+ * the normal query-then-execute command route.
+ */
+static CommandCost ValidatePortalTerminal(DoCommandFlags flags, const PortalTerminalLayout &layout, RailType railtype)
+{
+	CommandCost cost(ExpensesType::Construction);
+	if (GetTileSlope(layout.gate_tile) != SLOPE_FLAT) return CommandCost(STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
+	uint gate_height = TileHeight(layout.gate_tile);
+	DoCommandFlags test_flags = DoCommandFlags{flags}.Set(DoCommandFlag::Auto).Reset(DoCommandFlag::Execute);
+
+	for (const PortalTerminalTile &part : layout.tiles) {
+		if (!IsValidTile(part.tile) || !IsInnerTile(part.tile) ||
+				PlanetManager::GetTileWorld(part.tile) != layout.world_id ||
+				GetTileSlope(part.tile) != SLOPE_FLAT || TileHeight(part.tile) != gate_height ||
+				PortalRegistry::IsPortalTile(part.tile) || PortalRegistry::IsUnlinkedGate(part.tile) ||
+				EdgeConduitManager::IsConduitTile(part.tile)) {
+			return CommandCost(STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
+		}
+
+		CommandCost clear = Command<Commands::LandscapeClear>::Do(test_flags, part.tile);
+		if (clear.Failed()) return CommandCost(STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
+		cost.AddCost(clear.GetCost());
+	}
+
+	cost.AddCost(RailBuildCost(railtype) * layout.GetTrackPieceCount());
+	cost.AddCost(_price[Price::BuildSignals] * static_cast<uint>(layout.signals.size()));
+	return cost;
+}
+
+/** Clear a terminal whose entire footprint has already passed preflight. */
+static void ClearPortalTerminal(DoCommandFlags flags, const PortalTerminalLayout &layout)
+{
+	DoCommandFlags execute_flags = DoCommandFlags{flags}.Set({DoCommandFlag::Auto, DoCommandFlag::Execute});
+	for (const PortalTerminalTile &part : layout.tiles) {
+		CommandCost clear = Command<Commands::LandscapeClear>::Do(execute_flags, part.tile);
+		assert(clear.Succeeded());
+	}
+}
+
 CommandCost CmdBuildPortalGate(DoCommandFlags flags, TileIndex tile, DiagDirection dir, RailType railtype)
 {
 	CommandCost placement = PlanetManager::CheckConstructionPlacement(tile);
@@ -84,6 +128,8 @@ CommandCost CmdBuildPortalGate(DoCommandFlags flags, TileIndex tile, DiagDirecti
 	assert(world_id != INVALID_WORLD);
 	placement = ValidatePortalGateFootprint(tile, dir, world_id);
 	if (placement.Failed()) return placement;
+	std::optional<PortalTerminalLayout> terminal = PortalTerminal::Plan(tile, dir, world_id);
+	if (!terminal.has_value()) return CommandCost(STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
 
 	/* Cannot build on an already existing portal gate */
 	if (PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile)) {
@@ -92,16 +138,25 @@ CommandCost CmdBuildPortalGate(DoCommandFlags flags, TileIndex tile, DiagDirecti
 
 	if (HasTileWaterGround(tile)) return CommandCost(STR_ERROR_CAN_T_BUILD_ON_WATER);
 
-	/* Clear existing tile contents */
-	CommandCost ret = Command<Commands::LandscapeClear>::Do(flags, tile);
+	/* Preflight the head and every approach tile before modifying any state. */
+	DoCommandFlags test_flags = DoCommandFlags{flags}.Set(DoCommandFlag::Auto).Reset(DoCommandFlag::Execute);
+	CommandCost ret = Command<Commands::LandscapeClear>::Do(test_flags, tile);
 	if (ret.Failed()) return ret;
+	CommandCost terminal_cost = ValidatePortalTerminal(flags, *terminal, railtype);
+	if (terminal_cost.Failed()) return terminal_cost;
 
 	CommandCost cost(ret);
+	cost.AddCost(terminal_cost.GetCost());
 	/* Base gateway construction cost (capital-intensive infrastructure) */
 	cost.AddCost(_price[Price::BuildTunnel] * 5);
 	cost.AddCost(RailBuildCost(railtype));
 
 	if (flags.Test(DoCommandFlag::Execute)) {
+		CommandCost clear_head = Command<Commands::LandscapeClear>::Do(DoCommandFlags{flags}.Set({DoCommandFlag::Auto, DoCommandFlag::Execute}), tile);
+		assert(clear_head.Succeeded());
+		ClearPortalTerminal(flags, *terminal);
+		PortalTerminal::Build(*terminal, railtype, company);
+
 		Company *c = Company::GetIfValid(company);
 		if (c != nullptr) c->infrastructure.rail[railtype] += TUNNELBRIDGE_TRACKBIT_FACTOR;
 
@@ -140,7 +195,7 @@ CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex
 	WorldID world_a = PlanetManager::GetTileWorld(tile_a);
 	WorldID world_b = PlanetManager::GetTileWorld(tile_b);
 	if (world_a == INVALID_WORLD || world_b == INVALID_WORLD || world_a == world_b) {
-		return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
+		return CommandCost(STR_ERROR_PORTAL_GATES_DIFFERENT_WORLDS);
 	}
 
 	/* Virtual length is proportional to coordinate distance across worlds */
@@ -148,7 +203,7 @@ CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex
 	uint32_t virtual_length = std::max(2u, dist / 4);
 
 	/* Wormhole excitation and link stabilization cost */
-	CommandCost cost;
+	CommandCost cost(ExpensesType::Construction);
 	cost.AddCost(_price[Price::BuildTunnel] * 10);
 
 	if (flags.Test(DoCommandFlag::Execute)) {
@@ -194,6 +249,9 @@ CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirec
 	if (placement_a.Failed()) return placement_a;
 	placement_b = ValidatePortalGateFootprint(tile_b, dir_b, world_b);
 	if (placement_b.Failed()) return placement_b;
+	std::optional<PortalTerminalLayout> terminal_a = PortalTerminal::Plan(tile_a, dir_a, world_a);
+	std::optional<PortalTerminalLayout> terminal_b = PortalTerminal::Plan(tile_b, dir_b, world_b);
+	if (!terminal_a.has_value() || !terminal_b.has_value()) return CommandCost(STR_ERROR_PORTAL_TERMINAL_FOOTPRINT);
 
 	if (PortalRegistry::IsPortalTile(tile_a) || PortalRegistry::IsUnlinkedGate(tile_a) ||
 	    PortalRegistry::IsPortalTile(tile_b) || PortalRegistry::IsUnlinkedGate(tile_b)) {
@@ -202,13 +260,20 @@ CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirec
 
 	if (HasTileWaterGround(tile_a) || HasTileWaterGround(tile_b)) return CommandCost(STR_ERROR_CAN_T_BUILD_ON_WATER);
 
-	CommandCost ret_a = Command<Commands::LandscapeClear>::Do(flags, tile_a);
+	DoCommandFlags test_flags = DoCommandFlags{flags}.Set(DoCommandFlag::Auto).Reset(DoCommandFlag::Execute);
+	CommandCost ret_a = Command<Commands::LandscapeClear>::Do(test_flags, tile_a);
 	if (ret_a.Failed()) return ret_a;
-	CommandCost ret_b = Command<Commands::LandscapeClear>::Do(flags, tile_b);
+	CommandCost ret_b = Command<Commands::LandscapeClear>::Do(test_flags, tile_b);
 	if (ret_b.Failed()) return ret_b;
+	CommandCost terminal_cost_a = ValidatePortalTerminal(flags, *terminal_a, railtype);
+	if (terminal_cost_a.Failed()) return terminal_cost_a;
+	CommandCost terminal_cost_b = ValidatePortalTerminal(flags, *terminal_b, railtype);
+	if (terminal_cost_b.Failed()) return terminal_cost_b;
 
 	CommandCost cost(ret_a);
 	cost.AddCost(ret_b.GetCost());
+	cost.AddCost(terminal_cost_a.GetCost());
+	cost.AddCost(terminal_cost_b.GetCost());
 	cost.AddCost(_price[Price::BuildTunnel] * 20); // 2 heads + linking
 	cost.AddCost(RailBuildCost(railtype) * 2);
 
@@ -216,6 +281,15 @@ CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirec
 	uint32_t virtual_length = std::max(2u, dist / 4);
 
 	if (flags.Test(DoCommandFlag::Execute)) {
+		DoCommandFlags execute_flags = DoCommandFlags{flags}.Set({DoCommandFlag::Auto, DoCommandFlag::Execute});
+		CommandCost clear_a = Command<Commands::LandscapeClear>::Do(execute_flags, tile_a);
+		CommandCost clear_b = Command<Commands::LandscapeClear>::Do(execute_flags, tile_b);
+		assert(clear_a.Succeeded() && clear_b.Succeeded());
+		ClearPortalTerminal(flags, *terminal_a);
+		ClearPortalTerminal(flags, *terminal_b);
+		PortalTerminal::Build(*terminal_a, railtype, company);
+		PortalTerminal::Build(*terminal_b, railtype, company);
+
 		Company *c = Company::GetIfValid(company);
 		if (c != nullptr) c->infrastructure.rail[railtype] += 2 * TUNNELBRIDGE_TRACKBIT_FACTOR;
 
@@ -270,7 +344,7 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 	}
 
 	Money base_cost = _price[Price::ClearTunnel] + RailClearCost(GetRailType(tile));
-	CommandCost cost;
+	CommandCost cost(ExpensesType::Construction);
 	cost.AddCost(base_cost * ((demolish_both && endtile != INVALID_TILE) ? 2 : 1));
 
 	if (flags.Test(DoCommandFlag::Execute)) {
@@ -369,6 +443,9 @@ CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
 			SpaceportInfo *spaceport = SpaceportManager::GetSpaceportMutable(station);
 			spaceport->offworld_trade_tier++;
 		}
+		/* A normal in-game station already owns a viewport sign. Bare command
+		 * tests create pool objects without one and need no visual refresh. */
+		if (st->sign.kdtree_valid) st->UpdateVirtCoord();
 		SetWindowDirty(WindowClass::StationView, station);
 	}
 

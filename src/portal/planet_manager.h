@@ -20,7 +20,7 @@
 #include <array>
 #include <string>
 
-class Window;
+struct Window;
 
 /**
  * Spatial manager and query engine for planetary worlds.

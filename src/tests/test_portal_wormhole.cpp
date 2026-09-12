@@ -203,6 +203,100 @@ TEST_CASE("Portal Wormhole - YAPF Track Follower Traversal")
 	PortalRegistry::Reset();
 }
 
+TEST_CASE("Portal Wormhole - Unlinked gate is a closed rail terminal")
+{
+	struct TestRailFollower : public CFollowTrackRail {
+		using CFollowTrackRail::CFollowTrackRail;
+		using CFollowTrackRail::QueryNewTileTrackStatus;
+	};
+
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+
+	const DiagDirection dir = DiagDirection::NE;
+	const TileIndex gate = TileXY(20, 20);
+	const TileIndex approach = TileAddByDiagDir(gate, ReverseDiagDir(dir));
+	MakeRailTunnel(gate, Owner(0), dir, RAILTYPE_BEGIN);
+	MakeRailNormal(approach, Owner(0), TrackBits{DiagDirToDiagTrack(dir)}, RAILTYPE_BEGIN);
+	REQUIRE(PortalRegistry::RegisterUnlinkedGate(gate, dir, WorldID{0}));
+
+	/* A moving train and route follower must stop before entering the head. */
+	CHECK(GetTileTrackStatus(gate, TransportType::Rail, RoadTramType::Invalid, ReverseDiagDir(dir)).trackdirs.None());
+	TestRailFollower follower(Owner(0), RailTypes{RAILTYPE_BEGIN});
+	CHECK_FALSE(follower.Follow(approach, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+
+	/* Following directly from the head resolves no remote tile without dereferencing it. */
+	CHECK_FALSE(follower.Follow(gate, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.new_tile == INVALID_TILE);
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+
+	/* Corrupt or stale endpoints beyond the map boundary are rejected too. */
+	follower.new_tile = TileIndex{Map::Size()};
+	CHECK_FALSE(follower.QueryNewTileTrackStatus());
+	CHECK(follower.new_td_bits.None());
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+
+	PortalRegistry::Reset();
+}
+
+TEST_CASE("Portal Wormhole - Stale non-tunnel endpoint is rejected")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+
+	const DiagDirection dir = DiagDirection::NE;
+	const TileIndex entry = TileXY(20, 20);
+	const TileIndex approach = TileAddByDiagDir(entry, ReverseDiagDir(dir));
+	const TileIndex stale_remote = TileXY(40, 40);
+	MakeRailTunnel(entry, Owner(0), dir, RAILTYPE_BEGIN);
+	MakeRailNormal(approach, Owner(0), TrackBits{DiagDirToDiagTrack(dir)}, RAILTYPE_BEGIN);
+	REQUIRE_FALSE(IsTunnelTile(stale_remote));
+	REQUIRE(PortalRegistry::RegisterPortalPair(
+		entry, dir, WorldID{0},
+		stale_remote, DiagDirection::SW, WorldID{1},
+		18
+	) != INVALID_PORTAL);
+
+	CHECK(GetTileTrackStatus(entry, TransportType::Rail, RoadTramType::Invalid, ReverseDiagDir(dir)).trackdirs.None());
+	CFollowTrackRail follower(Owner(0), RailTypes{RAILTYPE_BEGIN});
+	CHECK_FALSE(follower.Follow(approach, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+	CHECK_FALSE(follower.Follow(entry, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.new_tile == INVALID_TILE);
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+
+	PortalRegistry::Reset();
+}
+
+TEST_CASE("Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	_vehicle_pool.CleanPool();
+
+	const TileIndex gate = TileXY(20, 20);
+	MakeRailTunnel(gate, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	REQUIRE(PortalRegistry::RegisterUnlinkedGate(gate, DiagDirection::NE, WorldID{0}));
+	SetTunnelBridgeReservation(gate, true);
+
+	REQUIRE(Vehicle::CanAllocateItem());
+	Train *train = Vehicle::Create<Train>();
+	train->SetFrontEngine();
+	train->owner = Owner(0);
+	train->tile = gate;
+	train->track = Track::X;
+	train->direction = Direction::SW;
+	train->flags.Set(VehicleRailFlag::Stuck);
+
+	CHECK(train->Crash(false) == 2);
+	CHECK(train->vehstatus.Test(VehState::Crashed));
+	CHECK_FALSE(HasTunnelBridgeReservation(gate));
+
+	PortalRegistry::Reset();
+	_vehicle_pool.CleanPool();
+}
+
 TEST_CASE("Portal Wormhole - Routing follows every exit orientation with rail turns disabled")
 {
 	const auto dir_a = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);

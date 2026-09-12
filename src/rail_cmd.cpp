@@ -38,6 +38,7 @@
 #include "table/railtypes.h"
 #include "table/track_land.h"
 #include "portal/planet_manager.h"
+#include "portal/edge_conduit.h"
 
 #include "safeguards.h"
 
@@ -1226,7 +1227,11 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 static bool AdvanceSignalAutoFill(TileIndex &tile, Trackdir &trackdir, bool remove)
 {
 	/* We only process starting tiles of tunnels or bridges so jump to the other end before moving further. */
-	if (IsTileType(tile, TileType::TunnelBridge)) tile = GetOtherTunnelBridgeEnd(tile);
+	if (IsTileType(tile, TileType::TunnelBridge)) {
+		TileIndex other_end = GetOtherTunnelBridgeEnd(tile);
+		if (other_end >= Map::Size() || !IsTileType(other_end, TileType::TunnelBridge)) return false;
+		tile = other_end;
+	}
 
 	tile = AddTileIndexDiffCWrap(tile, _trackdelta[trackdir]);
 	if (tile == INVALID_TILE) return false;
@@ -1693,10 +1698,16 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 
 			case TileType::TunnelBridge: {
 				TileIndex endtile = GetOtherTunnelBridgeEnd(tile);
+				const bool one_ended = PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile);
+				const bool valid_end = endtile < Map::Size() && IsTileType(endtile, TileType::TunnelBridge) &&
+						GetTunnelBridgeTransportType(endtile) == TransportType::Rail;
+				/* A stale portal link must not turn an unrelated tile into rail. */
+				if (!valid_end && !one_ended) continue;
+				const uint structure_tiles = valid_end ? GetTunnelBridgeLength(tile, endtile) + 2 : 1;
 
 				/* If both ends of tunnel/bridge are in the range, do not try to convert twice -
 				 * it would cause assert because of different test and exec runs */
-				if (endtile < tile) {
+				if (valid_end && endtile < tile) {
 					if (diagonal) {
 						if (DiagonalTileArea(area_start, area_end).Contains(endtile)) continue;
 					} else {
@@ -1706,7 +1717,7 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 
 				/* When not converting rail <-> el. rail, any vehicle cannot be in tunnel/bridge */
 				if (!IsCompatibleRail(GetRailType(tile), totype)) {
-					ret = TunnelBridgeIsFree(tile, endtile);
+					ret = TunnelBridgeIsFree(tile, valid_end ? endtile : INVALID_TILE);
 					if (ret.Failed()) {
 						error = std::move(ret);
 						continue;
@@ -1725,35 +1736,37 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 					}
 
 					/* Update the company infrastructure counters. */
-					uint num_pieces = (GetTunnelBridgeLength(tile, endtile) + 2) * TUNNELBRIDGE_TRACKBIT_FACTOR;
+					uint num_pieces = structure_tiles * TUNNELBRIDGE_TRACKBIT_FACTOR;
 					Company *c = Company::Get(GetTileOwner(tile));
 					c->infrastructure.rail[GetRailType(tile)] -= num_pieces;
 					c->infrastructure.rail[totype] += num_pieces;
 					DirtyCompanyInfrastructureWindows(c->index);
 
 					SetRailType(tile, totype);
-					SetRailType(endtile, totype);
+					if (valid_end) SetRailType(endtile, totype);
 
 					for (Vehicle *v : VehiclesOnTile(tile)) {
 						if (v->type == VehicleType::Train) include(affected_trains, Train::From(v)->First());
 					}
-					for (Vehicle *v : VehiclesOnTile(endtile)) {
-						if (v->type == VehicleType::Train) include(affected_trains, Train::From(v)->First());
+					if (valid_end) {
+						for (Vehicle *v : VehiclesOnTile(endtile)) {
+							if (v->type == VehicleType::Train) include(affected_trains, Train::From(v)->First());
+						}
 					}
 
 					YapfNotifyTrackLayoutChange(tile, track);
-					YapfNotifyTrackLayoutChange(endtile, track);
+					if (valid_end) YapfNotifyTrackLayoutChange(endtile, track);
 
 					if (IsBridge(tile)) {
 						MarkBridgeDirty(tile);
 					} else {
 						MarkTileDirtyByTile(tile);
-						MarkTileDirtyByTile(endtile);
+						if (valid_end) MarkTileDirtyByTile(endtile);
 					}
 				}
 
 				found_convertible_track = true;
-				cost.AddCost((GetTunnelBridgeLength(tile, endtile) + 2) * RailConvertCost(type, totype));
+				cost.AddCost(structure_tiles * RailConvertCost(type, totype));
 				break;
 			}
 

@@ -27,7 +27,7 @@
 
 TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 {
-	const std::string test_save_file = "/tmp/test_openspacettd_multiworld.sav";
+	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_multiworld.sav").string();
 	std::filesystem::remove(test_save_file);
 
 	Map::Allocate(1024, 1024);
@@ -255,7 +255,7 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 
 TEST_CASE("Planet SaveLoad - Empty / Single-World Game Round-Trip")
 {
-	const std::string test_save_file = "/tmp/test_openspacettd_empty.sav";
+	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_empty.sav").string();
 	std::filesystem::remove(test_save_file);
 
 	Map::Allocate(128, 128);

@@ -381,6 +381,8 @@ add_files(
     portal/portal_cmd.h
     portal/portal_registry.cpp
     portal/portal_registry.h
+    portal/portal_terminal.cpp
+    portal/portal_terminal.h
     portal/portal_type.h
     portal/spaceport_manager.cpp
     portal/spaceport_manager.h
