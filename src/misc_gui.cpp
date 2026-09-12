@@ -38,6 +38,8 @@
 #include "pathfinder/water_regions.h"
 #include "portal/edge_conduit.h"
 #include "portal/planet_manager.h"
+#include "portal/portal_registry.h"
+#include "portal/portal_terminal.h"
 
 #include "widgets/misc_widget.h"
 
@@ -249,6 +251,35 @@ public:
 				this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_NO_CARGO));
 			}
 			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL, conduit->total_produced));
+		}
+
+		/* Portal heads deliberately reuse tunnel rendering; make their identity,
+		 * remote destination, and traffic-control capacity explicit here. */
+		const PortalLink *portal = PortalRegistry::GetPortalLink(this->tile);
+		const PortalEndpoint *unlinked_gate = PortalRegistry::GetUnlinkedGate(this->tile);
+		if (portal != nullptr || unlinked_gate != nullptr) {
+			this->landinfo_data.push_back(GetString(portal != nullptr
+					? STR_LAND_AREA_INFORMATION_PORTAL_GATE_LINKED
+					: STR_LAND_AREA_INFORMATION_PORTAL_GATE_UNLINKED));
+
+			WorldID world_id = unlinked_gate != nullptr
+				? unlinked_gate->world_id
+				: (portal->end_a.tile == this->tile ? portal->end_a.world_id : portal->end_b.world_id);
+			const PlanetRegion *region = PlanetManager::GetRegion(world_id);
+			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_PORTAL_GATE_WORLD,
+					region != nullptr ? region->name : GetString(STR_SPACEPORT_UNKNOWN_WORLD)));
+
+			if (portal != nullptr) {
+				const PortalEndpoint *opposite = portal->GetOpposite(this->tile);
+				if (opposite != nullptr) {
+					const PlanetRegion *remote_region = PlanetManager::GetRegion(opposite->world_id);
+					this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_PORTAL_GATE_REMOTE,
+							remote_region != nullptr ? remote_region->name : GetString(STR_SPACEPORT_UNKNOWN_WORLD),
+							TileX(opposite->tile), TileY(opposite->tile)));
+				}
+			}
+			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_PORTAL_GATE_TERMINAL,
+					PORTAL_TERMINAL_HOLDING_LENGTH));
 		}
 
 		/* Road type name */

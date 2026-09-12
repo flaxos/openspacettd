@@ -245,18 +245,24 @@ TEST_CASE("Portal Wormhole - Stale non-tunnel endpoint is rejected")
 	Map::Allocate(64, 64);
 	PortalRegistry::Reset();
 
+	const DiagDirection dir = DiagDirection::NE;
 	const TileIndex entry = TileXY(20, 20);
+	const TileIndex approach = TileAddByDiagDir(entry, ReverseDiagDir(dir));
 	const TileIndex stale_remote = TileXY(40, 40);
-	MakeRailTunnel(entry, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeRailTunnel(entry, Owner(0), dir, RAILTYPE_BEGIN);
+	MakeRailNormal(approach, Owner(0), TrackBits{DiagDirToDiagTrack(dir)}, RAILTYPE_BEGIN);
 	REQUIRE_FALSE(IsTunnelTile(stale_remote));
 	REQUIRE(PortalRegistry::RegisterPortalPair(
-		entry, DiagDirection::NE, WorldID{0},
+		entry, dir, WorldID{0},
 		stale_remote, DiagDirection::SW, WorldID{1},
 		18
 	) != INVALID_PORTAL);
 
+	CHECK(GetTileTrackStatus(entry, TransportType::Rail, RoadTramType::Invalid, ReverseDiagDir(dir)).trackdirs.None());
 	CFollowTrackRail follower(Owner(0), RailTypes{RAILTYPE_BEGIN});
-	CHECK_FALSE(follower.Follow(entry, DiagDirToDiagTrackdir(DiagDirection::NE)));
+	CHECK_FALSE(follower.Follow(approach, DiagDirToDiagTrackdir(dir)));
+	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+	CHECK_FALSE(follower.Follow(entry, DiagDirToDiagTrackdir(dir)));
 	CHECK(follower.new_tile == INVALID_TILE);
 	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
 

@@ -14,13 +14,46 @@
 #include "../portal/world_gen.h"
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
+#include "../portal/portal_terminal.h"
 #include "../void_map.h"
 #include "../tunnel_map.h"
 #include "../tunnelbridge_map.h"
 #include "../rail_map.h"
 #include "../water_map.h"
+#include "../signal_func.h"
 
 #include "../safeguards.h"
+
+static const PortalLink *FindGeneratedPortal(WorldID world_a, WorldID world_b)
+{
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
+		if ((link.end_a.world_id == world_a && link.end_b.world_id == world_b) ||
+				(link.end_a.world_id == world_b && link.end_b.world_id == world_a)) return &link;
+	}
+	return nullptr;
+}
+
+static const PortalEndpoint *GetEndpointOnWorld(const PortalLink &link, WorldID world)
+{
+	if (link.end_a.world_id == world) return &link.end_a;
+	if (link.end_b.world_id == world) return &link.end_b;
+	return nullptr;
+}
+
+static void CheckGeneratedTerminal(const PortalEndpoint &endpoint)
+{
+	auto terminal = PortalTerminal::Plan(endpoint.tile, endpoint.enter_dir, endpoint.world_id);
+	REQUIRE(terminal.has_value());
+	CHECK(terminal->GetTrackPieceCount() == 36);
+	for (const PortalTerminalTile &part : terminal->tiles) {
+		CHECK(IsPlainRailTile(part.tile));
+		CHECK(GetTrackBits(part.tile) == part.tracks);
+	}
+	for (const PortalTerminalSignal &signal : terminal->signals) {
+		CHECK(HasSignalOnTrack(signal.tile, signal.track));
+		CHECK(GetSignalType(signal.tile, signal.track) == SignalType::PathOneWay);
+	}
+}
 
 TEST_CASE("MultiWorldGen - Layout Calculation Geometry")
 {
@@ -134,17 +167,23 @@ TEST_CASE("MultiWorldGen - Gateway Initialization and Pairing")
 	REQUIRE(p1 != nullptr);
 	REQUIRE(p2 != nullptr);
 
-	/* Gateway between World 0 and World 1. The endpoints are deliberately
-	 * non-collinear and use perpendicular local approach tracks. */
-	TileIndex gw_w0 = TileXY(p0->min_x + 3 * (p0->max_x - p0->min_x) / 4, p0->min_y + (p0->max_y - p0->min_y) / 3);
-	TileIndex gw_w1 = TileXY(p1->min_x + (p1->max_x - p1->min_x) / 4, p1->min_y + 2 * (p1->max_y - p1->min_y) / 3);
+	/* Gateway endpoints remain independent of one another. Tiny test worlds may
+	 * rotate or move a preferred site so the complete 18-tile terminal fits. */
+	const PortalLink *link_01 = FindGeneratedPortal(WorldID{0}, WorldID{1});
+	REQUIRE(link_01 != nullptr);
+	const PortalEndpoint *endpoint_w0 = GetEndpointOnWorld(*link_01, WorldID{0});
+	const PortalEndpoint *endpoint_w1 = GetEndpointOnWorld(*link_01, WorldID{1});
+	REQUIRE(endpoint_w0 != nullptr);
+	REQUIRE(endpoint_w1 != nullptr);
+	TileIndex gw_w0 = endpoint_w0->tile;
+	TileIndex gw_w1 = endpoint_w1->tile;
 
 	CHECK(PortalRegistry::IsPortalTile(gw_w0));
 	CHECK(PortalRegistry::IsPortalTile(gw_w1));
 	CHECK(IsTunnel(gw_w0));
 	CHECK(IsTunnel(gw_w1));
-	CHECK(GetTunnelBridgeDirection(gw_w0) == DiagDirection::SW);
-	CHECK(GetTunnelBridgeDirection(gw_w1) == DiagDirection::NW);
+	CHECK(GetTunnelBridgeDirection(gw_w0) == endpoint_w0->enter_dir);
+	CHECK(GetTunnelBridgeDirection(gw_w1) == endpoint_w1->enter_dir);
 	CHECK(TileX(gw_w0) != TileX(gw_w1));
 	CHECK(TileY(gw_w0) != TileY(gw_w1));
 
@@ -152,29 +191,32 @@ TEST_CASE("MultiWorldGen - Gateway Initialization and Pairing")
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w0) == gw_w1);
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w1) == gw_w0);
 
-	/* Gateway between World 1 and World 2 */
-	TileIndex gw_w1_s = TileXY(p1->min_x + 3 * (p1->max_x - p1->min_x) / 4, p1->min_y + 2 * (p1->max_y - p1->min_y) / 3);
-	TileIndex gw_w2_n = TileXY(p2->min_x + (p2->max_x - p2->min_x) / 4, p2->min_y + (p2->max_y - p2->min_y) / 3);
+	/* Gateway between World 1 and World 2. */
+	const PortalLink *link_12 = FindGeneratedPortal(WorldID{1}, WorldID{2});
+	REQUIRE(link_12 != nullptr);
+	const PortalEndpoint *endpoint_w1_s = GetEndpointOnWorld(*link_12, WorldID{1});
+	const PortalEndpoint *endpoint_w2_n = GetEndpointOnWorld(*link_12, WorldID{2});
+	REQUIRE(endpoint_w1_s != nullptr);
+	REQUIRE(endpoint_w2_n != nullptr);
+	TileIndex gw_w1_s = endpoint_w1_s->tile;
+	TileIndex gw_w2_n = endpoint_w2_n->tile;
 
 	CHECK(PortalRegistry::IsPortalTile(gw_w1_s));
 	CHECK(PortalRegistry::IsPortalTile(gw_w2_n));
 	CHECK(IsTunnel(gw_w1_s));
 	CHECK(IsTunnel(gw_w2_n));
-	CHECK(GetTunnelBridgeDirection(gw_w1_s) == DiagDirection::SE);
-	CHECK(GetTunnelBridgeDirection(gw_w2_n) == DiagDirection::NE);
+	CHECK(GetTunnelBridgeDirection(gw_w1_s) == endpoint_w1_s->enter_dir);
+	CHECK(GetTunnelBridgeDirection(gw_w2_n) == endpoint_w2_n->enter_dir);
 	CHECK(TileX(gw_w1_s) != TileX(gw_w2_n));
 	CHECK(TileY(gw_w1_s) != TileY(gw_w2_n));
 
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w1_s) == gw_w2_n);
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w2_n) == gw_w1_s);
 
-	/* Check track approach tiles exist and have track */
-	TileIndex track_w0 = TileAddByDiagDir(gw_w0, DiagDirection::NE);
-	TileIndex track_w1 = TileAddByDiagDir(gw_w1, DiagDirection::SE);
-	CHECK(IsPlainRailTile(track_w0));
-	CHECK(IsPlainRailTile(track_w1));
-	CHECK(GetTrackBits(track_w0) == TrackBits{Track::X});
-	CHECK(GetTrackBits(track_w1) == TrackBits{Track::Y});
+	CheckGeneratedTerminal(*endpoint_w0);
+	CheckGeneratedTerminal(*endpoint_w1);
+	CheckGeneratedTerminal(*endpoint_w1_s);
+	CheckGeneratedTerminal(*endpoint_w2_n);
 }
 
 TEST_CASE("MultiWorldGen - Asymmetric Map Partitioning along X")
@@ -204,20 +246,25 @@ TEST_CASE("MultiWorldGen - Asymmetric Map Partitioning along X")
 	CHECK(IsTileType(tile_buf_x, TileType::Void));
 
 	/* Gateways remain independent of the map partitioning axis. */
-	TileIndex gw_w0 = TileXY(p0->min_x + 3 * (p0->max_x - p0->min_x) / 4, p0->min_y + (p0->max_y - p0->min_y) / 3);
-	TileIndex gw_w1 = TileXY(p1->min_x + (p1->max_x - p1->min_x) / 4, p1->min_y + 2 * (p1->max_y - p1->min_y) / 3);
+	const PortalLink *link_01 = FindGeneratedPortal(WorldID{0}, WorldID{1});
+	REQUIRE(link_01 != nullptr);
+	const PortalEndpoint *endpoint_w0 = GetEndpointOnWorld(*link_01, WorldID{0});
+	const PortalEndpoint *endpoint_w1 = GetEndpointOnWorld(*link_01, WorldID{1});
+	REQUIRE(endpoint_w0 != nullptr);
+	REQUIRE(endpoint_w1 != nullptr);
+	TileIndex gw_w0 = endpoint_w0->tile;
+	TileIndex gw_w1 = endpoint_w1->tile;
 
 	CHECK(PortalRegistry::IsPortalTile(gw_w0));
 	CHECK(PortalRegistry::IsPortalTile(gw_w1));
 	CHECK(PortalRegistry::GetOtherPortalEnd(gw_w0) == gw_w1);
-	CHECK(GetTunnelBridgeDirection(gw_w0) == DiagDirection::SW);
-	CHECK(GetTunnelBridgeDirection(gw_w1) == DiagDirection::NW);
+	CHECK(GetTunnelBridgeDirection(gw_w0) == endpoint_w0->enter_dir);
+	CHECK(GetTunnelBridgeDirection(gw_w1) == endpoint_w1->enter_dir);
 	CHECK(TileX(gw_w0) != TileX(gw_w1));
 	CHECK(TileY(gw_w0) != TileY(gw_w1));
 
-	TileIndex track_w0 = TileAddByDiagDir(gw_w0, DiagDirection::NE);
-	CHECK(IsPlainRailTile(track_w0));
-	CHECK(GetTrackBits(track_w0) == TrackBits{Track::X});
+	CheckGeneratedTerminal(*endpoint_w0);
+	CheckGeneratedTerminal(*endpoint_w1);
 }
 
 TEST_CASE("MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain")

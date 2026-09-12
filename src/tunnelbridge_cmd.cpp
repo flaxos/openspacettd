@@ -1864,13 +1864,23 @@ static void TileLoop_TunnelBridge(TileIndex tile)
 	}
 }
 
+/** Test whether an OpenSpace rail head lacks a safe remote rail tunnel head. */
+static bool IsClosedOpenSpaceRailHead(TileIndex tile)
+{
+	if (PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile)) return true;
+	if (!PortalRegistry::IsPortalTile(tile)) return false;
+
+	TileIndex other_end = PortalRegistry::GetOtherPortalEnd(tile);
+	return other_end >= Map::Size() || !IsTunnelTile(other_end) ||
+			GetTunnelBridgeTransportType(other_end) != TransportType::Rail;
+}
+
 /** @copydoc GetTileTrackStatusProc */
 static TrackStatus GetTileTrackStatus_TunnelBridge(TileIndex tile, TransportType mode, RoadTramType sub_mode, DiagDirection side)
 {
 	TransportType transport_type = GetTunnelBridgeTransportType(tile);
 	if (transport_type != mode || (transport_type == TransportType::Road && !HasTileRoadType(tile, (RoadTramType)sub_mode))) return {};
-	if (mode == TransportType::Rail && side != DiagDirection::Invalid && IsTunnel(tile) &&
-			(PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile))) return {};
+	if (mode == TransportType::Rail && side != DiagDirection::Invalid && IsTunnel(tile) && IsClosedOpenSpaceRailHead(tile)) return {};
 
 	DiagDirection dir = GetTunnelBridgeDirection(tile);
 	if (side != DiagDirection::Invalid && side != ReverseDiagDir(dir)) return {};
@@ -1990,7 +2000,7 @@ static VehicleEnterTileStates VehicleEnterTile_TunnelBridge(Vehicle *v, TileInde
 	if (IsTunnel(tile)) {
 		if (v->type == VehicleType::Train) {
 			Train *t = Train::From(v);
-			if (dir == vdir && (PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile))) {
+			if (dir == vdir && IsClosedOpenSpaceRailHead(tile)) {
 				return VehicleEnterTileState::CannotEnter;
 			}
 

@@ -28,6 +28,7 @@
 #include "../water_map.h"
 #include "../tunnelbridge_map.h"
 #include "../rail_map.h"
+#include "../rail_cmd.h"
 #include "../pathfinder/follow_track.hpp"
 #include "../signal_func.h"
 #include "../saveload/saveload_func.h"
@@ -477,6 +478,43 @@ TEST_CASE("Edge Conduit - One-ended head is safe for signal updates")
 	CHECK_FALSE(follower.Follow(tile, DiagDirToDiagTrackdir(dir)));
 	CHECK(follower.new_tile == INVALID_TILE);
 	CHECK(follower.err == CFollowTrackRail::ErrorCode::NoWay);
+
+	/* Signal autofill stops at the terminal instead of stepping through a missing end. */
+	const Track track = DiagDirToDiagTrack(dir);
+	CHECK(CmdBuildSignalTrack(DoCommandFlag::Execute, approach, approach, track,
+		SignalType::Block, SignalVariant::Electric, false, true, false, 1).Succeeded());
+	CHECK(HasSignalOnTrack(approach, track));
+
+	/* Rail conversion applies to the single physical head and preserves its sidecar state. */
+	Company *company = Company::Get(_current_company);
+	const auto rail_before = company->infrastructure.rail[RAILTYPE_BEGIN];
+	const auto electric_before = company->infrastructure.rail[RAILTYPE_ELECTRIC];
+	REQUIRE(CmdConvertRail(DoCommandFlag::Execute, tile, tile, RAILTYPE_ELECTRIC, false).Succeeded());
+	CHECK(GetRailType(tile) == RAILTYPE_ELECTRIC);
+	CHECK(company->infrastructure.rail[RAILTYPE_BEGIN] == rail_before - TUNNELBRIDGE_TRACKBIT_FACTOR);
+	CHECK(company->infrastructure.rail[RAILTYPE_ELECTRIC] == electric_before + TUNNELBRIDGE_TRACKBIT_FACTOR);
+	CHECK(EdgeConduitManager::IsConduitTile(tile));
+	CHECK(GetOtherTunnelBridgeEnd(tile) == INVALID_TILE);
+}
+
+TEST_CASE("Portal rail conversion rejects a stale remote endpoint")
+{
+	SetupSprint9Environment();
+	const TileIndex entry = TileXY(40, 40);
+	const TileIndex stale_remote = TileXY(80, 80);
+	MakeRailTunnel(entry, _current_company, DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeClear(stale_remote, ClearGround::Grass, 0);
+	REQUIRE(PortalRegistry::RegisterPortalPair(
+		entry, DiagDirection::NE, WorldID{0},
+		stale_remote, DiagDirection::SW, WorldID{1},
+		18
+	) != INVALID_PORTAL);
+
+	CHECK(CmdConvertRail(DoCommandFlag::Execute, entry, entry, RAILTYPE_ELECTRIC, false).Failed());
+	CHECK(GetRailType(entry) == RAILTYPE_BEGIN);
+	CHECK(IsTileType(stale_remote, TileType::Clear));
+
+	PortalRegistry::Reset();
 }
 
 TEST_CASE("Edge Conduit - Physical map edges and corners are coordinate-safe")

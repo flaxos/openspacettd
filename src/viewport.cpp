@@ -65,6 +65,7 @@
 #include "landscape.h"
 #include "viewport_func.h"
 #include "station_base.h"
+#include "portal/spaceport_manager.h"
 #include "waypoint_base.h"
 #include "town.h"
 #include "signs_base.h"
@@ -1438,7 +1439,14 @@ static void ViewportAddStationStrings(DrawPixelInfo *dpi, const std::vector<cons
 		if (str == nullptr) continue;
 
 		if (Station::IsExpected(st)) { /* Station */
-			*str = GetString(small ? STR_STATION_NAME : STR_VIEWPORT_STATION, st->index, st->facilities);
+			const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(static_cast<StationID>(st->index));
+			if (spaceport != nullptr) {
+				*str = small
+					? GetString(STR_SPACEPORT_NAME, spaceport->offworld_trade_tier, st->index)
+					: GetString(STR_VIEWPORT_SPACEPORT, spaceport->offworld_trade_tier, st->index, st->facilities);
+			} else {
+				*str = GetString(small ? STR_STATION_NAME : STR_VIEWPORT_STATION, st->index, st->facilities);
+			}
 		} else { /* Waypoint */
 			*str = GetString(STR_WAYPOINT_NAME, st->index);
 		}

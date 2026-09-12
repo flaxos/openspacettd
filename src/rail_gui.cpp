@@ -52,6 +52,8 @@
 
 #include "portal/portal_cmd.h"
 #include "portal/portal_registry.h"
+#include "portal/portal_terminal.h"
+#include "portal/planet_manager.h"
 #include "portal/edge_conduit.h"
 
 #include "table/strings.h"
@@ -921,7 +923,19 @@ struct BuildRailToolbarWindow : Window {
 
 	void OnPlacePresize([[maybe_unused]] Point pt, TileIndex tile) override
 	{
-		if (this->last_user_action == WID_RAT_BUILD_PORTAL || this->last_user_action == WID_RAT_BUILD_CONDUIT) {
+		if (this->last_user_action == WID_RAT_BUILD_PORTAL) {
+			if (_portal_placement_mode == PortalPlacementMode::Build) {
+				WorldID world_id = PlanetManager::GetTileWorld(tile);
+				std::optional<PortalTerminalLayout> terminal = PortalTerminal::Plan(tile, _build_portal_direction, world_id);
+				if (terminal.has_value()) {
+					VpSetPresizeRange(tile, terminal->connection_tile);
+					return;
+				}
+			}
+			VpSetPresizeRange(tile, tile);
+			return;
+		}
+		if (this->last_user_action == WID_RAT_BUILD_CONDUIT) {
 			VpSetPresizeRange(tile, tile);
 			return;
 		}
@@ -2051,7 +2065,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_build_portal_widgets
 				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_DIRECTION_SW), SetStringTip(STR_BUILD_PORTAL_DIRECTION_SW, STR_BUILD_PORTAL_DIRECTION_TOOLTIP),
 				NWidget(WWT_TEXTBTN, Colours::Grey, WID_BRP_DIRECTION_SE), SetStringTip(STR_BUILD_PORTAL_DIRECTION_SE, STR_BUILD_PORTAL_DIRECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, Colours::DarkGreen, WID_BRP_STATUS), SetMinimalSize(300, 46), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, Colours::DarkGreen, WID_BRP_STATUS), SetMinimalSize(330, 62), SetFill(1, 0), EndContainer(),
 		EndContainer(),
 	EndContainer(),
 };

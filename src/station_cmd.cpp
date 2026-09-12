@@ -63,6 +63,7 @@
 #include "landscape_cmd.h"
 #include "rail_cmd.h"
 #include "newgrf_roadstop.h"
+#include "portal/spaceport_manager.h"
 #include "timer/timer.h"
 #include "timer/timer_game_calendar.h"
 #include "timer/timer_game_economy.h"
@@ -456,7 +457,14 @@ void Station::UpdateVirtCoord()
 
 	if (this->sign.kdtree_valid) _viewport_sign_kdtree.Remove(ViewportSignKdtreeItem::MakeStation(this->index));
 
-	this->sign.UpdatePosition(pt.x, pt.y, GetString(STR_VIEWPORT_STATION, this->index, this->facilities), GetString(STR_STATION_NAME, this->index, this->facilities));
+	const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(this->index);
+	std::string normal = spaceport == nullptr
+		? GetString(STR_VIEWPORT_STATION, this->index, this->facilities)
+		: GetString(STR_VIEWPORT_SPACEPORT, spaceport->offworld_trade_tier, this->index, this->facilities);
+	std::string small = spaceport == nullptr
+		? GetString(STR_STATION_NAME, this->index, this->facilities)
+		: GetString(STR_SPACEPORT_NAME, spaceport->offworld_trade_tier, this->index);
+	this->sign.UpdatePosition(pt.x, pt.y, normal, small);
 
 	_viewport_sign_kdtree.Insert(ViewportSignKdtreeItem::MakeStation(this->index));
 

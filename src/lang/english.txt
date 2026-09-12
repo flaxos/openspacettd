@@ -2843,7 +2843,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Build ra
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Build signal on railway. Ctrl+Click to build the alternate signal style{}Click+Drag to fill the selected section of rail with signals at the chosen spacing. Ctrl+Click+Drag to fill signals up to the next junction, station, or signal. Also press Shift to show cost estimate only
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Build railway bridge. Also press Shift to show cost estimate only
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Build railway tunnel. Also press Shift to show cost estimate only
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_PORTAL_GATE                      :{BLACK}Open the Portal Gate builder to construct gate heads or explicitly link two existing gates
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_PORTAL_GATE                      :{BLACK}Build a Portal Gate with an automatic two-lane, 14-tile holding terminal, or explicitly link two existing gates
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_EDGE_CONDUIT                     :{BLACK}Build an Edge Conduit on a world tile beside the void. Select an existing conduit to remove it
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toggle build/remove for railway track, signals, waypoints and stations. Ctrl+Click to also remove the rail of waypoints and stations
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Convert/Upgrade the type of rail. Also press Shift to show cost estimate only
@@ -2861,15 +2861,15 @@ STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP                       :{BLACK}Select r
 STR_BUILD_PORTAL_CAPTION                                        :{WHITE}Portal Gate Builder
 STR_BUILD_PORTAL_MODE_BUILD                                     :{BLACK}Build gate
 STR_BUILD_PORTAL_MODE_LINK                                      :{BLACK}Link gates
-STR_BUILD_PORTAL_MODE_BUILD_TOOLTIP                             :{BLACK}Choose an orientation, then click a tile to build an unlinked Portal Gate
+STR_BUILD_PORTAL_MODE_BUILD_TOOLTIP                             :{BLACK}Choose an orientation, then click a tile to build an unlinked gate with its two-lane waiting terminal
 STR_BUILD_PORTAL_MODE_LINK_TOOLTIP                              :{BLACK}Select two existing unlinked Portal Gates on different worlds
 STR_BUILD_PORTAL_ORIENTATION                                    :{BLACK}Gate orientation
 STR_BUILD_PORTAL_DIRECTION_NE                                   :{BLACK}NE
 STR_BUILD_PORTAL_DIRECTION_SE                                   :{BLACK}SE
 STR_BUILD_PORTAL_DIRECTION_SW                                   :{BLACK}SW
 STR_BUILD_PORTAL_DIRECTION_NW                                   :{BLACK}NW
-STR_BUILD_PORTAL_DIRECTION_TOOLTIP                              :{BLACK}Select the direction of the railway approach into the Portal Gate
-STR_BUILD_PORTAL_STATUS_BUILD                                   :{BLACK}Build mode: choose the gate orientation above, then click its tile. Build one gate on each world before linking them.
+STR_BUILD_PORTAL_DIRECTION_TOOLTIP                              :{BLACK}Select the direction trains enter the Portal Gate; its terminal extends 18 tiles behind the gate
+STR_BUILD_PORTAL_STATUS_BUILD                                   :{BLACK}Build mode: click the gate tile. A two-lane terminal with 14-tile waiting bay and one-way path signals is built behind it. Leave the highlighted approach clear.
 STR_BUILD_PORTAL_STATUS_LINK_FIRST                              :{BLACK}Link mode: click the first unlinked Portal Gate.
 STR_BUILD_PORTAL_STATUS_LINK_SECOND                             :{BLACK}First gate selected at tile {NUM}, {NUM}. Click an unlinked gate on another world to complete the link.
 
@@ -6120,3 +6120,15 @@ STR_BADGE_CONFIG_FILTERS                                        :{WHITE}Badge Fi
 STR_BADGE_CONFIG_PREVIEW                                        :Preview Image
 STR_BADGE_CONFIG_NAME                                           :Name
 STR_BADGE_FILTER_ANY_LABEL                                      :Any {STRING}
+
+##id 0x8859
+# OpenSpaceTTD strings are append-only: encoded StringIDs are stored in savegames.
+STR_LAND_AREA_INFORMATION_PORTAL_GATE_LINKED                    :{BLACK}Structure: {LTBLUE}Portal Gate — linked
+STR_LAND_AREA_INFORMATION_PORTAL_GATE_UNLINKED                  :{BLACK}Structure: {LTBLUE}Portal Gate — awaiting link
+STR_LAND_AREA_INFORMATION_PORTAL_GATE_WORLD                     :{BLACK}Local world: {LTBLUE}{RAW_STRING}
+STR_LAND_AREA_INFORMATION_PORTAL_GATE_REMOTE                    :{BLACK}Remote gate: {LTBLUE}{RAW_STRING} at {NUM} x {NUM}
+STR_LAND_AREA_INFORMATION_PORTAL_GATE_TERMINAL                  :{BLACK}Traffic control: {LTBLUE}two lanes, {NUM}-tile holding bay, one-way path signals
+STR_SPACEPORT_VIEW_CAPTION                                      :{WHITE}SPACEPORT T{NUM}: {STATION} {STATION_FEATURES}
+STR_ERROR_PORTAL_TERMINAL_FOOTPRINT                             :Portal Gate requires a clear, level 18 by 2 tile terminal area inside one world
+STR_VIEWPORT_SPACEPORT                                          :SPACEPORT T{NUM}: {STATION} {STATION_FEATURES}
+STR_SPACEPORT_NAME                                              :SP T{NUM}: {STATION}
