@@ -431,6 +431,9 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 
 	if (!ValParamRailType(railtype) || !ValParamTrackOrientation(track)) return CMD_ERROR;
 
+	CommandCost planet_res = PlanetManager::CheckTrackPlacement(tile, railtype);
+	if (planet_res.Failed()) return planet_res;
+
 	Slope tileh = GetTileSlope(tile);
 	TrackBits trackbit = track;
 
@@ -1618,6 +1621,13 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 		CommandCost ret = CheckTileOwnership(tile);
 		if (ret.Failed()) {
 			error = std::move(ret);
+			continue;
+		}
+
+		/* Check world phase tech progression rules for destination railtype */
+		CommandCost planet_res = PlanetManager::CheckTrackPlacement(tile, totype);
+		if (planet_res.Failed()) {
+			error = std::move(planet_res);
 			continue;
 		}
 

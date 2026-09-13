@@ -5187,6 +5187,12 @@ STR_ERROR_PORTAL_GATES_DIFFERENT_WORLDS                        :Portal Gates mus
 STR_ERROR_CAN_T_DESIGNATE_SPACEPORT                             :Can't designate or upgrade Spaceport...
 STR_ERROR_SPACEPORT_MAX_TIER                                   :Spaceport is already at maximum Tier 3
 STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD                       :cannot construct heavy industries or depots on an uncolonized Expansion World
+STR_ERROR_CANNOT_BUILD_ON_DEVELOPED_WORLD                       :cannot construct CST vacuum-tube maglev guideways on a Developed World (requires Core World)
+STR_ERROR_ALREADY_MAX_PHASE                                     :world is already at the maximum development tier (Phase 1 Core)
+STR_ERROR_NOT_ENOUGH_DEVELOPMENT                                :world has not accumulated sufficient development score for phase promotion
+STR_ERROR_CAN_T_PROMOTE_WORLD                                   :Can't promote world...
+STR_NEWS_WORLD_DEVELOPED                                        :{BIG_FONT}{BLACK}Colony Industrialized!{}{STRING} has achieved Developed World status (Phase 2)! Advanced catenary and manufacturing unlocked!
+STR_NEWS_WORLD_CORE_METROPOLIS                                  :{BIG_FONT}{BLACK}Metropolis Achieved!{}{STRING} has achieved Core World status (Phase 1)! CST Maglev guideways and Megacity arcologies unlocked!
 STR_ERROR_CANNOT_COLONIZE_ALREADY_COLONIZED                     :this world has already established colonial settlements
 STR_ERROR_CANNOT_COLONIZE_NON_EXPANSION                         :outposts can only be founded on an Expansion World (Phase 4)
 STR_ERROR_CAN_T_COLONIZE_OUTPOST                                :Can't colonize world...
@@ -6184,6 +6190,8 @@ STR_UNIVERSE_DIRECTORY_NO_WORLDS                                :{SILVER}No worl
 STR_UNIVERSE_DIRECTORY_COLONIZE                                  :Found Colony
 STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP                          :Establish an initial colonial outpost on this Phase 4 wilderness world
 STR_UNIVERSE_DIRECTORY_ALREADY_COLONIZED                         :This world has already established colonial settlements
+STR_UNIVERSE_DIRECTORY_PROMOTE                                   :Promote World
+STR_UNIVERSE_DIRECTORY_PROMOTE_TOOLTIP                           :Promote this world to its next development tier when development threshold is met
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
 
 # OpenSpaceTTD Sprint 25: Player Rail Blueprints

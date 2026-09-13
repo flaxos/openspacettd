@@ -15,6 +15,7 @@
 #include "../command_type.h"
 #include "../rail_type.h"
 #include "../economy_type.h"
+#include "../cargo_type.h"
 #include <vector>
 #include <unordered_map>
 #include <array>
@@ -74,6 +75,20 @@ public:
 	 * @return True if promoted, false if already at Phase 1 or not found.
 	 */
 	static bool PromoteWorldPhase(WorldID world);
+
+	/**
+	 * Check if a world is currently eligible for promotion to its next development phase tier.
+	 * @param world The WorldID to check.
+	 * @return True if world development score meets or exceeds the required threshold.
+	 */
+	static bool CanPromoteWorld(WorldID world);
+
+	/**
+	 * Get the development score threshold required to promote from the given phase to the next.
+	 * @param phase Current WorldPhase.
+	 * @return Required development score, or UINT32_MAX if already at Phase 1 Core.
+	 */
+	static uint32_t GetPromotionThreshold(WorldPhase phase);
 
 	/**
 	 * Colonize an uncolonized Phase 4 Expansion world, elevating it to Phase 3 Frontier status.
@@ -146,6 +161,16 @@ public:
 	static CommandCost CheckDepotPlacement(TileIndex tile, RailType railtype);
 
 	/**
+	 * Check if rail track of the specified railtype is permitted on the world at the given tile.
+	 * Enforces Commonwealth technology tiers: pioneer track on Expansion worlds, conventional/electric
+	 * on Frontier worlds, and restricts Maglev to Phase 1 Core worlds. Blocks track in void space.
+	 * @param tile Tile location for the proposed track.
+	 * @param railtype Rail type of the track.
+	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
+	 */
+	static CommandCost CheckTrackPlacement(TileIndex tile, RailType railtype);
+
+	/**
 	 * Calculate the percentage bonus applied to an interplanetary cargo shipment.
 	 * Returns 0 if intra-world or either tile is invalid/in void space.
 	 * @param src_tile Tile where cargo originated.
@@ -165,6 +190,16 @@ public:
 	 * @return Adjusted profit incorporating interplanetary trade premiums.
 	 */
 	static Money GetInterplanetaryCargoProfit(Money base_profit, TileIndex src_tile, TileIndex dest_tile);
+
+	/**
+	 * Record a cargo delivery at a destination station tile and credit development score to the target world.
+	 * Interplanetary shipments from different worlds grant higher development score bonuses.
+	 * @param dest_tile Destination station tile where cargo was delivered.
+	 * @param cargo_type Type of cargo delivered.
+	 * @param num_pieces Units of cargo accepted.
+	 * @param src_tile Origin tile of the cargo, or INVALID_TILE if unknown/local.
+	 */
+	static void RecordCargoDelivery(TileIndex dest_tile, CargoType cargo_type, uint num_pieces, TileIndex src_tile = INVALID_TILE);
 
 	/**
 	 * Get a user-friendly display name for a WorldPhase.

@@ -22,6 +22,11 @@ enum class WorldPhase : uint8_t {
 	Phase4_Expansion  = 4, ///< Uncharted wilderness / expansion worlds; untapped potential, no initial infrastructure.
 };
 
+/** Development score thresholds required to advance to higher world phases. */
+static constexpr uint32_t DEVELOPMENT_THRESHOLD_FRONTIER = 100;   ///< Threshold achieved upon founding outpost.
+static constexpr uint32_t DEVELOPMENT_THRESHOLD_DEVELOPED = 2000; ///< Threshold required to advance to Phase 2 Developed.
+static constexpr uint32_t DEVELOPMENT_THRESHOLD_CORE = 5000;      ///< Threshold required to advance to Phase 1 Core.
+
 /** Biome / climate classification for a planetary world. */
 enum class WorldBiome : uint8_t {
 	Temperate  = 0, ///< Earth-like, balanced agriculture and industry.

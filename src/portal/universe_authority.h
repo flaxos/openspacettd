@@ -180,6 +180,7 @@ public:
 	std::vector<RegisteredWorld> FindWorldsByPhase(WorldPhase phase) const;
 	std::vector<RegisteredWorld> GetWorldDirectory() const;
 	bool ColonizeWorld(WorldID world_id, const std::string &outpost_name = "");
+	bool PromoteWorld(WorldID world_id);
 
 	/* Inter-Server Route & Freight Corridor Management */
 	bool RegisterRoute(const InterServerRoute &route);

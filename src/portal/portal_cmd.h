@@ -125,6 +125,16 @@ CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, 
  */
 CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::string &outpost_name);
 
+/**
+ * Promote a registered world to its next development tier when development threshold is satisfied.
+ * Phase 4 -> Phase 3 -> Phase 2 -> Phase 1.
+ *
+ * @param flags Command flags.
+ * @param world The WorldID of the world to promote.
+ * @return Command cost or failure.
+ */
+CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world);
+
 /** GUI completion callback for portal gate linking. */
 CommandCallback CcPortalLink;
 
@@ -139,5 +149,6 @@ DEF_CMD_TRAIT(Commands::BuildEdgeConduit,          CmdBuildEdgeConduit,         
 DEF_CMD_TRAIT(Commands::DestroyEdgeConduit,        CmdDestroyEdgeConduit,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::ConfigureEdgeConduitFeeder, CmdConfigureEdgeConduitFeeder, {},                                                   CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::ColonizeOutpost,           CmdColonizeOutpost,           CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::PromoteWorld,              CmdPromoteWorld,              CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 
 #endif /* PORTAL_CMD_H */

@@ -393,6 +393,7 @@ enum class Commands : uint8_t {
 
 	PlaceBlueprint, ///< place a rail blueprint layout on the map
 	ColonizeOutpost, ///< colonize an uncolonized Phase 4 Expansion world and establish an initial pioneer outpost
+	PromoteWorld, ///< promote a world to its next development phase tier when development score threshold is met
 
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };

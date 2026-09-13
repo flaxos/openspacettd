@@ -1105,6 +1105,7 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		if (SpaceportManager::IsSpaceport(dest)) {
 			SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
 		}
+		PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
 	}
 
 	/* Update company statistics */

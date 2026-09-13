@@ -120,6 +120,26 @@ bool UniverseAuthorityService::ColonizeWorld(WorldID world_id, const std::string
 	return true;
 }
 
+bool UniverseAuthorityService::PromoteWorld(WorldID world_id)
+{
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) return false;
+	switch (it->second.phase) {
+		case WorldPhase::Phase4_Expansion:
+			it->second.phase = WorldPhase::Phase3_Frontier;
+			return true;
+		case WorldPhase::Phase3_Frontier:
+			it->second.phase = WorldPhase::Phase2_Developed;
+			return true;
+		case WorldPhase::Phase2_Developed:
+			it->second.phase = WorldPhase::Phase1_Core;
+			return true;
+		case WorldPhase::Phase1_Core:
+		default:
+			return false;
+	}
+}
+
 bool UniverseAuthorityService::RegisterRoute(const InterServerRoute &route)
 {
 	if (route.route_id == 0 || route.source_world == INVALID_WORLD || route.dest_world == INVALID_WORLD) {

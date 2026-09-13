@@ -144,6 +144,38 @@ bool PlanetManager::PromoteWorldPhase(WorldID world)
 	}
 }
 
+bool PlanetManager::CanPromoteWorld(WorldID world)
+{
+	const PlanetRegion *r = GetRegion(world);
+	if (r == nullptr) return false;
+	switch (r->phase) {
+		case WorldPhase::Phase4_Expansion:
+			return true;
+		case WorldPhase::Phase3_Frontier:
+			return r->development_score >= DEVELOPMENT_THRESHOLD_DEVELOPED;
+		case WorldPhase::Phase2_Developed:
+			return r->development_score >= DEVELOPMENT_THRESHOLD_CORE;
+		case WorldPhase::Phase1_Core:
+		default:
+			return false;
+	}
+}
+
+uint32_t PlanetManager::GetPromotionThreshold(WorldPhase phase)
+{
+	switch (phase) {
+		case WorldPhase::Phase4_Expansion:
+			return DEVELOPMENT_THRESHOLD_FRONTIER;
+		case WorldPhase::Phase3_Frontier:
+			return DEVELOPMENT_THRESHOLD_DEVELOPED;
+		case WorldPhase::Phase2_Developed:
+			return DEVELOPMENT_THRESHOLD_CORE;
+		case WorldPhase::Phase1_Core:
+		default:
+			return UINT32_MAX;
+	}
+}
+
 bool PlanetManager::ColonizeWorld(WorldID world, const std::string &outpost_name, TileIndex outpost_tile)
 {
 	auto it = id_to_region_index.find(world.base());
@@ -273,6 +305,36 @@ CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype
 	return CommandCost();
 }
 
+CommandCost PlanetManager::CheckTrackPlacement(TileIndex tile, RailType railtype)
+{
+	if (Count() == 0) return CommandCost();
+
+	WorldID world = GetTileWorld(tile);
+	if (world == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		/* On uncolonized expansion wilderness, only basic pioneer track is permitted */
+		if (railtype != RAILTYPE_RAIL) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+		}
+	} else if (phase == WorldPhase::Phase3_Frontier) {
+		/* On frontier worlds, pioneer rail and electric catenary are permitted; Maglev and Monorail require Developed/Core */
+		if (railtype == RAILTYPE_MAGLEV || railtype == RAILTYPE_MONO) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+		}
+	} else if (phase == WorldPhase::Phase2_Developed) {
+		/* On developed worlds, Maglev is restricted to Phase 1 Core Worlds */
+		if (railtype == RAILTYPE_MAGLEV) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_ON_DEVELOPED_WORLD);
+		}
+	}
+
+	return CommandCost();
+}
+
 uint32_t PlanetManager::GetInterplanetaryBonusPercent(TileIndex src_tile, TileIndex dest_tile)
 {
 	if (Count() == 0) return 0;
@@ -309,6 +371,40 @@ Money PlanetManager::GetInterplanetaryCargoProfit(Money base_profit, TileIndex s
 	if (bonus_pct == 0) return base_profit;
 
 	return base_profit + (base_profit * bonus_pct) / 100;
+}
+
+void PlanetManager::RecordCargoDelivery(TileIndex dest_tile, [[maybe_unused]] CargoType cargo_type, uint num_pieces, TileIndex src_tile)
+{
+	if (Count() == 0 || num_pieces == 0 || dest_tile == INVALID_TILE) return;
+
+	WorldID dest_world = GetTileWorld(dest_tile);
+	if (dest_world == INVALID_WORLD) return;
+
+	auto it = id_to_region_index.find(dest_world.base());
+	if (it == id_to_region_index.end()) return;
+
+	PlanetRegion &reg = regions[it->second];
+
+	/* Determine if this was an interplanetary import */
+	bool is_import = false;
+	if (src_tile != INVALID_TILE) {
+		WorldID src_world = GetTileWorld(src_tile);
+		if (src_world != dest_world) {
+			is_import = true;
+		}
+	}
+
+	/* Development points formula:
+	 * Local deliveries: 1 point per 10 cargo units (minimum 1).
+	 * Interplanetary imports: 5 points per 10 cargo units (minimum 3). */
+	uint32_t pts = 0;
+	if (is_import) {
+		pts = std::max(3u, num_pieces / 2);
+	} else {
+		pts = std::max(1u, num_pieces / 10);
+	}
+
+	reg.development_score += pts;
 }
 
 const char *PlanetManager::GetWorldPhaseName(WorldPhase phase)

@@ -31,8 +31,9 @@ static constexpr std::initializer_list<NWidgetPart> _nested_universe_directory_w
 		NWidget(WWT_STICKYBOX, Colours::Blue),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::Blue, WID_UD_HEADER_PANEL), SetMinimalSize(280, 36), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_COLONIZE_BTN), SetMinimalSize(90, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_COLONIZE, STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP),
+		NWidget(WWT_PANEL, Colours::Blue, WID_UD_HEADER_PANEL), SetMinimalSize(190, 36), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_PROMOTE_BTN), SetMinimalSize(85, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_PROMOTE, STR_UNIVERSE_DIRECTORY_PROMOTE_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_COLONIZE_BTN), SetMinimalSize(85, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_COLONIZE, STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_JUMP_BTN), SetMinimalSize(75, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_JUMP, STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_REFRESH), SetMinimalSize(75, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_REFRESH, STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP),
 	EndContainer(),
@@ -96,7 +97,10 @@ struct UniverseDirectoryWindow : Window {
 		const RegisteredWorld *selected = UniverseAuthorityService::Instance().GetWorld(this->selected_world);
 		const PlanetRegion *local_reg = (this->selected_world != INVALID_WORLD) ? PlanetManager::GetRegion(this->selected_world) : nullptr;
 		WorldPhase phase = (selected != nullptr) ? selected->phase : (local_reg != nullptr ? local_reg->phase : WorldPhase::Phase3_Frontier);
-		this->SetWidgetDisabledState(WID_UD_COLONIZE_BTN, phase != WorldPhase::Phase4_Expansion);
+		bool can_colonize = (phase == WorldPhase::Phase4_Expansion);
+		bool can_promote = (this->selected_world != INVALID_WORLD) && PlanetManager::CanPromoteWorld(this->selected_world) && (phase != WorldPhase::Phase4_Expansion);
+		this->SetWidgetDisabledState(WID_UD_COLONIZE_BTN, !can_colonize);
+		this->SetWidgetDisabledState(WID_UD_PROMOTE_BTN, !can_promote);
 
 		this->DrawWidgets();
 	}
@@ -205,13 +209,23 @@ struct UniverseDirectoryWindow : Window {
 				DrawString(tr, line2, TextColour::Gold);
 				tr.top += GetCharacterHeight(FontSize::Normal);
 
+				const PlanetRegion *local_reg = (this->selected_world != INVALID_WORLD) ? PlanetManager::GetRegion(this->selected_world) : nullptr;
+				uint32_t dev_score = local_reg != nullptr ? local_reg->development_score : 0;
+				uint32_t threshold = PlanetManager::GetPromotionThreshold(selected->phase);
+
 				if (selected->phase == WorldPhase::Phase4_Expansion) {
 					std::string line3 = "Colonization Status: Virgin Wilderness (Phase 4). Click 'Found Colony' to establish a pioneer outpost.";
 					DrawString(tr, line3, TextColour::Yellow);
+				} else if (selected->phase == WorldPhase::Phase1_Core) {
+					std::string line3 = fmt::format("Development Score: {:L} pts | Maximum Tier (Phase 1 Core Metropolis) | Net Balance: Cr {:L}",
+						dev_score, trade.net_trade_balance_credits);
+					DrawString(tr, line3, TextColour::Green);
 				} else {
-					std::string line3 = fmt::format("Inter-World Trade Balance: Cr {:L} (Exports: {} types, Imports: {} types)",
-						trade.net_trade_balance_credits, trade.exported_cargo.size(), trade.imported_cargo.size());
-					DrawString(tr, line3, trade.net_trade_balance_credits >= 0 ? TextColour::LightBlue : TextColour::Orange);
+					std::string line3 = fmt::format("Development: {:L} / {:L} pts ({}) | Net Trade: Cr {:L}",
+						dev_score, threshold,
+						dev_score >= threshold ? "Ready for Promotion!" : "Deliver cargo to advance",
+						trade.net_trade_balance_credits);
+					DrawString(tr, line3, dev_score >= threshold ? TextColour::Green : TextColour::LightBlue);
 				}
 				break;
 			}
@@ -244,6 +258,15 @@ struct UniverseDirectoryWindow : Window {
 						Command<Commands::ColonizeOutpost>::Post(STR_ERROR_CAN_T_COLONIZE_OUTPOST, outpost_tile, "");
 					}
 					service.ColonizeWorld(this->selected_world);
+					this->SetDirty();
+				}
+				break;
+			}
+
+			case WID_UD_PROMOTE_BTN: {
+				if (this->selected_world != INVALID_WORLD) {
+					Command<Commands::PromoteWorld>::Post(STR_ERROR_CAN_T_PROMOTE_WORLD, this->selected_world);
+					service.PromoteWorld(this->selected_world);
 					this->SetDirty();
 				}
 				break;

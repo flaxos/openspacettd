@@ -315,6 +315,31 @@ class UniverseAuthority:
         self._maybe_auto_save()
         return True, w
 
+    def promote_world(self, world_id):
+        if world_id is None:
+            return False, "world_id required"
+        try:
+            world_id = int(world_id)
+        except ValueError:
+            return False, f"Invalid world_id: {world_id}"
+        if world_id not in self.worlds:
+            return False, f"World {world_id} not found"
+        w = self.worlds[world_id]
+        cur_phase = int(w.get("phase", 3))
+        if cur_phase == 4:
+            w["phase"] = 3
+            w["development_score"] = int(w.get("development_score", 0)) + 100
+        elif cur_phase == 3:
+            w["phase"] = 2
+            w["development_score"] = int(w.get("development_score", 0)) + 250
+        elif cur_phase == 2:
+            w["phase"] = 1
+            w["development_score"] = int(w.get("development_score", 0)) + 500
+        else:
+            return False, f"World {world_id} is already at maximum development tier (Phase 1 Core)"
+        self._maybe_auto_save()
+        return True, w
+
     def get_world_directory(self, min_phase=0, prune_stale=False, stale_threshold=60.0):
         now = time.time()
         worlds_to_return = []
@@ -1191,6 +1216,16 @@ class AuthorityHandler(BaseHTTPRequestHandler):
                     pass
             outpost_name = data.get("outpost_name")
             ok, res = AUTHORITY.colonize_world(world_id, outpost_name)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path in ("/worlds/promote", "/directory/promote") or (url.path.startswith("/worlds/") and url.path.endswith("/promote")):
+            parts = url.path.strip("/").split("/")
+            world_id = data.get("world_id")
+            if len(parts) == 3 and parts[0] == "worlds" and parts[2] == "promote":
+                try:
+                    world_id = int(parts[1])
+                except ValueError:
+                    pass
+            ok, res = AUTHORITY.promote_world(world_id)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
 
         # Routing & Transfer endpoints

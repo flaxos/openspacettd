@@ -3144,6 +3144,46 @@ static bool ConColonizeWorld(std::span<std::string_view> argv)
 	return false;
 }
 
+/** Promote a planetary world to its next development tier. @copydoc IConsoleCmdProc */
+static bool ConPromoteWorld(std::span<std::string_view> argv)
+{
+	if (argv.empty() || argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Promote a world to its next development phase tier.");
+		IConsolePrint(CC_HELP, "Usage: 'promote_world <world_id>'");
+		return true;
+	}
+
+	auto parsed = ParseInteger(argv[1]);
+	if (!parsed.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid world ID: '{}'", argv[1]);
+		return false;
+	}
+
+	WorldID wid = WorldID(static_cast<uint32_t>(*parsed));
+	const PlanetRegion *reg = PlanetManager::GetRegion(wid);
+	if (reg == nullptr) {
+		IConsolePrint(CC_ERROR, "World {} not found.", wid.base());
+		return false;
+	}
+
+	if (reg->phase == WorldPhase::Phase1_Core) {
+		IConsolePrint(CC_ERROR, "World {} ('{}') is already at maximum development tier (Phase 1 Core).",
+			wid.base(), reg->name);
+		return false;
+	}
+
+	if (PlanetManager::PromoteWorldPhase(wid)) {
+		UniverseAuthorityService::Instance().PromoteWorld(wid);
+		const PlanetRegion *updated = PlanetManager::GetRegion(wid);
+		IConsolePrint(CC_DEFAULT, "Successfully promoted World {}: now '{}' ({}, score: {}).",
+			wid.base(), updated->name, PlanetManager::GetWorldPhaseName(updated->phase), updated->development_score);
+		return true;
+	}
+
+	IConsolePrint(CC_ERROR, "Failed to promote World {}.", wid.base());
+	return false;
+}
+
 /** Show the current framerate statistics. @copydoc IConsoleCmdProc */
 static bool ConFramerate(std::span<std::string_view> argv)
 {
@@ -3419,6 +3459,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("universe_megacity",       ConUniverseMegacity);
 	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
 	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
+	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
 
 	/* networking functions */
 

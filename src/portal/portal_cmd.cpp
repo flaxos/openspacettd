@@ -14,6 +14,7 @@
 #include "planet_manager.h"
 #include "spaceport_manager.h"
 #include "edge_conduit.h"
+#include "universe_authority.h"
 #include "../station_base.h"
 #include "../command_func.h"
 #include "../company_base.h"
@@ -605,6 +606,42 @@ CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::
 
 		/* Broadcast colony founding news */
 		AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_COLONIZED, name), NewsType::CompanyInfo, tile);
+	}
+
+	return cost;
+}
+
+CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
+{
+	const PlanetRegion *region = PlanetManager::GetRegion(world);
+	if (region == nullptr) return CMD_ERROR;
+
+	if (region->phase == WorldPhase::Phase1_Core) {
+		return CommandCost(STR_ERROR_ALREADY_MAX_PHASE);
+	}
+
+	if (!PlanetManager::CanPromoteWorld(world)) {
+		return CommandCost(STR_ERROR_NOT_ENOUGH_DEVELOPMENT);
+	}
+
+	/* Civic promotion and infrastructure elevation fee */
+	CommandCost cost(ExpensesType::Construction, _price[Price::BuildTown] * 8);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		WorldPhase prev_phase = region->phase;
+		PlanetManager::PromoteWorldPhase(world);
+
+		TileIndex news_tile = region->outpost_tile != INVALID_TILE ?
+			region->outpost_tile :
+			TileXY((region->min_x + region->max_x) / 2, (region->min_y + region->max_y) / 2);
+
+		if (prev_phase == WorldPhase::Phase3_Frontier) {
+			AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_DEVELOPED, region->name), NewsType::CompanyInfo, news_tile);
+		} else if (prev_phase == WorldPhase::Phase2_Developed) {
+			AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_CORE_METROPOLIS, region->name), NewsType::CompanyInfo, news_tile);
+		}
+
+		UniverseAuthorityService::Instance().PromoteWorld(world);
 	}
 
 	return cost;
