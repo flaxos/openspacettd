@@ -134,6 +134,8 @@ static bool IsSnapshotValid(const ConsistSnapshot &snapshot)
 {
 	if (!snapshot.consist_id.IsValid() || snapshot.units.empty() || snapshot.units.size() > CONSIST_SNAPSHOT_MAX_UNITS) return false;
 	if (snapshot.orders.size() > CONSIST_SNAPSHOT_MAX_ORDERS) return false;
+	if (!snapshot.orders.empty() && snapshot.current_order_index >= snapshot.orders.size()) return false;
+	if (snapshot.orders.empty() && snapshot.current_order_index != 0) return false;
 	if (snapshot.direction >= to_underlying(Direction::End)) return false;
 	for (const ConsistSnapshotUnit &unit : snapshot.units) {
 		if (unit.engine_type == EngineID::Invalid().base()) return false;
@@ -231,15 +233,28 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 		snapshot.units.push_back(snap_unit);
 	}
 
-	if (train->orders != nullptr) {
-		for (const Order &order : train->orders->GetOrders()) {
+	/* Check if a registered master schedule exists for this consist */
+	if (auto master = FederationIdentityRegistry::GetConsistSchedule(snapshot.consist_id.sequence); master.has_value() && !master->empty()) {
+		snapshot.orders = *master;
+		snapshot.current_order_index = (train->cur_real_order_index < snapshot.orders.size())
+			? static_cast<uint16_t>(train->cur_real_order_index) : 0;
+	} else if (train->orders != nullptr) {
+		uint16_t matched_idx = 0;
+		bool found_match = false;
+		for (size_t i = 0; i < train->orders->GetNumOrders(); ++i) {
 			if (snapshot.orders.size() == CONSIST_SNAPSHOT_MAX_ORDERS) break;
-			if (order.IsGotoOrder()) {
-				if (auto dest = FederationIdentityRegistry::GetOrCreateOrderDestination(order.GetDestination(), order.GetType()); dest.has_value()) {
+			const Order *order = train->orders->GetOrderAt(static_cast<VehicleOrderID>(i));
+			if (order != nullptr && order->IsGotoOrder()) {
+				if (auto dest = FederationIdentityRegistry::GetOrCreateOrderDestination(order->GetDestination(), order->GetType()); dest.has_value()) {
+					if (i == train->cur_real_order_index) {
+						matched_idx = static_cast<uint16_t>(snapshot.orders.size());
+						found_match = true;
+					}
 					snapshot.orders.push_back(*dest);
 				}
 			}
 		}
+		snapshot.current_order_index = found_match ? matched_idx : 0;
 	}
 
 	if (!IsSnapshotValid(snapshot)) return {ConsistSnapshotError::InvalidConsist, std::nullopt};
@@ -326,6 +341,7 @@ ConsistSnapshotBytes ConsistSnapshotCodec::Encode(const ConsistSnapshot &snapsho
 
 	/* V2: Global Orders */
 	writer.U16(static_cast<uint16_t>(snapshot.orders.size()));
+	writer.U16(snapshot.current_order_index);
 	for (const GlobalOrderDestinationID &order : snapshot.orders) {
 		writer.U8(static_cast<uint8_t>(order.type));
 		writer.U64(order.name_space.high);
@@ -441,6 +457,11 @@ ConsistSnapshotResult ConsistSnapshotCodec::Decode(std::span<const uint8_t> byte
 		uint16_t order_count;
 		if (!reader.U16(order_count)) return {ConsistSnapshotError::Truncated, std::nullopt};
 		if (order_count > CONSIST_SNAPSHOT_MAX_ORDERS) return {ConsistSnapshotError::InvalidField, std::nullopt};
+		uint16_t cur_order_idx = 0;
+		if (!reader.U16(cur_order_idx)) return {ConsistSnapshotError::Truncated, std::nullopt};
+		if (order_count > 0 && cur_order_idx >= order_count) return {ConsistSnapshotError::InvalidField, std::nullopt};
+		if (order_count == 0 && cur_order_idx != 0) return {ConsistSnapshotError::InvalidField, std::nullopt};
+		snapshot.current_order_index = cur_order_idx;
 		snapshot.orders.reserve(order_count);
 		for (uint i = 0; i < order_count; ++i) {
 			GlobalOrderDestinationID order;

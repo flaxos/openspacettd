@@ -195,9 +195,17 @@ public:
 	static bool RestoreSourceMapping(uint32_t source_key, uint64_t sequence);
 	static void PruneStaleSourceMappings();
 
-	/* Order destination identity */
+	/* Order destination identity and resolution */
 	static std::optional<GlobalOrderDestinationID> FindOrderDestination(DestinationID dest, OrderType order_type);
 	static std::optional<GlobalOrderDestinationID> GetOrCreateOrderDestination(DestinationID dest, OrderType order_type);
+	static std::optional<StationID> FindStationBySequence(uint64_t sequence);
+	static std::optional<StationID> ResolveStation(const GlobalStationID &global_st);
+	static std::optional<DestinationID> ResolveOrderDestination(const GlobalOrderDestinationID &order, WorldID current_world);
+
+	/* Consist master schedule management */
+	static void SetConsistSchedule(uint64_t consist_seq, std::vector<GlobalOrderDestinationID> schedule);
+	static std::optional<std::vector<GlobalOrderDestinationID>> GetConsistSchedule(uint64_t consist_seq);
+	static void ClearConsistSchedule(uint64_t consist_seq);
 
 	/* Counters and restoration */
 	static void RestoreCounters(uint64_t next_company, uint64_t next_station, uint64_t next_source);

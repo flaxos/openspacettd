@@ -64,6 +64,7 @@ struct ConsistSnapshot {
 	bool driving_backwards = false;
 	std::vector<ConsistSnapshotUnit> units;
 	std::vector<GlobalOrderDestinationID> orders{}; ///< Captured portable order destinations.
+	uint16_t current_order_index = 0;               ///< Active order index at time of transfer.
 
 	auto operator<=>(const ConsistSnapshot &) const = default;
 };

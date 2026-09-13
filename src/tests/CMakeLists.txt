@@ -29,6 +29,7 @@ add_test_files(
     test_federation_megacity_economy.cpp
     test_megacity_gui.cpp
     test_federation_cluster.cpp
+    test_federation_order_restoration.cpp
     test_portal_construction.cpp
     test_world_gen.cpp
     test_interplanetary_cargo.cpp
