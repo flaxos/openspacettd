@@ -107,6 +107,19 @@ std::vector<RegisteredWorld> UniverseAuthorityService::GetWorldDirectory() const
 	return result;
 }
 
+bool UniverseAuthorityService::ColonizeWorld(WorldID world_id, const std::string &outpost_name)
+{
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) return false;
+	if (it->second.phase != WorldPhase::Phase4_Expansion) return false;
+
+	it->second.phase = WorldPhase::Phase3_Frontier;
+	if (!outpost_name.empty()) {
+		it->second.name = outpost_name;
+	}
+	return true;
+}
+
 bool UniverseAuthorityService::RegisterRoute(const InterServerRoute &route)
 {
 	if (route.route_id == 0 || route.source_world == INVALID_WORLD || route.dest_world == INVALID_WORLD) {

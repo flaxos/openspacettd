@@ -17,6 +17,7 @@ enum UniverseDirectoryWidgets : WidgetID {
 	WID_UD_DETAILS_PANEL,  ///< Detail panel for selected world server.
 	WID_UD_REFRESH,        ///< Refresh directory button.
 	WID_UD_JUMP_BTN,       ///< Jump main viewport to selected world.
+	WID_UD_COLONIZE_BTN,   ///< Establish colonial outpost on selected wilderness world.
 };
 
 #endif /* WIDGETS_UNIVERSE_DIRECTORY_WIDGET_H */

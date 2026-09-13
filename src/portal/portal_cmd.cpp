@@ -601,7 +601,7 @@ CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::
 			name = fmt::format("Outpost {}", region->name);
 		}
 
-		PlanetManager::ColonizeWorld(world, name);
+		PlanetManager::ColonizeWorld(world, name, tile);
 
 		/* Broadcast colony founding news */
 		AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_COLONIZED, name), NewsType::CompanyInfo, tile);

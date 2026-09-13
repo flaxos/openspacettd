@@ -6181,6 +6181,9 @@ STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP                          :Poll Universe A
 STR_UNIVERSE_DIRECTORY_JUMP                                     :Jump Viewport
 STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP                             :Center the main viewport on the selected world's surface
 STR_UNIVERSE_DIRECTORY_NO_WORLDS                                :{SILVER}No worlds registered in directory
+STR_UNIVERSE_DIRECTORY_COLONIZE                                  :Found Colony
+STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP                          :Establish an initial colonial outpost on this Phase 4 wilderness world
+STR_UNIVERSE_DIRECTORY_ALREADY_COLONIZED                         :This world has already established colonial settlements
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
 
 # OpenSpaceTTD Sprint 25: Player Rail Blueprints

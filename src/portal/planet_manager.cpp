@@ -144,7 +144,7 @@ bool PlanetManager::PromoteWorldPhase(WorldID world)
 	}
 }
 
-bool PlanetManager::ColonizeWorld(WorldID world, const std::string &outpost_name)
+bool PlanetManager::ColonizeWorld(WorldID world, const std::string &outpost_name, TileIndex outpost_tile)
 {
 	auto it = id_to_region_index.find(world.base());
 	if (it == id_to_region_index.end()) return false;
@@ -155,6 +155,9 @@ bool PlanetManager::ColonizeWorld(WorldID world, const std::string &outpost_name
 	r.development_score += 100;
 	if (!outpost_name.empty()) {
 		r.name = outpost_name;
+	}
+	if (outpost_tile != INVALID_TILE) {
+		r.outpost_tile = outpost_tile;
 	}
 	return true;
 }
@@ -367,9 +370,14 @@ bool PlanetManager::JumpToPlanet(WorldID world_id)
 	const PlanetRegion *region = GetRegion(world_id);
 	if (region == nullptr) return false;
 
-	uint center_x = (region->min_x + region->max_x) / 2;
-	uint center_y = (region->min_y + region->max_y) / 2;
-	TileIndex target = TileXY(center_x, center_y);
+	TileIndex target;
+	if (region->outpost_tile != INVALID_TILE && IsValidTile(region->outpost_tile)) {
+		target = region->outpost_tile;
+	} else {
+		uint center_x = (region->min_x + region->max_x) / 2;
+		uint center_y = (region->min_y + region->max_y) / 2;
+		target = TileXY(center_x, center_y);
+	}
 
 	Window *main_window = FindWindowById(WindowClass::MainWindow, 0);
 	if (main_window != nullptr && main_window->viewport != nullptr) {

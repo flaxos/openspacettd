@@ -10,9 +10,10 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 echo "==========================================================================="
 echo " OpenSpaceTTD Federation Acceptance Kit Runner"
 echo "==========================================================================="
-echo "Executing Python acceptance test suite..."
+echo "Executing Python acceptance test suites..."
 
 python3 "${REPO_ROOT}/scripts/test_sprint29_acceptance_kit.py" "$@"
+python3 "${REPO_ROOT}/scripts/test_sprint31_colonization_kit.py" "$@"
 
 echo "==========================================================================="
 echo " Federation Acceptance Kit Run Completed Successfully!"

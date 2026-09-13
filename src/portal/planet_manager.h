@@ -79,9 +79,10 @@ public:
 	 * Colonize an uncolonized Phase 4 Expansion world, elevating it to Phase 3 Frontier status.
 	 * @param world The WorldID to colonize.
 	 * @param outpost_name Optional custom name for the initial colonial outpost / world update.
+	 * @param outpost_tile Optional tile coordinate where the initial outpost is established.
 	 * @return True if colonization succeeded, false if not an Expansion world or not found.
 	 */
-	static bool ColonizeWorld(WorldID world, const std::string &outpost_name = "");
+	static bool ColonizeWorld(WorldID world, const std::string &outpost_name = "", TileIndex outpost_tile = INVALID_TILE);
 
 	/**
 	 * Retrieve the planet region containing the given tile.

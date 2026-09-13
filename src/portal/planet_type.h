@@ -46,6 +46,7 @@ struct PlanetRegion {
 	uint32_t max_y = 0;
 
 	uint32_t development_score = 0;     ///< Score measuring infrastructure and economy progress.
+	TileIndex outpost_tile = INVALID_TILE; ///< Tile coordinate of colonial outpost if colonized.
 
 	/** Check if coordinate (x, y) falls within this planet's boundaries. */
 	constexpr bool ContainsCoord(uint32_t x, uint32_t y) const noexcept

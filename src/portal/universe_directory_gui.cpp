@@ -9,6 +9,8 @@
 #include "universe_directory_gui.h"
 #include "universe_authority.h"
 #include "planet_manager.h"
+#include "portal_cmd.h"
+#include "../command_func.h"
 #include "../window_gui.h"
 #include "../strings_func.h"
 #include "../zoom_func.h"
@@ -29,9 +31,10 @@ static constexpr std::initializer_list<NWidgetPart> _nested_universe_directory_w
 		NWidget(WWT_STICKYBOX, Colours::Blue),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::Blue, WID_UD_HEADER_PANEL), SetMinimalSize(360, 36), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_JUMP_BTN), SetMinimalSize(80, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_JUMP, STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_REFRESH), SetMinimalSize(80, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_REFRESH, STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP),
+		NWidget(WWT_PANEL, Colours::Blue, WID_UD_HEADER_PANEL), SetMinimalSize(280, 36), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_COLONIZE_BTN), SetMinimalSize(90, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_COLONIZE, STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_JUMP_BTN), SetMinimalSize(75, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_JUMP, STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_REFRESH), SetMinimalSize(75, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_REFRESH, STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, Colours::Blue, WID_UD_WORLD_LIST), SetMinimalSize(508, 200), SetFill(1, 1), SetResize(1, 1), EndContainer(),
@@ -64,6 +67,22 @@ struct UniverseDirectoryWindow : Window {
 		this->FinishInitNested(window_number);
 
 		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
+		if (worlds.empty() && PlanetManager::Count() > 0) {
+			for (const auto &reg : PlanetManager::GetAllRegions()) {
+				RegisteredWorld rw{
+					.world_id = reg.id,
+					.phase = reg.phase,
+					.name = reg.name,
+					.last_heartbeat_tick = 1,
+					.address = "Local Node",
+					.description = fmt::format("{} ecosystem", PlanetManager::GetWorldBiomeName(reg.biome)),
+					.status = WorldOnlineStatus::Online,
+					.biome = reg.biome,
+				};
+				UniverseAuthorityService::Instance().RegisterWorld(rw);
+			}
+			worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
+		}
 		if (!worlds.empty()) {
 			this->selected_world = worlds.front().world_id;
 		}
@@ -73,6 +92,11 @@ struct UniverseDirectoryWindow : Window {
 	{
 		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
 		this->vscroll->SetCount(worlds.size());
+
+		const RegisteredWorld *selected = UniverseAuthorityService::Instance().GetWorld(this->selected_world);
+		const PlanetRegion *local_reg = (this->selected_world != INVALID_WORLD) ? PlanetManager::GetRegion(this->selected_world) : nullptr;
+		WorldPhase phase = (selected != nullptr) ? selected->phase : (local_reg != nullptr ? local_reg->phase : WorldPhase::Phase3_Frontier);
+		this->SetWidgetDisabledState(WID_UD_COLONIZE_BTN, phase != WorldPhase::Phase4_Expansion);
 
 		this->DrawWidgets();
 	}
@@ -124,13 +148,15 @@ struct UniverseDirectoryWindow : Window {
 
 						Rect text_rect = item_rect.Shrink(WidgetDimensions::scaled.framerect);
 
-						/* Line 1: World ID, Name, and Status Badge */
+						/* Line 1: World ID, Name, Biome, and Status Badge */
 						StringID status_str = STR_UNIVERSE_DIRECTORY_ONLINE;
 						if (world.status == WorldOnlineStatus::Maintenance) status_str = STR_UNIVERSE_DIRECTORY_MAINTENANCE;
 						else if (world.status == WorldOnlineStatus::Unreachable) status_str = STR_UNIVERSE_DIRECTORY_UNREACHABLE;
 
-						std::string world_header = fmt::format("World #{}: {} [{}]",
-							world.world_id.base(), world.name, PlanetManager::GetWorldPhaseName(world.phase));
+						std::string world_header = fmt::format("World #{}: {} [{} | {}]",
+							world.world_id.base(), world.name,
+							PlanetManager::GetWorldPhaseName(world.phase),
+							PlanetManager::GetWorldBiomeName(world.biome));
 						DrawString(text_rect, world_header, is_selected ? TextColour::White : TextColour::Gold);
 
 						int header_w = GetStringBoundingBox(world_header).width;
@@ -162,8 +188,9 @@ struct UniverseDirectoryWindow : Window {
 
 				auto trade = service.GetWorldTradeBalance(this->selected_world);
 
-				std::string line1 = fmt::format("Selected: World #{} ({}) - {}",
+				std::string line1 = fmt::format("Selected: World #{} ({}) [{}] - {}",
 					selected->world_id.base(), selected->name,
+					PlanetManager::GetWorldBiomeName(selected->biome),
 					selected->description.empty() ? "No description provided." : selected->description);
 				DrawString(tr, line1, TextColour::White);
 				tr.top += GetCharacterHeight(FontSize::Normal);
@@ -178,9 +205,14 @@ struct UniverseDirectoryWindow : Window {
 				DrawString(tr, line2, TextColour::Gold);
 				tr.top += GetCharacterHeight(FontSize::Normal);
 
-				std::string line3 = fmt::format("Inter-World Trade Balance: Cr {:L} (Exports: {} types, Imports: {} types)",
-					trade.net_trade_balance_credits, trade.exported_cargo.size(), trade.imported_cargo.size());
-				DrawString(tr, line3, trade.net_trade_balance_credits >= 0 ? TextColour::LightBlue : TextColour::Orange);
+				if (selected->phase == WorldPhase::Phase4_Expansion) {
+					std::string line3 = "Colonization Status: Virgin Wilderness (Phase 4). Click 'Found Colony' to establish a pioneer outpost.";
+					DrawString(tr, line3, TextColour::Yellow);
+				} else {
+					std::string line3 = fmt::format("Inter-World Trade Balance: Cr {:L} (Exports: {} types, Imports: {} types)",
+						trade.net_trade_balance_credits, trade.exported_cargo.size(), trade.imported_cargo.size());
+					DrawString(tr, line3, trade.net_trade_balance_credits >= 0 ? TextColour::LightBlue : TextColour::Orange);
+				}
 				break;
 			}
 		}
@@ -200,6 +232,19 @@ struct UniverseDirectoryWindow : Window {
 			case WID_UD_JUMP_BTN: {
 				if (this->selected_world != INVALID_WORLD) {
 					PlanetManager::JumpToPlanet(this->selected_world);
+				}
+				break;
+			}
+
+			case WID_UD_COLONIZE_BTN: {
+				if (this->selected_world != INVALID_WORLD) {
+					const PlanetRegion *local_reg = PlanetManager::GetRegion(this->selected_world);
+					if (local_reg != nullptr && local_reg->phase == WorldPhase::Phase4_Expansion) {
+						TileIndex outpost_tile = TileXY((local_reg->min_x + local_reg->max_x) / 2, (local_reg->min_y + local_reg->max_y) / 2);
+						Command<Commands::ColonizeOutpost>::Post(STR_ERROR_CAN_T_COLONIZE_OUTPOST, outpost_tile, "");
+					}
+					service.ColonizeWorld(this->selected_world);
+					this->SetDirty();
 				}
 				break;
 			}

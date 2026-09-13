@@ -253,9 +253,11 @@ class UniverseAuthority:
         world_id = data.get("world_id")
         if world_id is None:
             return False, "world_id required"
+        world_id = int(world_id)
         self.worlds[world_id] = {
             "world_id": world_id,
             "phase": data.get("phase", 3),
+            "biome": data.get("biome", "Temperate"),
             "name": data.get("name", f"World {world_id}"),
             "address": data.get("address", f"127.0.0.1:{3979 + world_id}"),
             "description": data.get("description", "Federated Railway System"),
@@ -283,6 +285,8 @@ class UniverseAuthority:
             rec["address"] = data["address"]
         if "description" in data:
             rec["description"] = data["description"]
+        if "biome" in data:
+            rec["biome"] = data["biome"]
         if "active_clients" in data:
             rec["active_clients"] = int(data["active_clients"])
         if "max_clients" in data:
@@ -295,6 +299,21 @@ class UniverseAuthority:
             rec["status"] = "online"
         self._maybe_auto_save()
         return True, rec
+
+    def colonize_world(self, world_id, outpost_name=None):
+        if world_id is None:
+            return False, "world_id required"
+        world_id = int(world_id)
+        if world_id not in self.worlds:
+            return False, f"World {world_id} not found"
+        w = self.worlds[world_id]
+        if int(w.get("phase", 0)) != 4:
+            return False, f"World {world_id} is not an Expansion world (Phase 4)"
+        w["phase"] = 3
+        if outpost_name:
+            w["name"] = outpost_name
+        self._maybe_auto_save()
+        return True, w
 
     def get_world_directory(self, min_phase=0, prune_stale=False, stale_threshold=60.0):
         now = time.time()
@@ -1064,7 +1083,9 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         qs = parse_qs(url.query)
 
-        if url.path in ("/worlds", "/directory/worlds"):
+        if url.path in ("/health", "/status"):
+            self._send_json(200, {"status": "ok", "worlds": len(AUTHORITY.worlds)})
+        elif url.path in ("/worlds", "/directory/worlds"):
             min_phase = int(qs.get("min_phase", [0])[0])
             prune = qs.get("prune", ["false"])[0].lower() in ("true", "1")
             self._send_json(200, AUTHORITY.get_world_directory(min_phase=min_phase, prune_stale=prune))
@@ -1078,8 +1099,10 @@ class AuthorityHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"pending_transfers": pending})
         elif url.path == "/ledger/status":
             self._send_json(200, AUTHORITY.get_audit())
-        elif url.path in ("/ledger/audit_detailed", "/economy/conservation"):
-            self._send_json(200, AUTHORITY.get_detailed_audit())
+        elif url.path in ("/ledger/audit_detailed", "/economy/conservation", "/audit/commodity"):
+            audit = AUTHORITY.get_detailed_audit()
+            audit["conserved"] = audit.get("all_conserved", True)
+            self._send_json(200, audit)
         elif url.path == "/ledger/trade_balance":
             self._send_json(200, AUTHORITY.get_trade_balances())
         elif url.path == "/corridors/list":
@@ -1157,6 +1180,17 @@ class AuthorityHandler(BaseHTTPRequestHandler):
             self._send_json(200 if ok else 400, res if ok else {"error": res})
         elif url.path == "/directory/heartbeat":
             ok, res = AUTHORITY.update_heartbeat(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path in ("/worlds/colonize", "/directory/colonize") or (url.path.startswith("/worlds/") and url.path.endswith("/colonize")):
+            parts = url.path.strip("/").split("/")
+            world_id = data.get("world_id")
+            if len(parts) == 3 and parts[0] == "worlds" and parts[2] == "colonize":
+                try:
+                    world_id = int(parts[1])
+                except ValueError:
+                    pass
+            outpost_name = data.get("outpost_name")
+            ok, res = AUTHORITY.colonize_world(world_id, outpost_name)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
 
         # Routing & Transfer endpoints
