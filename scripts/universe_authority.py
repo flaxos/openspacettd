@@ -9,15 +9,20 @@ import argparse
 import base64
 import hashlib
 import json
+import os
 import secrets
 import sys
 import time
+from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 class UniverseAuthority:
-    def __init__(self):
+    def __init__(self, state_file=None):
+        self.state_file = state_file
         self.reset()
+        if self.state_file and os.path.exists(self.state_file):
+            self.load_from_disk(self.state_file)
 
     def reset(self):
         self.next_transfer_seq = 1
@@ -53,6 +58,90 @@ class UniverseAuthority:
             "total_tariffs_generated": 0
         }
 
+    def set_state_file(self, path):
+        self.state_file = path
+        if path and os.path.exists(path):
+            self.load_from_disk(path)
+
+    def export_state(self):
+        return {
+            "next_transfer_seq": self.next_transfer_seq,
+            "next_player_seq": self.next_player_seq,
+            "next_charter_seq": self.next_charter_seq,
+            "worlds": {str(k): v for k, v in self.worlds.items()},
+            "routes": {str(k): v for k, v in self.routes.items()},
+            "transfers": self.transfers,
+            "players": self.players,
+            "auth_tokens": self.auth_tokens,
+            "charters": self.charters,
+            "commodity_initiated": {str(k): v for k, v in self.commodity_initiated.items()},
+            "commodity_in_transit": {str(k): v for k, v in self.commodity_in_transit.items()},
+            "commodity_completed": {str(k): v for k, v in self.commodity_completed.items()},
+            "world_trade": self.world_trade,
+            "megacities": {str(k): v for k, v in self.megacities.items()},
+            "spaceports": {f"{w}:{s}": sp for (w, s), sp in self.spaceports.items()},
+            "conduits": {f"{w}:{c}": cond for (w, c), cond in self.conduits.items()},
+            "supply_chain_matrix": self.supply_chain_matrix
+        }
+
+    def import_state(self, state):
+        self.next_transfer_seq = state.get("next_transfer_seq", 1)
+        self.next_player_seq = state.get("next_player_seq", 1)
+        self.next_charter_seq = state.get("next_charter_seq", 1)
+        self.worlds = {int(k): v for k, v in state.get("worlds", {}).items()}
+        self.routes = {int(k): v for k, v in state.get("routes", {}).items()}
+        self.transfers = state.get("transfers", {})
+        self.players = state.get("players", {})
+        self.auth_tokens = state.get("auth_tokens", {})
+        self.charters = state.get("charters", {})
+        self.commodity_initiated = {int(k): v for k, v in state.get("commodity_initiated", {}).items()}
+        self.commodity_in_transit = {int(k): v for k, v in state.get("commodity_in_transit", {}).items()}
+        self.commodity_completed = {int(k): v for k, v in state.get("commodity_completed", {}).items()}
+        self.world_trade = state.get("world_trade", {})
+        self.megacities = {int(k): v for k, v in state.get("megacities", {}).items()}
+        self.spaceports = {}
+        for k, v in state.get("spaceports", {}).items():
+            parts = k.split(":")
+            if len(parts) == 2:
+                self.spaceports[(int(parts[0]), int(parts[1]))] = v
+        self.conduits = {}
+        for k, v in state.get("conduits", {}).items():
+            parts = k.split(":")
+            if len(parts) == 2:
+                self.conduits[(int(parts[0]), int(parts[1]))] = v
+        self.supply_chain_matrix = state.get("supply_chain_matrix", self.supply_chain_matrix)
+
+    def save_to_disk(self, filepath=None):
+        target = filepath or self.state_file
+        if not target:
+            return False, "No state file path configured"
+        try:
+            target_path = Path(target)
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path = target_path.with_suffix(".tmp")
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                json.dump(self.export_state(), f, indent=2)
+            tmp_path.replace(target_path)
+            return True, {"status": "saved", "path": str(target_path)}
+        except Exception as e:
+            return False, f"Failed to save state to {target}: {e}"
+
+    def load_from_disk(self, filepath=None):
+        target = filepath or self.state_file
+        if not target or not os.path.exists(target):
+            return False, f"State file {target} does not exist"
+        try:
+            with open(target, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            self.import_state(data)
+            return True, {"status": "loaded", "path": str(target)}
+        except Exception as e:
+            return False, f"Failed to load state from {target}: {e}"
+
+    def _maybe_auto_save(self):
+        if self.state_file:
+            self.save_to_disk()
+
     # -------------------------------------------------------------------------
     # Authentication & Accounts
     # -------------------------------------------------------------------------
@@ -82,6 +171,7 @@ class UniverseAuthority:
         }
         self.players[pid] = rec
         self.auth_tokens[token] = pid
+        self._maybe_auto_save()
         return True, {"player_id": pid, "token": token, "display_name": rec["display_name"]}
 
     def login_player(self, data):
@@ -94,6 +184,7 @@ class UniverseAuthority:
                 token = secrets.token_hex(24)
                 self.auth_tokens[token] = p["player_id"]
                 p["last_login"] = time.time()
+                self._maybe_auto_save()
                 return True, {"player_id": p["player_id"], "token": token, "display_name": p["display_name"]}
         return False, f"User '{username}' not found"
 
@@ -129,6 +220,7 @@ class UniverseAuthority:
             "created_at": time.time()
         }
         self.charters[cid] = rec
+        self._maybe_auto_save()
         return True, rec
 
     def list_companies(self, owner_filter=None, world_filter=None):
@@ -151,6 +243,7 @@ class UniverseAuthority:
         wid = int(wid)
         if wid not in self.charters[cid]["world_presences"]:
             self.charters[cid]["world_presences"].append(wid)
+            self._maybe_auto_save()
         return True, self.charters[cid]
 
     # -------------------------------------------------------------------------
@@ -173,6 +266,7 @@ class UniverseAuthority:
             "status": data.get("status", "online"),
             "last_heartbeat": time.time()
         }
+        self._maybe_auto_save()
         return True, self.worlds[world_id]
 
     def update_heartbeat(self, data):
@@ -199,6 +293,7 @@ class UniverseAuthority:
             rec["status"] = data["status"]
         else:
             rec["status"] = "online"
+        self._maybe_auto_save()
         return True, rec
 
     def get_world_directory(self, min_phase=0, prune_stale=False, stale_threshold=60.0):
@@ -243,6 +338,7 @@ class UniverseAuthority:
             "total_trains_dispatched": 0,
             "congestion_level": "CLEAR"
         }
+        self._maybe_auto_save()
         return True, self.routes[route_id]
 
     def update_corridor_limits(self, data):
@@ -259,6 +355,7 @@ class UniverseAuthority:
         if "transit_delay_sec" in data:
             route["transit_delay_sec"] = float(data["transit_delay_sec"])
         self.evaluate_corridor_congestion(route_id)
+        self._maybe_auto_save()
         return True, route
 
     def evaluate_corridor_congestion(self, route_id):
@@ -312,12 +409,38 @@ class UniverseAuthority:
         source_world = data.get("source_world")
         dest_world = data.get("dest_world")
         snapshot_b64 = data.get("snapshot_base64", "")
+        manifest_token = data.get("manifest_token", "")
         total_cargo = int(data.get("total_cargo", 0))
         cargo_breakdown = data.get("cargo_breakdown", {})
         valuation_credits = int(data.get("valuation_credits", 0))
 
         if source_world is None or dest_world is None:
             return False, "source_world and dest_world required"
+
+        dw_rec = self.worlds.get(dest_world)
+        if dw_rec:
+            dest_manifest = dw_rec.get("manifest_token", "")
+            if dest_manifest and manifest_token and dest_manifest != manifest_token:
+                return False, f"Content admission rejected: manifest mismatch (required: '{dest_manifest}', got: '{manifest_token}')"
+
+        # Validate snapshot base64 if supplied
+        if snapshot_b64:
+            try:
+                snap_bytes = base64.b64decode(snapshot_b64)
+            except Exception as e:
+                return False, f"Content admission rejected: malformed base64 snapshot ({e})"
+
+            if len(snap_bytes) < 4:
+                return False, "Content admission rejected: truncated snapshot payload"
+
+            if snap_bytes.startswith(b"OSCS"):
+                if len(snap_bytes) < 44:
+                    return False, "Content admission rejected: truncated OSCS snapshot header"
+                snap_manifest = snap_bytes[12:44].hex()
+                if dw_rec and dw_rec.get("manifest_token"):
+                    dest_manifest = dw_rec.get("manifest_token", "")
+                    if dest_manifest and len(dest_manifest) == 64 and dest_manifest.lower() != snap_manifest.lower():
+                        return False, f"Content admission rejected: snapshot manifest digest '{snap_manifest}' does not match destination manifest '{dest_manifest}'"
 
         tx_id = f"TRANSFER-X{self.next_transfer_seq:09d}"
         self.next_transfer_seq += 1
@@ -401,6 +524,10 @@ class UniverseAuthority:
             elif src_phase == 1:
                 self.supply_chain_matrix["core_export_cargo"] += cargo_units
 
+        orders = data.get("orders", [])
+        current_order_index = int(data.get("current_order_index", 0))
+        consist_id = data.get("consist_id", "")
+
         rec = {
             "transfer_id": tx_id,
             "source_world": source_world,
@@ -408,6 +535,10 @@ class UniverseAuthority:
             "source_gate": source_gate,
             "dest_gate": data.get("dest_gate", 0),
             "snapshot_base64": snapshot_b64,
+            "manifest_token": manifest_token or (dw_rec.get("manifest_token", "") if dw_rec else ""),
+            "orders": orders,
+            "current_order_index": current_order_index,
+            "consist_id": consist_id,
             "state": "LOCKED",
             "departure_time": 0.0,
             "arrival_time": time.time() + transit_delay,
@@ -420,6 +551,7 @@ class UniverseAuthority:
             "status_message": "Transfer locked and ready for departure"
         }
         self.transfers[tx_id] = rec
+        self._maybe_auto_save()
         return True, rec
 
     def depart_transfer(self, data):
@@ -435,6 +567,7 @@ class UniverseAuthority:
         rec["arrival_time"] = now + rec["transit_delay_sec"]
         rec["state"] = "IN_TRANSIT"
         rec["status_message"] = "Consist in transit through portal wormhole"
+        self._maybe_auto_save()
         return True, rec
 
     def query_pending(self, dest_world):
@@ -454,8 +587,13 @@ class UniverseAuthority:
         if rec["dest_world"] != dest_world or rec["state"] != "IN_TRANSIT":
             return False, f"Transfer {tx_id} not available for claim by world {dest_world}"
 
+        claim_token = data.get("manifest_token")
+        if claim_token and rec.get("manifest_token") and claim_token != rec["manifest_token"]:
+            return False, f"Content admission rejected on claim: manifest mismatch"
+
         rec["state"] = "ARRIVAL_PENDING"
         rec["status_message"] = "Claimed by destination world; awaiting emergence clearance"
+        self._maybe_auto_save()
         return True, rec
 
     def confirm_arrival(self, data):
@@ -473,6 +611,12 @@ class UniverseAuthority:
         if success:
             rec["state"] = "COMPLETED"
             rec["status_message"] = "Consist emerged and materialized successfully"
+
+            # Advance order index if consist has an itinerary
+            if rec.get("orders"):
+                advance_order = data.get("advance_order", True)
+                if advance_order:
+                    rec["current_order_index"] = (rec.get("current_order_index", 0) + 1) % len(rec["orders"])
 
             # Accounting: move commodity from transit to completed
             breakdown = rec.get("cargo_breakdown", {})
@@ -502,6 +646,8 @@ class UniverseAuthority:
         else:
             rec["state"] = "RECOVERY_REQUIRED"
             rec["status_message"] = reason or "Emergence failed on destination server"
+
+        self._maybe_auto_save()
         return True, rec
 
     def quarantine_transfers(self, data):
@@ -518,6 +664,7 @@ class UniverseAuthority:
                 rec["status_message"] = reason or f"Quarantined: destination world {world_id} offline"
                 quarantined.append(tx_id)
 
+        self._maybe_auto_save()
         return True, {
             "world_id": world_id,
             "quarantined_count": len(quarantined),
@@ -539,6 +686,7 @@ class UniverseAuthority:
                 rec["status_message"] = "Recovered from quarantine; ready for emergence"
                 recovered.append(tx_id)
 
+        self._maybe_auto_save()
         return True, {
             "world_id": world_id,
             "recovered_count": len(recovered),
@@ -959,6 +1107,20 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         elif url.path == "/transfers/quarantined":
             wid = qs.get("world", qs.get("dest_world", [None]))[0]
             self._send_json(200, AUTHORITY.get_quarantined_transfers(dest_world=int(wid) if wid is not None else None))
+        elif url.path == "/corridors/congestion":
+            rid = qs.get("route_id", [None])[0]
+            if rid is not None:
+                try:
+                    rid = int(rid)
+                except ValueError:
+                    pass
+                cong = AUTHORITY.evaluate_corridor_congestion(rid)
+                self._send_json(200, {"route_id": rid, "congestion_level": cong})
+            else:
+                congs = {r["route_id"]: AUTHORITY.evaluate_corridor_congestion(r["route_id"]) for r in AUTHORITY.routes.values()}
+                self._send_json(200, {"congestion_levels": congs})
+        elif url.path == "/admin/state":
+            self._send_json(200, AUTHORITY.export_state())
         elif url.path.startswith("/transfers/"):
             tx_id = url.path.split("/")[-1]
             rec = AUTHORITY.transfers.get(tx_id)
@@ -1048,6 +1210,16 @@ class AuthorityHandler(BaseHTTPRequestHandler):
             ok, res = AUTHORITY.pipe_conduit_minerals(data)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
 
+        # State persistence endpoints
+        elif url.path == "/admin/state/save":
+            filepath = data.get("filepath", AUTHORITY.state_file)
+            ok, res = AUTHORITY.save_to_disk(filepath)
+            self._send_json(200 if ok else 500, res if ok else {"error": res})
+        elif url.path == "/admin/state/load":
+            filepath = data.get("filepath", AUTHORITY.state_file)
+            ok, res = AUTHORITY.load_from_disk(filepath)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+
         elif url.path == "/reset":
             AUTHORITY.reset()
             self._send_json(200, {"status": "reset"})
@@ -1062,7 +1234,11 @@ def main():
     parser = argparse.ArgumentParser(description="OpenSpaceTTD Universe Authority Daemon")
     parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind")
     parser.add_argument("--port", type=int, default=8080, help="Port to listen on")
+    parser.add_argument("--state-file", default=None, help="Path to state persistence JSON file")
     args = parser.parse_args()
+
+    if args.state_file:
+        AUTHORITY.set_state_file(args.state_file)
 
     server = HTTPServer((args.host, args.port), AuthorityHandler)
     print(f"[UniverseAuthority] Running on http://{args.host}:{args.port}")

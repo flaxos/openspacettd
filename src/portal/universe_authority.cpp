@@ -187,7 +187,7 @@ std::string UniverseAuthorityService::InitiateTransfer(
 	uint32_t transit_duration_ticks,
 	FreightPriority priority)
 {
-	if (source_world == INVALID_WORLD || dest_world == INVALID_WORLD || !snapshot_bytes.Succeeded()) {
+	if (source_world == INVALID_WORLD || dest_world == INVALID_WORLD || !snapshot_bytes.Succeeded() || snapshot_bytes.bytes.empty()) {
 		return "";
 	}
 
@@ -352,6 +352,11 @@ bool UniverseAuthorityService::ConfirmTransferArrival(
 	if (success) {
 		it->second.state = TransferState::Completed;
 		it->second.status_message = "Delivered successfully";
+
+		/* Advance order progression if consist has an itinerary */
+		if (!it->second.snapshot.orders.empty()) {
+			it->second.snapshot.current_order_index = static_cast<uint16_t>((it->second.snapshot.current_order_index + 1) % it->second.snapshot.orders.size());
+		}
 
 		/* Update detailed commodity ledger and trade balances */
 		for (const auto &[cargo_type, count] : it->second.cargo_by_type) {
