@@ -65,6 +65,7 @@
 #include "table/strings.h"
 
 #include "portal/portal_registry.h"
+#include "portal/federation_identity.h"
 
 #include "safeguards.h"
 
@@ -837,6 +838,7 @@ void Vehicle::HandlePathfindingResult(bool path_found)
 void Vehicle::PreDestructor()
 {
 	PortalRegistry::ClearPortalTransit(this->index);
+	FederationIdentityRegistry::ReleaseVehicle(this->index);
 
 	if (CleaningPool()) return;
 

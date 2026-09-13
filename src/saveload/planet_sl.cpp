@@ -14,6 +14,7 @@
 #include "../portal/portal_registry.h"
 #include "../portal/spaceport_manager.h"
 #include "../portal/edge_conduit.h"
+#include "../portal/federation_identity.h"
 
 #include "../safeguards.h"
 
@@ -242,6 +243,138 @@ struct PRTXChunkHandler : ChunkHandler {
 	}
 };
 
+/** One metadata row followed by deterministic anchor-to-sequence mappings. */
+struct SlFederationIdentity {
+	uint8_t kind;
+	uint32_t anchor_vehicle;
+	uint64_t namespace_high;
+	uint64_t namespace_low;
+	uint64_t sequence;
+	uint64_t next_sequence;
+};
+
+static const SaveLoad _federation_identity_desc[] = {
+	SLE_VAR(SlFederationIdentity, kind,           VarTypes::U8),
+	SLE_VAR(SlFederationIdentity, anchor_vehicle, VarTypes::U32),
+	SLE_VAR(SlFederationIdentity, namespace_high, VarTypes::U64),
+	SLE_VAR(SlFederationIdentity, namespace_low,  VarTypes::U64),
+	SLE_VAR(SlFederationIdentity, sequence,       VarTypes::U64),
+	SLE_VAR(SlFederationIdentity, next_sequence,  VarTypes::U64),
+};
+
+/** Chunk handler for federation namespace and global consist IDs (FIDS). */
+struct FIDSChunkHandler : ChunkHandler {
+	FIDSChunkHandler() : ChunkHandler("FIDS", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_federation_identity_desc);
+		FederationNamespace name_space = FederationIdentityRegistry::GetNamespace();
+		SlFederationIdentity metadata{
+			.kind = 0,
+			.anchor_vehicle = VehicleID::Invalid().base(),
+			.namespace_high = name_space.high,
+			.namespace_low = name_space.low,
+			.sequence = 0,
+			.next_sequence = FederationIdentityRegistry::GetNextSequence(),
+		};
+		SlSetArrayIndex(0);
+		SlObject(&metadata, _federation_identity_desc);
+
+		int index = 1;
+		for (const auto &[anchor, sequence] : FederationIdentityRegistry::GetMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 1,
+				.anchor_vehicle = anchor,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		for (const auto &[company, sequence] : FederationIdentityRegistry::GetCompanyMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 2,
+				.anchor_vehicle = company,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		for (const auto &[station, sequence] : FederationIdentityRegistry::GetStationMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 3,
+				.anchor_vehicle = station,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		for (const auto &[source_key, sequence] : FederationIdentityRegistry::GetSourceMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 4,
+				.anchor_vehicle = source_key,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		SlFederationIdentity counters{
+			.kind = 5,
+			.anchor_vehicle = 0,
+			.namespace_high = FederationIdentityRegistry::GetNextSourceSequence(),
+			.namespace_low = 0,
+			.sequence = FederationIdentityRegistry::GetNextCompanySequence(),
+			.next_sequence = FederationIdentityRegistry::GetNextStationSequence(),
+		};
+		SlSetArrayIndex(index++);
+		SlObject(&counters, _federation_identity_desc);
+	}
+
+	void Load() const override
+	{
+		FederationIdentityRegistry::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_federation_identity_desc);
+		SlFederationIdentity record{};
+		while (SlIterateArray() != -1) {
+			record = {};
+			SlObject(&record, slt);
+			if (record.kind == 0) {
+				FederationIdentityRegistry::RestoreState({record.namespace_high, record.namespace_low}, record.next_sequence);
+			} else if (record.kind == 1) {
+				FederationIdentityRegistry::RestoreMapping(VehicleID{record.anchor_vehicle}, record.sequence);
+			} else if (record.kind == 2) {
+				FederationIdentityRegistry::RestoreCompanyMapping(CompanyID{static_cast<uint8_t>(record.anchor_vehicle)}, record.sequence);
+			} else if (record.kind == 3) {
+				FederationIdentityRegistry::RestoreStationMapping(StationID{static_cast<uint16_t>(record.anchor_vehicle)}, record.sequence);
+			} else if (record.kind == 4) {
+				FederationIdentityRegistry::RestoreSourceMapping(record.anchor_vehicle, record.sequence);
+			} else if (record.kind == 5) {
+				FederationIdentityRegistry::RestoreCounters(record.sequence, record.next_sequence, record.namespace_high);
+			}
+		}
+		FederationIdentityRegistry::PruneStaleMappings();
+		FederationIdentityRegistry::PruneStaleCompanyMappings();
+		FederationIdentityRegistry::PruneStaleStationMappings();
+		FederationIdentityRegistry::PruneStaleSourceMappings();
+	}
+};
+
 /** Temporary storage for Spaceport serialization. */
 struct SlSpaceport {
 	uint32_t station_id;
@@ -377,6 +510,7 @@ struct CONDChunkHandler : ChunkHandler {
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
+static const FIDSChunkHandler FIDS;
 static const SPRTChunkHandler SPRT;
 static const CONDChunkHandler COND;
 
@@ -384,6 +518,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
 	PORT,
 	PRTX,
+	FIDS,
 	SPRT,
 	COND,
 };

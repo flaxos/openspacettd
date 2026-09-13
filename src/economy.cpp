@@ -51,6 +51,7 @@
 #include "portal/planet_manager.h"
 #include "portal/spaceport_manager.h"
 #include "portal/edge_conduit.h"
+#include "portal/portal_registry.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -663,6 +664,7 @@ static void CompaniesGenStatistics()
 			cost.AddCost(CanalMaintenanceCost(c->infrastructure.water));
 			cost.AddCost(StationMaintenanceCost(c->infrastructure.station));
 			cost.AddCost(AirportMaintenanceCost(c->index));
+			cost.AddCost(PortalRegistry::GetCompanyPortalMaintenanceCost(c->index));
 
 			SubtractMoneyFromCompany(c->index, cost);
 		}

@@ -17,6 +17,9 @@
 #include "../town.h"
 #include "../window_func.h"
 #include "../table/strings.h"
+#include "universe_authority.h"
+#include "consist_snapshot.h"
+#include "content_manifest.h"
 
 #include <algorithm>
 
@@ -159,15 +162,149 @@ void SpaceportManager::ProcessOffWorldTrade()
 		uint32_t amount = CalculateTradeCargoProduction(info);
 		if (amount == 0) continue;
 
-		StationList stations;
-		stations.insert(st);
-		Source source = (st->town != nullptr) ? Source{st->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
-		MoveGoodsToStation(cargo, amount, source, stations);
-
 		info.total_offworld_cargo_generated += amount;
 		info.supplies_received /= 2; // Decay for next month
+
+		if (info.auto_dispatch && info.target_dest_world != INVALID_WORLD) {
+			BufferExportCargo(station_id, cargo, amount);
+			DispatchInterplanetaryTrade(station_id, 0);
+		} else {
+			StationList stations;
+			stations.insert(st);
+			Source source = (st->town != nullptr) ? Source{st->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
+			MoveGoodsToStation(cargo, amount, source, stations);
+		}
+
 		SetWindowDirty(WindowClass::StationView, station_id);
 	}
+}
+
+bool SpaceportManager::ConfigureSpaceportBridge(StationID station, WorldID dest_world, uint32_t route_id, bool auto_dispatch)
+{
+	SpaceportInfo *info = GetSpaceportMutable(station);
+	if (info == nullptr) return false;
+
+	info->target_dest_world = dest_world;
+	info->target_route_id = route_id;
+	info->auto_dispatch = auto_dispatch;
+	SetWindowDirty(WindowClass::StationView, station);
+	return true;
+}
+
+void SpaceportManager::BufferExportCargo(StationID station, CargoType cargo, uint32_t amount)
+{
+	SpaceportInfo *info = GetSpaceportMutable(station);
+	if (info == nullptr || amount == 0) return;
+
+	info->buffered_cargo_type = cargo;
+	info->buffered_export_cargo += amount;
+	SetWindowDirty(WindowClass::StationView, station);
+}
+
+std::string SpaceportManager::DispatchInterplanetaryTrade(StationID station, uint32_t max_amount)
+{
+	SpaceportInfo *info = GetSpaceportMutable(station);
+	if (info == nullptr || info->target_dest_world == INVALID_WORLD) return "";
+
+	uint32_t amount = info->buffered_export_cargo;
+	if (max_amount > 0 && max_amount < amount) {
+		amount = max_amount;
+	}
+	if (amount == 0) return "";
+
+	CargoType cargo = info->buffered_cargo_type;
+	if (!IsValidCargoType(cargo)) {
+		cargo = GetPreferredOffWorldCargo();
+	}
+
+	/* Build synthetic consist snapshot to represent interplanetary cargo launch */
+	ConsistSnapshot snapshot;
+	snapshot.direction = to_underlying(Direction::NE);
+	snapshot.speed = 100;
+	snapshot.acceleration = 10;
+
+	FederationNamespace ns{0x5350414345504F52ULL /* "SPACEPOR" */, static_cast<uint64_t>(station.base())};
+	snapshot.consist_id = GlobalConsistID{.name_space = ns, .sequence = info->total_interplanetary_dispatched + 1};
+	snapshot.company_id = GlobalCompanyID{.name_space = ns, .sequence = 1};
+	snapshot.owner = snapshot.company_id.ToOwnerToken();
+
+	ContentManifestResult manifest_res = ContentManifestCodec::CaptureCurrent();
+	if (manifest_res.Succeeded()) {
+		ContentManifestTokenResult token_res = ContentManifestCodec::Digest(*manifest_res.manifest);
+		if (token_res.Succeeded()) {
+			snapshot.content_manifest = token_res.token;
+		}
+	}
+
+	ConsistSnapshotUnit engine;
+	engine.engine_type = 0;
+	engine.cargo_type = 0;
+	engine.cargo_capacity = 0;
+	engine.cargo_count = 0;
+	engine.subtype = 1;
+	snapshot.units.push_back(engine);
+
+	ConsistSnapshotUnit wagon;
+	wagon.engine_type = 1;
+	wagon.cargo_type = static_cast<uint8_t>(cargo);
+	wagon.cargo_capacity = static_cast<uint16_t>(amount);
+	wagon.cargo_count = amount;
+	wagon.subtype = 0;
+	wagon.cargo_source.name_space = ns;
+	wagon.cargo_source.source_sequence = static_cast<uint64_t>(station.base()) + 1;
+	wagon.cargo_source.origin_world = info->world_id;
+	snapshot.units.push_back(wagon);
+
+	ConsistSnapshotBytes snap_bytes = ConsistSnapshotCodec::Encode(snapshot);
+	if (!snap_bytes.Succeeded()) return "";
+
+	auto &auth = UniverseAuthorityService::Instance();
+	std::string tx_id = auth.InitiateTransfer(
+		info->world_id,
+		info->target_dest_world,
+		0,
+		0,
+		snap_bytes,
+		100,
+		FreightPriority::Express
+	);
+
+	if (!tx_id.empty()) {
+		auth.DepartTransfer(tx_id, 0);
+		auth.RecordSpaceportThroughput(amount);
+		info->buffered_export_cargo -= amount;
+		info->total_interplanetary_dispatched += amount;
+		SetWindowDirty(WindowClass::StationView, station);
+	}
+
+	return tx_id;
+}
+
+bool SpaceportManager::ReceiveInterplanetaryConsist(StationID station, const UniverseTransferRecord &transfer)
+{
+	SpaceportInfo *info = GetSpaceportMutable(station);
+	if (info == nullptr) return false;
+
+	Station *st = Station::GetIfValid(station);
+	if (st == nullptr) return false;
+
+	Source source = (st->town != nullptr) ? Source{st->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
+
+	for (const auto &[cargo_type, count] : transfer.cargo_by_type) {
+		if (count > 0 && cargo_type < NUM_CARGO) {
+			CargoType ct{static_cast<uint8_t>(cargo_type)};
+			GoodsEntry &ge = st->goods[ct];
+			StationID next = ge.GetVia(st->index);
+			if (CargoPacket::CanAllocateItem()) {
+				ge.GetOrCreateData().cargo.Append(CargoPacket::Create(st->index, count, source), next);
+			}
+		}
+	}
+
+	info->total_interplanetary_received += transfer.total_cargo_units;
+	UniverseAuthorityService::Instance().RecordSpaceportThroughput(transfer.total_cargo_units);
+	SetWindowDirty(WindowClass::StationView, station);
+	return true;
 }
 
 void SpaceportManager::Reset()

@@ -33,6 +33,12 @@ struct EdgeConduit {
 	uint32_t production_rate{50}; ///< Base monthly production rate in units.
 	Owner owner{INVALID_OWNER};
 	uint32_t total_produced{0};
+
+	/* Sprint 20 Interplanetary Feeder fields */
+	bool direct_feeder_enabled{false};          ///< Whether raw extraction feeds directly into inter-world freight queues.
+	WorldID target_dest_world{INVALID_WORLD};   ///< Remote destination world for direct mineral piping.
+	uint32_t target_route_id{0};                ///< Inter-world corridor route ID, or 0 for auto-matching.
+	uint32_t total_piped_interplanetary{0};     ///< Cumulative bulk cargo units piped across federation corridors.
 };
 
 /** Fully validated one-tile Edge Conduit footprint. */
@@ -92,10 +98,16 @@ public:
 
 	/**
 	 * Periodic production loop for edge conduits.
-	 * Queries nearby rail stations and feeds raw minerals directly into catchment bays.
+	 * Queries nearby rail stations and feeds raw minerals directly into catchment bays,
+	 * or dispatches directly into inter-world freight queues if feeder mode is active.
 	 * Applies world phase multipliers (e.g. Frontier worlds receive +100% extraction bonus).
 	 */
 	static void ProduceAllConduits();
+
+	/**
+	 * Configure direct inter-world feeder mode for an edge conduit.
+	 */
+	static bool ConfigureDirectFeeder(TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id = 0);
 
 	/**
 	 * Calculate effective monthly production rate for an edge conduit.

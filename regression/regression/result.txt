@@ -1981,7 +1981,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetRoadVehicleTypeForCargo(): 1
   Cargo 5
     IsValidCargo():          true
-    GetName():               'Goods'
+    GetName():               'Manufactured Goods & Colony Supplies'
     GetCargoLabel():         'GOOD'
     IsFreight():             true
     HasCargoClass():         false
@@ -1994,7 +1994,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetRoadVehicleTypeForCargo(): 1
   Cargo 6
     IsValidCargo():          true
-    GetName():               'Grain'
+    GetName():               'Bio-Grain'
     GetCargoLabel():         'GRAI'
     IsFreight():             true
     HasCargoClass():         false
@@ -2020,7 +2020,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetRoadVehicleTypeForCargo(): 1
   Cargo 8
     IsValidCargo():          true
-    GetName():               'Iron Ore'
+    GetName():               'Heavy Iron Ore'
     GetCargoLabel():         'IORE'
     IsFreight():             true
     HasCargoClass():         false
@@ -2033,7 +2033,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetRoadVehicleTypeForCargo(): 1
   Cargo 9
     IsValidCargo():          true
-    GetName():               'Steel'
+    GetName():               'Structural Alloys'
     GetCargoLabel():         'STEL'
     IsFreight():             true
     HasCargoClass():         false
@@ -2046,7 +2046,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetRoadVehicleTypeForCargo(): 1
   Cargo 10
     IsValidCargo():          true
-    GetName():               'Valuables'
+    GetName():               'Valuables & Rare Crystals'
     GetCargoLabel():         'VALU'
     IsFreight():             true
     HasCargoClass():         false
@@ -2169,7 +2169,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetAllRailTypes():  null
   Engine 0
     IsValidEngine():    true
-    GetName():          Kirby Paul Tank (Steam)
+    GetName():          CST Pioneer 0-6-0 'Surveyor' (Steam)
     GetCargoType():     255
     CanRefitCargo():    false
     GetCapacity():      -1
@@ -2322,7 +2322,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetAllRailTypes():  null
   Engine 8
     IsValidEngine():    true
-    GetName():          Chaney 'Jubilee' (Steam)
+    GetName():          Commonwealth 'Jubilee' 4-6-0 (Steam)
     GetCargoType():     255
     CanRefitCargo():    false
     GetCapacity():      -1
@@ -2342,7 +2342,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 9
     IsValidEngine():    true
-    GetName():          Ginzu 'A4' (Steam)
+    GetName():          CST 'A4' Express Streamliner (Steam)
     GetCargoType():     255
     CanRefitCargo():    false
     GetCapacity():      -1
@@ -2685,7 +2685,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     GetAllRailTypes():  null
   Engine 27
     IsValidEngine():    true
-    GetName():          Passenger Carriage
+    GetName():          Commonwealth Passenger Coach
     GetCargoType():     0
     CanRefitCargo():    false
     GetCapacity():      40
@@ -2705,7 +2705,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 28
     IsValidEngine():    true
-    GetName():          Data Van
+    GetName():          Data Crystal Van
     GetCargoType():     2
     CanRefitCargo():    false
     GetCapacity():      30
@@ -2725,7 +2725,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 29
     IsValidEngine():    true
-    GetName():          Coal Truck
+    GetName():          Carbon & Coal Truck
     GetCargoType():     1
     CanRefitCargo():    true
     GetCapacity():      30
@@ -2745,7 +2745,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 30
     IsValidEngine():    true
-    GetName():          Oil Tanker
+    GetName():          Oil & Petrochemical Tanker
     GetCargoType():     3
     CanRefitCargo():    false
     GetCapacity():      30
@@ -2785,7 +2785,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 32
     IsValidEngine():    true
-    GetName():          Goods Van
+    GetName():          Manufactured Goods & Colony Supplies Van
     GetCargoType():     5
     CanRefitCargo():    false
     GetCapacity():      25
@@ -2805,7 +2805,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 33
     IsValidEngine():    true
-    GetName():          Grain Hopper
+    GetName():          Bio-Grain & Biomass Hopper
     GetCargoType():     6
     CanRefitCargo():    false
     GetCapacity():      30
@@ -2825,7 +2825,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 34
     IsValidEngine():    true
-    GetName():          Wood Truck
+    GetName():          Timber Truck
     GetCargoType():     7
     CanRefitCargo():    false
     GetCapacity():      30
@@ -2845,7 +2845,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 35
     IsValidEngine():    true
-    GetName():          Iron Ore Hopper
+    GetName():          Mineral & Heavy Ore Hopper
     GetCargoType():     8
     CanRefitCargo():    false
     GetCapacity():      30
@@ -2865,7 +2865,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 36
     IsValidEngine():    true
-    GetName():          Steel Truck
+    GetName():          Structural Alloys Truck
     GetCargoType():     9
     CanRefitCargo():    false
     GetCapacity():      20
@@ -2885,7 +2885,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
       0
   Engine 37
     IsValidEngine():    true
-    GetName():          Armoured Van
+    GetName():          Secure Data Crystal & Valuables Van
     GetCargoType():     10
     CanRefitCargo():    false
     GetCapacity():      20
@@ -7156,7 +7156,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
   GetIndustryCount():  71
   Industry 0
     IsValidIndustry(): true
-    GetName():         Kennville Oil Refinery
+    GetName():         Kennville Petrochemical & Polymer Cracker
     GetLocation():     19695
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7300,7 +7300,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 15
     IsValidIndustry(): true
-    GetName():         Trenningville Coal Mine
+    GetName():         Trenningville Carbon & Mineral Extraction Pit
     GetLocation():     51854
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  126
@@ -7308,7 +7308,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 16
     IsValidIndustry(): true
-    GetName():         Kennville Coal Mine
+    GetName():         Kennville Carbon & Mineral Extraction Pit
     GetLocation():     11734
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  99
@@ -7316,7 +7316,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 17
     IsValidIndustry(): true
-    GetName():         Great Hinninghall Coal Mine
+    GetName():         Great Hinninghall Carbon & Mineral Extraction Pit
     GetLocation():     13947
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  171
@@ -7324,7 +7324,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 18
     IsValidIndustry(): true
-    GetName():         Little Frutford Coal Mine
+    GetName():         Little Frutford Carbon & Mineral Extraction Pit
     GetLocation():     23682
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  126
@@ -7332,7 +7332,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 19
     IsValidIndustry(): true
-    GetName():         Hutford Coal Mine
+    GetName():         Hutford Carbon & Mineral Extraction Pit
     GetLocation():     57429
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  99
@@ -7340,7 +7340,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 20
     IsValidIndustry(): true
-    GetName():         Mendston Coal Mine
+    GetName():         Mendston Carbon & Mineral Extraction Pit
     GetLocation():     8562
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  171
@@ -7348,7 +7348,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 21
     IsValidIndustry(): true
-    GetName():         Tonston Coal Mine
+    GetName():         Tonston Carbon & Mineral Extraction Pit
     GetLocation():     29147
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  117
@@ -7356,7 +7356,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 22
     IsValidIndustry(): true
-    GetName():         Quarfingfield Coal Mine
+    GetName():         Quarfingfield Carbon & Mineral Extraction Pit
     GetLocation():     27822
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  153
@@ -7364,7 +7364,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 23
     IsValidIndustry(): true
-    GetName():         Muningville Coal Mine
+    GetName():         Muningville Carbon & Mineral Extraction Pit
     GetLocation():     43035
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  90
@@ -7372,7 +7372,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 24
     IsValidIndustry(): true
-    GetName():         Grinnway Coal Mine
+    GetName():         Grinnway Carbon & Mineral Extraction Pit
     GetLocation():     17943
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  40
@@ -7380,7 +7380,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 25
     IsValidIndustry(): true
-    GetName():         Satown Power Station
+    GetName():         Satown Planetary Fusion Substation
     GetLocation():     48182
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7388,7 +7388,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 26
     IsValidIndustry(): true
-    GetName():         Tunford Power Station
+    GetName():         Tunford Planetary Fusion Substation
     GetLocation():     33934
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7396,7 +7396,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 27
     IsValidIndustry(): true
-    GetName():         Quarfingfield Power Station
+    GetName():         Quarfingfield Planetary Fusion Substation
     GetLocation():     23714
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7404,7 +7404,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 28
     IsValidIndustry(): true
-    GetName():         Kennville Power Station
+    GetName():         Kennville Planetary Fusion Substation
     GetLocation():     20170
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7412,7 +7412,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 29
     IsValidIndustry(): true
-    GetName():         Nuntburg Power Station
+    GetName():         Nuntburg Planetary Fusion Substation
     GetLocation():     6685
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7420,7 +7420,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 30
     IsValidIndustry(): true
-    GetName():         Beburg Power Station
+    GetName():         Beburg Planetary Fusion Substation
     GetLocation():     29022
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7428,7 +7428,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 31
     IsValidIndustry(): true
-    GetName():         Beningville Power Station
+    GetName():         Beningville Planetary Fusion Substation
     GetLocation():     44160
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -7484,7 +7484,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 38
     IsValidIndustry(): true
-    GetName():         Fort Frindston Iron Ore Mine
+    GetName():         Fort Frindston Heavy Metallurgical Ore Mine
     GetLocation():     17742
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  108
@@ -7492,7 +7492,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 39
     IsValidIndustry(): true
-    GetName():         Tonston Iron Ore Mine
+    GetName():         Tonston Heavy Metallurgical Ore Mine
     GetLocation():     25545
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  30
@@ -7500,7 +7500,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 40
     IsValidIndustry(): true
-    GetName():         Fudhattan Iron Ore Mine
+    GetName():         Fudhattan Heavy Metallurgical Ore Mine
     GetLocation():     47838
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  72
@@ -7508,7 +7508,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 41
     IsValidIndustry(): true
-    GetName():         Nuntburg Iron Ore Mine
+    GetName():         Nuntburg Heavy Metallurgical Ore Mine
     GetLocation():     8763
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  72
@@ -7516,7 +7516,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 42
     IsValidIndustry(): true
-    GetName():         Larborough Iron Ore Mine
+    GetName():         Larborough Heavy Metallurgical Ore Mine
     GetLocation():     60866
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  81
@@ -7524,7 +7524,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 43
     IsValidIndustry(): true
-    GetName():         Tunford Iron Ore Mine
+    GetName():         Tunford Heavy Metallurgical Ore Mine
     GetLocation():     41155
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  108
@@ -7532,7 +7532,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 44
     IsValidIndustry(): true
-    GetName():         Chenfingbourne Iron Ore Mine
+    GetName():         Chenfingbourne Heavy Metallurgical Ore Mine
     GetLocation():     19529
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  135
@@ -7540,7 +7540,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 45
     IsValidIndustry(): true
-    GetName():         Natborough Farm
+    GetName():         Natborough Bio-Agricultural Complex / Agri-Plains
     GetLocation():     52931
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  81
@@ -7551,7 +7551,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 46
     IsValidIndustry(): true
-    GetName():         Larborough Farm
+    GetName():         Larborough Bio-Agricultural Complex / Agri-Plains
     GetLocation():     59604
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  81
@@ -7562,7 +7562,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 47
     IsValidIndustry(): true
-    GetName():         Chenfingbourne Farm
+    GetName():         Chenfingbourne Bio-Agricultural Complex / Agri-Plains
     GetLocation():     24366
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  63
@@ -7573,7 +7573,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 48
     IsValidIndustry(): true
-    GetName():         Wruntown Farm
+    GetName():         Wruntown Bio-Agricultural Complex / Agri-Plains
     GetLocation():     36847
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  72
@@ -7584,7 +7584,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 49
     IsValidIndustry(): true
-    GetName():         Little Frutford Farm
+    GetName():         Little Frutford Bio-Agricultural Complex / Agri-Plains
     GetLocation():     28287
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  90
@@ -7595,7 +7595,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 50
     IsValidIndustry(): true
-    GetName():         Hutford Farm
+    GetName():         Hutford Bio-Agricultural Complex / Agri-Plains
     GetLocation():     57432
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  117
@@ -7606,7 +7606,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 51
     IsValidIndustry(): true
-    GetName():         Tonston Farm
+    GetName():         Tonston Bio-Agricultural Complex / Agri-Plains
     GetLocation():     23519
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  81
@@ -7617,7 +7617,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 52
     IsValidIndustry(): true
-    GetName():         Nuntburg Farm
+    GetName():         Nuntburg Bio-Agricultural Complex / Agri-Plains
     GetLocation():     10773
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  126
@@ -7628,7 +7628,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 53
     IsValidIndustry(): true
-    GetName():         Satown Farm
+    GetName():         Satown Bio-Agricultural Complex / Agri-Plains
     GetLocation():     48206
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  40
@@ -7639,7 +7639,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 54
     IsValidIndustry(): true
-    GetName():         Quarfingfield Farm
+    GetName():         Quarfingfield Bio-Agricultural Complex / Agri-Plains
     GetLocation():     24005
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  72
@@ -7650,7 +7650,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      -1
   Industry 55
     IsValidIndustry(): true
-    GetName():         Little Frutford Steel Mill
+    GetName():         Little Frutford Alloy Smelting & Foundry Complex
     GetLocation():     21107
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7661,7 +7661,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 56
     IsValidIndustry(): true
-    GetName():         Quarfingfield Steel Mill
+    GetName():         Quarfingfield Alloy Smelting & Foundry Complex
     GetLocation():     23727
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7672,7 +7672,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 57
     IsValidIndustry(): true
-    GetName():         Beburg Steel Mill
+    GetName():         Beburg Alloy Smelting & Foundry Complex
     GetLocation():     41813
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7683,7 +7683,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 58
     IsValidIndustry(): true
-    GetName():         Franinghead Steel Mill
+    GetName():         Franinghead Alloy Smelting & Foundry Complex
     GetLocation():     8852
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7694,7 +7694,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 59
     IsValidIndustry(): true
-    GetName():         Larborough Steel Mill
+    GetName():         Larborough Alloy Smelting & Foundry Complex
     GetLocation():     59867
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7705,7 +7705,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 60
     IsValidIndustry(): true
-    GetName():         Satown Steel Mill
+    GetName():         Satown Alloy Smelting & Foundry Complex
     GetLocation():     55360
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7716,7 +7716,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 61
     IsValidIndustry(): true
-    GetName():         Fratston Steel Mill
+    GetName():         Fratston Alloy Smelting & Foundry Complex
     GetLocation():     52953
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7727,7 +7727,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 62
     IsValidIndustry(): true
-    GetName():         Chenfingbourne Factory
+    GetName():         Chenfingbourne Heavy Manufacturing & Assembly Fab
     GetLocation():     24893
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7744,7 +7744,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 63
     IsValidIndustry(): true
-    GetName():         Fort Frindston Factory
+    GetName():         Fort Frindston Heavy Manufacturing & Assembly Fab
     GetLocation():     20819
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7761,7 +7761,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 64
     IsValidIndustry(): true
-    GetName():         Fudhattan Factory
+    GetName():         Fudhattan Heavy Manufacturing & Assembly Fab
     GetLocation():     46278
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7778,7 +7778,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 65
     IsValidIndustry(): true
-    GetName():         Prundinghall Factory
+    GetName():         Prundinghall Heavy Manufacturing & Assembly Fab
     GetLocation():     53096
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7795,7 +7795,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 66
     IsValidIndustry(): true
-    GetName():         Kennville Factory
+    GetName():         Kennville Heavy Manufacturing & Assembly Fab
     GetLocation():     14818
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7812,7 +7812,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 67
     IsValidIndustry(): true
-    GetName():         Muningville Factory
+    GetName():         Muningville Heavy Manufacturing & Assembly Fab
     GetLocation():     34375
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7829,7 +7829,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 68
     IsValidIndustry(): true
-    GetName():         Trenningville Factory
+    GetName():         Trenningville Heavy Manufacturing & Assembly Fab
     GetLocation():     44181
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  -1
@@ -7846,7 +7846,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 69
     IsValidIndustry(): true
-    GetName():         Wruntown Oil Refinery
+    GetName():         Wruntown Petrochemical & Polymer Cracker
     GetLocation():     39663
     IsCargoAccepted(): 0
 	   GetLastMonthProduction():  0
@@ -7857,7 +7857,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
 	   GetStockpiledCargo():      0
   Industry 70
     IsValidIndustry(): true
-    GetName():         Mendston Power Station
+    GetName():         Mendston Planetary Fusion Substation
     GetLocation():     6498
     IsCargoAccepted(): 1
 	   GetLastMonthProduction():  -1
@@ -8262,7 +8262,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         true
     ProductionCanIncrease(): true
     GetConstructionCost():   -1
-    GetName():               Farm
+    GetName():               Bio-Agricultural Complex / Agri-Plains
     CanBuildIndustry():      false
     CanProspectIndustry():   false
     IsBuiltOnWater():        false
@@ -8302,7 +8302,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         false
     ProductionCanIncrease(): true
     GetConstructionCost():   703125
-    GetName():               Power Station
+    GetName():               Planetary Fusion Substation
     CanBuildIndustry():      true
     CanProspectIndustry():   false
     IsBuiltOnWater():        false
@@ -8332,7 +8332,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         true
     ProductionCanIncrease(): true
     GetConstructionCost():   -1
-    GetName():               Iron Ore Mine
+    GetName():               Heavy Metallurgical Ore Mine
     CanBuildIndustry():      false
     CanProspectIndustry():   false
     IsBuiltOnWater():        false
@@ -8342,7 +8342,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         true
     ProductionCanIncrease(): true
     GetConstructionCost():   -1
-    GetName():               Coal Mine
+    GetName():               Carbon & Mineral Extraction Pit
     CanBuildIndustry():      false
     CanProspectIndustry():   false
     IsBuiltOnWater():        false
@@ -8352,7 +8352,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         false
     ProductionCanIncrease(): true
     GetConstructionCost():   629882
-    GetName():               Steel Mill
+    GetName():               Alloy Smelting & Foundry Complex
     CanBuildIndustry():      true
     CanProspectIndustry():   false
     IsBuiltOnWater():        false
@@ -8362,7 +8362,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         false
     ProductionCanIncrease(): true
     GetConstructionCost():   714843
-    GetName():               Oil Refinery
+    GetName():               Petrochemical & Polymer Cracker
     CanBuildIndustry():      true
     CanProspectIndustry():   false
     IsBuiltOnWater():        false
@@ -8372,7 +8372,7 @@ ERROR: IsEnd() is invalid as Begin() is never called
     IsRawIndustry():         false
     ProductionCanIncrease(): true
     GetConstructionCost():   609375
-    GetName():               Factory
+    GetName():               Heavy Manufacturing & Assembly Fab
     CanBuildIndustry():      true
     CanProspectIndustry():   false
     IsBuiltOnWater():        false

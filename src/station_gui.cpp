@@ -864,7 +864,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_station_view_widgets
 	NWidget(WWT_PANEL, Colours::Grey, WID_SV_ACCEPT_RATING_LIST), SetMinimalSize(249, 23), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_SELECTION, Colours::Invalid, WID_SV_SPACEPORT_SEL),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_PANEL, Colours::Grey, WID_SV_SPACEPORT_STATUS), SetMinimalSize(249, 42), SetResize(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, Colours::Grey, WID_SV_SPACEPORT_STATUS), SetMinimalSize(249, 52), SetResize(1, 0), EndContainer(),
 			NWidget(WWT_TEXTBTN, Colours::Grey, WID_SV_SPACEPORT_ACTION), SetMinimalSize(249, 12), SetResize(1, 0), SetFill(1, 1),
 					SetStringTip(STR_SPACEPORT_DESIGNATE_BUTTON, STR_SPACEPORT_ACTION_TOOLTIP),
 		EndContainer(),
@@ -1460,7 +1460,7 @@ struct StationViewWindow : public Window {
 				break;
 
 			case WID_SV_SPACEPORT_STATUS:
-				size.height = 4 * GetCharacterHeight(FontSize::Normal) + padding.height;
+				size.height = 5 * GetCharacterHeight(FontSize::Normal) + padding.height;
 				break;
 		}
 	}
@@ -1563,6 +1563,14 @@ struct StationViewWindow : public Window {
 		}
 		tr.top += GetCharacterHeight(FontSize::Normal);
 		DrawString(tr, GetString(STR_SPACEPORT_STATUS_TOTAL_OUTPUT, info->total_offworld_cargo_generated), TextColour::Black, AlignmentH::Centre);
+		tr.top += GetCharacterHeight(FontSize::Normal);
+		if (info->target_dest_world != INVALID_WORLD) {
+			DrawString(tr, fmt::format("Federation Bridge: Active -> World {} (Out: {}, Staged: {})",
+				info->target_dest_world.base(), info->total_interplanetary_dispatched, info->buffered_export_cargo),
+				TextColour::Green, AlignmentH::Centre);
+		} else {
+			DrawString(tr, "Federation Bridge: Local Catchment Only", TextColour::Black, AlignmentH::Centre);
+		}
 	}
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override

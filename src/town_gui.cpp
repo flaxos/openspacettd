@@ -44,6 +44,7 @@
 #include "timer/timer.h"
 #include "timer/timer_game_calendar.h"
 #include "portal/planet_manager.h"
+#include "portal/megacity_gui.h"
 #include "3rdparty/fmt/format.h"
 #include "timer/timer_window.h"
 #include "zoom_func.h"
@@ -533,6 +534,11 @@ public:
 				ShowTownCargoGraph(this->window_number);
 				break;
 			}
+
+			case WID_TV_MEGACITY_STATUS: {
+				ShowMegacityOverview(static_cast<TownID>(this->window_number));
+				break;
+			}
 		}
 	}
 
@@ -649,9 +655,10 @@ static constexpr std::initializer_list<NWidgetPart> _nested_town_game_view_widge
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Brown, WID_TV_INFO), SetMinimalSize(260, 32), SetResize(1, 0), SetFill(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
-		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_TV_SHOW_AUTHORITY), SetMinimalSize(80, 12), SetFill(1, 1), SetResize(1, 0), SetStringTip(STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON, STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP),
-		NWidget(WWT_TEXTBTN, Colours::Brown, WID_TV_CATCHMENT), SetMinimalSize(40, 12), SetFill(1, 1), SetResize(1, 0), SetStringTip(STR_BUTTON_CATCHMENT, STR_TOOLTIP_CATCHMENT),
+		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_TV_SHOW_AUTHORITY), SetMinimalSize(70, 12), SetFill(1, 1), SetResize(1, 0), SetStringTip(STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON, STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP),
+		NWidget(WWT_TEXTBTN, Colours::Brown, WID_TV_CATCHMENT), SetMinimalSize(35, 12), SetFill(1, 1), SetResize(1, 0), SetStringTip(STR_BUTTON_CATCHMENT, STR_TOOLTIP_CATCHMENT),
 		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_TV_GRAPH), SetFill(1, 0), SetResize(1, 0), SetStringTip(STR_TOWN_VIEW_CARGO_GRAPH, STR_TOWN_VIEW_CARGO_GRAPH_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_TV_MEGACITY_STATUS), SetFill(1, 0), SetResize(1, 0), SetStringTip(STR_TOWN_VIEW_MEGACITY_BUTTON, STR_TOWN_VIEW_MEGACITY_TOOLTIP),
 		NWidget(WWT_RESIZEBOX, Colours::Brown),
 	EndContainer(),
 };

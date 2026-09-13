@@ -15,6 +15,7 @@
 #include "../rail_type.h"
 #include "../station_type.h"
 #include "../cargo_type.h"
+#include "portal_type.h"
 
 /**
  * Build a single unlinked portal gate head on a tile.
@@ -90,16 +91,42 @@ CommandCost CmdBuildEdgeConduit(DoCommandFlags flags, TileIndex tile, DiagDirect
  */
 CommandCost CmdDestroyEdgeConduit(DoCommandFlags flags, TileIndex tile);
 
+/**
+ * Configure the interplanetary federation routing bridge of a spaceport.
+ *
+ * @param flags Command flags.
+ * @param station Station ID of the spaceport.
+ * @param dest_world Destination world for off-world trade.
+ * @param route_id Route ID of the corridor, or 0 for auto-matching.
+ * @param auto_dispatch Whether to auto-dispatch generated trade.
+ * @return Command cost or failure.
+ */
+CommandCost CmdConfigureSpaceportBridge(DoCommandFlags flags, StationID station, WorldID dest_world, uint32_t route_id, bool auto_dispatch);
+
+/**
+ * Configure the direct inter-world feeder pipeline of an edge extraction conduit.
+ *
+ * @param flags Command flags.
+ * @param tile Tile of the edge conduit.
+ * @param enabled Whether direct feeder mode is active.
+ * @param dest_world Target destination world to pipe minerals to.
+ * @param route_id Route ID of the corridor, or 0 for auto-matching.
+ * @return Command cost or failure.
+ */
+CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id);
+
 /** GUI completion callback for portal gate linking. */
 CommandCallback CcPortalLink;
 
-DEF_CMD_TRAIT(Commands::BuildPortalGate,   CmdBuildPortalGate,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
-DEF_CMD_TRAIT(Commands::LinkPortalGates,  CmdLinkPortalGates,   {},                                                      CommandType::LandscapeConstruction)
-DEF_CMD_TRAIT(Commands::BuildPortalPair,   CmdBuildPortalPair,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
-DEF_CMD_TRAIT(Commands::DestroyPortalGate, CmdDestroyPortalGate, CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::BuildPortalGate,          CmdBuildPortalGate,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::LinkPortalGates,         CmdLinkPortalGates,          {},                                                      CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::BuildPortalPair,          CmdBuildPortalPair,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::DestroyPortalGate,        CmdDestroyPortalGate,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 
-DEF_CMD_TRAIT(Commands::DesignateSpaceport, CmdDesignateSpaceport, {},                                                   CommandType::LandscapeConstruction)
-DEF_CMD_TRAIT(Commands::BuildEdgeConduit,   CmdBuildEdgeConduit,   CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
-DEF_CMD_TRAIT(Commands::DestroyEdgeConduit, CmdDestroyEdgeConduit, CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::DesignateSpaceport,        CmdDesignateSpaceport,        {},                                                   CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::ConfigureSpaceportBridge,  CmdConfigureSpaceportBridge,  {},                                                   CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::BuildEdgeConduit,          CmdBuildEdgeConduit,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::DestroyEdgeConduit,        CmdDestroyEdgeConduit,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::ConfigureEdgeConduitFeeder, CmdConfigureEdgeConduitFeeder, {},                                                   CommandType::LandscapeConstruction)
 
 #endif /* PORTAL_CMD_H */

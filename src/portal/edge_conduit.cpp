@@ -17,6 +17,9 @@
 #include "../station_func.h"
 #include "../window_func.h"
 #include "../table/strings.h"
+#include "universe_authority.h"
+#include "consist_snapshot.h"
+#include "content_manifest.h"
 
 #include <algorithm>
 
@@ -167,16 +170,93 @@ void EdgeConduitManager::ProduceAllConduits()
 	bool produced = false;
 	for (auto &[tile, conduit] : conduits) {
 		uint32_t amount = CalculateProduction(conduit);
+		if (amount == 0) continue;
 
-		StationFinder finder(TileArea(conduit.tile, 1, 1));
-		const StationList &stations = finder.GetStations();
-		if (!stations.empty()) {
-			MoveGoodsToStation(conduit.cargo_type, amount, {static_cast<SourceID>(conduit.id & 0xFFFF), SourceType::Industry}, stations);
-			conduit.total_produced += amount;
-			produced = true;
+		if (conduit.direct_feeder_enabled && conduit.target_dest_world != INVALID_WORLD) {
+			/* Direct inter-world feeder pipeline: bypass local station handling and inject directly into federation corridor */
+			ConsistSnapshot snapshot;
+			snapshot.direction = to_underlying(Direction::NE);
+			snapshot.speed = 80;
+			snapshot.acceleration = 12;
+
+			FederationNamespace ns{0x434F4E4455495400ULL /* "CONDUIT\0" */, static_cast<uint64_t>(conduit.id)};
+			snapshot.consist_id = GlobalConsistID{.name_space = ns, .sequence = conduit.total_piped_interplanetary + 1};
+			snapshot.company_id = GlobalCompanyID{.name_space = ns, .sequence = 1};
+			snapshot.owner = snapshot.company_id.ToOwnerToken();
+
+			ContentManifestResult manifest_res = ContentManifestCodec::CaptureCurrent();
+			if (manifest_res.Succeeded()) {
+				ContentManifestTokenResult token_res = ContentManifestCodec::Digest(*manifest_res.manifest);
+				if (token_res.Succeeded()) {
+					snapshot.content_manifest = token_res.token;
+				}
+			}
+
+			ConsistSnapshotUnit engine;
+			engine.engine_type = 0;
+			engine.cargo_type = 0;
+			engine.cargo_capacity = 0;
+			engine.cargo_count = 0;
+			engine.subtype = 1;
+			snapshot.units.push_back(engine);
+
+			ConsistSnapshotUnit wagon;
+			wagon.engine_type = 1;
+			wagon.cargo_type = static_cast<uint8_t>(conduit.cargo_type);
+			wagon.cargo_capacity = static_cast<uint16_t>(amount);
+			wagon.cargo_count = amount;
+			wagon.subtype = 0;
+			wagon.cargo_source.name_space = ns;
+			wagon.cargo_source.source_sequence = static_cast<uint64_t>(conduit.id) + 1;
+			wagon.cargo_source.origin_world = conduit.world_id;
+			wagon.cargo_source.origin_tile_x = TileX(conduit.tile);
+			wagon.cargo_source.origin_tile_y = TileY(conduit.tile);
+			snapshot.units.push_back(wagon);
+
+			ConsistSnapshotBytes snap_bytes = ConsistSnapshotCodec::Encode(snapshot);
+			if (snap_bytes.Succeeded()) {
+				auto &auth = UniverseAuthorityService::Instance();
+				std::string tx_id = auth.InitiateTransfer(
+					conduit.world_id,
+					conduit.target_dest_world,
+					0,
+					0,
+					snap_bytes,
+					100,
+					FreightPriority::Bulk
+				);
+
+				if (!tx_id.empty()) {
+					auth.DepartTransfer(tx_id, 0);
+					auth.RecordEdgeConduitThroughput(amount);
+					conduit.total_piped_interplanetary += amount;
+					conduit.total_produced += amount;
+					produced = true;
+				}
+			}
+		} else {
+			StationFinder finder(TileArea(conduit.tile, 1, 1));
+			const StationList &stations = finder.GetStations();
+			if (!stations.empty()) {
+				MoveGoodsToStation(conduit.cargo_type, amount, {static_cast<SourceID>(conduit.id & 0xFFFF), SourceType::Industry}, stations);
+				conduit.total_produced += amount;
+				produced = true;
+			}
 		}
 	}
 	if (produced) InvalidateWindowData(WindowClass::LandInfo, 0, 1);
+}
+
+bool EdgeConduitManager::ConfigureDirectFeeder(TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id)
+{
+	EdgeConduit *conduit = GetConduitMutable(tile);
+	if (conduit == nullptr) return false;
+
+	conduit->direct_feeder_enabled = enabled;
+	conduit->target_dest_world = dest_world;
+	conduit->target_route_id = route_id;
+	InvalidateWindowData(WindowClass::LandInfo, 0, 1);
+	return true;
 }
 
 void EdgeConduitManager::Reset()

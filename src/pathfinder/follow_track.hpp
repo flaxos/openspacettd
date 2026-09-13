@@ -224,6 +224,12 @@ protected:
 				/* we are entering the tunnel / bridge */
 				if (IsTunnel(this->old_tile)) {
 					this->is_tunnel = true;
+					if (PortalRegistry::IsInterServerPortal(this->old_tile)) {
+						/* An inter-server portal exits the local map coordinate space. */
+						this->new_tile = INVALID_TILE;
+						this->err = ErrorCode::NoWay;
+						return;
+					}
 					this->new_tile = GetOtherTunnelEnd(this->old_tile);
 				} else { // IsBridge(old_tile)
 					this->is_bridge = true;
@@ -329,9 +335,13 @@ protected:
 			 * rail tunnel head through which the vehicle can emerge. */
 			bool closed_head = PortalRegistry::IsUnlinkedGate(this->new_tile) || EdgeConduitManager::IsConduitTile(this->new_tile);
 			if (PortalRegistry::IsPortalTile(this->new_tile)) {
-				TileIndex other_end = PortalRegistry::GetOtherPortalEnd(this->new_tile);
-				closed_head = other_end >= Map::Size() || !IsTunnelTile(other_end) ||
-						GetTunnelBridgeTransportType(other_end) != TransportType::Rail;
+				if (PortalRegistry::IsInterServerPortal(this->new_tile)) {
+					closed_head = false;
+				} else {
+					TileIndex other_end = PortalRegistry::GetOtherPortalEnd(this->new_tile);
+					closed_head = other_end >= Map::Size() || !IsTunnelTile(other_end) ||
+							GetTunnelBridgeTransportType(other_end) != TransportType::Rail;
+				}
 			}
 			if (closed_head) {
 				this->err = ErrorCode::NoWay;

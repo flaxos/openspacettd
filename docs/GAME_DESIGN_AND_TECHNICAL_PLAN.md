@@ -436,7 +436,7 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
 For complete architectural specifications, authoritative handoff state machines, and persistent global identity schemas, see [FEDERATED_UNIVERSE_VISION.md](file:///home/flax/.gemini/antigravity/brain/527edc66-0f08-4ba7-b746-432d46a19837/FEDERATED_UNIVERSE_VISION.md).
 
 ```text
-Current Sprints (1-11)       Federation Prep             Federation Prototype        Persistent Universe          Megacity Economy
+Current Sprints (1-13)       Federation Prep             Federation Prototype        Persistent Universe          Megacity Economy
 ┌──────────────────────┐    ┌─────────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐    ┌──────────────────────┐
 │ Single-Map           │    │ Stable Global IDs   │    │ 2-Server Handoff     │    │ Persistent Player   │    │ Dedicated Phase 1    │
 │ Planetary Regions    │───>│ Consist Streamer    │───>│ Spike                │───>│ Accounts & Corporate│───>│ Core Worlds          │
@@ -445,29 +445,83 @@ Current Sprints (1-11)       Federation Prep             Federation Prototype   
 └──────────────────────┘    └─────────────────────┘    └──────────────────────┘    └─────────────────────┘    └──────────────────────┘
 ```
 
-### Phase F1: Federation Preparation (Architectural Decoupling)
+### Phase F1: Federation Preparation (Architectural Decoupling) — **COMPLETE**
 - **Goal:** Ensure near-term single-map codebase avoids blocking multi-server serialization.
-- **Tasks:**
-  - Wrap internal vehicle/station/company IDs in globally unique identifier schemas (`GlobalID`).
-  - Memory stream serializer for train consist snapshots.
-  - Define `Universe Content Manifest` schema.
+- **Completed Deliverables (Sprints 12–14):**
+  - [x] Persistent 128-bit `FederationNamespace` and `GlobalConsistID` lifecycle tracking (`FIDS` savegame chunk).
+  - [x] Globally unique identifier schemas: `GlobalCompanyID`, `GlobalStationID` (with `WorldID` world attribution), `GlobalCargoSourceID` (provenance tracking), and `GlobalOrderDestinationID` (cross-world routing).
+  - [x] Canonical `UniverseContentManifest` with BLAKE2b-256 tokens and strict configuration admission diagnostics.
+  - [x] Consist Snapshot wire format v2 with cargo provenance resolution, goto order preservation, and v1 dual-version backward compatibility.
+  - [x] Full automated test coverage (100% CTest pass rate, 0 regressions). Codebase is verified and ready for Phase F2 / P2.
 
-### Phase F2: Federation Prototype (Technical Spike)
+### Phase F2: Federation Prototype (Technical Spike) — **COMPLETE**
 - **Goal:** Implement a 2-server handoff proof-of-concept.
-- **Tasks:**
-  - Build lightweight `Universe Authority` daemon.
-  - Implement inter-server transfer handoff state machine in `src/portal/federation_cmd.cpp`.
-  - Conduct 2-server local integration test (despawn on Server A $\rightarrow$ in-transit authority ledger $\rightarrow$ materialize on Server B).
+- **Completed Deliverables (Sprint 15):**
+  - [x] Authoritative `Universe Authority` daemon (`scripts/universe_authority.py`) and C++ engine client (`src/portal/universe_authority.h`, `src/portal/universe_authority.cpp`).
+  - [x] Inter-server portal gate registrations (`RegisterInterServerPortal`) and pathfinder boundary exit routing (`src/portal/portal_registry.cpp`, `src/pathfinder/follow_track.hpp`).
+  - [x] Consist despawn (`ConsistMaterializer::DespawnForTransfer`) with clean reservation release and vehicle destruction.
+  - [x] Consist emergence & materialization (`ConsistMaterializer::MaterializeFromTransfer`) with manifest validation, throat obstruction clearance, consist topology restoration, dynamics preservation, cargo packet reconstruction, and PBS tunnel reservation acquisition.
+  - [x] Multi-process integration spike test script (`scripts/test_two_server_federation.py`) and Catch2 test suite (`src/tests/test_federation_transfer.cpp`).
+  - [x] Strict commodity conservation invariant enforcement ($\sum \text{Cargo}_{\text{Init}} = \sum \text{Cargo}_{\text{Done}} + \sum \text{Cargo}_{\text{Transit}}$) with zero loss and zero duplication.
 
-### Phase F3: Persistent Universe & Corporate Ledger
+
+### Phase F3: Persistent Universe & Corporate Ledger — **COMPLETE**
 - **Goal:** Multi-server persistent universe infrastructure.
-- **Tasks:**
-  - Registered player account authentication.
-  - Dynamic world server directory and player universe browser.
-  - Global commodity ledger and cross-server cargo balance tracking.
+- **Completed Deliverables (Sprint 16):**
+  - [x] Persistent player account authentication and session token management (`GlobalPlayerID`, `PlayerAccount`, `FederationPlayerRegistry`).
+  - [x] Multi-world corporate ownership and chartering (`CorporateCharter`, `GlobalCompanyID`, `AuthorizeDelegate`, `RegisterWorldPresence`).
+  - [x] Dynamic world server discovery directory with real-time heartbeat monitoring, phase filtering, and stale world timeout handling.
+  - [x] Per-cargo-type detailed commodity conservation ledger verifying zero duplication across individual commodity types ($\sum \text{Cargo}_{\text{Init}}(c) = \sum \text{Cargo}_{\text{Done}}(c) + \sum \text{Cargo}_{\text{InTransit}}(c)$).
+  - [x] Inter-world trade balance accounting tracking bilateral cargo export/import volumes and transport valuation credits.
+  - [x] In-engine console commands (`universe_auth`, `universe_worlds`, `universe_company`, `universe_trade`).
+  - [x] Full test coverage: Catch2 persistent universe test suite (`src/tests/test_federation_persistent_universe.cpp`), 182/182 CTests passing, and Python end-to-end integration spike (`scripts/test_f3_persistent_universe.py`).
 
 ### Phase F4: Megacity & Empire Economy
-- **Goal:** Scale individual Phase 1 Core Worlds to dedicated max-size (4096×4096) servers.
-- **Tasks:**
-  - Megacity sustained commodity demand mechanics.
-  - High-throughput inter-world freight corridors and wormhole congestion management.
+- **Status:** Complete (Sprint 17)
+- **Goal:** Scale individual Phase 1 Core Worlds to dedicated max-size (4096×4096) servers, with sustained multi-tier commodity demand, high-throughput freight corridor congestion management, and empire-wide supply chain matrix tracking.
+- **Completed Deliverables:**
+  - [x] Megacity sustained commodity demand mechanics with three demand tiers: Tier 1 Sustenance ($P / 20$), Tier 2 Expansion ($P / 40$), Tier 3 Prosperity ($P / 100$).
+  - [x] Cyclical monthly supply evaluation driving metropolitan growth states: Starvation ($0.0\times$), Subsistence ($1.0\times$), MetropolitanBoom ($1.5\times$), and HyperGrowth ($2.0\times$).
+  - [x] High-throughput freight corridor capacity limits (`max_bandwidth_trains_per_min`, `max_active_in_transit`) with dynamic transit delay scaling across congestion tiers (Clear $1.0\times$, Moderate $1.2\times$, Congested $1.5\times$, Saturated $2.0\times$).
+  - [x] Quality of Service (QoS) priority mitigation: Express and PriorityUrgent freight shipments receive 50% delay penalty relief during corridor congestion.
+  - [x] Multi-planet empire supply chain matrix aggregating macro-phase transitions (Phase 3 $\to$ 2, Phase 2 $\to$ 1, Phase 3 $\to$ 1, Core exports) and interplanetary tariff accounting ($10$ Cr/unit).
+  - [x] In-engine console administration commands (`universe_corridors`, `universe_megacity`, `universe_economy`).
+  - [x] Universe Authority daemon REST endpoints (`/corridors/*`, `/megacity/*`, `/economy/*`).
+  - [x] Full test verification: Catch2 suite (`src/tests/test_federation_megacity_economy.cpp`), 185/185 CTests passing (100%), and Python end-to-end integration test (`scripts/test_f4_megacity_economy.py`).
+
+---
+
+## T. Future Roadmap & Commonwealth Saga Lore Alignment (Sprints 18–21)
+
+For the complete lore mapping, nomenclature audit, and detailed asset specifications, see [COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md](file:///home/flax/games/openspacettd/docs/COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md).
+
+### 1. Canonical Nomenclature Standard
+- **World / WorldID:** Logical world entity / server instance (`WorldID`).
+- **Planet Region:** Coordinate bounding box on the 4096×4096 physical map (`PlanetRegion`, `PlanetManager`).
+- **World Phase:** Development tier (`Phase1_Core` .. `Phase4_Expansion`).
+- **Portal Gate:** Physical track structure (`CmdBuildPortalGate`).
+- **Portal Link:** Intra-map wormhole pair (`PortalLink`).
+- **Freight Corridor:** Inter-server federation route (`InterServerRoute`, `FreightCorridor`).
+- **Universe Authority:** Interstellar transaction and identity coordinator (`UniverseAuthorityService`).
+- **Megacity:** Core world metropolis tracking 3-tier sustained commodity quotas (`MegacityManager`).
+
+### 2. Commonwealth Traction & Asset Gradient
+- **Phase 3 (Frontier):** Rugged Pioneer Steamers (Coal/Wood) and Heavy Planetary Diesels hauling raw biomass, minerals, and timber over un-electrified terrain.
+- **Phase 2 (Developed / Refinery):** High-Voltage Overhead Catenary Electrics hauling intermodal containers, superalloys, and synthetic chemicals.
+- **Phase 1 (Core Megacity):** CST Vacuum-Tube Maglevs (vactrains) traveling at 400–1,000+ km/h through subterranean and arcology guideways.
+
+### 3. Future Sprints Overview
+- **Sprint 18: In-Game GUI Integration for Federation & Megacities:**
+  - Megacity Status & Quota Overview Window (3-tier progress bars, growth badges).
+  - Freight Corridor Monitor Window (congestion gauges, delay multipliers, active trains).
+  - Universe Server Directory Browser (live server list, pings, client load, phase badges).
+- **Sprint 19: Dedicated Server Cluster Orchestration & Daemons:**
+  - Production cluster supervisor (`scripts/run_cluster.py`) managing headless instances (`./build/openttd -D`) and Universe Authority daemons.
+  - Configuration-driven topology bootstrapping (`cluster.json`) and automated crash recovery.
+- **Sprint 20: Planetary Infrastructure Integration (Spaceports & Edge Conduits):**
+  - Spaceport off-world trade routing into inter-server federation queues.
+  - Planetary Edge Conduits feeding inter-world freight corridors directly.
+- **Sprint 21: Commonwealth Saga Content & Asset Alignment Pack:**
+  - Implement Track A vehicle/cargo/industry string rebrands in `src/lang/english.txt`.
+  - In-tree NewGRF packages: `openspacettd_industries.nml` (12-cargo Commonwealth economy) and `openspacettd_rail.nml` (CST Vacuum Maglev, planetary diesels, pioneer steam).
+

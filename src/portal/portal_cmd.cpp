@@ -532,3 +532,43 @@ CommandCost CmdDestroyEdgeConduit(DoCommandFlags flags, TileIndex tile)
 
 	return cost;
 }
+
+CommandCost CmdConfigureSpaceportBridge(DoCommandFlags flags, StationID station, WorldID dest_world, uint32_t route_id, bool auto_dispatch)
+{
+	if (!Station::IsValidID(station)) return CMD_ERROR;
+
+	Station *st = Station::GetIfValid(station);
+	if (st == nullptr) return CMD_ERROR;
+
+	if (!SpaceportManager::IsSpaceport(station)) {
+		return CMD_ERROR;
+	}
+
+	CommandCost ret_own = CheckOwnership(st->owner);
+	if (ret_own.Failed()) return ret_own;
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		SpaceportManager::ConfigureSpaceportBridge(station, dest_world, route_id, auto_dispatch);
+		SetWindowDirty(WindowClass::StationView, station);
+	}
+
+	return CommandCost();
+}
+
+CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id)
+{
+	if (!IsValidTile(tile)) return CMD_ERROR;
+	if (!EdgeConduitManager::IsConduitTile(tile)) return CMD_ERROR;
+
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(tile);
+	if (conduit == nullptr) return CMD_ERROR;
+
+	CommandCost ret_own = CheckOwnership(conduit->owner);
+	if (ret_own.Failed()) return ret_own;
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		EdgeConduitManager::ConfigureDirectFeeder(tile, enabled, dest_world, route_id);
+	}
+
+	return CommandCost();
+}

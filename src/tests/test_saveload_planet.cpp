@@ -13,6 +13,7 @@
 #include "../map_func.h"
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
+#include "../portal/federation_identity.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
@@ -128,6 +129,12 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{10}) == 18);
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{42}) == 37);
 
+	/* Persist the save namespace and allocator state. The deliberately stale
+	 * mapping exercises post-load cleanup without requiring a live train. */
+	FederationNamespace federation_namespace{0x0123456789ABCDEFULL, 0xFEDCBA9876543210ULL};
+	FederationIdentityRegistry::RestoreState(federation_namespace, 8);
+	REQUIRE(FederationIdentityRegistry::RestoreMapping(VehicleID{10}, 7));
+
 	/* Save the game */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(save_res == SaveLoadResult::Ok);
@@ -141,10 +148,14 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	CHECK(PortalRegistry::Count() == 0);
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{10}) == 0);
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{42}) == 0);
+	CHECK(FederationIdentityRegistry::GetNextSequence() == 1);
 
 	/* Load the game back from disk */
 	SaveLoadResult load_res = SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(load_res == SaveLoadResult::Ok);
+	CHECK(FederationIdentityRegistry::GetNamespace() == federation_namespace);
+	CHECK(FederationIdentityRegistry::GetNextSequence() == 8);
+	CHECK(FederationIdentityRegistry::GetMappings().empty());
 
 	/* 1. Verify all planetary regions restored with accurate attributes */
 	CHECK(PlanetManager::Count() == 4);

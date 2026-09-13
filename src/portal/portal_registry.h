@@ -12,6 +12,8 @@
 
 #include "portal_type.h"
 #include "../vehicle_type.h"
+#include "../company_type.h"
+#include "../economy_type.h"
 #include <vector>
 #include <unordered_map>
 #include <optional>
@@ -194,12 +196,74 @@ public:
 	static void SetVehicleTransitProgress(VehicleID veh_id, uint32_t progress);
 
 	/**
+	 * Register an inter-server portal link connecting a local portal head to a remote world server.
+	 */
+	static PortalID RegisterInterServerPortal(
+		TileIndex local_tile,
+		DiagDirection dir,
+		WorldID local_world,
+		WorldID remote_world,
+		uint32_t remote_gate_id,
+		uint32_t virtual_length = 1
+	);
+
+	/**
+	 * Check whether a given tile is a registered inter-server portal gate.
+	 */
+	static bool IsInterServerPortal(TileIndex tile);
+
+	/**
+	 * Get the InterServerPortalLink for a local portal tile.
+	 */
+	static const InterServerPortalLink *GetInterServerPortal(TileIndex tile);
+
+	/**
+	 * Unregister an inter-server portal gate by local tile.
+	 */
+	static bool UnregisterInterServerPortal(TileIndex tile);
+
+	/**
+	 * Get all registered inter-server portals.
+	 */
+	static const std::unordered_map<TileIndex, InterServerPortalLink> &GetAllInterServerPortals();
+
+	/**
 	 * Repair generated neutral gateway heads from early multi-world saves where
 	 * the stored entry direction pointed away from the world-side lead track.
 	 * This operation is deterministic and idempotent.
 	 * @return Number of endpoint directions repaired.
 	 */
 	static size_t RepairLegacyGeneratedGateways();
+
+	/**
+	 * Compute monthly maintenance and excitation power upkeep for all active portal gates owned by a company.
+	 * @param owner Company to evaluate.
+	 * @return Upkeep cost in currency.
+	 */
+	static Money GetCompanyPortalMaintenanceCost(Owner owner);
+
+	/**
+	 * Test if two portal gate heads form a parallel twin gateway array (1-tile separation, parallel orientation).
+	 * @param tile_a First gate tile.
+	 * @param tile_b Second gate tile.
+	 * @return True if gates form a coordinated twin array.
+	 */
+	static bool IsTwinGateway(TileIndex tile_a, TileIndex tile_b);
+
+	/**
+	 * Resolve the parallel twin gate head adjacent to a given portal gate, if one exists.
+	 * @param tile Base gate tile.
+	 * @return Tile of the twin gate, or INVALID_TILE if none.
+	 */
+	static TileIndex GetTwinGate(TileIndex tile);
+
+	/**
+	 * Resolve the world tile corresponding to a gateway identifier or tile index.
+	 * @param gate_id Gateway identifier or direct tile.
+	 * @param world_id Optional world filter.
+	 * @return Tile of the gate head, or INVALID_TILE if unresolvable.
+	 */
+	static TileIndex ResolveGateTile(uint32_t gate_id, WorldID world_id = INVALID_WORLD);
 
 	/**
 	 * Clear all registered portals (for test isolation and new game setup).
@@ -210,6 +274,7 @@ private:
 	static std::unordered_map<TileIndex, PortalID> tile_to_portal;
 	static std::unordered_map<uint32_t, PortalLink> portal_links;
 	static std::unordered_map<TileIndex, PortalEndpoint> unlinked_gates;
+	static std::unordered_map<TileIndex, InterServerPortalLink> interserver_portals;
 	static std::unordered_map<uint32_t, uint32_t> vehicle_portal_progress;
 	static uint32_t next_portal_id;
 };

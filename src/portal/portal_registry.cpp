@@ -9,15 +9,19 @@
 
 #include "../stdafx.h"
 #include "portal_registry.h"
+#include "federation_identity.h"
 #include "../tunnelbridge_map.h"
 #include "../tile_map.h"
 #include "../landscape.h"
 #include "../direction_func.h"
 #include "../vehicle_base.h"
+#include "../economy_func.h"
+#include "../map_func.h"
 
 std::unordered_map<TileIndex, PortalID> PortalRegistry::tile_to_portal;
 std::unordered_map<uint32_t, PortalLink> PortalRegistry::portal_links;
 std::unordered_map<TileIndex, PortalEndpoint> PortalRegistry::unlinked_gates;
+std::unordered_map<TileIndex, InterServerPortalLink> PortalRegistry::interserver_portals;
 std::unordered_map<uint32_t, uint32_t> PortalRegistry::vehicle_portal_progress;
 uint32_t PortalRegistry::next_portal_id = 1;
 
@@ -71,6 +75,12 @@ bool PortalRegistry::UnregisterPortal(PortalID id)
 bool PortalRegistry::UnregisterPortalByTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;
+
+	auto it_is = interserver_portals.find(tile);
+	if (it_is != interserver_portals.end()) {
+		interserver_portals.erase(it_is);
+		return true;
+	}
 
 	auto it_un = unlinked_gates.find(tile);
 	if (it_un != unlinked_gates.end()) {
@@ -157,10 +167,64 @@ bool PortalRegistry::IsPortalInTransit(TileIndex tile)
 	return false;
 }
 
+PortalID PortalRegistry::RegisterInterServerPortal(
+	TileIndex local_tile,
+	DiagDirection dir,
+	WorldID local_world,
+	WorldID remote_world,
+	uint32_t remote_gate_id,
+	uint32_t virtual_length)
+{
+	if (local_tile == INVALID_TILE || remote_world == INVALID_WORLD) {
+		return INVALID_PORTAL;
+	}
+
+	if (tile_to_portal.find(local_tile) != tile_to_portal.end() ||
+	    interserver_portals.find(local_tile) != interserver_portals.end()) {
+		return INVALID_PORTAL;
+	}
+
+	unlinked_gates.erase(local_tile);
+
+	PortalID id{next_portal_id++};
+	InterServerPortalLink link;
+	link.id = id;
+	link.local_endpoint = PortalEndpoint{local_tile, dir, local_world};
+	link.remote_world = remote_world;
+	link.remote_gate_id = remote_gate_id;
+	link.virtual_length = virtual_length;
+
+	interserver_portals[local_tile] = link;
+	return id;
+}
+
+bool PortalRegistry::IsInterServerPortal(TileIndex tile)
+{
+	if (tile == INVALID_TILE) return false;
+	return interserver_portals.find(tile) != interserver_portals.end();
+}
+
+const InterServerPortalLink *PortalRegistry::GetInterServerPortal(TileIndex tile)
+{
+	auto it = interserver_portals.find(tile);
+	return it != interserver_portals.end() ? &it->second : nullptr;
+}
+
+bool PortalRegistry::UnregisterInterServerPortal(TileIndex tile)
+{
+	return interserver_portals.erase(tile) > 0;
+}
+
+const std::unordered_map<TileIndex, InterServerPortalLink> &PortalRegistry::GetAllInterServerPortals()
+{
+	return interserver_portals;
+}
+
 bool PortalRegistry::IsPortalTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;
-	return tile_to_portal.find(tile) != tile_to_portal.end();
+	return tile_to_portal.find(tile) != tile_to_portal.end() ||
+	       interserver_portals.find(tile) != interserver_portals.end();
 }
 
 TileIndex PortalRegistry::GetOtherPortalEnd(TileIndex tile)
@@ -217,7 +281,10 @@ PortalExitPosition PortalRegistry::GetPortalExitPosition(TileIndex entry_tile)
 uint32_t PortalRegistry::GetPortalVirtualLength(TileIndex tile)
 {
 	const PortalLink *link = GetPortalLink(tile);
-	return link != nullptr ? link->virtual_length : 1;
+	if (link != nullptr) return link->virtual_length;
+	const InterServerPortalLink *inter = GetInterServerPortal(tile);
+	if (inter != nullptr) return inter->virtual_length;
+	return 1;
 }
 
 const PortalLink *PortalRegistry::GetPortalLink(TileIndex tile)
@@ -333,11 +400,146 @@ size_t PortalRegistry::Count()
 	return portal_links.size();
 }
 
+Money PortalRegistry::GetCompanyPortalMaintenanceCost(Owner owner)
+{
+	if (owner >= MAX_COMPANIES) return 0;
+
+	Money base_tunnel_cost = _price[Price::BuildTunnel] > 0 ? _price[Price::BuildTunnel] : Money(450);
+	Money base_active_gate_cost = base_tunnel_cost / 4;
+	Money base_unlinked_gate_cost = base_tunnel_cost / 8;
+	Money total_cost = 0;
+
+	for (const auto &[id, link] : portal_links) {
+		bool owns_a = IsValidTile(link.end_a.tile) && GetTileOwner(link.end_a.tile) == owner;
+		bool owns_b = IsValidTile(link.end_b.tile) && GetTileOwner(link.end_b.tile) == owner;
+
+		if (owns_a) total_cost += base_active_gate_cost;
+		if (owns_b) total_cost += base_active_gate_cost;
+
+		if (owns_a && owns_b) {
+			total_cost += static_cast<Money>(link.virtual_length * 50);
+		} else if (owns_a || owns_b) {
+			total_cost += static_cast<Money>(link.virtual_length * 25);
+		}
+	}
+
+	for (const auto &[tile, link] : interserver_portals) {
+		if (IsValidTile(tile) && GetTileOwner(tile) == owner) {
+			total_cost += base_active_gate_cost + static_cast<Money>(link.virtual_length * 50);
+		}
+	}
+
+	for (const auto &[tile, ep] : unlinked_gates) {
+		if (IsValidTile(tile) && GetTileOwner(tile) == owner) {
+			total_cost += base_unlinked_gate_cost;
+		}
+	}
+
+	return total_cost;
+}
+
+static std::optional<DiagDirection> ResolveEndpointDirection(TileIndex tile)
+{
+	const PortalLink *link = PortalRegistry::GetPortalLink(tile);
+	if (link != nullptr) {
+		if (link->end_a.tile == tile) return link->end_a.enter_dir;
+		if (link->end_b.tile == tile) return link->end_b.enter_dir;
+	}
+
+	const auto &unlinked = PortalRegistry::GetUnlinkedGates();
+	auto it_un = unlinked.find(tile);
+	if (it_un != unlinked.end()) return it_un->second.enter_dir;
+
+	const auto &interserver = PortalRegistry::GetAllInterServerPortals();
+	auto it_is = interserver.find(tile);
+	if (it_is != interserver.end()) return it_is->second.local_endpoint.enter_dir;
+
+	if (IsValidTile(tile) && IsTunnelTile(tile)) {
+		return GetTunnelBridgeDirection(tile);
+	}
+	return std::nullopt;
+}
+
+bool PortalRegistry::IsTwinGateway(TileIndex tile_a, TileIndex tile_b)
+{
+	if (!IsValidTile(tile_a) || !IsValidTile(tile_b) || tile_a == tile_b) return false;
+	if (!IsPortalTile(tile_a) && !IsUnlinkedGate(tile_a)) return false;
+	if (!IsPortalTile(tile_b) && !IsUnlinkedGate(tile_b)) return false;
+
+	if (DistanceManhattan(tile_a, tile_b) != 1) return false;
+
+	auto dir_a = ResolveEndpointDirection(tile_a);
+	auto dir_b = ResolveEndpointDirection(tile_b);
+	if (!dir_a.has_value() || !dir_b.has_value()) return false;
+	if (*dir_a != *dir_b) return false;
+
+	DiagDirection gate_dir = *dir_a;
+	bool perpendicular = false;
+	for (DiagDirection d : {DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW}) {
+		if (TileAddByDiagDir(tile_a, d) == tile_b) {
+			if (d != gate_dir && d != ReverseDiagDir(gate_dir)) {
+				perpendicular = true;
+			}
+			break;
+		}
+	}
+	if (!perpendicular) return false;
+
+	if (GetTileOwner(tile_a) != GetTileOwner(tile_b)) return false;
+
+	return true;
+}
+
+TileIndex PortalRegistry::GetTwinGate(TileIndex tile)
+{
+	if (!IsValidTile(tile)) return INVALID_TILE;
+	if (!IsPortalTile(tile) && !IsUnlinkedGate(tile)) return INVALID_TILE;
+
+	for (DiagDirection d : {DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW}) {
+		TileIndex adj = TileAddByDiagDir(tile, d);
+		if (IsTwinGateway(tile, adj)) {
+			return adj;
+		}
+	}
+	return INVALID_TILE;
+}
+
+TileIndex PortalRegistry::ResolveGateTile(uint32_t gate_id, WorldID world_id)
+{
+	if (gate_id == 0) return INVALID_TILE;
+
+	const PortalLink *pl = GetPortalLinkByID(PortalID(gate_id));
+	if (pl != nullptr) {
+		if (world_id != INVALID_WORLD) {
+			if (pl->end_a.world_id == world_id) return pl->end_a.tile;
+			if (pl->end_b.world_id == world_id) return pl->end_b.tile;
+		}
+		return pl->end_a.tile;
+	}
+
+	for (const auto &[tile, link] : interserver_portals) {
+		if (link.id.base() == gate_id) {
+			if (world_id == INVALID_WORLD || link.local_endpoint.world_id == world_id) {
+				return tile;
+			}
+		}
+	}
+
+	TileIndex direct_tile = TileIndex(gate_id);
+	if (IsValidTile(direct_tile) && (IsPortalTile(direct_tile) || IsUnlinkedGate(direct_tile))) {
+		return direct_tile;
+	}
+
+	return INVALID_TILE;
+}
+
 void PortalRegistry::Reset()
 {
 	tile_to_portal.clear();
 	portal_links.clear();
 	unlinked_gates.clear();
+	interserver_portals.clear();
 	vehicle_portal_progress.clear();
 	next_portal_id = 1;
+	FederationIdentityRegistry::Reset();
 }
