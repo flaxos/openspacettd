@@ -1,5 +1,7 @@
 # OpenSpaceTTD UAT Demo
 
+> **Historical fixture:** v0.3 validates the early single-map planetary slice. It predates automatic portal terminals and the later federation, telemetry, round-trip order, blueprint and alien-art work. It is not the all-feature release UAT save. Sprint 28 will generate the successor guided save; Sprint 29 will add the matching three-server federation kit. See [FEATURE_UI_UAT_COVERAGE.md](../docs/FEATURE_UI_UAT_COVERAGE.md).
+
 `OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav` is a deterministic 1024 x 512
 three-world acceptance-test save generated with seed `9032026`.
 

@@ -5,11 +5,11 @@
 
 ## A. Current State
 
-The OpenSpaceTTD repository is a clean, operational development fork of OpenTTD (`master` baseline commit `de306de893`, version `20260908-main-m4dead5797f`), configured with CMake and Ninja in `build/`.
+OpenSpaceTTD is an operational OpenTTD fork with the single-map planetary slice and federation work through Sprint 22 implemented. Sprint 23 reconciled the roadmap and fixed the next delivery sequence. Alien art, blueprints, CST prefabs and the consolidated UAT release remain planned work.
 
 ### Established Codebase Assets
 - **Engine Baseline:** Upstream OpenTTD compiled with full optional library support (SDL2, OpenGL, FreeType, Fontconfig, HarfBuzz, ICU, PNG, ZLIB, LZMA, LZO, CURL, FluidSynth, OpusFile, Soxr).
-- **Test Baseline:** 100% test pass rate across unit tests and regression suites (103/103 tests passing).
+- **Test Inventory:** The configured build currently registers 207 CTest cases. Historical per-sprint pass counts remain in their sprint reports; rerun the full suite for release evidence.
 - **Core Repository Rules (`AGENTS.md`):** Strict preservation of `TileIndex`, single 2D coordinate space, deterministic simulation, and wormhole-derived portal architecture.
 - **Initial Prototype (`src/portal/`):**
   - `PortalRegistry` implemented in `src/portal/portal_registry.h` / `src/portal/portal_registry.cpp`.
@@ -433,7 +433,7 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
 
 ## S. Long-Term Roadmap: EPIC — Federated Multi-Server Universe
 
-For complete architectural specifications, authoritative handoff state machines, and persistent global identity schemas, see [FEDERATED_UNIVERSE_VISION.md](file:///home/flax/.gemini/antigravity/brain/527edc66-0f08-4ba7-b746-432d46a19837/FEDERATED_UNIVERSE_VISION.md).
+The implemented federation architecture and handoff state are documented in the Sprint 14–17 specifications in this directory and the current delivery audit in [SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md](SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md).
 
 ```text
 Current Sprints (1-13)       Federation Prep             Federation Prototype        Persistent Universe          Megacity Economy
@@ -491,9 +491,9 @@ Current Sprints (1-13)       Federation Prep             Federation Prototype   
 
 ---
 
-## T. Future Roadmap & Commonwealth Saga Lore Alignment (Sprints 18–21)
+## T. Delivery Status and Roadmap (Sprints 18–29)
 
-For the complete lore mapping, nomenclature audit, and detailed asset specifications, see [COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md](file:///home/flax/games/openspacettd/docs/COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md).
+For detailed scope, see [SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md](SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md), [ALIEN_WORLD_ART_DIRECTION.md](ALIEN_WORLD_ART_DIRECTION.md), [FEATURE_UI_UAT_COVERAGE.md](FEATURE_UI_UAT_COVERAGE.md) and [COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md](COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md).
 
 ### 1. Canonical Nomenclature Standard
 - **World / WorldID:** Logical world entity / server instance (`WorldID`).
@@ -510,18 +510,20 @@ For the complete lore mapping, nomenclature audit, and detailed asset specificat
 - **Phase 2 (Developed / Refinery):** High-Voltage Overhead Catenary Electrics hauling intermodal containers, superalloys, and synthetic chemicals.
 - **Phase 1 (Core Megacity):** CST Vacuum-Tube Maglevs (vactrains) traveling at 400–1,000+ km/h through subterranean and arcology guideways.
 
-### 3. Future Sprints Overview
-- **Sprint 18: In-Game GUI Integration for Federation & Megacities:**
-  - Megacity Status & Quota Overview Window (3-tier progress bars, growth badges).
-  - Freight Corridor Monitor Window (congestion gauges, delay multipliers, active trains).
-  - Universe Server Directory Browser (live server list, pings, client load, phase badges).
-- **Sprint 19: Dedicated Server Cluster Orchestration & Daemons:**
-  - Production cluster supervisor (`scripts/run_cluster.py`) managing headless instances (`./build/openttd -D`) and Universe Authority daemons.
-  - Configuration-driven topology bootstrapping (`cluster.json`) and automated crash recovery.
-- **Sprint 20: Planetary Infrastructure Integration (Spaceports & Edge Conduits):**
-  - Spaceport off-world trade routing into inter-server federation queues.
-  - Planetary Edge Conduits feeding inter-world freight corridors directly.
-- **Sprint 21: Commonwealth Saga Content & Asset Alignment Pack:**
-  - Implement Track A vehicle/cargo/industry string rebrands in `src/lang/english.txt`.
-  - In-tree NewGRF packages: `openspacettd_industries.nml` (12-cargo Commonwealth economy) and `openspacettd_rail.nml` (CST Vacuum Maglev, planetary diesels, pioneer steam).
+### 3. Reconciled status through Sprint 23
 
+- **Sprint 18 — Complete:** Native Megacity Overview, Freight Corridor Monitor and Universe Directory windows.
+- **Sprint 19 — Complete:** Configurable cluster supervisor, topology bootstrap and health/recovery integration coverage.
+- **Sprint 20 — Complete:** Spaceport and Edge Conduit federation routing with supply-chain attribution.
+- **Sprint 21 — Partially complete:** Gateway telemetry/navigation and Commonwealth string alignment shipped. The proposed alien art and in-tree NewGRF packs did not ship and move into Sprints 24 and the content backlog.
+- **Sprint 22 — Complete:** Round-trip consist order restoration and autonomous federation scheduling.
+- **Sprint 23 — Complete:** Scope reconciliation, alien art specification, UI coverage audit and UAT delivery plan.
+
+### 4. Planned delivery sequence
+
+- **Sprint 24 — Playable Alien Worlds:** Implement distinct Temperate Core, Arid Industrial and Sub-Arctic Frontier visuals, CST gateways and art packaging/provenance.
+- **Sprint 25 — Player Rail Blueprints:** Capture, manage, share, preview, transform and deterministically place rail infrastructure.
+- **Sprint 26 — CST Prefab Rail Blocks:** Ship eight built-in layouts through the blueprint system with traffic-side variants and operating guidance.
+- **Sprint 27 — Complete Feature UI:** Close player and operator UI gaps recorded in the coverage matrix.
+- **Sprint 28 — Guided Solo UAT:** Generate a fresh all-feature save with persistent Story Book goals and reproducible build metadata.
+- **Sprint 29 — Federation UAT:** Deliver a live three-server acceptance kit covering round trips, recovery, content admission, telemetry and commodity conservation.

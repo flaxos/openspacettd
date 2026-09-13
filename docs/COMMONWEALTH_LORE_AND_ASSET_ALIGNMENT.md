@@ -209,7 +209,24 @@ A dedicated in-tree industry set replacing default industries with a cohesive 3-
 
 ---
 
-## 5. Future Sprints Roadmap (Sprints 18–21)
+## 5. Reconciled Asset Roadmap (Sprint 23 onward)
+
+Sprint 23 audited the implementation and found that federation GUI and infrastructure work through Sprint 22 is present, while the visual and NewGRF portion formerly assigned to Sprint 21 is not. String alignment is implemented. Custom terrain, flora, portal, arcology, industry and rolling-stock assets remain open work and must not be described as shipped.
+
+The binding visual specification is [ALIEN_WORLD_ART_DIRECTION.md](ALIEN_WORLD_ART_DIRECTION.md). Sprint 24 delivers the three showcase biome/phase combinations and CST portal treatment. Further industry and rolling-stock packs remain a separately testable content backlog after the playable visual foundation.
+
+The current delivery order is:
+
+1. Sprint 24: three-world alien visual overhaul and asset pipeline.
+2. Sprint 25: player rail blueprint system.
+3. Sprint 26: CST prefab rail block library.
+4. Sprint 27: feature UI completion.
+5. Sprint 28: guided solo UAT save.
+6. Sprint 29: live federation UAT kit and release acceptance.
+
+The earlier Sprint 18–21 plan below is retained as historical intent. Its completion state is governed by the reconciliation above.
+
+## 6. Historical Sprint 18–21 Plan
 
 ```text
 Sprint 17 (DONE)             Sprint 18                   Sprint 19                   Sprint 20                   Sprint 21
