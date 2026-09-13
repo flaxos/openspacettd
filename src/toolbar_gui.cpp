@@ -72,6 +72,8 @@
 #include "portal/megacity_gui.h"
 #include "portal/freight_corridor_gui.h"
 #include "portal/universe_directory_gui.h"
+#include "portal/trade_ledger_gui.h"
+#include "portal/federation_auth_gui.h"
 #include "3rdparty/fmt/format.h"
 
 #include "network/network.h"
@@ -444,6 +446,8 @@ enum class MapMenuEntries : uint8_t {
 	ShowIndustryDirectory, ///< Open window with list of industries.
 	ShowFreightCorridors, ///< Open inter-server freight corridor monitor.
 	ShowUniverseDirectory, ///< Open universe authority world directory.
+	ShowTradeLedger, ///< Open empire supply chain matrix and trade ledger.
+	ShowFederationAuth, ///< Open federation player authentication and corporate charters.
 };
 
 static CallBackFunction ToolbarMapClick(Window *w)
@@ -455,6 +459,8 @@ static CallBackFunction ToolbarMapClick(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_SIGN_LIST, MapMenuEntries::ShowSignList));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FREIGHT_CORRIDORS, MapMenuEntries::ShowFreightCorridors));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_UNIVERSE_DIRECTORY, MapMenuEntries::ShowUniverseDirectory));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_TRADE_LEDGER, MapMenuEntries::ShowTradeLedger));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FEDERATION_AUTH, MapMenuEntries::ShowFederationAuth));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -477,6 +483,8 @@ static CallBackFunction ToolbarScenMapTownDir(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_INDUSTRY_MENU_INDUSTRY_DIRECTORY, MapMenuEntries::ShowIndustryDirectory));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FREIGHT_CORRIDORS, MapMenuEntries::ShowFreightCorridors));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_UNIVERSE_DIRECTORY, MapMenuEntries::ShowUniverseDirectory));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_TRADE_LEDGER, MapMenuEntries::ShowTradeLedger));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FEDERATION_AUTH, MapMenuEntries::ShowFederationAuth));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -512,6 +520,8 @@ static CallBackFunction MenuClickMap(int index)
 		case MapMenuEntries::ShowIndustryDirectory: ShowIndustryDirectory(); break;
 		case MapMenuEntries::ShowFreightCorridors: ShowFreightCorridorMonitor(); break;
 		case MapMenuEntries::ShowUniverseDirectory: ShowUniverseDirectory(); break;
+		case MapMenuEntries::ShowTradeLedger: ShowTradeLedger(); break;
+		case MapMenuEntries::ShowFederationAuth: ShowFederationAuth(); break;
 	}
 	return CallBackFunction::None;
 }

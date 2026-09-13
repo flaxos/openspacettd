@@ -204,6 +204,25 @@ std::vector<CorporateCharter> FederationPlayerRegistry::GetAllCharters()
 	return result;
 }
 
+static std::optional<PlayerAccount> _active_session = std::nullopt;
+
+std::optional<PlayerAccount> FederationPlayerRegistry::GetActiveSession()
+{
+	return _active_session;
+}
+
+bool FederationPlayerRegistry::SetActiveSession(const PlayerAccount &account)
+{
+	if (!account.IsValid()) return false;
+	_active_session = account;
+	return true;
+}
+
+void FederationPlayerRegistry::ClearActiveSession()
+{
+	_active_session = std::nullopt;
+}
+
 void FederationPlayerRegistry::Reset()
 {
 	_next_player_seq = 1;
@@ -211,4 +230,5 @@ void FederationPlayerRegistry::Reset()
 	_username_to_player.clear();
 	_token_to_player.clear();
 	_charters.clear();
+	_active_session = std::nullopt;
 }

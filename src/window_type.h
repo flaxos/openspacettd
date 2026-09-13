@@ -758,6 +758,12 @@ enum class WindowClass : uint16_t {
 	/** Rail blueprint library and manager window. */
 	BlueprintLibrary,
 
+	/** Multi-world supply chain matrix and commodity trade ledger window. */
+	TradeLedger,
+
+	/** Federation player authentication and corporate charters window. */
+	FederationAuth,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

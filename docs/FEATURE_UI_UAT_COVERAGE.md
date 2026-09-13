@@ -14,9 +14,8 @@ This matrix is the release checklist for Sprints 24–29. **Present** means a so
 | Spaceports | Station window designation, tier upgrade and trade telemetry | Present | Guided designation, supply, upgrade, dispatch and destination receipt. |
 | Megacity demand | Town button and Megacity Overview window | Present | Deliver all three tiers and demonstrate each growth state. |
 | Freight corridors | Map menu monitor with route, utilization, congestion and gate location | Present | Add player help for capacity/priority and demonstrate escalation and relief. |
-| Universe directory | Map menu directory with refresh and viewport jump | Present | Federation UAT covers heartbeats, stale world state and reconnect/navigation behavior. |
-| Supply-chain matrix and trade ledger | Console/daemon interfaces | Partial | Sprint 27 adds a readable operator/player summary appropriate to permissions. |
-| Federation authentication and charters | Console/daemon interfaces | Partial | Sprint 27 defines operator UI and actionable authorization/session errors. |
+| Supply-chain matrix and trade ledger | Map menu window (`TradeLedgerWindow`) | Present | Delivered in Sprint 27: dual-tab view with empire phase flows, infrastructure throughput, inter-world trade balances, and conservation auditing. |
+| Federation authentication and charters | Map menu window (`FederationAuthWindow`) | Present | Delivered in Sprint 27: in-game account login/register, session badge, corporate chartering, owner delegation, and world presence expansion. |
 | Consist handoff, identity and content admission | Automatic simulation with console/daemon diagnostics | Partial | Federation UAT shows identity continuity, mismatch rejection and cargo conservation. |
 | Round-trip order restoration | Automatic materialization and integration tests | Partial | Federation UAT runs a visible outbound and return service with restored orders. |
 | Cluster launch, health and recovery | `scripts/run_cluster.py` and configuration | Present for operators | Supply versioned topology, clean reset, health checks, failure injection and recovery guide. |

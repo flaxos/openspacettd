@@ -15,6 +15,7 @@ add_files(
     dropdown_widget.h
     engine_widget.h
     error_widget.h
+    federation_auth_widget.h
     fios_widget.h
     framerate_widget.h
     freight_corridor_widget.h
@@ -58,6 +59,7 @@ add_files(
     timetable_widget.h
     toolbar_widget.h
     town_widget.h
+    trade_ledger_widget.h
     transparency_widget.h
     tree_widget.h
     universe_directory_widget.h

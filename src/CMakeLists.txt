@@ -382,6 +382,8 @@ add_files(
     portal/consist_snapshot.h
     portal/federation_cmd.cpp
     portal/federation_cmd.h
+    portal/federation_auth_gui.cpp
+    portal/federation_auth_gui.h
     portal/federation_identity.cpp
     portal/federation_identity.h
     portal/federation_player.cpp
@@ -390,6 +392,8 @@ add_files(
     portal/freight_corridor_gui.h
     portal/megacity_gui.cpp
     portal/megacity_gui.h
+    portal/trade_ledger_gui.cpp
+    portal/trade_ledger_gui.h
     portal/megacity_manager.cpp
     portal/megacity_manager.h
     portal/universe_authority.cpp

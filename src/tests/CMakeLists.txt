@@ -39,6 +39,7 @@ add_test_files(
     test_sprint24_alien_biomes.cpp
     test_blueprint.cpp
     test_cst_prefabs.cpp
+    test_sprint27_feature_ui.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

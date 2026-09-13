@@ -6203,3 +6203,30 @@ STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Bluepri
 STR_ERROR_CAN_T_PLACE_BLUEPRINT                                  :{WHITE}Can't place blueprint...
 STR_ERROR_BLUEPRINT_BUILTIN_CANNOT_DELETE                        :{WHITE}Factory CST prefabs cannot be deleted
 
+# OpenSpaceTTD Sprint 27: Feature UI Completion
+STR_MAP_MENU_TRADE_LEDGER                                           :Supply Chain & Trade Ledger
+STR_MAP_MENU_FEDERATION_AUTH                                        :Federation Authentication & Charters
+
+STR_TRADE_LEDGER_CAPTION                                            :{WHITE}Empire Supply Chain Matrix & Trade Ledger
+STR_TRADE_LEDGER_TAB_SUPPLY_CHAIN                                   :Supply Chain Matrix
+STR_TRADE_LEDGER_TAB_TRADE_LEDGER                                   :Trade Balances & Conservation
+STR_TRADE_LEDGER_REFRESH                                            :Refresh
+STR_TRADE_LEDGER_REFRESH_TOOLTIP                                    :Refresh empire supply chain metrics and ledger balances
+STR_TRADE_LEDGER_STATUS_CONSERVED                                   :{GREEN}CONSERVED (Zero Duplication / Zero Loss)
+STR_TRADE_LEDGER_STATUS_VIOLATION                                   :{RED}VIOLATION DETECTED (Imbalance in In-Transit / Completed)
+STR_TRADE_LEDGER_NO_WORLDS                                          :{SILVER}No registered worlds with trade balance data
+
+STR_FEDERATION_AUTH_CAPTION                                         :{WHITE}Federation Player Authentication & Corporate Charters
+STR_FEDERATION_AUTH_BTN_LOGIN_REGISTER                              :Log In / Register
+STR_FEDERATION_AUTH_BTN_LOGIN_REGISTER_TOOLTIP                      :Authenticate or register a player account with the Universe Authority
+STR_FEDERATION_AUTH_BTN_NEW_CHARTER                                 :Charter Corporation
+STR_FEDERATION_AUTH_BTN_NEW_CHARTER_TOOLTIP                         :Charter a new multi-world corporation owned by the authenticated player
+STR_FEDERATION_AUTH_BTN_ADD_PRESENCE                                :Register World Presence
+STR_FEDERATION_AUTH_BTN_ADD_PRESENCE_TOOLTIP                         :Register an active operational presence for the selected corporation on this world
+STR_FEDERATION_AUTH_BTN_AUTH_DELEGATE                               :Authorize Delegate
+STR_FEDERATION_AUTH_BTN_AUTH_DELEGATE_TOOLTIP                       :Authorize a delegate player to operate this corporate charter
+STR_FEDERATION_AUTH_NO_CHARTERS                                     :{SILVER}No corporate charters registered
+STR_FEDERATION_AUTH_LOGIN_CAPTION                                   :{WHITE}Federation Player Username
+STR_FEDERATION_AUTH_CHARTER_CAPTION                                 :{WHITE}New Corporation Name
+STR_FEDERATION_AUTH_DELEGATE_CAPTION                                :{WHITE}Delegate Player Sequence ID
+
