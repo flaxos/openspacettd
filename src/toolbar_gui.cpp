@@ -69,6 +69,9 @@
 
 #include "widgets/toolbar_widget.h"
 #include "portal/planet_manager.h"
+#include "portal/megacity_gui.h"
+#include "portal/freight_corridor_gui.h"
+#include "portal/universe_directory_gui.h"
 #include "3rdparty/fmt/format.h"
 
 #include "network/network.h"
@@ -439,6 +442,8 @@ enum class MapMenuEntries : uint8_t {
 	ShowSignList, ///< Open sign list window.
 	ShowTownDirectory, ///< Open window with list of towns.
 	ShowIndustryDirectory, ///< Open window with list of industries.
+	ShowFreightCorridors, ///< Open inter-server freight corridor monitor.
+	ShowUniverseDirectory, ///< Open universe authority world directory.
 };
 
 static CallBackFunction ToolbarMapClick(Window *w)
@@ -448,6 +453,8 @@ static CallBackFunction ToolbarMapClick(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_EXTRA_VIEWPORT, MapMenuEntries::ShowExtraViewport));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_LINGRAPH_LEGEND, MapMenuEntries::ShowLinkGraph));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_SIGN_LIST, MapMenuEntries::ShowSignList));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FREIGHT_CORRIDORS, MapMenuEntries::ShowFreightCorridors));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_UNIVERSE_DIRECTORY, MapMenuEntries::ShowUniverseDirectory));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -468,6 +475,8 @@ static CallBackFunction ToolbarScenMapTownDir(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_SIGN_LIST, MapMenuEntries::ShowSignList));
 	list.push_back(MakeDropDownListStringItem(STR_TOWN_MENU_TOWN_DIRECTORY, MapMenuEntries::ShowTownDirectory));
 	list.push_back(MakeDropDownListStringItem(STR_INDUSTRY_MENU_INDUSTRY_DIRECTORY, MapMenuEntries::ShowIndustryDirectory));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FREIGHT_CORRIDORS, MapMenuEntries::ShowFreightCorridors));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_UNIVERSE_DIRECTORY, MapMenuEntries::ShowUniverseDirectory));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -501,6 +510,8 @@ static CallBackFunction MenuClickMap(int index)
 		case MapMenuEntries::ShowSignList: ShowSignList(); break;
 		case MapMenuEntries::ShowTownDirectory: ShowTownDirectory(); break;
 		case MapMenuEntries::ShowIndustryDirectory: ShowIndustryDirectory(); break;
+		case MapMenuEntries::ShowFreightCorridors: ShowFreightCorridorMonitor(); break;
+		case MapMenuEntries::ShowUniverseDirectory: ShowUniverseDirectory(); break;
 	}
 	return CallBackFunction::None;
 }
@@ -512,12 +523,14 @@ enum class TownMenuEntries {
 	ShowDirectory = 0, ///< Open window with list of towns.
 	ShowFoundTown, ///< Open town generation window.
 	ShowPlaceHouses, ///< Open house selection window.
+	ShowMegacityOverview, ///< Open megacity commodity overview window.
 };
 
 static CallBackFunction ToolbarTownClick(Window *w)
 {
 	DropDownList list;
 	list.push_back(MakeDropDownListStringItem(STR_TOWN_MENU_TOWN_DIRECTORY, TownMenuEntries::ShowDirectory));
+	list.push_back(MakeDropDownListStringItem(STR_TOWN_MENU_MEGACITY_OVERVIEW, TownMenuEntries::ShowMegacityOverview));
 	if (_settings_game.economy.found_town != TownFounding::Forbidden) list.push_back(MakeDropDownListStringItem(STR_TOWN_MENU_FOUND_TOWN, TownMenuEntries::ShowFoundTown));
 	if (_settings_game.economy.place_houses != PlaceHouses::Forbidden) list.push_back(MakeDropDownListStringItem(STR_SCENEDIT_TOWN_MENU_PACE_HOUSE, TownMenuEntries::ShowPlaceHouses));
 
@@ -536,6 +549,7 @@ static CallBackFunction MenuClickTown(int index)
 {
 	switch (TownMenuEntries(index)) {
 		case TownMenuEntries::ShowDirectory: ShowTownDirectory(); break;
+		case TownMenuEntries::ShowMegacityOverview: ShowMegacityOverview(); break;
 		case TownMenuEntries::ShowFoundTown: // Setting could be changed when the dropdown was open
 			if (_settings_game.economy.found_town != TownFounding::Forbidden) ShowFoundTownWindow();
 			break;

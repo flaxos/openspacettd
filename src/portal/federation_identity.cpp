@@ -8,11 +8,16 @@
 #include "../stdafx.h"
 #include "federation_identity.h"
 
+#include "../company_base.h"
+#include "../industry.h"
 #include "../map_func.h"
 #include "../openttd.h"
 #include "../settings_type.h"
+#include "../station_base.h"
+#include "../town.h"
 #include "../train.h"
 #include "../vehicle_base.h"
+#include "planet_manager.h"
 
 #include "../safeguards.h"
 
@@ -20,7 +25,15 @@ namespace {
 
 FederationNamespace _federation_namespace{};
 uint64_t _next_consist_sequence = 1;
+uint64_t _next_company_sequence = 1;
+uint64_t _next_station_sequence = 1;
+uint64_t _next_source_sequence = 1;
+uint64_t _next_depot_sequence = 1;
 std::map<uint32_t, uint64_t> _consist_mappings;
+std::map<uint8_t, uint64_t> _company_mappings;
+std::map<uint32_t, uint64_t> _station_mappings;
+std::map<uint32_t, uint64_t> _source_mappings;
+std::map<uint32_t, uint64_t> _depot_mappings;
 
 static uint64_t Mix64(uint64_t value)
 {
@@ -82,6 +95,34 @@ FederationNamespace FederationIdentityRegistry::GetNamespace()
 uint64_t FederationIdentityRegistry::GetNextSequence()
 {
 	return _next_consist_sequence;
+}
+
+uint64_t FederationIdentityRegistry::GetNextCompanySequence()
+{
+	return _next_company_sequence;
+}
+
+uint64_t FederationIdentityRegistry::GetNextStationSequence()
+{
+	return _next_station_sequence;
+}
+
+uint64_t FederationIdentityRegistry::GetNextSourceSequence()
+{
+	return _next_source_sequence;
+}
+
+GlobalOwnerToken GlobalCompanyID::ToOwnerToken() const
+{
+	GlobalOwnerToken token{};
+	if (!this->IsValid()) return token;
+	uint64_t high = this->name_space.high ^ Mix64(this->sequence);
+	uint64_t low = this->name_space.low ^ Mix64(this->sequence + 0x9E3779B97F4A7C15ULL);
+	for (int i = 0; i < 8; ++i) {
+		token[i] = static_cast<uint8_t>(high >> (i * 8));
+		token[8 + i] = static_cast<uint8_t>(low >> (i * 8));
+	}
+	return token;
 }
 
 std::optional<GlobalConsistID> FederationIdentityRegistry::Find(const Train *train)
@@ -206,9 +247,291 @@ void FederationIdentityRegistry::PruneStaleMappings()
 	}
 }
 
+std::optional<GlobalCompanyID> FederationIdentityRegistry::FindCompany(CompanyID company)
+{
+	if (company == CompanyID::Invalid() || company >= MAX_COMPANIES) return std::nullopt;
+	auto it = _company_mappings.find(company.base());
+	if (it == _company_mappings.end()) return std::nullopt;
+	return GlobalCompanyID{GetNamespace(), it->second};
+}
+
+std::optional<GlobalCompanyID> FederationIdentityRegistry::GetOrCreateCompany(CompanyID company)
+{
+	if (company == CompanyID::Invalid() || company >= MAX_COMPANIES) return std::nullopt;
+	if (auto existing = FindCompany(company); existing.has_value()) return existing;
+
+	EnsureNamespace();
+	if (_next_company_sequence == 0) return std::nullopt;
+	uint64_t sequence = _next_company_sequence++;
+	_company_mappings[company.base()] = sequence;
+	return GlobalCompanyID{_federation_namespace, sequence};
+}
+
+void FederationIdentityRegistry::ReleaseCompany(CompanyID company)
+{
+	_company_mappings.erase(company.base());
+}
+
+const std::map<uint8_t, uint64_t> &FederationIdentityRegistry::GetCompanyMappings()
+{
+	return _company_mappings;
+}
+
+bool FederationIdentityRegistry::RestoreCompanyMapping(CompanyID company, uint64_t sequence)
+{
+	if (company == CompanyID::Invalid() || sequence == 0) return false;
+	_company_mappings[company.base()] = sequence;
+	if (sequence == UINT64_MAX) {
+		_next_company_sequence = 0;
+	} else if (_next_company_sequence != 0) {
+		_next_company_sequence = std::max(_next_company_sequence, sequence + 1);
+	}
+	return true;
+}
+
+void FederationIdentityRegistry::PruneStaleCompanyMappings()
+{
+	for (auto it = _company_mappings.begin(); it != _company_mappings.end();) {
+		if (!Company::IsValidID(CompanyID{it->first})) {
+			it = _company_mappings.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
+
+std::optional<GlobalStationID> FederationIdentityRegistry::FindStation(StationID station)
+{
+	if (station == StationID::Invalid()) return std::nullopt;
+	auto it = _station_mappings.find(station.base());
+	if (it == _station_mappings.end()) return std::nullopt;
+
+	WorldID world = WorldID{0};
+	const Station *st = Station::GetIfValid(station);
+	if (st != nullptr && st->xy != INVALID_TILE) {
+		const PlanetRegion *region = PlanetManager::GetRegionByTile(st->xy);
+		if (region != nullptr) world = region->id;
+	}
+
+	return GlobalStationID{GetNamespace(), it->second, world};
+}
+
+std::optional<GlobalStationID> FederationIdentityRegistry::GetOrCreateStation(StationID station)
+{
+	if (station == StationID::Invalid()) return std::nullopt;
+	if (auto existing = FindStation(station); existing.has_value()) return existing;
+
+	EnsureNamespace();
+	if (_next_station_sequence == 0) return std::nullopt;
+	uint64_t sequence = _next_station_sequence++;
+	_station_mappings[station.base()] = sequence;
+
+	WorldID world = WorldID{0};
+	const Station *st = Station::GetIfValid(station);
+	if (st != nullptr && st->xy != INVALID_TILE) {
+		const PlanetRegion *region = PlanetManager::GetRegionByTile(st->xy);
+		if (region != nullptr) world = region->id;
+	}
+
+	return GlobalStationID{_federation_namespace, sequence, world};
+}
+
+void FederationIdentityRegistry::ReleaseStation(StationID station)
+{
+	_station_mappings.erase(station.base());
+}
+
+const std::map<uint32_t, uint64_t> &FederationIdentityRegistry::GetStationMappings()
+{
+	return _station_mappings;
+}
+
+bool FederationIdentityRegistry::RestoreStationMapping(StationID station, uint64_t sequence)
+{
+	if (station == StationID::Invalid() || sequence == 0) return false;
+	_station_mappings[station.base()] = sequence;
+	if (sequence == UINT64_MAX) {
+		_next_station_sequence = 0;
+	} else if (_next_station_sequence != 0) {
+		_next_station_sequence = std::max(_next_station_sequence, sequence + 1);
+	}
+	return true;
+}
+
+void FederationIdentityRegistry::PruneStaleStationMappings()
+{
+	for (auto it = _station_mappings.begin(); it != _station_mappings.end();) {
+		if (Station::GetIfValid(StationID{static_cast<uint16_t>(it->first)}) == nullptr) {
+			it = _station_mappings.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
+
+GlobalCargoSourceID FederationIdentityRegistry::CreateCargoSource(StationID first_station, Source source, TileIndex source_xy)
+{
+	EnsureNamespace();
+	GlobalCargoSourceID result;
+	result.name_space = _federation_namespace;
+
+	if (first_station != StationID::Invalid()) {
+		if (auto st = GetOrCreateStation(first_station); st.has_value()) {
+			result.origin_station = *st;
+			result.origin_world = st->world_id;
+		}
+	}
+
+	if (source.IsValid()) {
+		result.source_type = source.type;
+		uint32_t key = (static_cast<uint32_t>(source.type) << 16) | (source.id & 0xFFFF);
+		auto it = _source_mappings.find(key);
+		if (it != _source_mappings.end()) {
+			result.source_sequence = it->second;
+		} else {
+			uint64_t seq = _next_source_sequence++;
+			_source_mappings[key] = seq;
+			result.source_sequence = seq;
+		}
+	}
+
+	if (source_xy != INVALID_TILE) {
+		result.origin_tile_x = TileX(source_xy);
+		result.origin_tile_y = TileY(source_xy);
+		const PlanetRegion *region = PlanetManager::GetRegionByTile(source_xy);
+		if (region != nullptr) {
+			result.origin_world = region->id;
+		}
+	} else if (result.origin_station.IsValid()) {
+		const Station *st = Station::GetIfValid(first_station);
+		if (st != nullptr && st->xy != INVALID_TILE) {
+			result.origin_tile_x = TileX(st->xy);
+			result.origin_tile_y = TileY(st->xy);
+		}
+	}
+
+	return result;
+}
+
+const std::map<uint32_t, uint64_t> &FederationIdentityRegistry::GetSourceMappings()
+{
+	return _source_mappings;
+}
+
+bool FederationIdentityRegistry::RestoreSourceMapping(uint32_t source_key, uint64_t sequence)
+{
+	if (sequence == 0) return false;
+	_source_mappings[source_key] = sequence;
+	if (sequence == UINT64_MAX) {
+		_next_source_sequence = 0;
+	} else if (_next_source_sequence != 0) {
+		_next_source_sequence = std::max(_next_source_sequence, sequence + 1);
+	}
+	return true;
+}
+
+void FederationIdentityRegistry::PruneStaleSourceMappings()
+{
+	for (auto it = _source_mappings.begin(); it != _source_mappings.end();) {
+		SourceType type = static_cast<SourceType>(it->first >> 16);
+		uint16_t id = static_cast<uint16_t>(it->first & 0xFFFF);
+		bool valid = false;
+		switch (type) {
+			case SourceType::Industry:
+				valid = Industry::IsValidID(IndustryID{id});
+				break;
+			case SourceType::Town:
+				valid = Town::IsValidID(TownID{id});
+				break;
+			case SourceType::Headquarters:
+				valid = Company::IsValidID(CompanyID{static_cast<uint8_t>(id)});
+				break;
+			default:
+				break;
+		}
+		if (!valid) {
+			it = _source_mappings.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
+
+std::optional<GlobalOrderDestinationID> FederationIdentityRegistry::FindOrderDestination(DestinationID dest, OrderType order_type)
+{
+	switch (order_type) {
+		case OT_GOTO_STATION:
+		case OT_IMPLICIT: {
+			auto st = FindStation(dest.ToStationID());
+			if (!st.has_value()) return std::nullopt;
+			return GlobalOrderDestinationID::ForStation(*st, false);
+		}
+		case OT_GOTO_WAYPOINT: {
+			auto st = FindStation(dest.ToStationID());
+			if (!st.has_value()) return std::nullopt;
+			return GlobalOrderDestinationID::ForStation(*st, true);
+		}
+		case OT_GOTO_DEPOT: {
+			DepotID depot = dest.ToDepotID();
+			auto it = _depot_mappings.find(depot.base());
+			if (it == _depot_mappings.end()) return std::nullopt;
+			return GlobalOrderDestinationID::ForDepot(GetNamespace(), it->second, WorldID{0});
+		}
+		default:
+			return std::nullopt;
+	}
+}
+
+std::optional<GlobalOrderDestinationID> FederationIdentityRegistry::GetOrCreateOrderDestination(DestinationID dest, OrderType order_type)
+{
+	switch (order_type) {
+		case OT_GOTO_STATION:
+		case OT_IMPLICIT: {
+			auto st = GetOrCreateStation(dest.ToStationID());
+			if (!st.has_value()) return std::nullopt;
+			return GlobalOrderDestinationID::ForStation(*st, false);
+		}
+		case OT_GOTO_WAYPOINT: {
+			auto st = GetOrCreateStation(dest.ToStationID());
+			if (!st.has_value()) return std::nullopt;
+			return GlobalOrderDestinationID::ForStation(*st, true);
+		}
+		case OT_GOTO_DEPOT: {
+			EnsureNamespace();
+			DepotID depot = dest.ToDepotID();
+			uint64_t seq = 0;
+			auto it = _depot_mappings.find(depot.base());
+			if (it != _depot_mappings.end()) {
+				seq = it->second;
+			} else {
+				seq = _next_depot_sequence++;
+				_depot_mappings[depot.base()] = seq;
+			}
+			return GlobalOrderDestinationID::ForDepot(_federation_namespace, seq, WorldID{0});
+		}
+		default:
+			return std::nullopt;
+	}
+}
+
+void FederationIdentityRegistry::RestoreCounters(uint64_t next_company, uint64_t next_station, uint64_t next_source)
+{
+	if (next_company != 0) _next_company_sequence = next_company;
+	if (next_station != 0) _next_station_sequence = next_station;
+	if (next_source != 0) _next_source_sequence = next_source;
+}
+
 void FederationIdentityRegistry::Reset()
 {
 	_federation_namespace = {};
 	_next_consist_sequence = 1;
+	_next_company_sequence = 1;
+	_next_station_sequence = 1;
+	_next_source_sequence = 1;
+	_next_depot_sequence = 1;
 	_consist_mappings.clear();
+	_company_mappings.clear();
+	_station_mappings.clear();
+	_source_mappings.clear();
+	_depot_mappings.clear();
 }

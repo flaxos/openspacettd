@@ -82,4 +82,18 @@ struct PortalLink {
 	}
 };
 
+/** A gateway portal endpoint linked to a remote world server across the federation. */
+struct InterServerPortalLink {
+	PortalID id = INVALID_PORTAL;
+	PortalEndpoint local_endpoint;     ///< Local portal head on this server.
+	WorldID remote_world = INVALID_WORLD; ///< Destination world ID on remote server.
+	uint32_t remote_gate_id = 0;       ///< Remote gateway identifier.
+	uint32_t virtual_length = 1;       ///< Virtual route length for YAPF.
+
+	constexpr bool IsValid() const
+	{
+		return id != INVALID_PORTAL && local_endpoint.IsValid() && remote_world != INVALID_WORLD;
+	}
+};
+
 #endif /* PORTAL_TYPE_H */

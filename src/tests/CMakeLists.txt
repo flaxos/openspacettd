@@ -24,6 +24,10 @@ add_test_files(
     test_portal_wormhole.cpp
     test_consist_traversal.cpp
     test_federation.cpp
+    test_federation_transfer.cpp
+    test_federation_persistent_universe.cpp
+    test_federation_megacity_economy.cpp
+    test_megacity_gui.cpp
     test_portal_construction.cpp
     test_world_gen.cpp
     test_interplanetary_cargo.cpp

@@ -746,6 +746,15 @@ enum class WindowClass : uint16_t {
 	/** Portal gate construction and linking picker. */
 	BuildPortal,
 
+	/** Megacity status and commodity demand overview. */
+	MegacityOverview,
+
+	/** Inter-server freight corridor traffic monitor. */
+	FreightCorridorMonitor,
+
+	/** Universe Authority registered world directory. */
+	UniverseDirectory,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

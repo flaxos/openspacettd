@@ -46,6 +46,7 @@ enum TownViewWidgets : WidgetID {
 	WID_TV_EXPAND_ROADS, ///< Expand roads of this town (scenario editor only).
 	WID_TV_DELETE,         ///< Delete this town (scenario editor only).
 	WID_TV_GRAPH,
+	WID_TV_MEGACITY_STATUS, ///< Show megacity status window.
 };
 
 /** Widgets of the #FoundTownWindow class. */

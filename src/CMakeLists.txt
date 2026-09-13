@@ -376,10 +376,26 @@ add_files(
     portal/edge_conduit.h
     portal/content_manifest.cpp
     portal/content_manifest.h
+    portal/consist_materializer.cpp
+    portal/consist_materializer.h
     portal/consist_snapshot.cpp
     portal/consist_snapshot.h
+    portal/federation_cmd.cpp
+    portal/federation_cmd.h
     portal/federation_identity.cpp
     portal/federation_identity.h
+    portal/federation_player.cpp
+    portal/federation_player.h
+    portal/freight_corridor_gui.cpp
+    portal/freight_corridor_gui.h
+    portal/megacity_gui.cpp
+    portal/megacity_gui.h
+    portal/megacity_manager.cpp
+    portal/megacity_manager.h
+    portal/universe_authority.cpp
+    portal/universe_authority.h
+    portal/universe_directory_gui.cpp
+    portal/universe_directory_gui.h
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h

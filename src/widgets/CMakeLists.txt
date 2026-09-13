@@ -16,6 +16,7 @@ add_files(
     error_widget.h
     fios_widget.h
     framerate_widget.h
+    freight_corridor_widget.h
     game_widget.h
     genworld_widget.h
     goal_widget.h
@@ -28,6 +29,7 @@ add_files(
     league_widget.h
     link_graph_legend_widget.h
     main_widget.h
+    megacity_widget.h
     misc_widget.h
     music_widget.h
     network_chat_widget.h
@@ -57,6 +59,7 @@ add_files(
     town_widget.h
     transparency_widget.h
     tree_widget.h
+    universe_directory_widget.h
     vehicle_widget.h
     viewport_widget.h
     waypoint_widget.h

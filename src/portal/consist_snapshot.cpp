@@ -10,9 +10,12 @@
 
 #include "../base_consist.h"
 #include "../cargo_type.h"
+#include "../cargopacket.h"
 #include "../direction_type.h"
+#include "../order_base.h"
 #include "../train.h"
 #include "../vehicle_base.h"
+#include "planet_manager.h"
 
 #include "../safeguards.h"
 
@@ -130,12 +133,20 @@ static uint32_t SnapshotChecksum(std::span<const uint8_t> bytes)
 static bool IsSnapshotValid(const ConsistSnapshot &snapshot)
 {
 	if (!snapshot.consist_id.IsValid() || snapshot.units.empty() || snapshot.units.size() > CONSIST_SNAPSHOT_MAX_UNITS) return false;
+	if (snapshot.orders.size() > CONSIST_SNAPSHOT_MAX_ORDERS) return false;
 	if (snapshot.direction >= to_underlying(Direction::End)) return false;
 	for (const ConsistSnapshotUnit &unit : snapshot.units) {
 		if (unit.engine_type == EngineID::Invalid().base()) return false;
 		if (unit.cargo_type >= NUM_CARGO) return false;
 		if (unit.cargo_count > unit.cargo_capacity) return false;
-		if (unit.cargo_provenance_unresolved != (unit.cargo_count != 0)) return false;
+		if (unit.cargo_count == 0) {
+			if (unit.cargo_provenance_unresolved || unit.cargo_source.IsValid()) return false;
+		} else {
+			if (unit.cargo_provenance_unresolved == unit.cargo_source.IsValid()) return false;
+		}
+	}
+	for (const GlobalOrderDestinationID &order : snapshot.orders) {
+		if (!order.IsValid()) return false;
 	}
 	return true;
 }
@@ -153,6 +164,14 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 	snapshot.content_manifest = manifest;
 	snapshot.consist_id = *identity;
 	snapshot.owner = owner;
+
+	if (auto comp = FederationIdentityRegistry::GetOrCreateCompany(train->owner); comp.has_value()) {
+		snapshot.company_id = *comp;
+		if (snapshot.owner == GlobalOwnerToken{}) {
+			snapshot.owner = comp->ToOwnerToken();
+		}
+	}
+
 	snapshot.direction = to_underlying(train->direction);
 	snapshot.speed = train->cur_speed;
 	snapshot.subspeed = train->subspeed;
@@ -165,7 +184,8 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 		if (unit->engine_type == EngineID::Invalid() || !IsValidCargoType(unit->cargo_type)) {
 			return {ConsistSnapshotError::InvalidConsist, std::nullopt};
 		}
-		snapshot.units.push_back({
+
+		ConsistSnapshotUnit snap_unit{
 			.engine_type = unit->engine_type.base(),
 			.subtype = unit->subtype,
 			.cargo_type = to_underlying(unit->cargo_type),
@@ -184,8 +204,42 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 			.breakdowns_since_service = unit->breakdowns_since_last_service,
 			.breakdown_chance = unit->breakdown_chance,
 			.random_bits = unit->random_bits,
-			.cargo_provenance_unresolved = unit->cargo.StoredCount() != 0,
-		});
+			.cargo_provenance_unresolved = false,
+			.cargo_source = {},
+		};
+
+		if (unit->cargo.StoredCount() > 0) {
+			const auto *packets = unit->cargo.Packets();
+			if (packets != nullptr && !packets->empty()) {
+				const CargoPacket *first_packet = packets->front();
+				GlobalCargoSourceID source = FederationIdentityRegistry::CreateCargoSource(
+					first_packet->GetFirstStation(),
+					first_packet->GetSource(),
+					first_packet->GetSourceXY()
+				);
+				if (source.IsValid()) {
+					snap_unit.cargo_source = source;
+					snap_unit.cargo_provenance_unresolved = false;
+				} else {
+					snap_unit.cargo_provenance_unresolved = true;
+				}
+			} else {
+				snap_unit.cargo_provenance_unresolved = true;
+			}
+		}
+
+		snapshot.units.push_back(snap_unit);
+	}
+
+	if (train->orders != nullptr) {
+		for (const Order &order : train->orders->GetOrders()) {
+			if (snapshot.orders.size() == CONSIST_SNAPSHOT_MAX_ORDERS) break;
+			if (order.IsGotoOrder()) {
+				if (auto dest = FederationIdentityRegistry::GetOrCreateOrderDestination(order.GetDestination(), order.GetType()); dest.has_value()) {
+					snapshot.orders.push_back(*dest);
+				}
+			}
+		}
 	}
 
 	if (!IsSnapshotValid(snapshot)) return {ConsistSnapshotError::InvalidConsist, std::nullopt};
@@ -204,6 +258,7 @@ ConsistSnapshotResult ConsistSnapshotCodec::CaptureForCurrentContent(const Train
 ConsistSnapshotBytes ConsistSnapshotCodec::Encode(const ConsistSnapshot &snapshot)
 {
 	if (snapshot.units.size() > CONSIST_SNAPSHOT_MAX_UNITS) return {ConsistSnapshotError::TooManyUnits, {}};
+	if (snapshot.orders.size() > CONSIST_SNAPSHOT_MAX_ORDERS) return {ConsistSnapshotError::TooManyUnits, {}};
 	if (!IsSnapshotValid(snapshot)) return {ConsistSnapshotError::InvalidField, {}};
 
 	ByteWriter writer;
@@ -222,6 +277,12 @@ ConsistSnapshotBytes ConsistSnapshotCodec::Encode(const ConsistSnapshot &snapsho
 	writer.U16(snapshot.speed);
 	writer.U8(snapshot.subspeed);
 	writer.U8(snapshot.acceleration);
+
+	/* V2: Global Company ID */
+	writer.U64(snapshot.company_id.name_space.high);
+	writer.U64(snapshot.company_id.name_space.low);
+	writer.U64(snapshot.company_id.sequence);
+
 	writer.U16(static_cast<uint16_t>(snapshot.units.size()));
 
 	for (const ConsistSnapshotUnit &unit : snapshot.units) {
@@ -244,6 +305,37 @@ ConsistSnapshotBytes ConsistSnapshotCodec::Encode(const ConsistSnapshot &snapsho
 		writer.U8(unit.breakdown_chance);
 		writer.U16(unit.random_bits);
 		writer.U8(unit.cargo_provenance_unresolved ? 1 : 0);
+
+		/* V2: Cargo Source Provenance */
+		uint8_t has_source = unit.cargo_source.IsValid() ? 1 : 0;
+		writer.U8(has_source);
+		if (has_source != 0) {
+			writer.U64(unit.cargo_source.name_space.high);
+			writer.U64(unit.cargo_source.name_space.low);
+			writer.U64(unit.cargo_source.origin_station.name_space.high);
+			writer.U64(unit.cargo_source.origin_station.name_space.low);
+			writer.U64(unit.cargo_source.origin_station.sequence);
+			writer.U32(unit.cargo_source.origin_station.world_id.base());
+			writer.U8(static_cast<uint8_t>(unit.cargo_source.source_type));
+			writer.U64(unit.cargo_source.source_sequence);
+			writer.U32(unit.cargo_source.origin_world.base());
+			writer.U32(unit.cargo_source.origin_tile_x);
+			writer.U32(unit.cargo_source.origin_tile_y);
+		}
+	}
+
+	/* V2: Global Orders */
+	writer.U16(static_cast<uint16_t>(snapshot.orders.size()));
+	for (const GlobalOrderDestinationID &order : snapshot.orders) {
+		writer.U8(static_cast<uint8_t>(order.type));
+		writer.U64(order.name_space.high);
+		writer.U64(order.name_space.low);
+		writer.U64(order.station_id.name_space.high);
+		writer.U64(order.station_id.name_space.low);
+		writer.U64(order.station_id.sequence);
+		writer.U32(order.station_id.world_id.base());
+		writer.U64(order.destination_sequence);
+		writer.U32(order.target_world.base());
 	}
 
 	if (writer.data.size() + sizeof(uint32_t) > CONSIST_SNAPSHOT_MAX_BYTES) return {ConsistSnapshotError::TooLarge, {}};
@@ -270,18 +362,29 @@ ConsistSnapshotResult ConsistSnapshotCodec::Decode(std::span<const uint8_t> byte
 		return {ConsistSnapshotError::Truncated, std::nullopt};
 	}
 	if (magic != SNAPSHOT_MAGIC) return {ConsistSnapshotError::InvalidMagic, std::nullopt};
-	if (version != CONSIST_SNAPSHOT_VERSION) return {ConsistSnapshotError::UnsupportedVersion, std::nullopt};
+	if (version != 1 && version != 2) return {ConsistSnapshotError::UnsupportedVersion, std::nullopt};
 	if (reserved != 0) return {ConsistSnapshotError::InvalidField, std::nullopt};
 	if (total_size != bytes.size()) return {ConsistSnapshotError::LengthMismatch, std::nullopt};
 
 	ConsistSnapshot snapshot;
 	uint8_t flags;
-	uint16_t unit_count;
 	if (!reader.Bytes(snapshot.content_manifest) ||
 			!reader.U64(snapshot.consist_id.name_space.high) || !reader.U64(snapshot.consist_id.name_space.low) ||
 			!reader.U64(snapshot.consist_id.sequence) || !reader.Bytes(snapshot.owner) ||
 			!reader.U8(snapshot.direction) || !reader.U8(flags) || !reader.U16(snapshot.speed) ||
-			!reader.U8(snapshot.subspeed) || !reader.U8(snapshot.acceleration) || !reader.U16(unit_count)) {
+			!reader.U8(snapshot.subspeed) || !reader.U8(snapshot.acceleration)) {
+		return {ConsistSnapshotError::Truncated, std::nullopt};
+	}
+
+	if (version >= 2) {
+		if (!reader.U64(snapshot.company_id.name_space.high) || !reader.U64(snapshot.company_id.name_space.low) ||
+				!reader.U64(snapshot.company_id.sequence)) {
+			return {ConsistSnapshotError::Truncated, std::nullopt};
+		}
+	}
+
+	uint16_t unit_count;
+	if (!reader.U16(unit_count)) {
 		return {ConsistSnapshotError::Truncated, std::nullopt};
 	}
 	if (snapshot.content_manifest != expected_manifest) return {ConsistSnapshotError::ManifestMismatch, std::nullopt};
@@ -304,7 +407,57 @@ ConsistSnapshotResult ConsistSnapshotCodec::Decode(std::span<const uint8_t> byte
 		}
 		if (unresolved > 1) return {ConsistSnapshotError::InvalidField, std::nullopt};
 		unit.cargo_provenance_unresolved = unresolved != 0;
+
+		if (version >= 2) {
+			uint8_t has_source;
+			if (!reader.U8(has_source)) return {ConsistSnapshotError::Truncated, std::nullopt};
+			if (has_source > 1) return {ConsistSnapshotError::InvalidField, std::nullopt};
+			if (has_source != 0) {
+				uint32_t st_world, orig_world;
+				uint8_t src_type;
+				if (!reader.U64(unit.cargo_source.name_space.high) || !reader.U64(unit.cargo_source.name_space.low) ||
+						!reader.U64(unit.cargo_source.origin_station.name_space.high) ||
+						!reader.U64(unit.cargo_source.origin_station.name_space.low) ||
+						!reader.U64(unit.cargo_source.origin_station.sequence) ||
+						!reader.U32(st_world) ||
+						!reader.U8(src_type) ||
+						!reader.U64(unit.cargo_source.source_sequence) ||
+						!reader.U32(orig_world) ||
+						!reader.U32(unit.cargo_source.origin_tile_x) ||
+						!reader.U32(unit.cargo_source.origin_tile_y)) {
+					return {ConsistSnapshotError::Truncated, std::nullopt};
+				}
+				unit.cargo_source.name_space = snapshot.consist_id.name_space;
+				unit.cargo_source.origin_station.world_id = WorldID{st_world};
+				unit.cargo_source.source_type = static_cast<SourceType>(src_type);
+				unit.cargo_source.origin_world = WorldID{orig_world};
+			}
+		}
+
 		snapshot.units.push_back(unit);
+	}
+
+	if (version >= 2) {
+		uint16_t order_count;
+		if (!reader.U16(order_count)) return {ConsistSnapshotError::Truncated, std::nullopt};
+		if (order_count > CONSIST_SNAPSHOT_MAX_ORDERS) return {ConsistSnapshotError::InvalidField, std::nullopt};
+		snapshot.orders.reserve(order_count);
+		for (uint i = 0; i < order_count; ++i) {
+			GlobalOrderDestinationID order;
+			uint8_t order_type;
+			uint32_t st_world, target_world;
+			if (!reader.U8(order_type) ||
+					!reader.U64(order.name_space.high) || !reader.U64(order.name_space.low) ||
+					!reader.U64(order.station_id.name_space.high) || !reader.U64(order.station_id.name_space.low) ||
+					!reader.U64(order.station_id.sequence) || !reader.U32(st_world) ||
+					!reader.U64(order.destination_sequence) || !reader.U32(target_world)) {
+				return {ConsistSnapshotError::Truncated, std::nullopt};
+			}
+			order.type = static_cast<OrderDestinationType>(order_type);
+			order.station_id.world_id = WorldID{st_world};
+			order.target_world = WorldID{target_world};
+			snapshot.orders.push_back(order);
+		}
 	}
 
 	if (reader.Remaining() != 0) return {ConsistSnapshotError::LengthMismatch, std::nullopt};

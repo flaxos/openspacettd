@@ -19,6 +19,7 @@
 std::unordered_map<TileIndex, PortalID> PortalRegistry::tile_to_portal;
 std::unordered_map<uint32_t, PortalLink> PortalRegistry::portal_links;
 std::unordered_map<TileIndex, PortalEndpoint> PortalRegistry::unlinked_gates;
+std::unordered_map<TileIndex, InterServerPortalLink> PortalRegistry::interserver_portals;
 std::unordered_map<uint32_t, uint32_t> PortalRegistry::vehicle_portal_progress;
 uint32_t PortalRegistry::next_portal_id = 1;
 
@@ -72,6 +73,12 @@ bool PortalRegistry::UnregisterPortal(PortalID id)
 bool PortalRegistry::UnregisterPortalByTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;
+
+	auto it_is = interserver_portals.find(tile);
+	if (it_is != interserver_portals.end()) {
+		interserver_portals.erase(it_is);
+		return true;
+	}
 
 	auto it_un = unlinked_gates.find(tile);
 	if (it_un != unlinked_gates.end()) {
@@ -158,10 +165,64 @@ bool PortalRegistry::IsPortalInTransit(TileIndex tile)
 	return false;
 }
 
+PortalID PortalRegistry::RegisterInterServerPortal(
+	TileIndex local_tile,
+	DiagDirection dir,
+	WorldID local_world,
+	WorldID remote_world,
+	uint32_t remote_gate_id,
+	uint32_t virtual_length)
+{
+	if (local_tile == INVALID_TILE || remote_world == INVALID_WORLD) {
+		return INVALID_PORTAL;
+	}
+
+	if (tile_to_portal.find(local_tile) != tile_to_portal.end() ||
+	    interserver_portals.find(local_tile) != interserver_portals.end()) {
+		return INVALID_PORTAL;
+	}
+
+	unlinked_gates.erase(local_tile);
+
+	PortalID id{next_portal_id++};
+	InterServerPortalLink link;
+	link.id = id;
+	link.local_endpoint = PortalEndpoint{local_tile, dir, local_world};
+	link.remote_world = remote_world;
+	link.remote_gate_id = remote_gate_id;
+	link.virtual_length = virtual_length;
+
+	interserver_portals[local_tile] = link;
+	return id;
+}
+
+bool PortalRegistry::IsInterServerPortal(TileIndex tile)
+{
+	if (tile == INVALID_TILE) return false;
+	return interserver_portals.find(tile) != interserver_portals.end();
+}
+
+const InterServerPortalLink *PortalRegistry::GetInterServerPortal(TileIndex tile)
+{
+	auto it = interserver_portals.find(tile);
+	return it != interserver_portals.end() ? &it->second : nullptr;
+}
+
+bool PortalRegistry::UnregisterInterServerPortal(TileIndex tile)
+{
+	return interserver_portals.erase(tile) > 0;
+}
+
+const std::unordered_map<TileIndex, InterServerPortalLink> &PortalRegistry::GetAllInterServerPortals()
+{
+	return interserver_portals;
+}
+
 bool PortalRegistry::IsPortalTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;
-	return tile_to_portal.find(tile) != tile_to_portal.end();
+	return tile_to_portal.find(tile) != tile_to_portal.end() ||
+	       interserver_portals.find(tile) != interserver_portals.end();
 }
 
 TileIndex PortalRegistry::GetOtherPortalEnd(TileIndex tile)
@@ -218,7 +279,10 @@ PortalExitPosition PortalRegistry::GetPortalExitPosition(TileIndex entry_tile)
 uint32_t PortalRegistry::GetPortalVirtualLength(TileIndex tile)
 {
 	const PortalLink *link = GetPortalLink(tile);
-	return link != nullptr ? link->virtual_length : 1;
+	if (link != nullptr) return link->virtual_length;
+	const InterServerPortalLink *inter = GetInterServerPortal(tile);
+	if (inter != nullptr) return inter->virtual_length;
+	return 1;
 }
 
 const PortalLink *PortalRegistry::GetPortalLink(TileIndex tile)
@@ -339,6 +403,7 @@ void PortalRegistry::Reset()
 	tile_to_portal.clear();
 	portal_links.clear();
 	unlinked_gates.clear();
+	interserver_portals.clear();
 	vehicle_portal_progress.clear();
 	next_portal_id = 1;
 	FederationIdentityRegistry::Reset();

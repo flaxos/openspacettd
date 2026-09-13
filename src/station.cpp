@@ -29,6 +29,7 @@
 #include "linkgraph/linkgraphschedule.h"
 
 #include "table/strings.h"
+#include "portal/federation_identity.h"
 
 #include "safeguards.h"
 
@@ -52,6 +53,8 @@ void RebuildStationKdtree()
 BaseStation::~BaseStation()
 {
 	if (CleaningPool()) return;
+
+	FederationIdentityRegistry::ReleaseStation(this->index);
 
 	CloseWindowById(WindowClass::TrainList, VehicleListIdentifier(VehicleListType::Station, VehicleType::Train, this->owner, this->index).ToWindowNumber());
 	CloseWindowById(WindowClass::RoadVehicleList, VehicleListIdentifier(VehicleListType::Station, VehicleType::Road, this->owner, this->index).ToWindowNumber());

@@ -19,11 +19,10 @@
 
 struct Train;
 
-static constexpr uint16_t CONSIST_SNAPSHOT_VERSION = 1;
+static constexpr uint16_t CONSIST_SNAPSHOT_VERSION = 2;
 static constexpr size_t CONSIST_SNAPSHOT_MAX_UNITS = 256;
+static constexpr size_t CONSIST_SNAPSHOT_MAX_ORDERS = 256;
 static constexpr size_t CONSIST_SNAPSHOT_MAX_BYTES = 1024 * 1024;
-
-using GlobalOwnerToken = std::array<uint8_t, 16>;
 
 /** Portable, non-spatial state for one engine, wagon, or articulated part. */
 struct ConsistSnapshotUnit {
@@ -46,15 +45,17 @@ struct ConsistSnapshotUnit {
 	uint8_t breakdown_chance = 0;
 	uint16_t random_bits = 0;
 	bool cargo_provenance_unresolved = false;
+	GlobalCargoSourceID cargo_source{}; ///< Resolved global cargo provenance.
 
 	auto operator<=>(const ConsistSnapshotUnit &) const = default;
 };
 
-/** Version-independent in-memory representation of the Sprint 12 transfer core. */
+/** Version-independent in-memory representation of the consist transfer core. */
 struct ConsistSnapshot {
 	ContentManifestToken content_manifest{};
 	GlobalConsistID consist_id{};
 	GlobalOwnerToken owner{};
+	GlobalCompanyID company_id{}; ///< Resolved global company identity.
 	uint8_t direction = UINT8_MAX;
 	uint16_t speed = 0;
 	uint8_t subspeed = 0;
@@ -62,6 +63,7 @@ struct ConsistSnapshot {
 	bool stopped = false;
 	bool driving_backwards = false;
 	std::vector<ConsistSnapshotUnit> units;
+	std::vector<GlobalOrderDestinationID> orders{}; ///< Captured portable order destinations.
 
 	auto operator<=>(const ConsistSnapshot &) const = default;
 };

@@ -46,6 +46,10 @@
 #include "3rdparty/fmt/chrono.h"
 #include "company_cmd.h"
 #include "misc_cmd.h"
+#include "portal/universe_authority.h"
+#include "portal/federation_cmd.h"
+#include "portal/federation_player.h"
+#include "portal/megacity_manager.h"
 
 #if defined(WITH_ZLIB)
 #include "network/network_content.h"
@@ -2764,6 +2768,331 @@ static void IConsoleDebugLibRegister()
 }
 #endif
 
+/** Display Universe Authority federation status. @copydoc IConsoleCmdProc */
+static bool ConFederationStatus(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Display Universe Authority federation status, registered worlds, and commodity ledger.");
+		IConsolePrint(CC_HELP, "Usage: 'federation_status'");
+		return true;
+	}
+
+	auto audit = UniverseAuthorityService::Instance().GetCommodityAudit();
+	IConsolePrint(CC_DEFAULT, "Universe Authority Status:");
+	IConsolePrint(CC_DEFAULT, "  Transfers Initiated: {}, Completed: {}, In-Transit: {}",
+		audit.total_transfers_initiated, audit.total_transfers_completed, audit.total_transfers_in_transit);
+	IConsolePrint(CC_DEFAULT, "  Cargo Initiated: {}, Completed: {}, In-Transit: {}",
+		audit.total_cargo_initiated, audit.total_cargo_completed, audit.total_cargo_in_transit);
+	IConsolePrint(CC_DEFAULT, "  Commodity Conservation: {}", audit.IsConserved() ? "CONSERVED" : "VIOLATED");
+
+	auto worlds = UniverseAuthorityService::Instance().GetWorlds();
+	IConsolePrint(CC_DEFAULT, "Registered Worlds ({}):", worlds.size());
+	for (const auto &w : worlds) {
+		IConsolePrint(CC_DEFAULT, "  World {}: '{}' (Phase {})", w.world_id.base(), w.name, to_underlying(w.phase));
+	}
+	return true;
+}
+
+/** Authenticate or register a player account with the Universe Authority. @copydoc IConsoleCmdProc */
+static bool ConUniverseAuth(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Authenticate or register a player account with the Federation Universe.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_auth register <username> [auth_token]' or 'universe_auth login <username> <auth_token>' or 'universe_auth list'");
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "register") {
+		if (argv.size() < 3) {
+			IConsolePrint(CC_ERROR, "Usage: 'universe_auth register <username> [auth_token]'");
+			return false;
+		}
+		std::string username = std::string(argv[2]);
+		std::string token = (argv.size() >= 4) ? std::string(argv[3]) : "";
+		auto pid = FederationPlayerRegistry::RegisterPlayer(username, token);
+		if (!pid.IsValid()) {
+			IConsolePrint(CC_ERROR, "Failed to register player '{}'", username);
+			return false;
+		}
+		const auto *acc = FederationPlayerRegistry::GetPlayer(pid);
+		IConsolePrint(CC_DEFAULT, "Player registered: ID {:x}:{}, Username '{}', Token '{}'",
+			acc->player_id.name_space.low, acc->player_id.sequence, acc->username, acc->auth_token);
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "login") {
+		if (argv.size() < 4) {
+			IConsolePrint(CC_ERROR, "Usage: 'universe_auth login <username> <auth_token>'");
+			return false;
+		}
+		std::string username = std::string(argv[2]);
+		std::string token = std::string(argv[3]);
+		auto acc = FederationPlayerRegistry::Authenticate(username, token);
+		if (!acc.has_value()) {
+			IConsolePrint(CC_ERROR, "Authentication failed for username '{}'", username);
+			return false;
+		}
+		IConsolePrint(CC_DEFAULT, "Authenticated as '{}' (ID {:x}:{})",
+			acc->username, acc->player_id.name_space.low, acc->player_id.sequence);
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "list") {
+		auto players = FederationPlayerRegistry::GetAllPlayers();
+		IConsolePrint(CC_DEFAULT, "Registered Players ({}):", players.size());
+		for (const auto &p : players) {
+			IConsolePrint(CC_DEFAULT, "  Player {:x}:{}: '{}'",
+				p.player_id.name_space.low, p.player_id.sequence, p.username);
+		}
+		return true;
+	}
+
+	IConsolePrint(CC_ERROR, "Unknown subcommand. Usage: 'universe_auth <register|login|list>'");
+	return false;
+}
+
+/** Display dynamic world directory from the Universe Authority. @copydoc IConsoleCmdProc */
+static bool ConUniverseWorlds(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Query dynamic world directory from the Universe Authority.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_worlds [min_phase]'");
+		return true;
+	}
+
+	uint32_t min_phase = 0;
+	if (argv.size() >= 2) {
+		auto parsed = ParseInteger(argv[1]);
+		if (parsed.has_value()) {
+			min_phase = static_cast<uint32_t>(*parsed);
+		}
+	}
+
+	auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
+	IConsolePrint(CC_DEFAULT, "Dynamic World Directory ({} worlds):", worlds.size());
+	for (const auto &w : worlds) {
+		if (to_underlying(w.phase) < min_phase) continue;
+		const char *status_str = (w.status == WorldOnlineStatus::Online) ? "Online" :
+		                         (w.status == WorldOnlineStatus::Maintenance) ? "Maintenance" : "Unreachable";
+		IConsolePrint(CC_DEFAULT, "  World {}: '{}' | Status: {} | Addr: {} | Phase: {} | Clients: {}/{} | Trains: {}",
+			w.world_id.base(), w.name, status_str, w.address, to_underlying(w.phase),
+			w.active_clients, w.max_clients, w.active_trains);
+	}
+	return true;
+}
+
+/** Manage corporate charters across worlds. @copydoc IConsoleCmdProc */
+static bool ConUniverseCompany(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Manage multi-world corporate charters.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_company charter <owner_player_id_seq> <company_name>' or 'universe_company list' or 'universe_company presence <company_id_seq> <world_id>'");
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "charter") {
+		if (argv.size() < 4) {
+			IConsolePrint(CC_ERROR, "Usage: 'universe_company charter <owner_player_id_seq> <company_name>'");
+			return false;
+		}
+		auto owner_seq = ParseInteger(argv[2]);
+		if (!owner_seq.has_value()) {
+			IConsolePrint(CC_ERROR, "Invalid owner player sequence number.");
+			return false;
+		}
+		GlobalPlayerID owner_id{FederationNamespace{0, 1}, static_cast<uint64_t>(*owner_seq)};
+		std::string comp_name = std::string(argv[3]);
+		auto comp_id = FederationPlayerRegistry::CharterCompany(owner_id, comp_name);
+		if (!comp_id.IsValid()) {
+			IConsolePrint(CC_ERROR, "Failed to charter company '{}' for player sequence {}", comp_name, *owner_seq);
+			return false;
+		}
+		IConsolePrint(CC_DEFAULT, "Company chartered: ID {:x}:{}, Name '{}'",
+			comp_id.name_space.low, comp_id.sequence, comp_name);
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "list") {
+		auto charters = FederationPlayerRegistry::GetAllCharters();
+		IConsolePrint(CC_DEFAULT, "Corporate Charters ({}):", charters.size());
+		for (const auto &c : charters) {
+			IConsolePrint(CC_DEFAULT, "  Corp {:x}:{}: '{}' | Owner: {:x}:{} | Treasury: {} Cr | Presences: {}",
+				c.company_id.name_space.low, c.company_id.sequence, c.company_name,
+				c.owner_player_id.name_space.low, c.owner_player_id.sequence,
+				c.global_treasury_credits, c.active_world_presences.size());
+		}
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "presence") {
+		if (argv.size() < 4) {
+			IConsolePrint(CC_ERROR, "Usage: 'universe_company presence <company_id_seq> <world_id>'");
+			return false;
+		}
+		auto comp_seq = ParseInteger(argv[2]);
+		auto wid_raw = ParseInteger(argv[3]);
+		if (!comp_seq.has_value() || !wid_raw.has_value()) {
+			IConsolePrint(CC_ERROR, "Invalid company or world ID.");
+			return false;
+		}
+		GlobalCompanyID cid{FederationNamespace{0, 1}, static_cast<uint64_t>(*comp_seq)};
+		FederationPlayerRegistry::RegisterWorldPresence(cid, WorldID{static_cast<uint32_t>(*wid_raw)});
+		IConsolePrint(CC_DEFAULT, "Registered world presence {} for company {:x}:{}",
+			*wid_raw, cid.name_space.low, cid.sequence);
+		return true;
+	}
+
+	IConsolePrint(CC_ERROR, "Unknown subcommand. Usage: 'universe_company <charter|list|presence>'");
+	return false;
+}
+
+/** Query per-cargo commodity conservation audit and inter-world trade balances. @copydoc IConsoleCmdProc */
+static bool ConUniverseTrade(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Display detailed commodity ledger conservation audit and inter-world trade balances.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_trade'");
+		return true;
+	}
+
+	auto detailed = UniverseAuthorityService::Instance().GetDetailedCommodityAudit();
+	IConsolePrint(CC_DEFAULT, "Detailed Commodity Audit (Status: {}):",
+		detailed.IsConserved() ? "CONSERVED (All Cargo Types Balanced)" : "VIOLATION DETECTED");
+	for (const auto &[cargo, init] : detailed.cargo_initiated) {
+		uint64_t comp = detailed.cargo_completed.contains(cargo) ? detailed.cargo_completed.at(cargo) : 0;
+		uint64_t in_trans = detailed.cargo_in_transit.contains(cargo) ? detailed.cargo_in_transit.at(cargo) : 0;
+		bool ok = (init == comp + in_trans);
+		IConsolePrint(CC_DEFAULT, "  Cargo Type {:02d}: Init: {}, Completed: {}, In-Transit: {} [{}]",
+			cargo, init, comp, in_trans, ok ? "OK" : "LEAK/DUP");
+	}
+
+	auto balances = UniverseAuthorityService::Instance().GetAllTradeBalances();
+	IConsolePrint(CC_DEFAULT, "Inter-World Trade Balances ({} worlds):", balances.size());
+	for (const auto &[wid, b] : balances) {
+		uint64_t total_exp = 0;
+		for (const auto &[_, c] : b.exported_cargo) total_exp += c;
+		uint64_t total_imp = 0;
+		for (const auto &[_, c] : b.imported_cargo) total_imp += c;
+		IConsolePrint(CC_DEFAULT, "  World {}: Net Balance: {} Cr | Total Exported: {} units | Total Imported: {} units",
+			wid.base(), b.net_trade_balance_credits, total_exp, total_imp);
+	}
+	return true;
+}
+
+/** Display inter-server freight corridor bandwidth and congestion metrics. @copydoc IConsoleCmdProc */
+static bool ConUniverseCorridors(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Query inter-server freight corridor bandwidth, capacity, and congestion levels.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_corridors [route_id]'");
+		return true;
+	}
+
+	auto corridors = UniverseAuthorityService::Instance().GetFreightCorridors();
+	IConsolePrint(CC_DEFAULT, "Freight Corridors ({} registered):", corridors.size());
+	for (const auto &c : corridors) {
+		if (argv.size() >= 2) {
+			auto parsed = ParseInteger(argv[1]);
+			if (parsed.has_value() && c.route_id != static_cast<uint32_t>(*parsed)) continue;
+		}
+
+		const char *cong_str = "Clear (1.0x)";
+		switch (c.congestion_level) {
+			case CorridorCongestionLevel::Clear:     cong_str = "Clear (1.0x)"; break;
+			case CorridorCongestionLevel::Moderate:  cong_str = "Moderate (1.2x)"; break;
+			case CorridorCongestionLevel::Congested: cong_str = "Congested (1.5x)"; break;
+			case CorridorCongestionLevel::Saturated: cong_str = "Saturated (2.0x Backpressure)"; break;
+		}
+
+		IConsolePrint(CC_DEFAULT, "  Corridor {}: World {} Gate {} -> World {} Gate {} | Congestion: {} | In-Transit: {}/{} | Bandwidth: {}/min | Dispatched: {}",
+			c.route_id, c.source_world.base(), c.source_gate_id, c.dest_world.base(), c.dest_gate_id,
+			cong_str, c.current_in_transit_count, c.max_active_in_transit, c.max_bandwidth_trains_per_min, c.total_trains_dispatched);
+	}
+	return true;
+}
+
+/** Query and manage megacity commodity demands and supply satisfaction. @copydoc IConsoleCmdProc */
+static bool ConUniverseMegacity(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Inspect Megacity commodity demand profiles, delivery satisfaction, and growth states.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_megacity list' or 'universe_megacity status <town_id>' or 'universe_megacity eval'");
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "eval") {
+		MegacityManager::EvaluateMonthlySupply();
+		IConsolePrint(CC_DEFAULT, "Evaluated monthly Megacity commodity supply satisfaction cycles.");
+		return true;
+	}
+
+	if (argv.size() >= 2 && argv[1] == "status") {
+		if (argv.size() < 3) {
+			IConsolePrint(CC_ERROR, "Usage: 'universe_megacity status <town_id>'");
+			return false;
+		}
+		auto parsed = ParseInteger(argv[2]);
+		if (!parsed.has_value()) {
+			IConsolePrint(CC_ERROR, "Invalid town ID.");
+			return false;
+		}
+		TownID tid{static_cast<uint16_t>(*parsed)};
+		const auto *profile = MegacityManager::GetProfile(tid);
+		if (profile == nullptr) {
+			IConsolePrint(CC_ERROR, "Town {} is not a registered Megacity.", *parsed);
+			return false;
+		}
+
+		const char *state_str = "Subsistence (1.0x)";
+		switch (profile->growth_state) {
+			case MegacityGrowthState::Starvation:       state_str = "Starvation (Growth Frozen, 0.0x)"; break;
+			case MegacityGrowthState::Subsistence:      state_str = "Subsistence (Baseline, 1.0x)"; break;
+			case MegacityGrowthState::MetropolitanBoom: state_str = "Metropolitan Boom (+50% Growth, 1.5x)"; break;
+			case MegacityGrowthState::HyperGrowth:      state_str = "Hyper-Growth (+100% Growth, 2.0x, +50% Pass)"; break;
+		}
+
+		IConsolePrint(CC_DEFAULT, "Megacity {} ('{}') - World {}:", profile->town_id.base(), profile->town_name, profile->world_id.base());
+		IConsolePrint(CC_DEFAULT, "  Population: {} | Growth State: {}", profile->population, state_str);
+		IConsolePrint(CC_DEFAULT, "  Overall Supply Index: {:.1f}%", profile->overall_supply_index * 100.0f);
+		IConsolePrint(CC_DEFAULT, "  Tier 1 (Sustenance):  {}/{} units ({:.1f}%)", profile->delivered_last[0], profile->monthly_quota[0], profile->satisfaction_pct[0] * 100.0f);
+		IConsolePrint(CC_DEFAULT, "  Tier 2 (Expansion):   {}/{} units ({:.1f}%)", profile->delivered_last[1], profile->monthly_quota[1], profile->satisfaction_pct[1] * 100.0f);
+		IConsolePrint(CC_DEFAULT, "  Tier 3 (Prosperity):  {}/{} units ({:.1f}%)", profile->delivered_last[2], profile->monthly_quota[2], profile->satisfaction_pct[2] * 100.0f);
+		return true;
+	}
+
+	auto megacities = MegacityManager::GetAllMegacities();
+	IConsolePrint(CC_DEFAULT, "Registered Megacities ({}):", megacities.size());
+	for (const auto &m : megacities) {
+		const char *state_str = (m.growth_state == MegacityGrowthState::HyperGrowth) ? "HyperGrowth" :
+		                        (m.growth_state == MegacityGrowthState::MetropolitanBoom) ? "Boom" :
+		                        (m.growth_state == MegacityGrowthState::Starvation) ? "Starvation" : "Subsistence";
+		IConsolePrint(CC_DEFAULT, "  Town {} ('{}') | World {} | Pop: {} | Supply Index: {:.1f}% | State: {} ({:.1f}x)",
+			m.town_id.base(), m.town_name, m.world_id.base(), m.population,
+			m.overall_supply_index * 100.0f, state_str, m.growth_multiplier);
+	}
+	return true;
+}
+
+/** Display empire-wide supply chain matrix and multi-world production flows. @copydoc IConsoleCmdProc */
+static bool ConUniverseEconomy(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Display empire-wide multi-world supply chain flows and production dependencies.");
+		IConsolePrint(CC_HELP, "Usage: 'universe_economy'");
+		return true;
+	}
+
+	auto matrix = UniverseAuthorityService::Instance().GetEmpireSupplyChainMatrix();
+	IConsolePrint(CC_DEFAULT, "Empire Supply Chain Matrix:");
+	IConsolePrint(CC_DEFAULT, "  Frontier -> Refinery (Phase 3 -> 2): {} units (Raw Extraction)", matrix.frontier_to_refinery_cargo);
+	IConsolePrint(CC_DEFAULT, "  Refinery -> Megacity (Phase 2 -> 1): {} units (Industrial Refining)", matrix.refinery_to_core_cargo);
+	IConsolePrint(CC_DEFAULT, "  Frontier -> Megacity (Phase 3 -> 1): {} units (Direct Sustenance)", matrix.frontier_to_core_cargo);
+	IConsolePrint(CC_DEFAULT, "  Core Megacity Exports:               {} units (High-Tech / Consumer)", matrix.core_export_cargo);
+	IConsolePrint(CC_DEFAULT, "  Total Interplanetary Cargo Volume:   {} units", matrix.total_interplanetary_cargo);
+	IConsolePrint(CC_DEFAULT, "  Total Interplanetary Tariffs / Cr:   {} Cr", matrix.total_tariffs_generated);
+	return true;
+}
+
 /** Show the current framerate statistics. @copydoc IConsoleCmdProc */
 static bool ConFramerate(std::span<std::string_view> argv)
 {
@@ -3030,6 +3359,14 @@ void IConsoleStdLibRegister()
 
 	IConsole::CmdRegister("companies",               ConCompanies);
 	IConsole::AliasRegister("players",               "companies");
+	IConsole::CmdRegister("federation_status",       ConFederationStatus);
+	IConsole::CmdRegister("universe_auth",           ConUniverseAuth);
+	IConsole::CmdRegister("universe_worlds",         ConUniverseWorlds);
+	IConsole::CmdRegister("universe_company",        ConUniverseCompany);
+	IConsole::CmdRegister("universe_trade",          ConUniverseTrade);
+	IConsole::CmdRegister("universe_corridors",      ConUniverseCorridors);
+	IConsole::CmdRegister("universe_megacity",       ConUniverseMegacity);
+	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
 
 	/* networking functions */
 

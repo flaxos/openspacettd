@@ -294,6 +294,56 @@ struct FIDSChunkHandler : ChunkHandler {
 			SlSetArrayIndex(index++);
 			SlObject(&mapping, _federation_identity_desc);
 		}
+
+		for (const auto &[company, sequence] : FederationIdentityRegistry::GetCompanyMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 2,
+				.anchor_vehicle = company,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		for (const auto &[station, sequence] : FederationIdentityRegistry::GetStationMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 3,
+				.anchor_vehicle = station,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		for (const auto &[source_key, sequence] : FederationIdentityRegistry::GetSourceMappings()) {
+			SlFederationIdentity mapping{
+				.kind = 4,
+				.anchor_vehicle = source_key,
+				.namespace_high = 0,
+				.namespace_low = 0,
+				.sequence = sequence,
+				.next_sequence = 0,
+			};
+			SlSetArrayIndex(index++);
+			SlObject(&mapping, _federation_identity_desc);
+		}
+
+		SlFederationIdentity counters{
+			.kind = 5,
+			.anchor_vehicle = 0,
+			.namespace_high = FederationIdentityRegistry::GetNextSourceSequence(),
+			.namespace_low = 0,
+			.sequence = FederationIdentityRegistry::GetNextCompanySequence(),
+			.next_sequence = FederationIdentityRegistry::GetNextStationSequence(),
+		};
+		SlSetArrayIndex(index++);
+		SlObject(&counters, _federation_identity_desc);
 	}
 
 	void Load() const override
@@ -308,9 +358,20 @@ struct FIDSChunkHandler : ChunkHandler {
 				FederationIdentityRegistry::RestoreState({record.namespace_high, record.namespace_low}, record.next_sequence);
 			} else if (record.kind == 1) {
 				FederationIdentityRegistry::RestoreMapping(VehicleID{record.anchor_vehicle}, record.sequence);
+			} else if (record.kind == 2) {
+				FederationIdentityRegistry::RestoreCompanyMapping(CompanyID{static_cast<uint8_t>(record.anchor_vehicle)}, record.sequence);
+			} else if (record.kind == 3) {
+				FederationIdentityRegistry::RestoreStationMapping(StationID{static_cast<uint16_t>(record.anchor_vehicle)}, record.sequence);
+			} else if (record.kind == 4) {
+				FederationIdentityRegistry::RestoreSourceMapping(record.anchor_vehicle, record.sequence);
+			} else if (record.kind == 5) {
+				FederationIdentityRegistry::RestoreCounters(record.sequence, record.next_sequence, record.namespace_high);
 			}
 		}
 		FederationIdentityRegistry::PruneStaleMappings();
+		FederationIdentityRegistry::PruneStaleCompanyMappings();
+		FederationIdentityRegistry::PruneStaleStationMappings();
+		FederationIdentityRegistry::PruneStaleSourceMappings();
 	}
 };
 

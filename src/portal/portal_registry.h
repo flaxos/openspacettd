@@ -194,6 +194,38 @@ public:
 	static void SetVehicleTransitProgress(VehicleID veh_id, uint32_t progress);
 
 	/**
+	 * Register an inter-server portal link connecting a local portal head to a remote world server.
+	 */
+	static PortalID RegisterInterServerPortal(
+		TileIndex local_tile,
+		DiagDirection dir,
+		WorldID local_world,
+		WorldID remote_world,
+		uint32_t remote_gate_id,
+		uint32_t virtual_length = 1
+	);
+
+	/**
+	 * Check whether a given tile is a registered inter-server portal gate.
+	 */
+	static bool IsInterServerPortal(TileIndex tile);
+
+	/**
+	 * Get the InterServerPortalLink for a local portal tile.
+	 */
+	static const InterServerPortalLink *GetInterServerPortal(TileIndex tile);
+
+	/**
+	 * Unregister an inter-server portal gate by local tile.
+	 */
+	static bool UnregisterInterServerPortal(TileIndex tile);
+
+	/**
+	 * Get all registered inter-server portals.
+	 */
+	static const std::unordered_map<TileIndex, InterServerPortalLink> &GetAllInterServerPortals();
+
+	/**
 	 * Repair generated neutral gateway heads from early multi-world saves where
 	 * the stored entry direction pointed away from the world-side lead track.
 	 * This operation is deterministic and idempotent.
@@ -210,6 +242,7 @@ private:
 	static std::unordered_map<TileIndex, PortalID> tile_to_portal;
 	static std::unordered_map<uint32_t, PortalLink> portal_links;
 	static std::unordered_map<TileIndex, PortalEndpoint> unlinked_gates;
+	static std::unordered_map<TileIndex, InterServerPortalLink> interserver_portals;
 	static std::unordered_map<uint32_t, uint32_t> vehicle_portal_progress;
 	static uint32_t next_portal_id;
 };

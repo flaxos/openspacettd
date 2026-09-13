@@ -47,6 +47,7 @@
 #include "portal/portal_registry.h"
 #include "portal/federation_identity.h"
 #include "portal/planet_manager.h"
+#include "portal/federation_cmd.h"
 
 #include "safeguards.h"
 
@@ -3608,6 +3609,12 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 			}
 		} else {
 			if (PortalRegistry::IsPortalTile(v->tile)) {
+				if (PortalRegistry::IsInterServerPortal(v->tile)) {
+					if (v->IsMovingFront()) {
+						FederationTransferManager::InitiateConsistDeparture(first, v->tile);
+						return false;
+					}
+				}
 				uint32_t progress = PortalRegistry::AdvancePortalTransit(v->index);
 				uint32_t target = PORTAL_TRANSIT_DISTANCE;
 				if (progress >= target) {

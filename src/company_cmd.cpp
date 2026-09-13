@@ -49,6 +49,7 @@
 
 #include "table/strings.h"
 #include "table/company_face.h"
+#include "portal/federation_identity.h"
 
 #include "safeguards.h"
 
@@ -102,6 +103,7 @@ void Company::PostDestructor(size_t index)
 	InvalidateWindowData(WindowClass::LinkGraphLegend, 0);
 	/* If the currently shown error message has this company in it, then close it. */
 	InvalidateWindowData(WindowClass::ErrorMessage, 0);
+	FederationIdentityRegistry::ReleaseCompany(CompanyID{static_cast<uint8_t>(index)});
 }
 
 /**
