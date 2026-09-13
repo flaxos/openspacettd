@@ -115,6 +115,16 @@ CommandCost CmdConfigureSpaceportBridge(DoCommandFlags flags, StationID station,
  */
 CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id);
 
+/**
+ * Colonize an uncolonized Phase 4 Expansion world and establish an initial pioneer outpost.
+ *
+ * @param flags Command flags.
+ * @param tile Tile location for the initial colonial outpost town/settlement.
+ * @param outpost_name Custom name for the colonial outpost / world. If empty, an automated name is generated.
+ * @return Command cost or failure.
+ */
+CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::string &outpost_name);
+
 /** GUI completion callback for portal gate linking. */
 CommandCallback CcPortalLink;
 
@@ -128,5 +138,6 @@ DEF_CMD_TRAIT(Commands::ConfigureSpaceportBridge,  CmdConfigureSpaceportBridge, 
 DEF_CMD_TRAIT(Commands::BuildEdgeConduit,          CmdBuildEdgeConduit,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::DestroyEdgeConduit,        CmdDestroyEdgeConduit,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::ConfigureEdgeConduitFeeder, CmdConfigureEdgeConduitFeeder, {},                                                   CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::ColonizeOutpost,           CmdColonizeOutpost,           CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 
 #endif /* PORTAL_CMD_H */

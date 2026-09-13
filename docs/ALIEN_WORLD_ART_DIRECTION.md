@@ -31,7 +31,7 @@ Biome controls ecology and ground; World Phase controls settlement and infrastru
 | Volcanic | Charcoal crust, ember fissures and sulphur-green deposits | Heat-resistant red fans, mineral chimneys, obsidian needles | Hard angular terrain with hot high-contrast seams |
 | Oceanic | Deep cobalt water, turquoise shelves and pale reef flats | Floating mats, giant cup corals, mangrove-like root towers | Small land clusters joined by engineered causeways |
 
-Sprint 24 implements the first three rows for the UAT worlds. Sub-Tropic, Volcanic and Oceanic remain specified backlog work and must not be represented as complete.
+All six biomes are fully implemented as of Sprint 30, supporting procedural generation, terrain styling, flora transformations, and persistent tile loops across multi-world layouts.
 
 ## Showcase world composition
 

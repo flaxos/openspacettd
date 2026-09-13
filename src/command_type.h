@@ -392,6 +392,7 @@ enum class Commands : uint8_t {
 	ConfigureEdgeConduitFeeder, ///< configure direct inter-world feeder mode of an edge conduit
 
 	PlaceBlueprint, ///< place a rail blueprint layout on the map
+	ColonizeOutpost, ///< colonize an uncolonized Phase 4 Expansion world and establish an initial pioneer outpost
 
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };

@@ -300,6 +300,12 @@ static void TileLoop_Clear(TileIndex tile)
 		TileLoopClearDesert(tile);
 	} else if (biome == WorldBiome::SubArctic) {
 		TileLoopClearAlps(tile);
+	} else if (biome == WorldBiome::Volcanic) {
+		if (GetClearGround(tile) == ClearGround::Grass) {
+			SetClearGroundDensity(tile, ClearGround::Rough, GetClearDensity(tile));
+			MarkTileDirtyByTile(tile);
+		}
+		return;
 	} else {
 		switch (_settings_game.game_creation.landscape) {
 			case LandscapeType::Tropic: TileLoopClearDesert(tile); break;

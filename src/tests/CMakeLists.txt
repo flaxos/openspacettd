@@ -42,6 +42,7 @@ add_test_files(
     test_sprint27_feature_ui.cpp
     test_sprint28_guided_uat.cpp
     test_sprint29_federation_acceptance.cpp
+    test_sprint30_biomes_colonization.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

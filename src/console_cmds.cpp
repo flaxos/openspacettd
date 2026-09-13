@@ -50,6 +50,7 @@
 #include "portal/federation_cmd.h"
 #include "portal/federation_player.h"
 #include "portal/megacity_manager.h"
+#include "portal/planet_manager.h"
 
 #if defined(WITH_ZLIB)
 #include "network/network_content.h"
@@ -3094,6 +3095,55 @@ static bool ConUniverseEconomy(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Colonize a Phase 4 Expansion wilderness world and elevate it to Phase 3 Frontier. @copydoc IConsoleCmdProc */
+static bool ConColonizeWorld(std::span<std::string_view> argv)
+{
+	if (argv.empty() || argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Colonize a Phase 4 Expansion wilderness world.");
+		IConsolePrint(CC_HELP, "Usage: 'colonize_world <world_id> [outpost_name]'");
+		return true;
+	}
+
+	auto parsed = ParseInteger(argv[1]);
+	if (!parsed.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid world ID: '{}'", argv[1]);
+		return false;
+	}
+
+	WorldID wid = WorldID(static_cast<uint32_t>(*parsed));
+	const PlanetRegion *reg = PlanetManager::GetRegion(wid);
+	if (reg == nullptr) {
+		IConsolePrint(CC_ERROR, "World {} not found.", wid.base());
+		return false;
+	}
+
+	if (reg->phase != WorldPhase::Phase4_Expansion) {
+		IConsolePrint(CC_ERROR, "World {} ('{}') is already at Phase {} and cannot be colonized.",
+			wid.base(), reg->name, to_underlying(reg->phase));
+		return false;
+	}
+
+	std::string outpost_name;
+	if (argv.size() >= 3) {
+		outpost_name = std::string(argv[2]);
+		for (size_t i = 3; i < argv.size(); ++i) {
+			outpost_name += " ";
+			outpost_name += argv[i];
+		}
+	} else {
+		outpost_name = fmt::format("Outpost {}", reg->name);
+	}
+
+	if (PlanetManager::ColonizeWorld(wid, outpost_name)) {
+		IConsolePrint(CC_DEFAULT, "Successfully colonized World {}: now '{}' (Phase 3 Frontier).",
+			wid.base(), outpost_name);
+		return true;
+	}
+
+	IConsolePrint(CC_ERROR, "Failed to colonize World {}.", wid.base());
+	return false;
+}
+
 /** Show the current framerate statistics. @copydoc IConsoleCmdProc */
 static bool ConFramerate(std::span<std::string_view> argv)
 {
@@ -3368,6 +3418,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("universe_corridors",      ConUniverseCorridors);
 	IConsole::CmdRegister("universe_megacity",       ConUniverseMegacity);
 	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
+	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
 
 	/* networking functions */
 

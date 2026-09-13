@@ -155,11 +155,21 @@ std::vector<PlanetRegion> MultiWorldGen::CalculateLayout(uint32_t size_x, uint32
 				region.biome = WorldBiome::SubArctic;
 				region.name = "Frontier Outskirts (Phase 3)";
 				break;
-			default:
+			default: {
 				region.phase = WorldPhase::Phase4_Expansion;
-				region.biome = WorldBiome::Volcanic;
-				region.name = "Wilderness (Phase 4)";
+				uint32_t var = (i - 3) % 3;
+				if (var == 0) {
+					region.biome = WorldBiome::Volcanic;
+					region.name = fmt::format("Volcanic Wilderness (World {})", i);
+				} else if (var == 1) {
+					region.biome = WorldBiome::SubTropic;
+					region.name = fmt::format("Sub-Tropic Wilderness (World {})", i);
+				} else {
+					region.biome = WorldBiome::Oceanic;
+					region.name = fmt::format("Oceanic Wilderness (World {})", i);
+				}
 				break;
+			}
 		}
 
 		if (split_y) {
@@ -350,6 +360,7 @@ void MultiWorldGen::ApplyBiomeStyling(const PlanetRegion &region)
 				}
 
 				case WorldBiome::Volcanic: {
+					SetTropicZone(t, TropicZone::Normal);
 					if (IsTileType(t, TileType::Clear)) {
 						if (IsSnowTile(t)) ClearSnow(t);
 						uint density = GetClearDensity(t);
@@ -358,6 +369,46 @@ void MultiWorldGen::ApplyBiomeStyling(const PlanetRegion &region)
 						} else {
 							SetClearGroundDensity(t, ClearGround::Rough, density);
 						}
+					} else if (IsTileType(t, TileType::Trees)) {
+						uint tree_count = GetTreeCount(t);
+						TreeGrowthStage growth = GetTreeGrowth(t);
+						MakeTree(t, TREE_TEMPERATE, tree_count - 1, growth, TreeGround::Rough, 1);
+					}
+					break;
+				}
+
+				case WorldBiome::SubTropic: {
+					SetTropicZone(t, TropicZone::Rainforest);
+					if (IsTileType(t, TileType::Clear)) {
+						if (IsSnowTile(t)) ClearSnow(t);
+						uint density = GetClearDensity(t);
+						if ((TileHash(x, y) & 0xF) == 0) {
+							SetClearGroundDensity(t, ClearGround::Rough, density);
+						} else {
+							SetClearGroundDensity(t, ClearGround::Grass, 3);
+						}
+					} else if (IsTileType(t, TileType::Trees)) {
+						uint tree_count = GetTreeCount(t);
+						TreeGrowthStage growth = GetTreeGrowth(t);
+						MakeTree(t, TREE_RAINFOREST, tree_count - 1, growth, TreeGround::Grass, 3);
+					}
+					break;
+				}
+
+				case WorldBiome::Oceanic: {
+					SetTropicZone(t, TropicZone::Normal);
+					if (IsTileType(t, TileType::Clear)) {
+						if (IsSnowTile(t)) ClearSnow(t);
+						uint density = GetClearDensity(t);
+						if ((TileHash(x, y) & 0x7) == 0) {
+							SetClearGroundDensity(t, ClearGround::Rocks, density);
+						} else {
+							SetClearGroundDensity(t, ClearGround::Grass, density);
+						}
+					} else if (IsTileType(t, TileType::Trees)) {
+						uint tree_count = GetTreeCount(t);
+						TreeGrowthStage growth = GetTreeGrowth(t);
+						MakeTree(t, TREE_RAINFOREST, tree_count - 1, growth, TreeGround::Grass, 3);
 					}
 					break;
 				}

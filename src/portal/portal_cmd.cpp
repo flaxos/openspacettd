@@ -35,6 +35,8 @@
 #include "../train.h"
 
 #include "../table/strings.h"
+#include "../news_func.h"
+#include "../3rdparty/fmt/format.h"
 #include "../safeguards.h"
 
 static TileIndex GetPortalAdjacentTile(TileIndex tile, DiagDirection dir)
@@ -571,4 +573,39 @@ CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, 
 	}
 
 	return CommandCost();
+}
+
+CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::string &outpost_name)
+{
+	CommandCost placement = PlanetManager::CheckConstructionPlacement(tile);
+	if (placement.Failed()) return placement;
+
+	WorldID world = PlanetManager::GetTileWorld(tile);
+	if (world == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	const PlanetRegion *region = PlanetManager::GetRegion(world);
+	if (region == nullptr) return CMD_ERROR;
+
+	if (region->phase != WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_COLONIZE_NON_EXPANSION);
+	}
+
+	/* Capital colonization and outpost expedition fee */
+	CommandCost cost(ExpensesType::Construction, _price[Price::BuildTown] * 5);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		std::string name = outpost_name;
+		if (name.empty()) {
+			name = fmt::format("Outpost {}", region->name);
+		}
+
+		PlanetManager::ColonizeWorld(world, name);
+
+		/* Broadcast colony founding news */
+		AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_COLONIZED, name), NewsType::CompanyInfo, tile);
+	}
+
+	return cost;
 }

@@ -52,6 +52,38 @@ public:
 	static const PlanetRegion *GetRegion(WorldID world);
 
 	/**
+	 * Set the WorldPhase of a registered world.
+	 * @param world The WorldID.
+	 * @param phase The new WorldPhase.
+	 * @return True if world was found and updated, false otherwise.
+	 */
+	static bool SetWorldPhase(WorldID world, WorldPhase phase);
+
+	/**
+	 * Set the WorldBiome of a registered world.
+	 * @param world The WorldID.
+	 * @param biome The new WorldBiome.
+	 * @return True if world was found and updated, false otherwise.
+	 */
+	static bool SetWorldBiome(WorldID world, WorldBiome biome);
+
+	/**
+	 * Promote a registered world to its next development phase tier.
+	 * Phase4_Expansion -> Phase3_Frontier -> Phase2_Developed -> Phase1_Core.
+	 * @param world The WorldID to promote.
+	 * @return True if promoted, false if already at Phase 1 or not found.
+	 */
+	static bool PromoteWorldPhase(WorldID world);
+
+	/**
+	 * Colonize an uncolonized Phase 4 Expansion world, elevating it to Phase 3 Frontier status.
+	 * @param world The WorldID to colonize.
+	 * @param outpost_name Optional custom name for the initial colonial outpost / world update.
+	 * @return True if colonization succeeded, false if not an Expansion world or not found.
+	 */
+	static bool ColonizeWorld(WorldID world, const std::string &outpost_name = "");
+
+	/**
 	 * Retrieve the planet region containing the given tile.
 	 * @param tile Tile to query.
 	 * @return Pointer to the PlanetRegion containing the tile, or nullptr if in void/buffer space.

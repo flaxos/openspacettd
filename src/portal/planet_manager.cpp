@@ -104,6 +104,61 @@ const PlanetRegion *PlanetManager::GetRegion(WorldID world)
 	return &regions[it->second];
 }
 
+bool PlanetManager::SetWorldPhase(WorldID world, WorldPhase phase)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	regions[it->second].phase = phase;
+	return true;
+}
+
+bool PlanetManager::SetWorldBiome(WorldID world, WorldBiome biome)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	regions[it->second].biome = biome;
+	return true;
+}
+
+bool PlanetManager::PromoteWorldPhase(WorldID world)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	auto &r = regions[it->second];
+	switch (r.phase) {
+		case WorldPhase::Phase4_Expansion:
+			r.phase = WorldPhase::Phase3_Frontier;
+			r.development_score += 100;
+			return true;
+		case WorldPhase::Phase3_Frontier:
+			r.phase = WorldPhase::Phase2_Developed;
+			r.development_score += 250;
+			return true;
+		case WorldPhase::Phase2_Developed:
+			r.phase = WorldPhase::Phase1_Core;
+			r.development_score += 500;
+			return true;
+		case WorldPhase::Phase1_Core:
+		default:
+			return false;
+	}
+}
+
+bool PlanetManager::ColonizeWorld(WorldID world, const std::string &outpost_name)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	auto &r = regions[it->second];
+	if (r.phase != WorldPhase::Phase4_Expansion) return false;
+
+	r.phase = WorldPhase::Phase3_Frontier;
+	r.development_score += 100;
+	if (!outpost_name.empty()) {
+		r.name = outpost_name;
+	}
+	return true;
+}
+
 const PlanetRegion *PlanetManager::GetRegionByCoord(uint32_t x, uint32_t y)
 {
 	uint32_t cell_idx = CoordToCellIndex(x, y);
@@ -181,6 +236,9 @@ CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, b
 	}
 
 	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
 	if (phase == WorldPhase::Phase1_Core && is_raw) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_CORE_WORLD);
 	}
@@ -201,6 +259,9 @@ CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype
 	}
 
 	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
 	/* Tier 3 Vac-Train/Maglev depots cannot be constructed on Phase 3 Frontier worlds */
 	if (phase == WorldPhase::Phase3_Frontier && railtype == RAILTYPE_MAGLEV) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
