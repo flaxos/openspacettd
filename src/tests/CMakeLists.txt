@@ -40,6 +40,7 @@ add_test_files(
     test_blueprint.cpp
     test_cst_prefabs.cpp
     test_sprint27_feature_ui.cpp
+    test_sprint28_guided_uat.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

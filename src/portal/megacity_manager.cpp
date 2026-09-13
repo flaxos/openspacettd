@@ -45,6 +45,12 @@ bool MegacityManager::RegisterMegacity(TownID town_id, WorldID world_id, const s
 	return true;
 }
 
+void MegacityManager::RestoreMegacity(const MegacityProfile &profile)
+{
+	if (!profile.IsValid()) return;
+	_megacities[profile.town_id.base()] = profile;
+}
+
 bool MegacityManager::UnregisterMegacity(TownID town_id)
 {
 	if (town_id == TownID::Invalid()) return false;

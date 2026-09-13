@@ -522,8 +522,8 @@ For detailed scope, see [SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md](SPRINT2
 - **Sprint 25 — Complete:** Player Rail Blueprints with map capture, persistent library, portable JSON serialization, 90°/180°/270° rotation, horizontal reflection, deterministic server-authoritative placement command (`Commands::PlaceBlueprint`), and rail toolbar GUI.
 - **Sprint 26 — Complete:** Eight canonical CST Prefab Rail Blocks shipped through the blueprint system with RHD/LHD traffic-side invariance, embedded operating guidance, read-only builtin protection, and Catch2 test suite.
 - **Sprint 27 — Complete:** Closed player and operator UI gaps with native windows for Empire Supply Chain Matrix & Trade Ledger and Federation Authentication & Corporate Charters, Map dropdown menu integration, and automated test suite.
+- **Sprint 28 — Complete:** Generated fresh all-feature solo UAT savegame (`OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav`) with `OpenSpaceTTD-UAT-Demo` GameScript v7, 7 persistent Story Book chapters, 16 measurable acceptance goals, CST & Blueprint staging fixtures, Megacity save/load persistence (`MEGA` chunk), and 232/232 passing CTests.
 
 ### 4. Planned delivery sequence
 
-- **Sprint 28 — Guided Solo UAT:** Generate a fresh all-feature save with persistent Story Book goals and reproducible build metadata.
 - **Sprint 29 — Federation UAT:** Deliver a live three-server acceptance kit covering round trips, recovery, content admission, telemetry and commodity conservation.

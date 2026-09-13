@@ -22,7 +22,7 @@ This matrix is the release checklist for Sprints 24–29. **Present** means a so
 | Alien biome and Commonwealth assets | Biome styling across showcase worlds, procedural MultiWorldGen, CST cyan-blue/yellow portal recolouring | Present | Delivered in Sprint 24. |
 | Player rail blueprints | Rail toolbar button (`WID_RAT_BLUEPRINT`), Blueprint Library window (`BlueprintLibraryWindow`) | Present | Delivered in Sprint 25: map capture, library, JSON import/export, 90°/180°/270° rotation, horizontal flip, and deterministic placement command. |
 | CST prefab rail blocks | Built-in CST templates in Blueprint Library | Present | Delivered in Sprint 26: 8 canonical CST layouts, RHD/LHD invariant transforms, and operating guidance. |
-| Story Book and goals | Existing v0.3 tutorial/checklists | Partial | Sprint 28 replaces final-release evidence with persistent measurable goals spanning current features. |
+| Story Book and goals | In-game Story Book (`Manage Company` > `Story Book`) and Goal window | Present | Delivered in Sprint 28: 7 structured chapters, 16 persistent measurable goals, and clickable location pins in `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` (`OpenSpaceTTD-UAT-Demo` v7). |
 
 ## Definition of UI-wired
 

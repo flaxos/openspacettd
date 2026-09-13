@@ -2,6 +2,7 @@ class OpenSpaceUATDemo extends GSController {
 	initialized = false;
 	service_built = false;
 	sprint10_built = false;
+	sprint28_built = false;
 
 	function Start();
 	function Save();
@@ -9,8 +10,13 @@ class OpenSpaceUATDemo extends GSController {
 	function CalculateRegions();
 	function CalculateGateways(regions);
 	function FindGatewayNear(nominal);
+	function FindSpaceportSite(core);
+	function FindConduitSite(frontier);
+	function FindCSTStagingPad(developed);
+	function FindBlueprintSampleSite(developed, cst_pad);
 	function BuildAlphaDemonstrator(gateways);
 	function BuildSprint10Fixtures(regions);
+	function BuildSprint28Fixtures(regions);
 	function FindNearestTown(region, target);
 	function AddText(page, text);
 	function AddLocation(page, tile, text);
@@ -22,7 +28,8 @@ function OpenSpaceUATDemo::Save()
 	return {
 		initialized = this.initialized,
 		service_built = this.service_built,
-		sprint10_built = this.sprint10_built
+		sprint10_built = this.sprint10_built,
+		sprint28_built = this.sprint28_built
 	};
 }
 
@@ -33,7 +40,8 @@ function OpenSpaceUATDemo::Load(version, data)
 	this.initialized = ("initialized" in data) ? data.initialized : true;
 	this.service_built = ("service_built" in data) ? data.service_built : false;
 	this.sprint10_built = ("sprint10_built" in data) ? data.sprint10_built : false;
-	GSLog.Info("OpenSpaceTTD UAT Demo restored from savegame; Sprint 10 fixtures=" + this.sprint10_built + ".");
+	this.sprint28_built = ("sprint28_built" in data) ? data.sprint28_built : false;
+	GSLog.Info("OpenSpaceTTD UAT Demo restored from savegame; Sprint 10 fixtures=" + this.sprint10_built + ", Sprint 28 fixtures=" + this.sprint28_built + ".");
 }
 
 function OpenSpaceUATDemo::CalculateRegions()
@@ -154,6 +162,98 @@ function OpenSpaceUATDemo::FindGatewayNear(nominal)
 	return GSMap.TILE_INVALID;
 }
 
+function OpenSpaceUATDemo::FindSpaceportSite(core)
+{
+	local airport_type = GSAirport.AT_SMALL;
+	local width = GSAirport.GetAirportWidth(airport_type);
+	local height = GSAirport.GetAirportHeight(airport_type);
+	for (local y = core.min_y + 10; y <= core.max_y - height - 10; y += 4) {
+		for (local x = core.min_x + 10; x <= core.max_x - width - 10; x += 4) {
+			local candidate = GSMap.GetTileIndex(x, y);
+			if (!GSTile.IsBuildableRectangle(candidate, width, height)) continue;
+			local level = GSTile.GetMinHeight(candidate);
+			local flat = true;
+			for (local ay = 0; ay < height && flat; ay++) {
+				for (local ax = 0; ax < width; ax++) {
+					local part = GSMap.GetTileIndex(x + ax, y + ay);
+					if (GSTile.GetSlope(part) != GSTile.SLOPE_FLAT || GSTile.GetMinHeight(part) != level) {
+						flat = false;
+						break;
+					}
+				}
+			}
+			if (flat) return candidate;
+		}
+	}
+	return GSMap.TILE_INVALID;
+}
+
+function OpenSpaceUATDemo::FindConduitSite(frontier)
+{
+	for (local y = frontier.min_y + 10; y <= frontier.max_y - 10; y++) {
+		local candidate = GSMap.GetTileIndex(frontier.min_x, y);
+		if (!GSTile.IsBuildableRectangle(candidate, 5, 1)) continue;
+		local level = GSTile.GetMinHeight(candidate);
+		local flat = true;
+		for (local x = 0; x < 5; x++) {
+			local part = GSMap.GetTileIndex(frontier.min_x + x, y);
+			if (GSTile.GetSlope(part) != GSTile.SLOPE_FLAT || GSTile.GetMinHeight(part) != level) {
+				flat = false;
+				break;
+			}
+		}
+		if (flat) return candidate;
+	}
+	return GSMap.TILE_INVALID;
+}
+
+function OpenSpaceUATDemo::FindCSTStagingPad(developed)
+{
+	for (local y = developed.min_y + 12; y <= developed.max_y - 14; y += 4) {
+		for (local x = developed.min_x + 12; x <= developed.max_x - 18; x += 4) {
+			local candidate = GSMap.GetTileIndex(x, y);
+			if (!GSTile.IsBuildableRectangle(candidate, 16, 10)) continue;
+			local level = GSTile.GetMinHeight(candidate);
+			local flat = true;
+			for (local ay = 0; ay < 10 && flat; ay++) {
+				for (local ax = 0; ax < 16; ax++) {
+					local part = GSMap.GetTileIndex(x + ax, y + ay);
+					if (GSTile.GetSlope(part) != GSTile.SLOPE_FLAT || GSTile.GetMinHeight(part) != level) {
+						flat = false;
+						break;
+					}
+				}
+			}
+			if (flat) return candidate;
+		}
+	}
+	return GSMap.TILE_INVALID;
+}
+
+function OpenSpaceUATDemo::FindBlueprintSampleSite(developed, cst_pad)
+{
+	for (local y = developed.min_y + 24; y <= developed.max_y - 10; y += 4) {
+		for (local x = developed.min_x + 12; x <= developed.max_x - 16; x += 4) {
+			local candidate = GSMap.GetTileIndex(x, y);
+			if (cst_pad != GSMap.TILE_INVALID && GSMap.DistanceManhattan(candidate, cst_pad) < 14) continue;
+			if (!GSTile.IsBuildableRectangle(candidate, 10, 4)) continue;
+			local level = GSTile.GetMinHeight(candidate);
+			local flat = true;
+			for (local ay = 0; ay < 4 && flat; ay++) {
+				for (local ax = 0; ax < 10; ax++) {
+					local part = GSMap.GetTileIndex(x + ax, y + ay);
+					if (GSTile.GetSlope(part) != GSTile.SLOPE_FLAT || GSTile.GetMinHeight(part) != level) {
+						flat = false;
+						break;
+					}
+				}
+			}
+			if (flat) return candidate;
+		}
+	}
+	return GSMap.TILE_INVALID;
+}
+
 function OpenSpaceUATDemo::BuildAlphaDemonstrator(gateways)
 {
 	if (GSCompany.ResolveCompanyID(GSCompany.COMPANY_FIRST) == GSCompany.COMPANY_INVALID) return false;
@@ -194,7 +294,7 @@ function OpenSpaceUATDemo::BuildAlphaDemonstrator(gateways)
 
 	GSRail.SetCurrentRailType(GSEngine.GetRailType(engine_id));
 
-	/* Prepare only the player-owned portions. The one-tile neutral leads and
+	/* Prepare only the player-owned portions. The neutral leads and
 	 * gateway heads are generated by the engine and deliberately retained. */
 	for (local x = ax - 10; x <= ax - 2; x++) GSTile.DemolishTile(GSMap.GetTileIndex(x, ay));
 	for (local y = by + 2; y <= by + 6; y++) GSTile.DemolishTile(GSMap.GetTileIndex(bx, y));
@@ -245,88 +345,86 @@ function OpenSpaceUATDemo::BuildSprint10Fixtures(regions)
 	}
 	GSRail.SetCurrentRailType(railtype);
 
-	/* Reuse an ordinary small airport as the Spaceport candidate. The station
-	 * window added in Sprint 10 supplies designation, upgrades and telemetry. */
 	local core = regions[0];
-	local airport_type = GSAirport.AT_SMALL;
-	local width = GSAirport.GetAirportWidth(airport_type);
-	local height = GSAirport.GetAirportHeight(airport_type);
-	local airport = GSMap.TILE_INVALID;
-	for (local y = core.min_y + 10; y <= core.max_y - height - 10 && airport == GSMap.TILE_INVALID; y += 4) {
-		for (local x = core.min_x + 10; x <= core.max_x - width - 10; x += 4) {
-			local candidate = GSMap.GetTileIndex(x, y);
-			if (!GSTile.IsBuildableRectangle(candidate, width, height)) continue;
-			local level = GSTile.GetMinHeight(candidate);
-			local flat = true;
-			for (local ay = 0; ay < height && flat; ay++) {
-				for (local ax = 0; ax < width; ax++) {
-					local part = GSMap.GetTileIndex(x + ax, y + ay);
-					if (GSTile.GetSlope(part) != GSTile.SLOPE_FLAT || GSTile.GetMinHeight(part) != level) {
-						flat = false;
-						break;
-					}
-				}
-			}
-			if (flat && GSAirport.BuildAirport(candidate, airport_type, GSStation.STATION_NEW)) airport = candidate;
-			if (airport != GSMap.TILE_INVALID) break;
+	local airport = this.FindSpaceportSite(core);
+	if (airport != GSMap.TILE_INVALID) {
+		if (GSAirport.BuildAirport(airport, GSAirport.AT_SMALL, GSStation.STATION_NEW)) {
+			local airport_station = GSStation.GetStationID(airport);
+			if (GSStation.IsValidStation(airport_station)) GSBaseStation.SetName(airport_station, "Phase 1 Spaceport Candidate");
+			GSSign.BuildSign(airport, "Phase 1 Spaceport Candidate - Designate Spaceport in station window");
 		}
+	} else {
+		GSLog.Warning("Could not find a flat buildable site for the Spaceport candidate.");
 	}
-	if (airport == GSMap.TILE_INVALID) {
-		GSLog.Warning("Could not find a flat buildable site for the Sprint 10 Spaceport candidate: " + GSError.GetLastErrorString());
-		return false;
-	}
-	local airport_station = GSStation.GetStationID(airport);
-	if (!GSStation.IsValidStation(airport_station)) return false;
-	GSBaseStation.SetName(airport_station, "Phase 1 Spaceport Candidate");
-	GSSign.BuildSign(airport, "SPRINT 10: Open station window - Designate Spaceport");
 
-	/* Prepare a freight platform one tile inside the Phase 3 perimeter. The
-	 * signed empty boundary tile remains available for the player's conduit. */
 	local frontier = regions[2];
-	local conduit = GSMap.TILE_INVALID;
-	for (local y = frontier.min_y + 10; y <= frontier.max_y - 10; y++) {
-		local candidate = GSMap.GetTileIndex(frontier.min_x, y);
-		if (!GSTile.IsBuildableRectangle(candidate, 5, 1)) continue;
-		local level = GSTile.GetMinHeight(candidate);
-		local flat = true;
-		for (local x = 0; x < 5; x++) {
-			local part = GSMap.GetTileIndex(frontier.min_x + x, y);
-			if (GSTile.GetSlope(part) != GSTile.SLOPE_FLAT || GSTile.GetMinHeight(part) != level) {
-				flat = false;
-				break;
-			}
+	local conduit = this.FindConduitSite(frontier);
+	if (conduit != GSMap.TILE_INVALID) {
+		local lead = GSMap.GetTileIndex(GSMap.GetTileX(conduit) + 1, GSMap.GetTileY(conduit));
+		local mineral_station = GSMap.GetTileIndex(GSMap.GetTileX(conduit) + 2, GSMap.GetTileY(conduit));
+		if (GSRail.BuildRailStation(mineral_station, GSRail.RAILTRACK_NE_SW, 1, 3, GSStation.STATION_NEW)) {
+			GSRail.BuildRail(conduit, lead, mineral_station);
+			local mineral_station_id = GSStation.GetStationID(mineral_station);
+			if (GSStation.IsValidStation(mineral_station_id)) GSBaseStation.SetName(mineral_station_id, "Frontier Edge Minerals");
+			GSSign.BuildSign(conduit, "Frontier Edge Minerals - Build Edge Conduit on void boundary");
 		}
-		if (flat) {
-			conduit = candidate;
-			break;
-		}
+	} else {
+		GSLog.Warning("Could not find a flat Phase 3 boundary site for the Edge Conduit fixture.");
 	}
-	if (conduit == GSMap.TILE_INVALID) {
-		GSLog.Warning("Could not find a flat Phase 3 boundary site for the Sprint 10 Edge Conduit fixture.");
-		return false;
-	}
-	local lead = GSMap.GetTileIndex(GSMap.GetTileX(conduit) + 1, GSMap.GetTileY(conduit));
-	local mineral_station = GSMap.GetTileIndex(GSMap.GetTileX(conduit) + 2, GSMap.GetTileY(conduit));
-	if (!GSRail.BuildRailStation(mineral_station, GSRail.RAILTRACK_NE_SW, 1, 3, GSStation.STATION_NEW)) {
-		GSLog.Warning("Could not build the Sprint 10 mineral receiving station: " + GSError.GetLastErrorString());
-		return false;
-	}
-	GSRail.BuildRail(conduit, lead, mineral_station);
-	local mineral_station_id = GSStation.GetStationID(mineral_station);
-	if (GSStation.IsValidStation(mineral_station_id)) GSBaseStation.SetName(mineral_station_id, "Frontier Edge Minerals");
-	GSSign.BuildSign(conduit, "SPRINT 10: Build Edge Conduit on this boundary tile");
 
-	local page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "UAT - Planetary Operations");
-	this.AddText(page, "Sprint 10 adapts existing OpenTTD controls. Spaceport controls appear only in an owned airport station window. The Edge Conduit tool is the final tunnel-style button on the Railway Construction toolbar.");
-	this.AddLocation(page, airport, "Phase 1 Spaceport candidate airport");
-	this.AddGoal(page, airport, "8. Open the airport station window and designate the Phase 1 Spaceport candidate. Verify Tier 1 status, world name, supplies, projected monthly cargo and total output.");
-	this.AddGoal(page, airport, "9. Use the same station button to upgrade to Tier 2 and Tier 3. Verify the status changes and the Tier 3 button becomes disabled.");
-	this.AddLocation(page, conduit, "Phase 3 signed Edge Conduit construction tile");
-	this.AddGoal(page, conduit, "10. Select the final tunnel-style railway tool and build an Edge Conduit on the signed tile beside the void. Building one on an interior tile must explain that void adjacency is required.");
-	this.AddGoal(page, conduit, "11. Use Land Area Information on the conduit and verify its world, mineral cargo, 100-unit Frontier monthly extraction and total extracted. Select it again with the conduit tool to remove it.");
-	this.AddText(page, "Save and reload after building both structures. Their designation, tier and production counters must persist.");
-	GSLog.Info("Sprint 10 fixtures ready: owned airport, Phase 3 boundary site, receiving rail station, and four acceptance goals.");
-	GSStoryPage.Show(page);
+	GSLog.Info("Sprint 10 fixtures ready: owned airport and Frontier Edge Minerals receiving platform.");
+	return true;
+}
+
+function OpenSpaceUATDemo::BuildSprint28Fixtures(regions)
+{
+	if (GSCompany.ResolveCompanyID(GSCompany.COMPANY_FIRST) == GSCompany.COMPANY_INVALID) return false;
+
+	local company_mode = GSCompanyMode(GSCompany.COMPANY_FIRST);
+	GSCompany.SetLoanAmount(GSCompany.GetMaxLoanAmount());
+
+	local railtypes = GSRailTypeList();
+	local railtype = railtypes.Begin();
+	if (railtypes.IsEnd()) return false;
+	GSRail.SetCurrentRailType(railtype);
+
+	local developed = regions[1];
+	local cst_pad = this.FindCSTStagingPad(developed);
+	if (cst_pad != GSMap.TILE_INVALID) {
+		local cst_end = GSMap.GetTileIndex(GSMap.GetTileX(cst_pad) + 15, GSMap.GetTileY(cst_pad) + 9);
+		GSTile.LevelTiles(cst_pad, cst_end);
+		GSSign.BuildSign(cst_pad, "UAT CST Prefab: Open Blueprint Library ('B') and stamp CST block here");
+	}
+
+	local bp_pad = this.FindBlueprintSampleSite(developed, cst_pad);
+	if (bp_pad != GSMap.TILE_INVALID) {
+		local bx = GSMap.GetTileX(bp_pad);
+		local by = GSMap.GetTileY(bp_pad);
+		local bp_end = GSMap.GetTileIndex(bx + 9, by + 3);
+		GSTile.LevelTiles(bp_pad, bp_end);
+
+		local t1_start = GSMap.GetTileIndex(bx + 1, by + 1);
+		local t1_mid   = GSMap.GetTileIndex(bx + 4, by + 1);
+		local t1_end   = GSMap.GetTileIndex(bx + 8, by + 1);
+		local t2_start = GSMap.GetTileIndex(bx + 1, by + 2);
+		local t2_mid   = GSMap.GetTileIndex(bx + 4, by + 2);
+		local t2_end   = GSMap.GetTileIndex(bx + 8, by + 2);
+
+		GSRail.BuildRail(t1_start, t1_mid, t1_end);
+		GSRail.BuildRail(t2_start, t2_mid, t2_end);
+		GSSign.BuildSign(bp_pad, "UAT Blueprint: Select 'Capture From Map' in Blueprint Library ('B')");
+	}
+
+	local core = regions[0];
+	if ("anchor" in core) {
+		local cx = GSMap.GetTileX(core.anchor);
+		local cy = GSMap.GetTileY(core.anchor);
+		GSSign.BuildSign(GSMap.GetTileIndex(cx + 2, cy), "UAT Megacity: Open Town/Megacity Overview to inspect demand tiers");
+		GSSign.BuildSign(GSMap.GetTileIndex(cx, cy + 2), "UAT Federation: Open Map menu > 'Federation Authentication & Charters'");
+		GSSign.BuildSign(GSMap.GetTileIndex(cx + 2, cy + 2), "UAT Trade Ledger: Open Map menu > 'Supply Chain & Trade Ledger'");
+	}
+
+	GSLog.Info("Sprint 28 fixtures ready: CST staging pad, Blueprint capture track layout, and navigation/governance signs.");
 	return true;
 }
 
@@ -364,19 +462,21 @@ function OpenSpaceUATDemo::AddLocation(page, tile, text)
 
 function OpenSpaceUATDemo::AddGoal(page, tile, text)
 {
-	local goal = GSGoal.New(GSCompany.COMPANY_INVALID, text, GSGoal.GT_TILE, tile);
+	local goal = (tile != null && tile != GSMap.TILE_INVALID) ?
+		GSGoal.New(GSCompany.COMPANY_INVALID, text, GSGoal.GT_TILE, tile) :
+		GSGoal.New(GSCompany.COMPANY_INVALID, text, GSGoal.GT_NONE, 0);
 	if (GSGoal.IsValidGoal(goal)) GSStoryPage.NewElement(page, GSStoryPage.SPET_GOAL, goal, null);
+	return goal;
 }
 
 function OpenSpaceUATDemo::Start()
 {
 	if (!this.initialized) {
-		GSLog.Info("Creating OpenSpaceTTD three-world UAT fixtures.");
+		GSLog.Info("Creating OpenSpaceTTD guided solo UAT fixtures and persistent Story Book.");
 		local regions = this.CalculateRegions();
 		local anchor_towns = 0;
 
-		/* Give every phase an obvious anchor town without assuming a specific
-		 * procedural seed beyond the deterministic demo configuration. */
+		/* Establish canonical anchor towns for all 3 worlds. */
 		foreach (region in regions) {
 			local town = this.FindNearestTown(region, region.center);
 			if (town != null) {
@@ -397,34 +497,92 @@ function OpenSpaceUATDemo::Start()
 			GSSign.BuildSign(gateway_sides[i].second, label + " - World " + (i + 2) + " head (" + gateway_sides[i].second_axis + ")");
 		}
 
-		local overview = GSStoryPage.New(GSCompany.COMPANY_INVALID, "OpenSpaceTTD Three-World Demo");
-		this.AddText(overview, "This deterministic UAT world is the Phase 1-2-3 vertical-slice foundation. Use Ctrl+Alt+1, Ctrl+Alt+2, and Ctrl+Alt+3 to jump between worlds.");
-		foreach (region in regions) {
-			this.AddLocation(overview, region.anchor, region.world + ": " + region.phase + " - " + region.role + ".");
-		}
-		this.AddText(overview, "Gateway Alpha links Phase 1 to Phase 2. Gateway Beta links Phase 2 to Phase 3. Each pair is spatially offset and rotates trains onto a different track axis, proving that gateways are not ordinary aligned tunnels. Void buffer bands isolate the three logical worlds.");
+		local spaceport_tile = this.FindSpaceportSite(regions[0]);
+		local conduit_tile   = this.FindConduitSite(regions[2]);
+		local cst_pad_tile   = this.FindCSTStagingPad(regions[1]);
+		local bp_pad_tile    = this.FindBlueprintSampleSite(regions[1], cst_pad_tile);
 
-		local cargo_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "UAT - Data Crystals Rebranding");
-		this.AddText(cargo_page, "All five checks must use Data Crystals and must not expose the legacy user-facing word Mail.");
-		this.AddGoal(cargo_page, regions[0].anchor, "1. Graphs > Cargo Payment Rates lists Data Crystals.");
-		this.AddGoal(cargo_page, regions[0].anchor, "2. Game Settings search shows Distribution mode for data crystals.");
-		this.AddGoal(cargo_page, regions[0].anchor, "3. A town station acceptance/waiting list shows Data Crystals.");
-		this.AddGoal(cargo_page, regions[0].anchor, "4. A train depot purchase list contains the Data Van wagon.");
-		this.AddGoal(cargo_page, regions[0].anchor, "5. A road depot purchase list contains the MPS Data Courier.");
+		/* -------------------------------------------------------------
+		 * CHAPTER 1: Overview & Planetary Navigation
+		 * ------------------------------------------------------------- */
+		local overview_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "1. Overview & Planetary Navigation");
+		this.AddText(overview_page, "Welcome to the OpenSpaceTTD Guided Solo UAT environment. This deterministic vertical slice connects three distinct planetary worlds across the void: World 1 (Phase 1 Core, Temperate Biome), World 2 (Phase 2 Developed, Arid Industrial Biome), and World 3 (Phase 3 Frontier, Sub-Arctic Frontier Biome).");
+		this.AddText(overview_page, "Use Ctrl+Alt+1, Ctrl+Alt+2, and Ctrl+Alt+3 or the Map dropdown menu to jump viewports instantly between worlds.");
+		this.AddLocation(overview_page, regions[0].anchor, "World 1 Anchor: Oaktree Core (Phase 1 Core - Temperate)");
+		this.AddLocation(overview_page, regions[1].anchor, "World 2 Anchor: Merredin Industrial (Phase 2 Developed - Arid)");
+		this.AddLocation(overview_page, regions[2].anchor, "World 3 Anchor: Calyx Frontier (Phase 3 Frontier - Sub-Arctic)");
+		this.AddGoal(overview_page, regions[0].anchor, "1. Navigate all three worlds using Ctrl+Alt+1..3 or the Map menu world jump buttons. Confirm distinct environmental biomes.");
 
-		local portal_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "UAT - Portal Gates");
-		this.AddText(portal_page, "The generated gateways below are pre-linked reference pairs. Their heads are deep inside different worlds, are not aligned by X or Y coordinate, and use perpendicular local tracks. Use nearby player-owned rail to build a fresh pair with the portal button, then route a train through it.");
-		this.AddLocation(portal_page, gateway_sides[0].first, "Gateway Alpha - Phase 1 side (NE-SW track)");
-		this.AddLocation(portal_page, gateway_sides[0].second, "Gateway Alpha - Phase 2 side (NW-SE track)");
-		this.AddLocation(portal_page, gateway_sides[1].first, "Gateway Beta - Phase 2 side (NW-SE track)");
-		this.AddLocation(portal_page, gateway_sides[1].second, "Gateway Beta - Phase 3 side (NE-SW track)");
-		this.AddGoal(portal_page, gateway_sides[0].first, "6. Build an unlinked portal gate, then link it to a second gate in another world.");
-		this.AddGoal(portal_page, gateway_sides[0].first, "7. Route a train through Gateway Alpha and verify it emerges at the non-aligned Phase 2 head on the perpendicular track axis.");
-		this.AddText(portal_page, "Portal Gates passed UAT 9.1. Spaceport and Edge Conduit GUI checks are on the Sprint 10 Planetary Operations page.");
+		/* -------------------------------------------------------------
+		 * CHAPTER 2: Monumental Portal Gates
+		 * ------------------------------------------------------------- */
+		local portal_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "2. Monumental Portal Gates");
+		this.AddText(portal_page, "Monumental Portal Gates interlink planetary railway networks across the void. Pre-linked Gateway Alpha (World 1 <-> World 2) and Gateway Beta (World 2 <-> World 3) demonstrate arbitrary non-aligned spatial transitions with automatic 18-tile high-capacity terminals (holding lanes and path signals).");
+		this.AddText(portal_page, "The 'UAT Wormhole Demonstrator' locomotive continuously cycles between perpendicular track axes on World 1 and World 2.");
+		this.AddLocation(portal_page, gateway_sides[0].first, "Gateway Alpha - Phase 1 head (NE-SW track)");
+		this.AddLocation(portal_page, gateway_sides[0].second, "Gateway Alpha - Phase 2 head (NW-SE track)");
+		this.AddLocation(portal_page, gateway_sides[1].first, "Gateway Beta - Phase 2 head (NW-SE track)");
+		this.AddLocation(portal_page, gateway_sides[1].second, "Gateway Beta - Phase 3 head (NE-SW track)");
+		this.AddGoal(portal_page, gateway_sides[0].first, "2. Build an unlinked portal gate with its automatic 18-tile two-lane terminal, then link it to a destination gate in another world.");
+		this.AddGoal(portal_page, gateway_sides[0].first, "3. Run a portal consist through Gateway Alpha and verify it emerges smoothly at the non-aligned Phase 2 head on a perpendicular track axis.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 3: Player Blueprints & CST Prefabs
+		 * ------------------------------------------------------------- */
+		local bp_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "3. Player Blueprints & CST Prefabs");
+		this.AddText(bp_page, "Open the Blueprint Library by pressing 'B' or clicking the Blueprint icon on the Railway Construction toolbar. Test the 8 canonical CST Prefab Rail Blocks (using 'R' to rotate 90 degrees and 'F' to mirror/flip horizontally with RHD/LHD traffic invariance).");
+		this.AddText(bp_page, "Capture custom player blueprints from the map using 'Capture From Map', save them with custom names and tags, and place replicas deterministically.");
+		this.AddLocation(bp_page, cst_pad_tile != GSMap.TILE_INVALID ? cst_pad_tile : regions[1].center, "CST Prefab Staging Area (World 2: Merredin Industrial)");
+		this.AddLocation(bp_page, bp_pad_tile != GSMap.TILE_INVALID ? bp_pad_tile : regions[1].center, "Custom Blueprint Capture Track Layout (World 2: Merredin Industrial)");
+		this.AddGoal(bp_page, cst_pad_tile != GSMap.TILE_INVALID ? cst_pad_tile : regions[1].center, "4. Open Blueprint Library ('B'), select a canonical CST Prefab (e.g. CST Dual-Track Passing Siding or Mainline Double Straight), rotate/flip, and stamp it on the staging area.");
+		this.AddGoal(bp_page, bp_pad_tile != GSMap.TILE_INVALID ? bp_pad_tile : regions[1].center, "5. Select 'Capture From Map' in the Blueprint Library, drag across the sample rail layout, save it to your local library, and place a replica.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 4: Planetary Operations: Spaceports & Conduits
+		 * ------------------------------------------------------------- */
+		local ops_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "4. Planetary Operations: Spaceports & Conduits");
+		this.AddText(ops_page, "Spaceport operations and void Edge Conduits expand planetary extraction and off-world logistics. Spaceport controls appear in owned airport station windows. Edge Conduits are built using the void-tunnel tool on the Railway Construction toolbar.");
+		this.AddLocation(ops_page, spaceport_tile != GSMap.TILE_INVALID ? spaceport_tile : regions[0].center, "Phase 1 Spaceport candidate airport (World 1)");
+		this.AddGoal(ops_page, spaceport_tile != GSMap.TILE_INVALID ? spaceport_tile : regions[0].center, "6. Open station window for the Phase 1 Spaceport candidate and designate Spaceport. Upgrade through Tier 2 and Tier 3, observing supply status and projected off-world trade cargo.");
+		this.AddLocation(ops_page, conduit_tile != GSMap.TILE_INVALID ? conduit_tile : regions[2].center, "Phase 3 signed Edge Conduit construction tile (World 3)");
+		this.AddGoal(ops_page, conduit_tile != GSMap.TILE_INVALID ? conduit_tile : regions[2].center, "7. Select the Edge Conduit tool on the rail toolbar and build on the signed Phase 3 void boundary tile. Verify Land Area Information reports 100 units/mo Frontier extraction and mineral cargo.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 5: Megacity Demands & Freight Corridors
+		 * ------------------------------------------------------------- */
+		local mega_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "5. Megacity Demands & Freight Corridors");
+		this.AddText(mega_page, "Metropolitan core worlds demand multi-tier commodity logistics: Tier 1 Sustenance (Food/Water), Tier 2 Expansion (Goods/Alloys), and Tier 3 Prosperity (Data Crystals/Valuables). Monthly cycles evaluate supply satisfaction and transition growth states: Starvation (0.0x), Subsistence (1.0x), Metropolitan Boom (1.5x), and HyperGrowth (2.0x).");
+		this.AddText(mega_page, "The Freight Corridor Monitor tracks inter-world transport lanes, active transit volume, capacity utilization, and bottleneck escalation alerts.");
+		this.AddLocation(mega_page, regions[0].anchor, "Oaktree Core (Metropolitan Megacity)");
+		this.AddLocation(mega_page, gateway_sides[0].first, "Gateway Alpha Freight Corridor (Phase 1)");
+		this.AddGoal(mega_page, regions[0].anchor, "8. Open Town window > 'Megacity' or Town menu > 'Megacity Overview'. Inspect Tier 1-3 demands and observe growth state transitions under monthly evaluation.");
+		this.AddGoal(mega_page, gateway_sides[0].first, "9. Open Map dropdown > Freight Corridor Monitor. Inspect inter-world corridor transit volume, capacity utilization, and congestion bottleneck alerts.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 6: Supply Chain Matrix & Federation Governance
+		 * ------------------------------------------------------------- */
+		local fed_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "6. Supply Chain Matrix & Federation Governance");
+		this.AddText(fed_page, "Sprint 27 completed native player and operator UI surfaces. The Supply Chain Matrix & Trade Ledger window monitors Commonwealth macro phase flows, spaceport launch volume, conduit extraction, and bilateral commodity conservation audits.");
+		this.AddText(fed_page, "The Federation Authentication & Charters window handles player session identity, corporate chartering, owner delegation, and world presence expansion.");
+		this.AddLocation(fed_page, regions[0].anchor, "Federation Administrative Core (Oaktree Core)");
+		this.AddGoal(fed_page, regions[0].anchor, "10. Open Map dropdown > Supply Chain & Trade Ledger. Inspect macro phase flows, spaceport/conduit infrastructure volume, and verify the CONSERVED commodity trade balance audit.");
+		this.AddGoal(fed_page, regions[0].anchor, "11. Open Map dropdown > Federation Authentication & Charters. Authenticate player identity, charter a corporate entity, and expand world presence to World 1.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 7: Commonwealth Data Crystals Rebranding
+		 * ------------------------------------------------------------- */
+		local cargo_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "7. Commonwealth Data Crystals Rebranding");
+		this.AddText(cargo_page, "All user-facing references to the legacy mail cargo must display Data Crystals across economic, administrative, station, and vehicle surfaces.");
+		this.AddLocation(cargo_page, regions[0].anchor, "Oaktree Core Station & Depot Area");
+		this.AddGoal(cargo_page, regions[0].anchor, "12. Graphs > Cargo Payment Rates lists Data Crystals.");
+		this.AddGoal(cargo_page, regions[0].anchor, "13. Game Settings search shows Distribution mode for data crystals.");
+		this.AddGoal(cargo_page, regions[0].anchor, "14. Town station acceptance and waiting lists display Data Crystals.");
+		this.AddGoal(cargo_page, regions[0].anchor, "15. Train depot purchase list contains the Data Van wagon.");
+		this.AddGoal(cargo_page, regions[0].anchor, "16. Road depot purchase list contains the MPS Data Courier.");
 
 		this.initialized = true;
-		GSLog.Info("UAT fixtures ready: 3 worlds, " + anchor_towns + " anchor towns, 2 gateway pairs, and 7 acceptance goals.");
-		GSStoryPage.Show(overview);
+		GSLog.Info("Guided solo UAT ready: 3 worlds, " + anchor_towns + " anchor towns, 2 gateway pairs, 7 Story Book chapters, and 16 acceptance goals.");
+		GSStoryPage.Show(overview_page);
 	}
 
 	while (true) {
@@ -433,6 +591,7 @@ function OpenSpaceUATDemo::Start()
 			this.service_built = this.BuildAlphaDemonstrator(this.CalculateGateways(regions));
 		}
 		if (!this.sprint10_built) this.sprint10_built = this.BuildSprint10Fixtures(regions);
+		if (!this.sprint28_built) this.sprint28_built = this.BuildSprint28Fixtures(regions);
 		this.Sleep(74);
 	}
 }

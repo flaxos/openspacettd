@@ -14,6 +14,7 @@
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
 #include "../portal/federation_identity.h"
+#include "../portal/megacity_manager.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
@@ -135,6 +136,15 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	FederationIdentityRegistry::RestoreState(federation_namespace, 8);
 	REQUIRE(FederationIdentityRegistry::RestoreMapping(VehicleID{10}, 7));
 
+	/* Register a Megacity with deliveries and evaluate monthly cycle */
+	MegacityManager::Reset();
+	REQUIRE(MegacityManager::RegisterMegacity(TownID{1}, WorldID{0}, "Oaktree Core", 12000));
+	MegacityManager::SetCustomQuotas(TownID{1}, 80, 40, 15);
+	MegacityManager::RecordDelivery(TownID{1}, MegacityDemandTier::Tier1_Sustenance, 80);
+	MegacityManager::RecordDelivery(TownID{1}, MegacityDemandTier::Tier2_Expansion, 40);
+	MegacityManager::RecordDelivery(TownID{1}, MegacityDemandTier::Tier3_Prosperity, 10);
+	MegacityManager::EvaluateMonthlySupply();
+
 	/* Save the game */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(save_res == SaveLoadResult::Ok);
@@ -144,8 +154,10 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	/* Wipe game memory state completely */
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
+	MegacityManager::Reset();
 	CHECK(PlanetManager::Count() == 0);
 	CHECK(PortalRegistry::Count() == 0);
+	CHECK(MegacityManager::GetAllMegacities().empty());
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{10}) == 0);
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{42}) == 0);
 	CHECK(FederationIdentityRegistry::GetNextSequence() == 1);
@@ -260,6 +272,21 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{42}) == 37);
 	CHECK(PortalRegistry::GetPortalTransitProgress(VehicleID{99}) == 0);
 
+	/* 5. Verify Megacity profile, custom quotas, deliveries, and growth state restored */
+	CHECK(MegacityManager::IsMegacity(TownID{1}));
+	const MegacityProfile *mp = MegacityManager::GetProfile(TownID{1});
+	REQUIRE(mp != nullptr);
+	CHECK(mp->town_name == "Oaktree Core");
+	CHECK(mp->world_id == WorldID{0});
+	CHECK(mp->population == 12000);
+	CHECK(mp->monthly_quota[0] == 80);
+	CHECK(mp->monthly_quota[1] == 40);
+	CHECK(mp->monthly_quota[2] == 15);
+	CHECK(mp->delivered_last[0] == 80);
+	CHECK(mp->delivered_last[1] == 40);
+	CHECK(mp->delivered_last[2] == 10);
+	CHECK(mp->growth_state == MegacityGrowthState::MetropolitanBoom);
+
 	/* Cleanup */
 	std::filesystem::remove(test_save_file);
 }
@@ -285,9 +312,11 @@ TEST_CASE("Planet SaveLoad - Empty / Single-World Game Round-Trip")
 
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
+	MegacityManager::Reset();
 
 	CHECK(PlanetManager::Count() == 0);
 	CHECK(PortalRegistry::Count() == 0);
+	CHECK(MegacityManager::GetAllMegacities().empty());
 
 	/* Save empty multi-world state */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
@@ -301,6 +330,7 @@ TEST_CASE("Planet SaveLoad - Empty / Single-World Game Round-Trip")
 	/* Multi-world manager and portal registry remain clean and empty */
 	CHECK(PlanetManager::Count() == 0);
 	CHECK(PortalRegistry::Count() == 0);
+	CHECK(MegacityManager::GetAllMegacities().empty());
 	CHECK(PlanetManager::GetRegionByTile(TileXY(64, 64)) == nullptr);
 
 	/* Cleanup */

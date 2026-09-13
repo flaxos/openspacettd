@@ -15,6 +15,7 @@
 #include "../portal/spaceport_manager.h"
 #include "../portal/edge_conduit.h"
 #include "../portal/federation_identity.h"
+#include "../portal/megacity_manager.h"
 
 #include "../safeguards.h"
 
@@ -507,12 +508,127 @@ struct CONDChunkHandler : ChunkHandler {
 	}
 };
 
+/** Temporary storage for Megacity serialization. */
+struct SlMegacity {
+	uint32_t town_id;
+	uint32_t world_id;
+	std::string town_name;
+	uint32_t population;
+	uint32_t quota_0;
+	uint32_t quota_1;
+	uint32_t quota_2;
+	uint32_t deliv_curr_0;
+	uint32_t deliv_curr_1;
+	uint32_t deliv_curr_2;
+	uint32_t deliv_last_0;
+	uint32_t deliv_last_1;
+	uint32_t deliv_last_2;
+	uint8_t growth_state;
+};
+
+static const SaveLoad _megacity_desc[] = {
+	    SLE_VAR(SlMegacity, town_id,      VarTypes::U32),
+	    SLE_VAR(SlMegacity, world_id,     VarTypes::U32),
+	   SLE_SSTR(SlMegacity, town_name,    VarTypes::STR),
+	    SLE_VAR(SlMegacity, population,   VarTypes::U32),
+	    SLE_VAR(SlMegacity, quota_0,      VarTypes::U32),
+	    SLE_VAR(SlMegacity, quota_1,      VarTypes::U32),
+	    SLE_VAR(SlMegacity, quota_2,      VarTypes::U32),
+	    SLE_VAR(SlMegacity, deliv_curr_0, VarTypes::U32),
+	    SLE_VAR(SlMegacity, deliv_curr_1, VarTypes::U32),
+	    SLE_VAR(SlMegacity, deliv_curr_2, VarTypes::U32),
+	    SLE_VAR(SlMegacity, deliv_last_0, VarTypes::U32),
+	    SLE_VAR(SlMegacity, deliv_last_1, VarTypes::U32),
+	    SLE_VAR(SlMegacity, deliv_last_2, VarTypes::U32),
+	    SLE_VAR(SlMegacity, growth_state, VarTypes::U8),
+};
+
+/** Chunk handler for Megacities (MEGA). */
+struct MEGAChunkHandler : ChunkHandler {
+	MEGAChunkHandler() : ChunkHandler("MEGA", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_megacity_desc);
+
+		int i = 0;
+		for (const auto &m : MegacityManager::GetAllMegacities()) {
+			SlMegacity sl_mega{
+				.town_id = m.town_id.base(),
+				.world_id = m.world_id.base(),
+				.town_name = m.town_name,
+				.population = m.population,
+				.quota_0 = m.monthly_quota[0],
+				.quota_1 = m.monthly_quota[1],
+				.quota_2 = m.monthly_quota[2],
+				.deliv_curr_0 = m.delivered_current[0],
+				.deliv_curr_1 = m.delivered_current[1],
+				.deliv_curr_2 = m.delivered_current[2],
+				.deliv_last_0 = m.delivered_last[0],
+				.deliv_last_1 = m.delivered_last[1],
+				.deliv_last_2 = m.delivered_last[2],
+				.growth_state = to_underlying(m.growth_state),
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&sl_mega, _megacity_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		MegacityManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_megacity_desc);
+
+		SlMegacity sl_mega{};
+		while (SlIterateArray() != -1) {
+			sl_mega = {};
+			SlObject(&sl_mega, slt);
+			MegacityProfile p{
+				.town_id = TownID{static_cast<uint16_t>(sl_mega.town_id)},
+				.world_id = WorldID{sl_mega.world_id},
+				.town_name = sl_mega.town_name,
+				.population = sl_mega.population,
+				.monthly_quota = {sl_mega.quota_0, sl_mega.quota_1, sl_mega.quota_2},
+				.delivered_current = {sl_mega.deliv_curr_0, sl_mega.deliv_curr_1, sl_mega.deliv_curr_2},
+				.delivered_last = {sl_mega.deliv_last_0, sl_mega.deliv_last_1, sl_mega.deliv_last_2},
+				.growth_state = static_cast<MegacityGrowthState>(sl_mega.growth_state),
+			};
+			for (size_t tier = 0; tier < 3; ++tier) {
+				if (p.monthly_quota[tier] > 0) {
+					p.satisfaction_pct[tier] = static_cast<float>(p.delivered_current[tier]) / static_cast<float>(p.monthly_quota[tier]);
+				}
+			}
+			p.overall_supply_index = (p.satisfaction_pct[0] + p.satisfaction_pct[1] + p.satisfaction_pct[2]) / 3.0f;
+			switch (p.growth_state) {
+				case MegacityGrowthState::Starvation:
+					p.growth_multiplier = 0.0f;
+					p.passenger_multiplier = 0.5f;
+					break;
+				case MegacityGrowthState::Subsistence:
+					p.growth_multiplier = 1.0f;
+					p.passenger_multiplier = 1.0f;
+					break;
+				case MegacityGrowthState::MetropolitanBoom:
+					p.growth_multiplier = 1.5f;
+					p.passenger_multiplier = 1.25f;
+					break;
+				case MegacityGrowthState::HyperGrowth:
+					p.growth_multiplier = 2.0f;
+					p.passenger_multiplier = 1.5f;
+					break;
+			}
+			MegacityManager::RestoreMegacity(p);
+		}
+	}
+};
+
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
 static const FIDSChunkHandler FIDS;
 static const SPRTChunkHandler SPRT;
 static const CONDChunkHandler COND;
+static const MEGAChunkHandler MEGA;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
@@ -521,6 +637,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	FIDS,
 	SPRT,
 	COND,
+	MEGA,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);
