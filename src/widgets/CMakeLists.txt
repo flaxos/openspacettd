@@ -3,6 +3,7 @@ add_files(
     airport_widget.h
     autoreplace_widget.h
     bootstrap_widget.h
+    blueprint_widget.h
     bridge_widget.h
     build_vehicle_widget.h
     cheat_widget.h

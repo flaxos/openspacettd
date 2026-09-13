@@ -6111,3 +6111,30 @@ STR_UNIVERSE_DIRECTORY_REFRESH                                  :Refresh
 STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP                          :Poll Universe Authority for updated world heartbeats
 STR_UNIVERSE_DIRECTORY_NO_WORLDS                                :{SILVER}No worlds registered in directory
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
+
+# OpenSpaceTTD Sprint 25: Player Rail Blueprints
+STR_RAIL_TOOLBAR_TOOLTIP_BLUEPRINT_LIBRARY                      :{BLACK}Open Rail Blueprint Library. Capture, manage, and stamp rail layouts, depots, and stations
+STR_BLUEPRINT_VIEW_CAPTION                                       :{WHITE}Rail Blueprint Library
+STR_BLUEPRINT_RENAME_CAPTION                                     :{WHITE}Rename Blueprint
+STR_BLUEPRINT_BUTTON_CAPTURE                                     :Capture
+STR_BLUEPRINT_BUTTON_CAPTURE_TOOLTIP                             :{BLACK}Click and drag a rectangle over rail tracks on the map to capture a new blueprint template
+STR_BLUEPRINT_BUTTON_PLACE                                       :Place
+STR_BLUEPRINT_BUTTON_PLACE_TOOLTIP                               :{BLACK}Enter stamp placement mode to build this blueprint on the map
+STR_BLUEPRINT_BUTTON_ROTATE                                      :Rotate CW
+STR_BLUEPRINT_BUTTON_ROTATE_TOOLTIP                              :{BLACK}Rotate the blueprint 90 degrees clockwise (Hotkey: R)
+STR_BLUEPRINT_BUTTON_FLIP                                        :Flip
+STR_BLUEPRINT_BUTTON_FLIP_TOOLTIP                                :{BLACK}Mirror the blueprint horizontally (Hotkey: F)
+STR_BLUEPRINT_BUTTON_RENAME                                      :Rename
+STR_BLUEPRINT_BUTTON_RENAME_TOOLTIP                              :{BLACK}Rename the selected blueprint
+STR_BLUEPRINT_BUTTON_DELETE                                      :Delete
+STR_BLUEPRINT_BUTTON_DELETE_TOOLTIP                              :{BLACK}Delete the selected player blueprint from disk
+STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
+STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
+STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
+STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
+STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
+STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
+STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
+STR_ERROR_CAN_T_PLACE_BLUEPRINT                                  :{WHITE}Can't place blueprint...
+STR_ERROR_BLUEPRINT_BUILTIN_CANNOT_DELETE                        :{WHITE}Factory CST prefabs cannot be deleted
+

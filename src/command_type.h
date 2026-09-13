@@ -391,6 +391,8 @@ enum class Commands : uint8_t {
 	ConfigureSpaceportBridge, ///< configure the interplanetary routing bridge of a spaceport
 	ConfigureEdgeConduitFeeder, ///< configure direct inter-world feeder mode of an edge conduit
 
+	PlaceBlueprint, ///< place a rail blueprint layout on the map
+
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

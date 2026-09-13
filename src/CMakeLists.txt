@@ -410,6 +410,14 @@ add_files(
     portal/spaceport_manager.h
     portal/world_gen.cpp
     portal/world_gen.h
+    blueprint/blueprint.cpp
+    blueprint/blueprint.h
+    blueprint/blueprint_cmd.cpp
+    blueprint/blueprint_cmd.h
+    blueprint/blueprint_gui.cpp
+    blueprint/blueprint_gui.h
+    blueprint/blueprint_manager.cpp
+    blueprint/blueprint_manager.h
     progress.cpp
     progress.h
     provider_manager.h

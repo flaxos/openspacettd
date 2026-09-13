@@ -2583,6 +2583,7 @@ static bool ConListDirs(std::span<std::string_view> argv)
 		{ "autosave", Subdirectory::Autosave, true },
 		{ "screenshot", Subdirectory::Screenshot, true },
 		{ "social_integration", Subdirectory::SocialIntegration, true },
+		{ "blueprint", Subdirectory::Blueprint, true },
 	};
 
 	if (argv.size() != 2) {

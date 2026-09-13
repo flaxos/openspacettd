@@ -755,6 +755,9 @@ enum class WindowClass : uint16_t {
 	/** Universe Authority registered world directory. */
 	UniverseDirectory,
 
+	/** Rail blueprint library and manager window. */
+	BlueprintLibrary,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

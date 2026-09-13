@@ -54,6 +54,7 @@ static const EnumIndexArray<std::string_view, Subdirectory, Subdirectory::End> _
 	"screenshot" PATHSEP,
 	"social_integration" PATHSEP,
 	"docs" PATHSEP,
+	"blueprint" PATHSEP,
 };
 
 /**

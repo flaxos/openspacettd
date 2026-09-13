@@ -20,9 +20,9 @@ This matrix is the release checklist for Sprints 24–29. **Present** means a so
 | Consist handoff, identity and content admission | Automatic simulation with console/daemon diagnostics | Partial | Federation UAT shows identity continuity, mismatch rejection and cargo conservation. |
 | Round-trip order restoration | Automatic materialization and integration tests | Partial | Federation UAT runs a visible outbound and return service with restored orders. |
 | Cluster launch, health and recovery | `scripts/run_cluster.py` and configuration | Present for operators | Supply versioned topology, clean reset, health checks, failure injection and recovery guide. |
-| Alien biome and Commonwealth assets | Biome metadata and renamed strings; default-derived visuals | Planned | Sprint 24 implements the three showcase worlds and records remaining biome backlog. |
-| Player rail blueprints | None | Planned | Sprint 25 supplies capture, library, import/export, preview, transforms and deterministic placement. |
-| CST prefab rail blocks | None | Planned | Sprint 26 supplies eight built-ins and validates their documented traffic behavior. |
+| Alien biome and Commonwealth assets | Biome styling across showcase worlds, procedural MultiWorldGen, CST cyan-blue/yellow portal recolouring | Present | Delivered in Sprint 24. |
+| Player rail blueprints | Rail toolbar button (`WID_RAT_BLUEPRINT`), Blueprint Library window (`BlueprintLibraryWindow`) | Present | Delivered in Sprint 25: map capture, library, JSON import/export, 90°/180°/270° rotation, horizontal flip, and deterministic placement command. |
+| CST prefab rail blocks | Built-in CST templates in Blueprint Library | Partial | Sprint 26 expands to 8 standardized Commonwealth prefabs and traffic validation. |
 | Story Book and goals | Existing v0.3 tutorial/checklists | Partial | Sprint 28 replaces final-release evidence with persistent measurable goals spanning current features. |
 
 ## Definition of UI-wired
