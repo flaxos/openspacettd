@@ -38,6 +38,7 @@ add_test_files(
     test_gateway_arrays_and_telemetry.cpp
     test_sprint24_alien_biomes.cpp
     test_blueprint.cpp
+    test_cst_prefabs.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

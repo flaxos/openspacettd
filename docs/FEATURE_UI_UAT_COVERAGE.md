@@ -22,7 +22,7 @@ This matrix is the release checklist for Sprints 24–29. **Present** means a so
 | Cluster launch, health and recovery | `scripts/run_cluster.py` and configuration | Present for operators | Supply versioned topology, clean reset, health checks, failure injection and recovery guide. |
 | Alien biome and Commonwealth assets | Biome styling across showcase worlds, procedural MultiWorldGen, CST cyan-blue/yellow portal recolouring | Present | Delivered in Sprint 24. |
 | Player rail blueprints | Rail toolbar button (`WID_RAT_BLUEPRINT`), Blueprint Library window (`BlueprintLibraryWindow`) | Present | Delivered in Sprint 25: map capture, library, JSON import/export, 90°/180°/270° rotation, horizontal flip, and deterministic placement command. |
-| CST prefab rail blocks | Built-in CST templates in Blueprint Library | Partial | Sprint 26 expands to 8 standardized Commonwealth prefabs and traffic validation. |
+| CST prefab rail blocks | Built-in CST templates in Blueprint Library | Present | Delivered in Sprint 26: 8 canonical CST layouts, RHD/LHD invariant transforms, and operating guidance. |
 | Story Book and goals | Existing v0.3 tutorial/checklists | Partial | Sprint 28 replaces final-release evidence with persistent measurable goals spanning current features. |
 
 ## Definition of UI-wired

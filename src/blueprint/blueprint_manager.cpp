@@ -35,57 +35,570 @@ static std::string CleanBlueprintFilename(const std::string &name)
 	return clean;
 }
 
-static void CreateSampleBuiltin()
+static void CreateBuiltinCSTPrefabs()
 {
 	if (!_builtins.empty()) return;
 
-	/* Create a sample CST double-track straight module (8 tiles long along X axis) */
-	Blueprint cst_double;
-	cst_double.name = "CST Mainline Double Straight";
-	cst_double.description = "Commonwealth Standard Transit parallel double track (8 tiles, X-axis, with block signals).";
-	cst_double.author = "Commonwealth Transit Authority";
-	cst_double.version = 1;
-	cst_double.width = 8;
-	cst_double.height = 2;
-	cst_double.is_builtin = true;
+	/* 1. CST Mainline Double Straight (8x2) */
+	{
+		Blueprint bp;
+		bp.name = "CST Mainline Double Straight";
+		bp.description = "Commonwealth Standard Transit dual-track high-speed trunk (8 tiles, X-axis). Directional one-way path signals at mid-span. Default RHD; use Flip ('F') for LHD.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 8;
+		bp.height = 2;
+		bp.is_builtin = true;
 
-	for (int16_t x = 0; x < 8; ++x) {
-		/* Track 1: Bound SE */
-		BlueprintTile t1;
-		t1.dx = x;
-		t1.dy = 0;
-		t1.type = BlueprintTileType::Track;
-		t1.railtype = RAILTYPE_BEGIN;
-		t1.trackbits = TrackBits{Track::X};
-		if (x == 4) {
+		for (int16_t x = 0; x < 8; ++x) {
+			BlueprintTile t1;
+			t1.dx = x;
+			t1.dy = 0;
+			t1.type = BlueprintTileType::Track;
+			t1.railtype = RAILTYPE_BEGIN;
+			t1.trackbits = TrackBits{Track::X};
+			if (x == 4) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				t1.signals.push_back(s);
+			}
+			bp.tiles.push_back(t1);
+
+			BlueprintTile t2;
+			t2.dx = x;
+			t2.dy = 1;
+			t2.type = BlueprintTileType::Track;
+			t2.railtype = RAILTYPE_BEGIN;
+			t2.trackbits = TrackBits{Track::X};
+			if (x == 4) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+				t2.signals.push_back(s);
+			}
+			bp.tiles.push_back(t2);
+		}
+		_builtins.push_back(bp);
+	}
+
+	/* 2. CST Dual-Track Passing Siding (14x4) */
+	{
+		Blueprint bp;
+		bp.name = "CST Dual-Track Passing Siding";
+		bp.description = "High-capacity mainline overtake siding (14x4). Parallel mainline tracks with dedicated offline loop for slower mineral/freight consists. Entry & exit path signals prevent mainline blocking.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 14;
+		bp.height = 4;
+		bp.is_builtin = true;
+
+		for (int16_t x = 0; x < 14; ++x) {
+			BlueprintTile m1;
+			m1.dx = x;
+			m1.dy = 1;
+			m1.type = BlueprintTileType::Track;
+			m1.railtype = RAILTYPE_BEGIN;
+			if (x == 1) {
+				m1.trackbits = TrackBits{Track::X, Track::Upper};
+			} else if (x == 12) {
+				m1.trackbits = TrackBits{Track::X, Track::Right};
+			} else {
+				m1.trackbits = TrackBits{Track::X};
+			}
+			if (x == 0 || x == 7) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				m1.signals.push_back(s);
+			}
+			bp.tiles.push_back(m1);
+
+			BlueprintTile m2;
+			m2.dx = x;
+			m2.dy = 2;
+			m2.type = BlueprintTileType::Track;
+			m2.railtype = RAILTYPE_BEGIN;
+			m2.trackbits = TrackBits{Track::X};
+			if (x == 7) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+				m2.signals.push_back(s);
+			}
+			bp.tiles.push_back(m2);
+		}
+
+		BlueprintTile s_in;
+		s_in.dx = 2; s_in.dy = 0; s_in.type = BlueprintTileType::Track; s_in.railtype = RAILTYPE_BEGIN;
+		s_in.trackbits = TrackBits{Track::Lower};
+		bp.tiles.push_back(s_in);
+
+		for (int16_t x = 3; x <= 10; ++x) {
+			BlueprintTile st;
+			st.dx = x; st.dy = 0; st.type = BlueprintTileType::Track; st.railtype = RAILTYPE_BEGIN;
+			st.trackbits = TrackBits{Track::X};
+			if (x == 10) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				st.signals.push_back(s);
+			}
+			bp.tiles.push_back(st);
+		}
+
+		BlueprintTile s_out;
+		s_out.dx = 11; s_out.dy = 0; s_out.type = BlueprintTileType::Track; s_out.railtype = RAILTYPE_BEGIN;
+		s_out.trackbits = TrackBits{Track::Left};
+		bp.tiles.push_back(s_out);
+
+		_builtins.push_back(bp);
+	}
+
+	/* 3. CST Portal Gate Approach Corridor (10x4) */
+	{
+		Blueprint bp;
+		bp.name = "CST Portal Gate Approach Corridor";
+		bp.description = "Commonwealth wormhole gatehead approach corridor (10x4). Features dual deceleration buffer blocks and emergency crossover loop to prevent traffic spillover when gate transits queue.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 10;
+		bp.height = 4;
+		bp.is_builtin = true;
+
+		for (int16_t x = 0; x < 10; ++x) {
+			BlueprintTile in_t;
+			in_t.dx = x; in_t.dy = 1; in_t.type = BlueprintTileType::Track; in_t.railtype = RAILTYPE_BEGIN;
+			if (x == 4) {
+				in_t.trackbits = TrackBits{Track::X, Track::Lower};
+			} else {
+				in_t.trackbits = TrackBits{Track::X};
+			}
+			if (x == 2 || x == 6) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				in_t.signals.push_back(s);
+			}
+			bp.tiles.push_back(in_t);
+
+			BlueprintTile out_t;
+			out_t.dx = x; out_t.dy = 2; out_t.type = BlueprintTileType::Track; out_t.railtype = RAILTYPE_BEGIN;
+			if (x == 5) {
+				out_t.trackbits = TrackBits{Track::X, Track::Upper};
+			} else {
+				out_t.trackbits = TrackBits{Track::X};
+			}
+			if (x == 3 || x == 7) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+				out_t.signals.push_back(s);
+			}
+			bp.tiles.push_back(out_t);
+		}
+		_builtins.push_back(bp);
+	}
+
+	/* 4. CST High-Speed 3-Way Wye Junction (12x12) */
+	{
+		Blueprint bp;
+		bp.name = "CST High-Speed 3-Way Wye Junction";
+		bp.description = "Grade-separated high-speed triangular junction (12x12). Connects three dual-track corridors (West, East, North) with complete directional path signaling and zero diamond crossing conflicts.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 12;
+		bp.height = 12;
+		bp.is_builtin = true;
+
+		for (int16_t x = 0; x < 12; ++x) {
+			BlueprintTile t1;
+			t1.dx = x; t1.dy = 5; t1.type = BlueprintTileType::Track; t1.railtype = RAILTYPE_BEGIN;
+			if (x == 2) {
+				t1.trackbits = TrackBits{Track::X, Track::Upper};
+			} else if (x == 9) {
+				t1.trackbits = TrackBits{Track::X, Track::Left};
+			} else {
+				t1.trackbits = TrackBits{Track::X};
+			}
+			if (x == 0 || x == 6 || x == 10) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				t1.signals.push_back(s);
+			}
+			bp.tiles.push_back(t1);
+
+			BlueprintTile t2;
+			t2.dx = x; t2.dy = 6; t2.type = BlueprintTileType::Track; t2.railtype = RAILTYPE_BEGIN;
+			if (x == 3) {
+				t2.trackbits = TrackBits{Track::X, Track::Lower};
+			} else if (x == 8) {
+				t2.trackbits = TrackBits{Track::X, Track::Right};
+			} else {
+				t2.trackbits = TrackBits{Track::X};
+			}
+			if (x == 1 || x == 5 || x == 11) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+				t2.signals.push_back(s);
+			}
+			bp.tiles.push_back(t2);
+		}
+
+		for (int16_t y = 0; y < 5; ++y) {
+			BlueprintTile n1;
+			n1.dx = 5; n1.dy = y; n1.type = BlueprintTileType::Track; n1.railtype = RAILTYPE_BEGIN;
+			n1.trackbits = TrackBits{Track::Y};
+			if (y == 2) {
+				BlueprintSignal s;
+				s.track = Track::Y;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::Y_SE);
+				n1.signals.push_back(s);
+			}
+			bp.tiles.push_back(n1);
+
+			BlueprintTile n2;
+			n2.dx = 6; n2.dy = y; n2.type = BlueprintTileType::Track; n2.railtype = RAILTYPE_BEGIN;
+			n2.trackbits = TrackBits{Track::Y};
+			if (y == 2) {
+				BlueprintSignal s;
+				s.track = Track::Y;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::Y_NW);
+				n2.signals.push_back(s);
+			}
+			bp.tiles.push_back(n2);
+		}
+		_builtins.push_back(bp);
+	}
+
+	/* 5. CST 4-Way Compact Roundabout Junction (10x10) */
+	{
+		Blueprint bp;
+		bp.name = "CST 4-Way Compact Roundabout Junction";
+		bp.description = "Symmetric 4-way circular distribution junction (10x10). Provides full turning and interchange capability across four cardinal directions. Recommended for trains up to length 5.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 10;
+		bp.height = 10;
+		bp.is_builtin = true;
+
+		for (int16_t x = 0; x < 10; ++x) {
+			if (x < 3 || x > 6) {
+				BlueprintTile w1;
+				w1.dx = x; w1.dy = 4; w1.type = BlueprintTileType::Track; w1.railtype = RAILTYPE_BEGIN;
+				w1.trackbits = TrackBits{Track::X};
+				if (x == 1 || x == 8) {
+					BlueprintSignal s;
+					s.track = Track::X;
+					s.sigtype = SignalType::PathOneWay;
+					s.sigvar = SignalVariant::Electric;
+					s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+					w1.signals.push_back(s);
+				}
+				bp.tiles.push_back(w1);
+
+				BlueprintTile w2;
+				w2.dx = x; w2.dy = 5; w2.type = BlueprintTileType::Track; w2.railtype = RAILTYPE_BEGIN;
+				w2.trackbits = TrackBits{Track::X};
+				if (x == 1 || x == 8) {
+					BlueprintSignal s;
+					s.track = Track::X;
+					s.sigtype = SignalType::PathOneWay;
+					s.sigvar = SignalVariant::Electric;
+					s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+					w2.signals.push_back(s);
+				}
+				bp.tiles.push_back(w2);
+			}
+		}
+
+		for (int16_t y = 0; y < 10; ++y) {
+			if (y < 3 || y > 6) {
+				BlueprintTile n1;
+				n1.dx = 4; n1.dy = y; n1.type = BlueprintTileType::Track; n1.railtype = RAILTYPE_BEGIN;
+				n1.trackbits = TrackBits{Track::Y};
+				if (y == 1 || y == 8) {
+					BlueprintSignal s;
+					s.track = Track::Y;
+					s.sigtype = SignalType::PathOneWay;
+					s.sigvar = SignalVariant::Electric;
+					s.signals_copy = SignalAlongTrackdir(Trackdir::Y_SE);
+					n1.signals.push_back(s);
+				}
+				bp.tiles.push_back(n1);
+
+				BlueprintTile n2;
+				n2.dx = 5; n2.dy = y; n2.type = BlueprintTileType::Track; n2.railtype = RAILTYPE_BEGIN;
+				n2.trackbits = TrackBits{Track::Y};
+				if (y == 1 || y == 8) {
+					BlueprintSignal s;
+					s.track = Track::Y;
+					s.sigtype = SignalType::PathOneWay;
+					s.sigvar = SignalVariant::Electric;
+					s.signals_copy = SignalAlongTrackdir(Trackdir::Y_NW);
+					n2.signals.push_back(s);
+				}
+				bp.tiles.push_back(n2);
+			}
+		}
+
+		for (int16_t y = 3; y <= 6; ++y) {
+			for (int16_t x = 3; x <= 6; ++x) {
+				BlueprintTile r;
+				r.dx = x; r.dy = y; r.type = BlueprintTileType::Track; r.railtype = RAILTYPE_BEGIN;
+				if (y == 3 || y == 6) {
+					r.trackbits = TrackBits{Track::X};
+				} else {
+					r.trackbits = TrackBits{Track::Y};
+				}
+				bp.tiles.push_back(r);
+			}
+		}
+		_builtins.push_back(bp);
+	}
+
+	/* 6. CST Ro-Ro 4-Platform Terminal Station Block (12x8) */
+	{
+		Blueprint bp;
+		bp.name = "CST Ro-Ro 4-Platform Terminal Station Block";
+		bp.description = "High-throughput Roll-On/Roll-Off passenger & freight terminal (12x8). Features 4 parallel platforms (length 6) with ladder throat distribution. Eliminates reversal delay and terminal deadlocks.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 12;
+		bp.height = 8;
+		bp.is_builtin = true;
+
+		BlueprintTile in_lead;
+		in_lead.dx = 0; in_lead.dy = 2; in_lead.type = BlueprintTileType::Track; in_lead.railtype = RAILTYPE_BEGIN;
+		in_lead.trackbits = TrackBits{Track::X};
+		{
 			BlueprintSignal s;
 			s.track = Track::X;
 			s.sigtype = SignalType::PathOneWay;
 			s.sigvar = SignalVariant::Electric;
 			s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
-			t1.signals.push_back(s);
+			in_lead.signals.push_back(s);
 		}
-		cst_double.tiles.push_back(t1);
+		bp.tiles.push_back(in_lead);
 
-		/* Track 2: Bound NW */
-		BlueprintTile t2;
-		t2.dx = x;
-		t2.dy = 1;
-		t2.type = BlueprintTileType::Track;
-		t2.railtype = RAILTYPE_BEGIN;
-		t2.trackbits = TrackBits{Track::X};
-		if (x == 4) {
-			BlueprintSignal s;
-			s.track = Track::X;
-			s.sigtype = SignalType::PathOneWay;
-			s.sigvar = SignalVariant::Electric;
-			s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
-			t2.signals.push_back(s);
+		for (int16_t y = 2; y <= 5; ++y) {
+			for (int16_t x = 1; x <= 2; ++x) {
+				BlueprintTile th;
+				th.dx = x; th.dy = y; th.type = BlueprintTileType::Track; th.railtype = RAILTYPE_BEGIN;
+				th.trackbits = TrackBits{Track::X};
+				if (x == 2) {
+					BlueprintSignal s;
+					s.track = Track::X;
+					s.sigtype = SignalType::PathOneWay;
+					s.sigvar = SignalVariant::Electric;
+					s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+					th.signals.push_back(s);
+				}
+				bp.tiles.push_back(th);
+			}
 		}
-		cst_double.tiles.push_back(t2);
+
+		for (int16_t y = 2; y <= 5; ++y) {
+			for (int16_t x = 3; x <= 8; ++x) {
+				BlueprintTile st;
+				st.dx = x; st.dy = y; st.type = BlueprintTileType::Station; st.railtype = RAILTYPE_BEGIN;
+				st.axis = Axis::X;
+				st.spec_class = STAT_CLASS_DFLT;
+				st.spec_index = 0;
+				bp.tiles.push_back(st);
+			}
+		}
+
+		for (int16_t y = 2; y <= 5; ++y) {
+			for (int16_t x = 9; x <= 10; ++x) {
+				BlueprintTile th;
+				th.dx = x; th.dy = y; th.type = BlueprintTileType::Track; th.railtype = RAILTYPE_BEGIN;
+				th.trackbits = TrackBits{Track::X};
+				if (x == 9) {
+					BlueprintSignal s;
+					s.track = Track::X;
+					s.sigtype = SignalType::PathOneWay;
+					s.sigvar = SignalVariant::Electric;
+					s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+					th.signals.push_back(s);
+				}
+				bp.tiles.push_back(th);
+			}
+		}
+
+		BlueprintTile out_lead;
+		out_lead.dx = 11; out_lead.dy = 2; out_lead.type = BlueprintTileType::Track; out_lead.railtype = RAILTYPE_BEGIN;
+		out_lead.trackbits = TrackBits{Track::X};
+		bp.tiles.push_back(out_lead);
+
+		_builtins.push_back(bp);
 	}
 
-	_builtins.push_back(cst_double);
+	/* 7. CST Industrial Bulk Balloon Loop (14x10) */
+	{
+		Blueprint bp;
+		bp.name = "CST Industrial Bulk Balloon Loop";
+		bp.description = "Continuous-flow unidirectional balloon turnaround loop (14x10) with integrated 2-platform bulk loading siding. Designed for continuous-motion ore, mineral, and grain loading.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 14;
+		bp.height = 10;
+		bp.is_builtin = true;
+
+		for (int16_t x = 0; x <= 4; ++x) {
+			BlueprintTile in_t;
+			in_t.dx = x; in_t.dy = 3; in_t.type = BlueprintTileType::Track; in_t.railtype = RAILTYPE_BEGIN;
+			in_t.trackbits = TrackBits{Track::X};
+			if (x == 2) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				in_t.signals.push_back(s);
+			}
+			bp.tiles.push_back(in_t);
+		}
+
+		for (int16_t y = 3; y <= 4; ++y) {
+			for (int16_t x = 5; x <= 9; ++x) {
+				BlueprintTile st;
+				st.dx = x; st.dy = y; st.type = BlueprintTileType::Station; st.railtype = RAILTYPE_BEGIN;
+				st.axis = Axis::X;
+				st.spec_class = STAT_CLASS_DFLT;
+				st.spec_index = 0;
+				bp.tiles.push_back(st);
+			}
+		}
+
+		for (int16_t y = 1; y <= 8; ++y) {
+			BlueprintTile lp;
+			lp.dx = 13; lp.dy = y; lp.type = BlueprintTileType::Track; lp.railtype = RAILTYPE_BEGIN;
+			lp.trackbits = TrackBits{Track::Y};
+			if (y == 4) {
+				BlueprintSignal s;
+				s.track = Track::Y;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::Y_SE);
+				lp.signals.push_back(s);
+			}
+			bp.tiles.push_back(lp);
+		}
+
+		for (int16_t x = 0; x <= 12; ++x) {
+			BlueprintTile out_t;
+			out_t.dx = x; out_t.dy = 6; out_t.type = BlueprintTileType::Track; out_t.railtype = RAILTYPE_BEGIN;
+			out_t.trackbits = TrackBits{Track::X};
+			if (x == 6) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+				out_t.signals.push_back(s);
+			}
+			bp.tiles.push_back(out_t);
+		}
+		_builtins.push_back(bp);
+	}
+
+	/* 8. CST Depot Maintenance Staging Yard (10x6) */
+	{
+		Blueprint bp;
+		bp.name = "CST Depot Maintenance Staging Yard";
+		bp.description = "Offline dual-depot service facility (10x6). Mainline double-track bypass with dedicated depot branch, two service bays, and an acceleration merge track preventing mainline disruptions.";
+		bp.author = "Commonwealth Synergy Transport (CST)";
+		bp.version = 1;
+		bp.width = 10;
+		bp.height = 6;
+		bp.is_builtin = true;
+
+		for (int16_t x = 0; x < 10; ++x) {
+			BlueprintTile m1;
+			m1.dx = x; m1.dy = 1; m1.type = BlueprintTileType::Track; m1.railtype = RAILTYPE_BEGIN;
+			m1.trackbits = TrackBits{Track::X};
+			if (x == 5) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				m1.signals.push_back(s);
+			}
+			bp.tiles.push_back(m1);
+
+			BlueprintTile m2;
+			m2.dx = x; m2.dy = 2; m2.type = BlueprintTileType::Track; m2.railtype = RAILTYPE_BEGIN;
+			m2.trackbits = TrackBits{Track::X};
+			if (x == 5) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+				m2.signals.push_back(s);
+			}
+			bp.tiles.push_back(m2);
+		}
+
+		for (int16_t x = 1; x <= 3; ++x) {
+			BlueprintTile b1;
+			b1.dx = x; b1.dy = 4; b1.type = BlueprintTileType::Track; b1.railtype = RAILTYPE_BEGIN;
+			b1.trackbits = TrackBits{Track::X};
+			bp.tiles.push_back(b1);
+		}
+
+		BlueprintTile d1;
+		d1.dx = 4; d1.dy = 4; d1.type = BlueprintTileType::Depot; d1.railtype = RAILTYPE_BEGIN;
+		d1.dir = DiagDirection::NE;
+		bp.tiles.push_back(d1);
+
+		BlueprintTile d2;
+		d2.dx = 4; d2.dy = 5; d2.type = BlueprintTileType::Depot; d2.railtype = RAILTYPE_BEGIN;
+		d2.dir = DiagDirection::NE;
+		bp.tiles.push_back(d2);
+
+		for (int16_t x = 5; x <= 8; ++x) {
+			BlueprintTile esc;
+			esc.dx = x; esc.dy = 4; esc.type = BlueprintTileType::Track; esc.railtype = RAILTYPE_BEGIN;
+			esc.trackbits = TrackBits{Track::X};
+			if (x == 8) {
+				BlueprintSignal s;
+				s.track = Track::X;
+				s.sigtype = SignalType::PathOneWay;
+				s.sigvar = SignalVariant::Electric;
+				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
+				esc.signals.push_back(s);
+			}
+			bp.tiles.push_back(esc);
+		}
+		_builtins.push_back(bp);
+	}
 }
 
 void BlueprintManager::Initialize()
@@ -93,8 +606,23 @@ void BlueprintManager::Initialize()
 	if (_initialized) return;
 	_initialized = true;
 
-	CreateSampleBuiltin();
+	CreateBuiltinCSTPrefabs();
 	RescanLibrary();
+}
+
+size_t BlueprintManager::GetBuiltinCount()
+{
+	if (!_initialized) Initialize();
+	return _builtins.size();
+}
+
+const Blueprint *BlueprintManager::FindBuiltin(const std::string &name)
+{
+	if (!_initialized) Initialize();
+	for (const auto &b : _builtins) {
+		if (b.name == name) return &b;
+	}
+	return nullptr;
 }
 
 void BlueprintManager::Reset()

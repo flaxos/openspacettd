@@ -520,10 +520,10 @@ For detailed scope, see [SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md](SPRINT2
 - **Sprint 23 — Complete:** Scope reconciliation, alien art specification, UI coverage audit and UAT delivery plan.
 - **Sprint 24 — Complete:** Playable alien worlds foundation with procedural multi-world environmental stylization (Temperate Core, Arid Industrial, Sub-Arctic Frontier), O(1) spatial biome resolution, and CST monumental portal gate visuals.
 - **Sprint 25 — Complete:** Player Rail Blueprints with map capture, persistent library, portable JSON serialization, 90°/180°/270° rotation, horizontal reflection, deterministic server-authoritative placement command (`Commands::PlaceBlueprint`), and rail toolbar GUI.
+- **Sprint 26 — Complete:** Eight canonical CST Prefab Rail Blocks shipped through the blueprint system with RHD/LHD traffic-side invariance, embedded operating guidance, read-only builtin protection, and Catch2 test suite.
 
 ### 4. Planned delivery sequence
 
-- **Sprint 26 — CST Prefab Rail Blocks:** Ship eight built-in layouts through the blueprint system with traffic-side variants and operating guidance.
-- **Sprint 27 — Complete Feature UI:** Close player and operator UI gaps recorded in the coverage matrix.
+- **Sprint 27 — Complete Feature UI:** Close player and operator UI gaps recorded in the coverage matrix (Supply Chain Matrix & Trade Ledger window, Federation authentication and charter status feedback).
 - **Sprint 28 — Guided Solo UAT:** Generate a fresh all-feature save with persistent Story Book goals and reproducible build metadata.
 - **Sprint 29 — Federation UAT:** Deliver a live three-server acceptance kit covering round trips, recovery, content admission, telemetry and commodity conservation.

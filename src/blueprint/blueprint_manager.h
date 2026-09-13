@@ -51,6 +51,12 @@ public:
 
 	/** Clear all loaded blueprints (for testing or reset). */
 	static void Reset();
+
+	/** Get count of registered built-in CST prefabs. */
+	static size_t GetBuiltinCount();
+
+	/** Retrieve a built-in CST prefab by name. */
+	static const Blueprint *FindBuiltin(const std::string &name);
 };
 
 #endif /* BLUEPRINT_MANAGER_H */
