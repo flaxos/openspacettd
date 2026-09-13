@@ -160,6 +160,7 @@ CorridorCongestionLevel UniverseAuthorityService::EvaluateCorridorCongestion(uin
 
 	uint32_t active = it->second.current_in_transit_count;
 	uint32_t cap = it->second.max_active_in_transit;
+	if (it->second.is_twin_array) cap *= 2;
 	if (cap == 0) cap = 1;
 
 	float util = static_cast<float>(active) / static_cast<float>(cap);
@@ -259,6 +260,12 @@ std::string UniverseAuthorityService::InitiateTransfer(
 
 		/* High-priority QoS mitigation: reduce congestion penalty by 50% */
 		if (priority == FreightPriority::Express || priority == FreightPriority::PriorityUrgent) {
+			float penalty = multiplier - 1.0f;
+			multiplier = 1.0f + (penalty * 0.5f);
+		}
+
+		/* Twin gateway array mitigation: reduce congestion penalty by 50% */
+		if (route->is_twin_array && multiplier > 1.0f) {
 			float penalty = multiplier - 1.0f;
 			multiplier = 1.0f + (penalty * 0.5f);
 		}
@@ -382,6 +389,45 @@ bool UniverseAuthorityService::ConfirmTransferArrival(
 	return true;
 }
 
+size_t UniverseAuthorityService::QuarantineTransfersForWorld(WorldID dest_world, const std::string &reason)
+{
+	size_t count = 0;
+	for (auto &[id, rec] : this->_transfers) {
+		if (rec.dest_world == dest_world && (rec.state == TransferState::InTransit || rec.state == TransferState::ArrivalPending || rec.state == TransferState::Locked)) {
+			rec.state = TransferState::RecoveryRequired;
+			rec.status_message = reason.empty() ? "Quarantined due to destination node drop" : reason;
+			count++;
+		}
+	}
+	return count;
+}
+
+size_t UniverseAuthorityService::RecoverTransfersForWorld(WorldID dest_world)
+{
+	size_t count = 0;
+	for (auto &[id, rec] : this->_transfers) {
+		if (rec.dest_world == dest_world && rec.state == TransferState::RecoveryRequired) {
+			rec.state = TransferState::InTransit;
+			rec.arrival_tick = 0;
+			rec.status_message = "Recovered from quarantine bay; ready for arrival";
+			count++;
+		}
+	}
+	return count;
+}
+
+std::vector<std::string> UniverseAuthorityService::GetQuarantinedTransfers(WorldID dest_world) const
+{
+	std::vector<std::string> results;
+	for (const auto &[id, rec] : this->_transfers) {
+		if (rec.state == TransferState::RecoveryRequired) {
+			if (dest_world != INVALID_WORLD && rec.dest_world != dest_world) continue;
+			results.push_back(id);
+		}
+	}
+	return results;
+}
+
 const UniverseTransferRecord *UniverseAuthorityService::GetTransfer(const std::string &transfer_id) const
 {
 	auto it = this->_transfers.find(transfer_id);
@@ -396,6 +442,21 @@ std::vector<UniverseTransferRecord> UniverseAuthorityService::GetAllTransfers() 
 		list.push_back(rec);
 	}
 	return list;
+}
+
+std::vector<UniverseTransferRecord> UniverseAuthorityService::GetInTransitTransfersForRoute(uint32_t route_id) const
+{
+	std::vector<UniverseTransferRecord> result;
+	for (const auto &[id, rec] : this->_transfers) {
+		if ((route_id == 0 || rec.route_id == route_id) &&
+		    (rec.state == TransferState::InTransit ||
+		     rec.state == TransferState::ArrivalPending ||
+		     rec.state == TransferState::Departed ||
+		     rec.state == TransferState::Locked)) {
+			result.push_back(rec);
+		}
+	}
+	return result;
 }
 
 CommodityAuditResult UniverseAuthorityService::GetCommodityAudit() const
@@ -455,4 +516,14 @@ std::map<WorldID, TradeBalanceSummary> UniverseAuthorityService::GetAllTradeBala
 EmpireSupplyChainMatrix UniverseAuthorityService::GetEmpireSupplyChainMatrix() const
 {
 	return this->_supply_chain_matrix;
+}
+
+void UniverseAuthorityService::RecordSpaceportThroughput(uint64_t cargo_units)
+{
+	this->_supply_chain_matrix.spaceport_throughput_cargo += cargo_units;
+}
+
+void UniverseAuthorityService::RecordEdgeConduitThroughput(uint64_t cargo_units)
+{
+	this->_supply_chain_matrix.edge_conduit_throughput_cargo += cargo_units;
 }

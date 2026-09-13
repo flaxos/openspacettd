@@ -28,10 +28,13 @@ add_test_files(
     test_federation_persistent_universe.cpp
     test_federation_megacity_economy.cpp
     test_megacity_gui.cpp
+    test_federation_cluster.cpp
     test_portal_construction.cpp
     test_world_gen.cpp
     test_interplanetary_cargo.cpp
     test_spaceports_and_conduits.cpp
+    test_spaceport_conduit_bridge.cpp
+    test_gateway_arrays_and_telemetry.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

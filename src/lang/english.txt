@@ -6162,6 +6162,8 @@ STR_CORRIDOR_STATUS_MODERATE                                    :{YELLOW}Moderat
 STR_CORRIDOR_STATUS_CONGESTED                                   :{ORANGE}Congested (1.5x delay)
 STR_CORRIDOR_STATUS_SATURATED                                   :{RED}Saturated (2.0x backpressure delay)
 STR_CORRIDOR_NO_ROUTES                                          :{SILVER}No active inter-server freight corridors registered
+STR_CORRIDOR_LOCATE_GATE                                        :Locate Gate
+STR_CORRIDOR_LOCATE_GATE_TOOLTIP                                :Center the main viewport on the selected corridor's portal gate
 STR_MAP_MENU_FREIGHT_CORRIDORS                                  :Freight Corridor Monitor
 
 STR_UNIVERSE_DIRECTORY_CAPTION                                  :{WHITE}Universe Authority - World Directory
@@ -6170,6 +6172,8 @@ STR_UNIVERSE_DIRECTORY_MAINTENANCE                              :{YELLOW}MAINTEN
 STR_UNIVERSE_DIRECTORY_UNREACHABLE                              :{RED}UNREACHABLE
 STR_UNIVERSE_DIRECTORY_REFRESH                                  :Refresh
 STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP                          :Poll Universe Authority for updated world heartbeats
+STR_UNIVERSE_DIRECTORY_JUMP                                     :Jump Viewport
+STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP                             :Center the main viewport on the selected world's surface
 STR_UNIVERSE_DIRECTORY_NO_WORLDS                                :{SILVER}No worlds registered in directory
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
 

@@ -84,6 +84,7 @@ struct InterServerRoute {
 	CorridorCongestionLevel congestion_level = CorridorCongestionLevel::Clear;
 	uint32_t current_in_transit_count = 0;
 	uint64_t total_trains_dispatched = 0;
+	bool is_twin_array = false;
 };
 
 /** Transactional record for a train consist transfer across server boundaries. */
@@ -108,12 +109,14 @@ struct UniverseTransferRecord {
 
 /** Empire-wide supply chain aggregation across developmental world phases. */
 struct EmpireSupplyChainMatrix {
-	uint64_t frontier_to_refinery_cargo = 0; ///< Raw inputs feeding manufacturing (Phase 3 -> 2).
-	uint64_t refinery_to_core_cargo     = 0; ///< Refined goods/materials feeding megacity (Phase 2 -> 1).
-	uint64_t frontier_to_core_cargo     = 0; ///< Direct raw shipments to megacity (Phase 3 -> 1).
-	uint64_t core_export_cargo          = 0; ///< High-tech and consumer exports from core (Phase 1 -> Any).
-	uint64_t total_interplanetary_cargo = 0;
-	uint64_t total_tariffs_generated    = 0; ///< Interplanetary trade premiums credited (Cr).
+	uint64_t frontier_to_refinery_cargo  = 0; ///< Raw inputs feeding manufacturing (Phase 3 -> 2).
+	uint64_t refinery_to_core_cargo      = 0; ///< Refined goods/materials feeding megacity (Phase 2 -> 1).
+	uint64_t frontier_to_core_cargo      = 0; ///< Direct raw shipments to megacity (Phase 3 -> 1).
+	uint64_t core_export_cargo           = 0; ///< High-tech and consumer exports from core (Phase 1 -> Any).
+	uint64_t spaceport_throughput_cargo  = 0; ///< Cumulative cargo routed via spaceport interplanetary bridges.
+	uint64_t edge_conduit_throughput_cargo = 0; ///< Cumulative raw minerals piped via edge extraction conduits.
+	uint64_t total_interplanetary_cargo  = 0;
+	uint64_t total_tariffs_generated     = 0; ///< Interplanetary trade premiums credited (Cr).
 };
 
 /** Commodity conservation metrics for ledger verification. */
@@ -208,8 +211,13 @@ public:
 		const std::string &reason = ""
 	);
 
+	size_t QuarantineTransfersForWorld(WorldID dest_world, const std::string &reason = "");
+	size_t RecoverTransfersForWorld(WorldID dest_world);
+	std::vector<std::string> GetQuarantinedTransfers(WorldID dest_world = INVALID_WORLD) const;
+
 	const UniverseTransferRecord *GetTransfer(const std::string &transfer_id) const;
 	std::vector<UniverseTransferRecord> GetAllTransfers() const;
+	std::vector<UniverseTransferRecord> GetInTransitTransfersForRoute(uint32_t route_id) const;
 
 	/* Commodity Conservation & Trade Balance Ledger */
 	CommodityAuditResult GetCommodityAudit() const;
@@ -217,6 +225,8 @@ public:
 	TradeBalanceSummary GetWorldTradeBalance(WorldID world_id) const;
 	std::map<WorldID, TradeBalanceSummary> GetAllTradeBalances() const;
 	EmpireSupplyChainMatrix GetEmpireSupplyChainMatrix() const;
+	void RecordSpaceportThroughput(uint64_t cargo_units);
+	void RecordEdgeConduitThroughput(uint64_t cargo_units);
 
 	void Reset();
 

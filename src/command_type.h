@@ -388,6 +388,8 @@ enum class Commands : uint8_t {
 	DesignateSpaceport, ///< certify or upgrade an airport station as an interplanetary spaceport
 	BuildEdgeConduit, ///< build an edge mineral extraction conduit on a world perimeter
 	DestroyEdgeConduit, ///< demolish an edge mineral extraction conduit
+	ConfigureSpaceportBridge, ///< configure the interplanetary routing bridge of a spaceport
+	ConfigureEdgeConduitFeeder, ///< configure direct inter-world feeder mode of an edge conduit
 
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };

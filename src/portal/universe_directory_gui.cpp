@@ -29,7 +29,8 @@ static constexpr std::initializer_list<NWidgetPart> _nested_universe_directory_w
 		NWidget(WWT_STICKYBOX, Colours::Blue),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::Blue, WID_UD_HEADER_PANEL), SetMinimalSize(440, 36), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PANEL, Colours::Blue, WID_UD_HEADER_PANEL), SetMinimalSize(360, 36), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_JUMP_BTN), SetMinimalSize(80, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_JUMP, STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::Blue, WID_UD_REFRESH), SetMinimalSize(80, 36), SetFill(0, 0), SetResize(0, 0), SetStringTip(STR_UNIVERSE_DIRECTORY_REFRESH, STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -193,6 +194,13 @@ struct UniverseDirectoryWindow : Window {
 			case WID_UD_REFRESH: {
 				service.PruneStaleWorlds(0, 300);
 				this->SetDirty();
+				break;
+			}
+
+			case WID_UD_JUMP_BTN: {
+				if (this->selected_world != INVALID_WORLD) {
+					PlanetManager::JumpToPlanet(this->selected_world);
+				}
 				break;
 			}
 

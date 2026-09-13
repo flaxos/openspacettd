@@ -37,12 +37,18 @@ class UniverseAuthority:
         self.world_trade = {}    # f"{w1}->{w2}" -> {cargo_counts: {}, total_credits: 0}
         # Megacities (town_id -> dict)
         self.megacities = {}
+        # Spaceports ((world_id, station_id) -> dict)
+        self.spaceports = {}
+        # Edge Conduits ((world_id, conduit_id) -> dict)
+        self.conduits = {}
         # Empire supply chain matrix
         self.supply_chain_matrix = {
             "frontier_to_refinery_cargo": 0,
             "refinery_to_core_cargo": 0,
             "frontier_to_core_cargo": 0,
             "core_export_cargo": 0,
+            "spaceport_throughput_cargo": 0,
+            "edge_conduit_throughput_cargo": 0,
             "total_interplanetary_cargo": 0,
             "total_tariffs_generated": 0
         }
@@ -219,6 +225,10 @@ class UniverseAuthority:
         route_id = data.get("route_id")
         if not route_id:
             return False, "route_id required"
+        is_twin = bool(data.get("is_twin_array", False))
+        max_bw = int(data.get("max_bandwidth_trains_per_min", data.get("max_bandwidth", 10)))
+        if is_twin:
+            max_bw *= 2
         self.routes[route_id] = {
             "route_id": route_id,
             "source_world": data.get("source_world"),
@@ -226,8 +236,9 @@ class UniverseAuthority:
             "dest_world": data.get("dest_world"),
             "dest_gate": data.get("dest_gate"),
             "transit_delay_sec": data.get("transit_delay_sec", 5.0),
-            "max_bandwidth_trains_per_min": int(data.get("max_bandwidth_trains_per_min", data.get("max_bandwidth", 10))),
+            "max_bandwidth_trains_per_min": max_bw,
             "max_active_in_transit": int(data.get("max_active_in_transit", 8)),
+            "is_twin_array": is_twin,
             "current_in_transit_count": 0,
             "total_trains_dispatched": 0,
             "congestion_level": "CLEAR"
@@ -256,6 +267,8 @@ class UniverseAuthority:
             return "CLEAR"
         active = route.get("current_in_transit_count", 0)
         cap = route.get("max_active_in_transit", 8)
+        if route.get("is_twin_array", False):
+            cap *= 2
         if cap <= 0:
             cap = 1
         util = active / cap
@@ -269,6 +282,28 @@ class UniverseAuthority:
             level = "SATURATED"
         route["congestion_level"] = level
         return level
+
+    def get_corridor_telemetry(self, route_id=None):
+        now = time.time()
+        results = []
+        for tid, t in self.transfers.items():
+            if t.get("state") in ("IN_TRANSIT", "LOCKED", "DEPARTED", "ARRIVAL_PENDING"):
+                if route_id is not None and t.get("route_id") != route_id:
+                    continue
+                rem_eta = max(0.0, t.get("arrival_time", now) - now)
+                results.append({
+                    "transfer_id": tid,
+                    "route_id": t.get("route_id"),
+                    "source_world": t.get("source_world"),
+                    "dest_world": t.get("dest_world"),
+                    "state": t.get("state"),
+                    "priority": t.get("priority", "STANDARD"),
+                    "cargo_breakdown": t.get("cargo_breakdown", {}),
+                    "total_cargo": t.get("total_cargo", 0),
+                    "remaining_eta_sec": round(rem_eta, 2),
+                    "transit_delay_sec": t.get("transit_delay_sec", 0.0),
+                })
+        return True, results
 
     # -------------------------------------------------------------------------
     # Consist Transfers & Conservation Accounting
@@ -325,6 +360,10 @@ class UniverseAuthority:
                 is_priority = True
 
             if is_priority:
+                penalty = mult - 1.0
+                mult = 1.0 + (penalty * 0.5)
+
+            if route.get("is_twin_array", False) and mult > 1.0:
                 penalty = mult - 1.0
                 mult = 1.0 + (penalty * 0.5)
 
@@ -408,7 +447,7 @@ class UniverseAuthority:
 
     def claim_transfer(self, data):
         tx_id = data.get("transfer_id")
-        dest_world = data.get("dest_world")
+        dest_world = data.get("dest_world", data.get("world_id"))
         rec = self.transfers.get(tx_id)
         if not rec:
             return False, f"Transfer {tx_id} not found"
@@ -421,7 +460,7 @@ class UniverseAuthority:
 
     def confirm_arrival(self, data):
         tx_id = data.get("transfer_id")
-        dest_world = data.get("dest_world")
+        dest_world = data.get("dest_world", data.get("world_id"))
         success = data.get("success", True)
         reason = data.get("reason", "")
 
@@ -464,6 +503,56 @@ class UniverseAuthority:
             rec["state"] = "RECOVERY_REQUIRED"
             rec["status_message"] = reason or "Emergence failed on destination server"
         return True, rec
+
+    def quarantine_transfers(self, data):
+        world_id = data.get("world_id", data.get("dest_world"))
+        if world_id is None:
+            return False, "world_id or dest_world required"
+        world_id = int(world_id)
+        reason = data.get("reason", "")
+
+        quarantined = []
+        for tx_id, rec in self.transfers.items():
+            if rec["dest_world"] == world_id and rec["state"] in ("IN_TRANSIT", "ARRIVAL_PENDING", "LOCKED"):
+                rec["state"] = "RECOVERY_REQUIRED"
+                rec["status_message"] = reason or f"Quarantined: destination world {world_id} offline"
+                quarantined.append(tx_id)
+
+        return True, {
+            "world_id": world_id,
+            "quarantined_count": len(quarantined),
+            "transfer_ids": quarantined
+        }
+
+    def recover_transfers(self, data):
+        world_id = data.get("world_id", data.get("dest_world"))
+        if world_id is None:
+            return False, "world_id or dest_world required"
+        world_id = int(world_id)
+
+        recovered = []
+        now = time.time()
+        for tx_id, rec in self.transfers.items():
+            if rec["dest_world"] == world_id and rec["state"] == "RECOVERY_REQUIRED":
+                rec["state"] = "IN_TRANSIT"
+                rec["arrival_time"] = now
+                rec["status_message"] = "Recovered from quarantine; ready for emergence"
+                recovered.append(tx_id)
+
+        return True, {
+            "world_id": world_id,
+            "recovered_count": len(recovered),
+            "transfer_ids": recovered
+        }
+
+    def get_quarantined_transfers(self, dest_world=None):
+        results = []
+        for rec in self.transfers.values():
+            if rec["state"] == "RECOVERY_REQUIRED":
+                if dest_world is not None and rec["dest_world"] != dest_world:
+                    continue
+                results.append(rec)
+        return results
 
     # -------------------------------------------------------------------------
     # Ledger & Conservation Audit
@@ -670,6 +759,141 @@ class UniverseAuthority:
     def get_supply_chain_matrix(self):
         return self.supply_chain_matrix
 
+    # -------------------------------------------------------------------------
+    # Planetary Infrastructure: Spaceports & Edge Conduits (Sprint 20)
+    # -------------------------------------------------------------------------
+    def register_spaceport_hub(self, data):
+        world_id = int(data.get("world_id", 0))
+        station_id = int(data.get("station_id", 0))
+        key = (world_id, station_id)
+        self.spaceports[key] = {
+            "world_id": world_id,
+            "station_id": station_id,
+            "name": data.get("name", f"Spaceport {station_id}"),
+            "tier": int(data.get("tier", 1)),
+            "target_dest_world": data.get("target_dest_world"),
+            "target_route_id": data.get("target_route_id", 0),
+            "total_dispatched": 0,
+            "total_received": 0,
+            "buffered_cargo": 0
+        }
+        return True, self.spaceports[key]
+
+    def dispatch_spaceport_trade(self, data):
+        source_world = data.get("source_world")
+        dest_world = data.get("dest_world")
+        amount = int(data.get("amount", data.get("total_cargo", 0)))
+        cargo_type = int(data.get("cargo_type", 0))
+        station_id = data.get("station_id")
+
+        if source_world is None or dest_world is None or amount <= 0:
+            return False, "source_world, dest_world, and positive amount required"
+
+        tx_payload = {
+            "source_world": source_world,
+            "dest_world": dest_world,
+            "source_gate": int(data.get("source_gate", 0)),
+            "dest_gate": int(data.get("dest_gate", 0)),
+            "total_cargo": amount,
+            "cargo_breakdown": {cargo_type: amount},
+            "valuation_credits": int(data.get("valuation_credits", amount * 10)),
+            "priority": data.get("priority", "STANDARD"),
+            "route_id": data.get("route_id")
+        }
+
+        ok, rec = self.initiate_transfer(tx_payload)
+        if not ok:
+            return False, rec
+
+        tx_id = rec["transfer_id"]
+        rec["source_infrastructure"] = "SPACEPORT"
+        rec["source_station_id"] = station_id
+
+        # Update supply chain matrix throughput
+        self.supply_chain_matrix["spaceport_throughput_cargo"] += amount
+
+        if station_id is not None:
+            key = (int(source_world), int(station_id))
+            if key in self.spaceports:
+                self.spaceports[key]["total_dispatched"] += amount
+
+        # Auto-depart
+        self.depart_transfer({"transfer_id": tx_id})
+        return True, {"transfer_id": tx_id, "amount": amount, "state": "IN_TRANSIT"}
+
+    def get_spaceports(self, world_id=None):
+        res = []
+        for (w, s), sp in self.spaceports.items():
+            if world_id is not None and w != int(world_id):
+                continue
+            res.append(sp)
+        return res
+
+    def register_conduit_feeder(self, data):
+        world_id = int(data.get("world_id", 0))
+        conduit_id = int(data.get("conduit_id", 0))
+        key = (world_id, conduit_id)
+        self.conduits[key] = {
+            "world_id": world_id,
+            "conduit_id": conduit_id,
+            "cargo_type": int(data.get("cargo_type", 0)),
+            "target_dest_world": data.get("target_dest_world"),
+            "target_route_id": data.get("target_route_id", 0),
+            "production_rate": int(data.get("production_rate", 50)),
+            "total_piped": 0
+        }
+        return True, self.conduits[key]
+
+    def pipe_conduit_minerals(self, data):
+        source_world = data.get("source_world")
+        dest_world = data.get("dest_world")
+        amount = int(data.get("amount", data.get("total_cargo", 0)))
+        cargo_type = int(data.get("cargo_type", 0))
+        conduit_id = data.get("conduit_id")
+
+        if source_world is None or dest_world is None or amount <= 0:
+            return False, "source_world, dest_world, and positive amount required"
+
+        tx_payload = {
+            "source_world": source_world,
+            "dest_world": dest_world,
+            "source_gate": int(data.get("source_gate", 0)),
+            "dest_gate": int(data.get("dest_gate", 0)),
+            "total_cargo": amount,
+            "cargo_breakdown": {cargo_type: amount},
+            "valuation_credits": int(data.get("valuation_credits", amount * 10)),
+            "priority": data.get("priority", "BULK"),
+            "route_id": data.get("route_id")
+        }
+
+        ok, rec = self.initiate_transfer(tx_payload)
+        if not ok:
+            return False, rec
+
+        tx_id = rec["transfer_id"]
+        rec["source_infrastructure"] = "EDGE_CONDUIT"
+        rec["source_conduit_id"] = conduit_id
+
+        # Update supply chain matrix throughput
+        self.supply_chain_matrix["edge_conduit_throughput_cargo"] += amount
+
+        if conduit_id is not None:
+            key = (int(source_world), int(conduit_id))
+            if key in self.conduits:
+                self.conduits[key]["total_piped"] += amount
+
+        # Auto-depart
+        self.depart_transfer({"transfer_id": tx_id})
+        return True, {"transfer_id": tx_id, "amount": amount, "state": "IN_TRANSIT"}
+
+    def get_conduits(self, world_id=None):
+        res = []
+        for (w, c), cond in self.conduits.items():
+            if world_id is not None and w != int(world_id):
+                continue
+            res.append(cond)
+        return res
+
 AUTHORITY = UniverseAuthority()
 
 class AuthorityHandler(BaseHTTPRequestHandler):
@@ -706,17 +930,35 @@ class AuthorityHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"pending_transfers": pending})
         elif url.path == "/ledger/status":
             self._send_json(200, AUTHORITY.get_audit())
-        elif url.path == "/ledger/audit_detailed":
+        elif url.path in ("/ledger/audit_detailed", "/economy/conservation"):
             self._send_json(200, AUTHORITY.get_detailed_audit())
         elif url.path == "/ledger/trade_balance":
             self._send_json(200, AUTHORITY.get_trade_balances())
         elif url.path == "/corridors/list":
             self._send_json(200, AUTHORITY.get_corridors())
+        elif url.path == "/corridors/telemetry":
+            rid = qs.get("route_id", [None])[0]
+            if rid is not None:
+                try:
+                    rid = int(rid)
+                except ValueError:
+                    pass
+            ok, res = AUTHORITY.get_corridor_telemetry(route_id=rid)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
         elif url.path == "/megacity/status":
             tid = qs.get("town_id", [None])[0]
             self._send_json(200, AUTHORITY.get_megacity_status(town_id=tid))
         elif url.path == "/economy/matrix":
             self._send_json(200, AUTHORITY.get_supply_chain_matrix())
+        elif url.path == "/spaceport/list":
+            wid = qs.get("world", qs.get("world_id", [None]))[0]
+            self._send_json(200, AUTHORITY.get_spaceports(world_id=wid))
+        elif url.path == "/conduit/list":
+            wid = qs.get("world", qs.get("world_id", [None]))[0]
+            self._send_json(200, AUTHORITY.get_conduits(world_id=wid))
+        elif url.path == "/transfers/quarantined":
+            wid = qs.get("world", qs.get("dest_world", [None]))[0]
+            self._send_json(200, AUTHORITY.get_quarantined_transfers(dest_world=int(wid) if wid is not None else None))
         elif url.path.startswith("/transfers/"):
             tx_id = url.path.split("/")[-1]
             rec = AUTHORITY.transfers.get(tx_id)
@@ -774,6 +1016,12 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         elif url.path == "/transfers/confirm":
             ok, res = AUTHORITY.confirm_arrival(data)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path == "/transfers/quarantine":
+            ok, res = AUTHORITY.quarantine_transfers(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path == "/transfers/recover":
+            ok, res = AUTHORITY.recover_transfers(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
 
         # Megacity endpoints
         elif url.path == "/megacity/register":
@@ -784,6 +1032,20 @@ class AuthorityHandler(BaseHTTPRequestHandler):
             self._send_json(200 if ok else 400, res if ok else {"error": res})
         elif url.path == "/megacity/eval":
             ok, res = AUTHORITY.evaluate_megacity_supply(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+
+        # Planetary Infrastructure endpoints (Sprint 20)
+        elif url.path == "/spaceport/register":
+            ok, res = AUTHORITY.register_spaceport_hub(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path == "/spaceport/dispatch":
+            ok, res = AUTHORITY.dispatch_spaceport_trade(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path == "/conduit/register":
+            ok, res = AUTHORITY.register_conduit_feeder(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path == "/conduit/pipe":
+            ok, res = AUTHORITY.pipe_conduit_minerals(data)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
 
         elif url.path == "/reset":

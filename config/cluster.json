@@ -1,0 +1,96 @@
+{
+  "cluster_name": "Commonwealth Federation Cluster",
+  "version": "1.0",
+  "authority": {
+    "host": "127.0.0.1",
+    "port": 38080,
+    "scheme": "http",
+    "auto_spawn": true
+  },
+  "worlds": [
+    {
+      "world_id": 1,
+      "name": "Earth Core",
+      "phase": 1,
+      "host": "127.0.0.1",
+      "port": 3979,
+      "max_clients": 32,
+      "description": "Phase 1 Core Megacity World - High consumption, technological capital",
+      "enabled": true
+    },
+    {
+      "world_id": 2,
+      "name": "Vulcan Forge",
+      "phase": 2,
+      "host": "127.0.0.1",
+      "port": 3980,
+      "max_clients": 16,
+      "description": "Phase 2 Developed Manufacturing World - Heavy smelting & processing",
+      "enabled": true
+    },
+    {
+      "world_id": 3,
+      "name": "Haven Rim",
+      "phase": 3,
+      "host": "127.0.0.1",
+      "port": 3981,
+      "max_clients": 8,
+      "description": "Phase 3 Frontier Mining World - Raw resource extraction & conduits",
+      "enabled": true
+    }
+  ],
+  "corridors": [
+    {
+      "route_id": 1,
+      "name": "Haven-Vulcan Primary Ore Conduit",
+      "source_world": 3,
+      "source_gate": 1,
+      "dest_world": 2,
+      "dest_gate": 1,
+      "transit_delay_sec": 3.0,
+      "max_bandwidth_trains_per_min": 12,
+      "max_active_in_transit": 8,
+      "priority": "STANDARD"
+    },
+    {
+      "route_id": 2,
+      "name": "Vulcan-Earth Core Alloy Corridor",
+      "source_world": 2,
+      "source_gate": 1,
+      "dest_world": 1,
+      "dest_gate": 1,
+      "transit_delay_sec": 4.0,
+      "max_bandwidth_trains_per_min": 16,
+      "max_active_in_transit": 10,
+      "priority": "EXPRESS"
+    },
+    {
+      "route_id": 3,
+      "name": "Haven-Earth Deep Crystal Line",
+      "source_world": 3,
+      "source_gate": 2,
+      "dest_world": 1,
+      "dest_gate": 2,
+      "transit_delay_sec": 6.0,
+      "max_bandwidth_trains_per_min": 6,
+      "max_active_in_transit": 4,
+      "priority": "PRIORITY_URGENT"
+    }
+  ],
+  "supervisor": {
+    "binary_path": "./build/openttd",
+    "heartbeat_interval_sec": 3.0,
+    "health_check_interval_sec": 1.0,
+    "stale_threshold_sec": 15.0,
+    "quarantine_on_crash": true,
+    "auto_recover_on_restart": true,
+    "restart_policy": {
+      "auto_restart": true,
+      "max_retries": 5,
+      "backoff_factor": 1.5,
+      "initial_delay_sec": 1.0,
+      "reset_retries_after_stable_sec": 30.0
+    },
+    "log_dir": "logs/cluster"
+  }
+}

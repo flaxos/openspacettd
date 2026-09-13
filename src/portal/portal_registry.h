@@ -12,6 +12,8 @@
 
 #include "portal_type.h"
 #include "../vehicle_type.h"
+#include "../company_type.h"
+#include "../economy_type.h"
 #include <vector>
 #include <unordered_map>
 #include <optional>
@@ -232,6 +234,36 @@ public:
 	 * @return Number of endpoint directions repaired.
 	 */
 	static size_t RepairLegacyGeneratedGateways();
+
+	/**
+	 * Compute monthly maintenance and excitation power upkeep for all active portal gates owned by a company.
+	 * @param owner Company to evaluate.
+	 * @return Upkeep cost in currency.
+	 */
+	static Money GetCompanyPortalMaintenanceCost(Owner owner);
+
+	/**
+	 * Test if two portal gate heads form a parallel twin gateway array (1-tile separation, parallel orientation).
+	 * @param tile_a First gate tile.
+	 * @param tile_b Second gate tile.
+	 * @return True if gates form a coordinated twin array.
+	 */
+	static bool IsTwinGateway(TileIndex tile_a, TileIndex tile_b);
+
+	/**
+	 * Resolve the parallel twin gate head adjacent to a given portal gate, if one exists.
+	 * @param tile Base gate tile.
+	 * @return Tile of the twin gate, or INVALID_TILE if none.
+	 */
+	static TileIndex GetTwinGate(TileIndex tile);
+
+	/**
+	 * Resolve the world tile corresponding to a gateway identifier or tile index.
+	 * @param gate_id Gateway identifier or direct tile.
+	 * @param world_id Optional world filter.
+	 * @return Tile of the gate head, or INVALID_TILE if unresolvable.
+	 */
+	static TileIndex ResolveGateTile(uint32_t gate_id, WorldID world_id = INVALID_WORLD);
 
 	/**
 	 * Clear all registered portals (for test isolation and new game setup).

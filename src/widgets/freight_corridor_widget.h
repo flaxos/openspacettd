@@ -12,8 +12,10 @@
 enum FreightCorridorWidgets : WidgetID {
 	WID_FCM_CAPTION,        ///< Window caption.
 	WID_FCM_SUMMARY_PANEL,  ///< Empire supply chain and transit totals summary panel.
-	WID_FCM_CORRIDOR_LIST,  ///< Main list panel drawing active routes, utilization, and congestion.
-	WID_FCM_SCROLLBAR,      ///< Scrollbar for corridor list.
+	WID_FCM_CORRIDOR_LIST,   ///< Main list panel drawing active routes, utilization, and congestion.
+	WID_FCM_SCROLLBAR,       ///< Scrollbar for corridor list.
+	WID_FCM_TELEMETRY_PANEL, ///< Live telemetry panel for active consists on selected corridor.
+	WID_FCM_LOCATE_GATE,     ///< Button to scroll viewport to source gate.
 };
 
 #endif /* WIDGETS_FREIGHT_CORRIDOR_WIDGET_H */

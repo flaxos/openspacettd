@@ -18,6 +18,8 @@
 #include <unordered_map>
 #include <vector>
 
+struct UniverseTransferRecord;
+
 /** Information about a designated interplanetary spaceport. */
 struct SpaceportInfo {
 	StationID station_id{StationID::Invalid()};
@@ -25,6 +27,15 @@ struct SpaceportInfo {
 	uint32_t supplies_received{0};              ///< Life support / consumer supplies delivered in current cycle.
 	uint8_t offworld_trade_tier{1};             ///< Trade hub tier (1 = Hub, 2 = Major Gateway, 3 = Prime Terminal).
 	uint32_t total_offworld_cargo_generated{0}; ///< Cumulative off-world cargo produced.
+
+	/* Sprint 20 Interplanetary Federation Bridge */
+	WorldID target_dest_world{INVALID_WORLD};   ///< Remote destination world for interplanetary trade.
+	uint32_t target_route_id{0};                ///< Inter-world corridor route ID, or 0 for auto-matching.
+	bool auto_dispatch{false};                  ///< Automatically launch off-world production into federation corridor.
+	uint32_t buffered_export_cargo{0};          ///< Cargo staged for interplanetary dispatch.
+	CargoType buffered_cargo_type{0};           ///< Cargo type staged for export.
+	uint32_t total_interplanetary_dispatched{0};///< Cumulative cargo units launched into federation corridors.
+	uint32_t total_interplanetary_received{0};  ///< Cumulative cargo units received and delivered locally.
 };
 
 class SpaceportManager {
@@ -75,9 +86,36 @@ public:
 
 	/**
 	 * Periodic / monthly off-world trade loop.
-	 * Generates exotic off-world cargo packets directly into the spaceport station's waiting bay.
+	 * Generates exotic off-world cargo packets directly into the spaceport station's waiting bay
+	 * or automatically dispatches into an interplanetary freight corridor if bridge is active.
 	 */
 	static void ProcessOffWorldTrade();
+
+	/**
+	 * Configure the interplanetary federation routing bridge for a spaceport.
+	 */
+	static bool ConfigureSpaceportBridge(StationID station, WorldID dest_world, uint32_t route_id = 0, bool auto_dispatch = true);
+
+	/**
+	 * Buffer cargo for off-world export at a spaceport.
+	 */
+	static void BufferExportCargo(StationID station, CargoType cargo, uint32_t amount);
+
+	/**
+	 * Dispatch staged or produced cargo into an inter-server Universe Authority freight corridor.
+	 * @param station Spaceport station ID.
+	 * @param max_amount Maximum cargo units to dispatch (0 = dispatch all buffered).
+	 * @return Transfer ID of dispatched consist, or empty string on failure.
+	 */
+	static std::string DispatchInterplanetaryTrade(StationID station, uint32_t max_amount = 0);
+
+	/**
+	 * Receive an arriving interplanetary consist and unload cargo into the spaceport station.
+	 * @param station Destination spaceport station ID.
+	 * @param transfer Arrived transfer record.
+	 * @return True if successfully received and unpacked.
+	 */
+	static bool ReceiveInterplanetaryConsist(StationID station, const UniverseTransferRecord &transfer);
 
 	/**
 	 * Calculate off-world cargo production for a given spaceport.
