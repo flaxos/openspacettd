@@ -374,6 +374,12 @@ add_files(
     picker_gui.h
     portal/edge_conduit.cpp
     portal/edge_conduit.h
+    portal/content_manifest.cpp
+    portal/content_manifest.h
+    portal/consist_snapshot.cpp
+    portal/consist_snapshot.h
+    portal/federation_identity.cpp
+    portal/federation_identity.h
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h

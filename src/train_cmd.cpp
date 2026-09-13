@@ -45,6 +45,7 @@
 #include "table/train_sprites.h"
 
 #include "portal/portal_registry.h"
+#include "portal/federation_identity.h"
 #include "portal/planet_manager.h"
 
 #include "safeguards.h"
@@ -1345,6 +1346,8 @@ CommandCost CmdMoveRailVehicle(DoCommandFlags flags, VehicleID src_veh, VehicleI
 	 * src->GetFirst() always yields non-nullptr, so eventually original_src_head != nullptr as well. */
 	bool original_src_head_front_engine = original_src_head->IsFrontEngine();
 	bool original_dst_head_front_engine = original_dst_head != nullptr && original_dst_head->IsFrontEngine();
+	std::optional<GlobalConsistID> original_src_identity = FederationIdentityRegistry::Find(original_src_head);
+	std::optional<GlobalConsistID> original_dst_identity = FederationIdentityRegistry::Find(original_dst_head);
 
 	/* (Re)arrange the trains in the wanted arrangement. */
 	ArrangeTrains(&dst_head, dst, &src_head, src, move_chain);
@@ -1425,6 +1428,8 @@ CommandCost CmdMoveRailVehicle(DoCommandFlags flags, VehicleID src_veh, VehicleI
 		/* Handle 'new engine' part of cases #1b, #2b, #3b, #4b and #5 in NormaliseTrainHead. */
 		NormaliseTrainHead(src_head);
 		NormaliseTrainHead(dst_head);
+		FederationIdentityRegistry::ReconcileConsistChange(src_head, dst_head,
+				original_dst_identity.has_value() ? original_dst_identity : original_src_identity);
 
 		/* Add new heads to statistics.
 		 * This should be done after NormaliseTrainHead due to engine total limit checks in GetFreeUnitNumber. */

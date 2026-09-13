@@ -9,6 +9,7 @@
 
 #include "../stdafx.h"
 #include "portal_registry.h"
+#include "federation_identity.h"
 #include "../tunnelbridge_map.h"
 #include "../tile_map.h"
 #include "../landscape.h"
@@ -340,4 +341,5 @@ void PortalRegistry::Reset()
 	unlinked_gates.clear();
 	vehicle_portal_progress.clear();
 	next_portal_id = 1;
+	FederationIdentityRegistry::Reset();
 }
