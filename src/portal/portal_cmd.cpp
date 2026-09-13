@@ -15,6 +15,8 @@
 #include "spaceport_manager.h"
 #include "edge_conduit.h"
 #include "universe_authority.h"
+#include "megacity_manager.h"
+#include "../town.h"
 #include "../station_base.h"
 #include "../command_func.h"
 #include "../company_base.h"
@@ -31,6 +33,7 @@
 #include "../vehicle_func.h"
 #include "../economy_func.h"
 #include "../strings_func.h"
+#include "../language.h"
 #include "../map_func.h"
 #include "../pbs.h"
 #include "../train.h"
@@ -604,6 +607,18 @@ CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::
 
 		PlanetManager::ColonizeWorld(world, name, tile);
 
+		/* Spawn initial frontier settlement if none exists on this world */
+		Town *existing_town = PlanetManager::GetWorldPrimaryTown(world);
+		if (existing_town == nullptr && Town::CanAllocateItem() && IsValidTile(tile)) {
+			Town *t = Town::Create(tile);
+			if (t != nullptr) {
+				t->name = name;
+				if (_current_language != nullptr) {
+					t->UpdateVirtCoord();
+				}
+			}
+		}
+
 		/* Broadcast colony founding news */
 		AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_COLONIZED, name), NewsType::CompanyInfo, tile);
 	}
@@ -639,6 +654,11 @@ CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
 			AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_DEVELOPED, region->name), NewsType::CompanyInfo, news_tile);
 		} else if (prev_phase == WorldPhase::Phase2_Developed) {
 			AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_CORE_METROPOLIS, region->name), NewsType::CompanyInfo, news_tile);
+			/* Elevate primary settlement to Imperial Megacity */
+			Town *primary = PlanetManager::GetWorldPrimaryTown(world);
+			if (primary != nullptr && !MegacityManager::IsMegacity(primary->index)) {
+				MegacityManager::RegisterMegacity(primary->index, world, primary->name, std::max(1000u, primary->cache.population));
+			}
 		}
 
 		UniverseAuthorityService::Instance().PromoteWorld(world);

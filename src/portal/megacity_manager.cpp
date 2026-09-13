@@ -80,6 +80,18 @@ std::vector<MegacityProfile> MegacityManager::GetAllMegacities()
 	return result;
 }
 
+float MegacityManager::GetGrowthMultiplier(TownID town_id)
+{
+	const MegacityProfile *prof = GetProfile(town_id);
+	return prof != nullptr ? prof->growth_multiplier : 1.0f;
+}
+
+float MegacityManager::GetPassengerMultiplier(TownID town_id)
+{
+	const MegacityProfile *prof = GetProfile(town_id);
+	return prof != nullptr ? prof->passenger_multiplier : 1.0f;
+}
+
 void MegacityManager::UpdatePopulation(TownID town_id, uint32_t population)
 {
 	auto it = _megacities.find(town_id.base());

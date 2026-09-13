@@ -52,6 +52,7 @@
 #include "portal/spaceport_manager.h"
 #include "portal/edge_conduit.h"
 #include "portal/portal_registry.h"
+#include "portal/megacity_manager.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -1106,6 +1107,9 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 			SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
 		}
 		PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
+		if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
+			MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total);
+		}
 	}
 
 	/* Update company statistics */
@@ -2012,6 +2016,7 @@ static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthl
 {
 	SpaceportManager::ProcessOffWorldTrade();
 	EdgeConduitManager::ProduceAllConduits();
+	MegacityManager::EvaluateMonthlySupply();
 });
 
 static void DoAcquireCompany(Company *c, bool hostile_takeover)

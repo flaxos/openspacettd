@@ -45,6 +45,7 @@ add_test_files(
     test_sprint30_biomes_colonization.cpp
     test_sprint31_colonization_gui.cpp
     test_sprint32_lifecycle_and_tech.cpp
+    test_sprint33_planetary_economy_and_megacity.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

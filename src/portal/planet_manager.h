@@ -22,6 +22,7 @@
 #include <string>
 
 struct Window;
+struct Town;
 
 /**
  * Spatial manager and query engine for planetary worlds.
@@ -144,13 +145,22 @@ public:
 	static CommandCost CheckConstructionPlacement(TileIndex tile);
 
 	/**
+	 * Check if a town is permitted on the world at the given tile.
+	 * Blocks town placement in void buffer space and on uncolonized Phase 4 Expansion wilderness worlds.
+	 * @param tile Proposed town location tile.
+	 * @return Succeeded CommandCost if permitted; error CommandCost if restricted.
+	 */
+	static CommandCost CheckTownPlacement(TileIndex tile);
+
+	/**
 	 * Check if an industry is permitted on the world at the given tile.
 	 * @param tile Tile location for the proposed industry.
 	 * @param is_raw Whether the industry is an extractive or organic raw producer (e.g. Bio-Farm, Mine).
 	 * @param is_processing Whether the industry is a processing facility (e.g. Factory, Refinery).
+	 * @param is_farm Whether the industry is an agricultural / bio-farm facility.
 	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
 	 */
-	static CommandCost CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing);
+	static CommandCost CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing, bool is_farm = false);
 
 	/**
 	 * Check if a rail depot of the specified railtype is permitted on the world at the given tile.
@@ -244,6 +254,15 @@ public:
 
 	/** Rebuild the spatial grid acceleration structure from registered regions. */
 	static void RebuildSpatialGrid();
+
+	/** Get aggregate population of all settlements located on the specified world. */
+	static uint32_t GetWorldPopulation(WorldID world);
+
+	/** Get the primary (highest population or outpost) town located on the specified world. */
+	static Town *GetWorldPrimaryTown(WorldID world);
+
+	/** Get total count of active industries located on the specified world. */
+	static size_t GetWorldIndustryCount(WorldID world);
 
 private:
 	static std::vector<PlanetRegion> regions;

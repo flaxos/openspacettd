@@ -65,6 +65,8 @@ public:
 	static bool IsMegacity(TownID town_id);
 	static const MegacityProfile *GetProfile(TownID town_id);
 	static std::vector<MegacityProfile> GetAllMegacities();
+	static float GetGrowthMultiplier(TownID town_id);
+	static float GetPassengerMultiplier(TownID town_id);
 
 	/* Deliveries & Quotas */
 	static void UpdatePopulation(TownID town_id, uint32_t population);

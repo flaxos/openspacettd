@@ -16,6 +16,8 @@
 #include "../viewport_func.h"
 #include "../viewport_type.h"
 #include "../landscape.h"
+#include "../town.h"
+#include "../industry.h"
 #include "../3rdparty/fmt/format.h"
 #include <cmath>
 #include <cstdlib>
@@ -261,7 +263,20 @@ CommandCost PlanetManager::CheckConstructionPlacement(TileIndex tile)
 	return CommandCost();
 }
 
-CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing)
+CommandCost PlanetManager::CheckTownPlacement(TileIndex tile)
+{
+	CommandCost cost = CheckConstructionPlacement(tile);
+	if (cost.Failed()) return cost;
+
+	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
+
+	return CommandCost();
+}
+
+CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing, bool is_farm)
 {
 	if (Count() == 0) return CommandCost();
 
@@ -279,6 +294,9 @@ CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, b
 	}
 	if (phase == WorldPhase::Phase3_Frontier && is_processing) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+	}
+	if (is_farm && GetTileBiome(tile) == WorldBiome::Volcanic) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_FARM_ON_VOLCANIC_WORLD);
 	}
 
 	return CommandCost();
@@ -481,3 +499,50 @@ bool PlanetManager::JumpToPlanet(WorldID world_id)
 	}
 	return true;
 }
+
+uint32_t PlanetManager::GetWorldPopulation(WorldID world)
+{
+	if (world == INVALID_WORLD || Count() == 0) return 0;
+	uint32_t pop = 0;
+	for (const Town *t : Town::Iterate()) {
+		if (GetTileWorld(t->xy) == world) {
+			pop += t->cache.population;
+		}
+	}
+	return pop;
+}
+
+Town *PlanetManager::GetWorldPrimaryTown(WorldID world)
+{
+	if (world == INVALID_WORLD || Count() == 0) return nullptr;
+	Town *best_town = nullptr;
+	uint32_t max_pop = 0;
+	const PlanetRegion *reg = GetRegion(world);
+
+	for (Town *t : Town::Iterate()) {
+		if (GetTileWorld(t->xy) == world) {
+			/* If an outpost tile matches exactly, prefer it */
+			if (reg != nullptr && reg->outpost_tile != INVALID_TILE && t->xy == reg->outpost_tile) {
+				return t;
+			}
+			if (best_town == nullptr || t->cache.population >= max_pop) {
+				max_pop = t->cache.population;
+				best_town = t;
+			}
+		}
+	}
+	return best_town;
+}
+
+size_t PlanetManager::GetWorldIndustryCount(WorldID world)
+{
+	if (world == INVALID_WORLD || Count() == 0) return 0;
+	size_t count = 0;
+	for (const Industry *i : Industry::Iterate()) {
+		if (GetTileWorld(i->location.tile) == world) {
+			count++;
+		}
+	}
+	return count;
+}
+

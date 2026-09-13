@@ -15,6 +15,7 @@ echo "Executing Python acceptance test suites..."
 python3 "${REPO_ROOT}/scripts/test_sprint29_acceptance_kit.py" "$@"
 python3 "${REPO_ROOT}/scripts/test_sprint31_colonization_kit.py" "$@"
 python3 "${REPO_ROOT}/scripts/test_sprint32_lifecycle_kit.py" "$@"
+python3 "${REPO_ROOT}/scripts/test_sprint33_megacity_kit.py" "$@"
 
 echo "==========================================================================="
 echo " Federation Acceptance Kit Run Completed Successfully!"

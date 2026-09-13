@@ -5197,6 +5197,8 @@ STR_ERROR_CANNOT_COLONIZE_ALREADY_COLONIZED                     :this world has 
 STR_ERROR_CANNOT_COLONIZE_NON_EXPANSION                         :outposts can only be founded on an Expansion World (Phase 4)
 STR_ERROR_CAN_T_COLONIZE_OUTPOST                                :Can't colonize world...
 STR_NEWS_WORLD_COLONIZED                                        :{BIG_FONT}{BLACK}Outpost Founded!{}{STRING} has been colonized and elevated to Frontier status (Phase 3)!
+STR_ERROR_CANNOT_BUILD_FARM_ON_VOLCANIC_WORLD                   :cannot construct bio-farms or agriculture on a Volcanic World
+STR_NEWS_OUTPOST_INDUSTRY_FOUNDED                               :{BIG_FONT}{BLACK}Colony Sector Established!{}{STRING} has opened its first industrial operations on {STRING}!
 STR_ERROR_CAN_T_BUILD_EDGE_CONDUIT                              :Can't build Edge Conduit here...
 STR_ERROR_CAN_T_REMOVE_EDGE_CONDUIT                             :Can't remove Edge Conduit...
 STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID                            :Edge Conduit must be placed on a world boundary tile directly beside the void
@@ -6192,6 +6194,8 @@ STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP                          :Establish an i
 STR_UNIVERSE_DIRECTORY_ALREADY_COLONIZED                         :This world has already established colonial settlements
 STR_UNIVERSE_DIRECTORY_PROMOTE                                   :Promote World
 STR_UNIVERSE_DIRECTORY_PROMOTE_TOOLTIP                           :Promote this world to its next development tier when development threshold is met
+STR_UNIVERSE_DIRECTORY_MEGACITY                                  :View Megacity
+STR_UNIVERSE_DIRECTORY_MEGACITY_TOOLTIP                          :Open the Megacity Overview for this Core World's primary metropolis
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
 
 # OpenSpaceTTD Sprint 25: Player Rail Blueprints

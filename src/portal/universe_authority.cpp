@@ -133,11 +133,32 @@ bool UniverseAuthorityService::PromoteWorld(WorldID world_id)
 			return true;
 		case WorldPhase::Phase2_Developed:
 			it->second.phase = WorldPhase::Phase1_Core;
+			it->second.is_megacity = true;
+			it->second.megacity_growth_state = "Subsistence";
 			return true;
 		case WorldPhase::Phase1_Core:
 		default:
 			return false;
 	}
+}
+
+bool UniverseAuthorityService::UpdateMegacityStatus(
+	WorldID world_id,
+	bool is_megacity,
+	const std::string &growth_state,
+	float satisfaction_pct,
+	uint32_t population)
+{
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) return false;
+
+	it->second.is_megacity = is_megacity;
+	it->second.megacity_growth_state = growth_state;
+	it->second.satisfaction_pct = satisfaction_pct;
+	if (population > 0) {
+		it->second.population = population;
+	}
+	return true;
 }
 
 bool UniverseAuthorityService::RegisterRoute(const InterServerRoute &route)

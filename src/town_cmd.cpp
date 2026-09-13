@@ -63,6 +63,8 @@
 #include "timer/timer_game_calendar.h"
 #include "timer/timer_game_economy.h"
 #include "timer/timer_game_tick.h"
+#include "portal/planet_manager.h"
+#include "portal/megacity_manager.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -523,10 +525,18 @@ static void TownGenerateCargo(Town *t, CargoType cargo, uint amount, StationFind
 	amount = ScaleByCargoScale(amount, true);
 	if (amount == 0) return;
 
+	/* Boost passenger and mail generation in HyperGrowth Megacities */
+	if (MegacityManager::IsMegacity(t->index)) {
+		const MegacityProfile *prof = MegacityManager::GetProfile(t->index);
+		if (prof != nullptr && prof->passenger_multiplier > 1.0f) {
+			amount = static_cast<uint>(amount * prof->passenger_multiplier);
+		}
+	}
+
 	/* Actually generate cargo and update town statistics. */
 	auto &supplied = t->GetOrCreateCargoSupplied(cargo);
 	supplied.history[THIS_MONTH].production += amount;
-	supplied.history[THIS_MONTH].transported += MoveGoodsToStation(cargo, amount, {t->index, SourceType::Town}, stations.GetStations());;
+	supplied.history[THIS_MONTH].transported += MoveGoodsToStation(cargo, amount, {t->index, SourceType::Town}, stations.GetStations());
 }
 
 /**
@@ -2085,6 +2095,9 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32_t townnameparts, TownSi
  */
 static CommandCost TownCanBePlacedHere(TileIndex tile, bool check_surrounding)
 {
+	CommandCost planet_check = PlanetManager::CheckTownPlacement(tile);
+	if (planet_check.Failed()) return planet_check;
+
 	/* Check if too close to the edge of map */
 	if (DistanceFromEdge(tile) < 12) {
 		return CommandCost(STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP);
@@ -3919,6 +3932,19 @@ static void UpdateTownGrowthRate(Town *t)
 	if (t->flags.Test(TownFlag::CustomGrowth)) return;
 	uint old_rate = t->growth_rate;
 	t->growth_rate = GetNormalGrowthRate(t);
+
+	if (MegacityManager::IsMegacity(t->index)) {
+		const MegacityProfile *prof = MegacityManager::GetProfile(t->index);
+		if (prof != nullptr) {
+			if (prof->growth_state == MegacityGrowthState::Starvation) {
+				t->growth_rate = TOWN_GROWTH_RATE_NONE;
+			} else if (prof->growth_multiplier > 1.0f && t->growth_rate != TOWN_GROWTH_RATE_NONE && t->growth_rate > 1) {
+				uint32_t accelerated = static_cast<uint32_t>(t->growth_rate / prof->growth_multiplier);
+				t->growth_rate = std::max(1u, accelerated);
+			}
+		}
+	}
+
 	UpdateTownGrowCounter(t, old_rate);
 	SetWindowDirty(WindowClass::TownView, t->index);
 }
@@ -3933,6 +3959,14 @@ static void UpdateTownGrowth(Town *t)
 
 	t->flags.Reset(TownFlag::IsGrowing);
 	SetWindowDirty(WindowClass::TownView, t->index);
+
+	if (MegacityManager::IsMegacity(t->index)) {
+		const MegacityProfile *prof = MegacityManager::GetProfile(t->index);
+		if (prof != nullptr && prof->growth_state == MegacityGrowthState::Starvation) {
+			/* Starvation freezes town expansion until sustenance quotas are satisfied */
+			return;
+		}
+	}
 
 	if (_settings_game.economy.town_growth_rate == 0 && t->fund_buildings_months == 0) return;
 

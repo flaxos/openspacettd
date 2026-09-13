@@ -19,6 +19,7 @@ enum UniverseDirectoryWidgets : WidgetID {
 	WID_UD_JUMP_BTN,       ///< Jump main viewport to selected world.
 	WID_UD_COLONIZE_BTN,   ///< Establish colonial outpost on selected wilderness world.
 	WID_UD_PROMOTE_BTN,    ///< Promote world to next development tier when threshold is met.
+	WID_UD_MEGACITY_BTN,   ///< Open Megacity Overview for Phase 1 Core Worlds.
 };
 
 #endif /* WIDGETS_UNIVERSE_DIRECTORY_WIDGET_H */

@@ -266,6 +266,10 @@ class UniverseAuthority:
             "max_clients": int(data.get("max_clients", 16)),
             "active_trains": int(data.get("active_trains", 0)),
             "status": data.get("status", "online"),
+            "population": int(data.get("population", 0)),
+            "is_megacity": bool(data.get("is_megacity", False)),
+            "megacity_growth_state": data.get("megacity_growth_state", "Subsistence"),
+            "satisfaction_pct": float(data.get("satisfaction_pct", 100.0)),
             "last_heartbeat": time.time()
         }
         self._maybe_auto_save()
@@ -293,6 +297,14 @@ class UniverseAuthority:
             rec["max_clients"] = int(data["max_clients"])
         if "active_trains" in data:
             rec["active_trains"] = int(data["active_trains"])
+        if "population" in data:
+            rec["population"] = int(data["population"])
+        if "is_megacity" in data:
+            rec["is_megacity"] = bool(data["is_megacity"])
+        if "megacity_growth_state" in data:
+            rec["megacity_growth_state"] = data["megacity_growth_state"]
+        if "satisfaction_pct" in data:
+            rec["satisfaction_pct"] = float(data["satisfaction_pct"])
         if "status" in data:
             rec["status"] = data["status"]
         else:
@@ -335,10 +347,48 @@ class UniverseAuthority:
         elif cur_phase == 2:
             w["phase"] = 1
             w["development_score"] = int(w.get("development_score", 0)) + 500
+            w["is_megacity"] = True
+            w["megacity_growth_state"] = "Subsistence"
         else:
             return False, f"World {world_id} is already at maximum development tier (Phase 1 Core)"
         self._maybe_auto_save()
         return True, w
+
+    def update_megacity_status(self, world_id, is_megacity=True, growth_state="Subsistence", satisfaction_pct=100.0, population=None):
+        if world_id is None:
+            return False, "world_id required"
+        try:
+            world_id = int(world_id)
+        except ValueError:
+            return False, f"Invalid world_id: {world_id}"
+        if world_id not in self.worlds:
+            return False, f"World {world_id} not found"
+        w = self.worlds[world_id]
+        w["is_megacity"] = bool(is_megacity)
+        w["megacity_growth_state"] = str(growth_state)
+        w["satisfaction_pct"] = float(satisfaction_pct)
+        if population is not None:
+            w["population"] = int(population)
+        self._maybe_auto_save()
+        return True, w
+
+    def get_world_megacity(self, world_id):
+        if world_id is None:
+            return False, "world_id required"
+        try:
+            world_id = int(world_id)
+        except ValueError:
+            return False, f"Invalid world_id: {world_id}"
+        if world_id not in self.worlds:
+            return False, f"World {world_id} not found"
+        w = self.worlds[world_id]
+        return True, {
+            "world_id": world_id,
+            "population": w.get("population", 0),
+            "is_megacity": w.get("is_megacity", False),
+            "megacity_growth_state": w.get("megacity_growth_state", "Subsistence"),
+            "satisfaction_pct": w.get("satisfaction_pct", 100.0)
+        }
 
     def get_world_directory(self, min_phase=0, prune_stale=False, stale_threshold=60.0):
         now = time.time()
@@ -1144,6 +1194,16 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         elif url.path == "/megacity/status":
             tid = qs.get("town_id", [None])[0]
             self._send_json(200, AUTHORITY.get_megacity_status(town_id=tid))
+        elif url.path.startswith("/worlds/") and url.path.endswith("/megacity"):
+            parts = url.path.strip("/").split("/")
+            world_id = None
+            if len(parts) == 3 and parts[0] == "worlds" and parts[2] == "megacity":
+                try:
+                    world_id = int(parts[1])
+                except ValueError:
+                    pass
+            ok, res = AUTHORITY.get_world_megacity(world_id)
+            self._send_json(200 if ok else 404, res if ok else {"error": res})
         elif url.path == "/economy/matrix":
             self._send_json(200, AUTHORITY.get_supply_chain_matrix())
         elif url.path == "/spaceport/list":
@@ -1263,6 +1323,26 @@ class AuthorityHandler(BaseHTTPRequestHandler):
             self._send_json(200 if ok else 400, res if ok else {"error": res})
         elif url.path == "/megacity/eval":
             ok, res = AUTHORITY.evaluate_megacity_supply(data)
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path.startswith("/worlds/") and url.path.endswith("/megacity"):
+            parts = url.path.strip("/").split("/")
+            world_id = data.get("world_id")
+            if len(parts) == 3 and parts[0] == "worlds" and parts[2] == "megacity":
+                try:
+                    world_id = int(parts[1])
+                except ValueError:
+                    pass
+            is_megacity = data.get("is_megacity", True)
+            growth_state = data.get("megacity_growth_state", data.get("growth_state", "Subsistence"))
+            satisfaction_pct = float(data.get("satisfaction_pct", 100.0))
+            population = data.get("population")
+            ok, res = AUTHORITY.update_megacity_status(
+                world_id=world_id,
+                is_megacity=is_megacity,
+                growth_state=growth_state,
+                satisfaction_pct=satisfaction_pct,
+                population=population
+            )
             self._send_json(200 if ok else 400, res if ok else {"error": res})
 
         # Planetary Infrastructure endpoints (Sprint 20)
