@@ -81,6 +81,13 @@ public:
 	static WorldPhase GetTilePhase(TileIndex tile);
 
 	/**
+	 * Get the WorldBiome for a given tile in O(1) time.
+	 * @param tile Tile to query.
+	 * @return The WorldBiome of the tile (defaults to Temperate if invalid/in buffer).
+	 */
+	static WorldBiome GetTileBiome(TileIndex tile);
+
+	/**
 	 * Validate the common base-tile requirements for world-aware construction.
 	 * Commands remain responsible for asset-specific footprint and Phase rules.
 	 * @param tile Proposed construction tile.

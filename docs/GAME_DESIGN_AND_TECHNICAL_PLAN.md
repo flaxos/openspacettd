@@ -518,10 +518,10 @@ For detailed scope, see [SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md](SPRINT2
 - **Sprint 21 — Partially complete:** Gateway telemetry/navigation and Commonwealth string alignment shipped. The proposed alien art and in-tree NewGRF packs did not ship and move into Sprints 24 and the content backlog.
 - **Sprint 22 — Complete:** Round-trip consist order restoration and autonomous federation scheduling.
 - **Sprint 23 — Complete:** Scope reconciliation, alien art specification, UI coverage audit and UAT delivery plan.
+- **Sprint 24 — Complete:** Playable alien worlds foundation with procedural multi-world environmental stylization (Temperate Core, Arid Industrial, Sub-Arctic Frontier), O(1) spatial biome resolution, and CST monumental portal gate visuals.
 
 ### 4. Planned delivery sequence
 
-- **Sprint 24 — Playable Alien Worlds:** Implement distinct Temperate Core, Arid Industrial and Sub-Arctic Frontier visuals, CST gateways and art packaging/provenance.
 - **Sprint 25 — Player Rail Blueprints:** Capture, manage, share, preview, transform and deterministically place rail infrastructure.
 - **Sprint 26 — CST Prefab Rail Blocks:** Ship eight built-in layouts through the blueprint system with traffic-side variants and operating guidance.
 - **Sprint 27 — Complete Feature UI:** Close player and operator UI gaps recorded in the coverage matrix.

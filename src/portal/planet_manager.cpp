@@ -140,6 +140,12 @@ WorldPhase PlanetManager::GetTilePhase(TileIndex tile)
 	return r != nullptr ? r->phase : WorldPhase::Phase3_Frontier;
 }
 
+WorldBiome PlanetManager::GetTileBiome(TileIndex tile)
+{
+	const PlanetRegion *r = GetRegionByTile(tile);
+	return r != nullptr ? r->biome : WorldBiome::Temperate;
+}
+
 size_t PlanetManager::Count()
 {
 	return regions.size();

@@ -17,6 +17,7 @@
 #include "../rail_map.h"
 #include "../signal_func.h"
 #include "../clear_map.h"
+#include "../tree_map.h"
 #include "../direction_func.h"
 #include "../tile_map.h"
 #include "../map_func.h"
@@ -214,6 +215,11 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 		PlanetManager::RegisterRegion(reg);
 	}
 
+	/* 2b. Apply alien biome environmental stylization across worlds */
+	for (const auto &reg : regions) {
+		ApplyBiomeStyling(reg);
+	}
+
 	/* 3. Place and register starting gateway pairs between adjacent worlds */
 	if (config.place_gateways && regions.size() >= 2) {
 		PortalRegistry::Reset();
@@ -286,3 +292,80 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 
 	return true;
 }
+
+void MultiWorldGen::ApplyBiomeStyling(const PlanetRegion &region)
+{
+	for (uint32_t y = region.min_y; y <= region.max_y; ++y) {
+		for (uint32_t x = region.min_x; x <= region.max_x; ++x) {
+			TileIndex t = TileXY(x, y);
+			if (!IsValidTile(t)) continue;
+
+			switch (region.biome) {
+				case WorldBiome::AridDesert: {
+					SetTropicZone(t, TropicZone::Desert);
+					if (IsTileType(t, TileType::Clear)) {
+						uint density = GetClearDensity(t);
+						if ((TileHash(x, y) & 0x7) == 0) {
+							SetClearGroundDensity(t, ClearGround::Rocks, density);
+						} else {
+							SetClearGroundDensity(t, ClearGround::Desert, density);
+						}
+					} else if (IsTileType(t, TileType::Trees)) {
+						uint tree_count = GetTreeCount(t);
+						TreeGrowthStage growth = GetTreeGrowth(t);
+						MakeTree(t, TREE_CACTUS, tree_count - 1, growth, TreeGround::SnowOrDesert, 3);
+					}
+					break;
+				}
+
+				case WorldBiome::SubArctic: {
+					if (IsTileType(t, TileType::Clear)) {
+						uint density = GetClearDensity(t);
+						if (!IsSnowTile(t)) {
+							MakeSnow(t, density);
+						}
+						if ((TileHash(x, y) & 0x7) == 0) {
+							SetClearGroundDensity(t, ClearGround::Rocks, density);
+						}
+					} else if (IsTileType(t, TileType::Trees)) {
+						uint tree_count = GetTreeCount(t);
+						TreeGrowthStage growth = GetTreeGrowth(t);
+						MakeTree(t, TREE_SUB_ARCTIC, tree_count - 1, growth, TreeGround::SnowOrDesert, 3);
+					}
+					break;
+				}
+
+				case WorldBiome::Temperate: {
+					SetTropicZone(t, TropicZone::Normal);
+					if (IsTileType(t, TileType::Clear)) {
+						if (IsSnowTile(t)) ClearSnow(t);
+						uint density = GetClearDensity(t);
+						SetClearGroundDensity(t, ClearGround::Grass, density);
+					} else if (IsTileType(t, TileType::Trees)) {
+						uint tree_count = GetTreeCount(t);
+						TreeGrowthStage growth = GetTreeGrowth(t);
+						MakeTree(t, TREE_TEMPERATE, tree_count - 1, growth, TreeGround::Grass, 3);
+					}
+					break;
+				}
+
+				case WorldBiome::Volcanic: {
+					if (IsTileType(t, TileType::Clear)) {
+						if (IsSnowTile(t)) ClearSnow(t);
+						uint density = GetClearDensity(t);
+						if ((TileHash(x, y) & 0x3) == 0) {
+							SetClearGroundDensity(t, ClearGround::Rocks, density);
+						} else {
+							SetClearGroundDensity(t, ClearGround::Rough, density);
+						}
+					}
+					break;
+				}
+
+				default:
+					break;
+			}
+		}
+	}
+}
+

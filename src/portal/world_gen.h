@@ -56,6 +56,13 @@ public:
 	static std::vector<PlanetRegion> CalculateLayout(uint32_t size_x, uint32_t size_y);
 	static std::vector<PlanetRegion> CalculateLayout(uint32_t size_x, uint32_t size_y, const Config &config);
 
+	/**
+	 * Apply alien biome stylization to a world region:
+	 * transforms ground, rocks, snow/permafrost, and foliage according to the region's WorldBiome.
+	 * @param region The PlanetRegion to style.
+	 */
+	static void ApplyBiomeStyling(const PlanetRegion &region);
+
 private:
 	static bool enabled;
 };

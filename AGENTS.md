@@ -5,7 +5,7 @@
 - **Goal:** Railway-heavy industrial and logistics simulation game.
 - **Inspiration:** OpenTTD + Factorio-scale production chains + Peter F. Hamilton-style Commonwealth saga (planetary rail networks interlinked via fixed wormholes).
 - **Core Future Feature:** Multiple logical worlds connected by railway portal/wormhole gates.
-- **Current Status:** Gameplay and federation foundations are implemented through Sprint 22. Sprint 23 defines the alien-art, blueprint/prefab, UI-completion and consolidated UAT sequence for Sprints 24–29.
+- **Current Status:** Federation foundations and playable alien world biomes are implemented through Sprint 24. Sprints 25–29 deliver player blueprints, CST prefabs, UI completion, and consolidated UAT.
 
 ---
 

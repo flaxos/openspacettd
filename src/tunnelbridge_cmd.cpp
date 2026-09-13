@@ -41,6 +41,7 @@
 #include "terraform_cmd.h"
 
 #include "table/strings.h"
+#include "table/sprites.h"
 #include "table/bridge_land.h"
 
 #include "portal/portal_registry.h"
@@ -1354,10 +1355,19 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 			image = SPR_TUNNEL_ENTRY_REAR_ROAD;
 		}
 
+		bool is_portal_gate = (transport_type == TransportType::Rail) && (PortalRegistry::IsPortalTile(ti->tile) || PortalRegistry::IsUnlinkedGate(ti->tile));
+		PaletteID portal_pal = PAL_NONE;
+		if (is_portal_gate) {
+			/* Commonwealth CST monumental portal gate:
+			 * Active linked gates display cyan-blue conduit excitation (PALETTE_TO_STRUCT_BLUE);
+			 * Unlinked gates in standby display amber/yellow excitation (PALETTE_TO_STRUCT_YELLOW). */
+			portal_pal = PortalRegistry::IsPortalTile(ti->tile) ? PALETTE_TO_STRUCT_BLUE : PALETTE_TO_STRUCT_YELLOW;
+		}
+
 		if (HasTunnelBridgeSnowOrDesert(ti->tile)) image += railtype_overlay != 0 ? 8 : 32;
 
 		image += to_underlying(tunnelbridge_direction) * 2;
-		DrawGroundSprite(image, PAL_NONE);
+		DrawGroundSprite(image, portal_pal);
 
 		if (transport_type == TransportType::Road) {
 			RoadType road_rt = GetRoadTypeRoad(ti->tile);
@@ -1441,7 +1451,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 
 		if (railtype_overlay != 0 && !catenary) StartSpriteCombine();
 
-		AddSortableSpriteToDraw(image + 1, PAL_NONE, *ti, roof_bounds[tunnelbridge_direction], false);
+		AddSortableSpriteToDraw(image + 1, portal_pal, *ti, roof_bounds[tunnelbridge_direction], false);
 		/* Draw railtype tunnel portal overlay if defined. */
 		if (railtype_overlay != 0) AddSortableSpriteToDraw(railtype_overlay + to_underlying(tunnelbridge_direction), PAL_NONE, *ti, roof_bounds[tunnelbridge_direction], false);
 
