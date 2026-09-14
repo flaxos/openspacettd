@@ -36,6 +36,10 @@ jobs:
       id: vcpkg
       uses: OpenTTD/actions/setup-vcpkg@v7
 
+    - name: Use read-only vcpkg cache
+      shell: bash
+      run: echo "VCPKG_BINARY_SOURCES=clear;nuget,GitHub,read" >> "$GITHUB_ENV"
+
     - name: Install dependencies
       run: |
         echo "::group::Update apt"
