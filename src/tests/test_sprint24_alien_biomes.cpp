@@ -93,10 +93,13 @@ TEST_CASE("Alien Biomes - Procedural MultiWorldGen Biome Environmental Styling")
 
 	Map::Allocate(128, 128);
 
-	/* Initialize clear land across entire map initially as base grass */
+	/* Initialize playable inner tiles as base grass. OpenTTD requires the
+	 * outer map edge to remain TileType::Void. */
 	for (uint32_t y = 0; y < 128; ++y) {
 		for (uint32_t x = 0; x < 128; ++x) {
 			TileIndex t = TileXY(x, y);
+			if (!IsInnerTile(t)) continue;
+
 			MakeClear(t, ClearGround::Grass, 3);
 			SetTropicZone(t, TropicZone::Normal);
 		}
