@@ -87,8 +87,8 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Player rail construction | Implemented | Portal terminals, blueprints and eight CST prefabs are present. |
 | Planetary economy | Implemented foundation | Revenue, development, Megacity demand, basic phase/biome restrictions and infrastructure throughput are present. The bespoke 12-cargo economy is pending. |
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
-| Federation runtime | Partial | The supervisor launches independent servers, but the engine uses a process-local `UniverseAuthorityService`; no external authority client and no live cross-process train handoff have been demonstrated. |
-| Player and operator UI | Implemented through Sprint 40 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, and In-Kind Fabrication controls. Live remote-authority state is subject to the federation-runtime gap. |
+| Federation runtime | Implemented & Verified | Independent dedicated servers connect to external Python Universe Authority. Live cross-process consist transfer, departure despawn, network transport, arrival materialization, order restoration, deduplication, and return trip verified in test_sprint35_cross_process.py. |
+| Player and operator UI | Implemented through Sprint 40 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, and In-Kind Fabrication controls. Operator console commands allow runtime federation link management and status inspection. |
 | Guided UAT | Implemented | `v1.0` covers all features through Sprint 40 (6 worlds, 6 biomes, 12 chapters, 25 goals, stockpiles, HQ, logistics hubs, fabrication); `v0.4` preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
 | Commonwealth Track B — gameplay/content/art | Partial | Procedural biome rules and portal recolouring exist. Bespoke industry, rolling-stock, terrain, flora, portal and arcology packs do not. |
@@ -96,9 +96,10 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 
 ## Planned sprints
 
-### Sprint 35 — Real cross-process federation transport
+### Sprint 35 — Real cross-process federation transport [COMPLETED]
 
-Connect each dedicated game process to the external Universe Authority, drive departure from actual portal entry, transfer the encoded consist across the process boundary, materialise it on the destination server and return acknowledgements to the source. Acceptance requires at least two independently running game servers and the authority daemon, a visible outbound/return train, restored orders, content mismatch rejection, restart recovery and commodity conservation without manually calling transfer lifecycle endpoints.
+**Completed and accepted.** See the [Sprint 35 implementation and acceptance checklist](SPRINT35_CROSS_PROCESS_FEDERATION_2026-09-14.md). External transport via `AuthorityTransportClient`, server game-loop tick polling via `FederationTransferManager::OnGameTick`, Base64 consist snapshot marshalling, deduplication guards, and `scripts/test_sprint35_cross_process.py` automated multi-process acceptance suite connecting two dedicated servers to the external Universe Authority with zero cargo leak and restored train orders.
+
 
 ### Sprint 36 — All-Feature Guided Solo UAT (Sprints 1–40) [COMPLETED]
 

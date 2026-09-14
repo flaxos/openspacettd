@@ -10,6 +10,7 @@
 #include "../stdafx.h"
 #include "portal_registry.h"
 #include "federation_identity.h"
+#include "transfer_journal.h"
 #include "../tunnelbridge_map.h"
 #include "../tile_map.h"
 #include "../landscape.h"
@@ -173,7 +174,8 @@ PortalID PortalRegistry::RegisterInterServerPortal(
 	WorldID local_world,
 	WorldID remote_world,
 	uint32_t remote_gate_id,
-	uint32_t virtual_length)
+	uint32_t virtual_length,
+	uint32_t local_gate_id)
 {
 	if (local_tile == INVALID_TILE || remote_world == INVALID_WORLD) {
 		return INVALID_PORTAL;
@@ -186,7 +188,10 @@ PortalID PortalRegistry::RegisterInterServerPortal(
 
 	unlinked_gates.erase(local_tile);
 
-	PortalID id{next_portal_id++};
+	PortalID id = local_gate_id != 0 ? PortalID{local_gate_id} : PortalID{next_portal_id++};
+	if (id.base() >= next_portal_id) {
+		next_portal_id = id.base() + 1;
+	}
 	InterServerPortalLink link;
 	link.id = id;
 	link.local_endpoint = PortalEndpoint{local_tile, dir, local_world};
@@ -196,6 +201,17 @@ PortalID PortalRegistry::RegisterInterServerPortal(
 
 	interserver_portals[local_tile] = link;
 	return id;
+}
+
+bool PortalRegistry::RestoreInterServerPortal(const InterServerPortalLink &link)
+{
+	if (!link.IsValid()) return false;
+	unlinked_gates.erase(link.local_endpoint.tile);
+	interserver_portals[link.local_endpoint.tile] = link;
+	if (link.id.base() >= next_portal_id) {
+		next_portal_id = link.id.base() + 1;
+	}
+	return true;
 }
 
 bool PortalRegistry::IsInterServerPortal(TileIndex tile)
@@ -542,4 +558,5 @@ void PortalRegistry::Reset()
 	vehicle_portal_progress.clear();
 	next_portal_id = 1;
 	FederationIdentityRegistry::Reset();
+	TransferJournal::Reset();
 }

@@ -62,6 +62,18 @@ public:
 	 * Reset coordinator state (for tests and session initialization).
 	 */
 	static void Reset();
+
+	/**
+	 * Configure external Universe Authority base URL. If empty, uses in-memory service.
+	 */
+	static void SetAuthorityUrl(std::string url);
+	static const std::string &GetAuthorityUrl();
+	static bool HasExternalAuthority();
+
+	/**
+	 * Periodic simulation tick handler for background federation polling.
+	 */
+	static void OnGameTick(uint64_t current_tick);
 };
 
 #endif /* FEDERATION_CMD_H */

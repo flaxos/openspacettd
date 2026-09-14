@@ -15,6 +15,7 @@
 #include "../portal/spaceport_manager.h"
 #include "../portal/edge_conduit.h"
 #include "../portal/federation_identity.h"
+#include "../portal/transfer_journal.h"
 #include "../portal/megacity_manager.h"
 #include "../portal/company_stockpile.h"
 #include "../portal/logistics_hub.h"
@@ -892,6 +893,111 @@ struct FABRChunkHandler : ChunkHandler {
 	}
 };
 
+static const SaveLoad _transfer_checkpoint_desc[] = {
+	SLE_SSTR(TransferCheckpoint, request_id, VarTypes::STR),
+	SLE_SSTR(TransferCheckpoint, transfer_id, VarTypes::STR),
+	SLE_SSTR(TransferCheckpoint, arrival_receipt, VarTypes::STR),
+	SLE_VAR(TransferCheckpoint, namespace_high, VarTypes::U64),
+	SLE_VAR(TransferCheckpoint, namespace_low, VarTypes::U64),
+	SLE_VAR(TransferCheckpoint, consist_sequence, VarTypes::U64),
+	SLE_VAR(TransferCheckpoint, source_world, VarTypes::U32),
+	SLE_VAR(TransferCheckpoint, destination_world, VarTypes::U32),
+	SLE_VAR(TransferCheckpoint, state, VarTypes::U8),
+	SLE_CONDVECTOR(TransferCheckpoint, snapshot, VarTypes::U8, SaveLoadVersion::MinVersion, SaveLoadVersion::MaxVersion),
+};
+
+struct FTJRChunkHandler : ChunkHandler {
+	FTJRChunkHandler() : ChunkHandler("FTJR", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_transfer_checkpoint_desc);
+		int index = 0;
+		for (const auto &[key, record] : TransferJournal::GetAll()) {
+			SlSetArrayIndex(index++);
+			auto copy = record;
+			SlObject(&copy, _transfer_checkpoint_desc);
+		}
+	}
+	void Load() const override
+	{
+		TransferJournal::Reset();
+		const auto table = SlTableHeader(_transfer_checkpoint_desc);
+		while (SlIterateArray() != -1) {
+			TransferCheckpoint record;
+			SlObject(&record, table);
+			if (!TransferJournal::Restore(record)) SlErrorCorrupt("Invalid or conflicting federation checkpoint");
+		}
+	}
+};
+
+/** Temporary storage for InterServerPortalLink serialization. */
+struct SlInterServerPortal {
+	uint32_t id;
+	uint32_t tile;
+	uint8_t enter_dir;
+	uint32_t local_world;
+	uint32_t remote_world;
+	uint32_t remote_gate_id;
+	uint32_t virtual_length;
+};
+
+static const SaveLoad _interserver_portal_desc[] = {
+	SLE_VAR(SlInterServerPortal, id,             VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, tile,           VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, enter_dir,      VarTypes::U8),
+	SLE_VAR(SlInterServerPortal, local_world,    VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, remote_world,   VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, remote_gate_id, VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, virtual_length, VarTypes::U32),
+};
+
+/** Chunk handler for inter-server portal links (ISPR). */
+struct ISPRChunkHandler : ChunkHandler {
+	ISPRChunkHandler() : ChunkHandler("ISPR", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_interserver_portal_desc);
+		int i = 0;
+		for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
+			SlInterServerPortal sl_link{
+				.id = link.id.base(),
+				.tile = link.local_endpoint.tile.base(),
+				.enter_dir = to_underlying(link.local_endpoint.enter_dir),
+				.local_world = link.local_endpoint.world_id.base(),
+				.remote_world = link.remote_world.base(),
+				.remote_gate_id = link.remote_gate_id,
+				.virtual_length = link.virtual_length,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&sl_link, _interserver_portal_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		const std::vector<SaveLoad> slt = SlTableHeader(_interserver_portal_desc);
+		SlInterServerPortal sl_link{};
+		while (SlIterateArray() != -1) {
+			sl_link = {};
+			SlObject(&sl_link, slt);
+			InterServerPortalLink link;
+			link.id = PortalID{sl_link.id};
+			link.local_endpoint = PortalEndpoint{
+				TileIndex{sl_link.tile},
+				static_cast<DiagDirection>(sl_link.enter_dir),
+				WorldID{sl_link.local_world}
+			};
+			link.remote_world = WorldID{sl_link.remote_world};
+			link.remote_gate_id = sl_link.remote_gate_id;
+			link.virtual_length = sl_link.virtual_length;
+			PortalRegistry::RestoreInterServerPortal(link);
+		}
+	}
+};
+
+static const FTJRChunkHandler FTJR;
+static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
@@ -907,6 +1013,7 @@ static const FABRChunkHandler FABR;
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
 	PORT,
+	ISPR,
 	PRTX,
 	FIDS,
 	SPRT,
@@ -916,6 +1023,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	LHUB,
 	CHQS,
 	FABR,
+	FTJR,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

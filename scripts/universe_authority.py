@@ -13,18 +13,41 @@ import os
 import secrets
 import sys
 import time
+from functools import wraps
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+
+
+class PersistenceError(RuntimeError):
+    """No successful protocol acknowledgement is safe until persistence recovers."""
+
+
+def durable_request(handler):
+    @wraps(handler)
+    def wrapped(self):
+        try:
+            # Do not expose or mutate an unpersisted transition through another
+            # endpoint after a failed write. The HTTP server is single-threaded.
+            if AUTHORITY.persistence_pending:
+                AUTHORITY._maybe_auto_save()
+            return handler(self)
+        except PersistenceError:
+            self._send_json(503, {"error": "Authority persistence unavailable; retry the same request"})
+    return wrapped
+
 
 class UniverseAuthority:
     def __init__(self, state_file=None):
         self.state_file = state_file
         self.reset()
         if self.state_file and os.path.exists(self.state_file):
-            self.load_from_disk(self.state_file)
+            ok, error = self.load_from_disk(self.state_file)
+            if not ok:
+                raise PersistenceError(error)
 
     def reset(self):
+        self.persistence_pending = False
         self.next_transfer_seq = 1
         self.next_player_seq = 1
         self.next_charter_seq = 1
@@ -61,7 +84,9 @@ class UniverseAuthority:
     def set_state_file(self, path):
         self.state_file = path
         if path and os.path.exists(path):
-            self.load_from_disk(path)
+            ok, error = self.load_from_disk(path)
+            if not ok:
+                raise PersistenceError(error)
 
     def export_state(self):
         return {
@@ -121,7 +146,16 @@ class UniverseAuthority:
             tmp_path = target_path.with_suffix(".tmp")
             with open(tmp_path, "w", encoding="utf-8") as f:
                 json.dump(self.export_state(), f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
             tmp_path.replace(target_path)
+            # Persist the rename as well as the file contents on POSIX.
+            if os.name == "posix":
+                directory_fd = os.open(target_path.parent, os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
             return True, {"status": "saved", "path": str(target_path)}
         except Exception as e:
             return False, f"Failed to save state to {target}: {e}"
@@ -140,7 +174,11 @@ class UniverseAuthority:
 
     def _maybe_auto_save(self):
         if self.state_file:
-            self.save_to_disk()
+            self.persistence_pending = True
+            ok, error = self.save_to_disk()
+            if not ok:
+                raise PersistenceError(error)
+            self.persistence_pending = False
 
     # -------------------------------------------------------------------------
     # Authentication & Accounts
@@ -500,6 +538,27 @@ class UniverseAuthority:
     # Consist Transfers & Conservation Accounting
     # -------------------------------------------------------------------------
     def initiate_transfer(self, data):
+        # A source persists one request ID per departure attempt and reuses the
+        # exact payload after a lost response. Keep the receipt in the transfer
+        # record so it survives authority restart with the existing state file.
+        request_id = data.get("request_id")
+        request_digest = None
+        if request_id is not None:
+            if not self.state_file:
+                return False, "Retry-safe transfers require a configured authority state file"
+            if not isinstance(request_id, str) or not request_id or len(request_id) > 128:
+                return False, "request_id must be a non-empty string of at most 128 characters"
+            request_digest = hashlib.sha256(json.dumps(
+                data, sort_keys=True, separators=(",", ":"), allow_nan=False
+            ).encode("utf-8")).hexdigest()
+            for existing in self.transfers.values():
+                if (existing.get("request_id") == request_id and
+                        existing["source_world"] == data.get("source_world")):
+                    if existing.get("request_digest") != request_digest:
+                        return False, "request_id already used with a different departure payload"
+                    self._maybe_auto_save()
+                    return True, existing
+
         source_world = data.get("source_world")
         dest_world = data.get("dest_world")
         snapshot_b64 = data.get("snapshot_base64", "")
@@ -624,6 +683,8 @@ class UniverseAuthority:
 
         rec = {
             "transfer_id": tx_id,
+            "request_id": request_id,
+            "request_digest": request_digest,
             "source_world": source_world,
             "dest_world": dest_world,
             "source_gate": source_gate,
@@ -653,6 +714,10 @@ class UniverseAuthority:
         rec = self.transfers.get(tx_id)
         if not rec:
             return False, f"Transfer {tx_id} not found"
+        if rec.get("request_id") and rec["state"] in ("IN_TRANSIT", "ARRIVAL_PENDING", "COMPLETED"):
+            # A retry must not reset the transit deadline or revive a delivery.
+            self._maybe_auto_save()
+            return True, rec
         if rec["state"] not in ("PREPARING", "LOCKED"):
             return False, f"Invalid state {rec['state']} for departure"
 
@@ -668,7 +733,10 @@ class UniverseAuthority:
         now = time.time()
         ready = []
         for tx_id, rec in self.transfers.items():
-            if rec["dest_world"] == dest_world and rec["state"] == "IN_TRANSIT" and now >= rec["arrival_time"]:
+            if (rec["dest_world"] == dest_world and
+                    (rec["state"] == "IN_TRANSIT" or
+                     (rec.get("request_id") and rec["state"] == "ARRIVAL_PENDING")) and
+                    now >= rec["arrival_time"]):
                 ready.append(tx_id)
         return ready
 
@@ -678,8 +746,12 @@ class UniverseAuthority:
         rec = self.transfers.get(tx_id)
         if not rec:
             return False, f"Transfer {tx_id} not found"
-        if rec["dest_world"] != dest_world or rec["state"] != "IN_TRANSIT":
+        retry_claim = rec.get("request_id") and rec["state"] == "ARRIVAL_PENDING"
+        if rec["dest_world"] != dest_world or (rec["state"] != "IN_TRANSIT" and not retry_claim):
             return False, f"Transfer {tx_id} not available for claim by world {dest_world}"
+
+        if rec.get("request_id") and time.time() < rec["arrival_time"]:
+            return False, "Transfer has not reached its arrival deadline"
 
         claim_token = data.get("manifest_token")
         if claim_token and rec.get("manifest_token") and claim_token != rec["manifest_token"]:
@@ -699,10 +771,21 @@ class UniverseAuthority:
         rec = self.transfers.get(tx_id)
         if not rec:
             return False, f"Transfer {tx_id} not found"
+        receipt = data.get("arrival_receipt")
+        if rec.get("request_id") and success:
+            if not isinstance(receipt, str) or not receipt or len(receipt) > 128:
+                return False, "arrival_receipt is required for a retry-safe transfer"
+            if rec["state"] == "COMPLETED":
+                if rec["dest_world"] == dest_world and rec.get("arrival_receipt") == receipt:
+                    self._maybe_auto_save()
+                    return True, rec
+                return False, "Arrival receipt conflicts with the completed delivery"
         if rec["dest_world"] != dest_world or rec["state"] != "ARRIVAL_PENDING":
             return False, f"Transfer {tx_id} not pending arrival for world {dest_world}"
 
         if success:
+            if rec.get("request_id"):
+                rec["arrival_receipt"] = receipt
             rec["state"] = "COMPLETED"
             rec["status_message"] = "Consist emerged and materialized successfully"
 
@@ -1154,6 +1237,7 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         raw = self.rfile.read(content_len).decode("utf-8")
         return json.loads(raw)
 
+    @durable_request
     def do_GET(self):
         url = urlparse(self.path)
         qs = parse_qs(url.query)
@@ -1171,7 +1255,7 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         elif url.path == "/transfers/pending":
             dest_world = int(qs.get("dest_world", [0])[0])
             pending = AUTHORITY.query_pending(dest_world)
-            self._send_json(200, {"pending_transfers": pending})
+            self._send_json(200, {"pending_transfers": pending, "pending": pending})
         elif url.path == "/ledger/status":
             self._send_json(200, AUTHORITY.get_audit())
         elif url.path in ("/ledger/audit_detailed", "/economy/conservation", "/audit/commodity"):
@@ -1239,6 +1323,7 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         else:
             self._send_json(404, {"error": "Endpoint not found"})
 
+    @durable_request
     def do_POST(self):
         url = urlparse(self.path)
         data = self._read_json()
@@ -1263,7 +1348,7 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         elif url.path in ("/worlds/register", "/directory/register"):
             ok, res = AUTHORITY.register_world(data)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
-        elif url.path == "/directory/heartbeat":
+        elif url.path in ("/worlds/heartbeat", "/directory/heartbeat"):
             ok, res = AUTHORITY.update_heartbeat(data)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
         elif url.path in ("/worlds/colonize", "/directory/colonize") or (url.path.startswith("/worlds/") and url.path.endswith("/colonize")):

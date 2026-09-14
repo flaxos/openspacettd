@@ -391,6 +391,8 @@ add_files(
     portal/consist_snapshot.cpp
     portal/consist_snapshot.h
     portal/federation_cmd.cpp
+    portal/authority_transport.cpp
+    portal/authority_transport.h
     portal/federation_cmd.h
     portal/federation_auth_gui.cpp
     portal/federation_auth_gui.h

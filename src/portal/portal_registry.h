@@ -204,8 +204,14 @@ public:
 		WorldID local_world,
 		WorldID remote_world,
 		uint32_t remote_gate_id,
-		uint32_t virtual_length = 1
+		uint32_t virtual_length = 1,
+		uint32_t local_gate_id = 0
 	);
+
+	/**
+	 * Restore an existing inter-server portal link (e.g. during savegame load).
+	 */
+	static bool RestoreInterServerPortal(const InterServerPortalLink &link);
 
 	/**
 	 * Check whether a given tile is a registered inter-server portal gate.

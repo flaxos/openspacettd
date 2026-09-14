@@ -51,10 +51,13 @@
 #include "portal/federation_player.h"
 #include "portal/megacity_manager.h"
 #include "portal/planet_manager.h"
+#include "portal/portal_registry.h"
 #include "portal/corporate_hq.h"
 #include "portal/company_stockpile.h"
 #include "portal/logistics_hub.h"
 #include "portal/fabrication_manager.h"
+#include "tunnelbridge_map.h"
+#include "train.h"
 #include "station_base.h"
 #include "town.h"
 #include "clear_map.h"
@@ -2802,6 +2805,183 @@ static bool ConFederationStatus(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Configure or display the Universe Authority URL. @copydoc IConsoleCmdProc */
+static bool ConFederationAuthority(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Get or set the Universe Authority base URL for federation transfers.");
+		IConsolePrint(CC_HELP, "Usage: 'federation_authority [url]'");
+		return true;
+	}
+
+	if (argv.size() >= 2) {
+		std::string new_url = std::string(argv[1]);
+		FederationTransferManager::SetAuthorityUrl(new_url);
+		IConsolePrint(CC_DEFAULT, "Universe Authority URL set to: '{}'", new_url);
+		return true;
+	}
+
+	if (FederationTransferManager::HasExternalAuthority()) {
+		IConsolePrint(CC_DEFAULT, "Universe Authority URL: '{}'", FederationTransferManager::GetAuthorityUrl());
+	} else {
+		IConsolePrint(CC_DEFAULT, "Universe Authority: in-memory service (no external URL configured)");
+	}
+	return true;
+}
+
+/** Link a portal gate to a remote server world gate. @copydoc IConsoleCmdProc */
+static bool ConFederationLinkGate(std::span<std::string_view> argv)
+{
+	if (argv.size() < 4) {
+		IConsolePrint(CC_HELP, "Link a local portal gate head to a remote world server gate.");
+		IConsolePrint(CC_HELP, "Usage: 'federation_link_gate <tile> <remote_world> <remote_gate_id> [local_gate_id] [virtual_length]'");
+		return true;
+	}
+
+	auto p_tile = ParseInteger(argv[1]);
+	auto p_rworld = ParseInteger(argv[2]);
+	auto p_rgate = ParseInteger(argv[3]);
+	if (!p_tile.has_value() || !p_rworld.has_value() || !p_rgate.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid arguments. tile, remote_world and remote_gate_id must be integers.");
+		return false;
+	}
+
+	uint32_t local_gate_id = 0;
+	uint32_t virt_len = 10;
+	if (argv.size() >= 5) {
+		auto p_lgate = ParseInteger(argv[4]);
+		if (p_lgate.has_value() && *p_lgate > 0) local_gate_id = static_cast<uint32_t>(*p_lgate);
+	}
+	if (argv.size() >= 6) {
+		auto p_vlen = ParseInteger(argv[5]);
+		if (p_vlen.has_value() && *p_vlen > 0) virt_len = static_cast<uint32_t>(*p_vlen);
+	}
+
+	TileIndex tile{static_cast<uint32_t>(*p_tile)};
+	if (!IsValidTile(tile)) {
+		IConsolePrint(CC_ERROR, "Tile {} is invalid.", tile.base());
+		return false;
+	}
+
+	DiagDirection dir = DiagDirection::Invalid;
+	WorldID local_world = PlanetManager::GetTileWorld(tile);
+
+	/* Check unlinked gates */
+	const auto &unlinked = PortalRegistry::GetUnlinkedGates();
+	auto it_un = unlinked.find(tile);
+	if (it_un != unlinked.end()) {
+		dir = it_un->second.enter_dir;
+		local_world = it_un->second.world_id;
+	} else if (IsTunnelTile(tile)) {
+		dir = GetTunnelBridgeDirection(tile);
+	}
+
+	if (!IsValidDiagDirection(dir)) {
+		IConsolePrint(CC_ERROR, "Tile {} is not a recognized portal gate or tunnel entrance.", tile.base());
+		return false;
+	}
+
+	if (local_world == INVALID_WORLD) local_world = WorldID{1};
+
+	PortalRegistry::UnregisterPortalByTile(tile);
+
+	PortalID pid = PortalRegistry::RegisterInterServerPortal(
+		tile, dir, local_world, WorldID{static_cast<uint32_t>(*p_rworld)},
+		static_cast<uint32_t>(*p_rgate), virt_len, local_gate_id
+	);
+
+	if (pid == INVALID_PORTAL) {
+		IConsolePrint(CC_ERROR, "Failed to register inter-server portal at tile {}.", tile.base());
+		return false;
+	}
+
+	IConsolePrint(CC_DEFAULT, "Registered inter-server portal link (ID {}): Tile {} (World {}) -> Remote World {}, Gate {}",
+		pid.base(), tile.base(), local_world.base(), static_cast<uint32_t>(*p_rworld), static_cast<uint32_t>(*p_rgate));
+	return true;
+}
+
+/** List all portal gates and inter-server connections. @copydoc IConsoleCmdProc */
+static bool ConFederationListGates(std::span<std::string_view> argv)
+{
+	(void)argv;
+	IConsolePrint(CC_DEFAULT, "Inter-Server Portals:");
+	for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
+		IConsolePrint(CC_DEFAULT, "  Gate ID {}: Tile {} (World {}) -> Remote World {}, Remote Gate {}",
+			link.id.base(), tile.base(), link.local_endpoint.world_id.base(),
+			link.remote_world.base(), link.remote_gate_id);
+	}
+	IConsolePrint(CC_DEFAULT, "Paired Portals:");
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
+		IConsolePrint(CC_DEFAULT, "  Portal ID {}: Tile A {} (World {}) <-> Tile B {} (World {})",
+			id, link.end_a.tile.base(), link.end_a.world_id.base(),
+			link.end_b.tile.base(), link.end_b.world_id.base());
+	}
+	IConsolePrint(CC_DEFAULT, "Unlinked Gates:");
+	for (const auto &[tile, ep] : PortalRegistry::GetUnlinkedGates()) {
+		IConsolePrint(CC_DEFAULT, "  Tile {} (World {}, Dir {})",
+			tile.base(), ep.world_id.base(), to_underlying(ep.enter_dir));
+	}
+	return true;
+}
+
+/** List all trains on this server. @copydoc IConsoleCmdProc */
+static bool ConFederationTrains(std::span<std::string_view> argv)
+{
+	(void)argv;
+	size_t count = 0;
+	IConsolePrint(CC_DEFAULT, "Trains on this server:");
+	for (const Train *t : Train::Iterate()) {
+		if (t->IsFrontEngine()) {
+			count++;
+			uint32_t total_cargo = 0;
+			for (const Train *u = t; u != nullptr; u = u->Next()) {
+				total_cargo += u->cargo.StoredCount();
+			}
+			IConsolePrint(CC_DEFAULT, "  Train ID {}: Tile {}, Speed {} km/h, Cargo {}, Orders {}",
+				t->index.base(), t->tile.base(), t->cur_speed * 10 / 16, total_cargo, t->GetNumOrders());
+		}
+	}
+	IConsolePrint(CC_DEFAULT, "Total front engines: {}", count);
+	return true;
+}
+
+/** Dispatch a consist through an inter-server portal gate. @copydoc IConsoleCmdProc */
+static bool ConFederationDispatch(std::span<std::string_view> argv)
+{
+	if (argv.size() < 3) {
+		IConsolePrint(CC_HELP, "Dispatch a consist into an inter-server portal gate.");
+		IConsolePrint(CC_HELP, "Usage: 'federation_dispatch <vehicle_id> <portal_tile>'");
+		return true;
+	}
+
+	auto p_vid = ParseInteger(argv[1]);
+	auto p_tile = ParseInteger(argv[2]);
+	if (!p_vid.has_value() || !p_tile.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid arguments. vehicle_id and portal_tile must be integers.");
+		return false;
+	}
+
+	TileIndex tile{static_cast<uint32_t>(*p_tile)};
+	Train *v = Train::GetIfValid(VehicleID{static_cast<uint32_t>(*p_vid)});
+	if (v == nullptr) {
+		IConsolePrint(CC_ERROR, "Train ID {} not found.", *p_vid);
+		return false;
+	}
+
+	if (!PortalRegistry::IsPortalTile(tile) || !PortalRegistry::IsInterServerPortal(tile)) {
+		IConsolePrint(CC_ERROR, "Tile {} is not an inter-server portal gate.", tile.base());
+		return false;
+	}
+
+	if (!FederationTransferManager::InitiateConsistDeparture(v, tile)) {
+		IConsolePrint(CC_ERROR, "Failed to dispatch train {} into portal at tile {}.", *p_vid, tile.base());
+		return false;
+	}
+
+	IConsolePrint(CC_DEFAULT, "Dispatched train {} into portal at tile {}.", *p_vid, tile.base());
+	return true;
+}
+
 /** Authenticate or register a player account with the Universe Authority. @copydoc IConsoleCmdProc */
 static bool ConUniverseAuth(std::span<std::string_view> argv)
 {
@@ -3550,6 +3730,11 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("companies",               ConCompanies);
 	IConsole::AliasRegister("players",               "companies");
 	IConsole::CmdRegister("federation_status",       ConFederationStatus);
+	IConsole::CmdRegister("federation_authority",    ConFederationAuthority);
+	IConsole::CmdRegister("federation_link_gate",    ConFederationLinkGate);
+	IConsole::CmdRegister("federation_list_gates",   ConFederationListGates);
+	IConsole::CmdRegister("federation_trains",       ConFederationTrains);
+	IConsole::CmdRegister("federation_dispatch",     ConFederationDispatch);
 	IConsole::CmdRegister("universe_auth",           ConUniverseAuth);
 	IConsole::CmdRegister("universe_worlds",         ConUniverseWorlds);
 	IConsole::CmdRegister("universe_company",        ConUniverseCompany);

@@ -16,7 +16,9 @@
 #include "../portal/consist_materializer.h"
 #include "../portal/consist_snapshot.h"
 #include "../portal/content_manifest.h"
+#include "../portal/authority_transport.h"
 #include "../portal/federation_cmd.h"
+#include "../portal/transfer_journal.h"
 #include "../portal/federation_identity.h"
 #include "../portal/portal_registry.h"
 #include "../portal/universe_authority.h"
@@ -79,6 +81,48 @@ static ConsistSnapshot CreateSampleSnapshot(uint32_t cargo_count = 50)
 	snapshot.units.push_back(wagon);
 
 	return snapshot;
+}
+
+TEST_CASE("Federation Transfer - Checkpoint transitions reject conflicting receipts")
+{
+	TransferJournal::Reset();
+	TransferCheckpoint source;
+	source.request_id = "departure-1";
+	source.namespace_high = 42;
+	source.consist_sequence = 7;
+	source.source_world = 1;
+	source.destination_world = 2;
+	source.snapshot = {0, 255, 12};
+	REQUIRE(TransferJournal::Prepare(source));
+	CHECK(TransferJournal::Prepare(source));
+	CHECK_FALSE(TransferJournal::MarkDeparted(1, source.request_id));
+	REQUIRE(TransferJournal::BindTransfer(1, source.request_id, "TRANSFER-1"));
+	CHECK_FALSE(TransferJournal::BindTransfer(1, source.request_id, "TRANSFER-2"));
+	CHECK_FALSE(TransferJournal::Prepare(source));
+	REQUIRE(TransferJournal::MarkDeparted(1, source.request_id));
+	CHECK(TransferJournal::MarkDeparted(1, source.request_id));
+	CHECK(TransferJournal::Find(1, source.request_id)->state == TransferCheckpointState::Departed);
+	CHECK_FALSE(TransferJournal::ConfirmArrival(1, source.request_id, "receipt"));
+
+	TransferCheckpoint destination = *TransferJournal::Find(1, source.request_id);
+	TransferJournal::Reset(); // independent destination process
+	destination.state = TransferCheckpointState::Materialized;
+	destination.arrival_receipt = "receipt";
+	REQUIRE(TransferJournal::RecordArrival(destination));
+	CHECK(TransferJournal::RecordArrival(destination));
+	CHECK_FALSE(TransferJournal::MarkDeparted(1, destination.request_id));
+	CHECK_FALSE(TransferJournal::ConfirmArrival(1, destination.request_id, "wrong"));
+	REQUIRE(TransferJournal::ConfirmArrival(1, destination.request_id, "receipt"));
+	CHECK(TransferJournal::ConfirmArrival(1, destination.request_id, "receipt"));
+	CHECK_FALSE(TransferJournal::RecordArrival(destination)); // cannot rewind confirmation
+
+	destination.source_world = 3;
+	CHECK(TransferJournal::RecordArrival(destination)); // request IDs are source-scoped
+	destination.request_id = "invalid";
+	destination.state = static_cast<TransferCheckpointState>(255);
+	CHECK_FALSE(TransferJournal::Restore(destination));
+	CHECK(TransferJournal::GetAll().size() == 2);
+	TransferJournal::Reset();
 }
 
 TEST_CASE("Federation Transfer - Inter-Server Portal Registration and Query")
@@ -337,7 +381,22 @@ TEST_CASE("Federation Transfer - Consist Despawn for Transfer")
 	VehicleID wagon_id = wagon->index;
 
 	/* Despawn consist */
-	ConsistDespawnResult despawn_res = ConsistMaterializer::DespawnForTransfer(engine, owner_token);
+	bool admission_called = false;
+	auto rejected = ConsistMaterializer::DespawnForTransfer(engine, owner_token,
+		[&](const ConsistSnapshotBytes &bytes) {
+			admission_called = true;
+			CHECK(bytes.Succeeded());
+			CHECK_FALSE(bytes.bytes.empty());
+			return false;
+		});
+	CHECK(admission_called);
+	CHECK_FALSE(rejected.success);
+	REQUIRE(Train::GetIfValid(engine_id) == engine);
+	REQUIRE(Train::GetIfValid(wagon_id) != nullptr);
+	CHECK(HasTunnelBridgeReservation(gate_tile));
+
+	ConsistDespawnResult despawn_res = ConsistMaterializer::DespawnForTransfer(engine, owner_token,
+		[](const ConsistSnapshotBytes &) { return true; });
 	REQUIRE(despawn_res.success);
 	REQUIRE(!despawn_res.snapshot_bytes.bytes.empty());
 
@@ -414,6 +473,73 @@ TEST_CASE("Federation Transfer - Consist Materialization on Destination Gate")
 	_company_pool.CleanPool();
 }
 
+TEST_CASE("Federation Transfer - Coordinator retries only the exact destination gate")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+	_company_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+	(void)MockEnvironment::Instance();
+	InitTestEngines();
+	REQUIRE(Company::CanAllocateItem());
+	REQUIRE(Company::Create() != nullptr);
+
+	const TileIndex gate = TileXY(25, 25);
+	const TileIndex other_gate = TileXY(35, 35);
+	MakeRailTunnel(gate, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeRailTunnel(other_gate, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	const PortalID pid = PortalRegistry::RegisterInterServerPortal(
+		gate, DiagDirection::NE, WorldID{2}, WorldID{1}, 10, 100);
+	REQUIRE(pid != INVALID_PORTAL);
+	REQUIRE(PortalRegistry::RegisterUnlinkedGate(other_gate, DiagDirection::NE, WorldID{2}));
+
+	uint32_t destination = pid.base();
+	bool missing = false;
+	SECTION("Blocked gate resumes on a later poll") {
+		SetTunnelBridgeReservation(gate, true);
+	}
+	SECTION("Missing gate must not divert to another linked gate") {
+		destination = pid.base() + 1000;
+		missing = true;
+	}
+	SECTION("Missing gate must not divert to an unlinked gate") {
+		REQUIRE(PortalRegistry::UnregisterInterServerPortal(gate));
+		missing = true;
+	}
+
+	const auto encoded = ConsistSnapshotCodec::Encode(CreateSampleSnapshot(40));
+	REQUIRE(encoded.Succeeded());
+	const std::string tx = authority.InitiateTransfer(WorldID{1}, WorldID{2}, 10, destination, encoded, 10);
+	REQUIRE_FALSE(tx.empty());
+	REQUIRE(authority.DepartTransfer(tx, 0));
+	CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 10) == 0);
+	CHECK(authority.GetTransfer(tx)->state == TransferState::ArrivalPending);
+	CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 11) == 0);
+	CHECK(authority.QueryPendingTransfers(WorldID{2}, 11).size() == 1);
+	CHECK_FALSE(HasTunnelBridgeReservation(other_gate));
+	CHECK(Train::Iterate().begin() == Train::Iterate().end());
+
+	if (!missing) {
+		SetTunnelBridgeReservation(gate, false);
+		CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 12) == 1);
+		CHECK(authority.GetTransfer(tx)->state == TransferState::Completed);
+		CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 13) == 0);
+		CHECK(HasTunnelBridgeReservation(gate));
+		uint32_t cargo = 0;
+		for (const Train *train : Train::Iterate()) cargo += train->cargo.StoredCount();
+		CHECK(cargo == 40);
+	}
+
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	authority.Reset();
+}
+
 TEST_CASE("Federation Transfer - Obstruction and Manifest Rejection")
 {
 	Map::Allocate(64, 64);
@@ -456,4 +582,107 @@ TEST_CASE("Federation Transfer - Obstruction and Manifest Rejection")
 	PortalRegistry::Reset();
 	_vehicle_pool.CleanPool();
 	_company_pool.CleanPool();
+}
+
+TEST_CASE("Federation Transport - AuthorityRequest Protocol and Envelope Handling")
+{
+	SECTION("Reject invalid origins")
+	{
+		AuthorityRequest req1("ftp://localhost:8080", AuthorityOperation::RegisterWorld, nlohmann::json::object());
+		CHECK_FALSE(req1.GetError().empty());
+
+		AuthorityRequest req2("http://localhost:8080/path", AuthorityOperation::RegisterWorld, nlohmann::json::object());
+		CHECK_FALSE(req2.GetError().empty());
+	}
+
+	SECTION("Format operations and execute via mock sender")
+	{
+		std::string sent_uri;
+		std::string sent_body;
+		HTTPCallback *sent_cb = nullptr;
+
+		AuthorityRequest req("http://127.0.0.1:38080", AuthorityOperation::Pending, nlohmann::json::object(), 3);
+		bool started = req.Start([&](std::string_view uri, HTTPCallback *cb, std::string &&body) {
+			sent_uri = std::string(uri);
+			sent_cb = cb;
+			sent_body = std::move(body);
+		});
+
+		REQUIRE(started);
+		CHECK(sent_uri == "http://127.0.0.1:38080/transfers/pending?dest_world=3");
+		CHECK(sent_cb == &req);
+
+		// Deliver JSON response
+		std::string json_data = "{\"pending\": [\"TX-101\", \"TX-102\"]}";
+		auto buf = std::make_unique<char[]>(json_data.size());
+		std::copy(json_data.begin(), json_data.end(), buf.get());
+		req.OnReceiveData(std::move(buf), json_data.size());
+		req.OnReceiveData(nullptr, 0); // Terminal notification
+
+		REQUIRE(req.IsFinished());
+		REQUIRE(req.Succeeded());
+		CHECK(req.GetResponse()["pending"].size() == 2);
+	}
+
+	SECTION("Handle error response and failures")
+	{
+		AuthorityRequest req("http://127.0.0.1:38080", AuthorityOperation::Initiate, nlohmann::json{{"dest_world", 2}});
+		req.Start([&](std::string_view, HTTPCallback *cb, std::string &&) {
+			std::string err_json = "{\"error\": \"Transfer blocked by congestion\"}";
+			auto buf = std::make_unique<char[]>(err_json.size());
+			std::copy(err_json.begin(), err_json.end(), buf.get());
+			cb->OnReceiveData(std::move(buf), err_json.size());
+			cb->OnReceiveData(nullptr, 0);
+		});
+
+		REQUIRE(req.IsFinished());
+		CHECK_FALSE(req.Succeeded());
+		CHECK(req.GetError() == "Authority rejected request");
+	}
+}
+
+TEST_CASE("Federation Transport - Base64 Round Trip")
+{
+	std::vector<uint8_t> data = {0, 1, 2, 3, 255, 128, 64, 42, 13};
+	std::string encoded = Base64Encode(data);
+	std::vector<uint8_t> decoded = Base64Decode(encoded);
+	CHECK(decoded == data);
+
+	CHECK(Base64Decode(Base64Encode(std::vector<uint8_t>{})).empty());
+	CHECK(Base64Decode(Base64Encode(std::vector<uint8_t>{42})) == std::vector<uint8_t>{42});
+	CHECK(Base64Decode(Base64Encode(std::vector<uint8_t>{42, 99})) == std::vector<uint8_t>{42, 99});
+	CHECK(Base64Decode(Base64Encode(std::vector<uint8_t>{42, 99, 101})) == std::vector<uint8_t>{42, 99, 101});
+}
+
+TEST_CASE("Federation Transfer - Journal Deduplication and Authority URL Config")
+{
+	FederationTransferManager::Reset();
+	CHECK_FALSE(FederationTransferManager::HasExternalAuthority());
+
+	FederationTransferManager::SetAuthorityUrl("http://127.0.0.1:38080");
+	CHECK(FederationTransferManager::HasExternalAuthority());
+	CHECK(FederationTransferManager::GetAuthorityUrl() == "http://127.0.0.1:38080");
+
+	// Deduplication test: Record arrival in journal and verify HasArrival
+	TransferCheckpoint cp;
+	cp.request_id = "ARR-W2-TX1001";
+	cp.transfer_id = "TX-1001";
+	cp.arrival_receipt = "RCPT-W2-TX1001-100";
+	cp.namespace_high = 1;
+	cp.namespace_low = 2;
+	cp.consist_sequence = 3;
+	cp.source_world = 1;
+	cp.destination_world = 2;
+	cp.snapshot = {1, 2, 3, 4};
+	cp.state = TransferCheckpointState::Materialized;
+
+	CHECK_FALSE(TransferJournal::HasArrival("TX-1001"));
+	REQUIRE(TransferJournal::RecordArrival(cp));
+	CHECK(TransferJournal::HasArrival("TX-1001"));
+	CHECK(TransferJournal::FindByTransferId("TX-1001") != nullptr);
+	CHECK(TransferJournal::FindByTransferId("TX-1001")->arrival_receipt == "RCPT-W2-TX1001-100");
+
+	FederationTransferManager::Reset();
+	CHECK_FALSE(FederationTransferManager::HasExternalAuthority());
+	CHECK_FALSE(TransferJournal::HasArrival("TX-1001"));
 }
