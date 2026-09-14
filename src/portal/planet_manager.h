@@ -15,12 +15,14 @@
 #include "../command_type.h"
 #include "../rail_type.h"
 #include "../economy_type.h"
+#include "../cargo_type.h"
 #include <vector>
 #include <unordered_map>
 #include <array>
 #include <string>
 
 struct Window;
+struct Town;
 
 /**
  * Spatial manager and query engine for planetary worlds.
@@ -52,6 +54,61 @@ public:
 	static const PlanetRegion *GetRegion(WorldID world);
 
 	/**
+	 * Set the WorldPhase of a registered world.
+	 * @param world The WorldID.
+	 * @param phase The new WorldPhase.
+	 * @return True if world was found and updated, false otherwise.
+	 */
+	static bool SetWorldPhase(WorldID world, WorldPhase phase);
+
+	/**
+	 * Set the WorldBiome of a registered world.
+	 * @param world The WorldID.
+	 * @param biome The new WorldBiome.
+	 * @return True if world was found and updated, false otherwise.
+	 */
+	static bool SetWorldBiome(WorldID world, WorldBiome biome);
+
+	/**
+	 * Add development score directly to a world region.
+	 * @param world The WorldID.
+	 * @param score Score to add.
+	 * @return True if world was found and updated, false otherwise.
+	 */
+	static bool AddDevelopmentScore(WorldID world, uint32_t score);
+
+	/**
+	 * Promote a registered world to its next development phase tier.
+	 * Phase4_Expansion -> Phase3_Frontier -> Phase2_Developed -> Phase1_Core.
+	 * @param world The WorldID to promote.
+	 * @return True if promoted, false if already at Phase 1 or not found.
+	 */
+	static bool PromoteWorldPhase(WorldID world);
+
+	/**
+	 * Check if a world is currently eligible for promotion to its next development phase tier.
+	 * @param world The WorldID to check.
+	 * @return True if world development score meets or exceeds the required threshold.
+	 */
+	static bool CanPromoteWorld(WorldID world);
+
+	/**
+	 * Get the development score threshold required to promote from the given phase to the next.
+	 * @param phase Current WorldPhase.
+	 * @return Required development score, or UINT32_MAX if already at Phase 1 Core.
+	 */
+	static uint32_t GetPromotionThreshold(WorldPhase phase);
+
+	/**
+	 * Colonize an uncolonized Phase 4 Expansion world, elevating it to Phase 3 Frontier status.
+	 * @param world The WorldID to colonize.
+	 * @param outpost_name Optional custom name for the initial colonial outpost / world update.
+	 * @param outpost_tile Optional tile coordinate where the initial outpost is established.
+	 * @return True if colonization succeeded, false if not an Expansion world or not found.
+	 */
+	static bool ColonizeWorld(WorldID world, const std::string &outpost_name = "", TileIndex outpost_tile = INVALID_TILE);
+
+	/**
 	 * Retrieve the planet region containing the given tile.
 	 * @param tile Tile to query.
 	 * @return Pointer to the PlanetRegion containing the tile, or nullptr if in void/buffer space.
@@ -81,6 +138,13 @@ public:
 	static WorldPhase GetTilePhase(TileIndex tile);
 
 	/**
+	 * Get the WorldBiome for a given tile in O(1) time.
+	 * @param tile Tile to query.
+	 * @return The WorldBiome of the tile (defaults to Temperate if invalid/in buffer).
+	 */
+	static WorldBiome GetTileBiome(TileIndex tile);
+
+	/**
 	 * Validate the common base-tile requirements for world-aware construction.
 	 * Commands remain responsible for asset-specific footprint and Phase rules.
 	 * @param tile Proposed construction tile.
@@ -89,13 +153,22 @@ public:
 	static CommandCost CheckConstructionPlacement(TileIndex tile);
 
 	/**
+	 * Check if a town is permitted on the world at the given tile.
+	 * Blocks town placement in void buffer space and on uncolonized Phase 4 Expansion wilderness worlds.
+	 * @param tile Proposed town location tile.
+	 * @return Succeeded CommandCost if permitted; error CommandCost if restricted.
+	 */
+	static CommandCost CheckTownPlacement(TileIndex tile);
+
+	/**
 	 * Check if an industry is permitted on the world at the given tile.
 	 * @param tile Tile location for the proposed industry.
 	 * @param is_raw Whether the industry is an extractive or organic raw producer (e.g. Bio-Farm, Mine).
 	 * @param is_processing Whether the industry is a processing facility (e.g. Factory, Refinery).
+	 * @param is_farm Whether the industry is an agricultural / bio-farm facility.
 	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
 	 */
-	static CommandCost CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing);
+	static CommandCost CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing, bool is_farm = false);
 
 	/**
 	 * Check if a rail depot of the specified railtype is permitted on the world at the given tile.
@@ -104,6 +177,16 @@ public:
 	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
 	 */
 	static CommandCost CheckDepotPlacement(TileIndex tile, RailType railtype);
+
+	/**
+	 * Check if rail track of the specified railtype is permitted on the world at the given tile.
+	 * Enforces Commonwealth technology tiers: pioneer track on Expansion worlds, conventional/electric
+	 * on Frontier worlds, and restricts Maglev to Phase 1 Core worlds. Blocks track in void space.
+	 * @param tile Tile location for the proposed track.
+	 * @param railtype Rail type of the track.
+	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
+	 */
+	static CommandCost CheckTrackPlacement(TileIndex tile, RailType railtype);
 
 	/**
 	 * Calculate the percentage bonus applied to an interplanetary cargo shipment.
@@ -125,6 +208,16 @@ public:
 	 * @return Adjusted profit incorporating interplanetary trade premiums.
 	 */
 	static Money GetInterplanetaryCargoProfit(Money base_profit, TileIndex src_tile, TileIndex dest_tile);
+
+	/**
+	 * Record a cargo delivery at a destination station tile and credit development score to the target world.
+	 * Interplanetary shipments from different worlds grant higher development score bonuses.
+	 * @param dest_tile Destination station tile where cargo was delivered.
+	 * @param cargo_type Type of cargo delivered.
+	 * @param num_pieces Units of cargo accepted.
+	 * @param src_tile Origin tile of the cargo, or INVALID_TILE if unknown/local.
+	 */
+	static void RecordCargoDelivery(TileIndex dest_tile, CargoType cargo_type, uint num_pieces, TileIndex src_tile = INVALID_TILE);
 
 	/**
 	 * Get a user-friendly display name for a WorldPhase.
@@ -169,6 +262,15 @@ public:
 
 	/** Rebuild the spatial grid acceleration structure from registered regions. */
 	static void RebuildSpatialGrid();
+
+	/** Get aggregate population of all settlements located on the specified world. */
+	static uint32_t GetWorldPopulation(WorldID world);
+
+	/** Get the primary (highest population or outpost) town located on the specified world. */
+	static Town *GetWorldPrimaryTown(WorldID world);
+
+	/** Get total count of active industries located on the specified world. */
+	static size_t GetWorldIndustryCount(WorldID world);
 
 private:
 	static std::vector<PlanetRegion> regions;

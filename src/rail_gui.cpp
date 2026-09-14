@@ -55,6 +55,7 @@
 #include "portal/portal_terminal.h"
 #include "portal/planet_manager.h"
 #include "portal/edge_conduit.h"
+#include "blueprint/blueprint_gui.h"
 
 #include "table/strings.h"
 
@@ -509,7 +510,7 @@ struct BuildRailToolbarWindow : Window {
 		WID_RAT_BUILD_NS, WID_RAT_BUILD_X, WID_RAT_BUILD_EW, WID_RAT_BUILD_Y, WID_RAT_AUTORAIL,
 		WID_RAT_BUILD_DEPOT, WID_RAT_BUILD_WAYPOINT, WID_RAT_BUILD_STATION, WID_RAT_BUILD_SIGNALS,
 		WID_RAT_BUILD_BRIDGE, WID_RAT_BUILD_TUNNEL, WID_RAT_CONVERT_RAIL,
-		WID_RAT_BUILD_PORTAL, WID_RAT_BUILD_CONDUIT,
+		WID_RAT_BUILD_PORTAL, WID_RAT_BUILD_CONDUIT, WID_RAT_BLUEPRINT,
 	};
 
 	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
@@ -569,6 +570,7 @@ struct BuildRailToolbarWindow : Window {
 		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_TUNNEL)->SetSprite(rti->gui_sprites.build_tunnel);
 		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_PORTAL)->SetSprite(rti->gui_sprites.build_tunnel);
 		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_CONDUIT)->SetSprite(rti->gui_sprites.build_tunnel);
+		this->GetWidget<NWidgetCore>(WID_RAT_BLUEPRINT)->SetSprite(SPR_IMG_LANDSCAPING);
 	}
 
 	/**
@@ -647,6 +649,7 @@ struct BuildRailToolbarWindow : Window {
 			case WID_RAT_CONVERT_RAIL: return GetRailTypeInfo(_cur_railtype)->cursor.convert;
 			case WID_RAT_BUILD_PORTAL: return GetRailTypeInfo(_cur_railtype)->cursor.tunnel;
 			case WID_RAT_BUILD_CONDUIT: return GetRailTypeInfo(_cur_railtype)->cursor.tunnel;
+			case WID_RAT_BLUEPRINT: return SPR_CURSOR_MOUSE;
 			default: NOT_REACHED();
 		}
 	}
@@ -674,6 +677,7 @@ struct BuildRailToolbarWindow : Window {
 			case WID_RAT_CONVERT_RAIL: return HT_RECT | HT_DIAGONAL;
 			case WID_RAT_BUILD_PORTAL: return HT_SPECIAL;
 			case WID_RAT_BUILD_CONDUIT: return HT_SPECIAL;
+			case WID_RAT_BLUEPRINT: return HT_NONE;
 			default: NOT_REACHED();
 		}
 	}
@@ -726,6 +730,10 @@ struct BuildRailToolbarWindow : Window {
 				} else {
 					ClearPendingPortalLink();
 				}
+				break;
+
+			case WID_RAT_BLUEPRINT:
+				ShowBlueprintLibrary();
 				break;
 		}
 
@@ -1057,6 +1065,8 @@ static constexpr std::initializer_list<NWidgetPart> _nested_build_rail_widgets =
 						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_TUNNEL_RAIL, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_PORTAL_GATE),
 		NWidget(WWT_IMGBTN, Colours::DarkGreen, WID_RAT_BUILD_CONDUIT),
 						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_TUNNEL_RAIL, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_EDGE_CONDUIT),
+		NWidget(WWT_IMGBTN, Colours::DarkGreen, WID_RAT_BLUEPRINT),
+						SetFill(0, 1), SetToolbarMinimalSize(1), SetSpriteTip(SPR_IMG_LANDSCAPING, STR_RAIL_TOOLBAR_TOOLTIP_BLUEPRINT_LIBRARY),
 	EndContainer(),
 };
 

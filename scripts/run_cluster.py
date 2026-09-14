@@ -20,11 +20,12 @@ from pathlib import Path
 DEFAULT_CONFIG_PATH = "config/cluster.json"
 
 class ClusterSupervisor:
-    def __init__(self, config_path=DEFAULT_CONFIG_PATH, authority_only=False, no_servers=False):
+    def __init__(self, config_path=DEFAULT_CONFIG_PATH, authority_only=False, no_servers=False, state_file=None):
         self.config_path = config_path
         self.authority_only = authority_only
         self.no_servers = no_servers
         self.config = self._load_config()
+        self.state_file = state_file or self.config.get("authority", {}).get("state_file")
         self.running = False
 
         # State tracking
@@ -101,6 +102,8 @@ class ClusterSupervisor:
         print(f"[Supervisor] Launching Universe Authority daemon on {host}:{port}...")
         auth_log = open(self.log_dir / "universe_authority.log", "a")
         cmd = [sys.executable, "scripts/universe_authority.py", "--host", host, "--port", str(port)]
+        if self.state_file:
+            cmd.extend(["--state-file", str(self.state_file)])
         self.authority_process = subprocess.Popen(cmd, stdout=auth_log, stderr=subprocess.STDOUT)
 
         # Wait for Authority to become responsive
@@ -402,14 +405,25 @@ def main():
     parser.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Path to cluster configuration JSON")
     parser.add_argument("--authority-only", action="store_true", help="Start only the Universe Authority service")
     parser.add_argument("--no-servers", action="store_true", help="Bootstrap authority & routes without spawning game servers")
+    parser.add_argument("--state-file", default=None, help="Path to state persistence JSON file for authority")
     parser.add_argument("--status", action="store_true", help="Query and display cluster live status")
     parser.add_argument("--duration", type=float, default=None, help="Run supervisor for N seconds then shut down cleanly")
+    parser.add_argument("--run-acceptance", action="store_true", help="Execute the Sprint 29 Federation Acceptance Kit")
     args = parser.parse_args()
+
+    if args.run_acceptance:
+        acceptance_script = Path(__file__).parent / "test_sprint29_acceptance_kit.py"
+        if not acceptance_script.exists():
+            print(f"[Supervisor] Acceptance kit script not found at {acceptance_script}")
+            sys.exit(1)
+        res = subprocess.run([sys.executable, str(acceptance_script)])
+        sys.exit(res.returncode)
 
     supervisor = ClusterSupervisor(
         config_path=args.config,
         authority_only=args.authority_only,
-        no_servers=args.no_servers
+        no_servers=args.no_servers,
+        state_file=args.state_file
     )
 
     if args.status:

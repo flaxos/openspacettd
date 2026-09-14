@@ -755,6 +755,18 @@ enum class WindowClass : uint16_t {
 	/** Universe Authority registered world directory. */
 	UniverseDirectory,
 
+	/** Rail blueprint library and manager window. */
+	BlueprintLibrary,
+
+	/** Multi-world supply chain matrix and commodity trade ledger window. */
+	TradeLedger,
+
+	/** Federation player authentication and corporate charters window. */
+	FederationAuth,
+
+	/** Corporate Headquarters campus and planetary stockpile overview. */
+	CorporateHQ,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

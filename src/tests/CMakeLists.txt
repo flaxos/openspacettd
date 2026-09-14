@@ -29,12 +29,26 @@ add_test_files(
     test_federation_megacity_economy.cpp
     test_megacity_gui.cpp
     test_federation_cluster.cpp
+    test_federation_order_restoration.cpp
     test_portal_construction.cpp
     test_world_gen.cpp
     test_interplanetary_cargo.cpp
     test_spaceports_and_conduits.cpp
     test_spaceport_conduit_bridge.cpp
     test_gateway_arrays_and_telemetry.cpp
+    test_sprint24_alien_biomes.cpp
+    test_blueprint.cpp
+    test_cst_prefabs.cpp
+    test_sprint27_feature_ui.cpp
+    test_sprint28_guided_uat.cpp
+    test_sprint29_federation_acceptance.cpp
+    test_sprint30_biomes_colonization.cpp
+    test_sprint31_colonization_gui.cpp
+    test_sprint32_lifecycle_and_tech.cpp
+    test_sprint33_planetary_economy_and_megacity.cpp
+    test_sprint36_all_features_uat.cpp
+    test_sprint39_corporate_hq_and_stockpile.cpp
+    test_sprint40_fabrication_engine.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

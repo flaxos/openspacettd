@@ -103,6 +103,7 @@ enum class Subdirectory : uint8_t {
 	Screenshot, ///< Subdirectory for all screenshots.
 	SocialIntegration, ///< Subdirectory for all social integration plugins.
 	Docs, ///< Subdirectory for documentation.
+	Blueprint, ///< Subdirectory for player rail blueprints.
 	End, ///< End marker.
 	None, ///< A path without any base directory.
 };

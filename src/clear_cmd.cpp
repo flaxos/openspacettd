@@ -21,6 +21,8 @@
 #include "table/sprites.h"
 #include "table/clear_land.h"
 
+#include "portal/planet_manager.h"
+
 #include "safeguards.h"
 
 /** @copydoc ClearTileProc */
@@ -144,9 +146,17 @@ static void DrawTile_Clear(TileInfo *ti)
 	}
 
 	switch (GetClearGround(ti->tile)) {
-		case ClearGround::Grass:
-			DrawClearLandTile(ti, GetClearDensity(ti->tile));
+		case ClearGround::Grass: {
+			WorldBiome biome = PlanetManager::GetTileBiome(ti->tile);
+			if (biome == WorldBiome::AridDesert || biome == WorldBiome::SubArctic) {
+				DrawGroundSprite(_clear_land_sprites_snow_desert[GetClearDensity(ti->tile)] + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
+			} else if (biome == WorldBiome::Volcanic) {
+				DrawRoughLandTile(ti);
+			} else {
+				DrawClearLandTile(ti, GetClearDensity(ti->tile));
+			}
 			break;
+		}
 
 		case ClearGround::Rough:
 			DrawRoughLandTile(ti);
@@ -285,10 +295,23 @@ static void TileLoop_Clear(TileIndex tile)
 {
 	AmbientSoundEffect(tile);
 
-	switch (_settings_game.game_creation.landscape) {
-		case LandscapeType::Tropic: TileLoopClearDesert(tile); break;
-		case LandscapeType::Arctic: TileLoopClearAlps(tile);   break;
-		default: break;
+	WorldBiome biome = PlanetManager::GetTileBiome(tile);
+	if (biome == WorldBiome::AridDesert) {
+		TileLoopClearDesert(tile);
+	} else if (biome == WorldBiome::SubArctic) {
+		TileLoopClearAlps(tile);
+	} else if (biome == WorldBiome::Volcanic) {
+		if (GetClearGround(tile) == ClearGround::Grass) {
+			SetClearGroundDensity(tile, ClearGround::Rough, GetClearDensity(tile));
+			MarkTileDirtyByTile(tile);
+		}
+		return;
+	} else {
+		switch (_settings_game.game_creation.landscape) {
+			case LandscapeType::Tropic: TileLoopClearDesert(tile); break;
+			case LandscapeType::Arctic: TileLoopClearAlps(tile);   break;
+			default: break;
+		}
 	}
 
 	if (IsSnowTile(tile)) return;

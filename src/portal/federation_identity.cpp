@@ -9,15 +9,18 @@
 #include "federation_identity.h"
 
 #include "../company_base.h"
+#include "../depot_base.h"
 #include "../industry.h"
 #include "../map_func.h"
 #include "../openttd.h"
 #include "../settings_type.h"
 #include "../station_base.h"
+#include "../station_map.h"
 #include "../town.h"
 #include "../train.h"
 #include "../vehicle_base.h"
 #include "planet_manager.h"
+#include "portal_registry.h"
 
 #include "../safeguards.h"
 
@@ -34,6 +37,7 @@ std::map<uint8_t, uint64_t> _company_mappings;
 std::map<uint32_t, uint64_t> _station_mappings;
 std::map<uint32_t, uint64_t> _source_mappings;
 std::map<uint32_t, uint64_t> _depot_mappings;
+std::map<uint64_t, std::vector<GlobalOrderDestinationID>> _consist_global_schedules;
 
 static uint64_t Mix64(uint64_t value)
 {
@@ -514,6 +518,130 @@ std::optional<GlobalOrderDestinationID> FederationIdentityRegistry::GetOrCreateO
 	}
 }
 
+std::optional<StationID> FederationIdentityRegistry::FindStationBySequence(uint64_t sequence)
+{
+	for (const auto &[st_base, seq] : _station_mappings) {
+		if (seq == sequence) {
+			StationID st_id{static_cast<StationID::BaseType>(st_base)};
+			if (BaseStation::IsValidID(st_id)) return st_id;
+		}
+	}
+	return std::nullopt;
+}
+
+std::optional<StationID> FederationIdentityRegistry::ResolveStation(const GlobalStationID &global_st)
+{
+	if (!global_st.IsValid()) return std::nullopt;
+	if (global_st.name_space == GetNamespace()) {
+		auto found = FindStationBySequence(global_st.sequence);
+		if (found.has_value()) return found;
+	}
+	StationID direct_id{static_cast<StationID::BaseType>(global_st.sequence)};
+	if (BaseStation::IsValidID(direct_id)) return direct_id;
+
+	return std::nullopt;
+}
+
+static StationID FindStationNearTile(TileIndex tile, uint radius = 15)
+{
+	if (!IsValidTile(tile)) return StationID::Invalid();
+	int tx = TileX(tile);
+	int ty = TileY(tile);
+	int min_x = std::max<int>(0, tx - radius);
+	int max_x = std::min<int>(Map::MaxX(), tx + radius);
+	int min_y = std::max<int>(0, ty - radius);
+	int max_y = std::min<int>(Map::MaxY(), ty + radius);
+
+	for (int y = min_y; y <= max_y; ++y) {
+		for (int x = min_x; x <= max_x; ++x) {
+			TileIndex t = TileXY(x, y);
+			if (HasStationTileRail(t) || IsRailWaypointTile(t)) {
+				StationID st_id = GetStationIndex(t);
+				if (BaseStation::IsValidID(st_id)) return st_id;
+			}
+		}
+	}
+	return StationID::Invalid();
+}
+
+std::optional<DestinationID> FederationIdentityRegistry::ResolveOrderDestination(const GlobalOrderDestinationID &order, WorldID current_world)
+{
+	if (!order.IsValid()) return std::nullopt;
+
+	/* 1. If the destination targets the current local world */
+	if (order.target_world == current_world || order.target_world == INVALID_WORLD || order.target_world == DEFAULT_WORLD) {
+		switch (order.type) {
+			case OrderDestinationType::Station:
+			case OrderDestinationType::Waypoint: {
+				if (order.station_id.IsValid()) {
+					if (auto st = ResolveStation(order.station_id); st.has_value()) {
+						return DestinationID(*st);
+					}
+				}
+				if (auto st = FindStationBySequence(order.destination_sequence); st.has_value()) {
+					return DestinationID(*st);
+				}
+				StationID direct_id{static_cast<StationID::BaseType>(order.destination_sequence)};
+				if (BaseStation::IsValidID(direct_id)) return DestinationID(direct_id);
+				break;
+			}
+			case OrderDestinationType::Depot: {
+				for (const auto &[depot_base, seq] : _depot_mappings) {
+					if (seq == order.destination_sequence) {
+						DepotID d{static_cast<DepotID::BaseType>(depot_base)};
+						if (Depot::IsValidID(d)) return DestinationID(d);
+					}
+				}
+				DepotID direct_id{static_cast<DepotID::BaseType>(order.destination_sequence)};
+				if (Depot::IsValidID(direct_id)) return DestinationID(direct_id);
+				break;
+			}
+			case OrderDestinationType::PortalGate: {
+				for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
+					if (link.local_endpoint.world_id == current_world && link.id.base() == order.destination_sequence) {
+						StationID nearby_st = FindStationNearTile(tile);
+						if (nearby_st != StationID::Invalid()) return DestinationID(nearby_st);
+						return DestinationID(StationID{static_cast<uint16_t>(tile.base())});
+					}
+				}
+				break;
+			}
+			default:
+				break;
+		}
+	} else {
+		/* 2. Destination targets a REMOTE world!
+		 * On current_world, route towards the inter-server portal gate connecting to order.target_world. */
+		for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
+			if (link.local_endpoint.world_id == current_world && link.remote_world == order.target_world) {
+				StationID nearby_st = FindStationNearTile(tile);
+				if (nearby_st != StationID::Invalid()) return DestinationID(nearby_st);
+				return DestinationID(StationID{static_cast<uint16_t>(tile.base())});
+			}
+		}
+	}
+
+	return std::nullopt;
+}
+
+void FederationIdentityRegistry::SetConsistSchedule(uint64_t consist_seq, std::vector<GlobalOrderDestinationID> schedule)
+{
+	if (consist_seq == 0) return;
+	_consist_global_schedules[consist_seq] = std::move(schedule);
+}
+
+std::optional<std::vector<GlobalOrderDestinationID>> FederationIdentityRegistry::GetConsistSchedule(uint64_t consist_seq)
+{
+	auto it = _consist_global_schedules.find(consist_seq);
+	if (it == _consist_global_schedules.end()) return std::nullopt;
+	return it->second;
+}
+
+void FederationIdentityRegistry::ClearConsistSchedule(uint64_t consist_seq)
+{
+	_consist_global_schedules.erase(consist_seq);
+}
+
 void FederationIdentityRegistry::RestoreCounters(uint64_t next_company, uint64_t next_station, uint64_t next_source)
 {
 	if (next_company != 0) _next_company_sequence = next_company;
@@ -534,4 +662,5 @@ void FederationIdentityRegistry::Reset()
 	_station_mappings.clear();
 	_source_mappings.clear();
 	_depot_mappings.clear();
+	_consist_global_schedules.clear();
 }

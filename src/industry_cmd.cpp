@@ -1578,7 +1578,11 @@ static CommandCost CheckIfIndustryIsAllowed(TileIndex tile, IndustryType type, c
 {
 	const IndustrySpec *spec = GetIndustrySpec(type);
 
-	CommandCost planet_res = PlanetManager::CheckIndustryPlacement(tile, spec->IsRawIndustry(), spec->IsProcessingIndustry());
+	bool is_farm = (spec->check_proc == IndustryCheck::Farm ||
+	                spec->check_proc == IndustryCheck::Plantation ||
+	                spec->behaviour.Test(IndustryBehaviour::PlantFields) ||
+	                spec->behaviour.Test(IndustryBehaviour::PlantOnBuild));
+	CommandCost planet_res = PlanetManager::CheckIndustryPlacement(tile, spec->IsRawIndustry(), spec->IsProcessingIndustry(), is_farm);
 	if (planet_res.Failed()) return planet_res;
 
 	if (spec->behaviour.Test(IndustryBehaviour::Town1200More) && t->cache.population < 1200) {

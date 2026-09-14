@@ -38,6 +38,8 @@
 #include "train_cmd.h"
 #include "ship_cmd.h"
 #include <charconv>
+#include "portal/planet_manager.h"
+#include "portal/fabrication_manager.h"
 
 #include "widgets/vehicle_widget.h"
 
@@ -124,7 +126,16 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 	if (cargo >= NUM_CARGO && IsValidCargoType(cargo)) return { CMD_ERROR, VehicleID::Invalid(), 0, 0, {} };
 
 	const Engine *e = Engine::Get(eid);
-	CommandCost value(ExpensesType::NewVehicles, e->GetCost());
+	Money veh_cost = e->GetCost();
+	WorldID veh_world = PlanetManager::GetTileWorld(tile);
+	bool use_veh_fab = (type == VehicleType::Train && veh_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	if (use_veh_fab) {
+		if (!FabricationManager::CanFabricateVehicle(veh_world, _current_company, e)) {
+			return { CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS), VehicleID::Invalid(), 0, 0, {} };
+		}
+		veh_cost = veh_cost * 20 / 100;
+	}
+	CommandCost value(ExpensesType::NewVehicles, veh_cost);
 
 	/* Engines without valid cargo should not be available */
 	CargoType default_cargo = e->GetDefaultCargoType();
@@ -174,6 +185,9 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 	CargoArray cargo_capacities{};
 	if (value.Succeeded()) {
 		if (subflags.Test(DoCommandFlag::Execute)) {
+			if (use_veh_fab) {
+				FabricationManager::ConsumeVehicleBOM(veh_world, _current_company, e);
+			}
 			v->unitnumber = unit_num;
 			v->value      = value.GetCost();
 			veh_id        = v->index;

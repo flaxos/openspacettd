@@ -1,7 +1,8 @@
 # OpenSpaceTTD: Commonwealth Saga Lore, In-Game Asset Alignment & Roadmap
 
-Status: **CANONICAL SPECIFICATION & AUDIT**  
-Date: **2026-09-13**  
+Status: **CANONICAL CONTENT VISION — PARTIALLY DELIVERED**  
+Original date: **2026-09-13**  
+Status reconciled: **2026-09-14**  
 Inspiration: **Peter F. Hamilton's *Commonwealth Saga* (*Pandora's Star*, *Judas Unchained*) + OpenTTD Engine**
 
 ---
@@ -16,7 +17,7 @@ The overarching design of OpenSpaceTTD faithfully adapts this vision into OpenTT
 1. **Nomenclature & Codebase Alignment:** Resolving discrepancies between documentation, C++ engine data types, and Python services.
 2. **In-World Commonwealth Lore Mapping:** How traction technologies (steam, diesel, overhead catenary electric, vacuum-tube maglev) and industry chains map across planetary development phases.
 3. **Immediate Name/String Updates vs. Scoped Asset Additions:** A clear division between low-effort textual rebrands and medium/high-effort NewGRF/code extensions.
-4. **Future Sprints Plan (Sprints 18–21):** Detailed roadmap for GUI integration, server cluster orchestration, and planetary infrastructure.
+4. **Delivery History:** The former Sprints 18–21 roadmap is retained below as historical intent; current assignments are in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
 
 ---
 
@@ -95,6 +96,12 @@ In the Commonwealth Saga, planetary infrastructure follows an evolutionary gradi
 ## 4. Immediate String Changes vs. Scoped Asset Additions
 
 To achieve lore alignment efficiently, work is divided into two distinct tracks: **Track A** (pure string/name updates, zero C++ code changes, zero artist dependencies) and **Track B** (scoped gameplay extensions and custom NewGRF assets).
+
+| Track | Current status | Remaining boundary |
+|---|---|---|
+| Track A — names and strings | **Implemented** | Maintain translations when canonical English strings change. |
+| Track B — procedural world behaviour | **Partially implemented** | Six biome rules and portal palette states exist using base sprites. |
+| Track B — content packs and bespoke art | **Not implemented** | The proposed NML packages, cargo chain, rolling stock, portal arch, arcologies and original environment sprite sets are absent. |
 
 ### 4.1 Track A: Pure Name & String Changes (Immediate / Low Effort)
 
@@ -209,7 +216,24 @@ A dedicated in-tree industry set replacing default industries with a cohesive 3-
 
 ---
 
-## 5. Future Sprints Roadmap (Sprints 18–21)
+## 5. Current Asset Boundary
+
+String alignment, procedural six-biome rules and active/standby portal recolouring are implemented. They reuse base OpenTTD terrain and vegetation assets. Custom terrain, flora, portal, arcology, industry and rolling-stock assets remain open work and must not be described as shipped.
+
+The binding visual specification is [ALIEN_WORLD_ART_DIRECTION.md](ALIEN_WORLD_ART_DIRECTION.md). Sprints 24 and 30 delivered procedural behaviour for all six biomes. Planned Sprint 37 owns the industry and rolling-stock packages; planned Sprint 38 owns bespoke environment, portal and arcology art.
+
+The historical Sprint 23 delivery order was:
+
+1. Sprint 24: three-world alien visual overhaul and asset pipeline.
+2. Sprint 25: player rail blueprint system.
+3. Sprint 26: CST prefab rail block library.
+4. Sprint 27: feature UI completion.
+5. Sprint 28: guided solo UAT save.
+6. Sprint 29: federation authority/protocol acceptance kit.
+
+The earlier Sprint 18–21 plan below is retained as historical intent. Current completion state is governed by [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
+## 6. Historical Sprint 18–21 Plan
 
 ```text
 Sprint 17 (DONE)             Sprint 18                   Sprint 19                   Sprint 20                   Sprint 21

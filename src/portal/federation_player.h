@@ -69,6 +69,11 @@ public:
 	static void RegisterWorldPresence(GlobalCompanyID company_id, WorldID world_id);
 	static std::vector<CorporateCharter> GetAllCharters();
 
+	/* Active Local Player Session */
+	static std::optional<PlayerAccount> GetActiveSession();
+	static bool SetActiveSession(const PlayerAccount &account);
+	static void ClearActiveSession();
+
 	/* Reset */
 	static void Reset();
 

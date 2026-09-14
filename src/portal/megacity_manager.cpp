@@ -45,6 +45,12 @@ bool MegacityManager::RegisterMegacity(TownID town_id, WorldID world_id, const s
 	return true;
 }
 
+void MegacityManager::RestoreMegacity(const MegacityProfile &profile)
+{
+	if (!profile.IsValid()) return;
+	_megacities[profile.town_id.base()] = profile;
+}
+
 bool MegacityManager::UnregisterMegacity(TownID town_id)
 {
 	if (town_id == TownID::Invalid()) return false;
@@ -72,6 +78,18 @@ std::vector<MegacityProfile> MegacityManager::GetAllMegacities()
 		result.push_back(profile);
 	}
 	return result;
+}
+
+float MegacityManager::GetGrowthMultiplier(TownID town_id)
+{
+	const MegacityProfile *prof = GetProfile(town_id);
+	return prof != nullptr ? prof->growth_multiplier : 1.0f;
+}
+
+float MegacityManager::GetPassengerMultiplier(TownID town_id)
+{
+	const MegacityProfile *prof = GetProfile(town_id);
+	return prof != nullptr ? prof->passenger_multiplier : 1.0f;
 }
 
 void MegacityManager::UpdatePopulation(TownID town_id, uint32_t population)

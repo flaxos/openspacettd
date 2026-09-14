@@ -16,6 +16,8 @@
 #include "../viewport_func.h"
 #include "../viewport_type.h"
 #include "../landscape.h"
+#include "../town.h"
+#include "../industry.h"
 #include "../3rdparty/fmt/format.h"
 #include <cmath>
 #include <cstdlib>
@@ -104,6 +106,104 @@ const PlanetRegion *PlanetManager::GetRegion(WorldID world)
 	return &regions[it->second];
 }
 
+bool PlanetManager::SetWorldPhase(WorldID world, WorldPhase phase)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	regions[it->second].phase = phase;
+	return true;
+}
+
+bool PlanetManager::SetWorldBiome(WorldID world, WorldBiome biome)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	regions[it->second].biome = biome;
+	return true;
+}
+
+bool PlanetManager::AddDevelopmentScore(WorldID world, uint32_t score)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	regions[it->second].development_score += score;
+	return true;
+}
+
+bool PlanetManager::PromoteWorldPhase(WorldID world)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	auto &r = regions[it->second];
+	switch (r.phase) {
+		case WorldPhase::Phase4_Expansion:
+			r.phase = WorldPhase::Phase3_Frontier;
+			r.development_score += 100;
+			return true;
+		case WorldPhase::Phase3_Frontier:
+			r.phase = WorldPhase::Phase2_Developed;
+			r.development_score += 250;
+			return true;
+		case WorldPhase::Phase2_Developed:
+			r.phase = WorldPhase::Phase1_Core;
+			r.development_score += 500;
+			return true;
+		case WorldPhase::Phase1_Core:
+		default:
+			return false;
+	}
+}
+
+bool PlanetManager::CanPromoteWorld(WorldID world)
+{
+	const PlanetRegion *r = GetRegion(world);
+	if (r == nullptr) return false;
+	switch (r->phase) {
+		case WorldPhase::Phase4_Expansion:
+			return true;
+		case WorldPhase::Phase3_Frontier:
+			return r->development_score >= DEVELOPMENT_THRESHOLD_DEVELOPED;
+		case WorldPhase::Phase2_Developed:
+			return r->development_score >= DEVELOPMENT_THRESHOLD_CORE;
+		case WorldPhase::Phase1_Core:
+		default:
+			return false;
+	}
+}
+
+uint32_t PlanetManager::GetPromotionThreshold(WorldPhase phase)
+{
+	switch (phase) {
+		case WorldPhase::Phase4_Expansion:
+			return DEVELOPMENT_THRESHOLD_FRONTIER;
+		case WorldPhase::Phase3_Frontier:
+			return DEVELOPMENT_THRESHOLD_DEVELOPED;
+		case WorldPhase::Phase2_Developed:
+			return DEVELOPMENT_THRESHOLD_CORE;
+		case WorldPhase::Phase1_Core:
+		default:
+			return UINT32_MAX;
+	}
+}
+
+bool PlanetManager::ColonizeWorld(WorldID world, const std::string &outpost_name, TileIndex outpost_tile)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	auto &r = regions[it->second];
+	if (r.phase != WorldPhase::Phase4_Expansion) return false;
+
+	r.phase = WorldPhase::Phase3_Frontier;
+	r.development_score += 100;
+	if (!outpost_name.empty()) {
+		r.name = outpost_name;
+	}
+	if (outpost_tile != INVALID_TILE) {
+		r.outpost_tile = outpost_tile;
+	}
+	return true;
+}
+
 const PlanetRegion *PlanetManager::GetRegionByCoord(uint32_t x, uint32_t y)
 {
 	uint32_t cell_idx = CoordToCellIndex(x, y);
@@ -140,6 +240,12 @@ WorldPhase PlanetManager::GetTilePhase(TileIndex tile)
 	return r != nullptr ? r->phase : WorldPhase::Phase3_Frontier;
 }
 
+WorldBiome PlanetManager::GetTileBiome(TileIndex tile)
+{
+	const PlanetRegion *r = GetRegionByTile(tile);
+	return r != nullptr ? r->biome : WorldBiome::Temperate;
+}
+
 size_t PlanetManager::Count()
 {
 	return regions.size();
@@ -165,7 +271,20 @@ CommandCost PlanetManager::CheckConstructionPlacement(TileIndex tile)
 	return CommandCost();
 }
 
-CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing)
+CommandCost PlanetManager::CheckTownPlacement(TileIndex tile)
+{
+	CommandCost cost = CheckConstructionPlacement(tile);
+	if (cost.Failed()) return cost;
+
+	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
+
+	return CommandCost();
+}
+
+CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing, bool is_farm)
 {
 	if (Count() == 0) return CommandCost();
 
@@ -175,11 +294,17 @@ CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, b
 	}
 
 	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
 	if (phase == WorldPhase::Phase1_Core && is_raw) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_CORE_WORLD);
 	}
 	if (phase == WorldPhase::Phase3_Frontier && is_processing) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+	}
+	if (is_farm && GetTileBiome(tile) == WorldBiome::Volcanic) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_FARM_ON_VOLCANIC_WORLD);
 	}
 
 	return CommandCost();
@@ -195,9 +320,42 @@ CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype
 	}
 
 	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
 	/* Tier 3 Vac-Train/Maglev depots cannot be constructed on Phase 3 Frontier worlds */
 	if (phase == WorldPhase::Phase3_Frontier && railtype == RAILTYPE_MAGLEV) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+	}
+
+	return CommandCost();
+}
+
+CommandCost PlanetManager::CheckTrackPlacement(TileIndex tile, RailType railtype)
+{
+	if (Count() == 0) return CommandCost();
+
+	WorldID world = GetTileWorld(tile);
+	if (world == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+
+	WorldPhase phase = GetTilePhase(tile);
+	if (phase == WorldPhase::Phase4_Expansion) {
+		/* On uncolonized expansion wilderness, only basic pioneer track is permitted */
+		if (railtype != RAILTYPE_RAIL) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+		}
+	} else if (phase == WorldPhase::Phase3_Frontier) {
+		/* On frontier worlds, pioneer rail and electric catenary are permitted; Maglev and Monorail require Developed/Core */
+		if (railtype == RAILTYPE_MAGLEV || railtype == RAILTYPE_MONO) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
+		}
+	} else if (phase == WorldPhase::Phase2_Developed) {
+		/* On developed worlds, Maglev is restricted to Phase 1 Core Worlds */
+		if (railtype == RAILTYPE_MAGLEV) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_ON_DEVELOPED_WORLD);
+		}
 	}
 
 	return CommandCost();
@@ -239,6 +397,40 @@ Money PlanetManager::GetInterplanetaryCargoProfit(Money base_profit, TileIndex s
 	if (bonus_pct == 0) return base_profit;
 
 	return base_profit + (base_profit * bonus_pct) / 100;
+}
+
+void PlanetManager::RecordCargoDelivery(TileIndex dest_tile, [[maybe_unused]] CargoType cargo_type, uint num_pieces, TileIndex src_tile)
+{
+	if (Count() == 0 || num_pieces == 0 || dest_tile == INVALID_TILE) return;
+
+	WorldID dest_world = GetTileWorld(dest_tile);
+	if (dest_world == INVALID_WORLD) return;
+
+	auto it = id_to_region_index.find(dest_world.base());
+	if (it == id_to_region_index.end()) return;
+
+	PlanetRegion &reg = regions[it->second];
+
+	/* Determine if this was an interplanetary import */
+	bool is_import = false;
+	if (src_tile != INVALID_TILE) {
+		WorldID src_world = GetTileWorld(src_tile);
+		if (src_world != dest_world) {
+			is_import = true;
+		}
+	}
+
+	/* Development points formula:
+	 * Local deliveries: 1 point per 10 cargo units (minimum 1).
+	 * Interplanetary imports: 5 points per 10 cargo units (minimum 3). */
+	uint32_t pts = 0;
+	if (is_import) {
+		pts = std::max(3u, num_pieces / 2);
+	} else {
+		pts = std::max(1u, num_pieces / 10);
+	}
+
+	reg.development_score += pts;
 }
 
 const char *PlanetManager::GetWorldPhaseName(WorldPhase phase)
@@ -300,9 +492,14 @@ bool PlanetManager::JumpToPlanet(WorldID world_id)
 	const PlanetRegion *region = GetRegion(world_id);
 	if (region == nullptr) return false;
 
-	uint center_x = (region->min_x + region->max_x) / 2;
-	uint center_y = (region->min_y + region->max_y) / 2;
-	TileIndex target = TileXY(center_x, center_y);
+	TileIndex target;
+	if (region->outpost_tile != INVALID_TILE && IsValidTile(region->outpost_tile)) {
+		target = region->outpost_tile;
+	} else {
+		uint center_x = (region->min_x + region->max_x) / 2;
+		uint center_y = (region->min_y + region->max_y) / 2;
+		target = TileXY(center_x, center_y);
+	}
 
 	Window *main_window = FindWindowById(WindowClass::MainWindow, 0);
 	if (main_window != nullptr && main_window->viewport != nullptr) {
@@ -310,3 +507,50 @@ bool PlanetManager::JumpToPlanet(WorldID world_id)
 	}
 	return true;
 }
+
+uint32_t PlanetManager::GetWorldPopulation(WorldID world)
+{
+	if (world == INVALID_WORLD || Count() == 0) return 0;
+	uint32_t pop = 0;
+	for (const Town *t : Town::Iterate()) {
+		if (GetTileWorld(t->xy) == world) {
+			pop += t->cache.population;
+		}
+	}
+	return pop;
+}
+
+Town *PlanetManager::GetWorldPrimaryTown(WorldID world)
+{
+	if (world == INVALID_WORLD || Count() == 0) return nullptr;
+	Town *best_town = nullptr;
+	uint32_t max_pop = 0;
+	const PlanetRegion *reg = GetRegion(world);
+
+	for (Town *t : Town::Iterate()) {
+		if (GetTileWorld(t->xy) == world) {
+			/* If an outpost tile matches exactly, prefer it */
+			if (reg != nullptr && reg->outpost_tile != INVALID_TILE && t->xy == reg->outpost_tile) {
+				return t;
+			}
+			if (best_town == nullptr || t->cache.population >= max_pop) {
+				max_pop = t->cache.population;
+				best_town = t;
+			}
+		}
+	}
+	return best_town;
+}
+
+size_t PlanetManager::GetWorldIndustryCount(WorldID world)
+{
+	if (world == INVALID_WORLD || Count() == 0) return 0;
+	size_t count = 0;
+	for (const Industry *i : Industry::Iterate()) {
+		if (GetTileWorld(i->location.tile) == world) {
+			count++;
+		}
+	}
+	return count;
+}
+

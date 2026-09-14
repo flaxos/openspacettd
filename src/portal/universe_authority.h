@@ -52,6 +52,11 @@ struct RegisteredWorld {
 	uint32_t max_clients = 32;
 	uint32_t active_trains = 0;
 	WorldOnlineStatus status = WorldOnlineStatus::Online;
+	WorldBiome biome = WorldBiome::Temperate;
+	uint32_t population = 0;
+	bool is_megacity = false;
+	std::string megacity_growth_state = "Subsistence";
+	float satisfaction_pct = 100.0f;
 };
 
 /** Freight corridor congestion level determined by active transit utilization. */
@@ -178,6 +183,15 @@ public:
 	size_t PruneStaleWorlds(uint64_t current_tick, uint64_t timeout_ticks = 300);
 	std::vector<RegisteredWorld> FindWorldsByPhase(WorldPhase phase) const;
 	std::vector<RegisteredWorld> GetWorldDirectory() const;
+	bool ColonizeWorld(WorldID world_id, const std::string &outpost_name = "");
+	bool PromoteWorld(WorldID world_id);
+	bool UpdateMegacityStatus(
+		WorldID world_id,
+		bool is_megacity,
+		const std::string &growth_state = "Subsistence",
+		float satisfaction_pct = 100.0f,
+		uint32_t population = 0
+	);
 
 	/* Inter-Server Route & Freight Corridor Management */
 	bool RegisterRoute(const InterServerRoute &route);

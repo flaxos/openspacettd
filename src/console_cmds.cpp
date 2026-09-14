@@ -50,6 +50,14 @@
 #include "portal/federation_cmd.h"
 #include "portal/federation_player.h"
 #include "portal/megacity_manager.h"
+#include "portal/planet_manager.h"
+#include "portal/corporate_hq.h"
+#include "portal/company_stockpile.h"
+#include "portal/logistics_hub.h"
+#include "portal/fabrication_manager.h"
+#include "station_base.h"
+#include "town.h"
+#include "clear_map.h"
 
 #if defined(WITH_ZLIB)
 #include "network/network_content.h"
@@ -2583,6 +2591,7 @@ static bool ConListDirs(std::span<std::string_view> argv)
 		{ "autosave", Subdirectory::Autosave, true },
 		{ "screenshot", Subdirectory::Screenshot, true },
 		{ "social_integration", Subdirectory::SocialIntegration, true },
+		{ "blueprint", Subdirectory::Blueprint, true },
 	};
 
 	if (argv.size() != 2) {
@@ -3093,6 +3102,187 @@ static bool ConUniverseEconomy(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Colonize a Phase 4 Expansion wilderness world and elevate it to Phase 3 Frontier. @copydoc IConsoleCmdProc */
+static bool ConColonizeWorld(std::span<std::string_view> argv)
+{
+	if (argv.empty() || argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Colonize a Phase 4 Expansion wilderness world.");
+		IConsolePrint(CC_HELP, "Usage: 'colonize_world <world_id> [outpost_name]'");
+		return true;
+	}
+
+	auto parsed = ParseInteger(argv[1]);
+	if (!parsed.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid world ID: '{}'", argv[1]);
+		return false;
+	}
+
+	WorldID wid = WorldID(static_cast<uint32_t>(*parsed));
+	const PlanetRegion *reg = PlanetManager::GetRegion(wid);
+	if (reg == nullptr) {
+		IConsolePrint(CC_ERROR, "World {} not found.", wid.base());
+		return false;
+	}
+
+	if (reg->phase != WorldPhase::Phase4_Expansion) {
+		IConsolePrint(CC_ERROR, "World {} ('{}') is already at Phase {} and cannot be colonized.",
+			wid.base(), reg->name, to_underlying(reg->phase));
+		return false;
+	}
+
+	std::string outpost_name;
+	if (argv.size() >= 3) {
+		outpost_name = std::string(argv[2]);
+		for (size_t i = 3; i < argv.size(); ++i) {
+			outpost_name += " ";
+			outpost_name += argv[i];
+		}
+	} else {
+		outpost_name = fmt::format("Outpost {}", reg->name);
+	}
+
+	if (PlanetManager::ColonizeWorld(wid, outpost_name)) {
+		IConsolePrint(CC_DEFAULT, "Successfully colonized World {}: now '{}' (Phase 3 Frontier).",
+			wid.base(), outpost_name);
+		return true;
+	}
+
+	IConsolePrint(CC_ERROR, "Failed to colonize World {}.", wid.base());
+	return false;
+}
+
+/** Promote a planetary world to its next development tier. @copydoc IConsoleCmdProc */
+static bool ConPromoteWorld(std::span<std::string_view> argv)
+{
+	if (argv.empty() || argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Promote a world to its next development phase tier.");
+		IConsolePrint(CC_HELP, "Usage: 'promote_world <world_id>'");
+		return true;
+	}
+
+	auto parsed = ParseInteger(argv[1]);
+	if (!parsed.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid world ID: '{}'", argv[1]);
+		return false;
+	}
+
+	WorldID wid = WorldID(static_cast<uint32_t>(*parsed));
+	const PlanetRegion *reg = PlanetManager::GetRegion(wid);
+	if (reg == nullptr) {
+		IConsolePrint(CC_ERROR, "World {} not found.", wid.base());
+		return false;
+	}
+
+	if (reg->phase == WorldPhase::Phase1_Core) {
+		IConsolePrint(CC_ERROR, "World {} ('{}') is already at maximum development tier (Phase 1 Core).",
+			wid.base(), reg->name);
+		return false;
+	}
+
+	if (PlanetManager::PromoteWorldPhase(wid)) {
+		UniverseAuthorityService::Instance().PromoteWorld(wid);
+		const PlanetRegion *updated = PlanetManager::GetRegion(wid);
+		IConsolePrint(CC_DEFAULT, "Successfully promoted World {}: now '{}' ({}, score: {}).",
+			wid.base(), updated->name, PlanetManager::GetWorldPhaseName(updated->phase), updated->development_score);
+		return true;
+	}
+
+	IConsolePrint(CC_ERROR, "Failed to promote World {}.", wid.base());
+	return false;
+}
+
+/** Setup all mid-to-late game corporate, stockpile, and logistics fixtures for UAT. @copydoc IConsoleCmdProc */
+static bool ConSetupUATFixtures(std::span<std::string_view> argv)
+{
+	(void)argv;
+	IConsolePrint(CC_DEFAULT, "Setting up OpenSpaceTTD all-feature UAT fixtures...");
+
+	/* 1. Ensure company 0 exists and has sufficient operating capital */
+	Company *c = Company::GetIfValid(CompanyID{0});
+	if (c == nullptr) {
+		Company::CreateAtIndex(CompanyID{0});
+		c = Company::GetIfValid(CompanyID{0});
+	}
+	if (c != nullptr) {
+		c->money = 25000000; // 25M Cr
+	}
+
+	/* 2. Place Corporate HQ campus on World 0 */
+	WorldID w0{0};
+	const PlanetRegion *r0 = PlanetManager::GetRegion(w0);
+	if (r0 != nullptr) {
+		TileIndex hq_tile = TileXY((r0->min_x + r0->max_x) / 2 + 10, (r0->min_y + r0->max_y) / 2 + 10);
+		MakeClear(hq_tile, ClearGround::Grass, 3);
+		CorporateHQManager::RegisterHQ(CompanyID{0}, w0, hq_tile, "Commonwealth Central HQ");
+		CorporateHQManager::UpgradeHQTier(CompanyID{0}); // Advance to PlanetaryHQ
+		IConsolePrint(CC_DEFAULT, "  -> Corporate HQ placed on World 0 at tile ({}, {})", TileX(hq_tile), TileY(hq_tile));
+
+		/* Register Megacity on World 0 */
+		Town *town0 = ClosestTownFromTile(TileXY((r0->min_x + r0->max_x) / 2, (r0->min_y + r0->max_y) / 2), UINT_MAX);
+		if (town0 != nullptr) {
+			MegacityManager::RegisterMegacity(town0->index, w0, town0->name.empty() ? "Oaktree Core" : town0->name, 25000);
+			MegacityManager::SetCustomQuotas(town0->index, 100, 80, 50);
+			IConsolePrint(CC_DEFAULT, "  -> Megacity registered at town '{}' (id: {})", town0->name, town0->index.base());
+		}
+	}
+
+	/* 3. Ingest stockpile seed materials on World 0 and World 1 */
+	CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	CargoType steel   = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	CargoType wire    = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+	CargoType chips   = StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics);
+	CargoType alloy   = StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy);
+	CargoType comp    = StockpileManager::RoleToDefaultCargo(FabricationRole::Composites);
+
+	for (WorldID wid : {WorldID{0}, WorldID{1}}) {
+		StockpileManager::AddCargo(wid, CompanyID{0}, ballast, 1000);
+		StockpileManager::AddCargo(wid, CompanyID{0}, steel,   500);
+		StockpileManager::AddCargo(wid, CompanyID{0}, wire,    300);
+		StockpileManager::AddCargo(wid, CompanyID{0}, chips,   150);
+		StockpileManager::AddCargo(wid, CompanyID{0}, alloy,   200);
+		StockpileManager::AddCargo(wid, CompanyID{0}, comp,    100);
+	}
+	IConsolePrint(CC_DEFAULT, "  -> Stockpiles seeded on World 0 & World 1 (1000 Ballast, 500 Steel, 300 Wire, 150 Chips, 200 Alloy, 100 Comp)");
+
+	/* 4. Register a Logistics Hub on World 1 */
+	WorldID w1{1};
+	const PlanetRegion *r1 = PlanetManager::GetRegion(w1);
+	if (r1 != nullptr) {
+		TileIndex hub_tile = TileXY((r1->min_x + r1->max_x) / 2 - 10, (r1->min_y + r1->max_y) / 2 - 10);
+		StationID nearest_st = StationID::Invalid();
+		for (const Station *st : Station::Iterate()) {
+			if (st->owner == CompanyID{0} && PlanetManager::GetTileWorld(st->xy) == w1) {
+				nearest_st = st->index;
+				hub_tile = st->xy;
+				break;
+			}
+		}
+		if (nearest_st == StationID::Invalid() && Station::GetNumItems() > 0) {
+			nearest_st = Station::Get(StationID{0})->index;
+		}
+		uint32_t hub_id = LogisticsHubManager::RegisterHub(hub_tile, w1, CompanyID{0}, nearest_st, "Merredin Planetary Logistics Hub");
+		if (hub_id != 0) {
+			LogisticsHubManager::SetReserveFloor(hub_id, ballast, 200);
+			LogisticsHubManager::SetReserveFloor(hub_id, steel, 100);
+		}
+		IConsolePrint(CC_DEFAULT, "  -> Logistics Hub registered on World 1 (attached station: {})", nearest_st.base());
+	}
+
+	/* 5. Enable In-Kind Fabrication mode */
+	FabricationManager::SetFabricateFromStockpile(CompanyID{0}, true);
+	IConsolePrint(CC_DEFAULT, "  -> In-Kind Fabrication enabled for Company 0 (80% discount active)");
+
+	/* 6. Populate development scores */
+	PlanetManager::AddDevelopmentScore(WorldID{0}, 25000);
+	PlanetManager::AddDevelopmentScore(WorldID{1}, 8000);
+	PlanetManager::AddDevelopmentScore(WorldID{2}, 2500);
+	PlanetManager::AddDevelopmentScore(WorldID{3}, 1000);
+	IConsolePrint(CC_DEFAULT, "  -> Development scores initialized (W0: 25k, W1: 8k, W2: 2.5k, W3: 1k)");
+
+	IConsolePrint(CC_DEFAULT, "UAT fixtures setup complete!");
+	return true;
+}
+
 /** Show the current framerate statistics. @copydoc IConsoleCmdProc */
 static bool ConFramerate(std::span<std::string_view> argv)
 {
@@ -3367,6 +3557,9 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("universe_corridors",      ConUniverseCorridors);
 	IConsole::CmdRegister("universe_megacity",       ConUniverseMegacity);
 	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
+	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
+	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
+	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);
 
 	/* networking functions */
 

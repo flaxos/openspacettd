@@ -391,6 +391,13 @@ enum class Commands : uint8_t {
 	ConfigureSpaceportBridge, ///< configure the interplanetary routing bridge of a spaceport
 	ConfigureEdgeConduitFeeder, ///< configure direct inter-world feeder mode of an edge conduit
 
+	PlaceBlueprint, ///< place a rail blueprint layout on the map
+	ColonizeOutpost, ///< colonize an uncolonized Phase 4 Expansion world and establish an initial pioneer outpost
+	PromoteWorld, ///< promote a world to its next development phase tier when development score threshold is met
+	PlaceCorporateHQ, ///< construct an active corporate headquarters campus on a Phase 1 Core world
+	BuildLogisticsHub, ///< establish a dedicated company logistics hub warehouse for bi-directional inventory buffering
+	SetFabricationMode, ///< toggle between standard cash purchase and in-kind fabrication from planetary stockpile
+
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

@@ -81,6 +81,18 @@ public:
 		TileIndex exit_tile,
 		DiagDirection enter_dir
 	);
+
+	/**
+	 * Configure a 2-point cross-world round-trip schedule on a consist.
+	 *
+	 * @param consist Front engine of the consist.
+	 * @param origin_st Station on origin world.
+	 * @param origin_world Logical world containing origin station.
+	 * @param dest_st Station on destination world.
+	 * @param dest_world Logical world containing destination station.
+	 * @return True if schedule successfully assigned.
+	 */
+	static bool AssignRoundTripOrders(Train *consist, StationID origin_st, WorldID origin_world, StationID dest_st, WorldID dest_world);
 };
 
 #endif /* CONSIST_MATERIALIZER_H */

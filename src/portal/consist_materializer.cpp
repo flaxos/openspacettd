@@ -18,12 +18,15 @@
 #include "../engine_base.h"
 #include "../landscape.h"
 #include "../map_func.h"
+#include "../order_base.h"
 #include "../rail_map.h"
+#include "../station_base.h"
 #include "../train.h"
 #include "../tunnelbridge_map.h"
 #include "../timer/timer_game_calendar.h"
 #include "../vehicle_base.h"
 #include "../vehicle_func.h"
+#include "planet_manager.h"
 
 #include "../safeguards.h"
 
@@ -192,6 +195,7 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 	for (size_t i = 0; i < snapshot.units.size(); ++i) {
 		const auto &u_snap = snapshot.units[i];
 		Train *t = Vehicle::Create<Train>();
+		t->subtype = u_snap.subtype;
 		if (i == 0) {
 			front = t;
 			t->SetFrontEngine();
@@ -215,8 +219,11 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		t->vehstatus.Reset(VehState::Hidden);
 
 		t->engine_type = EngineID{u_snap.engine_type};
-		t->subtype = u_snap.subtype;
-		t->cargo_type = CargoType{u_snap.cargo_type};
+		if (u_snap.cargo_type < to_underlying(NUM_CARGO)) {
+			t->cargo_type = CargoType{u_snap.cargo_type};
+		} else {
+			t->cargo_type = CargoType{0};
+		}
 		t->cargo_subtype = u_snap.cargo_subtype;
 		t->cargo_cap = u_snap.cargo_capacity;
 		t->refit_cap = u_snap.refit_capacity;
@@ -280,8 +287,113 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		FederationIdentityRegistry::RestoreMapping(front->index, snapshot.consist_id.sequence);
 	}
 
+	/* 10. Restore and resolve order schedule */
+	if (!snapshot.orders.empty() && OrderList::CanAllocateItem()) {
+		WorldID exit_world = PlanetManager::GetTileWorld(exit_tile);
+		if (exit_world == INVALID_WORLD) {
+			const InterServerPortalLink *link = PortalRegistry::GetInterServerPortal(exit_tile);
+			if (link != nullptr) exit_world = link->local_endpoint.world_id;
+		}
+
+		/* Cache master schedule for this consist in FederationIdentityRegistry */
+		if (snapshot.consist_id.IsValid()) {
+			FederationIdentityRegistry::SetConsistSchedule(snapshot.consist_id.sequence, snapshot.orders);
+		}
+
+		std::vector<Order> restored_orders;
+		restored_orders.reserve(snapshot.orders.size());
+
+		for (const GlobalOrderDestinationID &g_ord : snapshot.orders) {
+			auto dest_opt = FederationIdentityRegistry::ResolveOrderDestination(g_ord, exit_world);
+			if (dest_opt.has_value()) {
+				Order ord;
+				if (g_ord.type == OrderDestinationType::Waypoint) {
+					ord.MakeGoToWaypoint(dest_opt->ToStationID());
+				} else if (g_ord.type == OrderDestinationType::Depot) {
+					ord.MakeGoToDepot(*dest_opt, OrderDepotTypeFlags{});
+				} else {
+					ord.MakeGoToStation(dest_opt->ToStationID());
+				}
+				restored_orders.push_back(std::move(ord));
+			}
+		}
+
+		if (!restored_orders.empty()) {
+			front->orders = OrderList::Create(std::move(restored_orders), front);
+
+			/* Advance order index if the previous order was targeting the origin world */
+			uint16_t active_idx = 0;
+			if (snapshot.current_order_index < snapshot.orders.size()) {
+				const auto &orig_order = snapshot.orders[snapshot.current_order_index];
+				if (orig_order.target_world == exit_world) {
+					active_idx = snapshot.current_order_index;
+				} else {
+					active_idx = static_cast<uint16_t>((snapshot.current_order_index + 1) % snapshot.orders.size());
+				}
+			}
+
+			if (active_idx >= front->GetNumOrders()) active_idx = 0;
+			front->cur_real_order_index = active_idx;
+			front->cur_implicit_order_index = active_idx;
+			front->current_order = *front->GetOrder(active_idx);
+		}
+	}
+
 	result.success = true;
 	result.consist = front;
 	result.total_cargo = total_cargo;
 	return result;
+}
+
+bool ConsistMaterializer::AssignRoundTripOrders(Train *consist, StationID origin_st, WorldID origin_world, StationID dest_st, WorldID dest_world)
+{
+	if (consist == nullptr || !BaseStation::IsValidID(origin_st) || !BaseStation::IsValidID(dest_st)) return false;
+
+	Train *front = consist->First();
+	if (front == nullptr) return false;
+
+	/* Register stations with FederationIdentityRegistry */
+	auto orig_global = FederationIdentityRegistry::GetOrCreateStation(origin_st);
+	auto dest_global = FederationIdentityRegistry::GetOrCreateStation(dest_st);
+	if (!orig_global.has_value() || !dest_global.has_value()) return false;
+
+	orig_global->world_id = origin_world;
+	dest_global->world_id = dest_world;
+
+	/* Construct master schedule */
+	std::vector<GlobalOrderDestinationID> master_schedule;
+	master_schedule.push_back(GlobalOrderDestinationID::ForStation(*orig_global, false));
+	master_schedule.push_back(GlobalOrderDestinationID::ForStation(*dest_global, false));
+
+	std::optional<GlobalConsistID> cid = FederationIdentityRegistry::GetOrCreate(front);
+	if (cid.has_value()) {
+		FederationIdentityRegistry::SetConsistSchedule(cid->sequence, master_schedule);
+	}
+
+	/* Build local projection */
+	std::vector<Order> local_orders;
+	Order o1;
+	o1.MakeGoToStation(origin_st);
+	local_orders.push_back(std::move(o1));
+
+	Order o2;
+	auto resolved_dest = FederationIdentityRegistry::ResolveOrderDestination(master_schedule[1], origin_world);
+	if (resolved_dest.has_value()) {
+		o2.MakeGoToStation(resolved_dest->ToStationID());
+	} else {
+		o2.MakeGoToStation(dest_st);
+	}
+	local_orders.push_back(std::move(o2));
+
+	if (front->orders != nullptr) {
+		front->orders->FreeChain();
+		front->orders = nullptr;
+	}
+
+	if (!OrderList::CanAllocateItem()) return false;
+	front->orders = OrderList::Create(std::move(local_orders), front);
+	front->cur_real_order_index = 0;
+	front->cur_implicit_order_index = 0;
+	front->current_order = *front->GetOrder(0);
+	return true;
 }

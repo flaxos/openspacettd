@@ -5,7 +5,7 @@
 - **Goal:** Railway-heavy industrial and logistics simulation game.
 - **Inspiration:** OpenTTD + Factorio-scale production chains + Peter F. Hamilton-style Commonwealth saga (planetary rail networks interlinked via fixed wormholes).
 - **Core Future Feature:** Multiple logical worlds connected by railway portal/wormhole gates.
-- **Current Status:** Repository bootstrap phase. OpenTTD engine compiled and verified; gameplay source has not been modified yet.
+- **Current Status:** Implementation exists through Sprint 33; Sprint 34 consolidates documentation. Procedural six-biome behaviour, colonisation, blueprints, CST prefabs, economy and UI are present. External cross-process train transfer, bespoke art/NewGRF content and an updated Sprints 30–33 playable UAT remain pending. See `docs/PROJECT_STATUS_AND_ROADMAP.md` for authoritative status and evidence boundaries.
 
 ---
 
@@ -52,3 +52,6 @@
 
 5. **Preserve Deterministic Simulation:**
    All simulation logic, command handling, random number generation, and vehicle movement must remain strictly deterministic to ensure savegame integrity and lockstep multiplayer synchronization.
+
+6. **Player Rail Blueprints:**
+   Player blueprints and CST prefabs must use the portable JSON schema and server-authoritative placement command (`Commands::PlaceBlueprint`) to ensure lockstep simulation and multiplayer determinism.

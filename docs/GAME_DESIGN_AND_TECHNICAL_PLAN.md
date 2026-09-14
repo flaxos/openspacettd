@@ -5,11 +5,11 @@
 
 ## A. Current State
 
-The OpenSpaceTTD repository is a clean, operational development fork of OpenTTD (`master` baseline commit `de306de893`, version `20260908-main-m4dead5797f`), configured with CMake and Ninja in `build/`.
+OpenSpaceTTD is an operational OpenTTD fork with gameplay implementation through Sprint 33. The authoritative current status, evidence boundaries and future sprint assignments are maintained in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). This document defines the stable design and architecture; its older roadmap sections are retained as historical context.
 
 ### Established Codebase Assets
 - **Engine Baseline:** Upstream OpenTTD compiled with full optional library support (SDL2, OpenGL, FreeType, Fontconfig, HarfBuzz, ICU, PNG, ZLIB, LZMA, LZO, CURL, FluidSynth, OpusFile, Soxr).
-- **Test Baseline:** 100% test pass rate across unit tests and regression suites (103/103 tests passing).
+- **Test Inventory:** The configured build currently registers 258 CTest cases. The Sprint 34 documentation audit did not rerun them; historical pass counts belong to their recorded sprint commits.
 - **Core Repository Rules (`AGENTS.md`):** Strict preservation of `TileIndex`, single 2D coordinate space, deterministic simulation, and wormhole-derived portal architecture.
 - **Initial Prototype (`src/portal/`):**
   - `PortalRegistry` implemented in `src/portal/portal_registry.h` / `src/portal/portal_registry.cpp`.
@@ -19,7 +19,9 @@ The OpenSpaceTTD repository is a clean, operational development fork of OpenTTD 
 
 ---
 
-## B. Spike Findings: Proven Capabilities & Remaining Constraints
+## B. Historical Spike Findings and Resolutions
+
+This section records the questions that shaped the portal architecture. Portal persistence, multi-wagon transit and cached transition state were subsequently implemented and tested. Current gaps are listed in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
 
 ### 1. What the Spike Proved
 1. **Wormhole Decoupling:** OpenTTD's native `Track::Wormhole` and `VehicleEnterTileState::EnteredWormhole` state machine cleanly decouples traversing vehicles from intermediate map grid tiles without breaking game loop invariants.
@@ -28,7 +30,7 @@ The OpenSpaceTTD repository is a clean, operational development fork of OpenTTD 
 4. **Natural Path Routing Penalty:** YAPF rail cost (`yapf_costrail.hpp`) multiplies `tiles_skipped * YAPF_TILE_LENGTH`, naturally giving wormholes realistic routing penalties and transit delay calculations without bespoke pathfinder forks.
 5. **Zero Regression:** Engine hooks integrated into OpenTTD's map accessors without breaking any existing tunnel, bridge, or regression test cases.
 
-### 2. Discovered Constraints & What Remains Uncertain
+### 2. Original Constraints (Subsequently Resolved)
 1. **Consist Euclidean Continuity (`CheckTrainsLengths`):**
    - *Constraint:* In `src/train_cmd.cpp`, `TrainController()` and `CheckTrainsLengths()` enforce that each trailing vehicle in a consist is positioned at `std::max(abs(u->x_pos - w->x_pos), abs(u->y_pos - w->y_pos)) == u->CalcNextVehicleOffset()`.
    - *Impact:* When a multi-wagon train transits an inter-world portal, leading wagons appear at World 1 coordinates while trailing wagons are still at World 0 coordinates.
@@ -319,7 +321,7 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
 
 ---
 
-## M. Implementation Roadmap: Narrow, Vibe-Code Sprints
+## M. Historical Initial Implementation Roadmap
 
 ```
 [Spike 2: Consist Wormhole Traversal]
@@ -397,7 +399,7 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
    - Consist distance check overrides during `Track::Wormhole`.
    - Gateway pairing and unregistration invariants.
 2. **Regression Suite (`ctest`):**
-   - All 103 baseline tests must continue to pass on every commit.
+   - Run the complete configured suite; do not copy an earlier sprint's numerical total into current verification evidence.
 3. **Headless Integration Tests:**
    - Dedicated headless mode (`./build/openttd -D -g`) running a deterministic 1000-tick script with trains traversing gateways.
 
@@ -414,11 +416,11 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
 
 ---
 
-## P. Required Additional Spikes
+## P. Historical Required Spike — Resolved
 
 ### Spike 2: Multi-Wagon Consist Wormhole Traversal
-- **Why Needed:** Before executing full gameplay sprints, we must prototype the exact consist following logic in `src/train_cmd.cpp` so multi-vehicle trains do not trigger `STR_BROKEN_VEHICLE_LENGTH` when their wagons span across an interplanetary portal.
-- **Estimated Scope:** ~100 lines of test and decoupled distance logic.
+- **Status:** Complete through Sprint 3 and covered by the consist traversal tests.
+- **Original question:** Verify that multi-vehicle trains do not trigger `STR_BROKEN_VEHICLE_LENGTH` while spanning a non-contiguous portal.
 
 ---
 
@@ -433,7 +435,7 @@ The vertical slice is the tightest possible end-to-end demonstration answering:
 
 ## S. Long-Term Roadmap: EPIC — Federated Multi-Server Universe
 
-For complete architectural specifications, authoritative handoff state machines, and persistent global identity schemas, see [FEDERATED_UNIVERSE_VISION.md](file:///home/flax/.gemini/antigravity/brain/527edc66-0f08-4ba7-b746-432d46a19837/FEDERATED_UNIVERSE_VISION.md).
+The domain model, protocol and process-supervisor layers are implemented. A live train-driven transfer through an external authority between independent game processes is still pending. See [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md) for the exact boundary.
 
 ```text
 Current Sprints (1-13)       Federation Prep             Federation Prototype        Persistent Universe          Megacity Economy
@@ -454,10 +456,10 @@ Current Sprints (1-13)       Federation Prep             Federation Prototype   
   - [x] Consist Snapshot wire format v2 with cargo provenance resolution, goto order preservation, and v1 dual-version backward compatibility.
   - [x] Full automated test coverage (100% CTest pass rate, 0 regressions). Codebase is verified and ready for Phase F2 / P2.
 
-### Phase F2: Federation Prototype (Technical Spike) — **COMPLETE**
+### Phase F2: Federation Prototype (Technical Spike) — **PROTOCOL PROTOTYPE COMPLETE**
 - **Goal:** Implement a 2-server handoff proof-of-concept.
 - **Completed Deliverables (Sprint 15):**
-  - [x] Authoritative `Universe Authority` daemon (`scripts/universe_authority.py`) and C++ engine client (`src/portal/universe_authority.h`, `src/portal/universe_authority.cpp`).
+  - [x] `Universe Authority` daemon prototype (`scripts/universe_authority.py`) and process-local C++ authority domain service (`src/portal/universe_authority.h`, `src/portal/universe_authority.cpp`). The external engine-to-daemon transport client remains pending.
   - [x] Inter-server portal gate registrations (`RegisterInterServerPortal`) and pathfinder boundary exit routing (`src/portal/portal_registry.cpp`, `src/pathfinder/follow_track.hpp`).
   - [x] Consist despawn (`ConsistMaterializer::DespawnForTransfer`) with clean reservation release and vehicle destruction.
   - [x] Consist emergence & materialization (`ConsistMaterializer::MaterializeFromTransfer`) with manifest validation, throat obstruction clearance, consist topology restoration, dynamics preservation, cargo packet reconstruction, and PBS tunnel reservation acquisition.
@@ -465,8 +467,8 @@ Current Sprints (1-13)       Federation Prep             Federation Prototype   
   - [x] Strict commodity conservation invariant enforcement ($\sum \text{Cargo}_{\text{Init}} = \sum \text{Cargo}_{\text{Done}} + \sum \text{Cargo}_{\text{Transit}}$) with zero loss and zero duplication.
 
 
-### Phase F3: Persistent Universe & Corporate Ledger — **COMPLETE**
-- **Goal:** Multi-server persistent universe infrastructure.
+### Phase F3: Persistent Universe & Corporate Ledger — **DOMAIN/PROTOCOL COMPLETE**
+- **Goal:** Persistent-universe identity, directory and ledger domain model.
 - **Completed Deliverables (Sprint 16):**
   - [x] Persistent player account authentication and session token management (`GlobalPlayerID`, `PlayerAccount`, `FederationPlayerRegistry`).
   - [x] Multi-world corporate ownership and chartering (`CorporateCharter`, `GlobalCompanyID`, `AuthorizeDelegate`, `RegisterWorldPresence`).
@@ -478,7 +480,7 @@ Current Sprints (1-13)       Federation Prep             Federation Prototype   
 
 ### Phase F4: Megacity & Empire Economy
 - **Status:** Complete (Sprint 17)
-- **Goal:** Scale individual Phase 1 Core Worlds to dedicated max-size (4096×4096) servers, with sustained multi-tier commodity demand, high-throughput freight corridor congestion management, and empire-wide supply chain matrix tracking.
+- **Goal:** Model the Megacity demand, corridor congestion and supply accounting required by future dedicated world servers.
 - **Completed Deliverables:**
   - [x] Megacity sustained commodity demand mechanics with three demand tiers: Tier 1 Sustenance ($P / 20$), Tier 2 Expansion ($P / 40$), Tier 3 Prosperity ($P / 100$).
   - [x] Cyclical monthly supply evaluation driving metropolitan growth states: Starvation ($0.0\times$), Subsistence ($1.0\times$), MetropolitanBoom ($1.5\times$), and HyperGrowth ($2.0\times$).
@@ -491,9 +493,9 @@ Current Sprints (1-13)       Federation Prep             Federation Prototype   
 
 ---
 
-## T. Future Roadmap & Commonwealth Saga Lore Alignment (Sprints 18–21)
+## T. Historical Delivery Snapshot (Superseded)
 
-For the complete lore mapping, nomenclature audit, and detailed asset specifications, see [COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md](file:///home/flax/games/openspacettd/docs/COMMONWEALTH_LORE_AND_ASSET_ALIGNMENT.md).
+The list below shows how delivery was described as work progressed through Sprint 33. It is retained for traceability and must not be used as the current roadmap. Use [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md) for current status, especially the partial Sprint 21 content scope and the Sprint 29 live-runtime limitation.
 
 ### 1. Canonical Nomenclature Standard
 - **World / WorldID:** Logical world entity / server instance (`WorldID`).
@@ -510,18 +512,62 @@ For the complete lore mapping, nomenclature audit, and detailed asset specificat
 - **Phase 2 (Developed / Refinery):** High-Voltage Overhead Catenary Electrics hauling intermodal containers, superalloys, and synthetic chemicals.
 - **Phase 1 (Core Megacity):** CST Vacuum-Tube Maglevs (vactrains) traveling at 400–1,000+ km/h through subterranean and arcology guideways.
 
-### 3. Future Sprints Overview
-- **Sprint 18: In-Game GUI Integration for Federation & Megacities:**
-  - Megacity Status & Quota Overview Window (3-tier progress bars, growth badges).
-  - Freight Corridor Monitor Window (congestion gauges, delay multipliers, active trains).
-  - Universe Server Directory Browser (live server list, pings, client load, phase badges).
-- **Sprint 19: Dedicated Server Cluster Orchestration & Daemons:**
-  - Production cluster supervisor (`scripts/run_cluster.py`) managing headless instances (`./build/openttd -D`) and Universe Authority daemons.
-  - Configuration-driven topology bootstrapping (`cluster.json`) and automated crash recovery.
-- **Sprint 20: Planetary Infrastructure Integration (Spaceports & Edge Conduits):**
-  - Spaceport off-world trade routing into inter-server federation queues.
-  - Planetary Edge Conduits feeding inter-world freight corridors directly.
-- **Sprint 21: Commonwealth Saga Content & Asset Alignment Pack:**
-  - Implement Track A vehicle/cargo/industry string rebrands in `src/lang/english.txt`.
-  - In-tree NewGRF packages: `openspacettd_industries.nml` (12-cargo Commonwealth economy) and `openspacettd_rail.nml` (CST Vacuum Maglev, planetary diesels, pioneer steam).
+### 3. Reconciled status through Sprint 23
+
+- **Sprint 18 — Complete:** Native Megacity Overview, Freight Corridor Monitor and Universe Directory windows.
+- **Sprint 19 — Complete:** Configurable cluster supervisor, topology bootstrap and health/recovery integration coverage.
+- **Sprint 20 — Complete:** Spaceport and Edge Conduit federation routing with supply-chain attribution.
+- **Sprint 21 — Partially complete:** Gateway telemetry/navigation and Commonwealth string alignment shipped. The proposed alien art and in-tree NewGRF packs did not ship and move into Sprints 24 and the content backlog.
+- **Sprint 22 — Complete:** Round-trip consist order restoration and autonomous federation scheduling.
+- **Sprint 23 — Complete:** Scope reconciliation, alien art specification, UI coverage audit and UAT delivery plan.
+- **Sprint 24 — Complete:** Playable alien worlds foundation with procedural multi-world environmental stylization (Temperate Core, Arid Industrial, Sub-Arctic Frontier), O(1) spatial biome resolution, and CST monumental portal gate visuals.
+- **Sprint 25 — Complete:** Player Rail Blueprints with map capture, persistent library, portable JSON serialization, 90°/180°/270° rotation, horizontal reflection, deterministic server-authoritative placement command (`Commands::PlaceBlueprint`), and rail toolbar GUI.
+- **Sprint 26 — Complete:** Eight canonical CST Prefab Rail Blocks shipped through the blueprint system with RHD/LHD traffic-side invariance, embedded operating guidance, read-only builtin protection, and Catch2 test suite.
+- **Sprint 27 — Complete:** Closed player and operator UI gaps with native windows for Empire Supply Chain Matrix & Trade Ledger and Federation Authentication & Corporate Charters, Map dropdown menu integration, and automated test suite.
+- **Sprint 28 — Complete:** Generated fresh all-feature solo UAT savegame (`OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav`) with `OpenSpaceTTD-UAT-Demo` GameScript v7, 7 persistent Story Book chapters, 16 measurable acceptance goals, CST & Blueprint staging fixtures, Megacity save/load persistence (`MEGA` chunk), and 232/232 passing CTests.
+- **Sprint 29 — Protocol acceptance complete:** Delivered the authority API acceptance kit with automated scenario runner (`scripts/run_acceptance_kit.sh`, `scripts/test_sprint29_acceptance_kit.py`), simulated 3-hop transfer lifecycle, content admission rejection, congestion, recovery, persistence and ledger checks. It did not prove a train-driven handoff between independent game processes.
+- **Sprint 30 — Complete:** Delivered Exotic Alien Biomes & Phase 4 Planetary Colonization Engine with complete 6-biome environmental palette (Temperate, Arid Desert, Sub-Arctic, Sub-Tropic, Volcanic, Oceanic), procedural styling and persistent tile loops, Phase 4 Expansion wilderness build restrictions, server-authoritative colonial outpost founding (`Commands::ColonizeOutpost`), dynamic phase promotion hierarchy, `colonize_world` console command, `PLNT` chunk save/load persistence, and Catch2 unit test suite (`test_sprint30_biomes_colonization.cpp`).
+- **Sprint 31 — Complete:** Delivered Planetary Colonization GUI, Universe Authority Federation Expansion, and Settlement Lifecycle with in-game `UniverseDirectoryWindow` colonization action bar (`WID_UD_COLONIZE_BTN`) and 6-biome taxonomy badges, Universe Authority remote outpost colonization REST API (`POST /worlds/<id>/colonize`), colonial outpost origin tile tracking (`outpost_tile`), viewport targeting upon planet jump, daemon checkpoint state persistence, unit tests (`test_sprint31_colonization_gui.cpp`), and end-to-end multi-server acceptance kit (`test_sprint31_colonization_kit.py`).
+- **Sprint 32 — Complete:** Delivered Planetary Settlement Lifecycle, Economy-Driven Phase Promotion, and Technology Progression Engine. Enforced Commonwealth traction and rail progression tiers (`PlanetManager::CheckTrackPlacement`) restricting pioneer rails on Phase 4, blocking Monorail/Maglev on Phase 3, and reserving Maglev for Phase 1 Core worlds. Implemented deterministic economy-driven cargo delivery scoring (`PlanetManager::RecordCargoDelivery` in `DeliverGoods`) with multiplier for interplanetary imports. Delivered server-authoritative multi-tier phase promotion command (`Commands::PromoteWorld`), news broadcasts, dedicated console command (`promote_world`), Universe Directory GUI promotion action and dynamic score progress bar (`WID_UD_PROMOTE_BTN`), Universe Authority REST promotion endpoints (`/worlds/<id>/promote`), daemon state checkpoint recovery, Catch2 unit test suite (`test_sprint32_lifecycle_and_tech.cpp`), and end-to-end federation acceptance kit (`test_sprint32_lifecycle_kit.py`).
+- **Sprint 33 — Complete:** Delivered Planetary Town Growth, Megacity Supply Loops, and Biome-Specific Industry Lifecycle. Enforced town founding protection (`PlanetManager::CheckTownPlacement`) safeguarding void space and uncolonized Phase 4 wilderness. Integrated living town growth rates and passenger/mail scaling with Megacity supply states (`Starvation` freeze, `MetropolitanBoom` 1.5x, `HyperGrowth` 2.0x). Connected station deliveries in `DeliverGoods` to `MegacityManager::RecordDeliveryByCargo` and monthly evaluations. Implemented colonial outpost town inception and auto-elevation to Megacity on Phase 1 Core promotion. Enforced biome-specific industry placement restrictions blocking bio-farms on Volcanic worlds. Added `View Megacity` GUI button (`WID_UD_MEGACITY_BTN`) and population badges in the Universe Directory. Added Universe Authority Megacity REST endpoints (`/worlds/<id>/megacity`), Catch2 unit test suite (`test_sprint33_planetary_economy_and_megacity.cpp`), and multi-server acceptance kit (`test_sprint33_megacity_kit.py`).
+
+### 4. Delivery Summary
+
+Sprints 24 through 33 are fully implemented, tested, and verified across headless solo UAT, multi-server federated acceptance suites, and unit test suites. OpenSpaceTTD provides a complete, deterministic, playable multi-world railway simulation with portal gates, full 6-biome alien ecologies, Phase 4 planetary colonization and GUI settlement lifecycle, economy-driven phase promotions, Commonwealth technology tiers, living town growth with Megacity supply loops, blueprints, CST prefabs, complete GUIs, and resilient federation clustering.
+
+---
+
+## U. Mid-to-Late Game Objectives: Corporate HQ, Tech Tree R&D, and In-Kind Fabrication
+
+**Authoritative Spike Reference:** [MID_TO_LATE_GAME_CORPORATE_TECH_SPIKE.md](MID_TO_LATE_GAME_CORPORATE_TECH_SPIKE.md)
+
+### 1. Gameplay Progression Pivot
+In vanilla OpenTTD, late-game economics suffer from the "infinite cash problem" where money ceases to be a meaningful constraint. OpenSpaceTTD resolves this by introducing a progression pivot once players operate stable multi-world networks across 3 to 4 phase worlds:
+1. **Corporate Headquarters Campus (Phase 1 Core World):** Players establish an active Corporate HQ nexus (CST Arcology style) on a Phase 1 Core world, serving as the administrative, financial, and scientific epicenter of their enterprise.
+2. **In-Lore Commonwealth Tech Tree (R&D):** Replacing calendar-based vehicle introductions with active, player-directed R&D trees (Traction & Propulsion, Wormhole & Portal Physics, Materials & Fabrication) funded by scientific cargo consignments (Data Crystals, Silicon Wafers, Neural Processors) and corporate operating profits.
+3. **In-Kind Material Fabrication (Factorio / Captain of Industry Play Style):** Rather than purchasing track, bridges, tunnels, signals, and rolling stock exclusively with liquid currency, players manufacture and fabricate assets using company-owned planetary stockpiles.
+
+### 2. Macro vs. Micro Logistics Invariant
+To preserve OpenTTD's grand-scale macro-railway simulation and avoid micro-management burdens:
+- **No Micro-Conveyor/Hauling Overhead:** Materials do not need to be hauled directly to individual track tiles.
+- **Bi-Directional Logistics Hubs (Planetary Warehouses):** Dedicated company warehouses act as active planetary inventory buffers rather than one-way cargo sinks. Trains can `Unload to Stockpile` to feed local planetary fabrication or R&D, while outgoing trains can execute `Load from Stockpile` to redistribute surplus materials across worlds or logistics corridors subject to configurable reserve threshold floors.
+- **Dual-Mode Construction with Economic Incentive:** Players can toggle between Commercial Cash and In-Kind Fabrication mode, saving 70–85% on infrastructure and rolling stock by consuming planetary stockpiles.
+
+### 3. Core Engine Architecture & Commonwealth Lore Enrichment
+- **Abstract Cargo Roles in Core C++:** The engine defines abstract fabrication roles (`BALLAST`, `STRUCTURAL_METAL`, `ELECTRICAL_COPPER`, `SILICON_CHIP`, `SUPERALLOY`).
+- **Two-Tier Data Crystal Lifecycle:**
+  - *Blank Crystals:* Synthesized from quartz sand and exotic minerals.
+  - *Consumer Crystals:* Formatted in towns/Megacities for encrypted civilian comms (replacing mail, driving Megacity prosperity).
+  - *Enriched Quantum Crystals:* Imprinted at frontier observatories and telemetry arrays with advanced mathematical proofs (Sheldon-Ozzie equations), acting as the essential feedstock for Corporate HQ R&D.
+- **Phased Rollout (Seamless Vanilla Fallback):** Sprints 39–41 map abstract roles to vanilla cargos (Stone, Steel, Goods, Valuables), ensuring immediate playability and testing without mod dependencies.
+- **Commonwealth Industry Pack (`openspacettd_industries.grf`):** In Sprint 42 (harmonized with Sprint 37), the bespoke 12-cargo suite binds directly to these exact engine roles.
+- **Continuous R&D Duration:** Corporate HQ research operates over continuous in-game time (3–12 months per project) powered by Research Points (RP) from delivered Enriched Quantum Crystals.
+- **Deterministic State Persistence:** Company world stockpiles and tech tree progress are saved in dedicated chunks (`STCK` and `TECH`), ensuring lockstep multiplayer determinism.
+
+### 4. Implementation Sequencing
+- **Sprint 39:** Corporate HQ & Bi-Directional Logistics Hubs (`CompanyWorldStockpile`, `CompanyLogisticsHub`, `STCK` chunk, HQ GUI).
+- **Sprint 40:** In-Kind Fabrication Engine & BOM (`FabricationManager`, dual-mode toggle, rail and vehicle command interception).
+- **Sprint 41:** In-Lore Commonwealth Tech Tree & Continuous R&D (research nodes, RP burn over in-game duration, `TECH` chunk, Tech Tree GUI).
+- **Sprint 42:** Factorio-Scale Multi-World Production Chains (12-cargo Commonwealth pack, data crystal enrichment, Megacity and R&D loops).
+
 

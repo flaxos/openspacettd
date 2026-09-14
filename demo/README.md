@@ -1,74 +1,63 @@
 # OpenSpaceTTD UAT Demo
 
-`OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav` is a deterministic 1024 x 512
-three-world acceptance-test save generated with seed `9032026`.
+> **Active Sprint 36 All-Feature Fixture:** `OpenSpaceTTD-All-Features-UAT-v1.0.sav` is the canonical guided solo UAT release savegame covering all features from Sprint 1 through Sprint 40. It features a 6-world procedural partition covering all 6 environmental biomes (Temperate Core, Arid Desert, Sub-Arctic, Volcanic, Sub-Tropic, Oceanic), 5 monumental gateway pairs, multi-tier megacity demand economics, planetary company stockpiles, corporate headquarters, logistics hubs, and in-kind fabrication. Powered by GameScript v8 with a 12-chapter, 25-goal persistent Story Book. See [ALL-FEATURES-UAT.md](ALL-FEATURES-UAT.md), [FEATURE_UI_UAT_COVERAGE.md](../docs/FEATURE_UI_UAT_COVERAGE.md), and [PROJECT_STATUS_AND_ROADMAP.md](../docs/PROJECT_STATUS_AND_ROADMAP.md).
 
-## World layout
+> **Legacy Sprint 28 Fixture:** `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` remains preserved for regression testing and covers features through Sprint 27. See [SPRINT28-UAT.md](SPRINT28-UAT.md).
 
-- World 1: Phase 1 Core, anchored by **Oaktree Core**.
-- World 2: Phase 2 Developed, anchored by **Merredin Industrial**.
-- World 3: Phase 3 Frontier, anchored by **Calyx Frontier**.
-- Gateway Alpha links Worlds 1 and 2 using spatially offset, perpendicular
-  portal heads. Its automatic demonstrator locomotive repeatedly traverses
-  the wormhole in both directions.
-- Gateway Beta links Worlds 2 and 3 with another non-aligned, rotated pair.
+### Quick Launch: All-Features Scenario (v1.0)
+```bash
+./build/openttd -g demo/OpenSpaceTTD-All-Features-UAT-v1.0.sav
+```
 
-Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, and `Ctrl+Alt+3` to jump between worlds.
-The in-game Story Book contains the complete Data Crystals, Portal Gates and
-Sprint 10 Planetary Operations acceptance checklists, location buttons, and
-persistent goals. Sprint 11 adds automatic high-capacity rail terminals to
-newly constructed and newly generated Portal Gates.
+---
 
-Sprint 10 adds two ready-to-use sites:
+## World Layout & Environmental Biomes
 
-- **Phase 1 Spaceport Candidate**, an owned small airport whose ordinary
-  station window exposes Spaceport designation, Tier 1-3 upgrades, supplies
-  and off-world trade telemetry.
-- **Frontier Edge Minerals**, an owned rail platform beside a signed empty
-  Phase 3 boundary tile. The final tunnel-style railway tool builds or removes
-  the Edge Conduit there; Land Area Information shows its live status.
+- **World 1 (Phase 1 Core):** Anchored by **Oaktree Core**, styled with Temperate Core biomes. Consumer and high-tech center.
+- **World 2 (Phase 2 Developed):** Anchored by **Merredin Industrial**, styled with Arid Industrial biomes. Heavy processing backbone, CST prefab staging area, and custom blueprint capture layout.
+- **World 3 (Phase 3 Frontier):** Anchored by **Calyx Frontier**, styled with Sub-Arctic Frontier biomes. Primary resource extraction and Edge Conduit void boundary.
+- **Gateway Alpha:** Interlinks Worlds 1 and 2 with non-aligned, perpendicular portal heads and automatic 18-tile terminals. Its demonstrator locomotive continuously traverses between worlds.
+- **Gateway Beta:** Interlinks Worlds 2 and 3 with rotated portal heads and automatic 18-tile terminals.
 
-The save contains a human company with starting funds, so it opens ready for
-construction rather than in spectator mode.
+Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, and `Ctrl+Alt+3` or the Map dropdown menu to jump between worlds.
+The in-game Story Book contains 7 chapters with 16 persistent, measurable acceptance goals and clickable location pins.
+
+## Dedicated UAT Testing Sites
+
+1. **Phase 1 Spaceport Candidate:** Owned small airport in World 1 with Spaceport designation, Tier 1-3 upgrades, life-support supplies, and trade telemetry in the station window.
+2. **Frontier Edge Minerals:** Owned rail platform beside a signed Phase 3 void boundary tile for Edge Conduit construction. Land Area Information shows live extraction metrics (+100% Frontier bonus).
+3. **CST Prefab Staging Area:** Pre-leveled 16x10 staging pad in World 2 for stamping canonical CST blocks from the Blueprint Library (`B`).
+4. **Custom Blueprint Capture Layout:** Pre-built sample track layout in World 2 for testing `Capture From Map` and custom library persistence.
+5. **Oaktree Core Megacity & Governance:** Anchor site for inspecting 3-tier commodity demands, growth states, Supply Chain Matrix & Trade Ledger, and Federation Authentication & Charters.
+
+The save contains an active human company with initial funds, ready for immediate construction.
 
 ## Launch
 
 ```bash
-./build/openttd -g demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav
+./build/openttd -g demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav
 ```
 
-Follow the Story Book location links or the signs for Gateway Alpha. The
-`UAT Wormhole Demonstrator` starts on an east-west line in World 1 and emerges
-on a north-south line at a different X and Y coordinate in World 2. This makes
-the arbitrary endpoint transition visibly distinct from an ordinary tunnel.
-
-Follow [SPRINT10-UAT.md](SPRINT10-UAT.md) for Planetary Operations and
-[SPRINT11-UAT.md](SPRINT11-UAT.md) for Portal Terminal acceptance. The existing
-save-menu folder link `OpenSpaceTTD-Demos` points at this directory. The v0.3
-save predates automatic terminal construction; use a newly generated game for
-the Sprint 11 terminal checks.
+Follow the step-by-step instructions in [SPRINT28-UAT.md](SPRINT28-UAT.md) or open the in-game Story Book (`Manage Company` > `Story Book`).
 
 ## Regenerate
 
-Build OpenSpaceTTD, then run:
+To deterministically regenerate the save from source:
 
 ```bash
 ./build/openttd -v null:ticks=200 -s null -m null -b null \
   -c demo/uat_demo.cfg -x -G 9032026 -g
 cmake -E copy demo/save/autosave/exit.sav \
-  demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav
+  demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav
 ./build/openttd -v null:ticks=1000 -s null -m null -b null \
   -c demo/uat_demo.cfg -x \
-  -g demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav
+  -g demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav
 cmake -E copy demo/save/autosave/exit.sav \
-  demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav
+  demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav
 ```
 
-The first pass creates the deterministic world and the embedded UAT content.
-The second non-networked load creates the initial human company. The null
-video driver writes `exit.sav` to the autosave directory because
-`autosave_on_exit` is enabled. Validate the final output with:
+Validate the generated save with:
 
 ```bash
-./build/openttd -q demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.3.sav
+./build/openttd -q demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav
 ```

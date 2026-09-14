@@ -39,6 +39,7 @@
 #include "table/track_land.h"
 #include "portal/planet_manager.h"
 #include "portal/edge_conduit.h"
+#include "portal/fabrication_manager.h"
 
 #include "safeguards.h"
 
@@ -431,6 +432,15 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 
 	if (!ValParamRailType(railtype) || !ValParamTrackOrientation(track)) return CMD_ERROR;
 
+	CommandCost planet_res = PlanetManager::CheckTrackPlacement(tile, railtype);
+	if (planet_res.Failed()) return planet_res;
+
+	WorldID track_world = PlanetManager::GetTileWorld(tile);
+	bool use_fabrication = (track_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	if (use_fabrication && !FabricationManager::CanFabricateTrack(track_world, _current_company, railtype)) {
+		return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+	}
+
 	Slope tileh = GetTileSlope(tile);
 	TrackBits trackbit = track;
 
@@ -603,7 +613,15 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 		YapfNotifyTrackLayoutChange(tile, track);
 	}
 
-	cost.AddCost(RailBuildCost(railtype));
+	Money rail_cost = RailBuildCost(railtype);
+	if (use_fabrication) {
+		if (flags.Test(DoCommandFlag::Execute)) {
+			FabricationManager::ConsumeTrackBOM(track_world, _current_company, railtype);
+		}
+		rail_cost = rail_cost * 20 / 100;
+	}
+
+	cost.AddCost(rail_cost);
 	return cost;
 }
 
@@ -1018,6 +1036,14 @@ CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType ra
 		rotate_existing_depot = true;
 	}
 
+	WorldID depot_world = PlanetManager::GetTileWorld(tile);
+	bool use_depot_fab = (depot_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	if (use_depot_fab && !rotate_existing_depot) {
+		if (!FabricationManager::CanFabricateDepot(depot_world, _current_company, railtype)) {
+			return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+		}
+	}
+
 	if (!rotate_existing_depot) {
 		cost.AddCost(Command<Commands::LandscapeClear>::Do(flags, tile));
 		if (cost.Failed()) return cost;
@@ -1053,8 +1079,18 @@ CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType ra
 		if (v != nullptr) TryPathReserve(v, true);
 	}
 
-	cost.AddCost(_price[Price::BuildDepotTrain]);
-	cost.AddCost(RailBuildCost(railtype));
+	Money depot_price = _price[Price::BuildDepotTrain];
+	Money track_price = RailBuildCost(railtype);
+	if (use_depot_fab && !rotate_existing_depot) {
+		if (flags.Test(DoCommandFlag::Execute)) {
+			FabricationManager::ConsumeDepotBOM(depot_world, _current_company, railtype);
+		}
+		depot_price = depot_price * 20 / 100;
+		track_price = track_price * 20 / 100;
+	}
+
+	cost.AddCost(depot_price);
+	cost.AddCost(track_price);
 	return cost;
 }
 
@@ -1103,10 +1139,20 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 	/* you can not convert a signal if no signal is on track */
 	if (convert_signal && !HasSignalOnTrack(tile, track)) return CommandCost(STR_ERROR_THERE_ARE_NO_SIGNALS);
 
+	WorldID signal_world = PlanetManager::GetTileWorld(tile);
+	bool use_signal_fab = (signal_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+
 	CommandCost cost;
 	if (!HasSignalOnTrack(tile, track)) {
 		/* build new signals */
-		cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals]);
+		if (use_signal_fab) {
+			if (!FabricationManager::CanFabricateSignal(signal_world, _current_company)) {
+				return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+			}
+			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals] * 20 / 100);
+		} else {
+			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals]);
+		}
 	} else {
 		if (signals_copy != 0 && sigvar != GetSignalVariant(tile, track)) {
 			/* convert signals <-> semaphores */
@@ -1153,6 +1199,9 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 		if (signals_copy == 0) {
 			if (!HasSignalOnTrack(tile, track)) {
 				/* build new signals */
+				if (use_signal_fab) {
+					FabricationManager::ConsumeSignalBOM(signal_world, _current_company);
+				}
 				SetPresentSignals(tile, GetPresentSignals(tile) | (IsPbsSignal(sigtype) ? KillFirstBit(SignalOnTrack(track)) : SignalOnTrack(track)));
 				SetSignalType(tile, track, sigtype);
 				SetSignalVariant(tile, track, sigvar);
@@ -1618,6 +1667,13 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 		CommandCost ret = CheckTileOwnership(tile);
 		if (ret.Failed()) {
 			error = std::move(ret);
+			continue;
+		}
+
+		/* Check world phase tech progression rules for destination railtype */
+		CommandCost planet_res = PlanetManager::CheckTrackPlacement(tile, totype);
+		if (planet_res.Failed()) {
+			error = std::move(planet_res);
 			continue;
 		}
 

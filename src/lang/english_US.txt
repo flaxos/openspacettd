@@ -30,20 +30,20 @@ STR_CARGO_PLURAL_COAL                                           :Coal
 STR_CARGO_PLURAL_MAIL                                           :Data Crystals
 STR_CARGO_PLURAL_OIL                                            :Oil
 STR_CARGO_PLURAL_LIVESTOCK                                      :Livestock
-STR_CARGO_PLURAL_GOODS                                          :Goods
-STR_CARGO_PLURAL_GRAIN                                          :Grain
+STR_CARGO_PLURAL_GOODS                                          :Manufactured Goods & Colony Supplies
+STR_CARGO_PLURAL_GRAIN                                          :Bio-Grain
 STR_CARGO_PLURAL_WOOD                                           :Wood
-STR_CARGO_PLURAL_IRON_ORE                                       :Iron Ore
-STR_CARGO_PLURAL_STEEL                                          :Steel
-STR_CARGO_PLURAL_VALUABLES                                      :Valuables
+STR_CARGO_PLURAL_IRON_ORE                                       :Heavy Iron Ore
+STR_CARGO_PLURAL_STEEL                                          :Structural Alloys
+STR_CARGO_PLURAL_VALUABLES                                      :Valuables & Rare Crystals
 STR_CARGO_PLURAL_COPPER_ORE                                     :Copper Ore
 STR_CARGO_PLURAL_MAIZE                                          :Corn
 STR_CARGO_PLURAL_FRUIT                                          :Fruit
-STR_CARGO_PLURAL_DIAMONDS                                       :Diamonds
-STR_CARGO_PLURAL_FOOD                                           :Food
+STR_CARGO_PLURAL_DIAMONDS                                       :Rare Silicates & Optical Crystals
+STR_CARGO_PLURAL_FOOD                                           :Packaged Nutrients & Rations
 STR_CARGO_PLURAL_PAPER                                          :Paper
 STR_CARGO_PLURAL_GOLD                                           :Gold
-STR_CARGO_PLURAL_WATER                                          :Water
+STR_CARGO_PLURAL_WATER                                          :Purified Hydration Feedstock
 STR_CARGO_PLURAL_WHEAT                                          :Wheat
 STR_CARGO_PLURAL_RUBBER                                         :Rubber
 STR_CARGO_PLURAL_SUGAR                                          :Sugar
@@ -64,20 +64,20 @@ STR_CARGO_SINGULAR_COAL                                         :Coal
 STR_CARGO_SINGULAR_MAIL                                         :Data Crystal
 STR_CARGO_SINGULAR_OIL                                          :Oil
 STR_CARGO_SINGULAR_LIVESTOCK                                    :Livestock
-STR_CARGO_SINGULAR_GOODS                                        :Goods
-STR_CARGO_SINGULAR_GRAIN                                        :Grain
+STR_CARGO_SINGULAR_GOODS                                        :Manufactured Goods & Colony Supplies
+STR_CARGO_SINGULAR_GRAIN                                        :Bio-Grain
 STR_CARGO_SINGULAR_WOOD                                         :Wood
-STR_CARGO_SINGULAR_IRON_ORE                                     :Iron Ore
-STR_CARGO_SINGULAR_STEEL                                        :Steel
-STR_CARGO_SINGULAR_VALUABLES                                    :Valuables
+STR_CARGO_SINGULAR_IRON_ORE                                     :Heavy Iron Ore
+STR_CARGO_SINGULAR_STEEL                                        :Structural Alloy
+STR_CARGO_SINGULAR_VALUABLES                                    :Valuables & Rare Crystals
 STR_CARGO_SINGULAR_COPPER_ORE                                   :Copper Ore
 STR_CARGO_SINGULAR_MAIZE                                        :Corn
 STR_CARGO_SINGULAR_FRUIT                                        :Fruit
-STR_CARGO_SINGULAR_DIAMOND                                      :Diamond
-STR_CARGO_SINGULAR_FOOD                                         :Food
+STR_CARGO_SINGULAR_DIAMOND                                      :Rare Silicate & Optical Crystal
+STR_CARGO_SINGULAR_FOOD                                         :Packaged Nutrients & Rations
 STR_CARGO_SINGULAR_PAPER                                        :Paper
 STR_CARGO_SINGULAR_GOLD                                         :Gold
-STR_CARGO_SINGULAR_WATER                                        :Water
+STR_CARGO_SINGULAR_WATER                                        :Purified Hydration Feedstock
 STR_CARGO_SINGULAR_WHEAT                                        :Wheat
 STR_CARGO_SINGULAR_RUBBER                                       :Rubber
 STR_CARGO_SINGULAR_SUGAR                                        :Sugar
@@ -2846,10 +2846,10 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Build ra
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toggle build/remove for railroad track, signals, waypoints and stations. Ctrl+Click to also remove the rail of waypoints and stations
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Convert/Upgrade the type of rail. Also press Shift to show cost estimate only
 
-STR_RAIL_NAME_RAILROAD                                          :Railroad
-STR_RAIL_NAME_ELRAIL                                            :Electrified railroad
-STR_RAIL_NAME_MONORAIL                                          :Monorail
-STR_RAIL_NAME_MAGLEV                                            :Maglev
+STR_RAIL_NAME_RAILROAD                                          :Conventional Pioneer Track
+STR_RAIL_NAME_ELRAIL                                            :Catenary Heavy Rail
+STR_RAIL_NAME_MONORAIL                                          :High-Speed Guided Rail
+STR_RAIL_NAME_MAGLEV                                            :CST Vacuum / Maglev Guideway
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Train Depot Orientation
@@ -5611,31 +5611,31 @@ STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Piggy-Bank
 
 ##id 0x4800
 # industry names
-STR_INDUSTRY_NAME_COAL_MINE                                     :Coal Mine
-STR_INDUSTRY_NAME_POWER_STATION                                 :Power Plant
+STR_INDUSTRY_NAME_COAL_MINE                                     :Carbon & Mineral Extraction Pit
+STR_INDUSTRY_NAME_POWER_STATION                                 :Planetary Fusion Substation
 STR_INDUSTRY_NAME_SAWMILL                                       :Sawmill
 STR_INDUSTRY_NAME_FOREST                                        :Forest
-STR_INDUSTRY_NAME_OIL_REFINERY                                  :Oil Refinery
+STR_INDUSTRY_NAME_OIL_REFINERY                                  :Petrochemical & Polymer Cracker
 STR_INDUSTRY_NAME_OIL_RIG                                       :Oil Rig
-STR_INDUSTRY_NAME_FACTORY                                       :Factory
+STR_INDUSTRY_NAME_FACTORY                                       :Heavy Manufacturing & Assembly Fab
 STR_INDUSTRY_NAME_PRINTING_WORKS                                :Printing Works
-STR_INDUSTRY_NAME_STEEL_MILL                                    :Steel Mill
-STR_INDUSTRY_NAME_FARM                                          :Farm
+STR_INDUSTRY_NAME_STEEL_MILL                                    :Alloy Smelting & Foundry Complex
+STR_INDUSTRY_NAME_FARM                                          :Bio-Agricultural Complex / Agri-Plains
 STR_INDUSTRY_NAME_COPPER_ORE_MINE                               :Copper Ore Mine
 STR_INDUSTRY_NAME_OIL_WELLS                                     :Oil Wells
 STR_INDUSTRY_NAME_BANK                                          :Bank
-STR_INDUSTRY_NAME_FOOD_PROCESSING_PLANT                         :Food Processing Plant
+STR_INDUSTRY_NAME_FOOD_PROCESSING_PLANT                         :Nutrient Synthesis & Packaging Facility
 STR_INDUSTRY_NAME_PAPER_MILL                                    :Paper Mill
 STR_INDUSTRY_NAME_GOLD_MINE                                     :Gold Mine
 STR_INDUSTRY_NAME_BANK_TROPIC_ARCTIC                            :Bank
-STR_INDUSTRY_NAME_DIAMOND_MINE                                  :Diamond Mine
-STR_INDUSTRY_NAME_IRON_ORE_MINE                                 :Iron Ore Mine
+STR_INDUSTRY_NAME_DIAMOND_MINE                                  :Rare Silicates & Optical Crystals Mine
+STR_INDUSTRY_NAME_IRON_ORE_MINE                                 :Heavy Metallurgical Ore Mine
 STR_INDUSTRY_NAME_FRUIT_PLANTATION                              :Fruit Plantation
 STR_INDUSTRY_NAME_RUBBER_PLANTATION                             :Rubber Plantation
-STR_INDUSTRY_NAME_WATER_SUPPLY                                  :Water Supply
-STR_INDUSTRY_NAME_WATER_TOWER                                   :Water Tower
-STR_INDUSTRY_NAME_FACTORY_2                                     :Factory
-STR_INDUSTRY_NAME_FARM_2                                        :Farm
+STR_INDUSTRY_NAME_WATER_SUPPLY                                  :Hydration Extraction & Purifier
+STR_INDUSTRY_NAME_WATER_TOWER                                   :Hydration Reservoir Tower
+STR_INDUSTRY_NAME_FACTORY_2                                     :Heavy Manufacturing & Assembly Fab
+STR_INDUSTRY_NAME_FARM_2                                        :Bio-Agricultural Complex / Agri-Plains
 STR_INDUSTRY_NAME_LUMBER_MILL                                   :Lumber Mill
 STR_INDUSTRY_NAME_COTTON_CANDY_FOREST                           :Cotton Candy Forest
 STR_INDUSTRY_NAME_CANDY_FACTORY                                 :Candy Factory
@@ -5695,45 +5695,45 @@ STR_SV_STNAME_FALLBACK                                          :{STRING} Statio
 ##id 0x8000
 ###length 116
 # Vehicle names
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_KIRBY_PAUL_TANK_STEAM        :Kirby Paul Tank (Steam)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MJS_250_DIESEL               :MJS 250 (Diesel)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_KIRBY_PAUL_TANK_STEAM        :CST Pioneer 0-6-0 'Surveyor' (Steam)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MJS_250_DIESEL               :Overland 250 Utility Diesel
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_PLODDYPHUT_CHOO_CHOO         :Ploddyphut Choo-Choo
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_POWERNAUT_CHOO_CHOO          :Powernaut Choo-Choo
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MIGHTYMOVER_CHOO_CHOO        :MightyMover Choo-Choo
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_PLODDYPHUT_DIESEL            :Ploddyphut Diesel
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_POWERNAUT_DIESEL             :Powernaut Diesel
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_WILLS_2_8_0_STEAM            :Wills 2-8-0 (Steam)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CHANEY_JUBILEE_STEAM         :Chaney 'Jubilee' (Steam)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_GINZU_A4_STEAM               :Ginzu 'A4' (Steam)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_8P_STEAM                  :SH '8P' (Steam)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_WILLS_2_8_0_STEAM            :Vulcan 2-8-0 'Frontier Hauler' (Steam)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CHANEY_JUBILEE_STEAM         :Commonwealth 'Jubilee' 4-6-0 (Steam)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_GINZU_A4_STEAM               :CST 'A4' Express Streamliner (Steam)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_8P_STEAM                  :Sheldon-Isaacs '8P' Heavy Freight (Steam)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MANLEY_MOREL_DMU_DIESEL      :Manley-Morel DMU (Diesel)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_DASH_DIESEL                  :'Dash' (Diesel)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_HENDRY_25_DIESEL          :SH/Hendry '25' (Diesel)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_UU_37_DIESEL                 :UU '37' (Diesel)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_FLOSS_47_DIESEL              :Floss '47' (Diesel)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CS_4000_DIESEL               :CS 4000 (Diesel)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CS_2400_DIESEL               :CS 2400 (Diesel)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CENTENNIAL_DIESEL            :Centennial (Diesel)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_KELLING_3100_DIESEL          :Kelling 3100 (Diesel)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CS_4000_DIESEL               :CST D-4000 Heavy Planetary Diesel
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CS_2400_DIESEL               :Overland 2400 General Utility Diesel
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_CENTENNIAL_DIESEL            :Titan D-100 Twin-Engine Hauler (Diesel)
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_KELLING_3100_DIESEL          :Frontier Freight 3100 Diesel
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_TURNER_TURBO_DIESEL          :Turner Turbo (Diesel)
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MJS_1000_DIESEL              :MJS 1000 (Diesel)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_125_DIESEL                :SH '125' (Diesel)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_30_ELECTRIC               :SH '30' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_40_ELECTRIC               :SH '40' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_T_I_M_ELECTRIC               :'T.I.M.' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_ASIASTAR_ELECTRIC            :'AsiaStar' (Electric)
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PASSENGER_CAR                 :Passenger Car
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_MAIL_VAN                      :Data Car
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_COAL_CAR                      :Coal Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_OIL_TANKER                    :Oil Tanker
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_125_DIESEL                :CST High-Speed Inter-World Diesel
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_30_ELECTRIC               :CST E-30 Heavy Catenary Freight
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_SH_40_ELECTRIC               :CST E-40 Inter-World Catenary Hauler
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_T_I_M_ELECTRIC               :Metropolitan Rapid Commuter EMU
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_ASIASTAR_ELECTRIC            :Commonwealth Star Passenger Express
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PASSENGER_CAR                 :Commonwealth Passenger Coach
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_MAIL_VAN                      :Data Crystal Van
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_COAL_CAR                      :Carbon & Coal Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_OIL_TANKER                    :Oil & Petrochemical Tanker
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_LIVESTOCK_VAN                 :Livestock Boxcar
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_GOODS_VAN                     :Goods Car
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_GRAIN_HOPPER                  :Grain Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_WOOD_TRUCK                    :Wood Car
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_IRON_ORE_HOPPER               :Iron Ore Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_STEEL_TRUCK                   :Steel Car
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_ARMORED_VAN                   :Armored Boxcar
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_FOOD_VAN                      :Food Boxcar
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_GOODS_VAN                     :Manufactured Goods & Colony Supplies Van
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_GRAIN_HOPPER                  :Bio-Grain & Biomass Hopper
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_WOOD_TRUCK                    :Timber Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_IRON_ORE_HOPPER               :Mineral & Heavy Ore Hopper
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_STEEL_TRUCK                   :Structural Alloys Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_ARMORED_VAN                   :Secure Data Crystal & Valuables Van
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_FOOD_VAN                      :Synthesized Food & Provisions Van
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PAPER_TRUCK                   :Paper Car
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_COPPER_ORE_HOPPER             :Copper Ore Hopper
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_WATER_TANKER                  :Water Tanker
@@ -5749,21 +5749,21 @@ STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_TOY_VAN                       :Toy Boxcar
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_BATTERY_TRUCK                 :Battery Flatcar
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_FIZZY_DRINK_TRUCK             :Fizzy Drink Flatcar
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PLASTIC_TRUCK                 :Plastic Flatcar
-STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_X2001_ELECTRIC           :'X2001' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_MILLENNIUM_Z1_ELECTRIC   :'Millennium Z1' (Electric)
+STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_X2001_ELECTRIC           :CST Trans-World High-Speed Electric
+STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_MILLENNIUM_Z1_ELECTRIC   :'Millennium Z1' Guided Electric
 STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_WIZZOWOW_Z99             :Wizzowow Z99
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PASSENGER_CAR             :Passenger Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_MAIL_VAN                  :Data Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COAL_CAR                  :Coal Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_OIL_TANKER                :Oil Tanker
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PASSENGER_CAR             :Commonwealth Passenger Coach
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_MAIL_VAN                  :Data Crystal Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COAL_CAR                  :Carbon & Coal Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_OIL_TANKER                :Oil & Petrochemical Tanker
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_LIVESTOCK_VAN             :Livestock Boxcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_GOODS_VAN                 :Goods Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_GRAIN_HOPPER              :Grain Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_WOOD_TRUCK                :Wood Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_IRON_ORE_HOPPER           :Iron Ore Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_STEEL_TRUCK               :Steel Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_ARMORED_VAN               :Armored Boxcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_FOOD_VAN                  :Food Boxcar
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_GOODS_VAN                 :Manufactured Goods & Colony Supplies Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_GRAIN_HOPPER              :Bio-Grain & Biomass Hopper
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_WOOD_TRUCK                :Timber Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_IRON_ORE_HOPPER           :Mineral & Heavy Ore Hopper
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_STEEL_TRUCK               :Structural Alloys Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_ARMORED_VAN               :Secure Data Crystal & Valuables Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_FOOD_VAN                  :Synthesized Food & Provisions Van
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PAPER_TRUCK               :Paper Car
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COPPER_ORE_HOPPER         :Copper Ore Hopper
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_WATER_TANKER              :Water Tanker
@@ -5779,23 +5779,23 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_TOY_VAN                   :Toy Boxcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_BATTERY_TRUCK             :Battery Flatcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_FIZZY_DRINK_TRUCK         :Fizzy Drink Flatcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PLASTIC_TRUCK             :Plastic Flatcar
-STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV1_LEVIATHAN_ELECTRIC    :Lev1 'Leviathan' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV2_CYCLOPS_ELECTRIC      :Lev2 'Cyclops' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV3_PEGASUS_ELECTRIC      :Lev3 'Pegasus' (Electric)
-STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV4_CHIMAERA_ELECTRIC     :Lev4 'Chimaera' (Electric)
+STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV1_LEVIATHAN_ELECTRIC    :CST Mark I 'Leviathan' Vacuum Maglev
+STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV2_CYCLOPS_ELECTRIC      :CST Mark II 'Cyclops' Heavy Maglev Hauler
+STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV3_PEGASUS_ELECTRIC      :CST Mark III 'Pegasus' High-Speed Maglev
+STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_LEV4_CHIMAERA_ELECTRIC     :CST Mark IV 'Chimaera' Hyper-Maglev Express
 STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_WIZZOWOW_ROCKETEER         :Wizzowow Rocketeer
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PASSENGER_CAR               :Passenger Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_MAIL_VAN                    :Data Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COAL_CAR                    :Coal Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_OIL_TANKER                  :Oil Tanker
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PASSENGER_CAR               :Commonwealth Passenger Coach
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_MAIL_VAN                    :Data Crystal Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COAL_CAR                    :Carbon & Coal Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_OIL_TANKER                  :Oil & Petrochemical Tanker
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_LIVESTOCK_VAN               :Livestock Boxcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_GOODS_VAN                   :Goods Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_GRAIN_HOPPER                :Grain Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_WOOD_TRUCK                  :Wood Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_IRON_ORE_HOPPER             :Iron Ore Hopper
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_STEEL_TRUCK                 :Steel Car
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_ARMORED_VAN                 :Armored Boxcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FOOD_VAN                    :Food Boxcar
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_GOODS_VAN                   :Manufactured Goods & Colony Supplies Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_GRAIN_HOPPER                :Bio-Grain & Biomass Hopper
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_WOOD_TRUCK                  :Timber Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_IRON_ORE_HOPPER             :Mineral & Heavy Ore Hopper
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_STEEL_TRUCK                 :Structural Alloys Truck
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_ARMORED_VAN                 :Secure Data Crystal & Valuables Van
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FOOD_VAN                    :Synthesized Food & Provisions Van
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PAPER_TRUCK                 :Paper Car
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COPPER_ORE_HOPPER           :Copper Ore Hopper
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_WATER_TANKER                :Water Tanker
@@ -6073,3 +6073,95 @@ STR_BADGE_CONFIG_FILTERS                                        :{WHITE}Badge Fi
 STR_BADGE_CONFIG_PREVIEW                                        :Preview Image
 STR_BADGE_CONFIG_NAME                                           :Name
 STR_BADGE_FILTER_ANY_LABEL                                      :Any {STRING}
+
+# OpenSpaceTTD Commonwealth Lore and GUI additions
+STR_MEGACITY_VIEW_CAPTION                                       :{WHITE}Megacity Commodity & Growth Overview
+STR_MEGACITY_VIEW_CAPTION_WITH_TOWN                             :{WHITE}Megacity: {TOWN}
+STR_MEGACITY_GROWTH_STARVATION                                  :{RED}Starvation (0.0x Growth)
+STR_MEGACITY_GROWTH_SUBSISTENCE                                 :{ORANGE}Subsistence (1.0x Growth)
+STR_MEGACITY_GROWTH_BOOM                                        :{GREEN}Metropolitan Boom (1.5x Growth)
+STR_MEGACITY_GROWTH_HYPERGROWTH                                 :{LTBLUE}HyperGrowth (2.0x Growth, +50% Traffic)
+STR_MEGACITY_TIER1_SUSTENANCE                                   :Tier 1: Sustenance (Food, Water)
+STR_MEGACITY_TIER2_EXPANSION                                    :Tier 2: Expansion (Alloys, Goods)
+STR_MEGACITY_TIER3_PROSPERITY                                   :Tier 3: Prosperity (Data Crystals, Valuables)
+STR_MEGACITY_BUTTON_PREV                                        :Previous
+STR_MEGACITY_BUTTON_PREV_TOOLTIP                                :Switch to previous registered megacity
+STR_MEGACITY_BUTTON_NEXT                                        :Next
+STR_MEGACITY_BUTTON_NEXT_TOOLTIP                                :Switch to next registered megacity
+STR_MEGACITY_BUTTON_LOCATE                                      :Locate Town
+STR_MEGACITY_BUTTON_LOCATE_TOOLTIP                              :Center the main view on this megacity
+STR_MEGACITY_BUTTON_DESIGNATE                                   :Designate Megacity
+STR_MEGACITY_BUTTON_DESIGNATE_TOOLTIP                           :Register this town as a metropolitan core megacity
+STR_MEGACITY_NO_MEGACITIES                                      :{SILVER}No megacities registered in the federation
+STR_TOWN_VIEW_MEGACITY_BUTTON                                   :Megacity
+STR_TOWN_VIEW_MEGACITY_TOOLTIP                                  :View megacity commodity demand and growth status
+STR_TOWN_MENU_MEGACITY_OVERVIEW                                 :Megacity Overview
+STR_CORRIDOR_MONITOR_CAPTION                                    :{WHITE}Inter-Server Freight Corridor Monitor
+STR_CORRIDOR_STATUS_CLEAR                                       :{GREEN}Clear (1.0x)
+STR_CORRIDOR_STATUS_MODERATE                                    :{YELLOW}Moderate (1.2x delay)
+STR_CORRIDOR_STATUS_CONGESTED                                   :{ORANGE}Congested (1.5x delay)
+STR_CORRIDOR_STATUS_SATURATED                                   :{RED}Saturated (2.0x backpressure delay)
+STR_CORRIDOR_NO_ROUTES                                          :{SILVER}No active inter-server freight corridors registered
+STR_MAP_MENU_FREIGHT_CORRIDORS                                  :Freight Corridor Monitor
+STR_UNIVERSE_DIRECTORY_CAPTION                                  :{WHITE}Universe Authority - World Directory
+STR_UNIVERSE_DIRECTORY_ONLINE                                   :{GREEN}ONLINE
+STR_UNIVERSE_DIRECTORY_MAINTENANCE                              :{YELLOW}MAINTENANCE
+STR_UNIVERSE_DIRECTORY_UNREACHABLE                              :{RED}UNREACHABLE
+STR_UNIVERSE_DIRECTORY_REFRESH                                  :Refresh
+STR_UNIVERSE_DIRECTORY_REFRESH_TOOLTIP                          :Poll Universe Authority for updated world heartbeats
+STR_UNIVERSE_DIRECTORY_NO_WORLDS                                :{SILVER}No worlds registered in directory
+STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
+
+# OpenSpaceTTD Sprint 25: Player Rail Blueprints
+STR_RAIL_TOOLBAR_TOOLTIP_BLUEPRINT_LIBRARY                      :{BLACK}Open Rail Blueprint Library. Capture, manage, and stamp rail layouts, depots, and stations
+STR_BLUEPRINT_VIEW_CAPTION                                       :{WHITE}Rail Blueprint Library
+STR_BLUEPRINT_RENAME_CAPTION                                     :{WHITE}Rename Blueprint
+STR_BLUEPRINT_BUTTON_CAPTURE                                     :Capture
+STR_BLUEPRINT_BUTTON_CAPTURE_TOOLTIP                             :{BLACK}Click and drag a rectangle over rail tracks on the map to capture a new blueprint template
+STR_BLUEPRINT_BUTTON_PLACE                                       :Place
+STR_BLUEPRINT_BUTTON_PLACE_TOOLTIP                               :{BLACK}Enter stamp placement mode to build this blueprint on the map
+STR_BLUEPRINT_BUTTON_ROTATE                                      :Rotate CW
+STR_BLUEPRINT_BUTTON_ROTATE_TOOLTIP                              :{BLACK}Rotate the blueprint 90 degrees clockwise (Hotkey: R)
+STR_BLUEPRINT_BUTTON_FLIP                                        :Flip
+STR_BLUEPRINT_BUTTON_FLIP_TOOLTIP                                :{BLACK}Mirror the blueprint horizontally (Hotkey: F)
+STR_BLUEPRINT_BUTTON_RENAME                                      :Rename
+STR_BLUEPRINT_BUTTON_RENAME_TOOLTIP                              :{BLACK}Rename the selected blueprint
+STR_BLUEPRINT_BUTTON_DELETE                                      :Delete
+STR_BLUEPRINT_BUTTON_DELETE_TOOLTIP                              :{BLACK}Delete the selected player blueprint from disk
+STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
+STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
+STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
+STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
+STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
+STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
+STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
+STR_ERROR_CAN_T_PLACE_BLUEPRINT                                  :{WHITE}Can't place blueprint...
+STR_ERROR_BLUEPRINT_BUILTIN_CANNOT_DELETE                        :{WHITE}Factory CST prefabs cannot be deleted
+
+# OpenSpaceTTD Sprint 27: Feature UI Completion
+STR_MAP_MENU_TRADE_LEDGER                                           :Supply Chain & Trade Ledger
+STR_MAP_MENU_FEDERATION_AUTH                                        :Federation Authentication & Charters
+
+STR_TRADE_LEDGER_CAPTION                                            :{WHITE}Empire Supply Chain Matrix & Trade Ledger
+STR_TRADE_LEDGER_TAB_SUPPLY_CHAIN                                   :Supply Chain Matrix
+STR_TRADE_LEDGER_TAB_TRADE_LEDGER                                   :Trade Balances & Conservation
+STR_TRADE_LEDGER_REFRESH                                            :Refresh
+STR_TRADE_LEDGER_REFRESH_TOOLTIP                                    :Refresh empire supply chain metrics and ledger balances
+STR_TRADE_LEDGER_STATUS_CONSERVED                                   :{GREEN}CONSERVED (Zero Duplication / Zero Loss)
+STR_TRADE_LEDGER_STATUS_VIOLATION                                   :{RED}VIOLATION DETECTED (Imbalance in In-Transit / Completed)
+STR_TRADE_LEDGER_NO_WORLDS                                          :{SILVER}No registered worlds with trade balance data
+
+STR_FEDERATION_AUTH_CAPTION                                         :{WHITE}Federation Player Authentication & Corporate Charters
+STR_FEDERATION_AUTH_BTN_LOGIN_REGISTER                              :Log In / Register
+STR_FEDERATION_AUTH_BTN_LOGIN_REGISTER_TOOLTIP                      :Authenticate or register a player account with the Universe Authority
+STR_FEDERATION_AUTH_BTN_NEW_CHARTER                                 :Charter Corporation
+STR_FEDERATION_AUTH_BTN_NEW_CHARTER_TOOLTIP                         :Charter a new multi-world corporation owned by the authenticated player
+STR_FEDERATION_AUTH_BTN_ADD_PRESENCE                                :Register World Presence
+STR_FEDERATION_AUTH_BTN_ADD_PRESENCE_TOOLTIP                         :Register an active operational presence for the selected corporation on this world
+STR_FEDERATION_AUTH_BTN_AUTH_DELEGATE                               :Authorize Delegate
+STR_FEDERATION_AUTH_BTN_AUTH_DELEGATE_TOOLTIP                       :Authorize a delegate player to operate this corporate charter
+STR_FEDERATION_AUTH_NO_CHARTERS                                     :{SILVER}No corporate charters registered
+STR_FEDERATION_AUTH_LOGIN_CAPTION                                   :{WHITE}Federation Player Username
+STR_FEDERATION_AUTH_CHARTER_CAPTION                                 :{WHITE}New Corporation Name
+STR_FEDERATION_AUTH_DELEGATE_CAPTION                                :{WHITE}Delegate Player Sequence ID
+

@@ -282,6 +282,7 @@ TEST_CASE("Portal Maintenance Economics - Upkeep Fees and Calculation")
 	Map::Allocate(64, 64);
 	PortalRegistry::Reset();
 	_company_pool.CleanPool();
+	_price[Price::BuildTunnel] = 450;
 
 	REQUIRE(Company::CanAllocateItem());
 	Company *c1 = Company::Create();

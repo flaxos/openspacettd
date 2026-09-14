@@ -1,5 +1,7 @@
 # OpenTTD
 
+> This repository is the OpenSpaceTTD fork. Start with the [OpenSpaceTTD project status and roadmap](docs/PROJECT_STATUS_AND_ROADMAP.md); the remainder of this README retains the upstream OpenTTD overview and build information.
+
 ## Table of contents
 
 - 1.0) [About](#10-about)

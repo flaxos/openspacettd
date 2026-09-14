@@ -30,6 +30,7 @@ enum RailToolbarWidgets : WidgetID {
 	WID_RAT_CONVERT_RAIL,   ///< Convert other rail to this type.
 	WID_RAT_BUILD_PORTAL,   ///< Build or link interplanetary portal gates.
 	WID_RAT_BUILD_CONDUIT,  ///< Build or remove an Edge Conduit at a world boundary.
+	WID_RAT_BLUEPRINT,      ///< Open or toggle the Rail Blueprint Library.
 };
 
 /** Widgets of the #BuildRailStationWindow class. */

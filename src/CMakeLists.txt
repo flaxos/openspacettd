@@ -374,6 +374,16 @@ add_files(
     picker_gui.h
     portal/edge_conduit.cpp
     portal/edge_conduit.h
+    portal/company_stockpile.cpp
+    portal/company_stockpile.h
+    portal/corporate_hq.cpp
+    portal/corporate_hq.h
+    portal/corporate_hq_gui.cpp
+    portal/corporate_hq_gui.h
+    portal/logistics_hub.cpp
+    portal/logistics_hub.h
+    portal/fabrication_manager.cpp
+    portal/fabrication_manager.h
     portal/content_manifest.cpp
     portal/content_manifest.h
     portal/consist_materializer.cpp
@@ -382,6 +392,8 @@ add_files(
     portal/consist_snapshot.h
     portal/federation_cmd.cpp
     portal/federation_cmd.h
+    portal/federation_auth_gui.cpp
+    portal/federation_auth_gui.h
     portal/federation_identity.cpp
     portal/federation_identity.h
     portal/federation_player.cpp
@@ -390,6 +402,8 @@ add_files(
     portal/freight_corridor_gui.h
     portal/megacity_gui.cpp
     portal/megacity_gui.h
+    portal/trade_ledger_gui.cpp
+    portal/trade_ledger_gui.h
     portal/megacity_manager.cpp
     portal/megacity_manager.h
     portal/universe_authority.cpp
@@ -410,6 +424,14 @@ add_files(
     portal/spaceport_manager.h
     portal/world_gen.cpp
     portal/world_gen.h
+    blueprint/blueprint.cpp
+    blueprint/blueprint.h
+    blueprint/blueprint_cmd.cpp
+    blueprint/blueprint_cmd.h
+    blueprint/blueprint_gui.cpp
+    blueprint/blueprint_gui.h
+    blueprint/blueprint_manager.cpp
+    blueprint/blueprint_manager.h
     progress.cpp
     progress.h
     provider_manager.h

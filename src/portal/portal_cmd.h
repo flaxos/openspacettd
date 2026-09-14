@@ -115,6 +115,56 @@ CommandCost CmdConfigureSpaceportBridge(DoCommandFlags flags, StationID station,
  */
 CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id);
 
+/**
+ * Colonize an uncolonized Phase 4 Expansion world and establish an initial pioneer outpost.
+ *
+ * @param flags Command flags.
+ * @param tile Tile location for the initial colonial outpost town/settlement.
+ * @param outpost_name Custom name for the colonial outpost / world. If empty, an automated name is generated.
+ * @return Command cost or failure.
+ */
+CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::string &outpost_name);
+
+/**
+ * Promote a registered world to its next development tier when development threshold is satisfied.
+ * Phase 4 -> Phase 3 -> Phase 2 -> Phase 1.
+ *
+ * @param flags Command flags.
+ * @param world The WorldID of the world to promote.
+ * @return Command cost or failure.
+ */
+CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world);
+
+/**
+ * Construct an active corporate headquarters campus on a Phase 1 Core world.
+ *
+ * @param flags Command flags.
+ * @param tile Tile location for the Corporate HQ.
+ * @param hq_name Custom name for the corporate campus.
+ * @return Command cost or failure.
+ */
+CommandCost CmdPlaceCorporateHQ(DoCommandFlags flags, TileIndex tile, const std::string &hq_name);
+
+/**
+ * Establish a dedicated company logistics hub warehouse for bi-directional inventory buffering.
+ *
+ * @param flags Command flags.
+ * @param tile Tile location for the Logistics Hub warehouse.
+ * @param st StationID of the attached rail/road station.
+ * @param hub_name Custom name for the logistics hub.
+ * @return Command cost or failure.
+ */
+CommandCost CmdBuildLogisticsHub(DoCommandFlags flags, TileIndex tile, StationID st, const std::string &hub_name);
+
+/**
+ * Toggle between standard cash purchase and in-kind fabrication from planetary stockpile.
+ *
+ * @param flags Command flags.
+ * @param enabled Whether in-kind fabrication mode is enabled.
+ * @return Command cost or failure.
+ */
+CommandCost CmdSetFabricationMode(DoCommandFlags flags, bool enabled);
+
 /** GUI completion callback for portal gate linking. */
 CommandCallback CcPortalLink;
 
@@ -128,5 +178,10 @@ DEF_CMD_TRAIT(Commands::ConfigureSpaceportBridge,  CmdConfigureSpaceportBridge, 
 DEF_CMD_TRAIT(Commands::BuildEdgeConduit,          CmdBuildEdgeConduit,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::DestroyEdgeConduit,        CmdDestroyEdgeConduit,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::ConfigureEdgeConduitFeeder, CmdConfigureEdgeConduitFeeder, {},                                                   CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::ColonizeOutpost,           CmdColonizeOutpost,           CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::PromoteWorld,              CmdPromoteWorld,              CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::PlaceCorporateHQ,          CmdPlaceCorporateHQ,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::BuildLogisticsHub,         CmdBuildLogisticsHub,         CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::SetFabricationMode,        CmdSetFabricationMode,        {},                                                   CommandType::CompanySetting)
 
 #endif /* PORTAL_CMD_H */

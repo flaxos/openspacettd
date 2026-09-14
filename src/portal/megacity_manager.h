@@ -60,10 +60,13 @@ public:
 
 	/* Registration & Inspection */
 	static bool RegisterMegacity(TownID town_id, WorldID world_id, const std::string &town_name, uint32_t population = 1000);
+	static void RestoreMegacity(const MegacityProfile &profile);
 	static bool UnregisterMegacity(TownID town_id);
 	static bool IsMegacity(TownID town_id);
 	static const MegacityProfile *GetProfile(TownID town_id);
 	static std::vector<MegacityProfile> GetAllMegacities();
+	static float GetGrowthMultiplier(TownID town_id);
+	static float GetPassengerMultiplier(TownID town_id);
 
 	/* Deliveries & Quotas */
 	static void UpdatePopulation(TownID town_id, uint32_t population);

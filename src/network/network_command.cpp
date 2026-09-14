@@ -47,6 +47,7 @@
 #include "../tree_cmd.h"
 #include "../tunnelbridge_cmd.h"
 #include "../portal/portal_cmd.h"
+#include "../blueprint/blueprint_cmd.h"
 #include "../vehicle_cmd.h"
 #include "../viewport_cmd.h"
 #include "../water_cmd.h"

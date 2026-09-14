@@ -107,6 +107,60 @@ std::vector<RegisteredWorld> UniverseAuthorityService::GetWorldDirectory() const
 	return result;
 }
 
+bool UniverseAuthorityService::ColonizeWorld(WorldID world_id, const std::string &outpost_name)
+{
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) return false;
+	if (it->second.phase != WorldPhase::Phase4_Expansion) return false;
+
+	it->second.phase = WorldPhase::Phase3_Frontier;
+	if (!outpost_name.empty()) {
+		it->second.name = outpost_name;
+	}
+	return true;
+}
+
+bool UniverseAuthorityService::PromoteWorld(WorldID world_id)
+{
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) return false;
+	switch (it->second.phase) {
+		case WorldPhase::Phase4_Expansion:
+			it->second.phase = WorldPhase::Phase3_Frontier;
+			return true;
+		case WorldPhase::Phase3_Frontier:
+			it->second.phase = WorldPhase::Phase2_Developed;
+			return true;
+		case WorldPhase::Phase2_Developed:
+			it->second.phase = WorldPhase::Phase1_Core;
+			it->second.is_megacity = true;
+			it->second.megacity_growth_state = "Subsistence";
+			return true;
+		case WorldPhase::Phase1_Core:
+		default:
+			return false;
+	}
+}
+
+bool UniverseAuthorityService::UpdateMegacityStatus(
+	WorldID world_id,
+	bool is_megacity,
+	const std::string &growth_state,
+	float satisfaction_pct,
+	uint32_t population)
+{
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) return false;
+
+	it->second.is_megacity = is_megacity;
+	it->second.megacity_growth_state = growth_state;
+	it->second.satisfaction_pct = satisfaction_pct;
+	if (population > 0) {
+		it->second.population = population;
+	}
+	return true;
+}
+
 bool UniverseAuthorityService::RegisterRoute(const InterServerRoute &route)
 {
 	if (route.route_id == 0 || route.source_world == INVALID_WORLD || route.dest_world == INVALID_WORLD) {
@@ -187,7 +241,7 @@ std::string UniverseAuthorityService::InitiateTransfer(
 	uint32_t transit_duration_ticks,
 	FreightPriority priority)
 {
-	if (source_world == INVALID_WORLD || dest_world == INVALID_WORLD || !snapshot_bytes.Succeeded()) {
+	if (source_world == INVALID_WORLD || dest_world == INVALID_WORLD || !snapshot_bytes.Succeeded() || snapshot_bytes.bytes.empty()) {
 		return "";
 	}
 
@@ -352,6 +406,11 @@ bool UniverseAuthorityService::ConfirmTransferArrival(
 	if (success) {
 		it->second.state = TransferState::Completed;
 		it->second.status_message = "Delivered successfully";
+
+		/* Advance order progression if consist has an itinerary */
+		if (!it->second.snapshot.orders.empty()) {
+			it->second.snapshot.current_order_index = static_cast<uint16_t>((it->second.snapshot.current_order_index + 1) % it->second.snapshot.orders.size());
+		}
 
 		/* Update detailed commodity ledger and trade balances */
 		for (const auto &[cargo_type, count] : it->second.cargo_by_type) {
