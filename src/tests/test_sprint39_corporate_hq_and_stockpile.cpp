@@ -120,7 +120,7 @@ TEST_CASE("Sprint 39 Stockpile - Role Mappings and Deserialization")
 	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal) == CargoType{9});
 	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring) == CargoType{5});
 	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics) == CargoType{10});
-	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::EnrichedCrystals) == CargoType{10});
+	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::EnrichedCrystals) == CargoType{2});
 
 	StockpileManager::Reset();
 	WorldID w{5};

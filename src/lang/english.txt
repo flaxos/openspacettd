@@ -6280,4 +6280,18 @@ STR_FABRICATION_MODE_INACTIVE                                      :{SILVER}In-K
 STR_FABRICATION_BTN_TOGGLE                                         :Toggle Mode
 STR_FABRICATION_BTN_TOGGLE_TOOLTIP                                 :Toggle between standard cash purchase and in-kind fabrication from planetary stockpile
 
+# OpenSpaceTTD Sprint 41: In-Lore Commonwealth Tech Tree & R&D Projects
+STR_CORPORATE_HQ_TAB_TECH_TREE                                      :Commonwealth Tech Tree
+STR_TECH_TREE_STATUS_NO_ACTIVE                                      :{SILVER}Active Research: None. Select an available technology below to begin.
+STR_TECH_TREE_STATUS_ACTIVE                                         :{ORANGE}Active Research: {WHITE}{STRING} {YELLOW}({COMMA} / {COMMA} RP — {COMMA}%)
+STR_TECH_TREE_BTN_START_RESEARCH                                    :Start Research
+STR_TECH_TREE_BTN_START_RESEARCH_TOOLTIP                            :Set the selected project as the company's active corporate R&D focus
+STR_TECH_TREE_BTN_SET_BUDGET                                        :Budget: {CURRENCY_LONG}/mo
+STR_TECH_TREE_BTN_SET_BUDGET_TOOLTIP                                :Cycle monthly corporate research funding allocation
+STR_TECH_TREE_BRANCH_TRACTION                                       :Traction & Propulsion
+STR_TECH_TREE_BRANCH_PORTAL                                         :Wormhole & Portal Physics
+STR_TECH_TREE_BRANCH_MATERIALS                                      :Materials & Fabrication
+STR_ERROR_PREREQUISITE_RESEARCH_LOCKED                              :{WHITE}Cannot research: Prerequisite technology or Corporate HQ missing
+
+
 

@@ -397,6 +397,8 @@ enum class Commands : uint8_t {
 	PlaceCorporateHQ, ///< construct an active corporate headquarters campus on a Phase 1 Core world
 	BuildLogisticsHub, ///< establish a dedicated company logistics hub warehouse for bi-directional inventory buffering
 	SetFabricationMode, ///< toggle between standard cash purchase and in-kind fabrication from planetary stockpile
+	SelectResearchProject, ///< select active research project focus for the company
+	SetResearchBudget, ///< set monthly research budget for the company
 
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };

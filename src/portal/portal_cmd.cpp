@@ -20,6 +20,7 @@
 #include "logistics_hub.h"
 #include "corporate_hq.h"
 #include "fabrication_manager.h"
+#include "tech_tree.h"
 #include "../town.h"
 #include "../station_base.h"
 #include "../command_func.h"
@@ -764,4 +765,38 @@ CommandCost CmdSetFabricationMode(DoCommandFlags flags, bool enabled)
 
 	return CommandCost();
 }
+
+CommandCost CmdSelectResearchProject(DoCommandFlags flags, TechID project_id)
+{
+	CompanyID company = _current_company;
+	if (company == CompanyID::Invalid()) return CMD_ERROR;
+
+	if (project_id != TECH_NONE) {
+		std::string err_msg;
+		if (!TechTreeManager::CanResearch(company, project_id, err_msg)) {
+			return CMD_ERROR;
+		}
+	}
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		TechTreeManager::SetActiveProject(company, project_id);
+		SetWindowDirty(WindowClass::CorporateHQ, company.base());
+	}
+
+	return CommandCost();
+}
+
+CommandCost CmdSetResearchBudget(DoCommandFlags flags, uint32_t budget)
+{
+	CompanyID company = _current_company;
+	if (company == CompanyID::Invalid()) return CMD_ERROR;
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		TechTreeManager::SetMonthlyBudget(company, budget);
+		SetWindowDirty(WindowClass::CorporateHQ, company.base());
+	}
+
+	return CommandCost();
+}
+
 

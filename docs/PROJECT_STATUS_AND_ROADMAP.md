@@ -74,10 +74,11 @@ The configured build registers **270 CTest cases** (all 270 automated unit and r
 | 36 | All-Feature Guided Solo UAT (Sprints 1–40) | Implemented; automated verified & playable accepted |
 | 39 | Corporate Headquarters, Planetary Stockpiles & Logistics Hubs | Implemented; automated verified |
 | 40 | In-Kind Fabrication Engine & Bill of Materials (BOM) | Implemented; automated verified |
+| 41 | In-Lore Commonwealth Tech Tree & R&D Projects | Implemented; automated verified |
 
-Dedicated sprint documents exist for Sprints 11–17 and 23–34, 39, and 40. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
+Dedicated sprint documents exist for Sprints 11–17, 23–34, and 39–41. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
 
-Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
+Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
 
 ## Track status
 
@@ -88,11 +89,11 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Planetary economy | Implemented foundation | Revenue, development, Megacity demand, basic phase/biome restrictions and infrastructure throughput are present. The bespoke 12-cargo economy is pending. |
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
 | Federation runtime | Implemented & Verified | Independent dedicated servers connect to external Python Universe Authority. Live cross-process consist transfer, departure despawn, network transport, arrival materialization, order restoration, deduplication, and return trip verified in test_sprint35_cross_process.py. |
-| Player and operator UI | Implemented through Sprint 40 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, and In-Kind Fabrication controls. Operator console commands allow runtime federation link management and status inspection. |
+| Player and operator UI | Implemented through Sprint 41 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, and Commonwealth Tech Tree R&D tab. Operator console commands allow runtime federation link management and status inspection. |
 | Guided UAT | Implemented | `v1.0` covers all features through Sprint 40 (6 worlds, 6 biomes, 12 chapters, 25 goals, stockpiles, HQ, logistics hubs, fabrication); `v0.4` preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
 | Commonwealth Track B — gameplay/content/art | Partial | Procedural biome rules and portal recolouring exist. Bespoke industry, rolling-stock, terrain, flora, portal and arcology packs do not. |
-| Corporate HQ, Stockpiles, Logistics Hubs & Fabrication | Implemented; automated verified | Sprints 39–40 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine with 80% discount and BOM consumption (`FABR`), and GUI. Tech Tree (Sprint 41) sequenced next. |
+| Corporate HQ, Stockpiles, Fabrication & Tech Tree | Implemented; automated verified | Sprints 39–41 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine with 80%/90% discount and BOM consumption (`FABR`), and Commonwealth Tech Tree R&D manager with feedstock burning (`TECH`) and GUI. |
 
 ## Planned sprints
 
@@ -121,9 +122,9 @@ Delivered corporate headquarters placement on Phase 1 Core worlds, `CompanyWorld
 
 Delivered `FabricationManager` with physical Bill of Materials (BOM) recipe registry, company-level dual-mode construction setting, command interception for rail, signal, depot, and vehicle construction with 80% discount and physical stockpile deduction, `FABR` save/load chunk persistence, and GUI integration.
 
-### Sprint 41 — In-Lore Commonwealth Tech Tree & R&D Projects
+### Sprint 41 — In-Lore Commonwealth Tech Tree & R&D Projects [COMPLETED]
 
-Deliver the Commonwealth Tech Tree manager (`TechTreeManager` and `TECH` chunk persistence) within the Corporate HQ window. Implement R&D project trees covering traction tiers, portal throughput, superconductor physics, and advanced metallurgy. Support continuous monthly research progression powered by Research Points (RP) from Enriched Quantum Data Crystals (carrying advanced mathematical proofs and telemetry from frontier observatories), high-tech processors, and allocated monthly R&D budgets.
+Delivered `TechTreeManager` domain model with 3 lore branches (`Traction & Propulsion`, `Wormhole & Portal Physics`, `Materials & Fabrication`) and 12 canonical technologies (Tiers 1–4). Requires Corporate HQ on Phase 1 Core world and prerequisite DAG validation. Integrated monthly R&D progression loop powered by dual-input funding: cash budget ($1\text{ RP}/1,000\text{ Cr}$) plus HQ world feedstock burning (Enriched Quantum Data Crystals at $10\text{ RP}/\text{unit}$ up to 5/mo; High-Tech Electronics at $5\text{ RP}/\text{unit}$ up to 10/mo). Unlocking `TECH_MATERIALS_3` dynamically upgrades fabrication discount to 90% (leaving only a 10% labor fee). Server commands `Commands::SelectResearchProject` and `Commands::SetResearchBudget`, `TECH` table chunk persistence, and Corporate HQ GUI 5th tab integration. Fully verified with Catch2 test suite (`src/tests/test_sprint41_tech_tree.cpp`).
 
 ### Sprint 42 — Factorio-Scale Multi-World Production Chains
 

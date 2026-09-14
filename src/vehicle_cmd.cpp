@@ -133,7 +133,8 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 		if (!FabricationManager::CanFabricateVehicle(veh_world, _current_company, e)) {
 			return { CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS), VehicleID::Invalid(), 0, 0, {} };
 		}
-		veh_cost = veh_cost * 20 / 100;
+		uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
+		veh_cost = veh_cost * labor_factor / 100;
 	}
 	CommandCost value(ExpensesType::NewVehicles, veh_cost);
 

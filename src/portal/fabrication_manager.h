@@ -64,6 +64,9 @@ public:
 	/** Set whether a company has "Fabricate from Stockpile" mode enabled. */
 	static void SetFabricateFromStockpile(CompanyID company, bool enabled);
 
+	/** Get effective cash discount percentage (80% base, or 90% if TECH_MATERIALS_3 is unlocked). */
+	static uint8_t GetBOMDiscountPercent(CompanyID company);
+
 	/** Get Bill of Materials for a specific rail type track piece. */
 	static BillOfMaterials GetTrackBOM(RailType railtype);
 

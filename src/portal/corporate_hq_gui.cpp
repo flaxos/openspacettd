@@ -13,6 +13,7 @@
 #include "fabrication_manager.h"
 #include "portal_cmd.h"
 #include "planet_manager.h"
+#include "tech_tree.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../command_func.h"
@@ -33,6 +34,7 @@ enum class CorporateHQTab : uint8_t {
 	Stockpiles = 1,
 	LogisticsHubs = 2,
 	Fabrication = 3,
+	TechTree = 4,
 };
 
 static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets = {
@@ -44,28 +46,31 @@ static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets
 		NWidget(WWT_STICKYBOX, Colours::DarkGreen),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_OVERVIEW), SetMinimalSize(100, 20), SetStringTip(STR_CORPORATE_HQ_TAB_OVERVIEW, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_STOCKPILES), SetMinimalSize(130, 20), SetStringTip(STR_CORPORATE_HQ_TAB_STOCKPILES, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_LOGISTICS_HUBS), SetMinimalSize(120, 20), SetStringTip(STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION), SetMinimalSize(130, 20), SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_OVERVIEW), SetMinimalSize(70, 20), SetStringTip(STR_CORPORATE_HQ_TAB_OVERVIEW, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_STOCKPILES), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_HQ_TAB_STOCKPILES, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_LOGISTICS_HUBS), SetMinimalSize(85, 20), SetStringTip(STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION), SetMinimalSize(85, 20), SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_TECH_TREE), SetMinimalSize(110, 20), SetStringTip(STR_CORPORATE_HQ_TAB_TECH_TREE, STR_EMPTY),
 		NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE), SetMinimalSize(90, 20), SetStringTip(STR_FABRICATION_BTN_TOGGLE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_LOCATE), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_HQ_BTN_LOCATE, STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_UPGRADE), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_HQ_BTN_UPGRADE, STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_RESEARCH_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_START_RESEARCH, STR_TECH_TREE_BTN_START_RESEARCH_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_BUDGET_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_SET_BUDGET, STR_TECH_TREE_BTN_SET_BUDGET_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE), SetMinimalSize(65, 20), SetStringTip(STR_FABRICATION_BTN_TOGGLE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_LOCATE), SetMinimalSize(55, 20), SetStringTip(STR_CORPORATE_HQ_BTN_LOCATE, STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_UPGRADE), SetMinimalSize(55, 20), SetStringTip(STR_CORPORATE_HQ_BTN_UPGRADE, STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP),
 	EndContainer(),
-	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_HEADER_PANEL), SetMinimalSize(660, 60), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_HEADER_PANEL), SetMinimalSize(740, 60), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_MAIN_PANEL), SetMinimalSize(648, 260), SetFill(1, 1), SetResize(1, 1), EndContainer(),
+		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_MAIN_PANEL), SetMinimalSize(728, 280), SetFill(1, 1), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VSCROLLBAR, Colours::DarkGreen, WID_CHQ_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(648, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(728, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, Colours::DarkGreen),
 	EndContainer(),
 };
 
 static WindowDesc _corporate_hq_desc(
-	WindowPosition::Automatic, "view_corporate_hq", 660, 380,
+	WindowPosition::Automatic, "view_corporate_hq", 740, 400,
 	WindowClass::CorporateHQ, WindowClass::None,
 	{},
 	_nested_corporate_hq_widgets
@@ -74,6 +79,7 @@ static WindowDesc _corporate_hq_desc(
 struct CorporateHQWindow : Window {
 	CompanyID company = CompanyID::Invalid();
 	CorporateHQTab active_tab = CorporateHQTab::Overview;
+	TechID selected_tech = TECH_TRACTION_1;
 	Scrollbar *vscroll = nullptr;
 
 	CorporateHQWindow(WindowDesc &desc, WindowNumber window_number) : Window(desc)
@@ -96,6 +102,11 @@ struct CorporateHQWindow : Window {
 			std::string comp_name = (c != nullptr) ? c->name : "Interstellar Corporation";
 			return fmt::format("Corporate Headquarters — {}", comp_name);
 		}
+		if (widget == WID_CHQ_TECH_BUDGET_BTN) {
+			uint32_t b = TechTreeManager::GetMonthlyBudget(this->company);
+			if (b == 0) return "Budget: 0 Cr";
+			return fmt::format("Budget: {:L} Cr", b);
+		}
 		return this->Window::GetWidgetString(widget, stringid);
 	}
 
@@ -106,6 +117,8 @@ struct CorporateHQWindow : Window {
 
 		this->SetWidgetDisabledState(WID_CHQ_LOCATE, !has_hq || profile == nullptr || profile->tile == INVALID_TILE);
 		this->SetWidgetDisabledState(WID_CHQ_UPGRADE, !has_hq || (profile != nullptr && profile->tier >= CorporateHQTier::CST_Arcology));
+		this->SetWidgetDisabledState(WID_CHQ_TECH_RESEARCH_BTN, this->active_tab != CorporateHQTab::TechTree || !has_hq);
+		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, this->active_tab != CorporateHQTab::TechTree || !has_hq);
 
 		if (this->active_tab == CorporateHQTab::Stockpiles) {
 			auto stockpiles = StockpileManager::GetAllStockpiles();
@@ -121,11 +134,11 @@ struct CorporateHQWindow : Window {
 				if (h.company_id == this->company) comp_count++;
 			}
 			this->vscroll->SetCount(comp_count);
+		} else if (this->active_tab == CorporateHQTab::TechTree) {
+			this->vscroll->SetCount(TechTreeManager::GetAllNodes().size());
 		} else {
 			this->vscroll->SetCount(0);
 		}
-
-		this->DrawWidgets();
 	}
 
 	void DrawWidget(const Rect &r, WidgetID widget) const override
@@ -287,6 +300,62 @@ struct CorporateHQWindow : Window {
 					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
 
 					DrawString(tr, "Tip: Use Logistics Hubs at regional terminals to ingest freight into the world's company stockpile.", TextColour::Gold);
+				} else if (this->active_tab == CorporateHQTab::TechTree) {
+					TechID active = TechTreeManager::GetActiveProject(this->company);
+					const TechProjectNode *active_node = TechTreeManager::GetNode(active);
+					uint32_t accumulated = TechTreeManager::GetAccumulatedRP(this->company);
+					uint32_t cost = active_node ? active_node->cost_rp : 100;
+					uint32_t pct = (cost > 0) ? (accumulated * 100) / cost : 0;
+					std::string status_line = (active == TECH_NONE) ?
+						"Active Research: None. Select an available technology below and click 'Start Research'." :
+						fmt::format("Active Research: {}  [Progress: {} / {} RP ({}%)]", active_node->name, accumulated, cost, pct);
+					DrawString(tr, status_line, (active == TECH_NONE) ? TextColour::Silver : TextColour::Gold);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 4;
+
+					const CorporateHQProfile *hq = CorporateHQManager::GetHQ(this->company);
+					WorldID hq_world = hq ? hq->world_id : INVALID_WORLD;
+					uint32_t cr_stock = (hq_world != INVALID_WORLD) ? StockpileManager::GetStock(hq_world, this->company, StockpileManager::RoleToDefaultCargo(FabricationRole::EnrichedCrystals)) : 0;
+					uint32_t el_stock = (hq_world != INVALID_WORLD) ? StockpileManager::GetStock(hq_world, this->company, StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics)) : 0;
+					uint32_t budget = TechTreeManager::GetMonthlyBudget(this->company);
+					DrawString(tr, fmt::format("HQ Stockpile: {} Enriched Crystals (10 RP/ea) | {} Electronics (5 RP/ea) | Budget: {:L} Cr/mo (1 RP/1k Cr)", cr_stock, el_stock, budget), TextColour::White);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
+
+					auto render_branch = [&](TechBranch branch, const char *title) {
+						DrawString(tr, fmt::format("─── {} ───", title), TextColour::Gold);
+						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+						auto nodes = TechTreeManager::GetNodesByBranch(branch);
+						for (const auto &node : nodes) {
+							bool unlocked = TechTreeManager::IsTechUnlocked(this->company, node.id);
+							bool is_active = (active == node.id);
+							std::string err;
+							bool can_res = TechTreeManager::CanResearch(this->company, node.id, err);
+
+							std::string state_tag;
+							TextColour color = TextColour::Silver;
+							if (unlocked) {
+								state_tag = "[RESEARCHED]";
+								color = TextColour::Green;
+							} else if (is_active) {
+								state_tag = fmt::format("[RESEARCHING - {}%]", pct);
+								color = TextColour::Gold;
+							} else if (can_res) {
+								state_tag = fmt::format("[AVAILABLE - {} RP]", node.cost_rp);
+								color = TextColour::White;
+							} else {
+								state_tag = "[LOCKED]";
+								color = TextColour::Grey;
+							}
+
+							std::string sel_marker = (this->selected_tech == node.id) ? "► " : "  ";
+							DrawString(tr, fmt::format("{}{:<26} {:<22} — {}", sel_marker, node.name, state_tag, node.unlock_summary), color);
+							tr.top += GetCharacterHeight(FontSize::Normal) + 1;
+						}
+						tr.top += 4;
+					};
+
+					render_branch(TechBranch::Traction, "Traction & Propulsion");
+					render_branch(TechBranch::PortalPhysics, "Wormhole & Portal Physics");
+					render_branch(TechBranch::Materials, "Materials & Fabrication");
 				}
 				break;
 			}
@@ -321,6 +390,46 @@ struct CorporateHQWindow : Window {
 				this->active_tab = CorporateHQTab::Fabrication;
 				this->SetDirty();
 				break;
+
+			case WID_CHQ_TAB_TECH_TREE:
+				this->active_tab = CorporateHQTab::TechTree;
+				this->SetDirty();
+				break;
+
+			case WID_CHQ_MAIN_PANEL:
+				if (this->active_tab == CorporateHQTab::TechTree) {
+					const auto &nodes = TechTreeManager::GetAllNodes();
+					if (!nodes.empty()) {
+						size_t cur = 0;
+						for (size_t i = 0; i < nodes.size(); ++i) {
+							if (nodes[i].id == this->selected_tech) {
+								cur = i;
+								break;
+							}
+						}
+						this->selected_tech = nodes[(cur + 1) % nodes.size()].id;
+						this->SetDirty();
+					}
+				}
+				break;
+
+			case WID_CHQ_TECH_RESEARCH_BTN:
+				if (this->selected_tech != TECH_NONE) {
+					Command<Commands::SelectResearchProject>::Post(this->selected_tech);
+				}
+				break;
+
+			case WID_CHQ_TECH_BUDGET_BTN: {
+				uint32_t cur_b = TechTreeManager::GetMonthlyBudget(this->company);
+				uint32_t next_b = 0;
+				if (cur_b == 0) next_b = 25000;
+				else if (cur_b <= 25000) next_b = 50000;
+				else if (cur_b <= 50000) next_b = 100000;
+				else if (cur_b <= 100000) next_b = 250000;
+				else next_b = 0;
+				Command<Commands::SetResearchBudget>::Post(next_b);
+				break;
+			}
 
 			case WID_CHQ_FABRICATION_TOGGLE: {
 				bool cur = FabricationManager::IsFabricateFromStockpileEnabled(this->company);

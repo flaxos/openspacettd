@@ -15,12 +15,15 @@ enum CorporateHQWidgets : WidgetID {
 	WID_CHQ_TAB_STOCKPILES,     ///< Planetary stockpiles matrix tab.
 	WID_CHQ_TAB_LOGISTICS_HUBS, ///< Logistics Hubs tab.
 	WID_CHQ_TAB_FABRICATION,    ///< In-Kind Fabrication BOM catalog & toggle tab.
+	WID_CHQ_TAB_TECH_TREE,      ///< Commonwealth Tech Tree & R&D projects tab.
 	WID_CHQ_HEADER_PANEL,       ///< Corporate campus status header.
 	WID_CHQ_MAIN_PANEL,         ///< Main content panel.
 	WID_CHQ_SCROLLBAR,          ///< Scrollbar for lists/tables.
 	WID_CHQ_LOCATE,             ///< Locate Corporate HQ button.
 	WID_CHQ_UPGRADE,            ///< Upgrade Campus Tier button.
 	WID_CHQ_FABRICATION_TOGGLE, ///< Toggle Fabrication mode button.
+	WID_CHQ_TECH_RESEARCH_BTN,  ///< Select / Start research on project button.
+	WID_CHQ_TECH_BUDGET_BTN,    ///< Cycle / Adjust monthly R&D budget button.
 	WID_CHQ_STATUS_BAR,         ///< Footer status bar.
 };
 

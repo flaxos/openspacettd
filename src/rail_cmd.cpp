@@ -618,7 +618,8 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 		if (flags.Test(DoCommandFlag::Execute)) {
 			FabricationManager::ConsumeTrackBOM(track_world, _current_company, railtype);
 		}
-		rail_cost = rail_cost * 20 / 100;
+		uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
+		rail_cost = rail_cost * labor_factor / 100;
 	}
 
 	cost.AddCost(rail_cost);
@@ -1085,8 +1086,9 @@ CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType ra
 		if (flags.Test(DoCommandFlag::Execute)) {
 			FabricationManager::ConsumeDepotBOM(depot_world, _current_company, railtype);
 		}
-		depot_price = depot_price * 20 / 100;
-		track_price = track_price * 20 / 100;
+		uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
+		depot_price = depot_price * labor_factor / 100;
+		track_price = track_price * labor_factor / 100;
 	}
 
 	cost.AddCost(depot_price);
@@ -1149,7 +1151,8 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 			if (!FabricationManager::CanFabricateSignal(signal_world, _current_company)) {
 				return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
 			}
-			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals] * 20 / 100);
+			uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
+			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals] * labor_factor / 100);
 		} else {
 			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals]);
 		}

@@ -21,6 +21,7 @@
 #include "../portal/logistics_hub.h"
 #include "../portal/corporate_hq.h"
 #include "../portal/fabrication_manager.h"
+#include "../portal/tech_tree.h"
 
 #include "../safeguards.h"
 
@@ -996,6 +997,92 @@ struct ISPRChunkHandler : ChunkHandler {
 	}
 };
 
+/** Temporary storage for Commonwealth Tech Tree serialization (TECH). */
+struct SlTechRecord {
+	uint8_t kind;             ///< 0 = Company research state, 1 = Unlocked technology node
+	uint8_t company_id;       ///< Company ID
+	uint16_t tech_id;         ///< Active project (when kind=0) or Unlocked tech ID (when kind=1)
+	uint32_t accumulated_rp;  ///< RP accumulated (when kind=0)
+	uint32_t monthly_budget;   ///< Monthly budget (when kind=0)
+};
+
+static const SaveLoad _tech_desc[] = {
+	SLE_VAR(SlTechRecord, kind,           VarTypes::U8),
+	SLE_VAR(SlTechRecord, company_id,     VarTypes::U8),
+	SLE_VAR(SlTechRecord, tech_id,        VarTypes::U16),
+	SLE_VAR(SlTechRecord, accumulated_rp, VarTypes::U32),
+	SLE_VAR(SlTechRecord, monthly_budget, VarTypes::U32),
+};
+
+/** Chunk handler for Commonwealth Tech Tree (TECH). */
+struct TECHChunkHandler : ChunkHandler {
+	TECHChunkHandler() : ChunkHandler("TECH", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_tech_desc);
+
+		int i = 0;
+		for (const auto &state : TechTreeManager::GetAllCompanyTechStates()) {
+			/* Save company state record */
+			SlTechRecord state_rec{
+				.kind = 0,
+				.company_id = state.company_id.base(),
+				.tech_id = state.active_project,
+				.accumulated_rp = state.accumulated_rp,
+				.monthly_budget = state.monthly_budget,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&state_rec, _tech_desc);
+
+			/* Save unlocked technologies */
+			for (TechID unlocked_id : state.unlocked_techs) {
+				SlTechRecord unlocked_rec{
+					.kind = 1,
+					.company_id = state.company_id.base(),
+					.tech_id = unlocked_id,
+					.accumulated_rp = 0,
+					.monthly_budget = 0,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&unlocked_rec, _tech_desc);
+			}
+		}
+	}
+
+	void Load() const override
+	{
+		TechTreeManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_tech_desc);
+
+		struct TempState {
+			TechID active_project = TECH_NONE;
+			uint32_t accumulated_rp = 0;
+			uint32_t monthly_budget = 0;
+			std::vector<TechID> unlocked;
+		};
+		std::map<CompanyID, TempState> loaded_states;
+
+		SlTechRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			CompanyID cid{rec.company_id};
+			if (rec.kind == 0) {
+				loaded_states[cid].active_project = rec.tech_id;
+				loaded_states[cid].accumulated_rp = rec.accumulated_rp;
+				loaded_states[cid].monthly_budget = rec.monthly_budget;
+			} else if (rec.kind == 1) {
+				loaded_states[cid].unlocked.push_back(rec.tech_id);
+			}
+		}
+
+		for (const auto &[cid, s] : loaded_states) {
+			TechTreeManager::RestoreCompanyTech(cid, s.active_project, s.accumulated_rp, s.monthly_budget, s.unlocked);
+		}
+	}
+};
+
 static const FTJRChunkHandler FTJR;
 static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
@@ -1009,6 +1096,7 @@ static const STCKChunkHandler STCK;
 static const LHUBChunkHandler LHUB;
 static const CHQSChunkHandler CHQS;
 static const FABRChunkHandler FABR;
+static const TECHChunkHandler TECH;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
@@ -1024,6 +1112,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	CHQS,
 	FABR,
 	FTJR,
+	TECH,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);
