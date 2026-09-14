@@ -122,6 +122,14 @@ bool PlanetManager::SetWorldBiome(WorldID world, WorldBiome biome)
 	return true;
 }
 
+bool PlanetManager::AddDevelopmentScore(WorldID world, uint32_t score)
+{
+	auto it = id_to_region_index.find(world.base());
+	if (it == id_to_region_index.end()) return false;
+	regions[it->second].development_score += score;
+	return true;
+}
+
 bool PlanetManager::PromoteWorldPhase(WorldID world)
 {
 	auto it = id_to_region_index.find(world.base());

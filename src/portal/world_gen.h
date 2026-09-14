@@ -38,6 +38,12 @@ public:
 	/** Enable or disable multi-world generation mode. */
 	static void SetEnabled(bool enabled);
 
+	/** Get the default world count for multi-world generation. */
+	static uint32_t GetDefaultWorldCount();
+
+	/** Set the default world count for multi-world generation (1-16). */
+	static void SetDefaultWorldCount(uint32_t count);
+
 	/**
 	 * Generate a multi-world planetary layout on the currently allocated map.
 	 * - Calculates non-overlapping bounding boxes for world_count planetary regions.
@@ -65,6 +71,7 @@ public:
 
 private:
 	static bool enabled;
+	static uint32_t default_world_count;
 };
 
 #endif /* WORLD_GEN_H */

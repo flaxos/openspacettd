@@ -53,6 +53,8 @@
 #include "portal/edge_conduit.h"
 #include "portal/portal_registry.h"
 #include "portal/megacity_manager.h"
+#include "portal/logistics_hub.h"
+#include "portal/company_stockpile.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -1110,6 +1112,10 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
 			MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total);
 		}
+		const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(dest);
+		if (hub != nullptr && hub->company_id == company->index) {
+			LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, accepted_total);
+		}
 	}
 
 	/* Update company statistics */
@@ -1797,6 +1803,20 @@ static void LoadUnloadVehicle(Vehicle *front)
 		if (cap_left > 0) {
 			/* If vehicle can load cargo, reset time_since_pickup. */
 			ge->time_since_pickup = 0;
+
+			/* Check if an attached Company Logistics Hub can provide surplus cargo from planetary stockpile */
+			const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(st->index);
+			if (hub != nullptr && hub->company_id == front->owner && cap_left > ge->AvailableCount()) {
+				uint32_t needed = cap_left - ge->AvailableCount();
+				uint32_t withdrawn = LogisticsHubManager::WithdrawFromStockpile(hub->tile, front->owner, v->cargo_type, needed);
+				if (withdrawn > 0) {
+					Source source = (st->town != nullptr) ? Source{st->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
+					StationID next = ge->GetVia(st->index);
+					if (CargoPacket::CanAllocateItem()) {
+						ge->GetOrCreateData().cargo.Append(CargoPacket::Create(st->index, withdrawn, source), next);
+					}
+				}
+			}
 
 			/* If there's goods waiting at the station, and the vehicle
 			 * has capacity for it, load it on the vehicle. */

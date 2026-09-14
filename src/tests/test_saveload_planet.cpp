@@ -21,6 +21,7 @@
 #include "../gfx_func.h"
 #include "../table/sprites.h"
 #include "../company_base.h"
+#include "../table/strings.h"
 #include "mock_environment.h"
 
 #include <filesystem>
@@ -45,6 +46,21 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	REQUIRE(Company::CanAllocateItem());
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);
+	/* Reproduce generated UAT saves with an uninitialised president name. */
+	REQUIRE(c->president_name_1 == INVALID_STRING_ID);
+	c->president_name_2 = 123456;
+	const CompanyID saved_company = c->index;
+	std::string expected_president_name;
+	SECTION("Missing president name generator is repaired") {}
+	SECTION("Existing generated president name is preserved")
+	{
+		c->president_name_1 = SPECSTR_PRESIDENT_NAME;
+	}
+	SECTION("Custom president name is preserved")
+	{
+		expected_president_name = "UAT Manager";
+		c->president_name = expected_president_name;
+	}
 
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
@@ -165,6 +181,10 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	/* Load the game back from disk */
 	SaveLoadResult load_res = SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(load_res == SaveLoadResult::Ok);
+	const Company *loaded_company = Company::Get(saved_company);
+	CHECK(loaded_company->president_name_1 == SPECSTR_PRESIDENT_NAME);
+	CHECK(loaded_company->president_name_2 == 123456);
+	CHECK(loaded_company->president_name == expected_president_name);
 	CHECK(FederationIdentityRegistry::GetNamespace() == federation_namespace);
 	CHECK(FederationIdentityRegistry::GetNextSequence() == 8);
 	CHECK(FederationIdentityRegistry::GetMappings().empty());

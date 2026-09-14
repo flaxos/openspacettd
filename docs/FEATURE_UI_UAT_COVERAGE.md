@@ -1,43 +1,49 @@
 # OpenSpaceTTD Feature, UI and UAT Coverage
 
-Status: **SPRINTS 24–29 COMPLETE (ALL FEATURES ACCEPTED)**  
-Date: **2026-09-13**
+Status: **CURRENT THROUGH SPRINT 34 — MATERIAL ACCEPTANCE GAPS OPEN**  
+Date reconciled: **2026-09-14**
 
-This matrix is the release checklist for Sprints 24–29. **Present** means a source-backed UI or operator acceptance route exists. **Partial** means the UI exposes only part of the workflow. **Planned** means no implementation exists yet.
+This matrix complements [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). “Implemented” describes source availability. Automated, playable, visual and live-runtime evidence are recorded separately so one type cannot be mistaken for another.
 
-| Feature family | Current player/operator surface | Current coverage | Required UI/UAT closure |
-|---|---|---|---|
-| World regions, phases and biomes | World labels, viewport context, `Ctrl+Alt+1..3` navigation, Map menu jump buttons | Present | Delivered in Sprints 24 & 28: distinct Temperate Core, Arid Industrial, and Sub-Arctic Frontier biomes with persistent Story Book navigation pins. |
-| Portal gate build and link | Rail toolbar portal picker with build/link modes and directional controls | Present | Delivered in Sprints 11 & 28: interactive gate placement, inter-world pairing, invalid link rejection, and consist transit. |
-| Portal terminals | Automatic terminal construction and portal status | Present | Delivered in Sprints 11, 24 & 28: 18-tile dual-track parallel holding loop with automated path signaling. |
-| Edge Conduits | Rail toolbar construction; Land Area Information status | Present | Delivered in Sprints 20 & 28: boundary placement, resource extraction telemetry, and feeder credit. |
-| Spaceports | Station window designation, tier upgrade and trade telemetry | Present | Delivered in Sprints 20 & 28: multi-tier spaceport upgrades, launch countdown, and cargo export telemetry. |
-| Megacity demand | Town button and Megacity Overview window | Present | Delivered in Sprints 18 & 28: 3-tier demand progress bars (Sustenance, Expansion, Prosperity) and growth states. |
-| Freight corridors | Map menu monitor with route, utilization, congestion and gate location | Present | Delivered in Sprints 18, 28 & 29: 4-tier congestion monitoring (Clear/Moderate/Congested/Saturated), dynamic transit scaling, and priority relief. |
-| Supply-chain matrix and trade ledger | Map menu window (`TradeLedgerWindow`) | Present | Delivered in Sprints 27 & 29: dual-tab view with empire phase flows, infrastructure throughput, inter-world trade balances, and conservation auditing. |
-| Federation authentication and charters | Map menu window (`FederationAuthWindow`) | Present | Delivered in Sprint 27: in-game account login/register, session badge, corporate chartering, owner delegation, and world presence expansion. |
-| Consist handoff, identity and content admission | Automatic simulation with console/daemon diagnostics; Federation Acceptance Kit | Present | Delivered in Sprint 29: live consist snapshot handoff, strict NewGRF manifest validation, corrupt stream rejection, and zero-cargo leak invariant. |
-| Round-trip order restoration | Automatic materialization and integration tests; Federation Acceptance Kit | Present | Delivered in Sprint 29: 3-hop multi-world circuit, global order indexing, and return loop order wrap-around (`current_order_index`). |
-| Cluster launch, health and recovery | `scripts/run_cluster.py`, `scripts/run_acceptance_kit.sh`, `--state-file` checkpointing | Present | Delivered in Sprint 29: supervisor topology bootstrap, automated acceptance suite (`--run-acceptance`), node crash quarantine bay, and daemon state reload. |
-| Alien biome and Commonwealth assets | Biome styling across showcase worlds, procedural MultiWorldGen, CST cyan-blue/yellow portal recolouring | Present | Delivered in Sprint 24. |
-| Player rail blueprints | Rail toolbar button (`WID_RAT_BLUEPRINT`), Blueprint Library window (`BlueprintLibraryWindow`) | Present | Delivered in Sprint 25: map capture, library, JSON import/export, 90°/180°/270° rotation, horizontal flip, and deterministic placement command. |
-| CST prefab rail blocks | Built-in CST templates in Blueprint Library | Present | Delivered in Sprint 26: 8 canonical CST layouts, RHD/LHD invariant transforms, and operating guidance. |
-| Story Book and goals | In-game Story Book (`Manage Company` > `Story Book`) and Goal window | Present | Delivered in Sprint 28: 7 structured chapters, 16 persistent measurable goals, and clickable location pins in `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` (`OpenSpaceTTD-UAT-Demo` v7). |
+| Feature family | UI or operator surface | Implementation | Acceptance evidence | Remaining gap |
+|---|---|---|---|---|
+| World regions and navigation | Viewport context, hotkeys and Map menu | Implemented | Automated; v1.0 playable for six worlds (Sprint 36) | None |
+| Six biome behaviours | Generated terrain rules and directory badges | Implemented | Automated; v1.0 playable | Bespoke sprites and visual review pending |
+| Portal construction and linking | Rail toolbar portal picker | Implemented | Automated; v1.0 playable | None for local single-map portals |
+| Portal terminals | Automatic construction and land information | Implemented | Automated; v1.0 playable | None for local terminal construction |
+| Edge Conduits | Rail toolbar and Land Area Information | Implemented | Automated; v1.0 playable | External federation dispatch depends on live-runtime work |
+| Spaceports | Station designation, upgrade and telemetry controls | Implemented | Automated; v1.0 playable | External federation dispatch depends on live-runtime work |
+| Megacity demand and growth | Town and Universe Directory buttons; overview | Implemented | Automated; v1.0 covers demand UI & growth states | None |
+| Phase 4 colonisation | Universe Directory & command colonisation | Implemented | Automated; v1.0 playable (Chapter 8) | None |
+| Development and promotion | Directory progress and promotion command | Implemented | Automated; v1.0 playable (Chapter 9) | None |
+| Rail technology restrictions | Construction validation and errors | Implemented | Automated; v1.0 playable | None |
+| Biome industry restrictions | Construction validation and errors | Implemented | Automated; v1.0 playable | None |
+| Freight corridors | Map menu monitor | Implemented | Automated and authority API scenarios | Live traffic from independent game servers pending |
+| Supply chain and trade ledger | Map menu ledger window | Implemented | Automated and v1.0 UI walkthrough | Remote live-authority data pending |
+| Federation accounts and charters | Map menu federation window | Implemented | Automated and v1.0 UI walkthrough | Remote live-authority session integration pending |
+| Content admission and consist identity | Automatic transfer domain logic and diagnostics | Implemented | C++ and Python protocol tests | Live cross-process departure/materialisation pending |
+| Round-trip order restoration | Automatic transfer domain logic | Implemented | In-process C++ and Python protocol tests | Visible train round trip across game processes pending |
+| Cluster supervision and recovery | `run_cluster.py` and authority endpoints | Implemented | Process/API tests and operator guide | Recovery of a real in-game consist pending |
+| Player blueprints | Rail toolbar and Blueprint Library | Implemented | Automated; v1.0 playable | None within rail-only v1 scope |
+| CST prefabs | Built-ins in Blueprint Library | Implemented | Automated; v1.0 playable | Bespoke CST visual assets pending |
+| Solo Story Book and goals | v1.0 GameScript v8 and save | Implemented through Sprint 40 | Artifact and scripted walkthrough (12 ch, 25 goals) | None |
+| Corporate HQ & Campuses | Map menu and dedicated Corporate HQ window | Implemented | Automated; v1.0 playable (Chapter 10) | None |
+| Planetary Stockpiles & Logistics Hubs | Corporate HQ Stockpile tab and Station Logistics Hub | Implemented | Automated; v1.0 playable (Chapter 11) | None |
+| In-Kind Fabrication & BOM Engine | Corporate HQ toggle, BOM deduction, 80% discount | Implemented | Automated; v1.0 playable (Chapter 12) | None |
+| Commonwealth 12-cargo economy | None | Not implemented | None | Planned Sprint 37 |
+| Bespoke CST and alien art | None beyond palette/base-sprite treatment | Not implemented | No visual evidence pack | Planned Sprint 38 |
 
-## Definition of UI-wired
+## Acceptance definitions
 
-A player-facing feature is UI-wired when it has a discoverable entry point, visible current state, enabled/disabled explanation, cost or consequence before confirmation, actionable error feedback and relevant contextual help. A console command may remain for debugging but cannot be the only release path for routine play.
+- **Automated:** unit, regression or service integration evidence for rules, formats and invariants.
+- **Playable:** a tester performs the operation in a supplied game save and observes the intended result.
+- **Visual:** reviewed captures verify art identity, layout and legibility.
+- **Live runtime:** independent game processes exchange real engine state through the external authority without manual lifecycle calls.
 
-Operator-only federation functions may use a dedicated operator surface rather than an in-game player window. The documentation must identify permissions, target instance, expected result and recovery action.
+A player feature is UI-wired when it has a discoverable entry point, visible state, cost or consequence before confirmation, disabled-state explanation, actionable errors and contextual help. Operator-only functions may use a documented operator interface.
 
-## UAT evidence levels
+## UAT closure requirements
 
-- **Automated:** unit/regression or integration evidence for deterministic rules, formats and invariants.
-- **Playable:** a tester performs the operation in the supplied save or federation kit and observes the result.
-- **Visual:** captured evidence confirms art, layout and legibility criteria.
+Sprint 36 must extend the guided UAT with Phase 4 discovery, all six biome badges, outpost founding, development scoring, phase promotion, technology unlocks, town growth, Megacity lifecycle and biome industry restrictions. Sprint 35 must first supply the live-runtime federation path used by the matching multi-server exercise.
 
-Release acceptance requires all applicable evidence levels. Protocol mocks support the federation kit but do not replace a live game-instance scenario.
-
-## Demo goal catalogue
-
-The Sprint 28 Story Book must include goals for navigating all three worlds; constructing and linking gates; running a portal consist; building a CST prefab; capturing and replacing a custom blueprint; operating an Edge Conduit; designating and upgrading a Spaceport; supplying Megacity demand tiers; and observing corridor state. Sprint 29 adds world-directory discovery, cross-server round trip, restored orders, content rejection, congestion relief, authority/server restart recovery and ledger conservation checks.
+Sprint 38 visual acceptance must include comparable normal-zoom captures for all six biomes, active/inactive portal states, stations, industries, settlements and busy rail layouts.

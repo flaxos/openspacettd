@@ -4,11 +4,11 @@ class OpenSpaceUATDemoInfo extends GSInfo {
 	 * script name human-readable without spaces. */
 	function GetName()        { return "OpenSpaceTTD-UAT-Demo"; }
 	function GetShortName()   { return "OSUD"; }
-	function GetDescription() { return "Creates persistent UAT guidance, CST prefab & blueprint staging, Planetary Operations, Megacity, Freight Corridor, and Federation governance fixtures and map markers for the three-world OpenSpaceTTD vertical slice."; }
-	function GetVersion()     { return 7; }
+	function GetDescription() { return "Creates persistent UAT guidance, CST prefab & blueprint staging, Planetary Operations, Megacities, Freight Corridors, Federation governance, Corporate HQ, Logistics Hubs, and In-Kind Fabrication fixtures and map markers for the six-world OpenSpaceTTD vertical slice."; }
+	function GetVersion()     { return 8; }
 	function MinVersionToLoad() { return 1; }
 	function GetAPIVersion()  { return "16"; }
-	function GetDate()        { return "2026-09-13"; }
+	function GetDate()        { return "2026-09-14"; }
 	function CreateInstance() { return "OpenSpaceUATDemo"; }
 	function UseAsRandomAI()  { return false; }
 }

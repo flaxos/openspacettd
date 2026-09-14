@@ -3,6 +3,7 @@ class OpenSpaceUATDemo extends GSController {
 	service_built = false;
 	sprint10_built = false;
 	sprint28_built = false;
+	sprint36_built = false;
 
 	function Start();
 	function Save();
@@ -17,6 +18,7 @@ class OpenSpaceUATDemo extends GSController {
 	function BuildAlphaDemonstrator(gateways);
 	function BuildSprint10Fixtures(regions);
 	function BuildSprint28Fixtures(regions);
+	function BuildSprint36Fixtures(regions);
 	function FindNearestTown(region, target);
 	function AddText(page, text);
 	function AddLocation(page, tile, text);
@@ -29,7 +31,8 @@ function OpenSpaceUATDemo::Save()
 		initialized = this.initialized,
 		service_built = this.service_built,
 		sprint10_built = this.sprint10_built,
-		sprint28_built = this.sprint28_built
+		sprint28_built = this.sprint28_built,
+		sprint36_built = this.sprint36_built
 	};
 }
 
@@ -41,14 +44,15 @@ function OpenSpaceUATDemo::Load(version, data)
 	this.service_built = ("service_built" in data) ? data.service_built : false;
 	this.sprint10_built = ("sprint10_built" in data) ? data.sprint10_built : false;
 	this.sprint28_built = ("sprint28_built" in data) ? data.sprint28_built : false;
-	GSLog.Info("OpenSpaceTTD UAT Demo restored from savegame; Sprint 10 fixtures=" + this.sprint10_built + ", Sprint 28 fixtures=" + this.sprint28_built + ".");
+	this.sprint36_built = ("sprint36_built" in data) ? data.sprint36_built : false;
+	GSLog.Info("OpenSpaceTTD UAT Demo restored from savegame; Sprint 10 fixtures=" + this.sprint10_built + ", Sprint 28 fixtures=" + this.sprint28_built + ", Sprint 36 fixtures=" + this.sprint36_built + ".");
 }
 
 function OpenSpaceUATDemo::CalculateRegions()
 {
 	local size_x = GSMap.GetMapSizeX();
 	local size_y = GSMap.GetMapSizeY();
-	local world_count = 3;
+	local world_count = (size_x >= 512 || size_y >= 512) ? 6 : 3;
 	local padding = 2;
 	local split_y = size_y >= size_x;
 	local total_length = split_y ? size_y : size_x;
@@ -59,19 +63,23 @@ function OpenSpaceUATDemo::CalculateRegions()
 	local buffer_width = min(size_x, size_y) / 16;
 	buffer_width = max(4, buffer_width);
 
-	while (2 * buffer_width + world_count * 8 > available_span && buffer_width > 2) {
+	local num_buffers = world_count - 1;
+	while (num_buffers * buffer_width + world_count * 8 > available_span && buffer_width > 2) {
 		buffer_width /= 2;
 	}
 
-	local net_world_span = available_span - 2 * buffer_width;
+	local net_world_span = available_span - num_buffers * buffer_width;
 	local base_world_span = net_world_span / world_count;
 	local remainder = net_world_span % world_count;
 	local cursor = start_coord;
 	local regions = [];
 	local metadata = [
-		{ world = "World 1", phase = "Phase 1 Core", town = "Oaktree Core", role = "dense consumer and high-tech hub" },
-		{ world = "World 2", phase = "Phase 2 Developed", town = "Merredin Industrial", role = "processing and intermodal backbone" },
-		{ world = "World 3", phase = "Phase 3 Frontier", town = "Calyx Frontier", role = "primary extraction and heavy freight origin" }
+		{ world = "World 1", phase = "Phase 1 Core", town = "Oaktree Core", biome = "Temperate", role = "dense consumer, megacity, and central corporate headquarters campus" },
+		{ world = "World 2", phase = "Phase 2 Developed", town = "Merredin Industrial", biome = "Arid Desert", role = "processing, interplanetary logistics hub, and fabrication staging" },
+		{ world = "World 3", phase = "Phase 3 Frontier", town = "Calyx Frontier", biome = "Sub-Arctic", role = "primary extraction, cryogenic logistics, and heavy freight origin" },
+		{ world = "World 4", phase = "Phase 4 Expansion", town = "Ignis Caldera", biome = "Volcanic", role = "uncolonized geothermal wilderness and rare mineral survey site" },
+		{ world = "World 5", phase = "Phase 4 Expansion", town = "Verdant Canopy", biome = "Sub-Tropic", role = "uncolonized alien biosphere and bio-agricultural survey site" },
+		{ world = "World 6", phase = "Phase 4 Expansion", town = "Pelagic Reach", biome = "Oceanic", role = "uncolonized archipelago frontier and maritime extraction basin" }
 	];
 
 	for (local i = 0; i < world_count; i++) {
@@ -428,6 +436,45 @@ function OpenSpaceUATDemo::BuildSprint28Fixtures(regions)
 	return true;
 }
 
+function OpenSpaceUATDemo::BuildSprint36Fixtures(regions)
+{
+	if (GSCompany.ResolveCompanyID(GSCompany.COMPANY_FIRST) == GSCompany.COMPANY_INVALID) return false;
+
+	local company_mode = GSCompanyMode(GSCompany.COMPANY_FIRST);
+
+	/* 1. Corporate HQ fixtures on World 1 */
+	local core = regions[0];
+	local hq_tile = GSMap.GetTileIndex((core.min_x + core.max_x) / 2 + 10, (core.min_y + core.max_y) / 2 + 10);
+	GSSign.BuildSign(hq_tile, "UAT Corporate HQ: Campus founded here. Open Map menu > 'Corporate Headquarters & Stockpiles'");
+
+	/* 2. Logistics Hub & Stockpile fixtures on World 2 */
+	if (regions.len() > 1) {
+		local dev = regions[1];
+		local hub_tile = GSMap.GetTileIndex((dev.min_x + dev.max_x) / 2 - 10, (dev.min_y + dev.max_y) / 2 - 10);
+		GSSign.BuildSign(hub_tile, "UAT Logistics Hub: Merredin Planetary Logistics Hub. Buffer & Ingest train deliveries into local stockpile");
+		local fab_tile = GSMap.GetTileIndex((dev.min_x + dev.max_x) / 2 - 8, (dev.min_y + dev.max_y) / 2 - 10);
+		GSSign.BuildSign(fab_tile, "UAT Fabrication: Toggle In-Kind Fabrication in HQ window for 80% discount using local stockpile");
+	}
+
+	/* 3. Outpost survey fixtures on Expansion Worlds (Worlds 4, 5, 6) */
+	if (regions.len() >= 6) {
+		local w4 = regions[3];
+		local w4_center = GSMap.GetTileIndex((w4.min_x + w4.max_x) / 2, (w4.min_y + w4.max_y) / 2);
+		GSSign.BuildSign(w4_center, "UAT Outpost Survey: World 4 Volcanic Caldera. Use 'colonize_world 3' or Outpost tool to elevate to Frontier");
+
+		local w5 = regions[4];
+		local w5_center = GSMap.GetTileIndex((w5.min_x + w5.max_x) / 2, (w5.min_y + w5.max_y) / 2);
+		GSSign.BuildSign(w5_center, "UAT Outpost Survey: World 5 Sub-Tropic Canopy. Survey site for biological extraction outpost");
+
+		local w6 = regions[5];
+		local w6_center = GSMap.GetTileIndex((w6.min_x + w6.max_x) / 2, (w6.min_y + w6.max_y) / 2);
+		GSSign.BuildSign(w6_center, "UAT Outpost Survey: World 6 Oceanic Archipelago. Survey site for maritime resource outpost");
+	}
+
+	GSLog.Info("Sprint 36 fixtures ready: Corporate HQ, Logistics Hub, In-Kind Fabrication, and multi-world Outpost survey markers.");
+	return true;
+}
+
 function OpenSpaceUATDemo::FindNearestTown(region, target)
 {
 	local towns = GSTownList();
@@ -491,8 +538,9 @@ function OpenSpaceUATDemo::Start()
 		}
 
 		local gateway_sides = this.CalculateGateways(regions);
+		local gateway_names = ["Gateway Alpha", "Gateway Beta", "Gateway Gamma", "Gateway Delta", "Gateway Epsilon"];
 		for (local i = 0; i < gateway_sides.len(); i++) {
-			local label = i == 0 ? "Gateway Alpha" : "Gateway Beta";
+			local label = (i < gateway_names.len()) ? gateway_names[i] : ("Gateway " + (i + 1));
 			GSSign.BuildSign(gateway_sides[i].first, label + " - World " + (i + 1) + " head (" + gateway_sides[i].first_axis + ")");
 			GSSign.BuildSign(gateway_sides[i].second, label + " - World " + (i + 2) + " head (" + gateway_sides[i].second_axis + ")");
 		}
@@ -506,23 +554,24 @@ function OpenSpaceUATDemo::Start()
 		 * CHAPTER 1: Overview & Planetary Navigation
 		 * ------------------------------------------------------------- */
 		local overview_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "1. Overview & Planetary Navigation");
-		this.AddText(overview_page, "Welcome to the OpenSpaceTTD Guided Solo UAT environment. This deterministic vertical slice connects three distinct planetary worlds across the void: World 1 (Phase 1 Core, Temperate Biome), World 2 (Phase 2 Developed, Arid Industrial Biome), and World 3 (Phase 3 Frontier, Sub-Arctic Frontier Biome).");
-		this.AddText(overview_page, "Use Ctrl+Alt+1, Ctrl+Alt+2, and Ctrl+Alt+3 or the Map dropdown menu to jump viewports instantly between worlds.");
-		this.AddLocation(overview_page, regions[0].anchor, "World 1 Anchor: Oaktree Core (Phase 1 Core - Temperate)");
-		this.AddLocation(overview_page, regions[1].anchor, "World 2 Anchor: Merredin Industrial (Phase 2 Developed - Arid)");
-		this.AddLocation(overview_page, regions[2].anchor, "World 3 Anchor: Calyx Frontier (Phase 3 Frontier - Sub-Arctic)");
-		this.AddGoal(overview_page, regions[0].anchor, "1. Navigate all three worlds using Ctrl+Alt+1..3 or the Map menu world jump buttons. Confirm distinct environmental biomes.");
+		this.AddText(overview_page, "Welcome to the OpenSpaceTTD All-Feature Guided Solo UAT environment. This deterministic vertical slice connects up to six distinct planetary worlds across the void: World 1 (Phase 1 Core, Temperate), World 2 (Phase 2 Developed, Arid Desert), World 3 (Phase 3 Frontier, Sub-Arctic), World 4 (Phase 4 Expansion, Volcanic), World 5 (Phase 4 Expansion, Sub-Tropic), and World 6 (Phase 4 Expansion, Oceanic).");
+		this.AddText(overview_page, "Use Ctrl+Alt+1 through Ctrl+Alt+6 or the Map dropdown menu to jump viewports instantly between worlds.");
+		for (local r = 0; r < regions.len(); r++) {
+			this.AddLocation(overview_page, regions[r].anchor, regions[r].world + " Anchor: " + regions[r].town + " (" + regions[r].phase + " - " + regions[r].biome + ")");
+		}
+		this.AddGoal(overview_page, regions[0].anchor, "1. Navigate all worlds using Ctrl+Alt+1..6 or the Map menu world jump buttons. Confirm distinct environmental biomes.");
 
 		/* -------------------------------------------------------------
 		 * CHAPTER 2: Monumental Portal Gates
 		 * ------------------------------------------------------------- */
 		local portal_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "2. Monumental Portal Gates");
-		this.AddText(portal_page, "Monumental Portal Gates interlink planetary railway networks across the void. Pre-linked Gateway Alpha (World 1 <-> World 2) and Gateway Beta (World 2 <-> World 3) demonstrate arbitrary non-aligned spatial transitions with automatic 18-tile high-capacity terminals (holding lanes and path signals).");
+		this.AddText(portal_page, "Monumental Portal Gates interlink planetary railway networks across the void. Pre-linked gateway pairs (Alpha 1<->2, Beta 2<->3, Gamma 3<->4, Delta 4<->5, Epsilon 5<->6) demonstrate arbitrary non-aligned spatial transitions with automatic 18-tile high-capacity terminals (holding lanes and path signals).");
 		this.AddText(portal_page, "The 'UAT Wormhole Demonstrator' locomotive continuously cycles between perpendicular track axes on World 1 and World 2.");
-		this.AddLocation(portal_page, gateway_sides[0].first, "Gateway Alpha - Phase 1 head (NE-SW track)");
-		this.AddLocation(portal_page, gateway_sides[0].second, "Gateway Alpha - Phase 2 head (NW-SE track)");
-		this.AddLocation(portal_page, gateway_sides[1].first, "Gateway Beta - Phase 2 head (NW-SE track)");
-		this.AddLocation(portal_page, gateway_sides[1].second, "Gateway Beta - Phase 3 head (NE-SW track)");
+		for (local g = 0; g < gateway_sides.len(); g++) {
+			local glabel = (g < gateway_names.len()) ? gateway_names[g] : ("Gateway " + (g + 1));
+			this.AddLocation(portal_page, gateway_sides[g].first, glabel + " - World " + (g + 1) + " head (" + gateway_sides[g].first_axis + ")");
+			this.AddLocation(portal_page, gateway_sides[g].second, glabel + " - World " + (g + 2) + " head (" + gateway_sides[g].second_axis + ")");
+		}
 		this.AddGoal(portal_page, gateway_sides[0].first, "2. Build an unlinked portal gate with its automatic 18-tile two-lane terminal, then link it to a destination gate in another world.");
 		this.AddGoal(portal_page, gateway_sides[0].first, "3. Run a portal consist through Gateway Alpha and verify it emerges smoothly at the non-aligned Phase 2 head on a perpendicular track axis.");
 
@@ -580,8 +629,59 @@ function OpenSpaceUATDemo::Start()
 		this.AddGoal(cargo_page, regions[0].anchor, "15. Train depot purchase list contains the Data Van wagon.");
 		this.AddGoal(cargo_page, regions[0].anchor, "16. Road depot purchase list contains the MPS Data Courier.");
 
+		/* -------------------------------------------------------------
+		 * CHAPTER 8: Phase 4 Colonisation & Frontier Outposts
+		 * ------------------------------------------------------------- */
+		local col_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "8. Phase 4 Colonisation & Frontier Outposts");
+		this.AddText(col_page, "Uncolonised Expansion Worlds (Worlds 4, 5, 6) represent pristine planetary wildernesses featuring distinct alien biomes: Volcanic (World 4), Sub-Tropic (World 5), and Oceanic (World 6). Initially, town founding and processing facilities are restricted. Found colonial outposts using the Colonize Outpost tool or 'colonize_world <world_id>' console command to elevate the world to Phase 3 Frontier status, unlocking primary resource extraction, depots, and frontier towns.");
+		if (regions.len() >= 6) {
+			this.AddLocation(col_page, regions[3].anchor, "World 4 Anchor: Ignis Caldera (Volcanic Wilderness)");
+			this.AddLocation(col_page, regions[4].anchor, "World 5 Anchor: Verdant Canopy (Sub-Tropic Wilderness)");
+			this.AddLocation(col_page, regions[5].anchor, "World 6 Anchor: Pelagic Reach (Oceanic Wilderness)");
+		}
+		this.AddGoal(col_page, regions.len() >= 4 ? regions[3].anchor : regions[0].anchor, "17. Inspect uncolonised Expansion Worlds (Worlds 4, 5, 6) and verify environmental styling and pre-colonisation placement restrictions.");
+		this.AddGoal(col_page, regions.len() >= 4 ? regions[3].anchor : regions[0].anchor, "18. Found a colonial outpost on an Expansion World to elevate it to Phase 3 Frontier status, unlocking primary extraction and settlement expansion.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 9: Planetary Development Scoring & Phase Promotion
+		 * ------------------------------------------------------------- */
+		local dev_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "9. Planetary Development Scoring & Phase Promotion");
+		this.AddText(dev_page, "Planetary worlds advance through 4 Commonwealth development phase tiers driven by logistics throughput and cargo delivery volume. Deliver cargo to stations across worlds to earn development score points (with interplanetary shipments earning significant premiums). When score thresholds are met (Phase 4->3: 100 pts, Phase 3->2: 5000 pts, Phase 2->1: 20000 pts), the world can be promoted via 'promote_world <world_id>' or the Planetary Operations window.");
+		this.AddLocation(dev_page, regions[1].anchor, "World 2 Anchor: Merredin Industrial");
+		this.AddGoal(dev_page, regions[1].anchor, "19. Deliver inter-world cargo across gateway pairs to accumulate planetary development score points.");
+		this.AddGoal(dev_page, regions[1].anchor, "20. Promote a Frontier or Developed world to its next development tier when the score threshold is satisfied, unlocking higher technology tiers.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 10: Corporate Headquarters Campus
+		 * ------------------------------------------------------------- */
+		local hq_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "10. Corporate Headquarters Campus");
+		this.AddText(hq_page, "Player corporations that establish networks spanning at least 3 distinct world phases and possess 5,000,000 Cr in capital can establish a monumental Corporate Headquarters campus on a Phase 1 Core World. Open Map menu > 'Corporate Headquarters & Stockpiles' to manage the campus, inspect branch tiers (Regional Branch -> Planetary HQ -> Commonwealth HQ), and track macro holdings.");
+		local hq_site = GSMap.GetTileIndex((regions[0].min_x + regions[0].max_x) / 2 + 10, (regions[0].min_y + regions[0].max_y) / 2 + 10);
+		this.AddLocation(hq_page, hq_site, "Commonwealth Central HQ Campus (World 1: Oaktree Core)");
+		this.AddGoal(hq_page, hq_site, "21. Open Map menu > 'Corporate Headquarters & Stockpiles' to inspect the established Commonwealth Central HQ campus on World 1.");
+		this.AddGoal(hq_page, hq_site, "22. Advance headquarters tier through Planetary HQ and Commonwealth HQ to unlock corporate-wide bonuses.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 11: Planetary Stockpiles & Logistics Hubs
+		 * ------------------------------------------------------------- */
+		local stock_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "11. Planetary Stockpiles & Logistics Hubs");
+		this.AddText(stock_page, "Each planetary world maintains a dedicated company physical stockpile of core fabrication commodities: Ballast, Structural Metal, Wiring, Electronics, Superalloy, and Composites. Company Logistics Hubs built adjacent to freight stations buffer and ingest train deliveries directly into local planetary stockpiles. Configure minimum reserve floors at logistics hubs to prevent trains from depleting reserves below operational minimums.");
+		local hub_site = (regions.len() > 1) ? GSMap.GetTileIndex((regions[1].min_x + regions[1].max_x) / 2 - 10, (regions[1].min_y + regions[1].max_y) / 2 - 10) : regions[0].anchor;
+		this.AddLocation(stock_page, hub_site, "Merredin Planetary Logistics Hub (World 2)");
+		this.AddGoal(stock_page, hub_site, "23. Open Corporate Headquarters > 'Planetary Stockpiles' tab and verify multi-world inventory levels across all 6 fabrication roles.");
+		this.AddGoal(stock_page, hub_site, "24. Inspect the Merredin Planetary Logistics Hub on World 2, configure minimum reserve floors, and verify train stockpile ingestion.");
+
+		/* -------------------------------------------------------------
+		 * CHAPTER 12: In-Kind Fabrication & BOM Construction
+		 * ------------------------------------------------------------- */
+		local fab_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "12. In-Kind Fabrication & BOM Construction");
+		this.AddText(fab_page, "Companies can toggle between standard commercial cash purchases and In-Kind Fabrication mode. When active, infrastructure construction (rail track, signals, depots) and vehicle manufacturing consume physical goods from the local planetary stockpile, applying a massive 80% cash discount.");
+		local fab_site = (regions.len() > 1) ? GSMap.GetTileIndex((regions[1].min_x + regions[1].max_x) / 2 - 8, (regions[1].min_y + regions[1].max_y) / 2 - 10) : regions[0].anchor;
+		this.AddLocation(fab_page, fab_site, "In-Kind Fabrication Track Staging (World 2)");
+		this.AddGoal(fab_page, fab_site, "25. Toggle In-Kind Fabrication mode in the Corporate HQ window, construct rail infrastructure using local stockpile materials, and verify the 80% cash discount.");
+
 		this.initialized = true;
-		GSLog.Info("Guided solo UAT ready: 3 worlds, " + anchor_towns + " anchor towns, 2 gateway pairs, 7 Story Book chapters, and 16 acceptance goals.");
+		GSLog.Info("Guided solo UAT ready: " + regions.len() + " worlds, " + anchor_towns + " anchor towns, " + gateway_sides.len() + " gateway pairs, 12 Story Book chapters, and 25 acceptance goals.");
 		GSStoryPage.Show(overview_page);
 	}
 
@@ -592,6 +692,7 @@ function OpenSpaceUATDemo::Start()
 		}
 		if (!this.sprint10_built) this.sprint10_built = this.BuildSprint10Fixtures(regions);
 		if (!this.sprint28_built) this.sprint28_built = this.BuildSprint28Fixtures(regions);
+		if (!this.sprint36_built) this.sprint36_built = this.BuildSprint36Fixtures(regions);
 		this.Sleep(74);
 	}
 }

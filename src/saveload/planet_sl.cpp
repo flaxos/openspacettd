@@ -16,6 +16,10 @@
 #include "../portal/edge_conduit.h"
 #include "../portal/federation_identity.h"
 #include "../portal/megacity_manager.h"
+#include "../portal/company_stockpile.h"
+#include "../portal/logistics_hub.h"
+#include "../portal/corporate_hq.h"
+#include "../portal/fabrication_manager.h"
 
 #include "../safeguards.h"
 
@@ -622,6 +626,272 @@ struct MEGAChunkHandler : ChunkHandler {
 	}
 };
 
+/** Temporary storage for Stockpile serialization. */
+struct SlStockpileRecord {
+	uint32_t world_id;
+	uint8_t company_id;
+	uint8_t cargo_type;
+	uint32_t amount;
+};
+
+static const SaveLoad _stockpile_desc[] = {
+	SLE_VAR(SlStockpileRecord, world_id,   VarTypes::U32),
+	SLE_VAR(SlStockpileRecord, company_id, VarTypes::U8),
+	SLE_VAR(SlStockpileRecord, cargo_type, VarTypes::U8),
+	SLE_VAR(SlStockpileRecord, amount,     VarTypes::U32),
+};
+
+/** Chunk handler for planetary company stockpiles (STCK). */
+struct STCKChunkHandler : ChunkHandler {
+	STCKChunkHandler() : ChunkHandler("STCK", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_stockpile_desc);
+
+		int i = 0;
+		for (const auto &sp : StockpileManager::GetAllStockpiles()) {
+			for (const auto &[cargo, amount] : sp.inventory) {
+				if (amount > 0) {
+					SlStockpileRecord rec{
+						.world_id = sp.world_id.base(),
+						.company_id = sp.company_id.base(),
+						.cargo_type = to_underlying(cargo),
+						.amount = amount,
+					};
+					SlSetArrayIndex(i++);
+					SlObject(&rec, _stockpile_desc);
+				}
+			}
+		}
+	}
+
+	void Load() const override
+	{
+		StockpileManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_stockpile_desc);
+
+		SlStockpileRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			StockpileManager::AddCargo(WorldID{rec.world_id}, CompanyID{rec.company_id}, CargoType{rec.cargo_type}, rec.amount);
+		}
+	}
+};
+
+/** Temporary storage for LogisticsHub and Reserve Floor serialization. */
+struct SlLogisticsHubRecord {
+	uint8_t kind; ///< 0 = Hub info, 1 = Reserve floor
+	uint32_t hub_id;
+	uint32_t tile;
+	uint32_t world_id;
+	uint8_t company_id;
+	uint16_t station_id;
+	std::string name;
+	uint64_t total_deposited;
+	uint64_t total_dispatched;
+	uint8_t cargo_type;
+	uint32_t min_reserve;
+};
+
+static const SaveLoad _logistics_hub_desc[] = {
+	    SLE_VAR(SlLogisticsHubRecord, kind,             VarTypes::U8),
+	    SLE_VAR(SlLogisticsHubRecord, hub_id,           VarTypes::U32),
+	    SLE_VAR(SlLogisticsHubRecord, tile,             VarTypes::U32),
+	    SLE_VAR(SlLogisticsHubRecord, world_id,         VarTypes::U32),
+	    SLE_VAR(SlLogisticsHubRecord, company_id,       VarTypes::U8),
+	    SLE_VAR(SlLogisticsHubRecord, station_id,       VarTypes::U16),
+	   SLE_SSTR(SlLogisticsHubRecord, name,             VarTypes::STR),
+	    SLE_VAR(SlLogisticsHubRecord, total_deposited,  VarTypes::U64),
+	    SLE_VAR(SlLogisticsHubRecord, total_dispatched, VarTypes::U64),
+	    SLE_VAR(SlLogisticsHubRecord, cargo_type,       VarTypes::U8),
+	    SLE_VAR(SlLogisticsHubRecord, min_reserve,      VarTypes::U32),
+};
+
+/** Chunk handler for dedicated company logistics hubs (LHUB). */
+struct LHUBChunkHandler : ChunkHandler {
+	LHUBChunkHandler() : ChunkHandler("LHUB", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_logistics_hub_desc);
+
+		int i = 0;
+		for (const auto &hub : LogisticsHubManager::GetAllHubs()) {
+			SlLogisticsHubRecord hub_rec{
+				.kind = 0,
+				.hub_id = hub.hub_id,
+				.tile = hub.tile.base(),
+				.world_id = hub.world_id.base(),
+				.company_id = hub.company_id.base(),
+				.station_id = hub.station_id.base(),
+				.name = hub.name,
+				.total_deposited = hub.total_deposited,
+				.total_dispatched = hub.total_dispatched,
+				.cargo_type = 0,
+				.min_reserve = 0,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&hub_rec, _logistics_hub_desc);
+
+			for (const auto &[cargo, min_reserve] : hub.reserve_floors) {
+				SlLogisticsHubRecord res_rec{
+					.kind = 1,
+					.hub_id = hub.hub_id,
+					.tile = 0,
+					.world_id = 0,
+					.company_id = 0,
+					.station_id = 0,
+					.name = "",
+					.total_deposited = 0,
+					.total_dispatched = 0,
+					.cargo_type = to_underlying(cargo),
+					.min_reserve = min_reserve,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&res_rec, _logistics_hub_desc);
+			}
+		}
+	}
+
+	void Load() const override
+	{
+		LogisticsHubManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_logistics_hub_desc);
+
+		SlLogisticsHubRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+
+			if (rec.kind == 0) {
+				LogisticsHub hub{
+					.hub_id = rec.hub_id,
+					.tile = TileIndex{rec.tile},
+					.world_id = WorldID{rec.world_id},
+					.company_id = CompanyID{rec.company_id},
+					.station_id = StationID{rec.station_id},
+					.name = rec.name,
+					.reserve_floors = {},
+					.total_deposited = rec.total_deposited,
+					.total_dispatched = rec.total_dispatched,
+				};
+				LogisticsHubManager::RestoreHub(hub);
+			} else if (rec.kind == 1) {
+				LogisticsHubManager::SetReserveFloor(rec.hub_id, CargoType{rec.cargo_type}, rec.min_reserve);
+			}
+		}
+	}
+};
+
+/** Temporary storage for Corporate Headquarters serialization. */
+struct SlCorporateHQRecord {
+	uint8_t company_id;
+	uint32_t world_id;
+	uint32_t tile;
+	uint8_t tier;
+	std::string campus_name;
+	uint64_t founding_date;
+};
+
+static const SaveLoad _corporate_hq_desc[] = {
+	    SLE_VAR(SlCorporateHQRecord, company_id,    VarTypes::U8),
+	    SLE_VAR(SlCorporateHQRecord, world_id,      VarTypes::U32),
+	    SLE_VAR(SlCorporateHQRecord, tile,          VarTypes::U32),
+	    SLE_VAR(SlCorporateHQRecord, tier,          VarTypes::U8),
+	   SLE_SSTR(SlCorporateHQRecord, campus_name,   VarTypes::STR),
+	    SLE_VAR(SlCorporateHQRecord, founding_date, VarTypes::U64),
+};
+
+/** Chunk handler for Corporate Headquarters (CHQS). */
+struct CHQSChunkHandler : ChunkHandler {
+	CHQSChunkHandler() : ChunkHandler("CHQS", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_corporate_hq_desc);
+
+		int i = 0;
+		for (const auto &hq : CorporateHQManager::GetAllHQ()) {
+			SlCorporateHQRecord rec{
+				.company_id = hq.company_id.base(),
+				.world_id = hq.world_id.base(),
+				.tile = hq.tile.base(),
+				.tier = to_underlying(hq.tier),
+				.campus_name = hq.campus_name,
+				.founding_date = hq.founding_date,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&rec, _corporate_hq_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		CorporateHQManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_corporate_hq_desc);
+
+		SlCorporateHQRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			CorporateHQProfile hq{
+				.company_id = CompanyID{rec.company_id},
+				.world_id = WorldID{rec.world_id},
+				.tile = TileIndex{rec.tile},
+				.tier = static_cast<CorporateHQTier>(rec.tier),
+				.campus_name = rec.campus_name,
+				.founding_date = rec.founding_date,
+			};
+			CorporateHQManager::RestoreHQ(hq);
+		}
+	}
+};
+
+struct SlFabricationModeRecord {
+	uint8_t company_id;
+	uint8_t enabled;
+};
+
+static const SaveLoad _fabrication_mode_desc[] = {
+	SLE_VAR(SlFabricationModeRecord, company_id, VarTypes::U8),
+	SLE_VAR(SlFabricationModeRecord, enabled,    VarTypes::U8),
+};
+
+/** Chunk handler for Company Fabrication Modes (FABR). */
+struct FABRChunkHandler : ChunkHandler {
+	FABRChunkHandler() : ChunkHandler("FABR", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_fabrication_mode_desc);
+
+		int i = 0;
+		for (const auto &[comp, enabled] : FabricationManager::GetAllCompanyModes()) {
+			SlFabricationModeRecord rec{
+				.company_id = comp.base(),
+				.enabled = static_cast<uint8_t>(enabled ? 1 : 0),
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&rec, _fabrication_mode_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		FabricationManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_fabrication_mode_desc);
+
+		SlFabricationModeRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			FabricationManager::RestoreCompanyMode(CompanyID{rec.company_id}, rec.enabled != 0);
+		}
+	}
+};
+
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
@@ -629,6 +899,10 @@ static const FIDSChunkHandler FIDS;
 static const SPRTChunkHandler SPRT;
 static const CONDChunkHandler COND;
 static const MEGAChunkHandler MEGA;
+static const STCKChunkHandler STCK;
+static const LHUBChunkHandler LHUB;
+static const CHQSChunkHandler CHQS;
+static const FABRChunkHandler FABR;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
@@ -638,6 +912,10 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	SPRT,
 	COND,
 	MEGA,
+	STCK,
+	LHUB,
+	CHQS,
+	FABR,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

@@ -6,6 +6,8 @@
 **Test Suite:** `src/tests/test_sprint31_colonization_gui.cpp`  
 **Acceptance Kit:** `scripts/test_sprint31_colonization_kit.py`  
 
+> **Evidence boundary:** The acceptance kit verifies the authority API and persistence model. It does not prove synchronisation between an external authority and independent game processes. See [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ---
 
 ## 1. Executive Summary

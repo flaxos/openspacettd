@@ -374,6 +374,16 @@ add_files(
     picker_gui.h
     portal/edge_conduit.cpp
     portal/edge_conduit.h
+    portal/company_stockpile.cpp
+    portal/company_stockpile.h
+    portal/corporate_hq.cpp
+    portal/corporate_hq.h
+    portal/corporate_hq_gui.cpp
+    portal/corporate_hq_gui.h
+    portal/logistics_hub.cpp
+    portal/logistics_hub.h
+    portal/fabrication_manager.cpp
+    portal/fabrication_manager.h
     portal/content_manifest.cpp
     portal/content_manifest.h
     portal/consist_materializer.cpp

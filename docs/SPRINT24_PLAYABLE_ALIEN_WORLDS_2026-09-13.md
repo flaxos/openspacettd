@@ -4,6 +4,8 @@ Status: **COMPLETE**
 Date: **2026-09-13**  
 Reference Specifications: [ALIEN_WORLD_ART_DIRECTION.md](ALIEN_WORLD_ART_DIRECTION.md), [SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md](SPRINT23_SCOPE_ART_AND_UAT_AUDIT_2026-09-13.md)
 
+> **Sprint 34 evidence clarification:** This sprint implemented procedural terrain/tree selection and portal palette states using existing base assets. It did not deliver the bespoke environment, portal, settlement or arcology sprite sets in the art vision, and the requested visual comparison pack is still outstanding. See [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ---
 
 ## 1. Executive Summary

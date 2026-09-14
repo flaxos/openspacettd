@@ -1,8 +1,15 @@
 # OpenSpaceTTD UAT Demo
 
-> **Active Sprint 28 Fixture:** `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` is the official guided solo UAT release savegame. It supersedes the early historical v0.3 slice and incorporates all features through Sprint 27 (automatic 18-tile portal terminals, player rail blueprints, 8 canonical CST prefabs, Spaceport/Edge Conduit planetary operations, Megacity multi-tier demands, Freight Corridor Monitor, Supply Chain Matrix & Trade Ledger, and Federation Authentication & Charters). See [FEATURE_UI_UAT_COVERAGE.md](../docs/FEATURE_UI_UAT_COVERAGE.md) and [SPRINT28_GUIDED_SOLO_UAT_2026-09-13.md](../docs/SPRINT28_GUIDED_SOLO_UAT_2026-09-13.md).
+> **Active Sprint 36 All-Feature Fixture:** `OpenSpaceTTD-All-Features-UAT-v1.0.sav` is the canonical guided solo UAT release savegame covering all features from Sprint 1 through Sprint 40. It features a 6-world procedural partition covering all 6 environmental biomes (Temperate Core, Arid Desert, Sub-Arctic, Volcanic, Sub-Tropic, Oceanic), 5 monumental gateway pairs, multi-tier megacity demand economics, planetary company stockpiles, corporate headquarters, logistics hubs, and in-kind fabrication. Powered by GameScript v8 with a 12-chapter, 25-goal persistent Story Book. See [ALL-FEATURES-UAT.md](ALL-FEATURES-UAT.md), [FEATURE_UI_UAT_COVERAGE.md](../docs/FEATURE_UI_UAT_COVERAGE.md), and [PROJECT_STATUS_AND_ROADMAP.md](../docs/PROJECT_STATUS_AND_ROADMAP.md).
 
-`OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` is a deterministic 1024 x 512 three-world acceptance-test save generated with seed `9032026`.
+> **Legacy Sprint 28 Fixture:** `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` remains preserved for regression testing and covers features through Sprint 27. See [SPRINT28-UAT.md](SPRINT28-UAT.md).
+
+### Quick Launch: All-Features Scenario (v1.0)
+```bash
+./build/openttd -g demo/OpenSpaceTTD-All-Features-UAT-v1.0.sav
+```
+
+---
 
 ## World Layout & Environmental Biomes
 

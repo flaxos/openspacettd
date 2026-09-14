@@ -764,6 +764,9 @@ enum class WindowClass : uint16_t {
 	/** Federation player authentication and corporate charters window. */
 	FederationAuth,
 
+	/** Corporate Headquarters campus and planetary stockpile overview. */
+	CorporateHQ,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

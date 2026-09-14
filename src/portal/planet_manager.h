@@ -70,6 +70,14 @@ public:
 	static bool SetWorldBiome(WorldID world, WorldBiome biome);
 
 	/**
+	 * Add development score directly to a world region.
+	 * @param world The WorldID.
+	 * @param score Score to add.
+	 * @return True if world was found and updated, false otherwise.
+	 */
+	static bool AddDevelopmentScore(WorldID world, uint32_t score);
+
+	/**
 	 * Promote a registered world to its next development phase tier.
 	 * Phase4_Expansion -> Phase3_Frontier -> Phase2_Developed -> Phase1_Core.
 	 * @param world The WorldID to promote.

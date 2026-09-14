@@ -16,6 +16,10 @@
 #include "edge_conduit.h"
 #include "universe_authority.h"
 #include "megacity_manager.h"
+#include "company_stockpile.h"
+#include "logistics_hub.h"
+#include "corporate_hq.h"
+#include "fabrication_manager.h"
 #include "../town.h"
 #include "../station_base.h"
 #include "../command_func.h"
@@ -666,3 +670,98 @@ CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
 
 	return cost;
 }
+
+CommandCost CmdPlaceCorporateHQ(DoCommandFlags flags, TileIndex tile, const std::string &hq_name)
+{
+	if (tile == INVALID_TILE) return CMD_ERROR;
+	CompanyID company = _current_company;
+	if (company == CompanyID::Invalid()) return CMD_ERROR;
+
+	std::string err_msg;
+	if (!CorporateHQManager::CanPlaceHQ(company, tile, err_msg)) {
+		if (err_msg.find("Phase 1 Core") != std::string::npos) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_HQ_NOT_CORE_WORLD);
+		}
+		if (err_msg.find("active Corporate Headquarters") != std::string::npos) {
+			return CommandCost(STR_ERROR_ALREADY_HAS_CORPORATE_HQ);
+		}
+		if (err_msg.find("5,000,000") != std::string::npos) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_FUNDS);
+		}
+		if (err_msg.find("3 distinct world phases") != std::string::npos) {
+			return CommandCost(STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_PRESENCE);
+		}
+		return CommandCost(STR_ERROR_SITE_UNSUITABLE);
+	}
+
+	/* Construction cost: 2,500,000 Cr */
+	CommandCost cost(ExpensesType::Construction, 2500000);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		const PlanetRegion *region = PlanetManager::GetRegionByTile(tile);
+		WorldID wid = (region != nullptr) ? region->id : PlanetManager::GetTileWorld(tile);
+		std::string name = hq_name.empty() ? "Corporate HQ Campus" : hq_name;
+		CorporateHQManager::RegisterHQ(company, wid, tile, name);
+
+		AddTileNewsItem(GetEncodedString(STR_NEWS_CORPORATE_HQ_ESTABLISHED, name), NewsType::CompanyInfo, tile);
+	}
+
+	return cost;
+}
+
+CommandCost CmdBuildLogisticsHub(DoCommandFlags flags, TileIndex tile, StationID st, const std::string &hub_name)
+{
+	if (tile == INVALID_TILE) return CMD_ERROR;
+	CompanyID company = _current_company;
+	if (company == CompanyID::Invalid()) return CMD_ERROR;
+
+	WorldID world_id = PlanetManager::GetTileWorld(tile);
+	if (world_id == INVALID_WORLD) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
+	}
+	const PlanetRegion *region = PlanetManager::GetRegion(world_id);
+	if (region == nullptr) return CMD_ERROR;
+
+	if (region->phase == WorldPhase::Phase4_Expansion && region->development_score == 0 && region->outpost_tile == INVALID_TILE) {
+		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
+	}
+
+	/* Construction cost: 75,000 Cr */
+	CommandCost cost(ExpensesType::Construction, 75000);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		if (st == StationID::Invalid()) {
+			if (IsTileType(tile, TileType::Station)) {
+				const Station *station = Station::GetByTile(tile);
+				if (station != nullptr) st = station->index;
+			}
+			if (st == StationID::Invalid()) {
+				for (const Station *s : Station::Iterate()) {
+					if (s->owner == company && DistanceManhattan(tile, s->xy) <= 4) {
+						st = s->index;
+						break;
+					}
+				}
+			}
+		}
+
+		std::string name = hub_name.empty() ? ("Logistics Hub " + region->name) : hub_name;
+		LogisticsHubManager::RegisterHub(tile, region->id, company, st, name);
+	}
+
+	return cost;
+}
+
+CommandCost CmdSetFabricationMode(DoCommandFlags flags, bool enabled)
+{
+	CompanyID company = _current_company;
+	if (company == CompanyID::Invalid()) return CMD_ERROR;
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		FabricationManager::SetFabricateFromStockpile(company, enabled);
+		SetWindowDirty(WindowClass::CorporateHQ, company.base());
+	}
+
+	return CommandCost();
+}
+

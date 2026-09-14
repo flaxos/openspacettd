@@ -21,6 +21,9 @@
 #include "../command_func.h"
 #include "../company_base.h"
 #include "../company_func.h"
+#include "../town.h"
+#include "../station_base.h"
+#include "../news_func.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
@@ -378,6 +381,9 @@ TEST_CASE("Sprint 30 Colonization - Save/Load Persistence of Promoted World Phas
 	}
 
 	_company_pool.CleanPool();
+	_town_pool.CleanPool();
+	_station_pool.CleanPool();
+	InitNewsItemStructs();
 	REQUIRE(Company::CanAllocateItem());
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);

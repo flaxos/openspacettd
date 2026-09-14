@@ -6,6 +6,8 @@
 **Test Suite:** `src/tests/test_sprint32_lifecycle_and_tech.cpp`  
 **Acceptance Kit:** `scripts/test_sprint32_lifecycle_kit.py`  
 
+> **Evidence boundary:** Native rules have C++ coverage and the Python kit verifies authority API behaviour. Live cross-process synchronisation remains planned work; see [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ---
 
 ## 1. Executive Summary

@@ -5,11 +5,13 @@
 **Branch:** `fix/portal-gate-lifecycle-crashes`  
 **Savegame Artifact:** `demo/OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav`  
 
+> **Coverage boundary:** This fixture covers features through Sprint 27. It predates the Sprint 30–33 colonisation, promotion, technology and settlement-lifecycle features. See [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ---
 
 ## 1. Executive Summary
 
-Sprint 28 delivers the official **Guided Solo UAT (User Acceptance Testing)** milestone for OpenSpaceTTD. It supersedes the early historical v0.3 planetary slice by delivering a fresh, reproducible, all-feature savegame (`OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav`) powered by version 7 of the `OpenSpaceTTD-UAT-Demo` GameScript (`bin/game/openspacettd_uat/`).
+Sprint 28 delivers the guided solo UAT milestone for features through Sprint 27. It supersedes the early historical v0.3 planetary slice with a reproducible savegame (`OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav`) powered by version 7 of the `OpenSpaceTTD-UAT-Demo` GameScript (`bin/game/openspacettd_uat/`).
 
 This release provides:
 1. **Persistent Story Book Goals:** 7 structured chapters containing 16 measurable, sequential acceptance goals with clickable viewport location pins spanning every feature implemented from Sprint 9 through Sprint 27.

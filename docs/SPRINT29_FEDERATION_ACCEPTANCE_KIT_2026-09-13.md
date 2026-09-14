@@ -1,4 +1,4 @@
-# Sprint 29: Federation Acceptance Kit & Multi-Server Verification Specification
+# Sprint 29: Federation Authority Protocol & Supervisor Verification
 
 **Status:** COMPLETE  
 **Date:** 2026-09-13  
@@ -6,11 +6,13 @@
 **Automated Acceptance Runner:** `scripts/run_acceptance_kit.sh` / `scripts/test_sprint29_acceptance_kit.py`  
 **C++ Acceptance Test Suite:** `src/tests/test_sprint29_federation_acceptance.cpp`  
 
+> **Sprint 34 evidence clarification:** Sprint 29 completed the transfer domain, authority API, supervisor and protocol acceptance scope. Its Python runner registers simulated worlds and advances transfer lifecycle endpoints directly; it does not demonstrate a train moving between independent game processes through an external authority. Current status is in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ---
 
 ## 1. Executive Summary
 
-Sprint 29 marks the culmination and delivery milestone of the OpenSpaceTTD federation sequence (Sprints 24–29). Building on the persistent story book and solo UAT savegame delivered in Sprint 28, Sprint 29 provides the **Live Federation Acceptance Kit**: an end-to-end, automated, and operator-playable testing framework that proves multi-server federation capabilities across independent running instances.
+Sprint 29 marks the authority-protocol acceptance milestone of the OpenSpaceTTD federation sequence. Building on the persistent Story Book and solo UAT save delivered in Sprint 28, it provides automated domain/API scenarios and operator procedures for the cluster supervisor. Live engine-to-engine transport remains a separate acceptance stage.
 
 The acceptance kit verifies eight fundamental federation capabilities:
 1. **Dynamic World-Directory Discovery & Liveliness:** Multi-phase registration (Core, Developed, Frontier), heartbeat telemetry, and automatic stale node pruning.

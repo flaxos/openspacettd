@@ -1,7 +1,8 @@
 # OpenSpaceTTD Alien World Art Direction
 
-Status: **SPRINT 23 BASELINE — implementation begins in Sprint 24**  
-Date: **2026-09-13**
+Status: **PROCEDURAL BIOME BEHAVIOUR IMPLEMENTED; BESPOKE ART PENDING**  
+Original specification: **2026-09-13**  
+Status reconciled: **2026-09-14**
 
 ## Visual thesis
 
@@ -31,7 +32,7 @@ Biome controls ecology and ground; World Phase controls settlement and infrastru
 | Volcanic | Charcoal crust, ember fissures and sulphur-green deposits | Heat-resistant red fans, mineral chimneys, obsidian needles | Hard angular terrain with hot high-contrast seams |
 | Oceanic | Deep cobalt water, turquoise shelves and pale reef flats | Floating mats, giant cup corals, mangrove-like root towers | Small land clusters joined by engineered causeways |
 
-All six biomes are fully implemented as of Sprint 30, supporting procedural generation, terrain styling, flora transformations, and persistent tile loops across multi-world layouts.
+All six biome behaviours are implemented as of Sprint 30, including procedural terrain selection, substitutions from existing tree sprites and persistent tile loops. The original terrain, flora and landmark silhouettes described in this table have not been authored as bespoke sprite sets.
 
 ## Showcase world composition
 
@@ -49,6 +50,8 @@ Use Sub-Arctic terrain with modular colony shells, rough ballast, temporary gant
 
 ## Asset delivery rules
 
+These rules remain acceptance criteria for planned Sprint 38. The repository currently has no dedicated OpenSpaceTTD art source/export package.
+
 - Author source sheets and export settings live with the packaged assets; generated sprites are reproducible.
 - Each asset records author, licence, source and palette/zoom variants.
 - Test normal, snow/desert or climate variants where applicable, all company colours and active/inactive portal states.
@@ -56,6 +59,6 @@ Use Sub-Arctic terrain with modular colony shells, rough ballast, temporary gant
 - Validate at normal play zoom before reviewing close-up detail.
 - Ship fallback sprites for missing optional content and emit a clear content-manifest diagnostic in federation mode.
 
-## Sprint 24 acceptance views
+## Outstanding visual acceptance
 
-Capture comparable overview and close gameplay views of all three showcase worlds, including daytime terrain, a busy junction, a station, an industry, a settlement and active/inactive portal gates. Acceptance requires immediate world recognition without reading the world label, clear track and signal states, and no visible seams at region or sprite boundaries.
+Sprint 24 supplied procedural differentiation and portal palette states, but the specified comparison captures and signed visual review are not present. Sprint 38 must capture comparable overview and close gameplay views of all six biomes, including terrain, a junction, a station, an industry, a settlement and active/inactive portal gates. Acceptance requires immediate world recognition without reading the label, clear track and signal states, and no visible seams.

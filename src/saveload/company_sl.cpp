@@ -571,6 +571,10 @@ struct PLYRChunkHandler : ChunkHandler {
 		while ((index = SlIterateArray()) != -1) {
 			Company *c = Company::CreateAtIndex(CompanyID(index));
 			SlObject(c, slt);
+			/* Some generated saves contain a company without an initialised president
+			 * name. Preserve its name seed and any custom name, but repair the missing
+			 * generator before the company window tries to format it. */
+			if (c->president_name_1 == INVALID_STRING_ID) c->president_name_1 = SPECSTR_PRESIDENT_NAME;
 			_company_colours[c->index] = c->colour;
 		}
 	}

@@ -3,6 +3,8 @@
 Status: **COMPLETE (documentation and delivery specification)**  
 Date: **2026-09-13**
 
+> Historical planning snapshot. Sprints 24–33 were subsequently implemented. Current status and remaining gaps are maintained in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ## Goal
 
 Turn the implemented federation foundation into a decision-complete delivery sequence for a visually distinctive, fully surfaced and testable OpenSpaceTTD release. Sprint 23 reconciles the repository state through Sprint 22 and defines the work for alien world art, player rail blueprints, CST prefab rail blocks, UI completion and a new UAT demo.

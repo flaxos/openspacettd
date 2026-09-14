@@ -5191,17 +5191,26 @@ STR_ERROR_CANNOT_BUILD_ON_DEVELOPED_WORLD                       :cannot construc
 STR_ERROR_ALREADY_MAX_PHASE                                     :world is already at the maximum development tier (Phase 1 Core)
 STR_ERROR_NOT_ENOUGH_DEVELOPMENT                                :world has not accumulated sufficient development score for phase promotion
 STR_ERROR_CAN_T_PROMOTE_WORLD                                   :Can't promote world...
-STR_NEWS_WORLD_DEVELOPED                                        :{BIG_FONT}{BLACK}Colony Industrialized!{}{STRING} has achieved Developed World status (Phase 2)! Advanced catenary and manufacturing unlocked!
-STR_NEWS_WORLD_CORE_METROPOLIS                                  :{BIG_FONT}{BLACK}Metropolis Achieved!{}{STRING} has achieved Core World status (Phase 1)! CST Maglev guideways and Megacity arcologies unlocked!
+STR_NEWS_WORLD_DEVELOPED                                        :{BIG_FONT}{BLACK}Colony Industrialized!{}{RAW_STRING} has achieved Developed World status (Phase 2)! Advanced catenary and manufacturing unlocked!
+STR_NEWS_WORLD_CORE_METROPOLIS                                  :{BIG_FONT}{BLACK}Metropolis Achieved!{}{RAW_STRING} has achieved Core World status (Phase 1)! CST Maglev guideways and Megacity arcologies unlocked!
 STR_ERROR_CANNOT_COLONIZE_ALREADY_COLONIZED                     :this world has already established colonial settlements
 STR_ERROR_CANNOT_COLONIZE_NON_EXPANSION                         :outposts can only be founded on an Expansion World (Phase 4)
 STR_ERROR_CAN_T_COLONIZE_OUTPOST                                :Can't colonize world...
-STR_NEWS_WORLD_COLONIZED                                        :{BIG_FONT}{BLACK}Outpost Founded!{}{STRING} has been colonized and elevated to Frontier status (Phase 3)!
+STR_NEWS_WORLD_COLONIZED                                        :{BIG_FONT}{BLACK}Outpost Founded!{}{RAW_STRING} has been colonized and elevated to Frontier status (Phase 3)!
 STR_ERROR_CANNOT_BUILD_FARM_ON_VOLCANIC_WORLD                   :cannot construct bio-farms or agriculture on a Volcanic World
-STR_NEWS_OUTPOST_INDUSTRY_FOUNDED                               :{BIG_FONT}{BLACK}Colony Sector Established!{}{STRING} has opened its first industrial operations on {STRING}!
+STR_NEWS_OUTPOST_INDUSTRY_FOUNDED                               :{BIG_FONT}{BLACK}Colony Sector Established!{}{RAW_STRING} has opened its first industrial operations on {RAW_STRING}!
 STR_ERROR_CAN_T_BUILD_EDGE_CONDUIT                              :Can't build Edge Conduit here...
 STR_ERROR_CAN_T_REMOVE_EDGE_CONDUIT                             :Can't remove Edge Conduit...
 STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID                            :Edge Conduit must be placed on a world boundary tile directly beside the void
+STR_ERROR_CANNOT_BUILD_HQ_NOT_CORE_WORLD                     :Corporate Headquarters must be founded on a Phase 1 Core World
+STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_FUNDS                 :insufficient capital: Corporate Headquarters requires at least 5,000,000 Cr
+STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_PRESENCE              :corporate rail network must operate across at least 3 distinct world phases
+STR_ERROR_ALREADY_HAS_CORPORATE_HQ                           :company has already established an active Corporate Headquarters
+STR_NEWS_CORPORATE_HQ_ESTABLISHED                            :{BIG_FONT}{BLACK}Corporate Headquarters Founded!{}{RAW_STRING} has established its interstellar corporate nexus!
+STR_ERROR_CAN_T_BUILD_LOGISTICS_HUB                          :Can't build Company Logistics Hub...
+STR_ERROR_CAN_T_PLACE_CORPORATE_HQ                           :Can't place Corporate Headquarters...
+STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS                   :insufficient materials in planetary stockpile for in-kind fabrication
+
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{TOWN} local authority refuses to allow this
@@ -6249,4 +6258,26 @@ STR_FEDERATION_AUTH_NO_CHARTERS                                     :{SILVER}No 
 STR_FEDERATION_AUTH_LOGIN_CAPTION                                   :{WHITE}Federation Player Username
 STR_FEDERATION_AUTH_CHARTER_CAPTION                                 :{WHITE}New Corporation Name
 STR_FEDERATION_AUTH_DELEGATE_CAPTION                                :{WHITE}Delegate Player Sequence ID
+
+# OpenSpaceTTD Sprint 39: Corporate Headquarters & Planetary Stockpiles
+STR_CORPORATE_HQ_VIEW_CAPTION                                       :{WHITE}Corporate Headquarters Campus
+STR_CORPORATE_HQ_TAB_OVERVIEW                                       :Overview
+STR_CORPORATE_HQ_TAB_STOCKPILES                                      :Planetary Stockpiles
+STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS                                 :Logistics Hubs
+STR_CORPORATE_HQ_BTN_LOCATE                                         :Locate Campus
+STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP                                 :Scroll the main viewport to the Corporate Headquarters campus
+STR_CORPORATE_HQ_BTN_UPGRADE                                        :Upgrade Tier
+STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP                                :Upgrade Corporate Headquarters advancement tier
+STR_CORPORATE_HQ_BTN_SET_RESERVE                                    :Configure Hub
+STR_CORPORATE_HQ_BTN_SET_RESERVE_TOOLTIP                            :Adjust minimum reserve threshold floor for this logistics hub
+STR_CORPORATE_HQ_STATUS_NOT_FOUNDED                                 :{SILVER}No active Corporate Headquarters campus established. Must be founded on a Phase 1 Core World.
+STR_MAP_MENU_CORPORATE_HQ                                           :Corporate Headquarters & Stockpiles
+
+# OpenSpaceTTD Sprint 40: In-Kind Fabrication Engine & Bill of Materials
+STR_CORPORATE_HQ_TAB_FABRICATION                                   :In-Kind Fabrication
+STR_FABRICATION_MODE_ACTIVE                                        :{GREEN}In-Kind Fabrication: ACTIVE (80% cash discount from local stockpile)
+STR_FABRICATION_MODE_INACTIVE                                      :{SILVER}In-Kind Fabrication: INACTIVE (Standard commercial cash purchase)
+STR_FABRICATION_BTN_TOGGLE                                         :Toggle Mode
+STR_FABRICATION_BTN_TOGGLE_TOOLTIP                                 :Toggle between standard cash purchase and in-kind fabrication from planetary stockpile
+
 

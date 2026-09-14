@@ -6,6 +6,8 @@
 **Test Suite:** `src/tests/test_sprint33_planetary_economy_and_megacity.cpp`  
 **Acceptance Kit:** `scripts/test_sprint33_megacity_kit.py`  
 
+> **Evidence boundary:** Native economy rules have C++ coverage and the Python kit verifies authority API behaviour. The v0.4 solo UAT predates this sprint, and live external-authority synchronisation is not yet accepted; see [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md).
+
 ---
 
 ## 1. Executive Summary

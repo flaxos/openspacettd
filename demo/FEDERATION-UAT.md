@@ -1,14 +1,16 @@
-# Sprint 29 Federation UAT: Live Cluster Acceptance Guide
+# Sprint 29 Federation UAT: Protocol and Cluster-Supervisor Guide
 
 **Milestone:** Sprint 29 (Federation Acceptance Kit)  
-**Target:** Live Multi-Server Commonwealth Cluster  
+**Target:** Universe Authority protocol plus cluster process supervision  
 **Supervisors & Runners:** `scripts/run_acceptance_kit.sh`, `scripts/run_cluster.py`  
+
+> **Evidence boundary:** The automated runner starts the Python Universe Authority and drives world registration, transfer, congestion, recovery and ledger endpoints directly. It does not launch trains inside independent OpenSpaceTTD game processes. `run_cluster.py` can launch three dedicated game processes, but the documented manual HTTP lifecycle is not proof of an engine-driven cross-process handoff. That work is planned for Sprint 35.
 
 ---
 
 ## 1. Quick Start: Automated Acceptance Kit
 
-To run the complete automated federation acceptance kit across all 8 scenarios:
+To run the automated authority/API acceptance groups:
 
 ```bash
 ./scripts/run_acceptance_kit.sh
@@ -31,7 +33,7 @@ Expected Output:
 
 ## 2. Interactive Operator Walkthrough
 
-For an operator performing live acceptance testing against a running cluster:
+For an operator inspecting the supervisor and authority against running server processes:
 
 ### Step 1: Launch Federation Cluster with Persistent Authority
 
@@ -189,9 +191,9 @@ Confirm arrivals to relieve backpressure back to `CLEAR`.
      -H "Content-Type: application/json" \
      -d '{"filepath": "demo/authority_state.json"}' | jq .
    ```
-2. Kill the running authority process:
+2. Terminate only the recorded Universe Authority PID from the supervisor output:
    ```bash
-   killall python3 # or terminate the specific authority PID
+   kill <authority-pid>
    ```
 3. Restart the daemon pointing to the checkpoint file:
    ```bash
