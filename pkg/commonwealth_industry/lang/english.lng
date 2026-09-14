@@ -1,0 +1,75 @@
+##grflangid 0x01
+##plural 0
+
+# GRF metadata
+STR_GRF_NAME                                            :OpenSpaceTTD Commonwealth Industry & Cargo Pack
+STR_GRF_DESC                                            :Canonical 12-cargo Commonwealth multi-world industrial production suite and facilities across Pipelines A-D.
+
+# Cargo Names & Units
+STR_CARGO_NAME_SILC                                     :Silicates & Ballast Slag
+STR_CARGO_UNIT_SILC                                     :{WEIGHT} of silicates
+STR_CARGO_ABBR_SILC                                     :SILC
+
+STR_CARGO_NAME_IRON                                     :Iron Ore
+STR_CARGO_UNIT_IRON                                     :{WEIGHT} of iron ore
+STR_CARGO_ABBR_IRON                                     :IRON
+
+STR_CARGO_NAME_STEL                                     :Structural Steel
+STR_CARGO_UNIT_STEL                                     :{WEIGHT} of structural steel
+STR_CARGO_ABBR_STEL                                     :STEL
+
+STR_CARGO_NAME_RARE                                     :Rare Earth Minerals
+STR_CARGO_UNIT_RARE                                     :{WEIGHT} of rare earth minerals
+STR_CARGO_ABBR_RARE                                     :RARE
+
+STR_CARGO_NAME_ALLO                                     :Superalloys & Superconductors
+STR_CARGO_UNIT_ALLO                                     :{WEIGHT} of superalloys
+STR_CARGO_ABBR_ALLO                                     :ALLO
+
+STR_CARGO_NAME_COPR                                     :Copper Ore
+STR_CARGO_UNIT_COPR                                     :{WEIGHT} of copper ore
+STR_CARGO_ABBR_COPR                                     :COPR
+
+STR_CARGO_NAME_WIRE                                     :Conductive Wiring & Coils
+STR_CARGO_UNIT_WIRE                                     :{WEIGHT} of conductive wiring
+STR_CARGO_ABBR_WIRE                                     :WIRE
+
+STR_CARGO_NAME_SAND                                     :Silica Sand & Quartz
+STR_CARGO_UNIT_SAND                                     :{WEIGHT} of silica sand
+STR_CARGO_ABBR_SAND                                     :SAND
+
+STR_CARGO_NAME_CHIP                                     :Silicon Wafers & Chips
+STR_CARGO_UNIT_CHIP                                     :{WEIGHT} of silicon chips
+STR_CARGO_ABBR_CHIP                                     :CHIP
+
+STR_CARGO_NAME_POLY                                     :Synthetic Polymers & Composites
+STR_CARGO_UNIT_POLY                                     :{WEIGHT} of synthetic polymers
+STR_CARGO_ABBR_POLY                                     :POLY
+
+STR_CARGO_NAME_BCRY                                     :Blank Data Crystals
+STR_CARGO_UNIT_BCRY                                     :{SIGNED_WORD} blank data crystals
+STR_CARGO_ABBR_BCRY                                     :BCRY
+
+STR_CARGO_NAME_QCRY                                     :Enriched Quantum Crystals
+STR_CARGO_UNIT_QCRY                                     :{SIGNED_WORD} quantum data crystals
+STR_CARGO_ABBR_QCRY                                     :QCRY
+
+STR_CARGO_NAME_CCRY                                     :Encrypted Consumer Crystals
+STR_CARGO_UNIT_CCRY                                     :{SIGNED_WORD} consumer data crystals
+STR_CARGO_ABBR_CCRY                                     :CCRY
+
+# Industry Names
+STR_IND_NAME_QUARRY                                     :Quarries & Slag Heaps
+STR_IND_NAME_CRUSHER                                    :Ballast Crusher Plant
+STR_IND_NAME_IRON_MINE                                  :Deep Iron Ore Mine
+STR_IND_NAME_STEEL_MILL                                 :Structural Steel Smelter & Mill
+STR_IND_NAME_RARE_MINE                                  :Rare Earth Extraction Mine
+STR_IND_NAME_SUPERALLOY_FOUNDRY                         :High-Temperature Superalloy Foundry
+STR_IND_NAME_COPPER_MINE                                :Surface Copper Mine
+STR_IND_NAME_COPPER_SMELTER                             :Conductive Wire Smelter
+STR_IND_NAME_SILICA_DUNES                               :Quartz & Silica Dunes
+STR_IND_NAME_SILICON_ARCOLOGY                           :Silicon Chip Arcology
+STR_IND_NAME_POLYMER_COMPLEX                            :Synthetic Polymer Complex
+STR_IND_NAME_MONOCRYSTAL_FAB                            :Monocrystal Substrate Fab
+STR_IND_NAME_QUANTUM_OBSERVATORY                        :Frontier Quantum Telemetry Observatory
+STR_IND_NAME_MEGACITY_FORMATTING                        :Megacity Data Formatting Center

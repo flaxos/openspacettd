@@ -388,6 +388,8 @@ add_files(
     portal/tech_tree.h
     portal/production_chain.cpp
     portal/production_chain.h
+    portal/commonwealth_pack.cpp
+    portal/commonwealth_pack.h
     portal/content_manifest.cpp
     portal/content_manifest.h
     portal/consist_materializer.cpp

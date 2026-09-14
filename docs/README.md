@@ -13,7 +13,7 @@ Start with [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). It is
 
 ## Sprint evidence
 
-Dedicated sprint records are point-in-time evidence. They retain the test totals and claims made at sprint completion; they are not cumulative current-status pages. Records exist for Sprints 11–17, 23–34, and 39–42. Sprints 1–10 and 18–22 are covered by repository history, tests and grouped design/UAT documentation.
+Dedicated sprint records are point-in-time evidence. They retain the test totals and claims made at sprint completion; they are not cumulative current-status pages. Records exist for Sprints 11–17, 23–34, and 36–42. Sprints 1–10 and 18–22 are covered by repository history, tests and grouped design/UAT documentation.
 
 ## UAT documentation
 

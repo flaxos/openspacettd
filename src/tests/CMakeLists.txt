@@ -47,6 +47,7 @@ add_test_files(
     test_sprint32_lifecycle_and_tech.cpp
     test_sprint33_planetary_economy_and_megacity.cpp
     test_sprint36_all_features_uat.cpp
+    test_sprint37_commonwealth_pack.cpp
     test_sprint39_corporate_hq_and_stockpile.cpp
     test_sprint40_fabrication_engine.cpp
     test_sprint41_tech_tree.cpp

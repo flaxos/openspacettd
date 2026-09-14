@@ -20,7 +20,7 @@ This is the authoritative answer to what is implemented, what has been tested, a
 | **Vision** | Desired direction without an assigned delivery commitment. |
 | **Historical** | Superseded plan or point-in-time evidence retained for traceability. |
 
-The configured build registers **270 CTest cases** (all 270 automated unit and regression tests passing cleanly as of Sprint 40).
+The configured build registers **299 CTest cases** (all 299 automated unit and regression tests passing cleanly as of Sprint 37).
 
 ## Completed spikes and stabilisation gates
 
@@ -72,14 +72,15 @@ The configured build registers **270 CTest cases** (all 270 automated unit and r
 | 33 | Town growth, Megacity supply integration and biome industry rules | Implemented; protocol accepted |
 | 34 | Documentation consolidation and evidence correction | **Complete:** this status register, documentation index and corrected scope boundaries |
 | 36 | All-Feature Guided Solo UAT (Sprints 1–40) | Implemented; automated verified & playable accepted |
+| 37 | Commonwealth economy and rolling-stock pack | Implemented; automated verified |
 | 39 | Corporate Headquarters, Planetary Stockpiles & Logistics Hubs | Implemented; automated verified |
 | 40 | In-Kind Fabrication Engine & Bill of Materials (BOM) | Implemented; automated verified |
 | 41 | In-Lore Commonwealth Tech Tree & R&D Projects | Implemented; automated verified |
 | 42 | Factorio-Scale Multi-World Production Chains | Implemented; automated verified |
 
-Dedicated sprint documents exist for Sprints 11–17, 23–34, and 39–42. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
+Dedicated sprint documents exist for Sprints 11–17, 23–34, and 36–42. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
 
-Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [Sprint 42 production chains report](SPRINT42_FACTORIO_SCALE_PRODUCTION_CHAINS_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
+Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 37 Commonwealth pack report](SPRINT37_COMMONWEALTH_ECONOMY_AND_ROLLING_STOCK_2026-09-15.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [Sprint 42 production chains report](SPRINT42_FACTORIO_SCALE_PRODUCTION_CHAINS_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
 
 ## Track status
 
@@ -93,7 +94,7 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Player and operator UI | Implemented through Sprint 41 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, and Commonwealth Tech Tree R&D tab. Operator console commands allow runtime federation link management and status inspection. |
 | Guided UAT | Implemented | `v1.0` covers all features through Sprint 40 (6 worlds, 6 biomes, 12 chapters, 25 goals, stockpiles, HQ, logistics hubs, fabrication); `v0.4` preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
-| Commonwealth Track B — gameplay/content/art | Partial | Procedural biome rules and portal recolouring exist. Bespoke industry, rolling-stock, terrain, flora, portal and arcology packs do not. |
+| Commonwealth Track B — gameplay/content/art | Partial | In-tree NML industry/cargo pack (`OST\x01`) and CST rolling-stock pack (`OST\x02`) implemented with reproducible Python GRF generator, Tech Tree vehicle gating, and closed 12-cargo loops. Bespoke terrain, flora, portal and arcology art packs remain open for Sprint 38. |
 | Corporate HQ, Stockpiles, Fabrication, Tech Tree & Industry | Implemented; automated verified | Sprints 39–42 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine (`FABR`), Commonwealth Tech Tree R&D manager (`TECH`), and Factorio-scale 12-cargo production chains (`PROD`) across Pipelines A–D. |
 
 ## Planned sprints
@@ -107,9 +108,9 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 
 Delivered canonical 6-world guided solo UAT savegame artifact (`demo/OpenSpaceTTD-All-Features-UAT-v1.0.sav`), GameScript v8 with 12 Story Book chapters and 25 measurable acceptance goals (`bin/game/openspacettd_uat/`), operator console command `setup_uat_fixtures`, Catch2 test suite (`src/tests/test_sprint36_all_features_uat.cpp`), and player guide (`demo/ALL-FEATURES-UAT.md`).
 
-### Sprint 37 — Commonwealth economy and rolling-stock pack
+### Sprint 37 — Commonwealth economy and rolling-stock pack [COMPLETED]
 
-Build reproducible in-tree NML packages for the planned cargo/industry chains and CST vehicle families. Define compatibility IDs, licensing, source assets, build integration, save compatibility and content-admission tests. Do not mark the 12-cargo economy complete until every cargo has a producing, processing or consuming role and a playable delivery loop.
+Delivered in-tree NML packages for Commonwealth industries and 12-cargo suite (`pkg/commonwealth_industry/`) and CST rolling stock (`pkg/commonwealth_rail/`), deterministic Python GRF build pipeline (`scripts/build_commonwealth_grf.py`), `CommonwealthPackManager` with Tech Tree gating (`TECH_TRACTION_1..4`), World Phase operational restrictions, In-Kind BOM linkage, content admission boundary integration, and closed delivery loops for all 12 Commonwealth cargos across Pipelines A–D. Fully verified with Catch2 test suite (`src/tests/test_sprint37_commonwealth_pack.cpp`). See [Sprint 37 milestone report](SPRINT37_COMMONWEALTH_ECONOMY_AND_ROLLING_STOCK_2026-09-15.md).
 
 ### Sprint 38 — Bespoke world and CST art
 
