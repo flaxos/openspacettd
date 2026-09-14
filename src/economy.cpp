@@ -56,6 +56,7 @@
 #include "portal/logistics_hub.h"
 #include "portal/company_stockpile.h"
 #include "portal/tech_tree.h"
+#include "portal/production_chain.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -2038,6 +2039,7 @@ static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthl
 	SpaceportManager::ProcessOffWorldTrade();
 	EdgeConduitManager::ProduceAllConduits();
 	MegacityManager::EvaluateMonthlySupply();
+	ProductionChainManager::ProcessMonthlyProduction();
 	TechTreeManager::ProcessMonthlyResearch();
 });
 

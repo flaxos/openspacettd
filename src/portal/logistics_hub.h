@@ -77,6 +77,11 @@ public:
 	static const LogisticsHub *GetHubForStation(StationID st);
 
 	/**
+	 * Check if a company has an established logistics hub on a specific world.
+	 */
+	static bool HasLogisticsHub(WorldID world, CompanyID company);
+
+	/**
 	 * Set the minimum reserve floor threshold for a specific cargo at a hub.
 	 */
 	static void SetReserveFloor(uint32_t hub_id, CargoType cargo, uint32_t min_amount);

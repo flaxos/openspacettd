@@ -50,6 +50,7 @@ add_test_files(
     test_sprint39_corporate_hq_and_stockpile.cpp
     test_sprint40_fabrication_engine.cpp
     test_sprint41_tech_tree.cpp
+    test_sprint42_production_chains.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

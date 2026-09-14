@@ -22,6 +22,7 @@
 #include "../portal/corporate_hq.h"
 #include "../portal/fabrication_manager.h"
 #include "../portal/tech_tree.h"
+#include "../portal/production_chain.h"
 
 #include "../safeguards.h"
 
@@ -1083,6 +1084,155 @@ struct TECHChunkHandler : ChunkHandler {
 	}
 };
 
+/** Temporary record for Commonwealth production facility serialization (PROD). */
+struct SlProdRecord {
+	uint8_t kind;             ///< 0 = Facility definition, 1 = Input buffer entry, 2 = Output buffer entry
+	uint32_t facility_id;     ///< Facility ID
+	uint32_t tile;            ///< Facility tile index
+	uint16_t world_id;        ///< Planetary world ID
+	uint16_t recipe_id;       ///< Recipe ID
+	uint8_t owner;            ///< Owner company ID (0xFF = invalid/neutral)
+	uint16_t station_id;      ///< Linked station ID (0xFFFF = invalid)
+	uint32_t capacity;        ///< Monthly capacity
+	uint32_t last_production; ///< Last month production count
+	uint32_t total_produced;  ///< Lifetime production count
+	uint8_t cargo_type;       ///< Cargo type (for kind 1 and 2)
+	uint32_t amount;          ///< Cargo amount (for kind 1 and 2)
+};
+
+static const SaveLoad _prod_desc[] = {
+	SLE_VAR(SlProdRecord, kind,            VarTypes::U8),
+	SLE_VAR(SlProdRecord, facility_id,     VarTypes::U32),
+	SLE_VAR(SlProdRecord, tile,            VarTypes::U32),
+	SLE_VAR(SlProdRecord, world_id,        VarTypes::U16),
+	SLE_VAR(SlProdRecord, recipe_id,       VarTypes::U16),
+	SLE_VAR(SlProdRecord, owner,           VarTypes::U8),
+	SLE_VAR(SlProdRecord, station_id,      VarTypes::U16),
+	SLE_VAR(SlProdRecord, capacity,        VarTypes::U32),
+	SLE_VAR(SlProdRecord, last_production, VarTypes::U32),
+	SLE_VAR(SlProdRecord, total_produced,  VarTypes::U32),
+	SLE_VAR(SlProdRecord, cargo_type,      VarTypes::U8),
+	SLE_VAR(SlProdRecord, amount,          VarTypes::U32),
+};
+
+/** Chunk handler for Commonwealth Production Chains (PROD). */
+struct PRODChunkHandler : ChunkHandler {
+	PRODChunkHandler() : ChunkHandler("PROD", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_prod_desc);
+
+		int i = 0;
+		for (const auto &f : ProductionChainManager::GetAllFacilities()) {
+			/* Save facility record */
+			SlProdRecord rec{
+				.kind = 0,
+				.facility_id = f.id,
+				.tile = f.tile.base(),
+				.world_id = static_cast<uint16_t>(f.world_id.base()),
+				.recipe_id = f.recipe_id,
+				.owner = (f.owner != CompanyID::Invalid()) ? static_cast<uint8_t>(f.owner.base()) : static_cast<uint8_t>(0xFF),
+				.station_id = (f.linked_station != StationID::Invalid()) ? static_cast<uint16_t>(f.linked_station.base()) : static_cast<uint16_t>(0xFFFF),
+				.capacity = f.monthly_capacity,
+				.last_production = f.last_month_production,
+				.total_produced = f.total_produced,
+				.cargo_type = 0,
+				.amount = 0,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&rec, _prod_desc);
+
+			/* Save input buffers */
+			for (const auto &[cargo, qty] : f.input_buffers) {
+				if (qty == 0) continue;
+				SlProdRecord in_rec{
+					.kind = 1,
+					.facility_id = f.id,
+					.tile = 0,
+					.world_id = 0,
+					.recipe_id = 0,
+					.owner = 0xFF,
+					.station_id = 0xFFFF,
+					.capacity = 0,
+					.last_production = 0,
+					.total_produced = 0,
+					.cargo_type = static_cast<uint8_t>(cargo),
+					.amount = qty,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&in_rec, _prod_desc);
+			}
+
+			/* Save output buffers */
+			for (const auto &[cargo, qty] : f.output_buffers) {
+				if (qty == 0) continue;
+				SlProdRecord out_rec{
+					.kind = 2,
+					.facility_id = f.id,
+					.tile = 0,
+					.world_id = 0,
+					.recipe_id = 0,
+					.owner = 0xFF,
+					.station_id = 0xFFFF,
+					.capacity = 0,
+					.last_production = 0,
+					.total_produced = 0,
+					.cargo_type = static_cast<uint8_t>(cargo),
+					.amount = qty,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&out_rec, _prod_desc);
+			}
+		}
+	}
+
+	void Load() const override
+	{
+		ProductionChainManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_prod_desc);
+
+		struct TempFacility {
+			TileIndex tile = INVALID_TILE;
+			WorldID world_id = INVALID_WORLD;
+			RecipeID recipe_id = RECIPE_NONE;
+			CompanyID owner = CompanyID::Invalid();
+			StationID linked_station = StationID::Invalid();
+			uint32_t capacity = 100;
+			uint32_t last_production = 0;
+			uint32_t total_produced = 0;
+			std::map<CargoType, uint32_t> inputs;
+			std::map<CargoType, uint32_t> outputs;
+		};
+		std::map<FacilityID, TempFacility> loaded;
+
+		SlProdRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			if (rec.kind == 0) {
+				TempFacility &tf = loaded[rec.facility_id];
+				tf.tile = TileIndex{rec.tile};
+				tf.world_id = WorldID{rec.world_id};
+				tf.recipe_id = rec.recipe_id;
+				tf.owner = (rec.owner != 0xFF) ? CompanyID{rec.owner} : CompanyID::Invalid();
+				tf.linked_station = (rec.station_id != 0xFFFF) ? StationID{rec.station_id} : StationID::Invalid();
+				tf.capacity = rec.capacity;
+				tf.last_production = rec.last_production;
+				tf.total_produced = rec.total_produced;
+			} else if (rec.kind == 1) {
+				loaded[rec.facility_id].inputs[CargoType{rec.cargo_type}] = rec.amount;
+			} else if (rec.kind == 2) {
+				loaded[rec.facility_id].outputs[CargoType{rec.cargo_type}] = rec.amount;
+			}
+		}
+
+		for (const auto &[fid, f] : loaded) {
+			ProductionChainManager::RestoreFacility(fid, f.tile, f.world_id, f.recipe_id, f.owner, f.linked_station, f.capacity, f.last_production, f.total_produced, f.inputs, f.outputs);
+		}
+	}
+};
+
 static const FTJRChunkHandler FTJR;
 static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
@@ -1097,6 +1247,7 @@ static const LHUBChunkHandler LHUB;
 static const CHQSChunkHandler CHQS;
 static const FABRChunkHandler FABR;
 static const TECHChunkHandler TECH;
+static const PRODChunkHandler PROD;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
@@ -1113,6 +1264,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	FABR,
 	FTJR,
 	TECH,
+	PROD,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

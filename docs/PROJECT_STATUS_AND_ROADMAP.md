@@ -75,10 +75,11 @@ The configured build registers **270 CTest cases** (all 270 automated unit and r
 | 39 | Corporate Headquarters, Planetary Stockpiles & Logistics Hubs | Implemented; automated verified |
 | 40 | In-Kind Fabrication Engine & Bill of Materials (BOM) | Implemented; automated verified |
 | 41 | In-Lore Commonwealth Tech Tree & R&D Projects | Implemented; automated verified |
+| 42 | Factorio-Scale Multi-World Production Chains | Implemented; automated verified |
 
-Dedicated sprint documents exist for Sprints 11–17, 23–34, and 39–41. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
+Dedicated sprint documents exist for Sprints 11–17, 23–34, and 39–42. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
 
-Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
+Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [Sprint 42 production chains report](SPRINT42_FACTORIO_SCALE_PRODUCTION_CHAINS_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
 
 ## Track status
 
@@ -86,14 +87,14 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 |---|---|---|
 | Single-map planetary simulation | Implemented | Regions, void separation, portal transit, phases, six biome behaviours and colonisation are present. |
 | Player rail construction | Implemented | Portal terminals, blueprints and eight CST prefabs are present. |
-| Planetary economy | Implemented foundation | Revenue, development, Megacity demand, basic phase/biome restrictions and infrastructure throughput are present. The bespoke 12-cargo economy is pending. |
+| Planetary economy | Implemented foundation & 12-cargo chains | Revenue, development, Megacity demand, basic phase/biome restrictions, infrastructure throughput, and 12-cargo Commonwealth multi-world production pipelines (Pipelines A–D) with `PROD` persistence are present. |
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
 | Federation runtime | Implemented & Verified | Independent dedicated servers connect to external Python Universe Authority. Live cross-process consist transfer, departure despawn, network transport, arrival materialization, order restoration, deduplication, and return trip verified in test_sprint35_cross_process.py. |
 | Player and operator UI | Implemented through Sprint 41 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, and Commonwealth Tech Tree R&D tab. Operator console commands allow runtime federation link management and status inspection. |
 | Guided UAT | Implemented | `v1.0` covers all features through Sprint 40 (6 worlds, 6 biomes, 12 chapters, 25 goals, stockpiles, HQ, logistics hubs, fabrication); `v0.4` preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
 | Commonwealth Track B — gameplay/content/art | Partial | Procedural biome rules and portal recolouring exist. Bespoke industry, rolling-stock, terrain, flora, portal and arcology packs do not. |
-| Corporate HQ, Stockpiles, Fabrication & Tech Tree | Implemented; automated verified | Sprints 39–41 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine with 80%/90% discount and BOM consumption (`FABR`), and Commonwealth Tech Tree R&D manager with feedstock burning (`TECH`) and GUI. |
+| Corporate HQ, Stockpiles, Fabrication, Tech Tree & Industry | Implemented; automated verified | Sprints 39–42 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine (`FABR`), Commonwealth Tech Tree R&D manager (`TECH`), and Factorio-scale 12-cargo production chains (`PROD`) across Pipelines A–D. |
 
 ## Planned sprints
 
@@ -126,9 +127,9 @@ Delivered `FabricationManager` with physical Bill of Materials (BOM) recipe regi
 
 Delivered `TechTreeManager` domain model with 3 lore branches (`Traction & Propulsion`, `Wormhole & Portal Physics`, `Materials & Fabrication`) and 12 canonical technologies (Tiers 1–4). Requires Corporate HQ on Phase 1 Core world and prerequisite DAG validation. Integrated monthly R&D progression loop powered by dual-input funding: cash budget ($1\text{ RP}/1,000\text{ Cr}$) plus HQ world feedstock burning (Enriched Quantum Data Crystals at $10\text{ RP}/\text{unit}$ up to 5/mo; High-Tech Electronics at $5\text{ RP}/\text{unit}$ up to 10/mo). Unlocking `TECH_MATERIALS_3` dynamically upgrades fabrication discount to 90% (leaving only a 10% labor fee). Server commands `Commands::SelectResearchProject` and `Commands::SetResearchBudget`, `TECH` table chunk persistence, and Corporate HQ GUI 5th tab integration. Fully verified with Catch2 test suite (`src/tests/test_sprint41_tech_tree.cpp`).
 
-### Sprint 42 — Factorio-Scale Multi-World Production Chains
+### Sprint 42 — Factorio-Scale Multi-World Production Chains [COMPLETED]
 
-Harmonized with the Sprint 37 Commonwealth industry set: introduce specialized industrial fabrication chains (Silicates $\to$ Silicon Wafers $\to$ Microchips, Copper Extraction $\to$ Catenary Wire, Superalloys $\to$ Maglev Guideways, Blank Data Crystal Synthesis $\to$ Consumer Mail vs Enriched Quantum Proofs). Balance multi-world supply loops feeding both Megacity consumption tiers and high-tech R&D fabrication stockpiles.
+Delivered `ProductionChainManager` with 12-cargo Commonwealth suite across 4 interlocking pipelines (Pipeline A: Structural; Pipeline B: Electronics; Pipeline C: Propulsion; Pipeline D: Data Crystals & R&D). Enforces planetary world phase constraints (Phase 3 raw extraction and quantum telemetry; Phase 2 heavy industrial processing; Phase 1 Megacity formatting). Monthly conversion simulation inside `_economy_spaceports_conduits_monthly` with +15% yield bonus for `TECH_MATERIALS_3` (Automated Nanofabrication Lines). Automatic buffering to planetary stockpiles when a Logistics Hub is present. `PROD` table chunk save/load persistence. Verified with Catch2 test suite (`src/tests/test_sprint42_production_chains.cpp`).
 
 ## Unscheduled visions
 
