@@ -32,6 +32,9 @@ enum StationViewWidgets : WidgetID {
 	WID_SV_ROADVEHS,           ///< List of scheduled road vehs button.
 	WID_SV_SHIPS,              ///< List of scheduled ships button.
 	WID_SV_PLANES,             ///< List of scheduled planes button.
+	WID_SV_PRODUCTION_STATUS, ///< Production recipe and buffers.
+	WID_SV_PRODUCTION_BUILD, ///< Select a station production recipe.
+	WID_SV_PRODUCTION_REMOVE, ///< Retire the attached facility.
 	WID_SV_CATCHMENT,          ///< Toggle catchment area highlight.
 };
 

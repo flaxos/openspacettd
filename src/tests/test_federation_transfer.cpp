@@ -610,14 +610,15 @@ TEST_CASE("Federation Transport - AuthorityRequest Protocol and Envelope Handlin
 
 		REQUIRE(started);
 		CHECK(sent_uri == "http://127.0.0.1:38080/transfers/pending?dest_world=3");
-		CHECK(sent_cb == &req);
+		REQUIRE(sent_cb != nullptr);
+		CHECK(sent_cb != &req); // Backend retains a relay, never the stack request.
 
 		// Deliver JSON response
 		std::string json_data = "{\"pending\": [\"TX-101\", \"TX-102\"]}";
 		auto buf = std::make_unique<char[]>(json_data.size());
 		std::copy(json_data.begin(), json_data.end(), buf.get());
-		req.OnReceiveData(std::move(buf), json_data.size());
-		req.OnReceiveData(nullptr, 0); // Terminal notification
+		sent_cb->OnReceiveData(std::move(buf), json_data.size());
+		sent_cb->OnReceiveData(nullptr, 0); // Terminal notification releases relay.
 
 		REQUIRE(req.IsFinished());
 		REQUIRE(req.Succeeded());
@@ -639,6 +640,44 @@ TEST_CASE("Federation Transport - AuthorityRequest Protocol and Envelope Handlin
 		CHECK_FALSE(req.Succeeded());
 		CHECK(req.GetError() == "Authority rejected request");
 	}
+}
+
+TEST_CASE("Federation Transport - Late callbacks after request timeout or destruction")
+{
+	HTTPCallback *callback = nullptr;
+	{
+		AuthorityRequest request("http://127.0.0.1:38080", AuthorityOperation::Pending, nlohmann::json::object());
+		REQUIRE(request.Start([&](std::string_view, HTTPCallback *cb, std::string &&) { callback = cb; }));
+		REQUIRE(callback != &request);
+		SECTION("Synchronous timeout returns before backend cancellation acknowledgement") {
+			CHECK_FALSE(request.ExecuteSync(std::chrono::milliseconds::zero()));
+			CHECK(request.IsFinished());
+			CHECK_FALSE(request.GetError().empty());
+		}
+		SECTION("Caller abandons an asynchronous request") {
+			CHECK_FALSE(request.IsFinished());
+		}
+	}
+	/* The backend may check cancellation and deliver already-queued bytes after
+	 * the stack frame returned. Neither may access the destroyed request. */
+	CHECK(callback->IsCancelled());
+	auto data = std::make_unique<char[]>(2);
+	data[0] = '{';
+	data[1] = '}';
+	callback->OnReceiveData(std::move(data), 2);
+	callback->OnFailure();
+}
+
+TEST_CASE("Federation Transport - Late successful completion after request destruction")
+{
+	HTTPCallback *callback = nullptr;
+	{
+		AuthorityRequest request("http://127.0.0.1:38080", AuthorityOperation::Pending, nlohmann::json::object());
+		REQUIRE(request.Start([&](std::string_view, HTTPCallback *cb, std::string &&) { callback = cb; }));
+		REQUIRE(callback != &request);
+	}
+	CHECK(callback->IsCancelled());
+	callback->OnReceiveData(nullptr, 0);
 }
 
 TEST_CASE("Federation Transport - Base64 Round Trip")

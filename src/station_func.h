@@ -20,6 +20,10 @@
 #include "linkgraph/linkgraph_type.h"
 #include "industry_type.h"
 
+/** Add whole units of produced cargo using the ordinary station supply, rating and animation path.
+ * Returns units accepted; leaves them with the caller if the cargo packet pool is full. */
+uint AddProducedCargoToStation(Station *station, CargoType cargo, uint16_t amount);
+
 void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint radius);
 
 void ShowStationViewWindow(StationID station);

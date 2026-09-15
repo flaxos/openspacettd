@@ -33,7 +33,7 @@ static constexpr std::array<uint8_t, 4> COMMONWEALTH_RAIL_GRFID_BYTES     = {'O'
 static const GrfID COMMONWEALTH_INDUSTRY_GRFID{"OST\x01"};
 static const GrfID COMMONWEALTH_RAIL_GRFID    {"OST\x02"};
 
-/** Canonical CST Locomotive Indices in standard OpenTTD train pool. */
+/** Catalog family identifiers. These are not loaded engine pool IDs or NewGRF local IDs. */
 static constexpr uint16_t CST_ENGINE_PIONEER_STEAM = 0;   ///< CST Pioneer 0-6-0 'Surveyor'
 static constexpr uint16_t CST_ENGINE_VULCAN_STEAM  = 7;   ///< Vulcan 2-8-0 'Frontier Hauler'
 static constexpr uint16_t CST_ENGINE_TITAN_DIESEL  = 18;  ///< Titan D-100 Twin-Engine Hauler
@@ -73,17 +73,20 @@ class CommonwealthPackManager {
 public:
 	static void Initialize();
 
-	/** Query whether an engine ID corresponds to a registered CST locomotive family. */
+	/** Query whether a catalog ID corresponds to a registered CST locomotive family. */
 	static bool IsCSTEngine(EngineID eid);
 
-	/** Retrieve full specification of a CST locomotive. */
+	/** Retrieve a CST locomotive specification by catalog family ID. */
 	static const CSTRollingStockSpec *GetRollingStockSpec(EngineID eid);
 
 	/** Retrieve all registered CST locomotive specifications. */
 	static const std::vector<CSTRollingStockSpec> &GetAllCSTRollingStock();
 
-	/** Check whether a company can construct a given vehicle on a given world (Tech Tree & Phase gating). */
+	/** Check a loaded engine using its NewGRF identity and local ID (Tech Tree & Phase gating). */
 	static bool IsVehicleBuildableForCompany(CompanyID company, EngineID eid, WorldID world);
+
+	/** Evaluate a catalog family, independently of loaded engine pool IDs. */
+	static bool IsRollingStockBuildableForCompany(CompanyID company, EngineID family, WorldID world);
 
 	/** Query physical Bill of Materials for fabricating this CST vehicle. */
 	static BillOfMaterials GetVehicleBOM(EngineID eid);

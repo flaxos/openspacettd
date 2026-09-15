@@ -283,6 +283,22 @@ const std::vector<CSTRollingStockSpec> &CommonwealthPackManager::GetAllCSTRollin
 
 bool CommonwealthPackManager::IsVehicleBuildableForCompany(CompanyID company, EngineID eid, WorldID world)
 {
+	const Engine *engine = Engine::GetIfValid(eid);
+	if (engine == nullptr) return false;
+	if (engine->type != VehicleType::Train || engine->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID) return true;
+
+	/* NewGRF local IDs are stable; engine pool IDs depend on the loaded content. */
+	static constexpr std::array<uint16_t, 5> families = {
+		CST_ENGINE_PIONEER_STEAM, CST_ENGINE_VULCAN_STEAM, CST_ENGINE_TITAN_DIESEL,
+		CST_ENGINE_CST_E40, CST_ENGINE_MARK4_MAGLEV,
+	};
+	uint16_t local_id = engine->grf_prop.local_id;
+	if (local_id < 0x20 || local_id >= 0x20 + families.size()) return true;
+	return IsRollingStockBuildableForCompany(company, EngineID{families[local_id - 0x20]}, world);
+}
+
+bool CommonwealthPackManager::IsRollingStockBuildableForCompany(CompanyID company, EngineID eid, WorldID world)
+{
 	Initialize();
 	const CSTRollingStockSpec *spec = GetRollingStockSpec(eid);
 	if (spec == nullptr) {

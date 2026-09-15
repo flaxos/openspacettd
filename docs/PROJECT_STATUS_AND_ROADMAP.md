@@ -1,11 +1,27 @@
 # OpenSpaceTTD Project Status and Roadmap
 
 Status: **CANONICAL**  
-As of: **2026-09-14**  
-Audited implementation commit: `f614ef4f339500215f039856903faf70b12537c5`  
+As of: **2026-09-15**
+
+Audited implementation commit: `a6b79add0362b847ce01457c7875ae21a5523157`
 Audited branch: `fix/portal-gate-lifecycle-crashes`
 
 This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status.
+
+## Current acceptance correction — v1.1 UAT refresh
+
+The [Sprints 1–42 player checklist](../demo/ALL-FEATURES-UAT.md) and
+[coverage matrix](FEATURE_UI_UAT_COVERAGE.md) supersede historical playable
+acceptance claims below. The user's v1.0 ownership failure is reproduced by
+generated gate heads/terminals using OWNER_NONE. v1.1 assigns complete demo
+terminals to human Company 0; ordinary world generation is unchanged.
+
+All human cases start **Not run**, except explicit blockers. Sprint 35's runner
+uses manual `federation_dispatch`; natural gate-entry and complete recovery UAT
+remain unproven. Sprint 37 content is not active in the migrated save. Sprint 42
+now has station-based facility construction, delivery, output and lifecycle integration; human chain acceptance is pending. Sprint 38 original
+art remains planned. These are acceptance/integration gaps even where historical
+sprint reports say completed. The v1.1 artifact refresh itself added no missing gameplay. The subsequent [production integration fix](PRODUCTION_GAMEPLAY_INTEGRATION_2026-09-15.md) adds station-based facilities.
 
 ## Status and evidence terms
 
@@ -13,14 +29,14 @@ This is the authoritative answer to what is implemented, what has been tested, a
 |---|---|
 | **Implemented** | Source and a corresponding commit exist. |
 | **Automated verified** | Dedicated automated tests exist and the sprint document records a passing run. |
-| **Playable accepted** | A supplied save or operator procedure exercises the feature in the game. |
+| **Playable accepted** | A human run records observed results and evidence; supplying a save or procedure alone is not acceptance. |
 | **Protocol accepted** | The C++ domain model and/or Python authority API is tested without proving a live transfer between independent game processes. |
 | **Partial** | Part of the stated outcome exists, with a material portion still missing. |
 | **Planned** | Approved next work with an assigned sprint and acceptance boundary. |
 | **Vision** | Desired direction without an assigned delivery commitment. |
 | **Historical** | Superseded plan or point-in-time evidence retained for traceability. |
 
-The configured build registers **299 CTest cases** (all 299 automated unit and regression tests passing cleanly as of Sprint 37).
+The latest blocker-fix validation passes **306/306 CTest cases** (2026-09-15), including production lifecycle and delayed HTTP callback regressions. See [the critical review](CRITICAL_BUG_REVIEW_2026-09-15.md). This automated result does not close the human UAT cases.
 
 ## Completed spikes and stabilisation gates
 
@@ -71,14 +87,16 @@ The configured build registers **299 CTest cases** (all 299 automated unit and r
 | 32 | Development scoring, phase promotion and rail technology restrictions | Implemented; protocol accepted |
 | 33 | Town growth, Megacity supply integration and biome industry rules | Implemented; protocol accepted |
 | 34 | Documentation consolidation and evidence correction | **Complete:** this status register, documentation index and corrected scope boundaries |
-| 36 | All-Feature Guided Solo UAT (Sprints 1–40) | Implemented; automated verified & playable accepted |
+| 35 | Cross-process transport | Implemented; operator-dispatch script exists; natural-entry/recovery human UAT outstanding |
+| 36 | All-Feature Guided Solo UAT | v1.1 coverage through Sprint 42; human acceptance Not run |
 | 37 | Commonwealth economy and rolling-stock pack | Implemented; automated verified |
+| 38 | Bespoke alien world and CST art | Planned; no original-art acceptance |
 | 39 | Corporate Headquarters, Planetary Stockpiles & Logistics Hubs | Implemented; automated verified |
 | 40 | In-Kind Fabrication Engine & Bill of Materials (BOM) | Implemented; automated verified |
 | 41 | In-Lore Commonwealth Tech Tree & R&D Projects | Implemented; automated verified |
 | 42 | Factorio-Scale Multi-World Production Chains | Implemented; automated verified |
 
-Dedicated sprint documents exist for Sprints 11–17, 23–34, and 36–42. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and the grouped plans; missing individual files are a documentation-history gap, not an implementation gap.
+Dedicated sprint documents exist for Sprints 11–17, 23–35, 37 and 39–42. Sprint 36 is represented by the UAT guide/tests; Sprint 38 remains in the roadmap/art direction. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and grouped plans; missing individual files are a documentation-history gap, not by themselves an implementation gap.
 
 Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 37 Commonwealth pack report](SPRINT37_COMMONWEALTH_ECONOMY_AND_ROLLING_STOCK_2026-09-15.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [Sprint 42 production chains report](SPRINT42_FACTORIO_SCALE_PRODUCTION_CHAINS_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
 
@@ -92,7 +110,7 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
 | Federation runtime | Implemented & Verified | Independent dedicated servers connect to external Python Universe Authority. Live cross-process consist transfer, departure despawn, network transport, arrival materialization, order restoration, deduplication, and return trip verified in test_sprint35_cross_process.py. |
 | Player and operator UI | Implemented through Sprint 41 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, and Commonwealth Tech Tree R&D tab. Operator console commands allow runtime federation link management and status inspection. |
-| Guided UAT | Implemented | `v1.0` covers all features through Sprint 40 (6 worlds, 6 biomes, 12 chapters, 25 goals, stockpiles, HQ, logistics hubs, fabrication); `v0.4` preserved for regression. |
+| Guided UAT | Coverage refreshed; human acceptance pending | v1.1 maps Sprints 1–42, repairs player terminal ownership and hub attachment, and explicitly records blocked concepts. v1.0/v0.4 preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
 | Commonwealth Track B — gameplay/content/art | Partial | In-tree NML industry/cargo pack (`OST\x01`) and CST rolling-stock pack (`OST\x02`) implemented with reproducible Python GRF generator, Tech Tree vehicle gating, and closed 12-cargo loops. Bespoke terrain, flora, portal and arcology art packs remain open for Sprint 38. |
 | Corporate HQ, Stockpiles, Fabrication, Tech Tree & Industry | Implemented; automated verified | Sprints 39–42 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine (`FABR`), Commonwealth Tech Tree R&D manager (`TECH`), and Factorio-scale 12-cargo production chains (`PROD`) across Pipelines A–D. |
@@ -101,12 +119,12 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 
 ### Sprint 35 — Real cross-process federation transport [COMPLETED]
 
-**Completed and accepted.** See the [Sprint 35 implementation and acceptance checklist](SPRINT35_CROSS_PROCESS_FEDERATION_2026-09-14.md). External transport via `AuthorityTransportClient`, server game-loop tick polling via `FederationTransferManager::OnGameTick`, Base64 consist snapshot marshalling, deduplication guards, and `scripts/test_sprint35_cross_process.py` automated multi-process acceptance suite connecting two dedicated servers to the external Universe Authority with zero cargo leak and restored train orders.
+**Implementation delivered; acceptance qualified.** See the [Sprint 35 implementation report](SPRINT35_CROSS_PROCESS_FEDERATION_2026-09-14.md). External transport, tick polling and snapshot marshalling exist. The runner calls manual dispatch for both directions; it does not establish natural gate-entry departure or every UAT-16 recovery/order criterion. Record those separately rather than inheriting the historical completed label.
 
 
-### Sprint 36 — All-Feature Guided Solo UAT (Sprints 1–40) [COMPLETED]
+### Sprint 36 — Guided Solo UAT [ARTIFACT DELIVERED; HUMAN ACCEPTANCE PENDING]
 
-Delivered canonical 6-world guided solo UAT savegame artifact (`demo/OpenSpaceTTD-All-Features-UAT-v1.0.sav`), GameScript v8 with 12 Story Book chapters and 25 measurable acceptance goals (`bin/game/openspacettd_uat/`), operator console command `setup_uat_fixtures`, Catch2 test suite (`src/tests/test_sprint36_all_features_uat.cpp`), and player guide (`demo/ALL-FEATURES-UAT.md`).
+Current artifact is `demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav`, GameScript v9 with 15 chapters and 27 checklist goals. The player guide maps all Sprints 1–42, while ownership repair, hub station attachment and explicit integration blockers correct gaps in v1.0. Goals are prompts, not automatic human acceptance evidence.
 
 ### Sprint 37 — Commonwealth economy and rolling-stock pack [COMPLETED]
 
@@ -138,8 +156,10 @@ These remain ideas rather than incomplete commitments: space combat or planetary
 
 ## Current evidence gaps
 
-- Full CTest has not been rerun at the audited Sprint 34 documentation state.
-- The automated federation runner exercises the Python authority API; it does not launch trains inside independent OpenSpaceTTD processes.
-- The v0.4 UAT save predates Sprints 30–33.
-- Required art-direction comparison captures and a signed visual acceptance record are absent.
-- No `assets/` directory, OpenSpaceTTD NML source or compiled OpenSpaceTTD content GRF exists.
+- Human v1.1 UAT and visual acceptance remain outstanding; automated results do not establish player acceptance.
+- The independent-process federation runner uses manual dispatch. Natural gate entry and the full recovery matrix still require acceptance evidence.
+- Sprint 37 pack sources and compiled GRFs exist, but the migrated v1.1 save does not activate them.
+- Sprint 42 station production upgrades have a gameplay path; human cross-world chain acceptance remains outstanding, including distinct active-pack cargos.
+- Bespoke Sprint 38 art and required biome comparison captures remain outstanding.
+
+See [the critical bug review](CRITICAL_BUG_REVIEW_2026-09-15.md) for the Sprint 37 engine-identity fix and prioritised follow-up.

@@ -400,6 +400,9 @@ enum class Commands : uint8_t {
 	SelectResearchProject, ///< select active research project focus for the company
 	SetResearchBudget, ///< set monthly research budget for the company
 
+	BuildProcessingFacility, ///< attach a production recipe to a company rail station
+	RemoveProcessingFacility, ///< retire a station production facility
+
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

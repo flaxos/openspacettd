@@ -8,6 +8,7 @@
 /** @file cargotype.cpp Implementation of cargoes. */
 
 #include "stdafx.h"
+#include "portal/production_chain.h"
 #include "cargotype.h"
 #include "core/geometry_func.hpp"
 #include "newgrf_cargo.h"
@@ -139,6 +140,7 @@ void BuildCargoLabelMap()
 
 		CargoSpec::label_map.emplace(cs.label, cs.Index());
 	}
+	ProductionChainManager::InitDefaultRecipes();
 }
 
 /**

@@ -77,6 +77,10 @@ public:
 	 * All footprint tiles must already be clear and level.
 	 */
 	static void Build(const PortalTerminalLayout &layout, RailType railtype, Owner owner);
+
+	/** UAT fixture repair only: validate or adopt a complete neutral terminal without rebuilding it.
+	 * Refuses foreign ownership or missing rails. Caller must refresh company infrastructure totals. */
+	static bool AdoptForUAT(const PortalTerminalLayout &layout, CompanyID company, bool execute);
 };
 
 #endif /* PORTAL_TERMINAL_H */

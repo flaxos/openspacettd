@@ -13,6 +13,10 @@
 #include "logistics_hub.h"
 #include "tech_tree.h"
 #include "../cargotype.h"
+#include "../station_base.h"
+#include "../station_func.h"
+#include "../company_base.h"
+#include "../window_func.h"
 
 #include <algorithm>
 #include <map>
@@ -215,12 +219,14 @@ void ProductionChainManager::RegisterRecipe(const ProductionRecipe &recipe)
 
 const ProductionRecipe *ProductionChainManager::GetRecipe(RecipeID id)
 {
+	if (_recipes.empty()) InitDefaultRecipes();
 	auto it = _recipes.find(id);
 	return (it != _recipes.end()) ? &it->second : nullptr;
 }
 
 std::vector<ProductionRecipe> ProductionChainManager::GetAllRecipes()
 {
+	if (_recipes.empty()) InitDefaultRecipes();
 	std::vector<ProductionRecipe> res;
 	res.reserve(_recipes.size());
 	for (const auto &[id, r] : _recipes) {
@@ -312,6 +318,74 @@ ProcessingFacility *ProductionChainManager::GetFacilityAtTile(TileIndex tile)
 	return nullptr;
 }
 
+ProcessingFacility *ProductionChainManager::GetFacilityForStation(StationID station)
+{
+	if (station == StationID::Invalid()) return nullptr;
+	for (auto &[id, f] : _facilities) {
+		if (f.linked_station == station) return &f;
+	}
+	return nullptr;
+}
+
+void ProductionChainManager::RemoveForStation(StationID station)
+{
+	ProcessingFacility *f = GetFacilityForStation(station);
+	if (f == nullptr) return;
+	if (Company::IsValidID(f->owner)) {
+		for (const auto &[cargo, amount] : f->input_buffers) StockpileManager::AddCargo(f->world_id, f->owner, cargo, amount);
+		for (const auto &[cargo, amount] : f->output_buffers) StockpileManager::AddCargo(f->world_id, f->owner, cargo, amount);
+	}
+	UnregisterFacility(f->id);
+}
+
+void ProductionChainManager::ChangeCompanyOwner(CompanyID old_owner, CompanyID new_owner)
+{
+	for (auto it = _facilities.begin(); it != _facilities.end();) {
+		if (it->second.owner != old_owner) { ++it; continue; }
+		if (!Company::IsValidID(new_owner)) {
+			it = _facilities.erase(it);
+		} else {
+			it->second.owner = new_owner;
+			++it;
+		}
+	}
+}
+
+bool ProductionChainManager::AcceptsCargo(StationID station, CargoType cargo)
+{
+	const ProcessingFacility *f = GetFacilityForStation(station);
+	const Station *st = Station::GetIfValid(station);
+	if (f == nullptr || st == nullptr || st->owner != f->owner || !st->facilities.Test(StationFacility::Train)) return false;
+	const ProductionRecipe *recipe = GetRecipe(f->recipe_id);
+	if (recipe == nullptr) return false;
+	return std::ranges::any_of(recipe->inputs, [cargo](const auto &input) { return input.first == cargo; });
+}
+
+uint32_t ProductionChainManager::DeliverToStation(StationID station, CargoType cargo, uint32_t amount)
+{
+	if (!AcceptsCargo(station, cargo)) return 0;
+	ProcessingFacility *f = GetFacilityForStation(station);
+	uint32_t accepted = std::min(amount, UINT32_MAX - f->input_buffers[cargo]);
+	DeliverCargo(f->id, cargo, accepted);
+	return accepted;
+}
+
+void ProductionChainManager::PublishStationOutput(ProcessingFacility &f)
+{
+	Station *st = Station::GetIfValid(f.linked_station);
+	if (st == nullptr || st->owner != f.owner || !st->facilities.Test(StationFacility::Train)) return;
+	for (auto &[cargo, amount] : f.output_buffers) {
+		if (cargo >= NUM_CARGO) continue;
+		while (amount > 0) {
+			uint16_t count = std::min<uint32_t>(amount, CargoPacket::MAX_COUNT);
+			uint moved = AddProducedCargoToStation(st, cargo, count);
+			if (moved == 0) break;
+			amount -= moved;
+		}
+	}
+	SetWindowDirty(WindowClass::StationView, st->index);
+}
+
 std::vector<ProcessingFacility> ProductionChainManager::GetAllFacilities()
 {
 	std::vector<ProcessingFacility> res;
@@ -363,6 +437,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 
 		if (max_batches == 0) {
 			f.last_month_production = 0;
+			PublishStationOutput(f);
 			continue;
 		}
 
@@ -390,6 +465,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 
 		f.last_month_production = max_batches;
 		f.total_produced += max_batches;
+		PublishStationOutput(f);
 	}
 }
 

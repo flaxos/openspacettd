@@ -4,8 +4,35 @@
 
 #include "../safeguards.h"
 
+namespace {
+/** This relay lives until HTTP's terminal notification, not the stack request.
+ * A weak target lets timeout return promptly without leaving a dangling callback. */
+class AuthorityCallbackRelay final : public HTTPCallback {
+public:
+	explicit AuthorityCallbackRelay(const std::shared_ptr<AuthorityRequest *> &target) : target(target) {}
+	bool IsCancelled() const override
+	{
+		auto live = this->target.lock();
+		return !live || (*live)->IsCancelled();
+	}
+	void OnFailure() override
+	{
+		std::unique_ptr<AuthorityCallbackRelay> completed(this);
+		if (auto live = this->target.lock()) (*live)->OnFailure();
+	}
+	void OnReceiveData(std::unique_ptr<char[]> data, size_t length) override
+	{
+		const bool terminal = data == nullptr;
+		std::unique_ptr<AuthorityCallbackRelay> completed(terminal ? this : nullptr);
+		if (auto live = this->target.lock()) (*live)->OnReceiveData(std::move(data), length);
+	}
+private:
+	std::weak_ptr<AuthorityRequest *> target;
+};
+} // namespace
+
 AuthorityRequest::AuthorityRequest(std::string base_url, AuthorityOperation operation,
-	nlohmann::json payload, uint32_t world, std::chrono::seconds timeout) : timeout(timeout)
+	nlohmann::json payload, uint32_t world, std::chrono::seconds timeout) : callback_target(std::make_shared<AuthorityRequest *>(this)), timeout(timeout)
 {
 	/* Configuration is an origin, not an arbitrary URL path or credential carrier. */
 	auto scheme = base_url.find("://");
@@ -56,7 +83,7 @@ bool AuthorityRequest::Start(const Sender &sender)
 	this->started = true;
 	this->deadline = Clock::now() + this->timeout;
 	/* Sender may synchronously fail (including builds without HTTP support). */
-	sender(this->uri, this, std::string(this->body));
+	sender(this->uri, new AuthorityCallbackRelay(this->callback_target), std::string(this->body));
 	return true;
 }
 

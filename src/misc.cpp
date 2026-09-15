@@ -8,6 +8,12 @@
 /** @file misc.cpp Misc functions that shouldn't be here. */
 
 #include "stdafx.h"
+#include "portal/production_chain.h"
+#include "portal/company_stockpile.h"
+#include "portal/logistics_hub.h"
+#include "portal/corporate_hq.h"
+#include "portal/tech_tree.h"
+#include "portal/fabrication_manager.h"
 #include "landscape.h"
 #include "news_func.h"
 #include "ai/ai.hpp"
@@ -130,6 +136,12 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	LinkGraphSchedule::Clear();
 	PoolBase::Clean(PoolType::Normal);
 
+	ProductionChainManager::Reset();
+	StockpileManager::Reset();
+	LogisticsHubManager::Reset();
+	CorporateHQManager::Reset();
+	TechTreeManager::Reset();
+	FabricationManager::Reset();
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
 	SpaceportManager::Reset();

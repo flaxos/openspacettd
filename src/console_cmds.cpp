@@ -52,6 +52,7 @@
 #include "portal/megacity_manager.h"
 #include "portal/planet_manager.h"
 #include "portal/portal_registry.h"
+#include "portal/portal_terminal.h"
 #include "portal/corporate_hq.h"
 #include "portal/company_stockpile.h"
 #include "portal/logistics_hub.h"
@@ -3375,14 +3376,108 @@ static bool ConPromoteWorld(std::span<std::string_view> argv)
 static bool ConSetupUATFixtures(std::span<std::string_view> argv)
 {
 	(void)argv;
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Offline UAT only: setup_uat_fixtures [ownership|verify]. Full setup seeds a fresh demo; ownership repairs v1.0 without re-seeding; verify is read-only.");
+		return true;
+	}
+	if (argv.size() > 2 || (argv.size() == 2 && argv[1] != "ownership" && argv[1] != "verify")) {
+		IConsolePrint(CC_ERROR, "Expected setup_uat_fixtures [ownership|verify].");
+		return true;
+	}
+	/* A dedicated server has one ClientInfo for itself, even with no players. */
+	if (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) {
+		IConsolePrint(CC_ERROR, "UAT setup is offline/dedicated generation only; never run on a live multiplayer game.");
+		return true;
+	}
 	IConsolePrint(CC_DEFAULT, "Setting up OpenSpaceTTD all-feature UAT fixtures...");
 
 	/* 1. Ensure company 0 exists and has sufficient operating capital */
 	Company *c = Company::GetIfValid(CompanyID{0});
-	if (c == nullptr) {
-		Company::CreateAtIndex(CompanyID{0});
-		c = Company::GetIfValid(CompanyID{0});
+	const bool verify = argv.size() == 2 && argv[1] == "verify";
+	if (verify && c == nullptr) {
+		IConsolePrint(CC_ERROR, "UAT verification failed: no Company 0.");
+		return true;
 	}
+	if (c == nullptr) {
+		extern Company *DoStartupNewCompany(bool is_ai, CompanyID company);
+		c = DoStartupNewCompany(false, CompanyID{0});
+	}
+	if (c == nullptr || c->is_ai) {
+		IConsolePrint(CC_ERROR, "UAT setup requires human Company 0.");
+		return true;
+	}
+	std::vector<PortalTerminalLayout> terminals;
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
+		for (const auto &end : {link.end_a, link.end_b}) {
+			auto layout = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+			if (!layout || !PortalTerminal::AdoptForUAT(*layout, c->index, false)) {
+				IConsolePrint(CC_ERROR, "UAT setup failed: missing or foreign-owned terminal at tile {}.", end.tile.base());
+				return true;
+			}
+			terminals.push_back(*layout);
+		}
+	}
+	if (terminals.size() != 10) {
+		IConsolePrint(CC_ERROR, "UAT setup requires six worlds and ten gate heads.");
+		return true;
+	}
+	if (verify) {
+		for (const auto &layout : terminals) {
+			if (GetTileOwner(layout.gate_tile) != c->index) {
+				IConsolePrint(CC_ERROR, "UAT verification failed: neutral gate head.");
+				return true;
+			}
+			for (const auto &part : layout.tiles) if (GetTileOwner(part.tile) != c->index) {
+				IConsolePrint(CC_ERROR, "UAT verification failed: neutral terminal rail.");
+				return true;
+			}
+		}
+		for (const auto &hub : LogisticsHubManager::GetAllHubs()) {
+			const Station *station = Station::GetIfValid(hub.station_id);
+			if (hub.company_id != c->index || station == nullptr || station->owner != c->index || PlanetManager::GetTileWorld(station->xy) != hub.world_id || hub.tile != station->xy) {
+				IConsolePrint(CC_ERROR, "UAT verification failed: hub {} has invalid station attachment.", hub.hub_id);
+				return true;
+			}
+		}
+		for (const Train *train : Train::Iterate()) if (train->owner != c->index) {
+			IConsolePrint(CC_ERROR, "UAT verification failed: foreign train.");
+			return true;
+		}
+		for (const Station *station : Station::Iterate()) if (station->owner != c->index) {
+			IConsolePrint(CC_ERROR, "UAT verification failed: foreign station.");
+			return true;
+		}
+		IConsolePrint(CC_DEFAULT, "UAT verification passed: human Company 0, ten owned terminals, valid stations/trains/hubs. Stations: {}, vehicles: {}.", Station::GetNumItems(), Train::GetNumItems());
+		return true;
+	}
+	for (const auto &layout : terminals) PortalTerminal::AdoptForUAT(layout, c->index, true);
+	for (auto hub : LogisticsHubManager::GetAllHubs()) {
+		if (hub.company_id != c->index) {
+			IConsolePrint(CC_ERROR, "UAT setup failed: foreign-owned logistics hub.");
+			return true;
+		}
+		const Station *station = Station::GetIfValid(hub.station_id);
+		if (station != nullptr && station->owner == c->index && PlanetManager::GetTileWorld(station->xy) == hub.world_id) continue;
+		station = nullptr;
+		for (const Station *candidate : Station::Iterate()) {
+			if (candidate->owner == c->index && PlanetManager::GetTileWorld(candidate->xy) == hub.world_id) {
+				station = candidate;
+				break;
+			}
+		}
+		if (station == nullptr) {
+			IConsolePrint(CC_ERROR, "UAT setup incomplete: no player station for hub {}.", hub.hub_id);
+			return true;
+		}
+		hub.station_id = station->index;
+		hub.tile = station->xy;
+		LogisticsHubManager::RestoreHub(hub);
+	}
+	extern void AfterLoadCompanyStats();
+	AfterLoadCompanyStats();
+	IConsolePrint(CC_DEFAULT, "UAT ownership verified: 10 complete terminals owned by human Company 0.");
+	/* Repair an existing demo without re-seeding inventories or progression. */
+	if (argv.size() == 2 && argv[1] == "ownership") return true;
 	if (c != nullptr) {
 		c->money = 25000000; // 25M Cr
 	}
@@ -3437,8 +3532,9 @@ static bool ConSetupUATFixtures(std::span<std::string_view> argv)
 				break;
 			}
 		}
-		if (nearest_st == StationID::Invalid() && Station::GetNumItems() > 0) {
-			nearest_st = Station::Get(StationID{0})->index;
+		if (nearest_st == StationID::Invalid()) {
+			IConsolePrint(CC_ERROR, "UAT setup incomplete: wait for a player-owned World 2 station before seeding fixtures.");
+			return true;
 		}
 		uint32_t hub_id = LogisticsHubManager::RegisterHub(hub_tile, w1, CompanyID{0}, nearest_st, "Merredin Planetary Logistics Hub");
 		if (hub_id != 0) {

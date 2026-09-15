@@ -6295,3 +6295,15 @@ STR_ERROR_PREREQUISITE_RESEARCH_LOCKED                              :{WHITE}Cann
 
 
 
+
+# Station production facilities
+STR_PRODUCTION_BUILD                         :{BLACK}Build production facility (100,000 Cr)
+STR_PRODUCTION_BUILD_TOOLTIP                 :{BLACK}Choose a production recipe for this rail station. Deliver its inputs by train; collect its output here, or in the planetary stockpile if a company logistics hub exists.
+STR_PRODUCTION_REMOVE                        :{BLACK}Remove facility
+STR_PRODUCTION_REMOVE_TOOLTIP                :{BLACK}Retire this facility. Remaining internal material goes to your planetary stockpile. Cargo already waiting at the station stays here.
+STR_PRODUCTION_NONE                          :{BLACK}No production facility. Choose a recipe below.
+STR_ERROR_PRODUCTION_ALREADY_BUILT           :This station already has a production facility
+STR_ERROR_PRODUCTION_WORLD                   :This recipe is not available on this world
+STR_ERROR_PRODUCTION_CARGO                   :This recipe requires cargo types that are not available
+STR_ERROR_PRODUCTION_BUILD                   :Cannot build production facility
+STR_ERROR_PRODUCTION_REMOVE                  :Cannot remove production facility

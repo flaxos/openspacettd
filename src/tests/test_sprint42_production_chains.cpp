@@ -19,6 +19,28 @@
 #include "../company_base.h"
 #include "../company_func.h"
 #include "mock_environment.h"
+#include "../portal/portal_cmd.h"
+#include "../portal/portal_registry.h"
+#include "../command_func.h"
+#include "../station_cmd.h"
+#include "../station_func.h"
+#include "../station_base.h"
+#include "../station_map.h"
+#include "../station_kdtree.h"
+#include "../town.h"
+#include "../town_kdtree.h"
+#include "../train.h"
+#include "../clear_map.h"
+#include "../map_func.h"
+#include "../cargotype.h"
+#include "../economy_base.h"
+#include "../saveload/saveload.h"
+#include "../fileio_func.h"
+#include "../gfx_func.h"
+#include "../language.h"
+#include "../strings_func.h"
+#include "../table/sprites.h"
+#include <filesystem>
 
 #include "../safeguards.h"
 
@@ -397,4 +419,218 @@ TEST_CASE("Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)")
 	CHECK(restored->total_produced == 100);
 	CHECK(restored->input_buffers[c_iron] == 30);
 	CHECK(restored->output_buffers[c_steel] == 15);
+}
+
+static Station *SetupProductionGameplay()
+{
+	(void)MockEnvironment::Instance();
+	/* Real station removal/save-load formats viewport labels, unlike the pure
+	 * domain tests. Supply a real language pack as well as mock graphics. */
+	if (_current_language == nullptr) {
+		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+		auto saved_paths = _valid_searchpaths;
+		auto saved_binary = _searchpaths[Searchpath::BinaryDir];
+		_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
+		_valid_searchpaths = {Searchpath::BinaryDir};
+		InitializeLanguagePacks();
+		_valid_searchpaths = std::move(saved_paths);
+		_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
+	}
+	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
+	ProductionChainManager::Reset();
+	PlanetManager::Reset();
+	PortalRegistry::Reset();
+	StockpileManager::Reset();
+	LogisticsHubManager::Reset();
+	TechTreeManager::Reset();
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+	_station_pool.CleanPool();
+	_town_pool.CleanPool();
+	_company_pool.CleanPool();
+	_cargopacket_pool.CleanPool();
+	Map::Allocate(64, 64);
+	for (uint y = 0; y < 64; ++y) {
+		for (uint x = 0; x < 64; ++x) MakeClear(TileXY(x, y), ClearGround::Grass, 3);
+	}
+	SetupCargoForClimate(LandscapeType::Temperate);
+	Company *company = Company::CreateAtIndex(CompanyID{0});
+	company->money = 10000000;
+	company->clear_limit = 1000 << 16;
+	company->infrastructure.station = 1;
+	company->infrastructure.rail[RAILTYPE_RAIL] = 1;
+	_current_company = company->index;
+	PlanetRegion region{
+		.id = WorldID{0}, .name = "Production test world", .phase = WorldPhase::Phase2_Developed,
+		.biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1, .max_x = 62, .max_y = 62,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(region));
+	TileIndex tile = TileXY(20, 20);
+	REQUIRE(Town::CanAllocateItem());
+	Town *town = Town::Create(TileXY(10, 10));
+	town->name = "Production Test Town";
+	town->townnametype = SPECSTR_TOWNNAME_START;
+	REQUIRE(Station::CanAllocateItem());
+	Station *station = Station::Create(tile);
+	station->name = "Production Test Station";
+	station->owner = company->index;
+	station->town = town;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(tile, 1, 1);
+	station->spread = station->train_station;
+	MakeRailStation(tile, company->index, station->index, Axis::X, 0, RAILTYPE_RAIL);
+	RebuildStationKdtree();
+	RebuildTownKdtree();
+	station->RecomputeCatchment();
+	if (_valid_searchpaths.empty()) _valid_searchpaths.push_back(Searchpath::WorkingDir);
+	return station;
+}
+
+TEST_CASE("Production gameplay - command validation and station lifecycle", "[production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	StationID sid = station->index;
+	const CargoType iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	CHECK(Command<Commands::BuildProcessingFacility>::Do({}, sid, RECIPE_STEEL_SMELTING).GetCost() == 100000);
+	CHECK(ProductionChainManager::GetFacilityForStation(sid) == nullptr);
+	CHECK(Command<Commands::BuildProcessingFacility>::Do({}, sid, RECIPE_QUANTUM_ENRICHMENT).Failed());
+	CHECK(Command<Commands::BuildProcessingFacility>::Do({}, sid, RECIPE_NONE).Failed());
+	CHECK(Command<Commands::BuildProcessingFacility>::Do({}, StationID::Invalid(), RECIPE_STEEL_SMELTING).Failed());
+	REQUIRE(Company::CanAllocateItem());
+	Company *other = Company::Create();
+	_current_company = other->index;
+	CHECK(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, sid, RECIPE_STEEL_SMELTING).Failed());
+	_current_company = station->owner;
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, sid, RECIPE_STEEL_SMELTING).Succeeded());
+	CHECK(station->goods[iron].status.Test(GoodsEntry::State::Acceptance));
+	CHECK_FALSE(station->always_accepted.Test(iron));
+	CHECK(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, sid, RECIPE_COPPER_SMELTING).Failed());
+	CHECK(ProductionChainManager::GetAllFacilities().size() == 1);
+	CHECK(ProductionChainManager::DeliverToStation(sid, iron, 3) == 3);
+	CHECK(ProductionChainManager::DeliverToStation(sid, GetCargoTypeByLabel(CT_PASSENGERS), 9) == 0);
+
+	SECTION("Large output buffers are split into valid cargo packets") {
+		CargoType steel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
+		ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(sid);
+		facility->output_buffers[steel] = 70000;
+		ProductionChainManager::PublishStationOutput(*facility);
+		CHECK(facility->output_buffers[steel] == 0);
+		CHECK(station->goods[steel].AvailableCount() == 70000);
+		CHECK(station->goods[steel].HasRating());
+	}
+	SECTION("Retirement salvages inputs and dry run preserves attachment") {
+		_current_company = other->index;
+		CHECK(Command<Commands::RemoveProcessingFacility>::Do(DoCommandFlag::Execute, sid).Failed());
+		_current_company = station->owner;
+		CHECK(Command<Commands::RemoveProcessingFacility>::Do({}, sid).Succeeded());
+		CHECK(ProductionChainManager::GetFacilityForStation(sid) != nullptr);
+		CHECK(Command<Commands::RemoveProcessingFacility>::Do(DoCommandFlag::Execute, sid).Succeeded());
+		CHECK(ProductionChainManager::GetFacilityForStation(sid) == nullptr);
+		CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 3);
+		CHECK_FALSE(station->goods[iron].status.Test(GoodsEntry::State::Acceptance));
+	}
+	SECTION("Removing the last platform retires production immediately") {
+		TileIndex tile = station->train_station.tile;
+		REQUIRE(Command<Commands::RemoveFromRailStation>::Do({}, tile, tile, false).Succeeded());
+		CHECK(ProductionChainManager::GetFacilityForStation(sid) != nullptr);
+		REQUIRE(Command<Commands::RemoveFromRailStation>::Do(DoCommandFlag::Execute, tile, tile, false).Succeeded());
+		CHECK(ProductionChainManager::GetFacilityForStation(sid) == nullptr);
+		CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, iron) == 3);
+		CHECK_FALSE(station->goods[iron].status.Test(GoodsEntry::State::Acceptance));
+	}
+	SECTION("Partial platform removal preserves production at the remaining tile") {
+		const TileIndex first = station->train_station.tile;
+		const TileIndex remaining = TileXY(TileX(first) + 1, TileY(first));
+		MakeRailStation(remaining, station->owner, sid, Axis::X, 0, RAILTYPE_RAIL);
+		station->train_station = TileArea(first, 2, 1);
+		station->spread = station->train_station;
+		REQUIRE(Command<Commands::RemoveFromRailStation>::Do(DoCommandFlag::Execute, first, first, false).Succeeded());
+		const auto *facility = ProductionChainManager::GetFacilityForStation(sid);
+		REQUIRE(facility != nullptr);
+		CHECK(facility->tile == remaining);
+		CHECK(facility->input_buffers.at(iron) == 3);
+		CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 0);
+	}
+	SECTION("Acquisition transfers facility ownership and bankruptcy removes it") {
+		ProductionChainManager::ChangeCompanyOwner(station->owner, other->index);
+		CHECK(ProductionChainManager::GetFacilityForStation(sid)->owner == other->index);
+		ProductionChainManager::ChangeCompanyOwner(other->index, CompanyID::Invalid());
+		CHECK(ProductionChainManager::GetFacilityForStation(sid) == nullptr);
+	}
+}
+
+TEST_CASE("Production gameplay - real cargo unloading conversion and onward loading", "[production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	const CargoType iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	const CargoType steel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
+	REQUIRE(Train::CanAllocateItem());
+	Train *train = Train::Create();
+	train->owner = station->owner;
+	train->last_station_visited = station->index;
+	train->tile = station->xy;
+	train->cargo_type = iron;
+	train->cargo_cap = 60;
+	REQUIRE(CargoPayment::CanAllocateItem());
+	CargoPayment *payment = CargoPayment::Create(train);
+	train->cargo_payment = payment;
+	REQUIRE(CargoPacket::CanAllocateItem());
+	CargoPacket *input = CargoPacket::Create(60, 1, StationID::Invalid(), TileXY(5, 5), 0);
+	input->UpdateLoadingTile(TileXY(5, 5));
+	train->cargo.Append(input, VehicleCargoList::MoveToAction::Keep);
+	train->cargo.Stage(true, station->index, {}, OrderUnloadType::Unload, &station->goods[iron], iron, payment, station->xy);
+
+	SECTION("Output becomes ordinary station cargo") {
+		CHECK(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, payment, station->xy) == 60);
+		CHECK(train->cargo.StoredCount() == 0);
+		CHECK(ProductionChainManager::GetFacilityForStation(station->index)->input_buffers[iron] == 60);
+		CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == 60);
+		CHECK(station->town->received[CargoSpec::Get(iron)->town_acceptance_effect].new_act == 0);
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(station->goods[steel].AvailableCount() == 30);
+		CHECK(ProductionChainManager::GetFacilityForStation(station->index)->input_buffers[iron] == 0);
+		train->cargo_type = steel;
+		CHECK(station->goods[steel].GetOrCreateData().cargo.Load(30, &train->cargo, {}, station->xy) == 30);
+		CHECK(train->cargo.StoredCount() == 30);
+		CHECK(station->goods[steel].AvailableCount() == 0);
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(station->goods[steel].AvailableCount() == 0);
+	}
+	SECTION("A hub cannot duplicate delivered recipe inputs") {
+		LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Test hub");
+		CHECK(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, payment, station->xy) == 60);
+		CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 0);
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, steel) == 30);
+		CHECK(station->goods[steel].AvailableCount() == 0);
+	}
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+}
+
+TEST_CASE("Production gameplay - station facility survives actual save and reload", "[production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	StationID sid = station->index;
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, sid, RECIPE_STEEL_SMELTING).Succeeded());
+	const CargoType iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	const CargoType steel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
+	REQUIRE(ProductionChainManager::DeliverToStation(sid, iron, 41) == 41);
+	ProductionChainManager::ProcessMonthlyProduction();
+	const auto path = (std::filesystem::temp_directory_path() / "openspacettd-production-gameplay.sav").string();
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(sid);
+	REQUIRE(facility != nullptr);
+	CHECK(facility->recipe_id == RECIPE_STEEL_SMELTING);
+	CHECK(facility->input_buffers.at(iron) == 1);
+	CHECK(facility->last_month_production == 20);
+	station = Station::Get(sid);
+	CHECK(station->goods[steel].AvailableCount() == 20);
+	CHECK(station->goods[iron].status.Test(GoodsEntry::State::Acceptance));
+	ProductionChainManager::DeliverToStation(sid, iron, 1);
+	ProductionChainManager::ProcessMonthlyProduction();
+	CHECK(station->goods[steel].AvailableCount() == 21);
+	std::filesystem::remove(path);
 }

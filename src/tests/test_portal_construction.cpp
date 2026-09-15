@@ -21,6 +21,7 @@
 #include "../tunnelbridge_map.h"
 #include "../tunnelbridge.h"
 #include "../rail_map.h"
+#include "../rail_cmd.h"
 #include "../signal_func.h"
 #include "../track_func.h"
 #include "../clear_map.h"
@@ -179,6 +180,57 @@ TEST_CASE("Portal Construction - High-capacity terminal topology and PBS directi
 		CHECK(HasSignalOnTrack(signal.tile, signal.track));
 		CHECK(GetSignalType(signal.tile, signal.track) == SignalType::PathOneWay);
 		CHECK(GetPresentSignals(signal.tile) == SignalAlongTrackdir(DiagDirToDiagTrackdir(signal.travel_dir)));
+	}
+}
+
+TEST_CASE("Portal Construction - UAT adopts complete neutral terminals only")
+{
+	SetupTestWorlds();
+	const auto owner = _current_company;
+	const auto gate = TileXY(50, 50);
+	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, gate, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
+	auto layout = PortalTerminal::Plan(gate, DiagDirection::NE, WorldID{0});
+	REQUIRE(layout.has_value());
+	SetTileOwner(gate, OWNER_NONE);
+	for (const auto &part : layout->tiles) SetTileOwner(part.tile, OWNER_NONE);
+	CHECK(CmdRemoveSingleRail({}, layout->connection_tile, Track::X).Failed());
+	SECTION("Missing footprint rejects adoption without taking the head") {
+		MakeClear(layout->tiles.back().tile, ClearGround::Grass, 3);
+		CHECK_FALSE(PortalTerminal::AdoptForUAT(*layout, owner, true));
+		CHECK(GetTileOwner(gate) == OWNER_NONE);
+	}
+	SECTION("Foreign ownership rejects the whole adoption") {
+		REQUIRE(Company::CanAllocateItem());
+		Company *other = Company::Create();
+		REQUIRE(other != nullptr);
+		SetTileOwner(layout->tiles.back().tile, other->index);
+		CHECK_FALSE(PortalTerminal::AdoptForUAT(*layout, owner, true));
+		CHECK(GetTileOwner(gate) == OWNER_NONE);
+		CHECK(GetTileOwner(layout->tiles.front().tile) == OWNER_NONE);
+		CHECK(GetTileOwner(layout->tiles.back().tile) == other->index);
+	}
+	SECTION("Player can modify adopted rails; dry run does not mutate") {
+		CHECK(PortalTerminal::AdoptForUAT(*layout, owner, false));
+		CHECK(GetTileOwner(gate) == OWNER_NONE);
+		REQUIRE(PortalTerminal::AdoptForUAT(*layout, owner, true));
+		CHECK(PortalTerminal::AdoptForUAT(*layout, owner, true));
+		CHECK(GetTileOwner(gate) == owner);
+		for (const auto &part : layout->tiles) {
+			CHECK(GetTileOwner(part.tile) == owner);
+			CHECK(GetTrackBits(part.tile) == part.tracks);
+		}
+		for (const auto &signal : layout->signals) CHECK(HasSignalOnTrack(signal.tile, signal.track));
+		CHECK(CmdRemoveSingleRail(DoCommandFlag::Execute, layout->connection_tile, Track::X).Succeeded());
+		CHECK(CmdBuildSingleRail(DoCommandFlag::Execute, layout->connection_tile, RAILTYPE_BEGIN, Track::X, false).Succeeded());
+		CHECK(CmdBuildSingleRail(DoCommandFlag::Execute, TileXY(69, 50), RAILTYPE_BEGIN, Track::X, false).Succeeded());
+		CHECK(CmdBuildTrainDepot(DoCommandFlag::Execute, TileXY(70, 50), RAILTYPE_BEGIN, DiagDirection::NE).Succeeded());
+		CHECK(CmdRemoveSingleSignal(DoCommandFlag::Execute, layout->signals.front().tile, layout->signals.front().track).Succeeded());
+		UpdateSignalsInBuffer();
+		const auto path = (std::filesystem::temp_directory_path() / "openspacettd-uat-ownership-test.sav").string();
+		REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+		REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+		CHECK(GetTileOwner(gate) == owner);
+		for (const auto &part : layout->tiles) CHECK(GetTileOwner(part.tile) == owner);
 	}
 }
 

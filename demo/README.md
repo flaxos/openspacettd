@@ -1,12 +1,16 @@
 # OpenSpaceTTD UAT Demo
 
-> **Active Sprint 36 All-Feature Fixture:** `OpenSpaceTTD-All-Features-UAT-v1.0.sav` is the canonical guided solo UAT release savegame covering all features from Sprint 1 through Sprint 40. It features a 6-world procedural partition covering all 6 environmental biomes (Temperate Core, Arid Desert, Sub-Arctic, Volcanic, Sub-Tropic, Oceanic), 5 monumental gateway pairs, multi-tier megacity demand economics, planetary company stockpiles, corporate headquarters, logistics hubs, and in-kind fabrication. Powered by GameScript v8 with a 12-chapter, 25-goal persistent Story Book. See [ALL-FEATURES-UAT.md](ALL-FEATURES-UAT.md), [FEATURE_UI_UAT_COVERAGE.md](../docs/FEATURE_UI_UAT_COVERAGE.md), and [PROJECT_STATUS_AND_ROADMAP.md](../docs/PROJECT_STATUS_AND_ROADMAP.md).
+Current release: **v1.1**, GameScript v9, 15 chapters and 27 checklist goals.
+Start with [ALL-FEATURES-UAT.md](ALL-FEATURES-UAT.md) for Sprints 1–42 and
+record observations in [UAT-RESULTS.md](UAT-RESULTS.md). All ten gate heads and
+complete terminals belong to the first human company. v1.0 and the remaining
+instructions below are historical regression material, not current acceptance.
 
 > **Legacy Sprint 28 Fixture:** `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` remains preserved for regression testing and covers features through Sprint 27. See [SPRINT28-UAT.md](SPRINT28-UAT.md).
 
-### Quick Launch: All-Features Scenario (v1.0)
+### Quick Launch: Current UAT (v1.1)
 ```bash
-./build/openttd -g demo/OpenSpaceTTD-All-Features-UAT-v1.0.sav
+./build/openttd -g demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav
 ```
 
 ---

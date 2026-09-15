@@ -122,6 +122,14 @@ public:
 	static bool UnregisterFacility(FacilityID id);
 	static ProcessingFacility *GetFacility(FacilityID id);
 	static ProcessingFacility *GetFacilityAtTile(TileIndex tile);
+	static ProcessingFacility *GetFacilityForStation(StationID station);
+	/** Retire a station attachment and salvage buffered material to its owner's stockpile. */
+	static void RemoveForStation(StationID station);
+	static void ChangeCompanyOwner(CompanyID old_owner, CompanyID new_owner);
+	static uint32_t DeliverToStation(StationID station, CargoType cargo, uint32_t amount);
+	static bool AcceptsCargo(StationID station, CargoType cargo);
+	/** Publish buffered output as ordinary waiting station cargo, retaining it if the packet pool is full. */
+	static void PublishStationOutput(ProcessingFacility &facility);
 	static std::vector<ProcessingFacility> GetAllFacilities();
 
 	/* Cargo delivery & buffering */

@@ -1,5 +1,11 @@
 # OpenSpaceTTD Documentation Index
 
+Current acceptance entry point: [v1.1 checklist through Sprint 42](../demo/ALL-FEATURES-UAT.md),
+[results sheet](../demo/UAT-RESULTS.md) and [coverage matrix](FEATURE_UI_UAT_COVERAGE.md).
+See the [commit review and verification record](UAT_V1_1_REVIEW_2026-09-15.md).
+Historical sprint completion is not human acceptance. Current blockers include
+full content activation, player production integration and bespoke art.
+
 Start with [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). It is the authoritative source for current completion, evidence boundaries and planned work.
 
 ## Canonical current documents

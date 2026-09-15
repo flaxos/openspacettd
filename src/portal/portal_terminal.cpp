@@ -17,11 +17,33 @@
 #include "../rail_map.h"
 #include "../signal_func.h"
 #include "../tile_map.h"
+#include "../tunnelbridge_map.h"
 #include "../track_func.h"
 #include "../viewport_func.h"
 #include "../window_func.h"
 
 #include "../safeguards.h"
+
+bool PortalTerminal::AdoptForUAT(const PortalTerminalLayout &layout, CompanyID company, bool execute)
+{
+	if (!Company::IsValidID(company)) return false;
+	auto admissible = [company](TileIndex tile) {
+		return tile < Map::Size() && (GetTileOwner(tile) == OWNER_NONE || GetTileOwner(tile) == company);
+	};
+	if (!admissible(layout.gate_tile) || !IsTunnelTile(layout.gate_tile) || GetTunnelBridgeTransportType(layout.gate_tile) != TransportType::Rail) return false;
+	for (const auto &part : layout.tiles) {
+		if (!admissible(part.tile) || !IsPlainRailTile(part.tile) || (GetTrackBits(part.tile) & part.tracks) != part.tracks) return false;
+	}
+	if (execute) {
+		SetTileOwner(layout.gate_tile, company);
+		MarkTileDirtyByTile(layout.gate_tile);
+		for (const auto &part : layout.tiles) {
+			SetTileOwner(part.tile, company);
+			MarkTileDirtyByTile(part.tile);
+		}
+	}
+	return true;
+}
 
 namespace {
 

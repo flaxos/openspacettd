@@ -8,6 +8,8 @@
 /** @file station_gui.cpp The GUI for stations. */
 
 #include "stdafx.h"
+#include "portal/production_chain.h"
+#include "portal/logistics_hub.h"
 #include "debug.h"
 #include "gui.h"
 #include "querystring_gui.h"
@@ -869,6 +871,11 @@ static constexpr std::initializer_list<NWidgetPart> _nested_station_view_widgets
 					SetStringTip(STR_SPACEPORT_DESIGNATE_BUTTON, STR_SPACEPORT_ACTION_TOOLTIP),
 		EndContainer(),
 	EndContainer(),
+	NWidget(WWT_PANEL, Colours::Grey, WID_SV_PRODUCTION_STATUS), SetMinimalSize(420, 64), SetResize(1, 0), EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_DROPDOWN, Colours::Grey, WID_SV_PRODUCTION_BUILD), SetFill(1, 1), SetResize(1, 0), SetStringTip(STR_PRODUCTION_BUILD, STR_PRODUCTION_BUILD_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, Colours::Grey, WID_SV_PRODUCTION_REMOVE), SetFill(0, 1), SetStringTip(STR_PRODUCTION_REMOVE, STR_PRODUCTION_REMOVE_TOOLTIP),
+	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
 		NWidget(WWT_PUSHTXTBTN, Colours::Grey, WID_SV_ACCEPTS_RATINGS), SetMinimalSize(46, 12), SetResize(1, 0), SetFill(1, 1),
 				SetStringTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
@@ -1459,6 +1466,10 @@ struct StationViewWindow : public Window {
 				size.height = ((this->GetWidget<NWidgetCore>(WID_SV_ACCEPTS_RATINGS)->GetString() == STR_STATION_VIEW_RATINGS_BUTTON) ? this->accepts_lines : this->rating_lines) * GetCharacterHeight(FontSize::Normal) + padding.height;
 				break;
 
+			case WID_SV_PRODUCTION_STATUS:
+				size.height = 4 * GetCharacterHeight(FontSize::Normal) + padding.height;
+				break;
+
 			case WID_SV_SPACEPORT_STATUS:
 				size.height = 5 * GetCharacterHeight(FontSize::Normal) + padding.height;
 				break;
@@ -1474,6 +1485,9 @@ struct StationViewWindow : public Window {
 		this->vscroll->SetCount(cargo.GetNumChildren()); // update scrollbar
 
 		/* disable some buttons */
+		const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(st->index);
+		this->SetWidgetDisabledState(WID_SV_PRODUCTION_BUILD, st->owner != _local_company || !Company::IsValidID(_local_company) || !st->facilities.Test(StationFacility::Train) || facility != nullptr);
+		this->SetWidgetDisabledState(WID_SV_PRODUCTION_REMOVE, st->owner != _local_company || facility == nullptr);
 		this->SetWidgetDisabledState(WID_SV_RENAME,   st->owner != _local_company);
 		this->SetWidgetDisabledState(WID_SV_TRAINS,   !st->facilities.Test(StationFacility::Train));
 		this->SetWidgetDisabledState(WID_SV_ROADVEHS, !st->facilities.Test(StationFacility::TruckStop) && !st->facilities.Test(StationFacility::BusStop));
@@ -1537,6 +1551,33 @@ struct StationViewWindow : public Window {
 
 	void DrawWidget(const Rect &r, WidgetID widget) const override
 	{
+		if (widget == WID_SV_PRODUCTION_STATUS) {
+			Rect tr = r.Shrink(WidgetDimensions::scaled.frametext);
+			const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(StationID{this->window_number});
+			const ProductionRecipe *recipe = facility == nullptr ? nullptr : ProductionChainManager::GetRecipe(facility->recipe_id);
+			if (recipe == nullptr) {
+				DrawString(tr, STR_PRODUCTION_NONE, TextColour::Black);
+				return;
+			}
+			DrawString(tr, recipe->name, TextColour::Black);
+			tr.top += GetCharacterHeight(FontSize::Normal);
+			auto describe = [](const auto &materials, const auto &buffer) {
+				std::string text;
+				for (const auto &[cargo, quantity] : materials) {
+					if (!text.empty()) text += "; ";
+					auto it = buffer.find(cargo);
+					text += fmt::format("{} {} ({} buffered)", quantity, GetString(CargoSpec::Get(cargo)->name), it == buffer.end() ? 0 : it->second);
+				}
+				return text;
+			};
+			DrawString(tr, "Input per batch: " + describe(recipe->inputs, facility->input_buffers), TextColour::Black);
+			tr.top += GetCharacterHeight(FontSize::Normal);
+			DrawString(tr, "Output per batch: " + describe(recipe->outputs, facility->output_buffers), TextColour::Black);
+			tr.top += GetCharacterHeight(FontSize::Normal);
+			DrawString(tr, fmt::format("Last month: {}/{} batches | Output: {}", facility->last_month_production, facility->monthly_capacity,
+				LogisticsHubManager::HasLogisticsHub(facility->world_id, facility->owner) ? "planetary stockpile" : "station waiting cargo"), TextColour::Black);
+			return;
+		}
 		if (widget != WID_SV_SPACEPORT_STATUS) return;
 
 		Rect tr = r.Shrink(WidgetDimensions::scaled.frametext);
@@ -2115,6 +2156,20 @@ struct StationViewWindow : public Window {
 				Command<Commands::OpenCloseAirport>::Post(this->window_number);
 				break;
 
+			case WID_SV_PRODUCTION_BUILD: {
+				const Station *station = Station::Get(this->window_number);
+				DropDownList list;
+				for (const auto &recipe : ProductionChainManager::GetAllRecipes()) {
+					bool disabled = Command<Commands::BuildProcessingFacility>::Do({}, station->index, recipe.id).Failed();
+					list.push_back(MakeDropDownListStringItem(std::string(recipe.name), recipe.id, disabled));
+				}
+				ShowDropDownList(this, std::move(list), -1, WID_SV_PRODUCTION_BUILD);
+				break;
+			}
+			case WID_SV_PRODUCTION_REMOVE:
+				Command<Commands::RemoveProcessingFacility>::Post(STR_ERROR_PRODUCTION_REMOVE, StationID{this->window_number});
+				break;
+
 			case WID_SV_SPACEPORT_ACTION:
 				Command<Commands::DesignateSpaceport>::Post(STR_ERROR_CAN_T_DESIGNATE_SPACEPORT, static_cast<StationID>(this->window_number));
 				break;
@@ -2242,7 +2297,9 @@ struct StationViewWindow : public Window {
 
 	void OnDropdownSelect(WidgetID widget, int index, int) override
 	{
-		if (widget == WID_SV_SORT_BY) {
+		if (widget == WID_SV_PRODUCTION_BUILD) {
+			Command<Commands::BuildProcessingFacility>::Post(STR_ERROR_PRODUCTION_BUILD, StationID{this->window_number}, static_cast<RecipeID>(index));
+		} else if (widget == WID_SV_SORT_BY) {
 			this->SelectSortBy(index);
 		} else {
 			this->SelectGroupBy(index);

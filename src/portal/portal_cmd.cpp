@@ -21,6 +21,10 @@
 #include "corporate_hq.h"
 #include "fabrication_manager.h"
 #include "tech_tree.h"
+#include "production_chain.h"
+#include "../station_func.h"
+#include "../window_func.h"
+#include "../cargotype.h"
 #include "../town.h"
 #include "../station_base.h"
 #include "../command_func.h"
@@ -800,3 +804,40 @@ CommandCost CmdSetResearchBudget(DoCommandFlags flags, uint32_t budget)
 }
 
 
+
+CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, RecipeID recipe)
+{
+	Station *st = Station::GetIfValid(station);
+	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || !st->facilities.Test(StationFacility::Train)) return CMD_ERROR;
+	if (ProductionChainManager::GetFacilityForStation(station) != nullptr) return CommandCost(STR_ERROR_PRODUCTION_ALREADY_BUILT);
+	TileIndex tile = st->train_station.tile;
+	WorldID world = PlanetManager::GetTileWorld(tile);
+	std::string error;
+	if (world == INVALID_WORLD || !ProductionChainManager::CanConstructFacility(world, recipe, error)) return CommandCost(STR_ERROR_PRODUCTION_WORLD);
+	const ProductionRecipe *rec = ProductionChainManager::GetRecipe(recipe);
+	for (const auto &[cargo, amount] : rec->inputs) {
+		if (cargo >= NUM_CARGO || !CargoSpec::Get(cargo)->IsValid() || amount == 0) return CommandCost(STR_ERROR_PRODUCTION_CARGO);
+	}
+	for (const auto &[cargo, amount] : rec->outputs) {
+		if (cargo >= NUM_CARGO || !CargoSpec::Get(cargo)->IsValid() || amount == 0) return CommandCost(STR_ERROR_PRODUCTION_CARGO);
+	}
+	if (flags.Test(DoCommandFlag::Execute)) {
+		ProductionChainManager::RegisterFacility(tile, world, recipe, _current_company, 100, station);
+		UpdateStationAcceptance(st, false);
+		SetWindowDirty(WindowClass::StationView, station);
+	}
+	return CommandCost(ExpensesType::Construction, 100000);
+}
+
+CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station)
+{
+	Station *st = Station::GetIfValid(station);
+	const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(station);
+	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || facility == nullptr || facility->owner != _current_company) return CMD_ERROR;
+	if (flags.Test(DoCommandFlag::Execute)) {
+		ProductionChainManager::RemoveForStation(station);
+		UpdateStationAcceptance(st, false);
+		SetWindowDirty(WindowClass::StationView, station);
+	}
+	return CommandCost(ExpensesType::Construction);
+}

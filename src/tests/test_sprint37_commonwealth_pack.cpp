@@ -223,28 +223,28 @@ TEST_CASE("Sprint 37: CST Rolling Stock Specifications and Tech Tree Gating", "[
 	CompanyID comp = CompanyID(1);
 
 	/* Baseline: Pioneer is always buildable */
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_PIONEER_STEAM), WorldID(1)));
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_PIONEER_STEAM), WorldID(3)));
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_PIONEER_STEAM), WorldID(1)));
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_PIONEER_STEAM), WorldID(3)));
 
 	/* Vulcan requires TECH_TRACTION_1 */
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(3)));
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(3)));
 	TechTreeManager::RestoreCompanyTech(comp, TECH_NONE, 0, 0, {TECH_TRACTION_1});
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(3)));
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(3)));
 
 	/* Titan requires TECH_TRACTION_2 */
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(2)));
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(2)));
 	TechTreeManager::RestoreCompanyTech(comp, TECH_NONE, 0, 0, {TECH_TRACTION_1, TECH_TRACTION_2});
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(2)));
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(2)));
 
 	/* CST E-40 requires TECH_TRACTION_3 */
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(1)));
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(1)));
 	TechTreeManager::RestoreCompanyTech(comp, TECH_NONE, 0, 0, {TECH_TRACTION_1, TECH_TRACTION_2, TECH_TRACTION_3});
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(1)));
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(1)));
 
 	/* CST Mark IV Maglev requires TECH_TRACTION_4 */
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(1)));
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(1)));
 	TechTreeManager::RestoreCompanyTech(comp, TECH_NONE, 0, 0, {TECH_TRACTION_1, TECH_TRACTION_2, TECH_TRACTION_3, TECH_TRACTION_4});
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(1)));
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(1)));
 
 	/* Verify locomotive performance specs */
 	const CSTRollingStockSpec *pioneer = CommonwealthPackManager::GetRollingStockSpec(EngineID(CST_ENGINE_PIONEER_STEAM));
@@ -282,28 +282,28 @@ TEST_CASE("Sprint 37: World Phase Operational Restrictions", "[sprint37]")
 	TechTreeManager::RestoreCompanyTech(comp, TECH_NONE, 0, 0, {TECH_TRACTION_1, TECH_TRACTION_2, TECH_TRACTION_3, TECH_TRACTION_4});
 
 	/* CST Mark IV Maglev: Phase 1 Core ONLY */
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(1)));  // Phase 1: OK
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(2))); // Phase 2: Forbidden
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(3))); // Phase 3: Forbidden
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(4))); // Phase 4: Forbidden
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(1)));  // Phase 1: OK
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(2))); // Phase 2: Forbidden
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(3))); // Phase 3: Forbidden
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_MARK4_MAGLEV), WorldID(4))); // Phase 4: Forbidden
 
 	/* CST E-40 Electric: Phase 1 Core & Phase 2 Developed ONLY */
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(1)));  // Phase 1: OK
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(2)));  // Phase 2: OK
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(3))); // Phase 3: Forbidden
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(4))); // Phase 4: Forbidden
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(1)));  // Phase 1: OK
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(2)));  // Phase 2: OK
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(3))); // Phase 3: Forbidden
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_CST_E40), WorldID(4))); // Phase 4: Forbidden
 
 	/* Titan D-100 Diesel: Phase 2 Developed & Phase 3 Frontier */
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(1))); // Phase 1: Forbidden
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(2)));  // Phase 2: OK
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(3)));  // Phase 3: OK
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(4))); // Phase 4: Forbidden
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(1))); // Phase 1: Forbidden
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(2)));  // Phase 2: OK
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(3)));  // Phase 3: OK
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_TITAN_DIESEL), WorldID(4))); // Phase 4: Forbidden
 
 	/* Vulcan 2-8-0 Steam: Phase 3 Frontier & Phase 4 Expansion */
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(1))); // Phase 1: Forbidden
-	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(2))); // Phase 2: Forbidden
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(3)));  // Phase 3: OK
-	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(4)));  // Phase 4: OK
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(1))); // Phase 1: Forbidden
+	CHECK_FALSE(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(2))); // Phase 2: Forbidden
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(3)));  // Phase 3: OK
+	CHECK(CommonwealthPackManager::IsRollingStockBuildableForCompany(comp, EngineID(CST_ENGINE_VULCAN_STEAM), WorldID(4)));  // Phase 4: OK
 }
 
 TEST_CASE("Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage", "[sprint37]")
@@ -400,4 +400,28 @@ TEST_CASE("Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops", "[sprint
 	const auto *ccry_loop = CommonwealthPackManager::GetCargoDeliveryLoop(CommonwealthCargoID::EncryptedConsumerCrystals);
 	REQUIRE(ccry_loop != nullptr);
 	CHECK(ccry_loop->producer_industry == "Megacity Data Formatting Center");
+}
+
+TEST_CASE("Sprint 37: Runtime gating uses pack identity and local engine IDs", "[sprint37]")
+{
+	SetupSprint37TestWorlds();
+	_engine_pool.CleanPool();
+	CompanyID company{0};
+	Engine *vanilla = Engine::CreateAtIndex(EngineID{CST_ENGINE_TITAN_DIESEL}, VehicleType::Train, CST_ENGINE_TITAN_DIESEL);
+	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(company, vanilla->index, WorldID{1}));
+
+	Engine *loaded = Engine::CreateAtIndex(EngineID{200}, VehicleType::Train, 0x22);
+	loaded->grf_prop.grfid = GrfID{"TEST"};
+	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(company, loaded->index, WorldID{1}));
+	loaded->grf_prop.grfid = COMMONWEALTH_RAIL_GRFID;
+	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(company, loaded->index, WorldID{2}));
+	TechTreeManager::RestoreCompanyTech(company, TECH_NONE, 0, 0, {TECH_TRACTION_1, TECH_TRACTION_2});
+	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(company, loaded->index, WorldID{2}));
+	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(company, loaded->index, WorldID{1}));
+	loaded->grf_prop.local_id = 0x30; // Coach, not a locomotive family.
+	CHECK(CommonwealthPackManager::IsVehicleBuildableForCompany(company, loaded->index, WorldID{1}));
+	CHECK_FALSE(CommonwealthPackManager::IsVehicleBuildableForCompany(company, EngineID::Invalid(), INVALID_WORLD));
+	_engine_pool.CleanPool();
+	PlanetManager::Reset();
+	TechTreeManager::Reset();
 }

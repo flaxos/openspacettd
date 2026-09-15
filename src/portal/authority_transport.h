@@ -7,12 +7,13 @@
 #include "../3rdparty/nlohmann/json.hpp"
 #include <chrono>
 #include <functional>
+#include <memory>
 
 enum class AuthorityOperation { RegisterWorld, Heartbeat, Initiate, Depart, Pending, Claim, Confirm };
 
-/** One request, owned by the server coordinator until IsFinished().
- * Cancellation/timeout is asynchronous: never destroy a running request just
- * because its deadline elapsed. Responses are data only; callbacks must not
+/** One request with an independently retained HTTP callback.
+ * Cancellation/timeout is asynchronous: the callback outlives a destroyed request
+ * until the backend acknowledges completion. Responses are data only; callbacks must not
  * mutate trains, journals, RNG, or any other simulation state.
  */
 class AuthorityRequest final : public HTTPCallback {
@@ -23,6 +24,10 @@ public:
 
 	AuthorityRequest(std::string base_url, AuthorityOperation operation, nlohmann::json payload,
 		uint32_t world = 0, std::chrono::seconds timeout = std::chrono::seconds(15));
+	AuthorityRequest(const AuthorityRequest &) = delete;
+	AuthorityRequest &operator=(const AuthorityRequest &) = delete;
+	AuthorityRequest(AuthorityRequest &&) = delete;
+	AuthorityRequest &operator=(AuthorityRequest &&) = delete;
 	bool Start(const Sender &sender);
 	bool Start();
 	bool ExecuteSync(std::chrono::milliseconds timeout_limit = std::chrono::milliseconds(5000));
@@ -37,6 +42,8 @@ public:
 	bool IsCancelled() const override;
 
 private:
+	/* Only game-thread callbacks access the target; HTTP backends marshal to that thread. */
+	std::shared_ptr<AuthorityRequest *> callback_target;
 	std::string uri;
 	std::string body;
 	std::string buffer;

@@ -17,6 +17,7 @@
 #include "../cargo_type.h"
 #include "portal_type.h"
 #include "tech_tree.h"
+#include "production_chain.h"
 
 /**
  * Build a single unlinked portal gate head on a tile.
@@ -205,5 +206,11 @@ DEF_CMD_TRAIT(Commands::SetFabricationMode,        CmdSetFabricationMode,       
 DEF_CMD_TRAIT(Commands::SelectResearchProject,     CmdSelectResearchProject,     {},                                                   CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::SetResearchBudget,         CmdSetResearchBudget,         {},                                                   CommandType::CompanySetting)
 
-#endif /* PORTAL_CMD_H */
 
+/** Attach a recipe to an owned rail station; query mode performs validation only. */
+CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, RecipeID recipe);
+CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station);
+DEF_CMD_TRAIT(Commands::BuildProcessingFacility, CmdBuildProcessingFacility, {}, CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::RemoveProcessingFacility, CmdRemoveProcessingFacility, {}, CommandType::LandscapeConstruction)
+
+#endif /* PORTAL_CMD_H */

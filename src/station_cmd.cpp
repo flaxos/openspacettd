@@ -8,6 +8,7 @@
 /** @file station_cmd.cpp Handling of station tiles. */
 
 #include "stdafx.h"
+#include "portal/production_chain.h"
 #include "core/flatset_type.hpp"
 #include "aircraft.h"
 #include "bridge_map.h"
@@ -647,7 +648,7 @@ void UpdateStationAcceptance(Station *st, bool show_msg)
 
 	/* Adjust in case our station only accepts fewer kinds of goods */
 	for (CargoType cargo : EnumRange(NUM_CARGO)) {
-		uint amt = acceptance[cargo];
+		uint amt = ProductionChainManager::AcceptsCargo(st->index, cargo) ? std::max<uint>(8, acceptance[cargo]) : acceptance[cargo];
 
 		/* Make sure the station can accept the goods type. */
 		bool is_passengers = IsCargoInClass(cargo, CargoClass::Passengers);
@@ -770,6 +771,9 @@ static void DeleteStationIfEmpty(BaseStation *st)
 void Station::AfterStationTileSetChange(bool adding, StationType type)
 {
 	this->UpdateVirtCoord();
+	if (auto *facility = ProductionChainManager::GetFacilityForStation(this->index); facility != nullptr && this->facilities.Test(StationFacility::Train)) {
+		facility->tile = this->train_station.tile;
+	}
 	DirtyCompanyInfrastructureWindows(this->owner);
 
 	if (adding) {
@@ -800,8 +804,10 @@ void Station::AfterStationTileSetChange(bool adding, StationType type)
 		UpdateStationAcceptance(this, false);
 		InvalidateWindowData(WindowClass::JoinStation, 0, 0);
 	} else {
+		if (!this->facilities.Test(StationFacility::Train)) ProductionChainManager::RemoveForStation(this->index);
 		DeleteStationIfEmpty(this);
 		this->RecomputeCatchment();
+		UpdateStationAcceptance(this, false);
 	}
 
 }
@@ -1829,6 +1835,18 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, std::vector<T *> &affected_st
 		MakeRailStationAreaSmaller(st);
 		MakeStationSpreadAreaSmaller(st);
 		UpdateStationSignCoord(st);
+
+		/* Rail removal does not call Station::AfterStationTileSetChange.
+		 * Handle both partial platform edits and complete removal here, including
+		 * the bulk-demolition path. Waypoints must not touch station facilities. */
+		if constexpr (std::is_same_v<T, Station>) {
+			if (st->train_station.IsEmpty()) {
+				ProductionChainManager::RemoveForStation(st->index);
+			} else if (auto *facility = ProductionChainManager::GetFacilityForStation(st->index)) {
+				facility->tile = st->train_station.tile;
+			}
+			UpdateStationAcceptance(st, false);
+		}
 
 		/* if we deleted the whole station, delete the train facility. */
 		if (st->train_station.IsEmpty()) {
@@ -4443,6 +4461,11 @@ static uint UpdateStationWaiting(Station *st, CargoType cargo, uint amount, Sour
 	return amount;
 }
 
+
+uint AddProducedCargoToStation(Station *station, CargoType cargo, uint16_t amount)
+{
+	return UpdateStationWaiting(station, cargo, static_cast<uint>(amount) << 8, Source{Source::Invalid, SourceType::Industry});
+}
 static bool IsUniqueStationName(const std::string &name)
 {
 	for (const Station *st : Station::Iterate()) {
