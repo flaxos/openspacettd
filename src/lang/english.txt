@@ -5193,12 +5193,10 @@ STR_ERROR_NOT_ENOUGH_DEVELOPMENT                                :world has not a
 STR_ERROR_CAN_T_PROMOTE_WORLD                                   :Can't promote world...
 STR_NEWS_WORLD_DEVELOPED                                        :{BIG_FONT}{BLACK}Colony Industrialized!{}{RAW_STRING} has achieved Developed World status (Phase 2)! Advanced catenary and manufacturing unlocked!
 STR_NEWS_WORLD_CORE_METROPOLIS                                  :{BIG_FONT}{BLACK}Metropolis Achieved!{}{RAW_STRING} has achieved Core World status (Phase 1)! CST Maglev guideways and Megacity arcologies unlocked!
-STR_ERROR_CANNOT_COLONIZE_ALREADY_COLONIZED                     :this world has already established colonial settlements
 STR_ERROR_CANNOT_COLONIZE_NON_EXPANSION                         :outposts can only be founded on an Expansion World (Phase 4)
 STR_ERROR_CAN_T_COLONIZE_OUTPOST                                :Can't colonize world...
 STR_NEWS_WORLD_COLONIZED                                        :{BIG_FONT}{BLACK}Outpost Founded!{}{RAW_STRING} has been colonized and elevated to Frontier status (Phase 3)!
 STR_ERROR_CANNOT_BUILD_FARM_ON_VOLCANIC_WORLD                   :cannot construct bio-farms or agriculture on a Volcanic World
-STR_NEWS_OUTPOST_INDUSTRY_FOUNDED                               :{BIG_FONT}{BLACK}Colony Sector Established!{}{RAW_STRING} has opened its first industrial operations on {RAW_STRING}!
 STR_ERROR_CAN_T_BUILD_EDGE_CONDUIT                              :Can't build Edge Conduit here...
 STR_ERROR_CAN_T_REMOVE_EDGE_CONDUIT                             :Can't remove Edge Conduit...
 STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID                            :Edge Conduit must be placed on a world boundary tile directly beside the void
@@ -5207,8 +5205,6 @@ STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_FUNDS                 :insufficient capit
 STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_PRESENCE              :corporate rail network must operate across at least 3 distinct world phases
 STR_ERROR_ALREADY_HAS_CORPORATE_HQ                           :company has already established an active Corporate Headquarters
 STR_NEWS_CORPORATE_HQ_ESTABLISHED                            :{BIG_FONT}{BLACK}Corporate Headquarters Founded!{}{RAW_STRING} has established its interstellar corporate nexus!
-STR_ERROR_CAN_T_BUILD_LOGISTICS_HUB                          :Can't build Company Logistics Hub...
-STR_ERROR_CAN_T_PLACE_CORPORATE_HQ                           :Can't place Corporate Headquarters...
 STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS                   :insufficient materials in planetary stockpile for in-kind fabrication
 
 
@@ -6158,7 +6154,6 @@ STR_SPACEPORT_NAME                                              :SP T{NUM}: {STA
 
 # OpenSpaceTTD Sprint 18: In-Game GUI Integration for Federation & Megacities
 STR_MEGACITY_VIEW_CAPTION                                       :{WHITE}Megacity Commodity & Growth Overview
-STR_MEGACITY_VIEW_CAPTION_WITH_TOWN                             :{WHITE}Megacity: {TOWN}
 STR_MEGACITY_GROWTH_STARVATION                                  :{RED}Starvation (0.0x Growth)
 STR_MEGACITY_GROWTH_SUBSISTENCE                                 :{ORANGE}Subsistence (1.0x Growth)
 STR_MEGACITY_GROWTH_BOOM                                        :{GREEN}Metropolitan Boom (1.5x Growth)
@@ -6200,7 +6195,6 @@ STR_UNIVERSE_DIRECTORY_JUMP_TOOLTIP                             :Center the main
 STR_UNIVERSE_DIRECTORY_NO_WORLDS                                :{SILVER}No worlds registered in directory
 STR_UNIVERSE_DIRECTORY_COLONIZE                                  :Found Colony
 STR_UNIVERSE_DIRECTORY_COLONIZE_TOOLTIP                          :Establish an initial colonial outpost on this Phase 4 wilderness world
-STR_UNIVERSE_DIRECTORY_ALREADY_COLONIZED                         :This world has already established colonial settlements
 STR_UNIVERSE_DIRECTORY_PROMOTE                                   :Promote World
 STR_UNIVERSE_DIRECTORY_PROMOTE_TOOLTIP                           :Promote this world to its next development tier when development threshold is met
 STR_UNIVERSE_DIRECTORY_MEGACITY                                  :View Megacity
@@ -6226,11 +6220,8 @@ STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
 STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
 STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
 STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
-STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
-STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
 STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
 STR_ERROR_CAN_T_PLACE_BLUEPRINT                                  :{WHITE}Can't place blueprint...
-STR_ERROR_BLUEPRINT_BUILTIN_CANNOT_DELETE                        :{WHITE}Factory CST prefabs cannot be deleted
 
 # OpenSpaceTTD Sprint 27: Feature UI Completion
 STR_MAP_MENU_TRADE_LEDGER                                           :Supply Chain & Trade Ledger
@@ -6241,8 +6232,6 @@ STR_TRADE_LEDGER_TAB_SUPPLY_CHAIN                                   :Supply Chai
 STR_TRADE_LEDGER_TAB_TRADE_LEDGER                                   :Trade Balances & Conservation
 STR_TRADE_LEDGER_REFRESH                                            :Refresh
 STR_TRADE_LEDGER_REFRESH_TOOLTIP                                    :Refresh empire supply chain metrics and ledger balances
-STR_TRADE_LEDGER_STATUS_CONSERVED                                   :{GREEN}CONSERVED (Zero Duplication / Zero Loss)
-STR_TRADE_LEDGER_STATUS_VIOLATION                                   :{RED}VIOLATION DETECTED (Imbalance in In-Transit / Completed)
 STR_TRADE_LEDGER_NO_WORLDS                                          :{SILVER}No registered worlds with trade balance data
 
 STR_FEDERATION_AUTH_CAPTION                                         :{WHITE}Federation Player Authentication & Corporate Charters
@@ -6268,15 +6257,11 @@ STR_CORPORATE_HQ_BTN_LOCATE                                         :Locate Camp
 STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP                                 :Scroll the main viewport to the Corporate Headquarters campus
 STR_CORPORATE_HQ_BTN_UPGRADE                                        :Upgrade Tier
 STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP                                :Upgrade Corporate Headquarters advancement tier
-STR_CORPORATE_HQ_BTN_SET_RESERVE                                    :Configure Hub
-STR_CORPORATE_HQ_BTN_SET_RESERVE_TOOLTIP                            :Adjust minimum reserve threshold floor for this logistics hub
 STR_CORPORATE_HQ_STATUS_NOT_FOUNDED                                 :{SILVER}No active Corporate Headquarters campus established. Must be founded on a Phase 1 Core World.
 STR_MAP_MENU_CORPORATE_HQ                                           :Corporate Headquarters & Stockpiles
 
 # OpenSpaceTTD Sprint 40: In-Kind Fabrication Engine & Bill of Materials
 STR_CORPORATE_HQ_TAB_FABRICATION                                   :In-Kind Fabrication
-STR_FABRICATION_MODE_ACTIVE                                        :{GREEN}In-Kind Fabrication: ACTIVE (80% cash discount from local stockpile)
-STR_FABRICATION_MODE_INACTIVE                                      :{SILVER}In-Kind Fabrication: INACTIVE (Standard commercial cash purchase)
 STR_FABRICATION_BTN_TOGGLE                                         :Toggle Mode
 STR_FABRICATION_BTN_TOGGLE_TOOLTIP                                 :Toggle between standard cash purchase and in-kind fabrication from planetary stockpile
 

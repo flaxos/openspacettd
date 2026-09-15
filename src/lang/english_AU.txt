@@ -6076,7 +6076,6 @@ STR_BADGE_FILTER_ANY_LABEL                                      :Any {STRING}
 
 # OpenSpaceTTD Commonwealth Lore and GUI additions
 STR_MEGACITY_VIEW_CAPTION                                       :{WHITE}Megacity Commodity & Growth Overview
-STR_MEGACITY_VIEW_CAPTION_WITH_TOWN                             :{WHITE}Megacity: {TOWN}
 STR_MEGACITY_GROWTH_STARVATION                                  :{RED}Starvation (0.0x Growth)
 STR_MEGACITY_GROWTH_SUBSISTENCE                                 :{ORANGE}Subsistence (1.0x Growth)
 STR_MEGACITY_GROWTH_BOOM                                        :{GREEN}Metropolitan Boom (1.5x Growth)
@@ -6132,11 +6131,8 @@ STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
 STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
 STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
 STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
-STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
-STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
 STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
 STR_ERROR_CAN_T_PLACE_BLUEPRINT                                  :{WHITE}Can't place blueprint...
-STR_ERROR_BLUEPRINT_BUILTIN_CANNOT_DELETE                        :{WHITE}Factory CST prefabs cannot be deleted
 
 # OpenSpaceTTD Sprint 27: Feature UI Completion
 STR_MAP_MENU_TRADE_LEDGER                                           :Supply Chain & Trade Ledger
@@ -6147,8 +6143,6 @@ STR_TRADE_LEDGER_TAB_SUPPLY_CHAIN                                   :Supply Chai
 STR_TRADE_LEDGER_TAB_TRADE_LEDGER                                   :Trade Balances & Conservation
 STR_TRADE_LEDGER_REFRESH                                            :Refresh
 STR_TRADE_LEDGER_REFRESH_TOOLTIP                                    :Refresh empire supply chain metrics and ledger balances
-STR_TRADE_LEDGER_STATUS_CONSERVED                                   :{GREEN}CONSERVED (Zero Duplication / Zero Loss)
-STR_TRADE_LEDGER_STATUS_VIOLATION                                   :{RED}VIOLATION DETECTED (Imbalance in In-Transit / Completed)
 STR_TRADE_LEDGER_NO_WORLDS                                          :{SILVER}No registered worlds with trade balance data
 
 STR_FEDERATION_AUTH_CAPTION                                         :{WHITE}Federation Player Authentication & Corporate Charters

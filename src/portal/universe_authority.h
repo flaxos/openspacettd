@@ -46,8 +46,8 @@ struct RegisteredWorld {
 	std::string name;
 	ContentManifestToken content_manifest{};
 	uint64_t last_heartbeat_tick = 0;
-	std::string address;
-	std::string description;
+	std::string address{};
+	std::string description{};
 	uint32_t active_clients = 0;
 	uint32_t max_clients = 32;
 	uint32_t active_trains = 0;
