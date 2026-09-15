@@ -1,0 +1,148 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 293: Production gameplay - command validation and station lifecycle
+1/8 Test #293: Production gameplay - command validation and station lifecycle .............   Passed    0.02 sec
+    Start 294: Production gameplay - real cargo unloading conversion and onward loading
+2/8 Test #294: Production gameplay - real cargo unloading conversion and onward loading ...   Passed    0.02 sec
+    Start 295: Hub unloading - industry cargo has exactly one destination
+3/8 Test #295: Hub unloading - industry cargo has exactly one destination .................Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 646 of /home/flax/games/openspacettd/src/engine.cpp: std::size(mapping) >= GetOriginalEngineCount(type)
+Filters: Hub unloading - industry cargo has exactly one destination
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - industry cargo has exactly one destination
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:647
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:658: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  has_hub := false
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 5 | 4 passed | 1 failed
+
+
+    Start 296: Hub unloading - isolated freight hub accepts real unloading
+4/8 Test #296: Hub unloading - isolated freight hub accepts real unloading ................Subprocess aborted***Exception:   0.17 sec
+Error: Assertion failed at line 646 of /home/flax/games/openspacettd/src/engine.cpp: std::size(mapping) >= GetOriginalEngineCount(type)
+Filters: Hub unloading - isolated freight hub accepts real unloading
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - isolated freight hub accepts real unloading
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:691
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:691: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 6 | 5 passed | 1 failed
+
+
+    Start 297: Hub unloading - town and nonfreight delivery controls
+5/8 Test #297: Hub unloading - town and nonfreight delivery controls ......................Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 646 of /home/flax/games/openspacettd/src/engine.cpp: std::size(mapping) >= GetOriginalEngineCount(type)
+Filters: Hub unloading - town and nonfreight delivery controls
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - town and nonfreight delivery controls
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:711
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:716: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  label := { 'G', 'O', 'O', 'D' }
+  hub_owner := -1
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 4 | 3 passed | 1 failed
+
+
+    Start 298: Hub unloading - explicit transfer and no unload keep their meaning
+6/8 Test #298: Hub unloading - explicit transfer and no unload keep their meaning .........Subprocess aborted***Exception:   0.15 sec
+Error: Assertion failed at line 646 of /home/flax/games/openspacettd/src/engine.cpp: std::size(mapping) >= GetOriginalEngineCount(type)
+Filters: Hub unloading - explicit transfer and no unload keep their meaning
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - explicit transfer and no unload keep their meaning
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:742
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:747: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 5 | 4 passed | 1 failed
+
+
+    Start 299: Hub unloading - deposited cargo survives actual save and reload
+7/8 Test #299: Hub unloading - deposited cargo survives actual save and reload ............Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 646 of /home/flax/games/openspacettd/src/engine.cpp: std::size(mapping) >= GetOriginalEngineCount(type)
+Filters: Hub unloading - deposited cargo survives actual save and reload
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - deposited cargo survives actual save and reload
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:765
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:765: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 5 | 4 passed | 1 failed
+
+
+    Start 300: Production gameplay - station facility survives actual save and reload
+8/8 Test #300: Production gameplay - station facility survives actual save and reload .....   Passed    0.04 sec
+
+38% tests passed, 5 tests failed out of 8
+
+Total Test time (real) =   0.85 sec
+
+The following tests FAILED:
+	295 - Hub unloading - industry cargo has exactly one destination (Subprocess aborted)
+	296 - Hub unloading - isolated freight hub accepts real unloading (Subprocess aborted)
+	297 - Hub unloading - town and nonfreight delivery controls (Subprocess aborted)
+	298 - Hub unloading - explicit transfer and no unload keep their meaning (Subprocess aborted)
+	299 - Hub unloading - deposited cargo survives actual save and reload (Subprocess aborted)
+Errors while running CTest

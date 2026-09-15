@@ -14,6 +14,7 @@
 #include "../portal/planet_manager.h"
 #include "../portal/world_gen.h"
 #include "../portal/portal_cmd.h"
+#include "../portal/universe_authority.h"
 #include "../clear_map.h"
 #include "../tree_map.h"
 #include "../tile_map.h"
@@ -22,11 +23,17 @@
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../town.h"
+#include "../rail_map.h"
+#include "../road.h"
+#include "../newgrf_house.h"
 #include "../station_base.h"
 #include "../news_func.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
+#include "../strings_func.h"
+#include "../language.h"
+#include "../timer/timer_game_calendar.h"
 #include "../gfx_func.h"
 #include "../table/sprites.h"
 #include "../table/strings.h"
@@ -313,13 +320,33 @@ TEST_CASE("Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock")
 {
 	MockEnvironment &mock = MockEnvironment::Instance();
 	(void)mock;
+	extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+	extern std::string _config_language_file;
+	auto saved_paths = _valid_searchpaths;
+	auto saved_binary = _searchpaths[Searchpath::BinaryDir];
+	_searchpaths[Searchpath::BinaryDir] = (std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / "build").string() + "/";
+	_valid_searchpaths = {Searchpath::BinaryDir};
+	_languages.clear();
+	_config_language_file = "english.lng";
+	InitializeLanguagePacks();
+	_valid_searchpaths = std::move(saved_paths);
+	_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
+	_game_mode = GameMode::Normal;
+	_settings_game.game_creation.landscape = LandscapeType::Temperate;
+	TimerGameCalendar::SetDate(TimerGameCalendar::ConvertYMDToDate(TimerGameCalendar::Year{1950}, 0, 1), 0);
+	ResetHouses();
+	InitializeBuildingCounts();
+	ResetRoadTypes();
 
 	Map::Allocate(128, 128);
+	_town_pool.CleanPool();
+	RebuildTownKdtree();
 	_company_pool.CleanPool();
 	REQUIRE(Company::CanAllocateItem());
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);
 	_current_company = c->index;
+	c->money = 1000000;
 	_price[Price::BuildTown] = 10000;
 
 	PlanetManager::Reset();
@@ -335,11 +362,20 @@ TEST_CASE("Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock")
 
 	TileIndex t_void = TileXY(2, 2);
 	TileIndex t_world = TileXY(25, 25);
-	MakeClear(t_world, ClearGround::Rough, 3);
+	for (uint y = 4; y <= 60; ++y) {
+		for (uint x = 4; x <= 60; ++x) MakeClear(TileXY(x, y), ClearGround::Grass, 3);
+	}
 
 	/* Execution on void tile fails */
 	CommandCost res_void = CmdColonizeOutpost({}, t_void, "Outpost Fail");
 	CHECK(res_void.Failed());
+	const auto phase_before_site_failure = PlanetManager::GetRegion(WorldID{0})->phase;
+	const uint towns_before_site_failure = Town::GetNumItems();
+	MakeRailNormal(t_world, c->index, TrackBits{Track::X}, RAILTYPE_RAIL);
+	CHECK(CmdColonizeOutpost(DoCommandFlag::Execute, t_world, "Unsuitable Outpost").Failed());
+	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == phase_before_site_failure);
+	CHECK(Town::GetNumItems() == towns_before_site_failure);
+	MakeClear(t_world, ClearGround::Grass, 3);
 
 	/* Test-mode execution succeeds and verifies non-zero cost */
 	CommandCost res_test = CmdColonizeOutpost(DoCommandFlag::Auto, t_world, "Outpost Alpha");
@@ -348,15 +384,76 @@ TEST_CASE("Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock")
 	/* Phase unchanged in test mode */
 	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == WorldPhase::Phase4_Expansion);
 
-	/* Live execution establishes colony and elevates world */
+	/* Denied callers and insufficient funds cannot create a town or change phase. */
+	_current_company = CompanyID::Invalid();
+	CHECK(CmdColonizeOutpost(DoCommandFlag::Execute, t_world, "Denied outpost").Failed());
+	CHECK(Town::GetNumItems() == 0);
+	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == WorldPhase::Phase4_Expansion);
+	_current_company = c->index;
+	Money saved_money = c->money;
+	c->money = 0;
+	CHECK(CmdColonizeOutpost(DoCommandFlag::Execute, t_world, "Unaffordable outpost").Failed());
+	CHECK(Town::GetNumItems() == 0);
+	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == WorldPhase::Phase4_Expansion);
+	c->money = saved_money;
+
+	/* Exhaustion is injected at the pool admission check without allocating
+	 * thousands of fake towns; command failure must leave the world untouched. */
+	{
+		AutoRestoreBackup pool_items(_town_pool.items, TownPool::MAX_SIZE);
+		REQUIRE_FALSE(Town::CanAllocateItem());
+		CHECK(CmdColonizeOutpost(DoCommandFlag::Auto, t_world, "No town slots").Failed());
+		CHECK(CmdColonizeOutpost(DoCommandFlag::Execute, t_world, "No town slots").Failed());
+		CHECK(PlanetManager::GetRegion(WorldID{0})->phase == WorldPhase::Phase4_Expansion);
+		CHECK(PlanetManager::GetRegion(WorldID{0})->name == "Rim Sector 7");
+		CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == 0);
+		CHECK(PlanetManager::GetWorldPrimaryTown(WorldID{0}) == nullptr);
+	}
+	CHECK(Town::GetNumItems() == 0);
+
+	/* Legacy metadata must stay intact until a separate town repair is chosen. */
+	REQUIRE(Town::CanAllocateItem());
+	Town *legacy_town = Town::Create(t_world);
+	REQUIRE(legacy_town != nullptr);
+	legacy_town->name = "Legacy Shell";
+	REQUIRE(PlanetManager::GetWorldPrimaryTown(WorldID{0}) == legacy_town);
+	REQUIRE(legacy_town->cache.num_houses == 0);
+	REQUIRE(legacy_town->cache.population == 0);
+	CommandCost legacy_query = CmdColonizeOutpost(DoCommandFlag::Auto, t_world, "Outpost Alpha");
+	CommandCost legacy_execute = CmdColonizeOutpost(DoCommandFlag::Execute, t_world, "Outpost Alpha");
+	CHECK(legacy_query.GetErrorMessage() == STR_ERROR_CANNOT_COLONIZE_INCOMPLETE_OUTPOST);
+	CHECK(legacy_execute.GetErrorMessage() == STR_ERROR_CANNOT_COLONIZE_INCOMPLETE_OUTPOST);
+	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == WorldPhase::Phase4_Expansion);
+	CHECK(PlanetManager::GetRegion(WorldID{0})->name == "Rim Sector 7");
+	CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == 0);
+	CHECK(PlanetManager::GetWorldPrimaryTown(WorldID{0}) == legacy_town);
+	CHECK(legacy_town->name == "Legacy Shell");
+	delete legacy_town;
+	REQUIRE(Town::GetNumItems() == 0);
+
+	/* Live execution initializes a native settlement before elevating the world. */
 	CommandCost res_exec = CmdColonizeOutpost(DoCommandFlags{DoCommandFlag::Execute, DoCommandFlag::Auto}, t_world, "Outpost Alpha");
-	CHECK(res_exec.Succeeded());
+	REQUIRE(res_exec.Succeeded());
 
 	const PlanetRegion *promoted = PlanetManager::GetRegion(WorldID{0});
 	REQUIRE(promoted != nullptr);
 	CHECK(promoted->phase == WorldPhase::Phase3_Frontier);
 	CHECK(promoted->name == "Outpost Alpha");
 	CHECK(promoted->development_score == 100);
+	Town *settlement = PlanetManager::GetWorldPrimaryTown(WorldID{0});
+	REQUIRE(settlement != nullptr);
+	CHECK(settlement->xy == t_world);
+	CHECK(settlement->name == "Outpost Alpha");
+	CHECK(settlement->cache.num_houses > 0);
+	CHECK(settlement->cache.population > 0);
+	CHECK(PlanetManager::GetWorldPopulation(WorldID{0}) == settlement->cache.population);
+	CHECK(CalcClosestTownFromTile(t_world) == settlement);
+	CHECK(Town::GetNumItems() == 1);
+	const auto directory = UniverseAuthorityService::Instance().GetWorldDirectoryForGUI();
+	const auto directory_world = std::find_if(directory.begin(), directory.end(), [](const RegisteredWorld &entry) { return entry.world_id == WorldID{0}; });
+	REQUIRE(directory_world != directory.end());
+	CHECK(directory_world->name == promoted->name);
+	CHECK(directory_world->phase == promoted->phase);
 
 	/* Post-colonization build rules: raw extraction and depots now unlocked! */
 	CHECK(PlanetManager::CheckIndustryPlacement(t_world, true, false).Succeeded());
@@ -374,6 +471,23 @@ TEST_CASE("Sprint 30 Colonization - Save/Load Persistence of Promoted World Phas
 	Map::Allocate(128, 128);
 	MockEnvironment &mock = MockEnvironment::Instance();
 	(void)mock;
+	extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+	extern std::string _config_language_file;
+	auto saved_paths = _valid_searchpaths;
+	auto saved_binary = _searchpaths[Searchpath::BinaryDir];
+	_searchpaths[Searchpath::BinaryDir] = (std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / "build").string() + "/";
+	_valid_searchpaths = {Searchpath::BinaryDir};
+	_languages.clear();
+	_config_language_file = "english.lng";
+	InitializeLanguagePacks();
+	_valid_searchpaths = std::move(saved_paths);
+	_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
+	_game_mode = GameMode::Normal;
+	_settings_game.game_creation.landscape = LandscapeType::Temperate;
+	TimerGameCalendar::SetDate(TimerGameCalendar::ConvertYMDToDate(TimerGameCalendar::Year{1950}, 0, 1), 0);
+	ResetHouses();
+	InitializeBuildingCounts();
+	ResetRoadTypes();
 	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
 
 	if (_valid_searchpaths.empty()) {
@@ -382,11 +496,15 @@ TEST_CASE("Sprint 30 Colonization - Save/Load Persistence of Promoted World Phas
 
 	_company_pool.CleanPool();
 	_town_pool.CleanPool();
+	RebuildTownKdtree();
 	_station_pool.CleanPool();
 	InitNewsItemStructs();
 	REQUIRE(Company::CanAllocateItem());
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);
+	_current_company = c->index;
+	c->money = 1000000;
+	_price[Price::BuildTown] = 10000;
 
 	PlanetManager::Reset();
 	PlanetRegion r_exp{
@@ -399,10 +517,18 @@ TEST_CASE("Sprint 30 Colonization - Save/Load Persistence of Promoted World Phas
 	};
 	REQUIRE(PlanetManager::RegisterRegion(r_exp));
 
-	/* Colonize to Phase 3 Frontier */
-	REQUIRE(PlanetManager::ColonizeWorld(WorldID{0}, "Fortuna Caldera"));
+	for (uint y = 4; y <= 100; ++y) {
+		for (uint x = 4; x <= 100; ++x) MakeClear(TileXY(x, y), ClearGround::Grass, 3);
+	}
+	TileIndex outpost_tile = TileXY(50, 50);
+	REQUIRE(CmdColonizeOutpost(DoCommandFlags{DoCommandFlag::Execute, DoCommandFlag::Auto}, outpost_tile, "Fortuna Caldera").Succeeded());
 	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == WorldPhase::Phase3_Frontier);
 	CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == 110);
+	Town *before_save = PlanetManager::GetWorldPrimaryTown(WorldID{0});
+	REQUIRE(before_save != nullptr);
+	REQUIRE(before_save->cache.num_houses > 0);
+	REQUIRE(before_save->cache.population > 0);
+	uint32_t population_before_save = before_save->cache.population;
 
 	/* Save game state */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
@@ -425,6 +551,13 @@ TEST_CASE("Sprint 30 Colonization - Save/Load Persistence of Promoted World Phas
 	CHECK(loaded->biome == WorldBiome::Volcanic);
 	CHECK(loaded->name == "Fortuna Caldera");
 	CHECK(loaded->development_score == 110);
+	CHECK(loaded->outpost_tile == outpost_tile);
+	Town *reloaded_town = PlanetManager::GetWorldPrimaryTown(WorldID{0});
+	REQUIRE(reloaded_town != nullptr);
+	CHECK(reloaded_town->xy == outpost_tile);
+	CHECK(reloaded_town->cache.num_houses > 0);
+	CHECK(reloaded_town->cache.population == population_before_save);
+	CHECK(CalcClosestTownFromTile(outpost_tile) == reloaded_town);
 
 	std::filesystem::remove(test_save_file);
 }

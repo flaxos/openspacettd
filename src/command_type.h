@@ -402,6 +402,8 @@ enum class Commands : uint8_t {
 
 	BuildProcessingFacility, ///< attach a production recipe to a company rail station
 	RemoveProcessingFacility, ///< retire a station production facility
+	UpgradeCorporateHQ, ///< advance an owned corporate headquarters by exactly one tier
+	SetLogisticsHubReserve, ///< set a cargo reserve floor for an owned logistics hub
 
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };

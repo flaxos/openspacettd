@@ -30,10 +30,16 @@
 #include "../town.h"
 #include "../town_kdtree.h"
 #include "../train.h"
+#include "../vehicle_func.h"
 #include "../clear_map.h"
 #include "../map_func.h"
 #include "../cargotype.h"
 #include "../economy_base.h"
+#include "../economy_func.h"
+#include "../industry.h"
+#include "../void_map.h"
+#include "../engine_base.h"
+#include "../engine_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
 #include "../gfx_func.h"
@@ -41,8 +47,11 @@
 #include "../strings_func.h"
 #include "../table/sprites.h"
 #include <filesystem>
+#include <chrono>
 
 #include "../safeguards.h"
+
+static Station *SetupProductionGameplay();
 
 TEST_CASE("Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog")
 {
@@ -319,32 +328,18 @@ TEST_CASE("Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loo
 
 TEST_CASE("Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering")
 {
-	(void)MockEnvironment::Instance();
-	PlanetManager::Reset();
-	LogisticsHubManager::Reset();
-	StockpileManager::Reset();
-	ProductionChainManager::Reset();
-
-	WorldID w_refining{2};
-	PlanetRegion r_refining{
-		.id = w_refining,
-		.name = "Vulcan Forge",
-		.phase = WorldPhase::Phase2_Developed,
-		.biome = WorldBiome::Volcanic,
-		.min_x = 110, .min_y = 10, .max_x = 190, .max_y = 90,
-	};
-	PlanetManager::RegisterRegion(r_refining);
-
+	Station *station = SetupProductionGameplay();
+	WorldID w_refining{0};
 	CompanyID c0{0};
-	TileIndex hub_tile{310};
-	StationID st{1};
+	TileIndex hub_tile = station->xy;
+	StationID st = station->index;
 
-	/* Build Logistics Hub on World 2 for Company 0 */
-	LogisticsHubManager::RegisterHub(hub_tile, w_refining, c0, st, "Vulcan Logistics Hub");
+	/* The auto-buffer requires a live, owned rail attachment. */
+	REQUIRE(LogisticsHubManager::RegisterHub(hub_tile, w_refining, c0, st, "Vulcan Logistics Hub") != 0);
 	REQUIRE(LogisticsHubManager::HasLogisticsHub(w_refining, c0));
 
 	/* Register Copper Smelter (2 Copper Ore -> 2 Conductive Wiring) */
-	TileIndex smelter_tile{320};
+	TileIndex smelter_tile = station->xy;
 	FacilityID fid = ProductionChainManager::RegisterFacility(smelter_tile, w_refining, RECIPE_COPPER_SMELTING, c0, 100, st);
 	REQUIRE(fid != INVALID_FACILITY);
 
@@ -445,15 +440,23 @@ static Station *SetupProductionGameplay()
 	TechTreeManager::Reset();
 	_cargo_payment_pool.CleanPool();
 	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
 	_station_pool.CleanPool();
+	_industry_pool.CleanPool();
 	_town_pool.CleanPool();
 	_company_pool.CleanPool();
 	_cargopacket_pool.CleanPool();
 	Map::Allocate(64, 64);
 	for (uint y = 0; y < 64; ++y) {
-		for (uint x = 0; x < 64; ++x) MakeClear(TileXY(x, y), ClearGround::Grass, 3);
+		for (uint x = 0; x < 64; ++x) {
+			TileIndex tile = TileXY(x, y);
+			if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
+			else MakeVoid(tile);
+		}
 	}
 	SetupCargoForClimate(LandscapeType::Temperate);
+	_engine_mngr.ResetToDefaultMapping();
+	SetupEngines();
 	Company *company = Company::CreateAtIndex(CompanyID{0});
 	company->money = 10000000;
 	company->clear_limit = 1000 << 16;
@@ -484,6 +487,298 @@ static Station *SetupProductionGameplay()
 	station->RecomputeCatchment();
 	if (_valid_searchpaths.empty()) _valid_searchpaths.push_back(Searchpath::WorkingDir);
 	return station;
+}
+
+TEST_CASE("Hub authority - invalid attachments reject query and execute without mutation", "[hub-authority]")
+{
+	Station *station = SetupProductionGameplay();
+	TileIndex tile = station->xy;
+	StationID sid = station->index;
+	SECTION("Missing explicit station") { sid = StationID{100}; }
+	SECTION("Invalid tile") { tile = INVALID_TILE; }
+	SECTION("Outside map") { tile = TileIndex{Map::Size()}; }
+	SECTION("Nonexistent company") { _current_company = CompanyID{1}; }
+	SECTION("Foreign explicit station") {
+		REQUIRE(Company::CanAllocateItem());
+		_current_company = Company::Create()->index;
+	}
+	SECTION("Foreign automatic station") {
+		REQUIRE(Company::CanAllocateItem());
+		_current_company = Company::Create()->index;
+		sid = StationID::Invalid();
+	}
+	SECTION("Rail facility removed") { station->facilities.Reset(StationFacility::Train); }
+	SECTION("Rail area empty") { station->train_station.Clear(); }
+	SECTION("Platform removed but metadata remains") { MakeClear(tile, ClearGround::Grass, 3); }
+	SECTION("Waypoint is not a freight platform") { MakeRailWaypoint(tile, station->owner, sid, Axis::X, 0, RAILTYPE_RAIL); }
+	SECTION("Platform owner differs from station owner") { SetTileOwner(tile, OWNER_NONE); }
+	SECTION("Distant explicit station") { tile = TileXY(25, 20); }
+	SECTION("No nearby automatic station") { tile = TileXY(25, 20); sid = StationID::Invalid(); }
+	SECTION("Wrong world despite nearby platform") {
+		PlanetManager::Reset();
+		REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{0}, .name = "West", .phase = WorldPhase::Phase2_Developed,
+			.biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1, .max_x = 20, .max_y = 62}));
+		REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{1}, .name = "East", .phase = WorldPhase::Phase2_Developed,
+			.biome = WorldBiome::Temperate, .min_x = 21, .min_y = 1, .max_x = 62, .max_y = 62}));
+		tile = TileXY(21, 20);
+	}
+	SECTION("Already bound station") {
+		REQUIRE(LogisticsHubManager::RegisterHub(tile, WorldID{0}, station->owner, sid, "Existing") != 0);
+		tile = TileXY(21, 20);
+	}
+	SECTION("Already occupied hub tile") {
+		REQUIRE(LogisticsHubManager::RegisterHub(tile, WorldID{0}, station->owner, sid, "Existing") != 0);
+	}
+	const size_t hubs_before = LogisticsHubManager::GetAllHubs().size();
+	const auto money_before = Company::Get(CompanyID{0})->money;
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, CargoType{2}, 123);
+	CHECK(Command<Commands::BuildLogisticsHub>::Do({}, tile, sid, "Rejected").Failed());
+	CHECK(LogisticsHubManager::GetAllHubs().size() == hubs_before);
+	CHECK(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, tile, sid, "Rejected").Failed());
+	CHECK(LogisticsHubManager::GetAllHubs().size() == hubs_before);
+	CHECK(Company::Get(CompanyID{0})->money == money_before);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, CargoType{2}) == 123);
+}
+
+static Station *AddHubTestStation(Station *first, TileIndex tile)
+{
+	REQUIRE(Station::CanAllocateItem());
+	Station *station = Station::Create(tile);
+	station->name = "Other hub station";
+	station->owner = first->owner;
+	station->town = first->town;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(tile, 1, 1);
+	station->spread = station->train_station;
+	MakeRailStation(tile, station->owner, station->index, Axis::X, 0, RAILTYPE_RAIL);
+	Company::Get(station->owner)->infrastructure.station++;
+	Company::Get(station->owner)->infrastructure.rail[RAILTYPE_RAIL]++;
+	RebuildStationKdtree();
+	station->RecomputeCatchment();
+	return station;
+}
+
+TEST_CASE("Hub authority - explicit and automatic placement share cost and eligibility", "[hub-authority]")
+{
+	Station *station = SetupProductionGameplay();
+	const bool automatic = GENERATE(false, true);
+	const TileIndex tile = TileXY(24, 20); // Inclusive four-tile platform boundary.
+	const auto money = Company::Get(station->owner)->money;
+	const StationID request = automatic ? StationID::Invalid() : station->index;
+	auto query = Command<Commands::BuildLogisticsHub>::Do({}, tile, request, "Boundary hub");
+	REQUIRE(query.Succeeded());
+	CHECK(query.GetCost() == 75000);
+	CHECK(LogisticsHubManager::GetAllHubs().empty());
+	CHECK(Company::Get(station->owner)->money == money);
+	auto execute = Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, tile, request, "Boundary hub");
+	REQUIRE(execute.Succeeded());
+	CHECK(execute.GetCost() == query.GetCost());
+	CHECK(Company::Get(station->owner)->money == money - 75000);
+	const auto *hub = LogisticsHubManager::GetHubAtTile(tile);
+	REQUIRE(hub != nullptr);
+	CHECK(hub->hub_id == 1); // Quotes never allocate an ID.
+	CHECK(hub->station_id == station->index);
+	CHECK(hub->company_id == station->owner);
+	CHECK(hub->world_id == WorldID{0});
+	CHECK(LogisticsHubManager::RegisterHub(tile, WorldID{0}, station->owner, station->index, "Duplicate") == 0);
+	CHECK(LogisticsHubManager::GetAllHubs().size() == 1);
+}
+
+TEST_CASE("Hub authority - automatic placement chooses nearest eligible platform deterministically", "[hub-authority]")
+{
+	Station *first = SetupProductionGameplay();
+	Station *second = AddHubTestStation(first, TileXY(24, 20));
+	TileIndex tile = TileXY(22, 20);
+	StationID expected = first->index;
+	SECTION("Equal distance chooses lower station ID") { }
+	SECTION("Closer higher station ID wins") { tile = TileXY(23, 20); expected = second->index; }
+	SECTION("An already bound station is skipped") {
+		REQUIRE(LogisticsHubManager::RegisterHub(first->xy, WorldID{0}, first->owner, first->index, "Existing") != 0);
+		expected = second->index;
+	}
+	SECTION("Nonrail station is skipped") {
+		first->facilities.Reset(StationFacility::Train);
+		expected = second->index;
+	}
+	SECTION("Foreign station is skipped") {
+		REQUIRE(Company::CanAllocateItem());
+		first->owner = Company::Create()->index;
+		SetTileOwner(first->xy, first->owner);
+		expected = second->index;
+	}
+	const auto count = LogisticsHubManager::GetAllHubs().size();
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do({}, tile, StationID::Invalid(), "Auto").Succeeded());
+	CHECK(LogisticsHubManager::GetAllHubs().size() == count);
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, tile, StationID::Invalid(), "Auto").Succeeded());
+	REQUIRE(LogisticsHubManager::GetHubAtTile(tile) != nullptr);
+	CHECK(LogisticsHubManager::GetHubAtTile(tile)->station_id == expected);
+}
+
+TEST_CASE("Hub authority - platform removal and station deletion retire only invalid bindings", "[hub-authority]")
+{
+	Station *station = SetupProductionGameplay();
+	const StationID sid = station->index;
+	const TileIndex first = station->xy;
+	const TileIndex remaining = TileXY(21, 20);
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	TileIndex anchor = first;
+	bool keep = false;
+	bool destroy = false;
+	SECTION("Last rail tile removes hub immediately") { }
+	SECTION("Partial removal keeps nearby remaining platform") { keep = true; }
+	SECTION("Partial removal retires hub when remaining platform is too far") { anchor = TileXY(16, 20); }
+	SECTION("Station destructor cannot leave binding for a reused ID") { destroy = true; }
+	if (keep || anchor != first) {
+		MakeRailStation(remaining, station->owner, sid, Axis::X, 0, RAILTYPE_RAIL);
+		station->train_station = TileArea(first, 2, 1);
+		station->spread = station->train_station;
+		Company::Get(station->owner)->infrastructure.station++;
+		Company::Get(station->owner)->infrastructure.rail[RAILTYPE_RAIL]++;
+	}
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, anchor, sid, "Lifecycle").Succeeded());
+	const uint32_t id = LogisticsHubManager::GetHubAtTile(anchor)->hub_id;
+	LogisticsHubManager::SetReserveFloor(id, iron, 40);
+	REQUIRE(LogisticsHubManager::DepositToStockpile(anchor, station->owner, iron, 100));
+	if (destroy) {
+		delete station;
+		station = Station::CreateAtIndex(sid, first);
+		station->town = Town::Get(TownID{0});
+		station->owner = CompanyID{0};
+		station->train_station = TileArea(first, 1, 1);
+		station->facilities.Set(StationFacility::Train);
+	} else {
+		REQUIRE(Command<Commands::RemoveFromRailStation>::Do({}, first, first, false).Succeeded());
+		CHECK(LogisticsHubManager::GetHub(id) != nullptr);
+		REQUIRE(Command<Commands::RemoveFromRailStation>::Do(DoCommandFlag::Execute, first, first, false).Succeeded());
+	}
+	CHECK((LogisticsHubManager::GetHub(id) != nullptr) == keep);
+	CHECK((LogisticsHubManager::GetHubForStation(sid) != nullptr) == keep);
+	CHECK(LogisticsHubManager::HasLogisticsHub(WorldID{0}, CompanyID{0}) == keep);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, iron) == 100);
+	if (keep) {
+		CHECK(LogisticsHubManager::GetHub(id)->tile == anchor);
+		CHECK(LogisticsHubManager::GetReserveFloor(id, iron) == 40);
+	} else {
+		CHECK_FALSE(LogisticsHubManager::DepositToStockpile(anchor, CompanyID{0}, iron, 1));
+		CHECK(LogisticsHubManager::WithdrawFromStockpile(anchor, CompanyID{0}, iron, 1) == 0);
+	}
+}
+
+/** Exercise the actual LHUB save chunk and full engine after-load lifecycle. */
+static Station *ReloadHubAuthority(StationID sid)
+{
+	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-hub-wp04-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	REQUIRE(std::filesystem::create_directory(dir));
+	const auto path = (dir / "authority.sav").string();
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	std::filesystem::remove(path);
+	std::filesystem::remove(dir);
+	return Station::Get(sid);
+}
+
+TEST_CASE("Hub authority - native company acquisition transfers attachment and bankruptcy removes it", "[hub-authority]")
+{
+	Station *station = SetupProductionGameplay();
+	const StationID sid = station->index;
+	const TileIndex tile = station->xy;
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	REQUIRE(Company::CanAllocateItem());
+	const CompanyID buyer = Company::Create()->index;
+	Company::Get(buyer)->money = 10000000;
+	AutoRestoreBackup local_company(_local_company, COMPANY_SPECTATOR);
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, tile, sid, "Acquired hub").Succeeded());
+	const uint32_t id = LogisticsHubManager::GetHubForStation(sid)->hub_id;
+	LogisticsHubManager::SetReserveFloor(id, iron, 40);
+	ChangeOwnershipOfCompanyItems(CompanyID{0}, buyer);
+	REQUIRE(LogisticsHubManager::GetHubForStation(sid) != nullptr);
+	CHECK(LogisticsHubManager::GetHub(id)->company_id == buyer);
+	CHECK(station->owner == buyer);
+	CHECK(GetTileOwner(tile) == buyer);
+	CHECK_FALSE(LogisticsHubManager::HasLogisticsHub(WorldID{0}, CompanyID{0}));
+	CHECK(LogisticsHubManager::HasLogisticsHub(WorldID{0}, buyer));
+	CHECK_FALSE(LogisticsHubManager::DepositToStockpile(tile, CompanyID{0}, iron, 100));
+	CHECK(LogisticsHubManager::WithdrawFromStockpile(tile, CompanyID{0}, iron, 100) == 0);
+	CHECK(LogisticsHubManager::DepositToStockpile(tile, buyer, iron, 100));
+	CHECK(LogisticsHubManager::WithdrawFromStockpile(tile, buyer, iron, 100) == 60);
+	station = ReloadHubAuthority(sid);
+	REQUIRE(LogisticsHubManager::GetHubForStation(sid) != nullptr);
+	CHECK(LogisticsHubManager::GetHub(id)->company_id == buyer);
+	CHECK(LogisticsHubManager::GetReserveFloor(id, iron) == 40);
+	CHECK(LogisticsHubManager::GetHub(id)->total_deposited == 100);
+	CHECK(LogisticsHubManager::GetHub(id)->total_dispatched == 60);
+	CHECK(StockpileManager::GetStock(WorldID{0}, buyer, iron) == 40);
+	ChangeOwnershipOfCompanyItems(buyer, INVALID_OWNER);
+	CHECK(LogisticsHubManager::GetHub(id) == nullptr);
+	CHECK_FALSE(LogisticsHubManager::HasLogisticsHub(WorldID{0}, buyer));
+	CHECK(StockpileManager::GetStock(WorldID{0}, buyer, iron) == 40);
+	ReloadHubAuthority(sid);
+	CHECK(LogisticsHubManager::GetAllHubs().empty());
+	CHECK(StockpileManager::GetStock(WorldID{0}, buyer, iron) == 40);
+}
+
+TEST_CASE("Hub authority - save reload retains valid bindings and retires legacy invalid duplicates", "[hub-authority]")
+{
+	Station *station = SetupProductionGameplay();
+	const StationID sid = station->index;
+	const TileIndex tile = station->xy;
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, tile, sid, "Valid survivor").Succeeded());
+	const uint32_t id = LogisticsHubManager::GetHubForStation(sid)->hub_id;
+	LogisticsHubManager::SetReserveFloor(id, iron, 40);
+	REQUIRE(LogisticsHubManager::DepositToStockpile(tile, CompanyID{0}, iron, 100));
+	CHECK(LogisticsHubManager::WithdrawFromStockpile(tile, CompanyID{0}, iron, 20) == 20);
+	const LogisticsHub valid = *LogisticsHubManager::GetHub(id);
+	LogisticsHub legacy = valid;
+	legacy.hub_id = 100;
+	SECTION("Duplicate station at nearby anchor") { legacy.tile = TileXY(21, 20); }
+	SECTION("Duplicate tile with another eligible station") { legacy.station_id = AddHubTestStation(station, TileXY(21, 20))->index; }
+	SECTION("Missing station") { legacy.station_id = StationID{100}; legacy.tile = TileXY(30, 20); }
+	SECTION("Foreign station") { legacy.company_id = CompanyID{1}; }
+	SECTION("Missing world") { legacy.world_id = INVALID_WORLD; }
+	SECTION("Out of map tile") { legacy.tile = TileIndex{Map::Size()}; }
+	SECTION("Distant station") { legacy.tile = TileXY(30, 20); }
+	SECTION("Duplicate maximum hub ID") { legacy.hub_id = UINT32_MAX; }
+	SECTION("Reserved zero hub ID") { legacy.hub_id = 0; }
+	LogisticsHubManager::RestoreHub(legacy);
+	station = ReloadHubAuthority(sid);
+	REQUIRE(LogisticsHubManager::GetAllHubs().size() == 1);
+	const auto *restored = LogisticsHubManager::GetHub(id);
+	REQUIRE(restored != nullptr);
+	CHECK(restored->name == valid.name);
+	CHECK(restored->station_id == sid);
+	CHECK(restored->company_id == CompanyID{0});
+	CHECK(restored->tile == tile);
+	CHECK(restored->world_id == WorldID{0});
+	CHECK(restored->reserve_floors == valid.reserve_floors);
+	CHECK(restored->total_deposited == 100);
+	CHECK(restored->total_dispatched == 20);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, iron) == 80);
+	// Round-trip the repaired save, and prove a malicious ID cannot disable future construction.
+	station = ReloadHubAuthority(sid);
+	Station *second = AddHubTestStation(station, TileXY(30, 20));
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, second->xy, second->index, "After reload").Succeeded());
+	REQUIRE(LogisticsHubManager::GetHubForStation(second->index) != nullptr);
+	CHECK(LogisticsHubManager::GetHubForStation(second->index)->hub_id != 0);
+	CHECK(LogisticsHubManager::GetHubForStation(second->index)->hub_id != id);
+}
+
+TEST_CASE("Hub authority - maximum saved hub ID preserves binding and future construction", "[hub-authority]")
+{
+	Station *station = SetupProductionGameplay();
+	const StationID sid = station->index;
+	LogisticsHubManager::RestoreHub({.hub_id = UINT32_MAX, .tile = station->xy, .world_id = WorldID{0},
+		.company_id = station->owner, .station_id = sid, .name = "Maximum ID", .reserve_floors = {}});
+	station = ReloadHubAuthority(sid);
+	REQUIRE(LogisticsHubManager::GetHub(UINT32_MAX) != nullptr);
+	CHECK(LogisticsHubManager::GetHub(UINT32_MAX)->station_id == sid);
+	Station *other = AddHubTestStation(station, TileXY(30, 20));
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do({}, other->xy, other->index, "New ID").Succeeded());
+	REQUIRE(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, other->xy, other->index, "New ID").Succeeded());
+	REQUIRE(LogisticsHubManager::GetHubForStation(other->index) != nullptr);
+	CHECK(LogisticsHubManager::GetHubForStation(other->index)->hub_id != 0);
+	CHECK(LogisticsHubManager::GetHubForStation(other->index)->hub_id != UINT32_MAX);
+	CHECK(LogisticsHubManager::GetAllHubs().size() == 2);
 }
 
 TEST_CASE("Production gameplay - command validation and station lifecycle", "[production-gameplay]")
@@ -607,6 +902,445 @@ TEST_CASE("Production gameplay - real cargo unloading conversion and onward load
 	}
 	_cargo_payment_pool.CleanPool();
 	_vehicle_pool.CleanPool();
+}
+
+/** A real cargo packet entering the normal station unloading preparation path. */
+static Train *PrepareHubDelivery(Station *station, CargoType cargo, OrderUnloadType unload = OrderUnloadType::Unload)
+{
+	if (Engine::GetIfValid(EngineID{0}) == nullptr) {
+		_engine_mngr.ResetToDefaultMapping();
+		SetupEngines();
+	}
+	REQUIRE(Train::CanAllocateItem());
+	Train *train = Train::Create();
+	train->SetFrontEngine();
+	train->engine_type = EngineID{0};
+	train->owner = station->owner;
+	train->last_station_visited = station->index;
+	train->tile = station->xy;
+	train->cargo_type = cargo;
+	train->cargo_cap = 60;
+	train->current_order.MakeLoading(false);
+	train->current_order.SetUnloadType(unload);
+	train->current_order.SetLoadType(OrderLoadType::NoLoad);
+	REQUIRE(CargoPacket::CanAllocateItem());
+	CargoPacket *input = CargoPacket::Create(60, 1, StationID::Invalid(), TileXY(5, 5), 0);
+	input->UpdateLoadingTile(TileXY(5, 5));
+	train->cargo.Append(input, VehicleCargoList::MoveToAction::Keep);
+	PrepareUnload(train);
+	return train;
+}
+
+TEST_CASE("Hub unloading - industry cargo has exactly one destination", "[hub-unloading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	CargoSpec::Get(iron)->current_payment = 1000;
+	REQUIRE(Industry::CanAllocateItem());
+	Industry *industry = Industry::Create(TileXY(21, 20));
+	industry->town = station->town;
+	industry->accepted.push_back({.cargo = iron});
+	station->industries_near.insert({0, industry});
+	station->goods[iron].status.Set(GoodsEntry::State::Acceptance);
+	const bool has_hub = GENERATE(false, true);
+	CAPTURE(has_hub);
+	if (has_hub) REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Conservation hub") != 0);
+	Train *train = PrepareHubDelivery(station, iron);
+	REQUIRE(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 60);
+	CargoPayment *payment = train->cargo_payment;
+	const uint32_t development = PlanetManager::GetRegion(WorldID{0})->development_score;
+	const auto town_effect = CargoSpec::Get(iron)->town_acceptance_effect;
+	for (uint moved : {17u, 43u}) {
+		REQUIRE(train->cargo.Unload(moved, &station->goods[iron].GetOrCreateData().cargo, iron, payment, station->xy) == moved);
+		uint delivered = 60 - train->cargo.StoredCount();
+		uint stock = StockpileManager::GetStock(WorldID{0}, station->owner, iron);
+		CHECK(industry->accepted[0].waiting + stock + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 60);
+		CHECK(industry->accepted[0].waiting == (has_hub ? 0 : delivered));
+		CHECK(stock == (has_hub ? delivered : 0));
+		CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == (has_hub ? 0 : delivered));
+		CHECK(station->town->received[town_effect].new_act == (has_hub ? 0 : delivered));
+		if (has_hub) {
+			CHECK(payment->route_profit == 0);
+			CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == development);
+			CHECK(LogisticsHubManager::GetHubForStation(station->index)->total_deposited == delivered);
+		} else {
+			CHECK(payment->route_profit > 0);
+			CHECK(PlanetManager::GetRegion(WorldID{0})->development_score > development);
+		}
+	}
+	/* Finish the station cycle so native production flushes its deferred list. */
+	LoadUnloadStation(station);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+}
+
+TEST_CASE("Hub unloading - isolated freight hub accepts real unloading", "[hub-unloading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Isolated hub") != 0);
+	REQUIRE_FALSE(station->goods[iron].status.Test(GoodsEntry::State::Acceptance));
+	Train *train = PrepareHubDelivery(station, iron);
+	CHECK(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 60);
+	AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, false);
+	/* Exercise both PrepareUnload and the acceptance recheck in the station tick. */
+	LoadUnloadStation(station);
+	CHECK(train->cargo.StoredCount() == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 60);
+	CHECK(station->goods[iron].AvailableCount() == 0);
+	CHECK(train->cargo_payment->route_profit == 0);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+}
+
+TEST_CASE("Hub unloading - town and nonfreight delivery controls", "[hub-unloading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CargoLabel label = GENERATE(CT_GOODS, CT_PASSENGERS, CT_MAIL);
+	const CargoType cargo = GetCargoTypeByLabel(label);
+	const int hub_owner = GENERATE(-1, 0, 1);
+	CAPTURE(label, hub_owner);
+	CargoSpec::Get(cargo)->current_payment = 1000;
+	station->always_accepted.Set(cargo);
+	station->goods[cargo].status.Set(GoodsEntry::State::Acceptance);
+	if (hub_owner >= 0) {
+		if (hub_owner == 1) {
+			REQUIRE(Company::CanAllocateItem());
+			REQUIRE(Company::Create()->index == CompanyID{1});
+			/* Old saves can contain a foreign binding; it must remain inactive. */
+			LogisticsHubManager::RestoreHub({.hub_id = 1, .tile = station->xy, .world_id = WorldID{0},
+				.company_id = CompanyID{1}, .station_id = station->index, .name = "Legacy foreign hub", .reserve_floors = {}});
+		} else {
+			REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Town hub") != 0);
+		}
+	}
+	Train *train = PrepareHubDelivery(station, cargo);
+	REQUIRE(train->cargo.Unload(60, &station->goods[cargo].GetOrCreateData().cargo, cargo, train->cargo_payment, station->xy) == 60);
+	const uint stored = hub_owner == 0 && CargoSpec::Get(cargo)->is_freight ? 60 : 0;
+	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, cargo) == stored);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{1}, cargo) == 0);
+	CHECK(station->town->GetOrCreateCargoAccepted(cargo).history[THIS_MONTH].accepted == 60 - stored);
+	CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[cargo] == 60 - stored);
+	CHECK((train->cargo_payment->route_profit == 0) == (stored == 60));
+	CHECK(station->goods[cargo].AvailableCount() + train->cargo.StoredCount() == 0);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+}
+
+TEST_CASE("Hub unloading - explicit transfer and no unload keep their meaning", "[hub-unloading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Order hub") != 0);
+	const OrderUnloadType order = GENERATE(OrderUnloadType::Transfer, OrderUnloadType::NoUnload);
+	Train *train = PrepareHubDelivery(station, iron, order);
+	CHECK(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 0);
+	if (order == OrderUnloadType::Transfer) {
+		CHECK(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, train->cargo_payment, station->xy) == 60);
+		CHECK(station->goods[iron].AvailableCount() == 60);
+	} else {
+		CHECK(train->cargo.StoredCount() == 60);
+		CHECK(train->cargo.UnloadCount() == 0);
+	}
+	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 0);
+	CHECK(train->cargo_payment->route_profit == 0);
+	CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == 0);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+}
+
+TEST_CASE("Hub unloading - deposited cargo survives actual save and reload", "[hub-unloading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const StationID sid = station->index;
+	const CompanyID owner = station->owner;
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	const uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, owner, sid, "Persistent hub");
+	REQUIRE(hub_id != 0);
+	/* Existing balances remain intact; unloading adds only the physical delivery. */
+	StockpileManager::AddCargo(WorldID{0}, owner, iron, 11);
+	Train *train = PrepareHubDelivery(station, iron);
+	REQUIRE(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, train->cargo_payment, station->xy) == 60);
+	const Money money = Company::Get(owner)->money;
+	delete train->cargo_payment;
+	CHECK(Company::Get(owner)->money == money);
+	station->loading_vehicles.clear();
+	_vehicle_pool.CleanPool();
+	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-hub-wp02-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	REQUIRE(std::filesystem::create_directory(dir));
+	const auto path = (dir / "hub.sav").string();
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 71);
+	REQUIRE(LogisticsHubManager::GetHub(hub_id) != nullptr);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_deposited == 60);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->station_id == sid);
+	CHECK(Company::Get(owner)->money == money);
+	CHECK(Company::Get(owner)->cur_economy.delivered_cargo[iron] == 0);
+	CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == 0);
+	CHECK(Station::Get(sid)->goods[iron].AvailableCount() == 0);
+	std::filesystem::remove(path);
+	std::filesystem::remove(dir);
+}
+
+TEST_CASE("Hub unloading - invalid stored destination cannot consume cargo", "[hub-unloading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	const bool invalid_tile = GENERATE(false, true);
+	LogisticsHubManager::RestoreHub({.hub_id = 1, .tile = invalid_tile ? INVALID_TILE : station->xy,
+		.world_id = invalid_tile ? WorldID{0} : INVALID_WORLD, .company_id = station->owner, .station_id = station->index,
+		.name = "Invalid destination", .reserve_floors = {}});
+	Train *train = PrepareHubDelivery(station, iron);
+	CHECK(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 0);
+	REQUIRE(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, train->cargo_payment, station->xy) == 60);
+	CHECK(station->goods[iron].AvailableCount() == 60);
+	CHECK(LogisticsHubManager::GetHub(1)->total_deposited == 0);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+}
+
+/** Reuse the real train fixture for pickup without an incoming delivery. */
+static Train *PrepareHubPickup(Station *station, CargoType cargo)
+{
+	Train *train = PrepareHubDelivery(station, cargo, OrderUnloadType::NoUnload);
+	train->cargo.Truncate();
+	/* Loading refreshes the consist's capacity and length. Give the controlled
+	 * 60-unit test vehicle matching engine data and initialize the native cache. */
+	Engine *engine = Engine::Get(train->engine_type);
+	engine->info.cargo_type = cargo;
+	engine->VehInfo<RailVehicleInfo>().capacity = 60;
+	train->ConsistChanged(CCF_ARRANGE);
+	REQUIRE(train->cargo_cap == 60);
+	train->current_order.SetLoadType(OrderLoadType::LoadIfPossible);
+	return train;
+}
+
+/** Exercise native allocation checks with a bounded number of free slots. The
+ * occupancy bias is removed on scope exit, preserving real allocations/deletions. */
+class ScopedCargoPacketCapacity {
+	size_t bias;
+public:
+	explicit ScopedCargoPacketCapacity(size_t free_slots)
+	{
+		REQUIRE(_cargopacket_pool.items + free_slots <= CargoPacketPool::MAX_SIZE);
+		this->bias = CargoPacketPool::MAX_SIZE - free_slots - _cargopacket_pool.items;
+		_cargopacket_pool.items += this->bias;
+	}
+	~ScopedCargoPacketCapacity() { _cargopacket_pool.items -= this->bias; }
+};
+
+/** Persist the physical stockpile/station cargo after a refused pickup. */
+static Station *ReloadHubPickup(Station *station, Train *train)
+{
+	REQUIRE(train->cargo.StoredCount() == 0);
+	const StationID sid = station->index;
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	train->cargo.Truncate();
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-hub-wp03-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	REQUIRE(std::filesystem::create_directory(dir));
+	const auto path = (dir / "pickup.sav").string();
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	std::filesystem::remove(path);
+	std::filesystem::remove(dir);
+	return Station::Get(sid);
+}
+
+TEST_CASE("Hub loading - full packet pool preserves inventory and recovers", "[hub-loading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	const uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Pickup hub");
+	REQUIRE(hub_id != 0);
+	StockpileManager::AddCargo(WorldID{0}, station->owner, iron, 100);
+	LogisticsHubManager::SetReserveFloor(hub_id, iron, 40);
+	Train *train = PrepareHubPickup(station, iron);
+	const uint16_t waiting = GENERATE(0, 20);
+	if (waiting > 0) {
+		REQUIRE(CargoPacket::CanAllocateItem());
+		station->goods[iron].GetOrCreateData().cargo.Append(CargoPacket::Create(station->index, waiting, Source{}), StationID::Invalid());
+	}
+	AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, false);
+	const size_t packets = CargoPacket::GetNumItems();
+	{
+		/* Deterministically reject allocation through the native pool check without
+		 * constructing sixteen million packets. Existing packets can still move. */
+		ScopedCargoPacketCapacity full_pool(0);
+		REQUIRE_FALSE(CargoPacket::CanAllocateItem());
+		LoadUnloadStation(station);
+		CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 100);
+		CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 0);
+		CHECK(station->goods[iron].AvailableCount() == 0);
+		CHECK(train->cargo.StoredCount() == waiting);
+		CHECK(_cargopacket_pool.items == CargoPacketPool::MAX_SIZE);
+	}
+	CHECK(CargoPacket::GetNumItems() == packets);
+	REQUIRE(CargoPacket::CanAllocateItem());
+	/* Start another pickup attempt after LoadIfPossible completed its earlier slice. */
+	train->vehicle_flags.Reset({VehicleFlag::StopLoading, VehicleFlag::LoadingFinished});
+	train->load_unload_ticks = 1;
+	LoadUnloadStation(station);
+	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 40u + waiting);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60u - waiting);
+	CHECK(train->cargo.StoredCount() == 60);
+	CHECK(station->goods[iron].AvailableCount() == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 100u + waiting);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	train->cargo.Truncate();
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	CHECK(CargoPacket::GetNumItems() == 0);
+}
+
+TEST_CASE("Hub loading - capacity reserve and rights boundaries conserve cargo", "[hub-loading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CompanyID owner = station->owner;
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	const uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, owner, station->index, "Boundary hub");
+	REQUIRE(hub_id != 0);
+	Train *train = PrepareHubPickup(station, iron);
+	uint32_t stock = 100, expected = 60;
+	uint16_t waiting = 0, onboard = 0;
+	SECTION("Empty inventory releases the unused allocated packet") { stock = 0; expected = 0; }
+	SECTION("Below reserve releases the unused allocated packet") { stock = 39; expected = 0; }
+	SECTION("At reserve releases the unused allocated packet") { stock = 40; expected = 0; }
+	SECTION("One unit above reserve reduces the allocated packet") { stock = 41; expected = 1; }
+	SECTION("Available stock fills capacity") { }
+	SECTION("Zero capacity") { train->cargo_cap = 0; expected = 0; }
+	SECTION("Full vehicle") { onboard = 60; expected = 0; }
+	SECTION("No loading order") { train->current_order.SetLoadType(OrderLoadType::NoLoad); expected = 0; }
+	SECTION("Waiting cargo already fills the vehicle") { waiting = 60; expected = 0; }
+	SECTION("Only the gap after waiting cargo is withdrawn") { waiting = 20; expected = 40; }
+	SECTION("Exclusive rights deny pickup without withdrawing") {
+		station->owner = OWNER_NONE;
+		station->town->exclusive_counter = 12;
+		station->town->exclusivity = CompanyID{1};
+		expected = 0;
+	}
+	SECTION("Exclusive rights allow waiting cargo but cannot revive an unowned hub") {
+		station->owner = OWNER_NONE;
+		station->town->exclusive_counter = 12;
+		station->town->exclusivity = owner;
+		waiting = 20;
+		expected = 0;
+	}
+	SECTION("Owned hub is unaffected by another company's town exclusivity") {
+		station->town->exclusive_counter = 12;
+		station->town->exclusivity = CompanyID{1};
+	}
+	StockpileManager::AddCargo(WorldID{0}, owner, iron, stock);
+	LogisticsHubManager::SetReserveFloor(hub_id, iron, 40);
+	if (waiting > 0) {
+		REQUIRE(CargoPacket::CanAllocateItem());
+		station->goods[iron].GetOrCreateData().cargo.Append(CargoPacket::Create(station->index, waiting, Source{}), StationID::Invalid());
+	}
+	if (onboard > 0) {
+		REQUIRE(CargoPacket::CanAllocateItem());
+		CargoPacket *cp = CargoPacket::Create(onboard, 1, StationID::Invalid(), TileXY(5, 5), 0);
+		cp->UpdateLoadingTile(TileXY(5, 5));
+		train->cargo.Append(cp, VehicleCargoList::MoveToAction::Keep);
+	}
+	AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, false);
+	LoadUnloadStation(station);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == stock - expected);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == expected);
+	CHECK(train->cargo.StoredCount() == onboard + waiting + expected);
+	CHECK(station->goods[iron].AvailableCount() == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == stock + waiting + onboard);
+	if (train->cargo.StoredCount() == 0) CHECK(CargoPacket::GetNumItems() == 0);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	train->cargo.Truncate();
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	CHECK(CargoPacket::GetNumItems() == 0);
+}
+
+TEST_CASE("Hub loading - failed pickup survives reload and retries", "[hub-loading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CompanyID owner = station->owner;
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	const uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, owner, station->index, "Reload hub");
+	REQUIRE(hub_id != 0);
+	StockpileManager::AddCargo(WorldID{0}, owner, iron, 100);
+	LogisticsHubManager::SetReserveFloor(hub_id, iron, 40);
+	Train *train = PrepareHubPickup(station, iron);
+	{
+		ScopedCargoPacketCapacity full_pool(0);
+		LoadUnloadStation(station);
+	}
+	station = ReloadHubPickup(station, train);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 100);
+	REQUIRE(LogisticsHubManager::GetHub(hub_id) != nullptr);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 0);
+	CHECK(LogisticsHubManager::GetReserveFloor(hub_id, iron) == 40);
+	CHECK(station->goods[iron].AvailableCount() == 0);
+	train = PrepareHubPickup(station, iron);
+	AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, false);
+	LoadUnloadStation(station);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 40);
+	CHECK(train->cargo.StoredCount() == 60);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	train->cargo.Truncate();
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	CHECK(CargoPacket::GetNumItems() == 0);
+}
+
+TEST_CASE("Hub loading - failed packet split keeps cargo available", "[hub-loading][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	const CompanyID owner = station->owner;
+	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
+	const uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, owner, station->index, "Split hub");
+	REQUIRE(hub_id != 0);
+	StockpileManager::AddCargo(WorldID{0}, owner, iron, 100);
+	LogisticsHubManager::SetReserveFloor(hub_id, iron, 40);
+	Train *train = PrepareHubPickup(station, iron);
+	{
+		AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, true);
+		AutoRestoreBackup load_amount(Engine::Get(train->engine_type)->info.load_amount, uint8_t{10});
+		/* The withdrawal packet fits; the subsequent gradual-loading split does not. */
+		ScopedCargoPacketCapacity last_slot(1);
+		LoadUnloadStation(station);
+		CHECK(_cargopacket_pool.items == CargoPacketPool::MAX_SIZE);
+	}
+	CHECK(CargoPacket::GetNumItems() == 1);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 40);
+	CHECK(station->goods[iron].AvailableCount() == 60);
+	CHECK(train->cargo.StoredCount() == 0);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60);
+	station = ReloadHubPickup(station, train);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 40);
+	CHECK(station->goods[iron].AvailableCount() == 60);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60);
+	train = PrepareHubPickup(station, iron);
+	AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, false);
+	LoadUnloadStation(station);
+	CHECK(train->cargo.StoredCount() == 60);
+	CHECK(station->goods[iron].AvailableCount() == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 40);
+	CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60);
+	station->loading_vehicles.clear();
+	_cargo_payment_pool.CleanPool();
+	train->cargo.Truncate();
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	CHECK(CargoPacket::GetNumItems() == 0);
 }
 
 TEST_CASE("Production gameplay - station facility survives actual save and reload", "[production-gameplay]")

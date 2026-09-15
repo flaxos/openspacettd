@@ -8,6 +8,7 @@
 /** @file afterload.cpp Code updating data after game load. */
 
 #include "../stdafx.h"
+#include "../portal/logistics_hub.h"
 #include "../void_map.h"
 #include "../signs_base.h"
 #include "../depot_base.h"
@@ -3352,6 +3353,7 @@ bool AfterLoadGame()
 
 	/* Compute station catchment areas. This is needed here in case UpdateStationAcceptance is called below. */
 	Station::RecomputeCatchmentForAll();
+	LogisticsHubManager::ValidateAfterLoad();
 
 	/* Station acceptance is some kind of cache */
 	if (IsSavegameVersionBefore(SaveLoadVersion::TownAcceptance)) {

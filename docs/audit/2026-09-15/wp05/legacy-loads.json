@@ -1,0 +1,48 @@
+[
+  {
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/openspacettd-audit-20260915/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=1000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-d",
+      "misc=1,script=2",
+      "-g",
+      "/tmp/openspacettd-audit-20260915/blueprint-crash.sav"
+    ],
+    "cwd": "/tmp/openspacettd-audit-20260915",
+    "exit_code": 0,
+    "sha256_before": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03",
+    "sha256_after": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03",
+    "log": "logs/blueprint-crash-legacy-load.log"
+  },
+  {
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/openspacettd-audit-20260915/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=1000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-d",
+      "misc=1,script=2",
+      "-g",
+      "/tmp/openspacettd-audit-20260915/uat-v1.1.sav"
+    ],
+    "cwd": "/tmp/openspacettd-audit-20260915",
+    "exit_code": 0,
+    "sha256_before": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b",
+    "sha256_after": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b",
+    "log": "logs/uat-v1.1-legacy-load.log"
+  }
+]

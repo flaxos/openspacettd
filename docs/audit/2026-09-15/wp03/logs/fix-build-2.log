@@ -1,0 +1,23 @@
+ninja: Entering directory `build'
+[1/6] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/5] Building CXX object CMakeFiles/openttd_lib.dir/src/economy.cpp.o
+[3/5] Linking CXX executable openttd
+[4/5] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o
+In file included from /home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:11:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp: In function ‘void C_A_T_C_H_T_E_S_T_44()’:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:893:76: warning: comparison of integer expressions of different signedness: ‘uint32_t’ {aka ‘unsigned int’} and ‘int’ [-Wsign-compare]
+  893 |         CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 40 + waiting);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:894:69: warning: comparison of integer expressions of different signedness: ‘const uint64_t’ {aka ‘const long unsigned int’} and ‘int’ [-Wsign-compare]
+  894 |         CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60 - waiting);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:897:145: warning: comparison of integer expressions of different signedness: ‘uint32_t’ {aka ‘unsigned int’} and ‘int’ [-Wsign-compare]
+  897 |         CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 100 + waiting);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+[5/5] Linking CXX executable openttd_test

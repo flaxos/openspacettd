@@ -1,0 +1,10 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 209: Blueprint rejected placement preserves map money and materials
+1/2 Test #209: Blueprint rejected placement preserves map money and materials ...   Passed    0.08 sec
+    Start 216: CST Prefabs - Deterministic In-Game Map Placement
+2/2 Test #216: CST Prefabs - Deterministic In-Game Map Placement ................   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.33 sec

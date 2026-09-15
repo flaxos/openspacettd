@@ -1,0 +1,24 @@
+{
+  "directory": "/tmp/openspacettd-wp06-base-pcj37kf6",
+  "files": [
+    "src/blueprint/blueprint.h",
+    "src/blueprint/blueprint.cpp",
+    "src/blueprint/blueprint_manager.h",
+    "src/blueprint/blueprint_manager.cpp",
+    "src/blueprint/blueprint_gui.cpp",
+    "src/tests/test_blueprint.cpp",
+    "src/tests/test_cst_prefabs.cpp",
+    "src/tests/CMakeLists.txt",
+    "src/lang/english.txt",
+    "src/lang/english_AU.txt",
+    "src/lang/english_US.txt"
+  ],
+  "new_files": [
+    "src/tests/test_blueprint_validation.cpp",
+    "src/tests/test_blueprint_storage.cpp",
+    "src/tests/test_blueprint_file_gui.cpp",
+    "src/tests/blueprint_io_faults.c",
+    "scripts/test_blueprint_io_failures.py"
+  ],
+  "captured_at_utc": "2026-09-15T13:42:21.129322+00:00"
+}

@@ -1,0 +1,59 @@
+ninja: Entering directory `build'
+[1/6] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/5] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o
+FAILED: CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o 
+/usr/bin/c++ -DGLOBAL_DATA_DIR=\"/usr/local/share/games/openttd\" -DPERSONAL_DIR=\".openttd\" -DPOINTER_IS_64BIT -DUNIX -DWITH_ASSERT -DWITH_CURL -DWITH_FLUIDSYNTH -DWITH_FONTCONFIG -DWITH_FREETYPE -DWITH_HARFBUZZ -DWITH_ICU_I18N -DWITH_ICU_UC -DWITH_LIBLZMA -DWITH_LZO -DWITH_OPENGL -DWITH_OPUSFILE -DWITH_PERSONAL_DIR -DWITH_PNG -DWITH_SDL2 -DWITH_SOXR -DWITH_SSE -DWITH_ZLIB -I/home/flax/games/openspacettd/src/3rdparty/squirrel/include -I/usr/include/harfbuzz -I/home/flax/games/openspacettd/build/generated -I/home/flax/games/openspacettd/build/generated/script/api -I/home/flax/games/openspacettd/src/script/api -I/home/flax/games/openspacettd/build/generated/script -I/home/flax/games/openspacettd/build/generated/script/api/ai -I/home/flax/games/openspacettd/src/script/api/ai -I/home/flax/games/openspacettd/build/generated/script/api/game -I/home/flax/games/openspacettd/src/script/api/game -I/home/flax/games/openspacettd/build/generated/script/api/template -I/home/flax/games/openspacettd/src/script/api/template -isystem /usr/include/SDL2 -isystem /usr/include/freetype2 -isystem /usr/include/opus -isystem /usr/include/ogg -O3 -DNDEBUG -std=c++20 -finput-charset=utf-8 -D_FORTIFY_SOURCE=2 -W -Wall -Wcast-qual -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wformat-security -Wformat=2 -Winit-self -Wnon-virtual-dtor -Wsuggest-override -fno-strict-enums -fno-strict-overflow -Wno-redundant-move -MD -MT CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o -MF CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o.d -o CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o -c /home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp
+In file included from /home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:11:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp: In function ‘void C_A_T_C_H_T_E_S_T_44()’:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:893:76: warning: comparison of integer expressions of different signedness: ‘uint32_t’ {aka ‘unsigned int’} and ‘int’ [-Wsign-compare]
+  893 |         CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 40 + waiting);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:894:69: warning: comparison of integer expressions of different signedness: ‘const uint64_t’ {aka ‘const long unsigned int’} and ‘int’ [-Wsign-compare]
+  894 |         CHECK(LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60 - waiting);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:897:145: warning: comparison of integer expressions of different signedness: ‘uint32_t’ {aka ‘unsigned int’} and ‘int’ [-Wsign-compare]
+  897 |         CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 100 + waiting);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp: In function ‘void C_A_T_C_H_T_E_S_T_63()’:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1005:96: error: class template argument deduction failed:
+ 1005 |                 AutoRestoreBackup load_amount(train->GetEngine()->info.load_amount, uint8_t{10});
+      |                                                                                                ^
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1005:96: error: no matching function for call to ‘AutoRestoreBackup(const uint8_t&, uint8_t)’
+In file included from /home/flax/games/openspacettd/src/tests/../command_func.h:17,
+                 from /home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:24:
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:196:9: note: candidate: ‘template<class T> AutoRestoreBackup(const AutoRestoreBackup<T>&)-> AutoRestoreBackup<T>’
+  196 |         AutoRestoreBackup(const AutoRestoreBackup&) = delete;
+      |         ^~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:196:9: note:   template argument deduction/substitution failed:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1005:96: note:   mismatched types ‘const AutoRestoreBackup<T>’ and ‘const uint8_t’ {aka ‘const unsigned char’}
+ 1005 |                 AutoRestoreBackup load_amount(train->GetEngine()->info.load_amount, uint8_t{10});
+      |                                                                                                ^
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:170:9: note: candidate: ‘template<class T> AutoRestoreBackup(T&)-> AutoRestoreBackup<T>’
+  170 |         AutoRestoreBackup(T &original) : original(original), original_value(original)
+      |         ^~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:170:9: note:   template argument deduction/substitution failed:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1005:96: note:   candidate expects 1 argument, 2 provided
+ 1005 |                 AutoRestoreBackup load_amount(train->GetEngine()->info.load_amount, uint8_t{10});
+      |                                                                                                ^
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:161:9: note: candidate: ‘template<class T> AutoRestoreBackup(T&, T)-> AutoRestoreBackup<T>’
+  161 |         AutoRestoreBackup(T &original, T new_value) : original(original), original_value(original)
+      |         ^~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:161:9: note:   template argument deduction/substitution failed:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1005:96: note:   deduced conflicting types for parameter ‘T’ (‘const unsigned char’ and ‘unsigned char’)
+ 1005 |                 AutoRestoreBackup load_amount(train->GetEngine()->info.load_amount, uint8_t{10});
+      |                                                                                                ^
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:149:8: note: candidate: ‘template<class T> AutoRestoreBackup(AutoRestoreBackup<T>)-> AutoRestoreBackup<T>’
+  149 | struct AutoRestoreBackup {
+      |        ^~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/../core/backup_type.hpp:149:8: note:   template argument deduction/substitution failed:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1005:96: note:   mismatched types ‘AutoRestoreBackup<T>’ and ‘unsigned char’
+ 1005 |                 AutoRestoreBackup load_amount(train->GetEngine()->info.load_amount, uint8_t{10});
+      |                                                                                                ^
+[3/5] Building CXX object CMakeFiles/openttd_lib.dir/src/economy.cpp.o
+ninja: build stopped: subcommand failed.

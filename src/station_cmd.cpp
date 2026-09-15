@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "portal/production_chain.h"
+#include "portal/logistics_hub.h"
 #include "core/flatset_type.hpp"
 #include "aircraft.h"
 #include "bridge_map.h"
@@ -805,6 +806,7 @@ void Station::AfterStationTileSetChange(bool adding, StationType type)
 		InvalidateWindowData(WindowClass::JoinStation, 0, 0);
 	} else {
 		if (!this->facilities.Test(StationFacility::Train)) ProductionChainManager::RemoveForStation(this->index);
+		LogisticsHubManager::RefreshForStation(this->index);
 		DeleteStationIfEmpty(this);
 		this->RecomputeCatchment();
 		UpdateStationAcceptance(this, false);
@@ -1840,6 +1842,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, std::vector<T *> &affected_st
 		 * Handle both partial platform edits and complete removal here, including
 		 * the bulk-demolition path. Waypoints must not touch station facilities. */
 		if constexpr (std::is_same_v<T, Station>) {
+			LogisticsHubManager::RefreshForStation(st->index);
 			if (st->train_station.IsEmpty()) {
 				ProductionChainManager::RemoveForStation(st->index);
 			} else if (auto *facility = ProductionChainManager::GetFacilityForStation(st->index)) {

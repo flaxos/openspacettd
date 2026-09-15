@@ -1,0 +1,9 @@
+{
+  "commit": "abbcd7e07737bcd83c3f830f539313a45bef5f01",
+  "branch": "fix/portal-gate-lifecycle-crashes",
+  "temporary_source_snapshot": "/tmp/openspacettd-wp03-base-9ibtcw9b",
+  "files": [
+    "src/economy.cpp",
+    "src/tests/test_sprint42_production_chains.cpp"
+  ]
+}

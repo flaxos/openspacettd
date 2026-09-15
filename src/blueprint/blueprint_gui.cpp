@@ -10,6 +10,7 @@
 #include "blueprint_manager.h"
 #include "blueprint_cmd.h"
 #include "../window_gui.h"
+#include "../window_func.h"
 #include "../strings_func.h"
 #include "../viewport_func.h"
 #include "../gfx_func.h"
@@ -30,6 +31,8 @@ enum class BlueprintWindowMode : uint8_t {
 	Capturing,
 	Placing,
 };
+
+enum class BlueprintQuery : uint8_t { None, CaptureName, Rename, Export, Import };
 
 static constexpr std::initializer_list<NWidgetPart> _nested_blueprint_library_widgets = {
 	NWidget(NWID_HORIZONTAL),
@@ -77,12 +80,17 @@ struct BlueprintLibraryWindow : Window {
 
 	Blueprint working_bp;
 	bool has_working_bp = false;
+	BlueprintQuery pending_query = BlueprintQuery::None;
+	size_t pending_index = 0;
+	Blueprint pending_export;
+	Blueprint pending_capture;
 
 	BlueprintLibraryWindow(WindowDesc &desc, WindowNumber window_number) : Window(desc)
 	{
 		this->CreateNestedTree();
 		this->vscroll = this->GetScrollbar(WID_BPL_SCROLLBAR);
-		BlueprintManager::Initialize();
+		std::string scan_error;
+		if (!BlueprintManager::RescanLibrary(&scan_error)) this->status_message = "Library scan: " + scan_error;
 		this->FinishInitNested(window_number);
 		this->UpdateSelection();
 	}
@@ -107,6 +115,7 @@ struct BlueprintLibraryWindow : Window {
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
+		if (widget == WID_BPL_STATUS_BAR) return this->status_message;
 		if (widget == WID_BPL_CAPTION) {
 			return GetString(STR_BLUEPRINT_VIEW_CAPTION);
 		}
@@ -206,11 +215,13 @@ struct BlueprintLibraryWindow : Window {
 		Rect sr = status_wid->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
 		TextColour status_tc = (this->mode == BlueprintWindowMode::Placing) ? TextColour::Yellow :
 		                       ((this->mode == BlueprintWindowMode::Capturing) ? TextColour::Orange : TextColour::Silver);
-		DrawString(sr.left + 4, sr.right - 4, sr.top + 4, this->status_message, status_tc);
+		DrawString(sr.left + 4, sr.right - 4, sr.top + 4, this->GetWidgetString(WID_BPL_STATUS_BAR, STR_NULL), status_tc);
 	}
 
 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
 	{
+		/* A new library action cancels any earlier path/name query before its target changes. */
+		CloseWindowByClass(WindowClass::QueryString);
 		switch (widget) {
 			case WID_BPL_LIST_PANEL: {
 				const NWidgetBase *list_wid = this->GetWidget<NWidgetBase>(WID_BPL_LIST_PANEL);
@@ -236,8 +247,9 @@ struct BlueprintLibraryWindow : Window {
 			}
 
 			case WID_BPL_CAPTURE: {
-				this->mode = BlueprintWindowMode::Capturing;
+				/* Installing a tool aborts the previous one, including our own. */
 				SetObjectToPlaceWnd(SPR_CURSOR_MOUSE, PAL_NONE, HT_RECT, this);
+				this->mode = BlueprintWindowMode::Capturing;
 				SetTileSelectSize(1, 1);
 				this->status_message = "Capture mode: Click & drag a rectangle on map to capture rail blueprint.";
 				this->SetDirty();
@@ -246,8 +258,8 @@ struct BlueprintLibraryWindow : Window {
 
 			case WID_BPL_PLACE: {
 				if (!this->has_working_bp) break;
-				this->mode = BlueprintWindowMode::Placing;
 				SetObjectToPlaceWnd(SPR_CURSOR_MOUSE, PAL_NONE, HT_RECT, this);
+				this->mode = BlueprintWindowMode::Placing;
 				SetTileSelectSize(this->working_bp.width, this->working_bp.height);
 				this->status_message = fmt::format("Placing '{}' ({}x{}). Click map to stamp. Hotkeys: [R] Rotate, [F] Flip.",
 					this->working_bp.name, this->working_bp.width, this->working_bp.height);
@@ -280,32 +292,40 @@ struct BlueprintLibraryWindow : Window {
 			}
 
 			case WID_BPL_RENAME: {
-				if (!this->has_working_bp) break;
-				ShowQueryString(this->working_bp.name, STR_BLUEPRINT_RENAME_CAPTION, 64, this, CS_ALPHANUMERAL, QueryStringFlag::EnableDefault);
+				const Blueprint *selected = BlueprintManager::GetBlueprint(this->selected_index);
+				if (selected == nullptr || selected->is_builtin) break;
+				this->pending_query = BlueprintQuery::Rename;
+				this->pending_index = this->selected_index;
+				ShowQueryString(selected->name, STR_BLUEPRINT_RENAME_CAPTION, Blueprint::MAX_NAME_BYTES + 1, this, CS_ALPHANUMERAL, QueryStringFlag::AcceptUnchanged);
 				break;
 			}
 
 			case WID_BPL_DELETE: {
-				if (BlueprintManager::DeleteBlueprint(this->selected_index)) {
+				std::string error;
+				if (BlueprintManager::DeleteBlueprint(this->selected_index, &error)) {
 					this->status_message = "Blueprint deleted.";
 					this->UpdateSelection();
-					this->SetDirty();
+				} else {
+					this->status_message = "Delete failed: " + error;
 				}
+				this->SetDirty();
 				break;
 			}
 
 			case WID_BPL_EXPORT: {
 				if (!this->has_working_bp) break;
-				std::string json_str = this->working_bp.ToJson();
-				this->status_message = fmt::format("Exported '{}' ({} chars) to template file.", this->working_bp.name, json_str.size());
+				this->pending_query = BlueprintQuery::Export;
+				this->pending_export = this->working_bp;
+				this->status_message = "Export: enter a new JSON file path. Existing files are preserved.";
+				ShowQueryString(BlueprintManager::GetDefaultExportPath(this->working_bp), STR_BLUEPRINT_BUTTON_EXPORT, 4096, this, CS_ALPHANUMERAL, QueryStringFlag::AcceptUnchanged);
 				this->SetDirty();
 				break;
 			}
 
 			case WID_BPL_IMPORT: {
-				BlueprintManager::RescanLibrary();
-				this->UpdateSelection();
-				this->status_message = "Refreshed blueprint templates from disk.";
+				this->pending_query = BlueprintQuery::Import;
+				this->status_message = "Import: enter the path to a Blueprint JSON file.";
+				ShowQueryString({}, STR_BLUEPRINT_BUTTON_IMPORT, 4096, this, CS_ALPHANUMERAL, {});
 				this->SetDirty();
 				break;
 			}
@@ -314,14 +334,56 @@ struct BlueprintLibraryWindow : Window {
 
 	void OnQueryTextFinished(std::optional<std::string> str) override
 	{
-		if (str.has_value() && !str->empty()) {
-			if (BlueprintManager::RenameBlueprint(this->selected_index, *str)) {
-				this->working_bp.name = *str;
-				this->status_message = fmt::format("Renamed blueprint to '{}'.", *str);
-				this->UpdateSelection();
-				this->SetDirty();
-			}
+		BlueprintQuery query = this->pending_query;
+		this->pending_query = BlueprintQuery::None;
+		if (query == BlueprintQuery::None) return;
+		if (!str.has_value() || str->empty()) {
+			this->status_message = "Operation cancelled.";
+			this->SetDirty();
+			return;
 		}
+		std::string error;
+		switch (query) {
+			case BlueprintQuery::CaptureName:
+				this->pending_capture.name = *str;
+				if (BlueprintManager::SaveBlueprint(this->pending_capture, &error)) {
+					this->selected_index = BlueprintManager::GetBlueprints().size() - 1;
+					this->UpdateSelection();
+					this->status_message = fmt::format("Captured and saved '{}' ({}x{}, {} pieces, {} signals).",
+						this->working_bp.name, this->working_bp.width, this->working_bp.height,
+						this->working_bp.GetTrackPieceCount(), this->working_bp.GetSignalCount());
+				} else {
+					this->status_message = "Capture could not be saved: " + error;
+				}
+				break;
+			case BlueprintQuery::Rename:
+				if (BlueprintManager::RenameBlueprint(this->pending_index, *str, &error)) {
+					this->selected_index = this->pending_index;
+					this->UpdateSelection();
+					this->status_message = fmt::format("Renamed blueprint to '{}'.", *str);
+				} else {
+					this->status_message = "Rename failed: " + error;
+				}
+				break;
+			case BlueprintQuery::Export:
+				if (BlueprintManager::ExportToFile(this->pending_export, *str, &error)) {
+					this->status_message = fmt::format("Exported '{}' to '{}'.", this->pending_export.name, *str);
+				} else {
+					this->status_message = "Export failed: " + error;
+				}
+				break;
+			case BlueprintQuery::Import:
+				if (BlueprintManager::ImportFromFile(*str, &error)) {
+					this->selected_index = BlueprintManager::GetBlueprints().size() - 1;
+					this->UpdateSelection();
+					this->status_message = fmt::format("Imported '{}' from '{}'.", this->working_bp.name, *str);
+				} else {
+					this->status_message = "Import failed: " + error;
+				}
+				break;
+			case BlueprintQuery::None: break;
+		}
+		this->SetDirty();
 	}
 
 	EventState OnKeyPress([[maybe_unused]] char32_t key, uint16_t keycode) override
@@ -350,29 +412,37 @@ struct BlueprintLibraryWindow : Window {
 		return EventState::NotHandled;
 	}
 
-	void OnPlaceMouseUp([[maybe_unused]] ViewportPlaceMethod select_method, [[maybe_unused]] ViewportDragDropSelectionProcess select_proc, [[maybe_unused]] Point pt, TileIndex start_tile, TileIndex end_tile) override
+	void OnPlaceDrag(ViewportPlaceMethod select_method, [[maybe_unused]] ViewportDragDropSelectionProcess select_proc, Point pt) override
 	{
-		if (this->mode == BlueprintWindowMode::Capturing) {
+		if (this->mode == BlueprintWindowMode::Capturing && select_proc == DDSP_CAPTURE_BLUEPRINT) {
+			VpSelectTilesWithMethod(pt.x, pt.y, select_method);
+		}
+	}
+
+	void OnPlaceMouseUp([[maybe_unused]] ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt, TileIndex start_tile, TileIndex end_tile) override
+	{
+		if (this->mode == BlueprintWindowMode::Capturing && select_proc == DDSP_CAPTURE_BLUEPRINT && pt.x != -1) {
 			auto bp = BlueprintManager::CaptureArea(start_tile, end_tile);
-			if (bp.has_value()) {
-				BlueprintManager::SaveBlueprint(*bp);
-				this->UpdateSelection();
-				this->selected_index = BlueprintManager::GetBlueprints().size() - 1;
-				this->working_bp = *bp;
-				this->has_working_bp = true;
-				this->status_message = fmt::format("Captured and saved '{}' ({}x{}, {} pieces, {} signals).",
-					bp->name, bp->width, bp->height, bp->GetTrackPieceCount(), bp->GetSignalCount());
-			} else {
-				this->status_message = "Capture failed: No rail infrastructure found, or area exceeds 64x64.";
-			}
 			this->mode = BlueprintWindowMode::Normal;
 			ResetObjectToPlace();
+			if (bp.has_value()) {
+				this->pending_capture = *bp;
+				this->pending_query = BlueprintQuery::CaptureName;
+				this->status_message = "Capture ready: enter a name to save it.";
+				ShowQueryString(bp->name, STR_BLUEPRINT_CAPTURE_NAME_CAPTION, Blueprint::MAX_NAME_BYTES + 1, this, CS_ALPHANUMERAL, QueryStringFlag::AcceptUnchanged);
+			} else {
+				this->status_message = "Capture failed: empty, foreign-owned, or larger than 64x64.";
+			}
 			this->SetDirty();
 		}
 	}
 
 	void OnPlaceObject([[maybe_unused]] Point pt, TileIndex tile) override
 	{
+		if (this->mode == BlueprintWindowMode::Capturing) {
+			VpStartPlaceSizing(tile, VPM_X_AND_Y, DDSP_CAPTURE_BLUEPRINT);
+			return;
+		}
 		if (this->mode == BlueprintWindowMode::Placing && this->has_working_bp) {
 			RailType rt = (_last_built_railtype != INVALID_RAILTYPE) ? _last_built_railtype : RAILTYPE_RAIL;
 			Command<Commands::PlaceBlueprint>::Post(
@@ -391,7 +461,7 @@ struct BlueprintLibraryWindow : Window {
 	void OnPlaceObjectAbort() override
 	{
 		this->mode = BlueprintWindowMode::Normal;
-		this->status_message = "Placement cancelled. Library ready.";
+		this->status_message = "Map selection cancelled. Library ready.";
 		this->SetDirty();
 	}
 };

@@ -1,0 +1,14 @@
+{
+  "directory": "/tmp/openspacettd-wp04-base-pqs37cfj",
+  "files": [
+    "src/portal/logistics_hub.h",
+    "src/portal/logistics_hub.cpp",
+    "src/portal/portal_cmd.cpp",
+    "src/station.cpp",
+    "src/station_cmd.cpp",
+    "src/economy.cpp",
+    "src/saveload/afterload.cpp",
+    "src/tests/test_sprint42_production_chains.cpp",
+    "src/tests/test_sprint39_corporate_hq_and_stockpile.cpp"
+  ]
+}

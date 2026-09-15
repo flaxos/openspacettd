@@ -1,0 +1,327 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+  Test   #1: ICU ScriptRun
+  Test   #2: AlternatingIterator tests
+  Test   #3: SetBitIterator tests
+  Test   #4: EnumOverOptimisation_BoundsCheck
+  Test   #5: EnumOverOptimisation_Bitmask
+  Test   #6: Ownership errors only show manager faces for real companies
+  Test   #7: FlatSet - basic
+  Test   #8: History Rotation and Reporting tests
+  Test   #9: PartialPixelSlopeAdditionTest - A one corner slope, plus the opposite three corner slope results in a flat but elevated slope
+  Test  #10: PartialPixelSlopeAdditionTest - Diagonal slopes with their opposite slope result in a flat but elevated slope
+  Test  #11: PartialPixelSlopeAdditionTest - Half tile slopes with their opposite half tile slope result in a flat but elevated slope
+  Test  #12: PartialPixelSlopeAdditionTest - Two opposite one corner slopes result in the two corner slope with opposite corners
+  Test  #13: PartialPixelSlopeAdditionTest - A steep slope is a one corner slope on top of a three corner slope
+  Test  #14: PartialPixelSlopeAdditionTest - A half tile steep slope is a one corner half tile on top of a three corner slope
+  Test  #15: PartialPixelTest - One corner up slopes - SLOPE_N
+  Test  #16: PartialPixelTest - One corner up slopes - SLOPE_E
+  Test  #17: PartialPixelTest - One corner up slopes - SLOPE_S
+  Test  #18: PartialPixelTest - One corner up slopes - SLOPE_W
+  Test  #19: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NE
+  Test  #20: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SE
+  Test  #21: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SW
+  Test  #22: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NW
+  Test  #23: PartialPixelTest - Two opposite corner up slopes - SLOPE_NS
+  Test  #24: PartialPixelTest - Two opposite corner up slopes - SLOPE_EW
+  Test  #25: PartialPixelTest - Three corner up slopes - SLOPE_ENW
+  Test  #26: PartialPixelTest - Three corner up slopes - SLOPE_SEN
+  Test  #27: PartialPixelTest - Three corner up slopes - SLOPE_WSE
+  Test  #28: PartialPixelTest - Three corner up slopes - SLOPE_NWS
+  Test  #29: PartialPixelTest - Normal half tile slopes - SLOPE_N/Corner::N
+  Test  #30: PartialPixelTest - Normal half tile slopes - SLOPE_E/Corner::E
+  Test  #31: PartialPixelTest - Normal half tile slopes - SLOPE_S/Corner::S
+  Test  #32: PartialPixelTest - Normal half tile slopes - SLOPE_W/Corner::W
+  Test  #33: PartialPixelTest - Steep slopes - SLOPE_STEEP_N
+  Test  #34: PartialPixelTest - Steep slopes - SLOPE_STEEP_E
+  Test  #35: PartialPixelTest - Steep slopes - SLOPE_STEEP_S
+  Test  #36: PartialPixelTest - Steep slopes - SLOPE_STEEP_W
+  Test  #37: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::N
+  Test  #38: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::E
+  Test  #39: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::S
+  Test  #40: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::W
+  Test  #41: DivideApproxTest - Negative
+  Test  #42: DivideApproxTest, Divide
+  Test  #43: IntSqrtTest - Zero
+  Test  #44: IntSqrtTest - FindSqRt
+  Test  #45: ClampTo
+  Test  #46: SoftClamp
+  Test  #47: StringBuilder - basic
+  Test  #48: StringBuilder - binary
+  Test  #49: StringBuilder - text
+  Test  #50: StringConsumer - basic
+  Test  #51: StringConsumer - binary8
+  Test  #52: StringConsumer - binary16
+  Test  #53: StringConsumer - binary32
+  Test  #54: StringConsumer - binary64
+  Test  #55: StringConsumer - utf8
+  Test  #56: StringConsumer - conditions
+  Test  #57: StringConsumer - ascii
+  Test  #58: StringConsumer - parse int
+  Test  #59: StringConsumer - invalid int
+  Test  #60: StringConsumer - most negative
+  Test  #61: InPlaceReplacement
+  Test  #62: StrCompareIgnoreCase - std::string
+  Test  #63: StrCompareIgnoreCase - std::string_view
+  Test  #64: StrEqualsIgnoreCase - std::string
+  Test  #65: StrEqualsIgnoreCase - std::string_view
+  Test  #66: StrStartsWithIgnoreCase - std::string
+  Test  #67: StrStartsWithIgnoreCase - std::string_view
+  Test  #68: StrEndsWithIgnoreCase - std::string
+  Test  #69: StrEndsWithIgnoreCase - std::string_view
+  Test  #70: FormatArrayAsHex
+  Test  #71: ConvertHexToBytes
+  Test  #72: StrTrimInPlace
+  Test  #73: StrTrimView
+  Test  #74: FixSCCEncoded
+  Test  #75: FixSCCEncodedNegative
+  Test  #76: EncodedString::ReplaceParam - positive
+  Test  #77: EncodedString::ReplaceParam - negative
+  Test  #78: Authentication_KeyExchangeOnly
+  Test  #79: Authentication_PAKE
+  Test  #80: Authentication_AuthorizedKey
+  Test  #81: Authentication_Combined
+  Test  #82: Encryption handling
+  Test  #83: Placement Restrictions - Industry Rules Matrix
+  Test  #84: Placement Restrictions - Train Depot Rules Matrix
+  Test  #85: Placement Restrictions - CmdBuildTrainDepot Integration
+  Test  #86: PlanetManager - Registration and Validation
+  Test  #87: PlanetManager - Multi-World Spatial Partitioning and Buffer Zones
+  Test  #88: PlanetManager - Arbitrary Non-Cell-Aligned Boundary Precision
+  Test  #89: Planet UI - Phase & Biome Names
+  Test  #90: Planet UI - Viewport Status & Navigation
+  Test  #91: Planet SaveLoad - Multi-World Serialization Round-Trip
+  Test  #92: Planet SaveLoad - Empty / Single-World Game Round-Trip
+  Test  #93: PortalRegistry - Basic Pairing and Lookups
+  Test  #94: PortalRegistry - Multi-World Topologies and Validation
+  Test  #95: Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length)
+  Test  #96: Portal Wormhole - YAPF Track Follower Traversal
+  Test  #97: Portal Wormhole - Unlinked gate is a closed rail terminal
+  Test  #98: Portal Wormhole - Stale non-tunnel endpoint is rejected
+  Test  #99: Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation
+  Test #100: Portal Wormhole - Routing follows every exit orientation with rail turns disabled
+  Test #101: Portal Wormhole - Neutral Generated Gateway Is Shared Rail
+  Test #102: Portal Wormhole - Legacy Generated Gateway Direction Repair
+  Test #103: Portal Wormhole - Exit Emergence Coordinates Calculation
+  Test #104: Portal Wormhole - Consist Distance Decoupling Across Wormhole
+  Test #105: ConsistTraversal - Progress Tracking API
+  Test #106: ConsistTraversal - Following Wagon Enters Plain Rail Tile
+  Test #107: ConsistTraversal - Company Train Traverses Neutral Gateway
+  Test #108: ConsistTraversal - Single Locomotive Portal Emergence
+  Test #109: ConsistTraversal - Complete consist clears every portal orientation forwards and backwards
+  Test #110: ConsistTraversal - Multi-Wagon Traversal Across Worlds
+  Test #111: ConsistTraversal - Vehicle Destruction Clears Transit Tracker
+  Test #112: Content Manifest - canonical codec and digest
+  Test #113: Content Manifest - strict compatibility diagnostics
+  Test #114: Federation Identity - deterministic namespace and consist lifecycle
+  Test #115: Consist Snapshot - canonical round trip and validation
+  Test #116: Consist Snapshot - capture is non-spatial and leaves the train unchanged
+  Test #117: Federation Identity - company and station lifecycle
+  Test #118: Federation Identity - cargo source and order destination provenance
+  Test #119: Consist Snapshot - v2 encode/decode with company, cargo source, and orders
+  Test #120: Consist Snapshot - v1 wire format backward compatibility decoding
+  Test #121: Federation Identity - savegame FIDS round-trip with all mappings
+  Test #122: Federation Transfer - Checkpoint transitions reject conflicting receipts
+  Test #123: Federation Transfer - Inter-Server Portal Registration and Query
+  Test #124: Federation Transfer - Universe Authority Lifecycle and State Machine
+  Test #125: Federation Transfer - Commodity Conservation Invariant Audit
+  Test #126: Federation Transfer - Consist Despawn for Transfer
+  Test #127: Federation Transfer - Consist Materialization on Destination Gate
+  Test #128: Federation Transfer - Coordinator retries only the exact destination gate
+  Test #129: Federation Transfer - Obstruction and Manifest Rejection
+  Test #130: Federation Transport - AuthorityRequest Protocol and Envelope Handling
+  Test #131: Federation Transport - Late callbacks after request timeout or destruction
+  Test #132: Federation Transport - Late successful completion after request destruction
+  Test #133: Federation Transport - Base64 Round Trip
+  Test #134: Federation Transfer - Journal Deduplication and Authority URL Config
+  Test #135: Federation Persistent Universe - Player Registration and Authentication
+  Test #136: Federation Persistent Universe - Corporate Charters and Multi-World Ownership
+  Test #137: Federation Persistent Universe - Dynamic World Directory & Heartbeats
+  Test #138: Federation Persistent Universe - Detailed Per-Cargo Commodity Conservation & Trade Balances
+  Test #139: Federation Megacity - Registration, Quotas, and Monthly Evaluation Lifecycle
+  Test #140: Federation Freight Corridors - Congestion Escalation, Dynamic Delay & Priority QoS
+  Test #141: Federation Empire Supply Chain Matrix & Conservation Accounting
+  Test #142: Sprint 18 GUI - WindowDesc Registration & Widget Tree Validity
+  Test #143: Sprint 18 GUI - Megacity Profile Presentation and Growth Multipliers
+  Test #144: Sprint 18 GUI - Freight Corridor Monitor Utilization and Delays
+  Test #145: Sprint 18 GUI - Universe Directory World Status and Heartbeats
+  Test #146: Sprint 18 GUI - TownView Megacity Status Button Widget
+  Test #147: Federation Cluster - Topology Registration and Phase Hierarchy
+  Test #148: Federation Cluster - Multi-Phase Freight Transit & Supply Chain Accounting
+  Test #149: Federation Cluster - Node Drop, Quarantine Bay & Invariant Preservation
+  Test #150: Federation Cluster - Server Recovery and Consist Re-Activation
+  Test #151: Consist Snapshot - current_order_index serialization round-trip
+  Test #152: Federation Identity - Order destination resolution across worlds
+  Test #153: Consist Materializer - Restores Orders and Advances Order Index on Arrival
+  Test #154: Consist Materializer - End-to-end Autonomous Round-Trip Order Cycling
+  Test #155: Portal Construction - Unlinked Gate Lifecycle and Restrictions
+  Test #156: Portal Construction - High-capacity terminal topology and PBS directions
+  Test #157: Portal Construction - UAT adopts complete neutral terminals only
+  Test #158: Portal Construction - Terminal footprint rejection is atomic
+  Test #159: Portal Construction - Authoritative world and Phase placement rules
+  Test #160: Portal Construction - Cross-World Gate Linking
+  Test #161: Portal Construction - Atomic Pair Builder
+  Test #162: Portal Construction - Demolition Safeguards While Consist In Transit
+  Test #163: Portal Construction - Partial Demolition Unlinking
+  Test #164: Portal Construction - Area demolition safely removes a reserved linked pair
+  Test #165: Portal Construction - Savegame Persistence of Unlinked and Linked Portals
+  Test #166: MultiWorldGen - Layout Calculation Geometry
+  Test #167: MultiWorldGen - Map Partitioning and Void Isolation
+  Test #168: MultiWorldGen - Gateway Initialization and Pairing
+  Test #169: MultiWorldGen - Asymmetric Map Partitioning along X
+  Test #170: MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain
+  Test #171: MultiWorldGen - Partitioning Preserves Terrain Heights and Shores
+  Test #172: Interplanetary Cargo - Trade Premium Matrix
+  Test #173: Interplanetary Cargo - Edge Case Handling and Profit Preservation
+  Test #174: Interplanetary Cargo - Industry Supply Chain Restrictions
+  Test #175: Interplanetary Cargo - CargoPacket Source Tracking
+  Test #176: Interplanetary Cargo - Procedural Layout Revenue Scaling
+  Test #177: Spaceport Manager - Lifecycle and Trade Calculation
+  Test #178: Spaceport Command - CmdDesignateSpaceport
+  Test #179: Edge Conduit - Boundary Void Adjacency Rules
+  Test #180: Edge Conduit - Construction and Demolition Commands
+  Test #181: Edge Conduit - Frontier World Extraction Multiplier
+  Test #182: Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)
+  Test #183: Edge Conduit - One-ended head is safe for signal updates
+  Test #184: Portal rail conversion rejects a stale remote endpoint
+  Test #185: Edge Conduit - Physical map edges and corners are coordinate-safe
+  Test #186: Edge Conduit - Invalid boundaries, orientation and terrain fail atomically
+  Test #187: Edge Conduit - Logical boundary, phases and adjacent rail remain supported
+  Test #188: Edge Conduit - Constructed tile survives save, reload and signal refresh
+  Test #189: Spaceport Bridge - Configuration and Command Execution
+  Test #190: Spaceport Bridge - Interplanetary Trade Dispatch and Reception
+  Test #191: Edge Conduit Feeder - Configuration and Direct Inter-World Piping
+  Test #192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation
+  Test #193: Twin Gateway Arrays - Spatial Recognition and Pairing
+  Test #194: Twin Gateway Arrays - Corridor Capacity and Congestion Mitigation
+  Test #195: In-Transit Consist Telemetry - Querying and Lifecycle Updates
+  Test #196: Portal Maintenance Economics - Upkeep Fees and Calculation
+  Test #197: Viewport World-Hopping and Gate Resolution
+  Test #198: Alien Biomes - PlanetManager GetTileBiome O(1) query
+  Test #199: Alien Biomes - Procedural MultiWorldGen Biome Environmental Styling
+  Test #200: Alien Biomes - Tree Foliage Transformation per Biome
+  Test #201: Alien Biomes - CST Portal Gate Classification and Visual Styling
+  Test #202: Blueprint Data Model and JSON Round-Trip
+  Test #203: Blueprint Rotation 90, 180, 270 and Invariance
+  Test #204: Blueprint Horizontal Flip/Mirror
+  Test #205: Blueprint Capture from Game Map
+  Test #206: Blueprint Manager Storage and Builtin Protection
+  Test #207: Deterministic Blueprint Placement Command
+  Test #208: Blueprint depot quote matches execution
+  Test #209: Blueprint rejected placement preserves map money and materials
+  Test #210: Blueprint Mainline placement clears trees with exact fabrication materials
+  Test #211: Blueprint dispatcher charges quote exactly once
+  Test #212: Blueprint unsupported station layouts reject without changes
+  Test #213: Blueprint clearing foundation and signal replacement use canonical costs
+  Test #214: Blueprint infrastructure money and materials survive save reload
+  Test #215: CST Prefabs - Complete 8-Layout Catalogue Registration
+  Test #216: CST Prefabs - Structural & Functional Integrity
+  Test #217: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+  Test #218: CST Prefabs - Deterministic In-Game Map Placement
+  Test #219: CST Prefabs - Immutability & Builtin Deletion Protection
+  Test #220: Sprint 27 GUI - WindowDesc Registration & Widget Tree Compilation
+  Test #221: Sprint 27 GUI - Empire Supply Chain Matrix & Feeder Presentation
+  Test #222: Sprint 27 GUI - Inter-World Trade Balances & Conservation Auditing
+  Test #223: Sprint 27 GUI - Federation Player Authentication & Active Session Management
+  Test #224: Sprint 27 GUI - Corporate Charter Operations & Delegation Permissions
+  Test #225: Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata
+  Test #226: Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration
+  Test #227: Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance
+  Test #228: Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States
+  Test #229: Sprint 28 UAT - Script Goal & Story Page Enums and Types
+  Test #230: Sprint 29 Federation - Dynamic World Directory Discovery & Liveliness
+  Test #231: Sprint 29 Federation - Strict Content Admission Rejection & Invariant Guard
+  Test #232: Sprint 29 Federation - Freight Corridor Congestion & Dynamic Priority Relief
+  Test #233: Sprint 29 Federation - Cross-Server Multi-Hop Round Trip & Order Progression
+  Test #234: Sprint 29 Federation - Destination Node Crash, Quarantine Bay & Auto-Recovery
+  Test #235: Sprint 29 Federation - Empire-Wide Multi-Commodity Conservation & Bilateral Trade Balances
+  Test #236: Sprint 30 Biomes - All 6 Biomes Environmental Styling & Spatial Resolution
+  Test #237: Sprint 30 Biomes - MultiWorldGen Biome Partitioning for 4+ Worlds
+  Test #238: Sprint 30 Biomes - Procedural Environmental Styling and Foliage
+  Test #239: Sprint 30 Colonization - Phase 4 Expansion World Pre-Colonization Restrictions
+  Test #240: Sprint 30 Colonization - PlanetManager ColonizeWorld and Promotion Hierarchy
+  Test #241: Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock
+  Test #242: Sprint 30 Colonization - Save/Load Persistence of Promoted World Phase
+  Test #243: Sprint 31 GUI - Universe Directory Widget Hierarchy and Button States
+  Test #244: Sprint 31 Origin - Outpost Origin Coordinate Assignment and Viewport Navigation
+  Test #245: Sprint 31 Authority - RegisteredWorld Biome Tracking and Directory Sync
+  Test #246: Sprint 31 Authority - Remote ColonizeWorld Lifecycle
+  Test #247: Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase
+  Test #248: Sprint 32 Economy - Cargo Delivery and Development Points Accumulation
+  Test #249: Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating
+  Test #250: Sprint 32 Authority - Universe Authority Remote World Promotion
+  Test #251: Sprint 33 - Planetary Town Placement Protection by World Phase
+  Test #252: Sprint 33 - Biome-Specific Industry Placement Protection
+  Test #253: Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation Integration
+  Test #254: Sprint 33 - Megacity Multipliers and Town Growth Controls
+  Test #255: Sprint 33 - Universe Authority Megacity Federation Tracking & State
+  Test #256: Sprint 36 UAT - Savegame File Artifact & Invariants
+  Test #257: Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v9 Metadata & Backwards Compatibility
+  Test #258: Sprint 36 UAT - Six-World Biome Partition & Layout Geometry
+  Test #259: Sprint 36 UAT - Mid/Late Game Fixtures & Engine System Validation
+  Test #260: Sprint 37: In-Tree NML Package Source Integrity
+  Test #261: Sprint 37: Reproducible Binary GRF Container Synthesis
+  Test #262: Sprint 37: Content Admission Boundary and Manifest Integration
+  Test #263: Sprint 37: CST Rolling Stock Specifications and Tech Tree Gating
+  Test #264: Sprint 37: World Phase Operational Restrictions
+  Test #265: Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage
+  Test #266: Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops
+  Test #267: Sprint 37: Runtime gating uses pack identity and local engine IDs
+  Test #268: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation
+  Test #269: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption
+  Test #270: Sprint 39 Stockpile - Role Mappings and Deserialization
+  Test #271: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors
+  Test #272: Sprint 39 Corporate HQ - Placement Rules & Validation
+  Test #273: Sprint 39 Corporate HQ - Tier Advancement & Serialization
+  Test #274: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub
+  Test #275: Sprint 40 Fabrication - BOM Recipes & Catalog
+  Test #276: Sprint 40 Fabrication - Mode Toggling and Company Isolation
+  Test #277: Sprint 40 Fabrication - Track Building Interception
+  Test #278: Sprint 40 Fabrication - Signal and Depot Interception
+  Test #279: Sprint 40 Fabrication - Save/Load Serialization
+  Test #280: Sprint 41 Tech Tree - Catalog & Branches
+  Test #281: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites
+  Test #282: Sprint 41 Tech Tree - Server Commands & Budget Allocation
+  Test #283: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning
+  Test #284: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration
+  Test #285: Sprint 41 Tech Tree - Save/Load State Restoration
+  Test #286: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog
+  Test #287: Sprint 42 Production Chains - World Phase Placement Constraints
+  Test #288: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion
+  Test #289: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk
+  Test #290: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop
+  Test #291: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering
+  Test #292: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)
+  Test #293: Production gameplay - command validation and station lifecycle
+  Test #294: Production gameplay - real cargo unloading conversion and onward loading
+  Test #295: Hub unloading - industry cargo has exactly one destination
+  Test #296: Hub unloading - isolated freight hub accepts real unloading
+  Test #297: Hub unloading - town and nonfreight delivery controls
+  Test #298: Hub unloading - explicit transfer and no unload keep their meaning
+  Test #299: Hub unloading - deposited cargo survives actual save and reload
+  Test #300: Hub unloading - invalid stored destination cannot consume cargo
+  Test #301: Hub loading - full packet pool preserves inventory and recovers
+  Test #302: Hub loading - capacity reserve and rights boundaries conserve cargo
+  Test #303: Hub loading - failed pickup survives reload and retries
+  Test #304: Hub loading - failed packet split keeps cargo available
+  Test #305: Production gameplay - station facility survives actual save and reload
+  Test #306: Squirrel -> JSON conversion
+  Test #307: JSON -> Squirrel conversion
+  Test #308: WindowDesc - ini_key uniqueness
+  Test #309: WindowDesc - ini_key validity
+  Test #310: WindowDesc - NWidgetParts properly closed
+  Test #311: WindowDesc - NWidgetPart validity
+  Test #312: SpiralTileSequence - minimum
+  Test #313: SpiralTileSequence - odd
+  Test #314: SpiralTileSequence - even
+  Test #315: SpiralTileSequence - zero hole
+  Test #316: SpiralTileSequence - normal hole
+  Test #317: Utf8View - empty
+  Test #318: Utf8View - invalid
+  Test #319: Utf8View - iterate
+  Test #320: regression_regression
+  Test #321: regression_stationlist
+  Test #322: regression_gs
+  Test #323: regression_gs_compat
+
+Total Tests: 323

@@ -1,0 +1,4 @@
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-ubuntu--lv  115G  106G  3.6G  97% /home/flax/games/ope...
+217M	build
+608K	docs/audit/2026-09-15/wp01

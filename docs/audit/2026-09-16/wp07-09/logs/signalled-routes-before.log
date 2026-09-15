@@ -1,0 +1,1378 @@
+Filters: CST prefabs run every advertised route with native trains and intact signals
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=87,81
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=82,82
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=81,87
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=82,82
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=82,87
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=81,82
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=87,82
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=82,81
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=82,82
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=87,81
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=82,82
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=81,87
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=81,82
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=82,87
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 1
+  original_route.end.x := 0
+  original_route.end.y := 2
+  original_route.station := {?}
+  ticks=4096 tile=82,81
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST Portal Gate Approach Corridor"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 9
+  original_route.start.y := 2
+  original_route.end.x := 9
+  original_route.end.y := 1
+  original_route.station := {?}
+  ticks=4096 tile=87,82
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=81,85
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=81,85
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=84,86
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=85,81
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=85,81
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 0
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=86,84
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=86,81
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=86,81
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=85,84
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=81,86
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=81,86
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 1
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=84,85
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=90,86
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=90,86
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=87,85
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=86,90
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=86,90
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 2
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=85,87
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=85,90
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=85,90
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := false
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=86,87
+
+-------------------------------------------------------------------------------
+CST prefabs run every advertised route with native trains and intact signals
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:487
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 0
+  original_route.start.y := 5
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=90,85
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 11
+  original_route.end.y := 5
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 5
+  original_route.start.y := 0
+  original_route.end.x := 0
+  original_route.end.y := 6
+  original_route.station := {?}
+  ticks=4096 tile=90,85
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:603: FAILED:
+  CHECK( path_found )
+with expansion:
+  false
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:617: FAILED:
+  CHECK( train->tile == end )
+with expansion:
+  {?} == {?}
+with messages:
+  name := "CST High-Speed 3-Way Wye Junction"
+  rotation := 3
+  mirror := true
+  original_route.start.x := 11
+  original_route.start.y := 6
+  original_route.end.x := 6
+  original_route.end.y := 0
+  original_route.station := {?}
+  ticks=4096 tile=87,86
+
+===============================================================================
+test cases:    1 |    0 passed |  1 failed
+assertions: 6176 | 6088 passed | 88 failed
+

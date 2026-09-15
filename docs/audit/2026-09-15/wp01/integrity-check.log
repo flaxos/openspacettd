@@ -1,0 +1,3 @@
+PASS: final source and binary SHA-256 entries match their files.
+PASS: every checks.json log exists.
+PASS: 46 relative Markdown file links in the updated plan, handoff, defect, UAT and evidence documents exist.

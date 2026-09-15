@@ -1,0 +1,8 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 300: Hub unloading - invalid stored destination cannot consume cargo
+1/1 Test #300: Hub unloading - invalid stored destination cannot consume cargo ...   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.05 sec

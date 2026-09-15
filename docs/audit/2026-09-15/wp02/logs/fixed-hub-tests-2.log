@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 295: Hub unloading - industry cargo has exactly one destination
+1/5 Test #295: Hub unloading - industry cargo has exactly one destination ...........   Passed    0.02 sec
+    Start 296: Hub unloading - isolated freight hub accepts real unloading
+2/5 Test #296: Hub unloading - isolated freight hub accepts real unloading ..........   Passed    0.02 sec
+    Start 297: Hub unloading - town and nonfreight delivery controls
+3/5 Test #297: Hub unloading - town and nonfreight delivery controls ................   Passed    0.02 sec
+    Start 298: Hub unloading - explicit transfer and no unload keep their meaning
+4/5 Test #298: Hub unloading - explicit transfer and no unload keep their meaning ...   Passed    0.02 sec
+    Start 299: Hub unloading - deposited cargo survives actual save and reload
+5/5 Test #299: Hub unloading - deposited cargo survives actual save and reload ......   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   0.16 sec

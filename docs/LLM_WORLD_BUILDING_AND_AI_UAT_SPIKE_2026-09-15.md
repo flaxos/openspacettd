@@ -1,5 +1,8 @@
 # Architectural Spike: LLM-Driven Lore World Synthesis, In-Game AI CPU Opponents, and Automated Long-Horizon Balancing UAT
 
+> **Recovery audit, 2026-09-15:** This spike is preserved as a proposal. The appended
+> interface/example audit governs executability; the [master recovery plan](RECOVERY_PLAN_2026-09-15.md#f-practical-ai-research-plan-and-entry-gate) owns entry gates, evaluation and budgets.
+
 **Status:** ARCHITECTURAL & TECHNICAL DESIGN SPIKE  
 **Date:** 2026-09-15  
 **Context:** Pre-UAT Architecture Planning for OpenSpaceTTD (Sprints 1–42)  
@@ -626,3 +629,80 @@ By formalizing this architectural spike while the current build finishes:
 2. **Direct Path to Rich Pre-Built Scenarios:** When players want to test or play late-game situations, an LLM can generate lore-accurate, fully functional multi-world setups in seconds, eliminating hundreds of hours of tedious manual setup.
 3. **Smarter In-Game CPU Competitors:** The research and prefab layout patterns discovered here provide the exact blueprints needed to upgrade OpenTTD's in-game AI opponents into formidable Commonwealth industrial conglomerates.
 4. **Data-Driven Game Balancing:** The headless fast-forward simulation loop gives designers an automated tool to stress-test 42 sprints of economy, tech trees, and rolling stock over multi-decade runs before shipping to players.
+
+
+## Recovery audit: every example interface and manifest assumption
+
+Audited against `abbcd7e077`. Earlier text remains intact to preserve the proposal;
+this section supersedes claims that its examples already execute. Original line
+references below refer to the pre-audit document at that commit. No model, training,
+paid API, new bridge or scenario compiler ran in this audit.
+
+| Original example / claim | Status | Actual source or correction |
+|---|---|---|
+| WorldID, region/void/portal framework | Existing | `src/portal/world_gen.cpp`, `portal_type.h`, registry/commands. |
+| Six1024² worlds/64-tile buffer/diagram (13,51–75) | Incorrect as current generator description | Major-axis strips; default count3, configurable1–16; buffer max(4,min(x,y)/16). Arithmetic below. |
+| PortalEndpoint in portal_registry.h (77) | Existing, location incorrect | Definition in `src/portal/portal_type.h:46`. |
+| Gate universally must face void (541) | Unsupported | Generic gate validates coordinates/approach; void adjacency is an Edge Conduit constraint, not all gate sites. |
+| Instant/distance-independent guaranteed transit (78–80) | Partial/overstated | Virtual length/progress/occupancy and consist state exist; do not replace them with unconditional teleportation. |
+| 18-tile terminal stations | Incorrect description | Two-lane rail throat, holding14/approach18; `portal_terminal.h`, no station platform. |
+| CompanyWorldStockpile/fabrication | Existing | StockpileManager/LogisticsHubManager; `CompanyLogisticsHub` is not actual type; base80%/advanced90% discount. |
+| Closed12-cargo economy | Partial | 13 conceptual entries including consumer crystals; aliases/content/runtime gaps remain. |
+| Eight prefab dimensions (124–133) | Existing | Current source footprints largely match; names5/6 include Junction/Block suffixes. |
+| Grade-separated Wye, guaranteed connectivity/deadlock freedom | Unsupported | Blueprint only Track/Depot/Station, ordinary same-level rails. Known Wye/RoRo route gaps; native graph/train verification required. |
+| Squirrel + GSRail/GSStation/GSTown/GSVehicle/GSOrder | Existing | Used by actual UAT GameScript; permission/company context and command results still required. |
+| Python admin port3977 | Existing transport, proposed orchestration | Authenticated RCON + GS JSON events; not arbitrary C++ method execution (`network_admin.cpp:519`). |
+| Direct binary save manipulation / MAP,VEH,STCK illustration | Rejected proposal | Keep rejected; labels are not a supported writer schema. Use engine serialization. |
+| `openttd -D -s -g -c openttd.cfg` (169) | Incorrect | `-s` needs driver. Dedicated mode already selects null sound/music; specify `-s null` if explicit. |
+| `bin/game/llm_world_builder/main.nut`, manifest compiler | Proposed/absent | Only OpenSpace UAT GameScript delivered; no manifest parser/compiler/schema. |
+| `GSSaveLoad.Save` | Unsupported/nonexistent | Local console `save` + acknowledgement as in `scripts/refresh_uat_demo.py`, normal serializer. |
+| ScriptPortal methods | Proposed | Native gate/link commands and registry exist; safe script wrapper absent. |
+| ScriptStockpile Get/Set/Deposit and mode/reserves | Proposed | Real types use CargoType/uint32; separate privileged stock injection from opponent actions. No reserve command/UI bridge yet. |
+| ScriptBlueprintBridge PlacePrefab/PlaceJsonBlueprint | Proposed | Wrap validated `Commands::PlaceBlueprint`; stable versioned IDs preferable to display names. |
+| ScriptTechTree Unlock/SetResearchBudget(company,tech_id,Money) | Proposed and signature mismatch | Actual TechID uint16, budget uint32 per company without project argument; native select and budget commands exist. Privileged unlock separate. |
+| WorldGenerationManifest.json and schema URL (252–374) | Proposed/incomplete | No in-tree schema or validator. Names, lore and pseudo-orders are not executable IDs/APIs. |
+| AI persona directories openspace_cst/grand_central | Proposed/absent | `bin/ai` has compatibility scripts, no these opponents. |
+| RunCycle/GetStockpile/FindFlatPrefabPad/WORLD_DEVELOPED/CARGO_STEEL/AIBlueprint | Proposed pseudocode | No helpers/constants/bridge as shown; startup/scheduling/persistence/retry policy unspecified. |
+| `AIMap.TILE_INVALID` | Existing | `script_map.hpp:22`; does not validate remaining pseudocode. |
+| All conventional AIs produce spaghetti/deadlocks; YAPF planner claims | Unsupported generalization | AI script strategy differs; routing and construction planning are different; compare measured workloads. |
+| `openttd -D -g ... -x -t 73000` as50-year fast-forward | Incorrect | `-t` is start year; `-x` disables config writes; dedicated loop throttles. Use explicit bounded runner/calendar condition and measure throughput. |
+| telemetry_run.json exporter | Proposed/absent | Company/facility/stockpile/research/Megacity state exists, exporter and derived metrics do not. |
+| Gate total_transits/queue/Green-Red telemetry | Proposed/mismatched | External InterServerRoute exposes in-transit/dispatched/congestion enums; local queues need instrumentation. |
+| Megacity satisfaction and HyperGrowth sample | Derivable, sample inconsistent | Profile fields exist; all-three>=100% rule does not support same-period98/91/74% HyperGrowth sample. Define time periods. |
+| Critic year2422/34% furnace/siding cause | Unsupported inference | Single snapshot proves neither history nor cause; need time-series, route/queue evidence and controlled intervention. |
+|0.75 steel/tile at src/economy/fabrication_manager.cpp | Incorrect | Actual `src/portal/fabrication_manager.cpp`, integer uint32 BOM. Fractional recipes require explicit fixed-point design. |
+| GSMap.GetTileIndex/GSError.GetLastErrorString | Existing | Use actual command error handling; no silent retries or invalid-tile math. |
+| Phase2-only processing/adjacent-phase-only links (573–581) | Overbroad | Validate recipe allowed_phases and actual world phase, not generation index; links/processing rules differ by feature. |
+| test_llm_manifest_validation.cpp/10,000 synthetic pairs | Proposed/absent | No such test; validation needs command and functional engine evidence too. |
+| scripts/llm_architect/orchestrator.py, balance_critic.py, one-click CLI | Proposed/absent | No implementation or cost/quality evidence. |
+| Seconds to world / decades per minute / guaranteed labor saving | Unmeasured | Research hypotheses only; benchmark against deterministic baseline. |
+
+### Geometry and manifest corrections
+
+For4096x4096, six worlds, default padding2 and auto buffer256,
+`world_gen.cpp:121–208` gives X2..4093 for each world. Available Y4092 minus
+five buffers1280 leaves2812 tiles: four469-high and two468-high strips.
+Y ranges are2..470,727..1195,1452..1920,2177..2645,2902..3369,3626..4093.
+The earlier1024² diagram is not this layout. Validate engine-returned regions;
+neither a drawn box nor a prefab description establishes constructible geometry.
+
+The sample manifest omits map/config/content fingerprints, stable IDs, gate tile/
+direction/ownership/terminal clearances, connectors/depot coordinates and station
+creation for its named order targets. Merredin contains a hub but no instantiated
+smelter facility. TransitWormhole/UnloadAndStockpile are not GS order flags; use
+resolved ordinary station orders and implemented transfer semantics. A list of
+three prefab names is not a connected corridor. Initial reserves supply no material;
+fabrication=true with zero stock must obey real failure/fallback rules. “Heavy
+Planetary Diesel” identifies no guaranteed engine/date/research/refit. Four
+8-wagon trains require real length checks against six-tile platforms and approaches.
+Validate phase/biome aliases explicitly, source supply, station catchment/service,
+consumer acceptance, recipe ratios and sustainable cash/material budgets.
+
+### Retained direction
+
+High-level manifests compiled to deterministic command-backed engine execution are
+a practical direction. Keep external inference outside deterministic multiplayer.
+Preserve three tracks: A generation; B opponents; C telemetry/UAT/analysis. The
+master plan defines one small no-model route proof, held-out cases, cost/storage
+caps, model-method comparison and stop/go rules. Training is neither presumed
+necessary nor ruled out without evidence; correctness and measured benefit decide.

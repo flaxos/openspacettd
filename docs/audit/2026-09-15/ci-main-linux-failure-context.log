@@ -1,0 +1,108 @@
+Command: gh run view 34956427967 --repo flaxos/openspacettd --job 104339490455 --log-failed
+Exit: 0
+Filtered failure context from 4293 lines
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:32.0645906Z Additional packages (*) will be modified to complete this operation.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:32.0646471Z Detecting compiler hash for triplet x64-linux...
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:32.6085538Z Compiler found: /usr/bin/g++
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0397943Z warning: /usr/bin/mono /home/runner/work/_temp/vcpkg/downloads/tools/nuget-7.9.0-linux/nuget.exe install -ForceEnglishOutput -Verbosity detailed -NonInteractive /home/runner/work/_temp/vcpkg/buildtrees/packages.config -OutputDirectory /home/runner/work/_temp/vcpkg/packages -ExcludeVersion -PreRelease -PackageSaveMode nupkg -DirectDownload -NoHttpCache -Source GitHub failed with exit code 1
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0400327Z NuGet Version: 7.9.0.83
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0400613Z Feeds used:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0400918Z   https://nuget.pkg.github.com/flaxos/index.json
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0401206Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0401722Z Restoring NuGet package vcpkg-cmake_x64-linux.2025.8.7-vcpkg3610dd5d1ab14314f7ac023eae5ed636c66dae10363e1184803b09ee579756f5.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0403793Z   GET https://nuget.pkg.github.com/flaxos/download/vcpkg-cmake_x64-linux/2025.8.7-vcpkg3610dd5d1ab14314f7ac023eae5ed636c66dae10363e1184803b09ee579756f5/vcpkg-cmake_x64-linux.2025.8.7-vcpkg3610dd5d1ab14314f7ac023eae5ed636c66dae10363e1184803b09ee579756f5.nupkg
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0406287Z   NotFound https://nuget.pkg.github.com/flaxos/download/vcpkg-cmake_x64-linux/2025.8.7-vcpkg3610dd5d1ab14314f7ac023eae5ed636c66dae10363e1184803b09ee579756f5/vcpkg-cmake_x64-linux.2025.8.7-vcpkg3610dd5d1ab14314f7ac023eae5ed636c66dae10363e1184803b09ee579756f5.nupkg 18ms
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:10:34.0408156Z Unable to find version '2025.8.7-vcpkg3610dd5d1ab14314f7ac023eae5ed636c66dae10363e1184803b09ee579756f5' of package 'vcpkg-cmake_x64-linux'.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.4393128Z         Start 287: Production gameplay - real cargo unloading conversion and onward loading
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.4463551Z 284/306 Test #285: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk) ..............................................................   Passed    0.04 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.4493090Z         Start 288: Production gameplay - station facility survives actual save and reload
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8608364Z 285/306 Test #286: Production gameplay - command validation and station lifecycle ..................................................................Subprocess aborted***Exception:   0.43 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8657545Z openttd_test: /home/runner/work/openspacettd/openspacettd/src/tests/../tile_map.h:136: void SetTileType(Tile, TileType): Assertion `IsInnerTile(tile) || type == TileType::Void' failed.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8772911Z Filters: Production gameplay - command validation and station lifecycle
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8801942Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8813229Z ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8842976Z openttd_test is a Catch v2.13.10 host application.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8901462Z Run with -? for options
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8952801Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.8977685Z -------------------------------------------------------------------------------
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9002435Z Production gameplay - command validation and station lifecycle
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9043400Z /home/runner/work/openspacettd/openspacettd/src/tests/test_sprint42_production_chains.cpp:489
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9063469Z ...............................................................................
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9102883Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9103809Z /home/runner/work/openspacettd/openspacettd/src/tests/test_sprint42_production_chains.cpp:489: FAILED:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9105222Z due to a fatal error condition:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9153038Z   SIGABRT - Abort (abnormal termination) signal
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9169041Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9204275Z ===============================================================================
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9227873Z test cases: 1 | 1 failed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9233001Z assertions: 1 | 1 failed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9262692Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9277912Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9301186Z         Start 289: Squirrel -> JSON conversion
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9341188Z 286/306 Test #288: Production gameplay - station facility survives actual save and reload ..........................................................Subprocess aborted***Exception:   0.43 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9364369Z openttd_test: /home/runner/work/openspacettd/openspacettd/src/tests/../tile_map.h:136: void SetTileType(Tile, TileType): Assertion `IsInnerTile(tile) || type == TileType::Void' failed.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9377211Z Filters: Production gameplay - station facility survives actual save and reload
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9422625Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9429644Z ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9448615Z openttd_test is a Catch v2.13.10 host application.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9471302Z Run with -? for options
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9502593Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9523154Z -------------------------------------------------------------------------------
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9553212Z Production gameplay - station facility survives actual save and reload
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9583433Z /home/runner/work/openspacettd/openspacettd/src/tests/test_sprint42_production_chains.cpp:612
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9613134Z ...............................................................................
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9613757Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9643587Z /home/runner/work/openspacettd/openspacettd/src/tests/test_sprint42_production_chains.cpp:612: FAILED:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9673676Z due to a fatal error condition:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9683071Z   SIGABRT - Abort (abnormal termination) signal
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9697701Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9713023Z ===============================================================================
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9753602Z test cases: 1 | 1 failed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9763137Z assertions: 1 | 1 failed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9783287Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9812901Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9835969Z         Start 290: JSON -> Squirrel conversion
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9853691Z 287/306 Test #287: Production gameplay - real cargo unloading conversion and onward loading ........................................................Subprocess aborted***Exception:   0.43 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9874326Z openttd_test: /home/runner/work/openspacettd/openspacettd/src/tests/../tile_map.h:136: void SetTileType(Tile, TileType): Assertion `IsInnerTile(tile) || type == TileType::Void' failed.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9903431Z Filters: Production gameplay - real cargo unloading conversion and onward loading
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9932807Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9933457Z ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9963389Z openttd_test is a Catch v2.13.10 host application.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:54.9993110Z Run with -? for options
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0012932Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0023315Z -------------------------------------------------------------------------------
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0053302Z Production gameplay - real cargo unloading conversion and onward loading
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0113607Z /home/runner/work/openspacettd/openspacettd/src/tests/test_sprint42_production_chains.cpp:562
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0114809Z ...............................................................................
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0138326Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0173769Z /home/runner/work/openspacettd/openspacettd/src/tests/test_sprint42_production_chains.cpp:562: FAILED:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0175037Z due to a fatal error condition:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0203431Z   SIGABRT - Abort (abnormal termination) signal
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0234917Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0263331Z ===============================================================================
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0306509Z test cases: 1 | 1 failed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0363030Z assertions: 1 | 1 failed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0363400Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0413460Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0483537Z         Start 291: WindowDesc - ini_key uniqueness
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0513868Z 288/306 Test #289: Squirrel -> JSON conversion .....................................................................................................   Passed    0.06 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0573676Z         Start 292: WindowDesc - ini_key validity
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0604693Z 289/306 Test #292: WindowDesc - ini_key validity ...................................................................................................   Passed    0.04 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0663498Z         Start 293: WindowDesc - NWidgetParts properly closed
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:20:55.0693786Z 290/306 Test #290: JSON -> Squirrel conversion .....................................................................................................   Passed    0.11 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:07.1224455Z         Start 306: regression_gs_compat
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4514814Z 306/306 Test #306: regression_gs_compat ............................................................................................................   Passed    1.33 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4520426Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4520785Z 99% tests passed, 3 tests failed out of 306
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4521177Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4521424Z Total Test time (real) =  18.41 sec
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4521755Z 
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4521956Z The following tests FAILED:
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4523103Z 	286 - Production gameplay - command validation and station lifecycle (Subprocess aborted)
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4524343Z 	287 - Production gameplay - real cargo unloading conversion and onward loading (Subprocess aborted)
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4525572Z 	288 - Production gameplay - station facility survives actual save and reload (Subprocess aborted)
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4526425Z Errors while running CTest
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4586263Z ##[error]Process completed with exit code 8.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.4697324Z Post job cleanup.
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.5596337Z [command]/usr/bin/git version
+Linux (GCC - SDL2) / CI	UNKNOWN STEP	2026-09-15T10:21:08.5651118Z git version 2.55.0

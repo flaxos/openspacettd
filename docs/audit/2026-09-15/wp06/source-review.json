@@ -1,0 +1,41 @@
+{
+  "parser": {
+    "baseline": "IsValid checked only dimensions/nonempty/offsets. FromJson narrowed values before admission and accepted arbitrary versions/enums; Rotate/Mirror used TrackToTrackdir without validation. This is source evidence, not an executed old-binary comparison.",
+    "change": "Shared IsValid, typed integers before narrowing, bounded byte/depth/schema/metadata/array admission, SAX duplicate-key rejection, exact track/signal compatibility, guarded transforms.",
+    "evidence": "Three new parser CTests plus invalid-signal255 GUI import rejection; all previous transforms/128 prefab placements and persistence pass.",
+    "compatibility": "Existing serializer-produced v1 retained. Unknown versions, missing required shape fields, oversized/invalid metadata reject; no existing files rewritten."
+  },
+  "storage": {
+    "baseline": "Save truncated destination directly and ignored final stream errors; rename deleted old file first and changed memory before saving. Filenames rederived from names could collide or point at the wrong file. Export GUI only created a local JSON string and Import only rescanned.",
+    "change": "Actual source paths per row, temporary writes and checked flush/close, atomic replacement/no-clobber publication, same-file metadata rename, bounded reads, collision policies and error reporting. New imports do not overwrite an existing player name.",
+    "evidence": "Six storage CTests plus six real fault-injected processes and three real GUI query cases. Each failed write/commit checks old bytes, memory, reopened data and retry.",
+    "compatibility": "Keeps FioFindDirectory then personal-directory fallback, preserving existing XDG/search roots. Invalid files retained; default export outside scan. Windows wrappers included and reviewed but not run."
+  },
+  "gui": {
+    "change": "Explicit pending query kind/snapshot; import/export real paths; export current transformed model; cancellation and accurate success/failure text; scan errors reported on opening.",
+    "verification": "Native window, editbox query and OK/cancel callbacks with null video/mock sprites/fonts; no visual rendering acceptance. Hidden Catch cases explicitly registered as isolated CTests."
+  },
+  "out_of_scope": [
+    "WP-07 capture drag/cancel/naming and route topology",
+    "Library mass migration or user-file deletion",
+    "Power-cut filesystem durability",
+    "Graphical human acceptance"
+  ],
+  "source_hashes": {
+    "src/blueprint/blueprint.h": "94f12ca5c7e4f7c2096a3ee68e8f742f9e7525c75e35fd0abfe8b4d018d1006d",
+    "src/blueprint/blueprint.cpp": "6625c4f8e6f371166c1311882e19c5c96b0de26a0d57af20100719f9f67a1e25",
+    "src/blueprint/blueprint_manager.h": "8cc6732c7249347024318fe2985e37fd2a658bbe8ca4213fa23b1da510503bf2",
+    "src/blueprint/blueprint_manager.cpp": "28ee9151b3895ad80b68afd9c1561cef52f8e789f578c32751abd93489413fed",
+    "src/blueprint/blueprint_gui.cpp": "fcbd2f83423bb694cae3691047d23c1cc053c2726811cb9f1206ce066c6d89cd",
+    "src/tests/test_blueprint.cpp": "83a79261fc66215ad819a73313d1660ec807919c6a7a690dcaa81c005aefb573",
+    "src/tests/CMakeLists.txt": "a5de97596db81fa4c7cb5426b0edd3d8a1c60722765d066430252cc715f4d0a9",
+    "src/lang/english.txt": "78066b5f5317051779c1c7c3efda9c0f957744d60e5c2bf017e12b22ba963272",
+    "src/lang/english_AU.txt": "e0fb51194debe1ce3e08c81eef76e9c69ad56722eb69809a0c7df7306080b8f8",
+    "src/lang/english_US.txt": "357e4621bcb6aedb3611f4bb6dd331f95ea816a195111b51b7d5d3d5b3fe29b0",
+    "src/tests/test_blueprint_validation.cpp": "43af3581172a75429e17db76c4be3c49652832b2ab09ee1d44f4235b2d3b47df",
+    "src/tests/test_blueprint_storage.cpp": "545a01591641f7171d53ef3fbfebe9204da76d898152383f64494d02ea6daac4",
+    "src/tests/test_blueprint_file_gui.cpp": "28730d901080a222d64e2230409ea8aebbc77be3d049189967233c622f74c8c4",
+    "src/tests/blueprint_io_faults.c": "3394e00f264a9945e2d59758cdcb9b4d10ac05fcc009a8a3f558c93535dd3ac0",
+    "scripts/test_blueprint_io_failures.py": "c594007cc7cc5614b4e14e8d1b1de44d988063d33d6f992c7795b78b31aaf710"
+  }
+}

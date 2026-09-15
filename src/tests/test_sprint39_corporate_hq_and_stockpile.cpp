@@ -22,6 +22,7 @@
 #include "../company_func.h"
 #include "../command_func.h"
 #include "../station_base.h"
+#include "../station_map.h"
 #include "../table/strings.h"
 #include "mock_environment.h"
 
@@ -142,13 +143,27 @@ TEST_CASE("Sprint 39 Stockpile - Role Mappings and Deserialization")
 
 TEST_CASE("Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors")
 {
+	(void)MockEnvironment::Instance();
+	PlanetManager::Reset();
 	StockpileManager::Reset();
 	LogisticsHubManager::Reset();
+	_station_pool.CleanPool();
+	_company_pool.CleanPool();
+	Map::Allocate(64, 64);
 
 	WorldID world{1};
 	CompanyID company{0};
-	StationID st{10};
+	Company::CreateAtIndex(company);
+	REQUIRE(PlanetManager::RegisterRegion({.id = world, .name = "Warehouse world", .phase = WorldPhase::Phase2_Developed,
+		.biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1, .max_x = 62, .max_y = 62}));
 	TileIndex tile = TileXY(40, 40);
+	REQUIRE(Station::CanAllocateItem());
+	Station *station = Station::Create(tile);
+	station->owner = company;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(tile, 1, 1);
+	StationID st = station->index;
+	MakeRailStation(tile, company, st, Axis::X, 0, RAILTYPE_RAIL);
 	CargoType cargo{2};
 
 	uint32_t hub_id = LogisticsHubManager::RegisterHub(tile, world, company, st, "Foundry Rail Warehouse");
@@ -199,6 +214,7 @@ TEST_CASE("Sprint 39 Corporate HQ - Placement Rules & Validation")
 	PlanetManager::Reset();
 	CorporateHQManager::Reset();
 	_company_pool.CleanPool();
+	_station_pool.CleanPool();
 	Map::Allocate(512, 512);
 
 	Company::CreateAtIndex(CompanyID{0});
@@ -270,8 +286,21 @@ TEST_CASE("Sprint 39 Corporate HQ - Placement Rules & Validation")
 	CHECK_FALSE(CorporateHQManager::CanPlaceHQ(CompanyID{0}, t_core, err));
 	CHECK(err.find("5,000,000 Cr") != std::string::npos);
 
-	/* 5. Presence check: regions r_core, r_developed, and r_frontier have dev > 0 */
+	/* 5. Presence requires this company's live rail operations across phases. */
 	c->money = 6000000;
+	CHECK_FALSE(CorporateHQManager::CanPlaceHQ(CompanyID{0}, t_core, err));
+	REQUIRE(Station::CanAllocateItem());
+	Station *developed_station = Station::Create(t_dev);
+	developed_station->owner = c->index;
+	developed_station->facilities.Set(StationFacility::Train);
+	developed_station->train_station = TileArea(t_dev, 1, 1);
+	MakeRailStation(t_dev, c->index, developed_station->index, Axis::X, 0, RAILTYPE_RAIL);
+	REQUIRE(Station::CanAllocateItem());
+	Station *frontier_station = Station::Create(t_front);
+	frontier_station->owner = c->index;
+	frontier_station->facilities.Set(StationFacility::Train);
+	frontier_station->train_station = TileArea(t_front, 1, 1);
+	MakeRailStation(t_front, c->index, frontier_station->index, Axis::X, 0, RAILTYPE_RAIL);
 	CHECK(CorporateHQManager::CanPlaceHQ(CompanyID{0}, t_core, err));
 
 	/* 6. Establishment & single HQ per company rule */
@@ -328,9 +357,11 @@ TEST_CASE("Sprint 39 Corporate HQ - Tier Advancement & Serialization")
 
 TEST_CASE("Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub")
 {
+	(void)MockEnvironment::Instance();
 	PlanetManager::Reset();
 	CorporateHQManager::Reset();
 	LogisticsHubManager::Reset();
+	_station_pool.CleanPool();
 	_company_pool.CleanPool();
 	Map::Allocate(512, 512);
 
@@ -378,10 +409,40 @@ TEST_CASE("Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub")
 	CHECK(res_hub_void.Failed());
 	CHECK(res_hub_void.GetErrorMessage() == STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
 
-	/* 2. BuildLogisticsHub on valid world tile -> Succeeds */
+	/* 2. A world tile alone is insufficient; a real rail station is required. */
+	CHECK(Command<Commands::BuildLogisticsHub>::Do({}, t_dev_hub, StationID::Invalid(), "Missing rail").Failed());
+	CHECK(LogisticsHubManager::GetAllHubs().empty());
+	REQUIRE(Station::CanAllocateItem());
+	Station *station = Station::Create(t_dev_hub);
+	station->owner = c->index;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(t_dev_hub, 1, 1);
+	MakeRailStation(t_dev_hub, c->index, station->index, Axis::X, 0, RAILTYPE_RAIL);
 	auto res_hub = Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, t_dev_hub, StationID::Invalid(), "Hephaestus Hub");
 	CHECK(res_hub.Succeeded());
 	CHECK(LogisticsHubManager::GetHubAtTile(t_dev_hub) != nullptr);
+	const uint32_t hub_id = LogisticsHubManager::GetHubAtTile(t_dev_hub)->hub_id;
+	CargoType reserve_cargo{0};
+	REQUIRE(IsValidCargoType(reserve_cargo));
+	CHECK(Command<Commands::SetLogisticsHubReserve>::Do({}, hub_id, reserve_cargo, 75).Succeeded());
+	CHECK(LogisticsHubManager::GetReserveFloor(hub_id, reserve_cargo) == 0);
+	CHECK(Command<Commands::SetLogisticsHubReserve>::Do(DoCommandFlag::Execute, hub_id, reserve_cargo, 75).Succeeded());
+	CHECK(LogisticsHubManager::GetReserveFloor(hub_id, reserve_cargo) == 75);
+	CHECK(Command<Commands::SetLogisticsHubReserve>::Do({}, hub_id + 100, reserve_cargo, 1).Failed());
+	Company::CreateAtIndex(CompanyID{1});
+	_current_company = CompanyID{1};
+	CHECK(Command<Commands::SetLogisticsHubReserve>::Do(DoCommandFlag::Execute, hub_id, reserve_cargo, 1).Failed());
+	CHECK(LogisticsHubManager::GetReserveFloor(hub_id, reserve_cargo) == 75);
+	_current_company = CompanyID{0};
+	/* A company needs its own operations on other phases; global development is insufficient. */
+	CHECK(Command<Commands::PlaceCorporateHQ>::Do({}, t_core_hq, "Premature HQ").Failed());
+	TileIndex t_front_station = TileXY(245, 45);
+	REQUIRE(Station::CanAllocateItem());
+	Station *front_station = Station::Create(t_front_station);
+	front_station->owner = c->index;
+	front_station->facilities.Set(StationFacility::Train);
+	front_station->train_station = TileArea(t_front_station, 1, 1);
+	MakeRailStation(t_front_station, c->index, front_station->index, Axis::X, 0, RAILTYPE_RAIL);
 
 	/* 3. PlaceCorporateHQ command on non-core world tile -> Fails */
 	auto res_hq_dev = Command<Commands::PlaceCorporateHQ>::Do(DoCommandFlag::Execute, t_dev_hub, "Dev HQ");

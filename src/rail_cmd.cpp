@@ -392,7 +392,7 @@ Foundation GetRailFoundation(Slope tileh, TrackBits bits)
  * @param tile Tile (used for water test)
  * @return Error message or cost for foundation building.
  */
-static CommandCost CheckRailSlope(Slope tileh, TrackBits rail_bits, TrackBits existing, TileIndex tile)
+CommandCost CheckRailSlope(Slope tileh, TrackBits rail_bits, TrackBits existing, TileIndex tile)
 {
 	/* don't allow building on the lower side of a coast */
 	if (GetFloodingBehaviour(tile) != FloodingBehaviour::None) {
@@ -417,12 +417,21 @@ static inline bool ValParamTrackOrientation(Track track)
 	return IsValidTrack(track);
 }
 
+Money GetNewRailTrackCost(RailType railtype, WorldID world, CompanyID company)
+{
+	Money cost = RailBuildCost(railtype);
+	if (world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(company)) {
+		cost = cost * (100 - FabricationManager::GetBOMDiscountPercent(company)) / 100;
+	}
+	return cost;
+}
+
 /**
  * Build a single piece of rail
  * @param flags operation to perform
  * @param tile tile  to build on
  * @param railtype railtype of being built piece (normal, mono, maglev)
- * @param track track-orientation
+ * @param track rail orientation
  * @param auto_remove_signals false = error on signal in the way, true = auto remove signals when in the way
  * @return the cost of this operation or an error
  */
@@ -613,16 +622,13 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 		YapfNotifyTrackLayoutChange(tile, track);
 	}
 
-	Money rail_cost = RailBuildCost(railtype);
 	if (use_fabrication) {
 		if (flags.Test(DoCommandFlag::Execute)) {
 			FabricationManager::ConsumeTrackBOM(track_world, _current_company, railtype);
 		}
-		uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
-		rail_cost = rail_cost * labor_factor / 100;
 	}
 
-	cost.AddCost(rail_cost);
+	cost.AddCost(GetNewRailTrackCost(railtype, track_world, _current_company));
 	return cost;
 }
 
@@ -1114,6 +1120,15 @@ CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType ra
  * @param signals_copy used for CmdBuildManySignals() to copy direction of first signal
  * @return the cost of this operation or an error
  */
+Money GetNewRailSignalCost(WorldID world, CompanyID company)
+{
+	Money price = _price[Price::BuildSignals];
+	if (world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(company)) {
+		price = price * (100 - FabricationManager::GetBOMDiscountPercent(company)) / 100;
+	}
+	return price;
+}
+
 CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track track, SignalType sigtype, SignalVariant sigvar, bool convert_signal, bool skip_existing_signals, bool ctrl_pressed, SignalType cycle_start, SignalType cycle_stop, uint8_t num_dir_cycle, uint8_t signals_copy)
 {
 	if (sigtype >= SignalType::End || sigvar >= SignalVariant::End) return CMD_ERROR;
@@ -1143,19 +1158,17 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 
 	WorldID signal_world = PlanetManager::GetTileWorld(tile);
 	bool use_signal_fab = (signal_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	bool new_signal = !HasSignalOnTrack(tile, track);
 
 	CommandCost cost;
-	if (!HasSignalOnTrack(tile, track)) {
+	if (new_signal) {
 		/* build new signals */
 		if (use_signal_fab) {
 			if (!FabricationManager::CanFabricateSignal(signal_world, _current_company)) {
 				return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
 			}
-			uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
-			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals] * labor_factor / 100);
-		} else {
-			cost = CommandCost(ExpensesType::Construction, _price[Price::BuildSignals]);
 		}
+		cost = CommandCost(ExpensesType::Construction, GetNewRailSignalCost(signal_world, _current_company));
 	} else {
 		if (signals_copy != 0 && sigvar != GetSignalVariant(tile, track)) {
 			/* convert signals <-> semaphores */
@@ -1178,6 +1191,11 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 	}
 
 	if (flags.Test(DoCommandFlag::Execute)) {
+		/* Copying a saved signal orientation also builds a new physical signal.
+		 * Consume before any tile or reservation changes. */
+		if (new_signal && use_signal_fab && !FabricationManager::ConsumeSignalBOM(signal_world, _current_company)) {
+			return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+		}
 		Train *v = nullptr;
 		/* The new/changed signal could block our path. As this can lead to
 		 * stale reservations, we clear the path reservation here and try
@@ -1202,9 +1220,6 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 		if (signals_copy == 0) {
 			if (!HasSignalOnTrack(tile, track)) {
 				/* build new signals */
-				if (use_signal_fab) {
-					FabricationManager::ConsumeSignalBOM(signal_world, _current_company);
-				}
 				SetPresentSignals(tile, GetPresentSignals(tile) | (IsPbsSignal(sigtype) ? KillFirstBit(SignalOnTrack(track)) : SignalOnTrack(track)));
 				SetSignalType(tile, track, sigtype);
 				SetSignalVariant(tile, track, sigvar);

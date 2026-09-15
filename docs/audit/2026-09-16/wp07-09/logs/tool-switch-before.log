@@ -1,0 +1,119 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 354: Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name
+1/2 Test #354: Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name ...***Failed    0.02 sec
+Filters: Blueprint GUI captures a selected map rectangle and saves the chosen name
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint GUI captures a selected map rectangle and saves the chosen name
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint_file_gui.cpp:103
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint_file_gui.cpp:137: FAILED:
+  REQUIRE( query != nullptr )
+with expansion:
+  nullptr != nullptr
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 4 | 3 passed | 1 failed
+
+
+    Start 359: WP09_GUI_establishment_and_process_reload
+2/2 Test #359: WP09_GUI_establishment_and_process_reload ...................................***Failed    0.04 sec
+CMake Error at /home/flax/games/openspacettd/src/tests/wp09_gui_persistence.cmake:21 (message):
+  Corporate HQ GUI lets an eligible player found the first HQ failed (2)
+
+  Filters: Corporate HQ GUI lets an eligible player found the first HQ
+
+
+
+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+  openttd_test is a Catch v2.13.10 host application.
+
+  Run with -? for options
+
+
+
+
+  -------------------------------------------------------------------------------
+
+
+  Corporate HQ GUI lets an eligible player found the first HQ
+
+
+  -------------------------------------------------------------------------------
+
+
+  /home/flax/games/openspacettd/src/tests/test_command_authority.cpp:479
+
+
+  ...............................................................................
+
+
+
+
+  /home/flax/games/openspacettd/src/tests/test_command_authority.cpp:523:
+  FAILED:
+
+    CHECK( window->GetWidgetString(WID_CHQ_STATUS_BAR, STR_NULL).find("Select one of your rail station platform tiles") == 0 )
+
+  with expansion:
+
+    18446744073709551615 (0xffffffffffffffff)
+    ==
+    0
+
+  
+
+  /home/flax/games/openspacettd/src/tests/test_command_authority.cpp:541:
+  FAILED:
+
+    REQUIRE( hq != nullptr )
+
+  with expansion:
+
+    nullptr != nullptr
+
+  
+
+
+  ===============================================================================
+
+
+  test cases: 1 | 0 passed | 1 failed
+
+  assertions: 27 | 25 passed | 2 failed
+
+
+
+
+
+
+
+  Save retained at
+  /home/flax/games/openspacettd/build/Testing/wp09-gui-persistence/fresh-company.sav
+
+
+
+
+0% tests passed, 2 tests failed out of 2
+
+Label Time Summary:
+integration         =   0.04 sec*proc (1 test)
+requires-baseset    =   0.04 sec*proc (1 test)
+
+Total Test time (real) =   0.09 sec
+
+The following tests FAILED:
+	354 - Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name (Failed)
+	359 - WP09_GUI_establishment_and_process_reload (Failed)
+Errors while running CTest

@@ -1,0 +1,294 @@
+{
+  "package": "WP-05 / OST-AUTH-001",
+  "objective": "WO-05 (interpreted as WP-05)",
+  "completed_at_utc": "2026-09-15T13:32:45.893862+00:00",
+  "branch": "fix/portal-gate-lifecycle-crashes",
+  "head": "abbcd7e07737bcd83c3f830f539313a45bef5f01",
+  "working_tree": "dirty; all pre-existing work preserved; no commit/push/merge",
+  "baseline": {
+    "directory": "/tmp/openspacettd-wp05-base-ow208ec1",
+    "files": [
+      "src/command_type.h",
+      "src/portal/portal_cmd.h",
+      "src/portal/portal_cmd.cpp",
+      "src/portal/corporate_hq.cpp",
+      "src/portal/corporate_hq.h",
+      "src/portal/corporate_hq_gui.cpp",
+      "src/portal/universe_directory_gui.cpp",
+      "src/portal/universe_authority.h",
+      "src/portal/universe_authority.cpp",
+      "src/lang/english.txt",
+      "src/tests/CMakeLists.txt",
+      "src/tests/test_sprint39_corporate_hq_and_stockpile.cpp",
+      "src/tests/test_sprint32_lifecycle_and_tech.cpp",
+      "src/saveload/planet_sl.cpp"
+    ],
+    "new_files": [
+      "src/tests/test_command_authority.cpp",
+      "src/tests/test_command_authority_network.cpp",
+      "scripts/test_command_authority_network.py"
+    ]
+  },
+  "changed_sources": {
+    "src/command_type.h": {
+      "before_sha256": "70fc9f304864311e827f4f6aa993db8eb05e4861514997f3c8a780347c8ca925",
+      "after_sha256": "7f94000de4171fe68dce0b5e753d7ddde4ee797ff8b672e5b2c9d267d5b524be"
+    },
+    "src/portal/portal_cmd.h": {
+      "before_sha256": "8d54a76ef7ae61fede327e2fc37d6f8dc73a97fac74c57158de9f1175a7d2744",
+      "after_sha256": "ee8904e9d4a3f360db3ae8eb0bc9df6f3b3b240fa6f859b268a84e1c5ceaf99e"
+    },
+    "src/portal/portal_cmd.cpp": {
+      "before_sha256": "cbc7f1d23e5eb4f1b3bf41a91b0ae9fbb50e53da684e265393478f18eb42b12a",
+      "after_sha256": "0350abf035cd4e106c2be05c6bd8c8f00a70859fea35593f0cafaa8bae2a7264"
+    },
+    "src/portal/corporate_hq_gui.cpp": {
+      "before_sha256": "276fe4e354309719d962ac790d8900e247418fae30da137e52745c2e4136d381",
+      "after_sha256": "a3097e54ce183ee9fb5c3663db1b0fc68128697ee97cf68712d57b07649ade77"
+    },
+    "src/portal/universe_directory_gui.cpp": {
+      "before_sha256": "ab0462e80e5a593d927ad24bca4d3b90bdd9a793d8e62a4cdf7dc7f2678027ca",
+      "after_sha256": "7eab1d644680e59492cfa48786ed42b323c5e0fcef2080a909d64c2e7c241a52"
+    },
+    "src/portal/universe_authority.h": {
+      "before_sha256": "bf72ac6c576e6b7582080e2d8afdded91b9c4073f7bf64725aa0b005a223e6bc",
+      "after_sha256": "74ea9b4971c8ef64cd43eadb724b6ffd9552d26820aea5bac9c65bb66bd53fa8"
+    },
+    "src/portal/universe_authority.cpp": {
+      "before_sha256": "f49b3c9eec6da273606f3256c1f7cd640442ac389ecb9bcda02559b1e5e0bae7",
+      "after_sha256": "0f3e70943ce50720f9a2165ab1ea3429edac5318785f0abd34e968aa85f82d6b"
+    },
+    "src/tests/CMakeLists.txt": {
+      "before_sha256": "c51d2a3b6af233ad781dc86a95916161540efef3d40098e21e9f0d5f7c8bb495",
+      "after_sha256": "e955e53a4451851319af828294bd04c7fe5179aa08109a934c40b73d00dde99f"
+    },
+    "src/tests/test_sprint32_lifecycle_and_tech.cpp": {
+      "before_sha256": "3140563de234580d80c75ed4d7265a9fd8a88be5f8f44d468216f4b8a72978cb",
+      "after_sha256": "e2b84fd975398419e54afedbc7cfae9925c2cd44936fafa9346c4956fb2289a8"
+    },
+    "src/saveload/planet_sl.cpp": {
+      "before_sha256": "99413d25bb33fb4dbf965071b223c9713974fbf1ce46fddaaf3c010594269e23",
+      "after_sha256": "eb6769d362eabbc13b0b3331f750a264914a0a901c782b07837f13cee8ecb397"
+    },
+    "src/tests/test_command_authority.cpp": {
+      "before_sha256": null,
+      "after_sha256": "bc79707e7ca35885f00176f8110c4f6f50d98ba421c95b0bed0f764c7aba3a3e"
+    },
+    "src/tests/test_command_authority_network.cpp": {
+      "before_sha256": null,
+      "after_sha256": "ed0f5f958926af818d13bff8e231e1c234939cc6ed802bc16ff6c263b0d2c74f"
+    },
+    "scripts/test_command_authority_network.py": {
+      "before_sha256": null,
+      "after_sha256": "27999943439570fc150583abfd37fefbfc2442772e6737c1e22b4dcec4787fce"
+    }
+  },
+  "commands": [
+    {
+      "command": "ninja -C build -j 2 openttd openttd_test",
+      "exit_code": 0,
+      "log": "logs/build-first.log",
+      "note": "480 actions after command enum dependency change; existing build only."
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^Command authority'",
+      "exit_code": 8,
+      "log": "logs/local-tests-first.log",
+      "note": "2/7 pass; five SIGSEGVs from fixture screen dimensions without dirty-block initialization."
+    },
+    {
+      "command": "gdb -q -batch -ex run -ex \"bt 18\" --args build/openttd_test ...",
+      "exit_code": 127,
+      "log": "logs/persistence-backtrace.log",
+      "note": "gdb unavailable; temporary LD_PRELOAD signal backtrace then located AddDirtyBlock in both GUI creation and AfterLoadGame."
+    },
+    {
+      "command": "ninja -C build -j 2 openttd openttd_test",
+      "exit_code": 0,
+      "log": "logs/build-fixture-final.log",
+      "note": "ScreenSizeChanged fixture initialization and HQ DrawWidgets repair."
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^Command authority'",
+      "exit_code": 8,
+      "log": "logs/local-tests-after-screen-fix.log",
+      "note": "6/7 pass; actual colony save/reload exposes missing outpost_tile in PLNT. Full-state comparison retained."
+    },
+    {
+      "command": "ninja -C build -j 2 openttd openttd_test",
+      "exit_code": 0,
+      "log": "logs/build-persistence-final.log",
+      "note": "Final PLNT repair."
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^Command authority'",
+      "exit_code": 0,
+      "log": "logs/local-tests-final.log",
+      "passed": 7
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^(Hub |Production gameplay)|Blueprint|CST Prefabs|Sprint (30|31|32|33|39|40|41|42)|Spaceport'",
+      "exit_code": 0,
+      "log": "logs/related-tests.log",
+      "passed": 88
+    },
+    {
+      "command": "python3 scripts/test_command_authority_network.py ./build/openttd_test",
+      "exit_code": 0,
+      "log": "logs/loopback-first.log",
+      "note": "Approved scoped sandbox escalation for 127.0.0.1 sockets only. All workers exit0 and sockets close. 9 commands: 6 denied, 3 successful; money/tier/phase/score/name/outpost and directory equality, then actual save/reload."
+    },
+    {
+      "command": "./build/openttd -h",
+      "exit_code": 0,
+      "log": "logs/executable-help.log"
+    },
+    {
+      "command": "ctest --test-dir build -N",
+      "exit_code": 0,
+      "registered": 338
+    }
+  ],
+  "legacy_loads": [
+    {
+      "command": [
+        "/home/flax/games/openspacettd/build/openttd",
+        "-c",
+        "/tmp/openspacettd-audit-20260915/openttd.cfg",
+        "-x",
+        "-v",
+        "null:ticks=1000",
+        "-s",
+        "null",
+        "-m",
+        "null",
+        "-d",
+        "misc=1,script=2",
+        "-g",
+        "/tmp/openspacettd-audit-20260915/blueprint-crash.sav"
+      ],
+      "cwd": "/tmp/openspacettd-audit-20260915",
+      "exit_code": 0,
+      "sha256_before": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03",
+      "sha256_after": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03",
+      "log": "logs/blueprint-crash-legacy-load.log"
+    },
+    {
+      "command": [
+        "/home/flax/games/openspacettd/build/openttd",
+        "-c",
+        "/tmp/openspacettd-audit-20260915/openttd.cfg",
+        "-x",
+        "-v",
+        "null:ticks=1000",
+        "-s",
+        "null",
+        "-m",
+        "null",
+        "-d",
+        "misc=1,script=2",
+        "-g",
+        "/tmp/openspacettd-audit-20260915/uat-v1.1.sav"
+      ],
+      "cwd": "/tmp/openspacettd-audit-20260915",
+      "exit_code": 0,
+      "sha256_before": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b",
+      "sha256_after": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b",
+      "log": "logs/uat-v1.1-legacy-load.log"
+    }
+  ],
+  "verification": {
+    "distinct_selected_ctests_passed": 95,
+    "registered_ctests": 338,
+    "network_worker_default_case_counted": false,
+    "network": "native commands over TCP between independent server/client1/client2 engine workers; relay controls broadcast; not full join/auth/map handshake",
+    "gui": "actual windows and OnClick callbacks exercised with mock font/sprite fixture; rendering not observed",
+    "new_settlement": "existing town isolates separate WP-08 native creation defect",
+    "assertions": "existing Release configuration; Catch checks execute. Previously recorded OST-TEST-001 local NDEBUG limitation remains; production assertions not weakened."
+  },
+  "binaries": {
+    "build/openttd": {
+      "sha256": "675e506ccb87aaca76c95851ebd8491b2a78573d4f053fcc3e3da99cbda3e8ef",
+      "bytes": 22663808
+    },
+    "build/openttd_test": {
+      "sha256": "b1e6b5ad17160bd4d58dfa404fca5601681a56c5cafac88447979db6b06943f4",
+      "bytes": 27429984
+    }
+  },
+  "logs": {
+    "logs/blueprint-crash-legacy-load.log": {
+      "sha256": "42f5146f7fbaed75dee6e163a9ebed766d1bd8504a518c167296847107c46e5b",
+      "bytes": 18843
+    },
+    "logs/build-first.log": {
+      "sha256": "e24d17853a98e8d69381ab85b09e5a2aa0988e5c7c1dbc97a7f3d8fd1c5ae6e1",
+      "bytes": 269444
+    },
+    "logs/build-fixture-final.log": {
+      "sha256": "207894a58df3ee01a9c583975c52139b0d35e2f4d9a96a6b07c3b0013c1445fe",
+      "bytes": 886
+    },
+    "logs/build-persistence-final.log": {
+      "sha256": "71ff946743d93eb3252a2622e1c01309a6f25e0d513f13c600590e2e407ba6e5",
+      "bytes": 788
+    },
+    "logs/executable-help.log": {
+      "sha256": "8c40a1d471ec473bf556a05d1923c663372a915bb0b1cb30e4bc385d93217e62",
+      "bytes": 4884
+    },
+    "logs/gui-backtrace.log": {
+      "sha256": "4ac2ebc4219b17fd9400674072be8957de052b272c84124e26a434bfe589a4a8",
+      "bytes": 42
+    },
+    "logs/gui-trace.log": {
+      "sha256": "b6e7d922e92619eacaee57d3f2d617347038572ea6c9f78434eade7d5bf0284c",
+      "bytes": 1227
+    },
+    "logs/local-tests-after-screen-fix.log": {
+      "sha256": "a5feac7f7a3492a1c8886153324d378991950404620554679c14243d187f1d39",
+      "bytes": 3155
+    },
+    "logs/local-tests-final.log": {
+      "sha256": "da3244e596206ee7d699255781535d0bfc7538e71f023a318aa7e0815e15ed6b",
+      "bytes": 1757
+    },
+    "logs/local-tests-first.log": {
+      "sha256": "1ea4d0cc5303ac9e63008c5383c29713c7130f896a817a5bcc54c13791566a79",
+      "bytes": 7557
+    },
+    "logs/loopback-first.log": {
+      "sha256": "a25e4d9cdfd68e7d2c5d9d704be794a20c557d74dee3f385550edfe1d69a2e87",
+      "bytes": 1652
+    },
+    "logs/network-syntax-first.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/persistence-backtrace.log": {
+      "sha256": "4ac2ebc4219b17fd9400674072be8957de052b272c84124e26a434bfe589a4a8",
+      "bytes": 42
+    },
+    "logs/persistence-trace.log": {
+      "sha256": "6a5f0f58e6972ddeb1a7bafc448d21afde30ece1174794a3b171b3a07445a9fd",
+      "bytes": 1513
+    },
+    "logs/related-tests.log": {
+      "sha256": "bb6de7a99460ec74ae50149f5789bbaf0e62e1b518a92fb1f5d1619c403068f8",
+      "bytes": 18839
+    },
+    "logs/test-syntax-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/test-syntax-first.log": {
+      "sha256": "4843ad9c2610304029ea567855e7ef1d190dc172fa5c831ebc53ac0966178376",
+      "bytes": 4237
+    },
+    "logs/uat-v1.1-legacy-load.log": {
+      "sha256": "42f5146f7fbaed75dee6e163a9ebed766d1bd8504a518c167296847107c46e5b",
+      "bytes": 18843
+    }
+  },
+  "source_patch_sha256": "e9c39bc518f637dca929713cd83f960a5838229acbe5dce7b404775b05827cb3"
+}

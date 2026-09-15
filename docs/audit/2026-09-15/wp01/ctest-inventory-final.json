@@ -1,0 +1,4825 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "create_regression"
+    ],
+    "files" : 
+    [
+      "/home/flax/games/openspacettd/cmake/CreateRegression.cmake",
+      "/home/flax/games/openspacettd/regression/regression/CMakeLists.txt",
+      "/home/flax/games/openspacettd/regression/stationlist/CMakeLists.txt",
+      "/home/flax/games/openspacettd/regression/gs/CMakeLists.txt",
+      "/home/flax/games/openspacettd/regression/gs_compat/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 1
+      },
+      {
+        "command" : 1,
+        "file" : 1,
+        "line" : 2,
+        "parent" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 49,
+        "parent" : 1
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 1,
+        "file" : 2,
+        "line" : 2,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 49,
+        "parent" : 4
+      },
+      {
+        "file" : 3
+      },
+      {
+        "command" : 1,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 6
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 49,
+        "parent" : 7
+      },
+      {
+        "file" : 4
+      },
+      {
+        "command" : 1,
+        "file" : 4,
+        "line" : 2,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 49,
+        "parent" : 10
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ICU ScriptRun"
+      ],
+      "name" : "ICU ScriptRun",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "AlternatingIterator tests"
+      ],
+      "name" : "AlternatingIterator tests",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SetBitIterator tests"
+      ],
+      "name" : "SetBitIterator tests",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "EnumOverOptimisation_BoundsCheck"
+      ],
+      "name" : "EnumOverOptimisation_BoundsCheck",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "EnumOverOptimisation_Bitmask"
+      ],
+      "name" : "EnumOverOptimisation_Bitmask",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Ownership errors only show manager faces for real companies"
+      ],
+      "name" : "Ownership errors only show manager faces for real companies",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "FlatSet - basic"
+      ],
+      "name" : "FlatSet - basic",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "History Rotation and Reporting tests"
+      ],
+      "name" : "History Rotation and Reporting tests",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelSlopeAdditionTest - A one corner slope\\, plus the opposite three corner slope results in a flat but elevated slope"
+      ],
+      "name" : "PartialPixelSlopeAdditionTest - A one corner slope, plus the opposite three corner slope results in a flat but elevated slope",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelSlopeAdditionTest - Diagonal slopes with their opposite slope result in a flat but elevated slope"
+      ],
+      "name" : "PartialPixelSlopeAdditionTest - Diagonal slopes with their opposite slope result in a flat but elevated slope",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelSlopeAdditionTest - Half tile slopes with their opposite half tile slope result in a flat but elevated slope"
+      ],
+      "name" : "PartialPixelSlopeAdditionTest - Half tile slopes with their opposite half tile slope result in a flat but elevated slope",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelSlopeAdditionTest - Two opposite one corner slopes result in the two corner slope with opposite corners"
+      ],
+      "name" : "PartialPixelSlopeAdditionTest - Two opposite one corner slopes result in the two corner slope with opposite corners",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelSlopeAdditionTest - A steep slope is a one corner slope on top of a three corner slope"
+      ],
+      "name" : "PartialPixelSlopeAdditionTest - A steep slope is a one corner slope on top of a three corner slope",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelSlopeAdditionTest - A half tile steep slope is a one corner half tile on top of a three corner slope"
+      ],
+      "name" : "PartialPixelSlopeAdditionTest - A half tile steep slope is a one corner half tile on top of a three corner slope",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - One corner up slopes - SLOPE_N"
+      ],
+      "name" : "PartialPixelTest - One corner up slopes - SLOPE_N",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - One corner up slopes - SLOPE_E"
+      ],
+      "name" : "PartialPixelTest - One corner up slopes - SLOPE_E",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - One corner up slopes - SLOPE_S"
+      ],
+      "name" : "PartialPixelTest - One corner up slopes - SLOPE_S",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - One corner up slopes - SLOPE_W"
+      ],
+      "name" : "PartialPixelTest - One corner up slopes - SLOPE_W",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Two corner up\\, diagonal slopes - SLOPE_NE"
+      ],
+      "name" : "PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NE",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Two corner up\\, diagonal slopes - SLOPE_SE"
+      ],
+      "name" : "PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SE",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Two corner up\\, diagonal slopes - SLOPE_SW"
+      ],
+      "name" : "PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SW",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Two corner up\\, diagonal slopes - SLOPE_NW"
+      ],
+      "name" : "PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NW",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Two opposite corner up slopes - SLOPE_NS"
+      ],
+      "name" : "PartialPixelTest - Two opposite corner up slopes - SLOPE_NS",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Two opposite corner up slopes - SLOPE_EW"
+      ],
+      "name" : "PartialPixelTest - Two opposite corner up slopes - SLOPE_EW",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Three corner up slopes - SLOPE_ENW"
+      ],
+      "name" : "PartialPixelTest - Three corner up slopes - SLOPE_ENW",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Three corner up slopes - SLOPE_SEN"
+      ],
+      "name" : "PartialPixelTest - Three corner up slopes - SLOPE_SEN",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Three corner up slopes - SLOPE_WSE"
+      ],
+      "name" : "PartialPixelTest - Three corner up slopes - SLOPE_WSE",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Three corner up slopes - SLOPE_NWS"
+      ],
+      "name" : "PartialPixelTest - Three corner up slopes - SLOPE_NWS",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Normal half tile slopes - SLOPE_N/Corner::N"
+      ],
+      "name" : "PartialPixelTest - Normal half tile slopes - SLOPE_N/Corner::N",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Normal half tile slopes - SLOPE_E/Corner::E"
+      ],
+      "name" : "PartialPixelTest - Normal half tile slopes - SLOPE_E/Corner::E",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Normal half tile slopes - SLOPE_S/Corner::S"
+      ],
+      "name" : "PartialPixelTest - Normal half tile slopes - SLOPE_S/Corner::S",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Normal half tile slopes - SLOPE_W/Corner::W"
+      ],
+      "name" : "PartialPixelTest - Normal half tile slopes - SLOPE_W/Corner::W",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Steep slopes - SLOPE_STEEP_N"
+      ],
+      "name" : "PartialPixelTest - Steep slopes - SLOPE_STEEP_N",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Steep slopes - SLOPE_STEEP_E"
+      ],
+      "name" : "PartialPixelTest - Steep slopes - SLOPE_STEEP_E",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Steep slopes - SLOPE_STEEP_S"
+      ],
+      "name" : "PartialPixelTest - Steep slopes - SLOPE_STEEP_S",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Steep slopes - SLOPE_STEEP_W"
+      ],
+      "name" : "PartialPixelTest - Steep slopes - SLOPE_STEEP_W",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::N"
+      ],
+      "name" : "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::N",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::E"
+      ],
+      "name" : "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::E",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::S"
+      ],
+      "name" : "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::S",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::W"
+      ],
+      "name" : "PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::W",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "DivideApproxTest - Negative"
+      ],
+      "name" : "DivideApproxTest - Negative",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "DivideApproxTest\\, Divide"
+      ],
+      "name" : "DivideApproxTest, Divide",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "IntSqrtTest - Zero"
+      ],
+      "name" : "IntSqrtTest - Zero",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "IntSqrtTest - FindSqRt"
+      ],
+      "name" : "IntSqrtTest - FindSqRt",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ClampTo"
+      ],
+      "name" : "ClampTo",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SoftClamp"
+      ],
+      "name" : "SoftClamp",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringBuilder - basic"
+      ],
+      "name" : "StringBuilder - basic",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringBuilder - binary"
+      ],
+      "name" : "StringBuilder - binary",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringBuilder - text"
+      ],
+      "name" : "StringBuilder - text",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - basic"
+      ],
+      "name" : "StringConsumer - basic",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - binary8"
+      ],
+      "name" : "StringConsumer - binary8",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - binary16"
+      ],
+      "name" : "StringConsumer - binary16",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - binary32"
+      ],
+      "name" : "StringConsumer - binary32",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - binary64"
+      ],
+      "name" : "StringConsumer - binary64",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - utf8"
+      ],
+      "name" : "StringConsumer - utf8",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - conditions"
+      ],
+      "name" : "StringConsumer - conditions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - ascii"
+      ],
+      "name" : "StringConsumer - ascii",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - parse int"
+      ],
+      "name" : "StringConsumer - parse int",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - invalid int"
+      ],
+      "name" : "StringConsumer - invalid int",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StringConsumer - most negative"
+      ],
+      "name" : "StringConsumer - most negative",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "InPlaceReplacement"
+      ],
+      "name" : "InPlaceReplacement",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrCompareIgnoreCase - std::string"
+      ],
+      "name" : "StrCompareIgnoreCase - std::string",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrCompareIgnoreCase - std::string_view"
+      ],
+      "name" : "StrCompareIgnoreCase - std::string_view",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrEqualsIgnoreCase - std::string"
+      ],
+      "name" : "StrEqualsIgnoreCase - std::string",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrEqualsIgnoreCase - std::string_view"
+      ],
+      "name" : "StrEqualsIgnoreCase - std::string_view",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrStartsWithIgnoreCase - std::string"
+      ],
+      "name" : "StrStartsWithIgnoreCase - std::string",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrStartsWithIgnoreCase - std::string_view"
+      ],
+      "name" : "StrStartsWithIgnoreCase - std::string_view",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrEndsWithIgnoreCase - std::string"
+      ],
+      "name" : "StrEndsWithIgnoreCase - std::string",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrEndsWithIgnoreCase - std::string_view"
+      ],
+      "name" : "StrEndsWithIgnoreCase - std::string_view",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "FormatArrayAsHex"
+      ],
+      "name" : "FormatArrayAsHex",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConvertHexToBytes"
+      ],
+      "name" : "ConvertHexToBytes",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrTrimInPlace"
+      ],
+      "name" : "StrTrimInPlace",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "StrTrimView"
+      ],
+      "name" : "StrTrimView",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "FixSCCEncoded"
+      ],
+      "name" : "FixSCCEncoded",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "FixSCCEncodedNegative"
+      ],
+      "name" : "FixSCCEncodedNegative",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "EncodedString::ReplaceParam - positive"
+      ],
+      "name" : "EncodedString::ReplaceParam - positive",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "EncodedString::ReplaceParam - negative"
+      ],
+      "name" : "EncodedString::ReplaceParam - negative",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Authentication_KeyExchangeOnly"
+      ],
+      "name" : "Authentication_KeyExchangeOnly",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Authentication_PAKE"
+      ],
+      "name" : "Authentication_PAKE",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Authentication_AuthorizedKey"
+      ],
+      "name" : "Authentication_AuthorizedKey",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Authentication_Combined"
+      ],
+      "name" : "Authentication_Combined",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Encryption handling"
+      ],
+      "name" : "Encryption handling",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Placement Restrictions - Industry Rules Matrix"
+      ],
+      "name" : "Placement Restrictions - Industry Rules Matrix",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Placement Restrictions - Train Depot Rules Matrix"
+      ],
+      "name" : "Placement Restrictions - Train Depot Rules Matrix",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Placement Restrictions - CmdBuildTrainDepot Integration"
+      ],
+      "name" : "Placement Restrictions - CmdBuildTrainDepot Integration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PlanetManager - Registration and Validation"
+      ],
+      "name" : "PlanetManager - Registration and Validation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PlanetManager - Multi-World Spatial Partitioning and Buffer Zones"
+      ],
+      "name" : "PlanetManager - Multi-World Spatial Partitioning and Buffer Zones",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PlanetManager - Arbitrary Non-Cell-Aligned Boundary Precision"
+      ],
+      "name" : "PlanetManager - Arbitrary Non-Cell-Aligned Boundary Precision",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Planet UI - Phase & Biome Names"
+      ],
+      "name" : "Planet UI - Phase & Biome Names",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Planet UI - Viewport Status & Navigation"
+      ],
+      "name" : "Planet UI - Viewport Status & Navigation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Planet SaveLoad - Multi-World Serialization Round-Trip"
+      ],
+      "name" : "Planet SaveLoad - Multi-World Serialization Round-Trip",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Planet SaveLoad - Empty / Single-World Game Round-Trip"
+      ],
+      "name" : "Planet SaveLoad - Empty / Single-World Game Round-Trip",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PortalRegistry - Basic Pairing and Lookups"
+      ],
+      "name" : "PortalRegistry - Basic Pairing and Lookups",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "PortalRegistry - Multi-World Topologies and Validation"
+      ],
+      "name" : "PortalRegistry - Multi-World Topologies and Validation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length)"
+      ],
+      "name" : "Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length)",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - YAPF Track Follower Traversal"
+      ],
+      "name" : "Portal Wormhole - YAPF Track Follower Traversal",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Unlinked gate is a closed rail terminal"
+      ],
+      "name" : "Portal Wormhole - Unlinked gate is a closed rail terminal",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Stale non-tunnel endpoint is rejected"
+      ],
+      "name" : "Portal Wormhole - Stale non-tunnel endpoint is rejected",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation"
+      ],
+      "name" : "Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Routing follows every exit orientation with rail turns disabled"
+      ],
+      "name" : "Portal Wormhole - Routing follows every exit orientation with rail turns disabled",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Neutral Generated Gateway Is Shared Rail"
+      ],
+      "name" : "Portal Wormhole - Neutral Generated Gateway Is Shared Rail",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Legacy Generated Gateway Direction Repair"
+      ],
+      "name" : "Portal Wormhole - Legacy Generated Gateway Direction Repair",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Exit Emergence Coordinates Calculation"
+      ],
+      "name" : "Portal Wormhole - Exit Emergence Coordinates Calculation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Wormhole - Consist Distance Decoupling Across Wormhole"
+      ],
+      "name" : "Portal Wormhole - Consist Distance Decoupling Across Wormhole",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Progress Tracking API"
+      ],
+      "name" : "ConsistTraversal - Progress Tracking API",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Following Wagon Enters Plain Rail Tile"
+      ],
+      "name" : "ConsistTraversal - Following Wagon Enters Plain Rail Tile",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Company Train Traverses Neutral Gateway"
+      ],
+      "name" : "ConsistTraversal - Company Train Traverses Neutral Gateway",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Single Locomotive Portal Emergence"
+      ],
+      "name" : "ConsistTraversal - Single Locomotive Portal Emergence",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Complete consist clears every portal orientation forwards and backwards"
+      ],
+      "name" : "ConsistTraversal - Complete consist clears every portal orientation forwards and backwards",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Multi-Wagon Traversal Across Worlds"
+      ],
+      "name" : "ConsistTraversal - Multi-Wagon Traversal Across Worlds",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "ConsistTraversal - Vehicle Destruction Clears Transit Tracker"
+      ],
+      "name" : "ConsistTraversal - Vehicle Destruction Clears Transit Tracker",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Content Manifest - canonical codec and digest"
+      ],
+      "name" : "Content Manifest - canonical codec and digest",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Content Manifest - strict compatibility diagnostics"
+      ],
+      "name" : "Content Manifest - strict compatibility diagnostics",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Identity - deterministic namespace and consist lifecycle"
+      ],
+      "name" : "Federation Identity - deterministic namespace and consist lifecycle",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Snapshot - canonical round trip and validation"
+      ],
+      "name" : "Consist Snapshot - canonical round trip and validation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Snapshot - capture is non-spatial and leaves the train unchanged"
+      ],
+      "name" : "Consist Snapshot - capture is non-spatial and leaves the train unchanged",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Identity - company and station lifecycle"
+      ],
+      "name" : "Federation Identity - company and station lifecycle",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Identity - cargo source and order destination provenance"
+      ],
+      "name" : "Federation Identity - cargo source and order destination provenance",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Snapshot - v2 encode/decode with company\\, cargo source\\, and orders"
+      ],
+      "name" : "Consist Snapshot - v2 encode/decode with company, cargo source, and orders",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Snapshot - v1 wire format backward compatibility decoding"
+      ],
+      "name" : "Consist Snapshot - v1 wire format backward compatibility decoding",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Identity - savegame FIDS round-trip with all mappings"
+      ],
+      "name" : "Federation Identity - savegame FIDS round-trip with all mappings",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Checkpoint transitions reject conflicting receipts"
+      ],
+      "name" : "Federation Transfer - Checkpoint transitions reject conflicting receipts",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Inter-Server Portal Registration and Query"
+      ],
+      "name" : "Federation Transfer - Inter-Server Portal Registration and Query",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Universe Authority Lifecycle and State Machine"
+      ],
+      "name" : "Federation Transfer - Universe Authority Lifecycle and State Machine",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Commodity Conservation Invariant Audit"
+      ],
+      "name" : "Federation Transfer - Commodity Conservation Invariant Audit",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Consist Despawn for Transfer"
+      ],
+      "name" : "Federation Transfer - Consist Despawn for Transfer",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Consist Materialization on Destination Gate"
+      ],
+      "name" : "Federation Transfer - Consist Materialization on Destination Gate",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Coordinator retries only the exact destination gate"
+      ],
+      "name" : "Federation Transfer - Coordinator retries only the exact destination gate",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Obstruction and Manifest Rejection"
+      ],
+      "name" : "Federation Transfer - Obstruction and Manifest Rejection",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transport - AuthorityRequest Protocol and Envelope Handling"
+      ],
+      "name" : "Federation Transport - AuthorityRequest Protocol and Envelope Handling",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transport - Late callbacks after request timeout or destruction"
+      ],
+      "name" : "Federation Transport - Late callbacks after request timeout or destruction",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transport - Late successful completion after request destruction"
+      ],
+      "name" : "Federation Transport - Late successful completion after request destruction",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transport - Base64 Round Trip"
+      ],
+      "name" : "Federation Transport - Base64 Round Trip",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Transfer - Journal Deduplication and Authority URL Config"
+      ],
+      "name" : "Federation Transfer - Journal Deduplication and Authority URL Config",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Persistent Universe - Player Registration and Authentication"
+      ],
+      "name" : "Federation Persistent Universe - Player Registration and Authentication",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Persistent Universe - Corporate Charters and Multi-World Ownership"
+      ],
+      "name" : "Federation Persistent Universe - Corporate Charters and Multi-World Ownership",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Persistent Universe - Dynamic World Directory & Heartbeats"
+      ],
+      "name" : "Federation Persistent Universe - Dynamic World Directory & Heartbeats",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Persistent Universe - Detailed Per-Cargo Commodity Conservation & Trade Balances"
+      ],
+      "name" : "Federation Persistent Universe - Detailed Per-Cargo Commodity Conservation & Trade Balances",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Megacity - Registration\\, Quotas\\, and Monthly Evaluation Lifecycle"
+      ],
+      "name" : "Federation Megacity - Registration, Quotas, and Monthly Evaluation Lifecycle",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Freight Corridors - Congestion Escalation\\, Dynamic Delay & Priority QoS"
+      ],
+      "name" : "Federation Freight Corridors - Congestion Escalation, Dynamic Delay & Priority QoS",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Empire Supply Chain Matrix & Conservation Accounting"
+      ],
+      "name" : "Federation Empire Supply Chain Matrix & Conservation Accounting",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 18 GUI - WindowDesc Registration & Widget Tree Validity"
+      ],
+      "name" : "Sprint 18 GUI - WindowDesc Registration & Widget Tree Validity",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 18 GUI - Megacity Profile Presentation and Growth Multipliers"
+      ],
+      "name" : "Sprint 18 GUI - Megacity Profile Presentation and Growth Multipliers",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 18 GUI - Freight Corridor Monitor Utilization and Delays"
+      ],
+      "name" : "Sprint 18 GUI - Freight Corridor Monitor Utilization and Delays",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 18 GUI - Universe Directory World Status and Heartbeats"
+      ],
+      "name" : "Sprint 18 GUI - Universe Directory World Status and Heartbeats",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 18 GUI - TownView Megacity Status Button Widget"
+      ],
+      "name" : "Sprint 18 GUI - TownView Megacity Status Button Widget",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Cluster - Topology Registration and Phase Hierarchy"
+      ],
+      "name" : "Federation Cluster - Topology Registration and Phase Hierarchy",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Cluster - Multi-Phase Freight Transit & Supply Chain Accounting"
+      ],
+      "name" : "Federation Cluster - Multi-Phase Freight Transit & Supply Chain Accounting",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Cluster - Node Drop\\, Quarantine Bay & Invariant Preservation"
+      ],
+      "name" : "Federation Cluster - Node Drop, Quarantine Bay & Invariant Preservation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Cluster - Server Recovery and Consist Re-Activation"
+      ],
+      "name" : "Federation Cluster - Server Recovery and Consist Re-Activation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Snapshot - current_order_index serialization round-trip"
+      ],
+      "name" : "Consist Snapshot - current_order_index serialization round-trip",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Federation Identity - Order destination resolution across worlds"
+      ],
+      "name" : "Federation Identity - Order destination resolution across worlds",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Materializer - Restores Orders and Advances Order Index on Arrival"
+      ],
+      "name" : "Consist Materializer - Restores Orders and Advances Order Index on Arrival",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Consist Materializer - End-to-end Autonomous Round-Trip Order Cycling"
+      ],
+      "name" : "Consist Materializer - End-to-end Autonomous Round-Trip Order Cycling",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Unlinked Gate Lifecycle and Restrictions"
+      ],
+      "name" : "Portal Construction - Unlinked Gate Lifecycle and Restrictions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - High-capacity terminal topology and PBS directions"
+      ],
+      "name" : "Portal Construction - High-capacity terminal topology and PBS directions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - UAT adopts complete neutral terminals only"
+      ],
+      "name" : "Portal Construction - UAT adopts complete neutral terminals only",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Terminal footprint rejection is atomic"
+      ],
+      "name" : "Portal Construction - Terminal footprint rejection is atomic",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Authoritative world and Phase placement rules"
+      ],
+      "name" : "Portal Construction - Authoritative world and Phase placement rules",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Cross-World Gate Linking"
+      ],
+      "name" : "Portal Construction - Cross-World Gate Linking",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Atomic Pair Builder"
+      ],
+      "name" : "Portal Construction - Atomic Pair Builder",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Demolition Safeguards While Consist In Transit"
+      ],
+      "name" : "Portal Construction - Demolition Safeguards While Consist In Transit",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Partial Demolition Unlinking"
+      ],
+      "name" : "Portal Construction - Partial Demolition Unlinking",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Area demolition safely removes a reserved linked pair"
+      ],
+      "name" : "Portal Construction - Area demolition safely removes a reserved linked pair",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Construction - Savegame Persistence of Unlinked and Linked Portals"
+      ],
+      "name" : "Portal Construction - Savegame Persistence of Unlinked and Linked Portals",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "MultiWorldGen - Layout Calculation Geometry"
+      ],
+      "name" : "MultiWorldGen - Layout Calculation Geometry",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "MultiWorldGen - Map Partitioning and Void Isolation"
+      ],
+      "name" : "MultiWorldGen - Map Partitioning and Void Isolation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "MultiWorldGen - Gateway Initialization and Pairing"
+      ],
+      "name" : "MultiWorldGen - Gateway Initialization and Pairing",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "MultiWorldGen - Asymmetric Map Partitioning along X"
+      ],
+      "name" : "MultiWorldGen - Asymmetric Map Partitioning along X",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain"
+      ],
+      "name" : "MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "MultiWorldGen - Partitioning Preserves Terrain Heights and Shores"
+      ],
+      "name" : "MultiWorldGen - Partitioning Preserves Terrain Heights and Shores",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Interplanetary Cargo - Trade Premium Matrix"
+      ],
+      "name" : "Interplanetary Cargo - Trade Premium Matrix",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Interplanetary Cargo - Edge Case Handling and Profit Preservation"
+      ],
+      "name" : "Interplanetary Cargo - Edge Case Handling and Profit Preservation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Interplanetary Cargo - Industry Supply Chain Restrictions"
+      ],
+      "name" : "Interplanetary Cargo - Industry Supply Chain Restrictions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Interplanetary Cargo - CargoPacket Source Tracking"
+      ],
+      "name" : "Interplanetary Cargo - CargoPacket Source Tracking",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Interplanetary Cargo - Procedural Layout Revenue Scaling"
+      ],
+      "name" : "Interplanetary Cargo - Procedural Layout Revenue Scaling",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Spaceport Manager - Lifecycle and Trade Calculation"
+      ],
+      "name" : "Spaceport Manager - Lifecycle and Trade Calculation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Spaceport Command - CmdDesignateSpaceport"
+      ],
+      "name" : "Spaceport Command - CmdDesignateSpaceport",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Boundary Void Adjacency Rules"
+      ],
+      "name" : "Edge Conduit - Boundary Void Adjacency Rules",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Construction and Demolition Commands"
+      ],
+      "name" : "Edge Conduit - Construction and Demolition Commands",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Frontier World Extraction Multiplier"
+      ],
+      "name" : "Edge Conduit - Frontier World Extraction Multiplier",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)"
+      ],
+      "name" : "Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - One-ended head is safe for signal updates"
+      ],
+      "name" : "Edge Conduit - One-ended head is safe for signal updates",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal rail conversion rejects a stale remote endpoint"
+      ],
+      "name" : "Portal rail conversion rejects a stale remote endpoint",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Physical map edges and corners are coordinate-safe"
+      ],
+      "name" : "Edge Conduit - Physical map edges and corners are coordinate-safe",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Invalid boundaries\\, orientation and terrain fail atomically"
+      ],
+      "name" : "Edge Conduit - Invalid boundaries, orientation and terrain fail atomically",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Logical boundary\\, phases and adjacent rail remain supported"
+      ],
+      "name" : "Edge Conduit - Logical boundary, phases and adjacent rail remain supported",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit - Constructed tile survives save\\, reload and signal refresh"
+      ],
+      "name" : "Edge Conduit - Constructed tile survives save, reload and signal refresh",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Spaceport Bridge - Configuration and Command Execution"
+      ],
+      "name" : "Spaceport Bridge - Configuration and Command Execution",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Spaceport Bridge - Interplanetary Trade Dispatch and Reception"
+      ],
+      "name" : "Spaceport Bridge - Interplanetary Trade Dispatch and Reception",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Edge Conduit Feeder - Configuration and Direct Inter-World Piping"
+      ],
+      "name" : "Edge Conduit Feeder - Configuration and Direct Inter-World Piping",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Planetary Infrastructure - Concurrent Spaceport and Conduit Federation"
+      ],
+      "name" : "Planetary Infrastructure - Concurrent Spaceport and Conduit Federation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Twin Gateway Arrays - Spatial Recognition and Pairing"
+      ],
+      "name" : "Twin Gateway Arrays - Spatial Recognition and Pairing",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Twin Gateway Arrays - Corridor Capacity and Congestion Mitigation"
+      ],
+      "name" : "Twin Gateway Arrays - Corridor Capacity and Congestion Mitigation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "In-Transit Consist Telemetry - Querying and Lifecycle Updates"
+      ],
+      "name" : "In-Transit Consist Telemetry - Querying and Lifecycle Updates",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Portal Maintenance Economics - Upkeep Fees and Calculation"
+      ],
+      "name" : "Portal Maintenance Economics - Upkeep Fees and Calculation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Viewport World-Hopping and Gate Resolution"
+      ],
+      "name" : "Viewport World-Hopping and Gate Resolution",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Alien Biomes - PlanetManager GetTileBiome O(1) query"
+      ],
+      "name" : "Alien Biomes - PlanetManager GetTileBiome O(1) query",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Alien Biomes - Procedural MultiWorldGen Biome Environmental Styling"
+      ],
+      "name" : "Alien Biomes - Procedural MultiWorldGen Biome Environmental Styling",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Alien Biomes - Tree Foliage Transformation per Biome"
+      ],
+      "name" : "Alien Biomes - Tree Foliage Transformation per Biome",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Alien Biomes - CST Portal Gate Classification and Visual Styling"
+      ],
+      "name" : "Alien Biomes - CST Portal Gate Classification and Visual Styling",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint Data Model and JSON Round-Trip"
+      ],
+      "name" : "Blueprint Data Model and JSON Round-Trip",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint Rotation 90\\, 180\\, 270 and Invariance"
+      ],
+      "name" : "Blueprint Rotation 90, 180, 270 and Invariance",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint Horizontal Flip/Mirror"
+      ],
+      "name" : "Blueprint Horizontal Flip/Mirror",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint Capture from Game Map"
+      ],
+      "name" : "Blueprint Capture from Game Map",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint Manager Storage and Builtin Protection"
+      ],
+      "name" : "Blueprint Manager Storage and Builtin Protection",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Deterministic Blueprint Placement Command"
+      ],
+      "name" : "Deterministic Blueprint Placement Command",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint depot quote matches execution"
+      ],
+      "name" : "Blueprint depot quote matches execution",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint rejected placement preserves map money and materials"
+      ],
+      "name" : "Blueprint rejected placement preserves map money and materials",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint Mainline placement clears trees with exact fabrication materials"
+      ],
+      "name" : "Blueprint Mainline placement clears trees with exact fabrication materials",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint dispatcher charges quote exactly once"
+      ],
+      "name" : "Blueprint dispatcher charges quote exactly once",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint unsupported station layouts reject without changes"
+      ],
+      "name" : "Blueprint unsupported station layouts reject without changes",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint clearing foundation and signal replacement use canonical costs"
+      ],
+      "name" : "Blueprint clearing foundation and signal replacement use canonical costs",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Blueprint infrastructure money and materials survive save reload"
+      ],
+      "name" : "Blueprint infrastructure money and materials survive save reload",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "CST Prefabs - Complete 8-Layout Catalogue Registration"
+      ],
+      "name" : "CST Prefabs - Complete 8-Layout Catalogue Registration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "CST Prefabs - Structural & Functional Integrity"
+      ],
+      "name" : "CST Prefabs - Structural & Functional Integrity",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "CST Prefabs - Geometric Transforms & RHD/LHD Invariance"
+      ],
+      "name" : "CST Prefabs - Geometric Transforms & RHD/LHD Invariance",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "CST Prefabs - Deterministic In-Game Map Placement"
+      ],
+      "name" : "CST Prefabs - Deterministic In-Game Map Placement",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "CST Prefabs - Immutability & Builtin Deletion Protection"
+      ],
+      "name" : "CST Prefabs - Immutability & Builtin Deletion Protection",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 27 GUI - WindowDesc Registration & Widget Tree Compilation"
+      ],
+      "name" : "Sprint 27 GUI - WindowDesc Registration & Widget Tree Compilation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 27 GUI - Empire Supply Chain Matrix & Feeder Presentation"
+      ],
+      "name" : "Sprint 27 GUI - Empire Supply Chain Matrix & Feeder Presentation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 27 GUI - Inter-World Trade Balances & Conservation Auditing"
+      ],
+      "name" : "Sprint 27 GUI - Inter-World Trade Balances & Conservation Auditing",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 27 GUI - Federation Player Authentication & Active Session Management"
+      ],
+      "name" : "Sprint 27 GUI - Federation Player Authentication & Active Session Management",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 27 GUI - Corporate Charter Operations & Delegation Permissions"
+      ],
+      "name" : "Sprint 27 GUI - Corporate Charter Operations & Delegation Permissions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata"
+      ],
+      "name" : "Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration"
+      ],
+      "name" : "Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance"
+      ],
+      "name" : "Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States"
+      ],
+      "name" : "Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 28 UAT - Script Goal & Story Page Enums and Types"
+      ],
+      "name" : "Sprint 28 UAT - Script Goal & Story Page Enums and Types",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 29 Federation - Dynamic World Directory Discovery & Liveliness"
+      ],
+      "name" : "Sprint 29 Federation - Dynamic World Directory Discovery & Liveliness",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 29 Federation - Strict Content Admission Rejection & Invariant Guard"
+      ],
+      "name" : "Sprint 29 Federation - Strict Content Admission Rejection & Invariant Guard",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 29 Federation - Freight Corridor Congestion & Dynamic Priority Relief"
+      ],
+      "name" : "Sprint 29 Federation - Freight Corridor Congestion & Dynamic Priority Relief",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 29 Federation - Cross-Server Multi-Hop Round Trip & Order Progression"
+      ],
+      "name" : "Sprint 29 Federation - Cross-Server Multi-Hop Round Trip & Order Progression",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 29 Federation - Destination Node Crash\\, Quarantine Bay & Auto-Recovery"
+      ],
+      "name" : "Sprint 29 Federation - Destination Node Crash, Quarantine Bay & Auto-Recovery",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 29 Federation - Empire-Wide Multi-Commodity Conservation & Bilateral Trade Balances"
+      ],
+      "name" : "Sprint 29 Federation - Empire-Wide Multi-Commodity Conservation & Bilateral Trade Balances",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Biomes - All 6 Biomes Environmental Styling & Spatial Resolution"
+      ],
+      "name" : "Sprint 30 Biomes - All 6 Biomes Environmental Styling & Spatial Resolution",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Biomes - MultiWorldGen Biome Partitioning for 4+ Worlds"
+      ],
+      "name" : "Sprint 30 Biomes - MultiWorldGen Biome Partitioning for 4+ Worlds",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Biomes - Procedural Environmental Styling and Foliage"
+      ],
+      "name" : "Sprint 30 Biomes - Procedural Environmental Styling and Foliage",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Colonization - Phase 4 Expansion World Pre-Colonization Restrictions"
+      ],
+      "name" : "Sprint 30 Colonization - Phase 4 Expansion World Pre-Colonization Restrictions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Colonization - PlanetManager ColonizeWorld and Promotion Hierarchy"
+      ],
+      "name" : "Sprint 30 Colonization - PlanetManager ColonizeWorld and Promotion Hierarchy",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock"
+      ],
+      "name" : "Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 30 Colonization - Save/Load Persistence of Promoted World Phase"
+      ],
+      "name" : "Sprint 30 Colonization - Save/Load Persistence of Promoted World Phase",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 31 GUI - Universe Directory Widget Hierarchy and Button States"
+      ],
+      "name" : "Sprint 31 GUI - Universe Directory Widget Hierarchy and Button States",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 31 Origin - Outpost Origin Coordinate Assignment and Viewport Navigation"
+      ],
+      "name" : "Sprint 31 Origin - Outpost Origin Coordinate Assignment and Viewport Navigation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 31 Authority - RegisteredWorld Biome Tracking and Directory Sync"
+      ],
+      "name" : "Sprint 31 Authority - RegisteredWorld Biome Tracking and Directory Sync",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 31 Authority - Remote ColonizeWorld Lifecycle"
+      ],
+      "name" : "Sprint 31 Authority - Remote ColonizeWorld Lifecycle",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase"
+      ],
+      "name" : "Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 32 Economy - Cargo Delivery and Development Points Accumulation"
+      ],
+      "name" : "Sprint 32 Economy - Cargo Delivery and Development Points Accumulation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating"
+      ],
+      "name" : "Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 32 Authority - Universe Authority Remote World Promotion"
+      ],
+      "name" : "Sprint 32 Authority - Universe Authority Remote World Promotion",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 33 - Planetary Town Placement Protection by World Phase"
+      ],
+      "name" : "Sprint 33 - Planetary Town Placement Protection by World Phase",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 33 - Biome-Specific Industry Placement Protection"
+      ],
+      "name" : "Sprint 33 - Biome-Specific Industry Placement Protection",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation Integration"
+      ],
+      "name" : "Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation Integration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 33 - Megacity Multipliers and Town Growth Controls"
+      ],
+      "name" : "Sprint 33 - Megacity Multipliers and Town Growth Controls",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 33 - Universe Authority Megacity Federation Tracking & State"
+      ],
+      "name" : "Sprint 33 - Universe Authority Megacity Federation Tracking & State",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 36 UAT - Savegame File Artifact & Invariants"
+      ],
+      "name" : "Sprint 36 UAT - Savegame File Artifact & Invariants",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v9 Metadata & Backwards Compatibility"
+      ],
+      "name" : "Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v9 Metadata & Backwards Compatibility",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 36 UAT - Six-World Biome Partition & Layout Geometry"
+      ],
+      "name" : "Sprint 36 UAT - Six-World Biome Partition & Layout Geometry",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 36 UAT - Mid/Late Game Fixtures & Engine System Validation"
+      ],
+      "name" : "Sprint 36 UAT - Mid/Late Game Fixtures & Engine System Validation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: In-Tree NML Package Source Integrity"
+      ],
+      "name" : "Sprint 37: In-Tree NML Package Source Integrity",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: Reproducible Binary GRF Container Synthesis"
+      ],
+      "name" : "Sprint 37: Reproducible Binary GRF Container Synthesis",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: Content Admission Boundary and Manifest Integration"
+      ],
+      "name" : "Sprint 37: Content Admission Boundary and Manifest Integration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: CST Rolling Stock Specifications and Tech Tree Gating"
+      ],
+      "name" : "Sprint 37: CST Rolling Stock Specifications and Tech Tree Gating",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: World Phase Operational Restrictions"
+      ],
+      "name" : "Sprint 37: World Phase Operational Restrictions",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage"
+      ],
+      "name" : "Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops"
+      ],
+      "name" : "Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 37: Runtime gating uses pack identity and local engine IDs"
+      ],
+      "name" : "Sprint 37: Runtime gating uses pack identity and local engine IDs",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Stockpile - Multi-World & Company Ledger Isolation"
+      ],
+      "name" : "Sprint 39 Stockpile - Multi-World & Company Ledger Isolation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption"
+      ],
+      "name" : "Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Stockpile - Role Mappings and Deserialization"
+      ],
+      "name" : "Sprint 39 Stockpile - Role Mappings and Deserialization",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors"
+      ],
+      "name" : "Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Corporate HQ - Placement Rules & Validation"
+      ],
+      "name" : "Sprint 39 Corporate HQ - Placement Rules & Validation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Corporate HQ - Tier Advancement & Serialization"
+      ],
+      "name" : "Sprint 39 Corporate HQ - Tier Advancement & Serialization",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub"
+      ],
+      "name" : "Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 40 Fabrication - BOM Recipes & Catalog"
+      ],
+      "name" : "Sprint 40 Fabrication - BOM Recipes & Catalog",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 40 Fabrication - Mode Toggling and Company Isolation"
+      ],
+      "name" : "Sprint 40 Fabrication - Mode Toggling and Company Isolation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 40 Fabrication - Track Building Interception"
+      ],
+      "name" : "Sprint 40 Fabrication - Track Building Interception",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 40 Fabrication - Signal and Depot Interception"
+      ],
+      "name" : "Sprint 40 Fabrication - Signal and Depot Interception",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 40 Fabrication - Save/Load Serialization"
+      ],
+      "name" : "Sprint 40 Fabrication - Save/Load Serialization",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 41 Tech Tree - Catalog & Branches"
+      ],
+      "name" : "Sprint 41 Tech Tree - Catalog & Branches",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites"
+      ],
+      "name" : "Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 41 Tech Tree - Server Commands & Budget Allocation"
+      ],
+      "name" : "Sprint 41 Tech Tree - Server Commands & Budget Allocation",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning"
+      ],
+      "name" : "Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 41 Tech Tree - Fabrication Bonus Discount Integration"
+      ],
+      "name" : "Sprint 41 Tech Tree - Fabrication Bonus Discount Integration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 41 Tech Tree - Save/Load State Restoration"
+      ],
+      "name" : "Sprint 41 Tech Tree - Save/Load State Restoration",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog"
+      ],
+      "name" : "Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - World Phase Placement Constraints"
+      ],
+      "name" : "Sprint 42 Production Chains - World Phase Placement Constraints",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion"
+      ],
+      "name" : "Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk"
+      ],
+      "name" : "Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop"
+      ],
+      "name" : "Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering"
+      ],
+      "name" : "Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)"
+      ],
+      "name" : "Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Production gameplay - command validation and station lifecycle"
+      ],
+      "name" : "Production gameplay - command validation and station lifecycle",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Production gameplay - real cargo unloading conversion and onward loading"
+      ],
+      "name" : "Production gameplay - real cargo unloading conversion and onward loading",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Production gameplay - station facility survives actual save and reload"
+      ],
+      "name" : "Production gameplay - station facility survives actual save and reload",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Squirrel -> JSON conversion"
+      ],
+      "name" : "Squirrel -> JSON conversion",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "JSON -> Squirrel conversion"
+      ],
+      "name" : "JSON -> Squirrel conversion",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "WindowDesc - ini_key uniqueness"
+      ],
+      "name" : "WindowDesc - ini_key uniqueness",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "WindowDesc - ini_key validity"
+      ],
+      "name" : "WindowDesc - ini_key validity",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "WindowDesc - NWidgetParts properly closed"
+      ],
+      "name" : "WindowDesc - NWidgetParts properly closed",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "WindowDesc - NWidgetPart validity"
+      ],
+      "name" : "WindowDesc - NWidgetPart validity",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SpiralTileSequence - minimum"
+      ],
+      "name" : "SpiralTileSequence - minimum",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SpiralTileSequence - odd"
+      ],
+      "name" : "SpiralTileSequence - odd",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SpiralTileSequence - even"
+      ],
+      "name" : "SpiralTileSequence - even",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SpiralTileSequence - zero hole"
+      ],
+      "name" : "SpiralTileSequence - zero hole",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "SpiralTileSequence - normal hole"
+      ],
+      "name" : "SpiralTileSequence - normal hole",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Utf8View - empty"
+      ],
+      "name" : "Utf8View - empty",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Utf8View - invalid"
+      ],
+      "name" : "Utf8View - invalid",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "command" : 
+      [
+        "/home/flax/games/openspacettd/build/openttd_test",
+        "Utf8View - iterate"
+      ],
+      "name" : "Utf8View - iterate",
+      "properties" : 
+      [
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 2,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DOPENTTD_EXECUTABLE=/home/flax/games/openspacettd/build/openttd",
+        "-DEDITBIN_EXECUTABLE=",
+        "-DREGRESSION_TEST=regression",
+        "-DSCRIPT_FOLDER=ai",
+        "-P",
+        "/home/flax/games/openspacettd/cmake/scripts/Regression.cmake"
+      ],
+      "name" : "regression_regression",
+      "properties" : 
+      [
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DOPENTTD_EXECUTABLE=/home/flax/games/openspacettd/build/openttd",
+        "-DEDITBIN_EXECUTABLE=",
+        "-DREGRESSION_TEST=stationlist",
+        "-DSCRIPT_FOLDER=ai",
+        "-P",
+        "/home/flax/games/openspacettd/cmake/scripts/Regression.cmake"
+      ],
+      "name" : "regression_stationlist",
+      "properties" : 
+      [
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 8,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DOPENTTD_EXECUTABLE=/home/flax/games/openspacettd/build/openttd",
+        "-DEDITBIN_EXECUTABLE=",
+        "-DREGRESSION_TEST=gs",
+        "-DSCRIPT_FOLDER=game",
+        "-P",
+        "/home/flax/games/openspacettd/cmake/scripts/Regression.cmake"
+      ],
+      "name" : "regression_gs",
+      "properties" : 
+      [
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DOPENTTD_EXECUTABLE=/home/flax/games/openspacettd/build/openttd",
+        "-DEDITBIN_EXECUTABLE=",
+        "-DREGRESSION_TEST=gs_compat",
+        "-DSCRIPT_FOLDER=game",
+        "-P",
+        "/home/flax/games/openspacettd/cmake/scripts/Regression.cmake"
+      ],
+      "name" : "regression_gs_compat",
+      "properties" : 
+      [
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/home/flax/games/openspacettd/build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

@@ -1,5 +1,9 @@
 # OpenSpaceTTD Documentation Index
 
+Start recovery work with the [master recovery plan](RECOVERY_PLAN_2026-09-15.md).
+It links the baseline/evidence, defect register, updated existing UAT, AI research
+gates, provenance and title milestones. [Checkpoint](../DEVBOX_HANDOFF.md).
+
 Current acceptance entry point: [v1.1 checklist through Sprint 42](../demo/ALL-FEATURES-UAT.md),
 [results sheet](../demo/UAT-RESULTS.md) and [coverage matrix](FEATURE_UI_UAT_COVERAGE.md).
 See the [commit review and verification record](UAT_V1_1_REVIEW_2026-09-15.md).
@@ -19,7 +23,7 @@ Start with [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). It is
 
 ## Sprint evidence
 
-Dedicated sprint records are point-in-time evidence. They retain the test totals and claims made at sprint completion; they are not cumulative current-status pages. Records exist for Sprints 11–17, 23–34, and 36–42. Sprints 1–10 and 18–22 are covered by repository history, tests and grouped design/UAT documentation.
+Dedicated sprint records are point-in-time evidence. They retain the test totals and claims made at sprint completion; they are not cumulative current-status pages. Dedicated records exist for Sprints 11–17, 23–35, 37 and 39–42; Sprint36 is represented by UAT artifacts and Sprint38 art remains planned. Sprints 1–10 and 18–22 are covered by repository history, tests and grouped design/UAT documentation.
 
 ## UAT documentation
 

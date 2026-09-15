@@ -5,7 +5,7 @@
 - **Goal:** Railway-heavy industrial and logistics simulation game.
 - **Inspiration:** OpenTTD + Factorio-scale production chains + Peter F. Hamilton-style Commonwealth saga (planetary rail networks interlinked via fixed wormholes).
 - **Core Future Feature:** Multiple logical worlds connected by railway portal/wormhole gates.
-- **Current Status:** Implementation exists through Sprint 33; Sprint 34 consolidates documentation. Procedural six-biome behaviour, colonisation, blueprints, CST prefabs, economy and UI are present. External cross-process train transfer, bespoke art/NewGRF content and an updated Sprints 30–33 playable UAT remain pending. See `docs/PROJECT_STATUS_AND_ROADMAP.md` for authoritative status and evidence boundaries.
+- **Current Status:** Source includes implementation through the recorded Sprint 42 scope, with WP-01–09 Blueprint, cargo-conservation, hub lifecycle, GUI-authority, capture/routing, native settlement and HQ/hub/reserve repairs implemented locally. Content, federation and human acceptance work are tracked in the recovery plan. Read `docs/RECOVERY_PLAN_2026-09-15.md` for the single recovery plan, `docs/PROJECT_STATUS_AND_ROADMAP.md` for historical sprint status, and `DEVBOX_HANDOFF.md` for the audit checkpoint. Passing domain tests are not human acceptance.
 
 ---
 

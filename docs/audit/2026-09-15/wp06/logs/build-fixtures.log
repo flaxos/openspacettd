@@ -1,0 +1,11 @@
+ninja: Entering directory `build'
+[1/6] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/4] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint_storage.cpp.o
+[3/4] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o
+[4/4] Linking CXX executable openttd_test

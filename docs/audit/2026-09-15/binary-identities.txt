@@ -1,0 +1,2 @@
+ace3d2ce48f7620723a953e9821fc56d3eddf5996e9a115ccc899391ad7d23aa  build/openttd
+cb77a38bb3c704c009c7957b377147afcbef0743768f51a73b57528dfddb472a  build/openttd_test

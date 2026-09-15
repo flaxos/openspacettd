@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 243: Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata
+1/5 Test #243: Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata ...   Passed    0.02 sec
+    Start 244: Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration
+2/5 Test #244: Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration ....   Passed    0.02 sec
+    Start 245: Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance
+3/5 Test #245: Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance .........   Passed    0.02 sec
+    Start 246: Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States
+4/5 Test #246: Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States ..........   Passed    0.02 sec
+    Start 247: Sprint 28 UAT - Script Goal & Story Page Enums and Types
+5/5 Test #247: Sprint 28 UAT - Script Goal & Story Page Enums and Types ............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   0.13 sec

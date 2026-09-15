@@ -1,0 +1,257 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+      Start 202: Blueprint Data Model and JSON Round-Trip
+ 1/16 Test #202: Blueprint Data Model and JSON Round-Trip .....................................   Passed    0.07 sec
+      Start 203: Blueprint Rotation 90, 180, 270 and Invariance
+ 2/16 Test #203: Blueprint Rotation 90, 180, 270 and Invariance ...............................   Passed    0.03 sec
+      Start 204: Blueprint Horizontal Flip/Mirror
+ 3/16 Test #204: Blueprint Horizontal Flip/Mirror .............................................   Passed    0.03 sec
+      Start 205: Blueprint Capture from Game Map
+ 4/16 Test #205: Blueprint Capture from Game Map ..............................................Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint Capture from Game Map
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint Capture from Game Map
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:337
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:337: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 206: Blueprint Manager Storage and Builtin Protection
+ 5/16 Test #206: Blueprint Manager Storage and Builtin Protection .............................Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint Manager Storage and Builtin Protection
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint Manager Storage and Builtin Protection
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:372
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:372: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 207: Deterministic Blueprint Placement Command
+ 6/16 Test #207: Deterministic Blueprint Placement Command ....................................Subprocess aborted***Exception:   0.13 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Deterministic Blueprint Placement Command
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Deterministic Blueprint Placement Command
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:418
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:418: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 208: Blueprint depot quote matches execution
+ 7/16 Test #208: Blueprint depot quote matches execution ......................................Subprocess aborted***Exception:   0.13 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint depot quote matches execution
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint depot quote matches execution
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:494
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:494: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 209: Blueprint rejected placement preserves map money and materials
+ 8/16 Test #209: Blueprint rejected placement preserves map money and materials ...............Subprocess aborted***Exception:   0.13 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint rejected placement preserves map money and materials
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint rejected placement preserves map money and materials
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:546
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:546: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 210: Blueprint Mainline placement clears trees with exact fabrication materials
+ 9/16 Test #210: Blueprint Mainline placement clears trees with exact fabrication materials ...Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint Mainline placement clears trees with exact fabrication materials
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint Mainline placement clears trees with exact fabrication materials
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:606
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:608: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 211: Blueprint dispatcher charges quote exactly once
+10/16 Test #211: Blueprint dispatcher charges quote exactly once ..............................Subprocess aborted***Exception:   0.14 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint dispatcher charges quote exactly once
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint dispatcher charges quote exactly once
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:643
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:643: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 212: Blueprint clearing foundation and signal replacement use canonical costs
+11/16 Test #212: Blueprint clearing foundation and signal replacement use canonical costs .....Subprocess aborted***Exception:   0.15 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: Blueprint clearing foundation and signal replacement use canonical costs
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Blueprint clearing foundation and signal replacement use canonical costs
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:660
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:660: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 213: CST Prefabs - Complete 8-Layout Catalogue Registration
+12/16 Test #213: CST Prefabs - Complete 8-Layout Catalogue Registration .......................   Passed    0.02 sec
+      Start 214: CST Prefabs - Structural & Functional Integrity
+13/16 Test #214: CST Prefabs - Structural & Functional Integrity ..............................   Passed    0.02 sec
+      Start 215: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+14/16 Test #215: CST Prefabs - Geometric Transforms & RHD/LHD Invariance ......................   Passed    0.02 sec
+      Start 216: CST Prefabs - Deterministic In-Game Map Placement
+15/16 Test #216: CST Prefabs - Deterministic In-Game Map Placement ............................Subprocess aborted***Exception:   0.13 sec
+Error: Assertion failed at line 119 of /home/flax/games/openspacettd/src/core/pool_func.hpp: this->checked != 0
+Filters: CST Prefabs - Deterministic In-Game Map Placement
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+CST Prefabs - Deterministic In-Game Map Placement
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:266
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_cst_prefabs.cpp:271: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
+
+      Start 217: CST Prefabs - Immutability & Builtin Deletion Protection
+16/16 Test #217: CST Prefabs - Immutability & Builtin Deletion Protection .....................   Passed    0.02 sec
+
+44% tests passed, 9 tests failed out of 16
+
+Total Test time (real) =   1.58 sec
+
+The following tests FAILED:
+	205 - Blueprint Capture from Game Map (Subprocess aborted)
+	206 - Blueprint Manager Storage and Builtin Protection (Subprocess aborted)
+	207 - Deterministic Blueprint Placement Command (Subprocess aborted)
+	208 - Blueprint depot quote matches execution (Subprocess aborted)
+	209 - Blueprint rejected placement preserves map money and materials (Subprocess aborted)
+	210 - Blueprint Mainline placement clears trees with exact fabrication materials (Subprocess aborted)
+	211 - Blueprint dispatcher charges quote exactly once (Subprocess aborted)
+	212 - Blueprint clearing foundation and signal replacement use canonical costs (Subprocess aborted)
+	216 - CST Prefabs - Deterministic In-Game Map Placement (Subprocess aborted)
+Errors while running CTest

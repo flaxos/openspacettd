@@ -1,0 +1,20 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start  7: Command authority - HQ rejects foreign invalid and stale tier requests
+1/7 Test  #7: Command authority - HQ rejects foreign invalid and stale tier requests .......................   Passed    0.04 sec
+    Start  8: Command authority - HQ advances once per requested tier and persists
+2/7 Test  #8: Command authority - HQ advances once per requested tier and persists .........................   Passed    0.05 sec
+    Start  9: Command authority - world commands preserve state on denial and charge once on success
+3/7 Test  #9: Command authority - world commands preserve state on denial and charge once on success .......   Passed    0.04 sec
+    Start 10: Command authority - actual HQ GUI queues an upgrade without local mutation
+4/7 Test #10: Command authority - actual HQ GUI queues an upgrade without local mutation ...................   Passed    0.02 sec
+    Start 11: Command authority - foreign HQ window never upgrades either company
+5/7 Test #11: Command authority - foreign HQ window never upgrades either company ..........................   Passed    0.03 sec
+    Start 12: Command authority - actual Directory GUI observes successful queued commands only
+6/7 Test #12: Command authority - actual Directory GUI observes successful queued commands only ............   Passed    0.02 sec
+    Start 13: Command authority - directory projection is read only and canonical despite stale metadata
+7/7 Test #13: Command authority - directory projection is read only and canonical despite stale metadata ...   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   0.25 sec

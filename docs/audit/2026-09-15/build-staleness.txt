@@ -1,0 +1,13 @@
+ninja: Entering directory `build'
+ninja explain: output CMakeFiles/find_version doesn't exist
+ninja explain: /home/flax/games/openspacettd/build/generated/rev.cpp is dirty
+ninja explain: CMakeFiles/find_version is dirty
+ninja explain: generated/rev.cpp is dirty
+ninja explain: /home/flax/games/openspacettd/build/generated/rev.cpp is dirty
+ninja explain: CMakeFiles/openttd_lib.dir/generated/rev.cpp.o is dirty
+ninja explain: CMakeFiles/openttd_lib.dir/generated/rev.cpp.o is dirty
+ninja explain: CMakeFiles/openttd_lib.dir/generated/rev.cpp.o is dirty
+[1/4] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+[2/4] Building CXX object CMakeFiles/openttd_lib.dir/generated/rev.cpp.o
+[3/4] Linking CXX executable openttd
+[4/4] Linking CXX executable openttd_test

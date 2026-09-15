@@ -1,0 +1,148 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start  7: Command authority - HQ rejects foreign invalid and stale tier requests
+1/7 Test  #7: Command authority - HQ rejects foreign invalid and stale tier requests .......................   Passed    0.02 sec
+    Start  8: Command authority - HQ advances once per requested tier and persists
+2/7 Test  #8: Command authority - HQ advances once per requested tier and persists .........................***Exception: SegFault  0.14 sec
+Loading your savegame caused OpenTTD to crash.
+This is probably caused by a corruption in the savegame.
+Please file a bug report and attach this savegame.
+
+Filters: Command authority - HQ advances once per requested tier and persists
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Command authority - HQ advances once per requested tier and persists
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:184
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:184: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 30 | 29 passed | 1 failed
+
+
+    Start  9: Command authority - world commands preserve state on denial and charge once on success
+3/7 Test  #9: Command authority - world commands preserve state on denial and charge once on success .......***Exception: SegFault  0.15 sec
+Loading your savegame caused OpenTTD to crash.
+This is probably caused by a corruption in the savegame.
+Please file a bug report and attach this savegame.
+
+Filters: Command authority - world commands preserve state on denial and charge once on success
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Command authority - world commands preserve state on denial and charge once on
+success
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:206
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:219: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 47 | 46 passed | 1 failed
+
+
+    Start 10: Command authority - actual HQ GUI queues an upgrade without local mutation
+4/7 Test #10: Command authority - actual HQ GUI queues an upgrade without local mutation ...................***Exception: SegFault  0.13 sec
+Filters: Command authority - actual HQ GUI queues an upgrade without local mutation
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Command authority - actual HQ GUI queues an upgrade without local mutation
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:251
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:251: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 4 | 3 passed | 1 failed
+
+
+    Start 11: Command authority - foreign HQ window never upgrades either company
+5/7 Test #11: Command authority - foreign HQ window never upgrades either company ..........................***Exception: SegFault  0.14 sec
+Filters: Command authority - foreign HQ window never upgrades either company
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Command authority - foreign HQ window never upgrades either company
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:269
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:269: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 5 | 4 passed | 1 failed
+
+
+    Start 12: Command authority - actual Directory GUI observes successful queued commands only
+6/7 Test #12: Command authority - actual Directory GUI observes successful queued commands only ............***Exception: SegFault  0.14 sec
+Filters: Command authority - actual Directory GUI observes successful queued commands only
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Command authority - actual Directory GUI observes successful queued commands
+only
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:290
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:294: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 4 | 3 passed | 1 failed
+
+
+    Start 13: Command authority - directory projection is read only and canonical despite stale metadata
+7/7 Test #13: Command authority - directory projection is read only and canonical despite stale metadata ...   Passed    0.02 sec
+
+29% tests passed, 5 tests failed out of 7
+
+Total Test time (real) =   0.78 sec
+
+The following tests FAILED:
+	  8 - Command authority - HQ advances once per requested tier and persists (SEGFAULT)
+	  9 - Command authority - world commands preserve state on denial and charge once on success (SEGFAULT)
+	 10 - Command authority - actual HQ GUI queues an upgrade without local mutation (SEGFAULT)
+	 11 - Command authority - foreign HQ window never upgrades either company (SEGFAULT)
+	 12 - Command authority - actual Directory GUI observes successful queued commands only (SEGFAULT)
+Errors while running CTest

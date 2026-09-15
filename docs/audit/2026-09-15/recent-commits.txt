@@ -1,0 +1,12 @@
+abbcd7e077 2026-09-15T19:53:55+10:00 fix: unblock UAT and production gameplay, refresh guided demo
+a6b79add03 2026-09-15T06:48:01+10:00 feat(sprint-37): commonwealth economy and rolling-stock pack
+a14c6538ea 2026-09-15T06:24:36+10:00 feat(sprint-42): factorio-scale multi-world production chains
+50df597962 2026-09-15T06:12:30+10:00 feat(sprint-41): in-lore commonwealth tech tree and r&d projects
+387dd5d99d 2026-09-15T05:26:50+10:00 feat(sprint-35): real cross-process federation transport and acceptance suite
+30bee5fdce 2026-09-14T20:13:38+10:00 feat(sprint-34-40): corporate tech systems, in-kind fabrication, and all-feature guided UAT
+f614ef4f33 2026-09-14T07:49:33+10:00 feat(sprint-33): planetary town growth, megacity supply loops, and biome industry lifecycle
+55f954d6c6 2026-09-14T07:11:26+10:00 feat(sprint-32): planetary settlement lifecycle, economy-driven phase promotion, and technology progression engine
+fd3e4f0e55 2026-09-14T06:48:00+10:00 feat(sprint-31): planetary colonization GUI, universe authority federation expansion, and settlement lifecycle
+9e023914be 2026-09-14T06:07:57+10:00 feat(sprint-30): exotic alien biomes and Phase 4 planetary colonization engine
+2677feeb3a 2026-09-13T23:11:51+10:00 feat(sprint-29): live federation acceptance kit and multi-server verification
+bda8b0599e 2026-09-13T22:51:57+10:00 feat(sprint-28): guided solo UAT save with persistent Story Book goals and reproducible metadata

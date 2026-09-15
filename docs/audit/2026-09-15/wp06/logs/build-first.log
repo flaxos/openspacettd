@@ -1,0 +1,118 @@
+ninja: Entering directory `build'
+[0/1] Re-running CMake...
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Could NOT find unofficial-breakpad (missing: unofficial-breakpad_DIR)
+-- Could NOT find Allegro (missing: Allegro_LIBRARY Allegro_INCLUDE_DIR) 
+-- Found the following ICU libraries:
+--   i18n (optional): /usr/lib/x86_64-linux-gnu/libicui18n.so
+--   uc (optional): /usr/lib/x86_64-linux-gnu/libicuuc.so
+-- Option Package Dependencies - OFF
+-- Option Dedicated - OFF
+-- Option Install FHS - ON
+-- Option Use assert - ON
+-- Option Use NSIS - OFF
+-- Option Survey Key - NOT USED
+-- PNG found -- -DWITH_PNG -- PNG::PNG
+-- ZLIB found -- -DWITH_ZLIB -- ZLIB::ZLIB
+-- LIBLZMA found -- -DWITH_LIBLZMA -- LibLZMA::LibLZMA
+-- LZO found -- -DWITH_LZO -- /usr/include /usr/include -- /usr/lib/x86_64-linux-gnu/liblzo2.so /usr/lib/x86_64-linux-gnu/liblzo2.so
+-- CURL found -- -DWITH_CURL -- /usr/include/x86_64-linux-gnu /usr/include/x86_64-linux-gnu -- /usr/lib/x86_64-linux-gnu/libcurl.so /usr/lib/x86_64-linux-gnu/libcurl.so
+-- Fluidsynth found -- -DWITH_FLUIDSYNTH -- /usr/include /usr/include -- /usr/lib/x86_64-linux-gnu/libfluidsynth.so /usr/lib/x86_64-linux-gnu/libfluidsynth.so
+-- SDL2 found -- -DWITH_SDL2 -- SDL2::SDL2
+-- FREETYPE found -- -DWITH_FREETYPE -- Freetype::Freetype
+-- Fontconfig found -- -DWITH_FONTCONFIG -- Fontconfig::Fontconfig
+-- Harfbuzz found -- -DWITH_HARFBUZZ -- /usr/include/harfbuzz /usr/include/harfbuzz -- /usr/lib/x86_64-linux-gnu/libharfbuzz.so /usr/lib/x86_64-linux-gnu/libharfbuzz.so
+-- ICU_I18N found -- -DWITH_ICU_I18N -- ICU::i18n
+-- ICU_UC found -- -DWITH_ICU_UC -- ICU::uc
+-- OpusFile found -- -DWITH_OPUSFILE -- OpusFile::opusfile
+-- Soxr found -- -DWITH_SOXR -- Soxr::soxr
+-- OpenGL found -- -DWITH_OPENGL -- (via SDL2)
+-- SSE found -- -DWITH_SSE --   --  
+-- Configuring done (1.0s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/flax/games/openspacettd/build
+[1/310] Compiling language afrikaans
+[2/310] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[3/309] Compiling language arabic_egypt
+[4/309] Compiling language basque
+[5/309] Compiling language belarusian
+[6/309] Compiling language brazilian_portuguese
+[7/309] Compiling language bulgarian
+[8/309] Compiling language catalan
+[9/309] Compiling language chuvash
+[10/309] Compiling language croatian
+[11/309] Compiling language czech
+[12/309] Compiling language danish
+[13/309] Compiling language dutch
+[14/309] Compiling language english
+[15/309] Compiling language english_AU
+[16/309] Compiling language english_US
+[17/309] Compiling language esperanto
+[18/309] Compiling language estonian
+[19/309] Compiling language faroese
+[20/309] Compiling language finnish
+[21/309] Compiling language french
+[22/309] Compiling language frisian
+[23/309] Compiling language gaelic
+[24/309] Compiling language galician
+[25/309] Compiling language german
+[26/309] Compiling language greek
+[27/309] Compiling language hebrew
+[28/309] Compiling language hindi
+[29/309] Compiling language icelandic
+[30/309] Compiling language hungarian
+[31/309] Compiling language ido
+[32/309] Compiling language indonesian
+[33/309] Compiling language irish
+[34/309] Compiling language italian
+[35/309] Compiling language japanese
+[36/309] Compiling language korean
+[37/309] Compiling language latin
+[38/309] Compiling language latvian
+[39/309] Compiling language lithuanian
+[40/309] Compiling language luxembourgish
+[41/309] Compiling language macedonian
+[42/309] Compiling language malay
+[43/309] Compiling language maltese
+[44/309] Compiling language marathi
+[45/309] Compiling language maori
+[46/309] Compiling language norwegian_nynorsk
+[47/309] Compiling language norwegian_bokmal
+[48/309] Compiling language persian
+[49/309] Compiling language polish
+[50/309] Compiling language portuguese
+[51/309] Compiling language romanian
+[52/309] Compiling language russian
+[53/309] Compiling language serbian
+[54/309] Compiling language simplified_chinese
+[55/309] Compiling language slovak
+[56/309] Compiling language slovenian
+[57/309] Compiling language spanish
+[58/309] Compiling language swedish
+[59/309] Compiling language spanish_MX
+[60/309] Compiling language tamil
+[61/309] Compiling language thai
+[62/309] Compiling language traditional_chinese
+[63/309] Compiling language turkish
+[64/309] Compiling language ukrainian
+[65/309] Compiling language urdu
+[66/309] Compiling language vietnamese
+[67/309] Compiling language welsh
+[68/309] Generating table/strings.h
+[69/92] Generating desktop file
+[70/92] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_cmd.cpp.o
+[71/92] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o
+FAILED: CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o 
+/usr/bin/c++ -DGLOBAL_DATA_DIR=\"/usr/local/share/games/openttd\" -DPERSONAL_DIR=\".openttd\" -DPOINTER_IS_64BIT -DUNIX -DWITH_ASSERT -DWITH_CURL -DWITH_FLUIDSYNTH -DWITH_FONTCONFIG -DWITH_FREETYPE -DWITH_HARFBUZZ -DWITH_ICU_I18N -DWITH_ICU_UC -DWITH_LIBLZMA -DWITH_LZO -DWITH_OPENGL -DWITH_OPUSFILE -DWITH_PERSONAL_DIR -DWITH_PNG -DWITH_SDL2 -DWITH_SOXR -DWITH_SSE -DWITH_ZLIB -I/home/flax/games/openspacettd/src/3rdparty/squirrel/include -I/usr/include/harfbuzz -I/home/flax/games/openspacettd/build/generated -I/home/flax/games/openspacettd/build/generated/script/api -I/home/flax/games/openspacettd/src/script/api -I/home/flax/games/openspacettd/build/generated/script -I/home/flax/games/openspacettd/build/generated/script/api/ai -I/home/flax/games/openspacettd/src/script/api/ai -I/home/flax/games/openspacettd/build/generated/script/api/game -I/home/flax/games/openspacettd/src/script/api/game -I/home/flax/games/openspacettd/build/generated/script/api/template -I/home/flax/games/openspacettd/src/script/api/template -isystem /usr/include/SDL2 -isystem /usr/include/freetype2 -isystem /usr/include/opus -isystem /usr/include/ogg -O3 -DNDEBUG -std=c++20 -finput-charset=utf-8 -D_FORTIFY_SOURCE=2 -W -Wall -Wcast-qual -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wformat-security -Wformat=2 -Winit-self -Wnon-virtual-dtor -Wsuggest-override -fno-strict-enums -fno-strict-overflow -Wno-redundant-move -Winvalid-pch -include /home/flax/games/openspacettd/build/CMakeFiles/openttd_lib.dir/cmake_pch.hxx -MD -MT CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o -MF CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o.d -o CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o -c /home/flax/games/openspacettd/src/blueprint/blueprint_gui.cpp
+/home/flax/games/openspacettd/src/blueprint/blueprint_gui.cpp: In member function ‘virtual void BlueprintLibraryWindow::OnClick(Point, WidgetID, int)’:
+/home/flax/games/openspacettd/src/blueprint/blueprint_gui.cpp:221:17: error: ‘CloseWindowByClass’ was not declared in this scope
+  221 |                 CloseWindowByClass(WindowClass::QueryString);
+      |                 ^~~~~~~~~~~~~~~~~~
+[72/92] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint.cpp.o
+ninja: build stopped: subcommand failed.

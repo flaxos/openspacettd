@@ -25,6 +25,11 @@ enum CorporateHQWidgets : WidgetID {
 	WID_CHQ_TECH_RESEARCH_BTN,  ///< Select / Start research on project button.
 	WID_CHQ_TECH_BUDGET_BTN,    ///< Cycle / Adjust monthly R&D budget button.
 	WID_CHQ_STATUS_BAR,         ///< Footer status bar.
+	WID_CHQ_BUILD_HQ,           ///< Select a map site for an owned headquarters.
+	WID_CHQ_BUILD_HUB,          ///< Select an owned rail station for a logistics hub.
+	WID_CHQ_SELECT_HUB,         ///< Choose an owned hub for reserve editing.
+	WID_CHQ_SELECT_CARGO,       ///< Choose a cargo for reserve editing.
+	WID_CHQ_SET_RESERVE,        ///< Set the selected hub cargo reserve.
 };
 
 #endif /* WIDGETS_CORPORATE_HQ_WIDGET_H */

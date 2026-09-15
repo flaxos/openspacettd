@@ -17,6 +17,15 @@
 #include "../blueprint/blueprint_manager.h"
 #include "../blueprint/blueprint_cmd.h"
 #include "../rail_map.h"
+#include "../rail_cmd.h"
+#include "../clear_map.h"
+#include "../void_map.h"
+#include "../depot_base.h"
+#include "../portal/fabrication_manager.h"
+#include "../portal/tech_tree.h"
+#include "../tree_map.h"
+#include "../station_base.h"
+#include "../town.h"
 #include "../station_map.h"
 #include "../signal_func.h"
 #include "../track_func.h"
@@ -25,23 +34,55 @@
 #include "../vehicle_base.h"
 #include "../fileio_func.h"
 #include "../economy_func.h"
+#include "../strings_func.h"
+#include "../language.h"
+#include "../saveload/saveload.h"
+#include "../gfx_func.h"
+#include "../table/sprites.h"
+#include "../engine_func.h"
+#include "../timer/timer_game_calendar.h"
 #include "../table/strings.h"
 #include "mock_environment.h"
 
 #include <filesystem>
+#include <chrono>
 
 static void SetupBlueprintTestEnv(uint32_t map_w = 256, uint32_t map_h = 256)
 {
 	UpdateSignalsInBuffer();
 	Map::Allocate(map_w, map_h);
+	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
+		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 0);
+		else MakeVoid(tile);
+	}
 	PortalRegistry::Reset();
 	PlanetManager::Reset();
 	BlueprintManager::Reset();
+	FabricationManager::Reset();
+	StockpileManager::Reset();
+	TechTreeManager::Reset();
+	ResetRailTypes();
+	StationClass::Reset();
 	_vehicle_pool.CleanPool();
+	_depot_pool.CleanPool();
+	_station_pool.CleanPool();
+	_town_pool.CleanPool();
 	_company_pool.CleanPool();
 
 	MockEnvironment &mock = MockEnvironment::Instance();
 	(void)mock;
+
+	/* Real station sign formatting needs the build's language pack. */
+	if (_current_language == nullptr) {
+		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+		auto saved_paths = _valid_searchpaths;
+		auto saved_binary = _searchpaths[Searchpath::BinaryDir];
+		_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
+		_valid_searchpaths = {Searchpath::BinaryDir};
+		InitializeLanguagePacks();
+		_valid_searchpaths = std::move(saved_paths);
+		_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
+	}
 
 	if (_valid_searchpaths.empty()) {
 		_valid_searchpaths.push_back(Searchpath::WorkingDir);
@@ -51,6 +92,7 @@ static void SetupBlueprintTestEnv(uint32_t map_w = 256, uint32_t map_h = 256)
 	Company *c = Company::Create();
 	REQUIRE(c != nullptr);
 	_current_company = c->index;
+	_local_company = c->index;
 	c->money = 1'000'000'000;
 	c->avail_railtypes.Set(RAILTYPE_BEGIN);
 	c->avail_railtypes.Set(RAILTYPE_ELECTRIC);
@@ -60,6 +102,20 @@ static void SetupBlueprintTestEnv(uint32_t map_w = 256, uint32_t map_h = 256)
 	_price[Price::BuildSignals] = 50;
 	_price[Price::BuildDepotTrain] = 500;
 	_price[Price::BuildStationRail] = 200;
+	_price[Price::BuildStationRailLength] = 30;
+	_price[Price::BuildFoundation] = 75;
+	_price[Price::ClearTrees] = 7;
+	_price[Price::ClearSignals] = 15;
+	_settings_game.station.station_spread = 64;
+	_settings_game.construction.build_on_slopes = true;
+	_settings_game.economy.dist_local_authority = 64;
+	_settings_game.difficulty.infinite_money = false;
+	REQUIRE(Town::CanAllocateItem());
+	Town *town = Town::Create(TileXY(15, 15));
+	town->name = "Blueprint test town";
+	town->townnametype = SPECSTR_TOWNNAME_START;
+	RebuildTownKdtree();
+	RebuildStationKdtree();
 
 	/* World 0: (10..100, 10..100) */
 	PlanetRegion w0{
@@ -88,13 +144,13 @@ TEST_CASE("Blueprint Data Model and JSON Round-Trip", "[blueprint]")
 	bp.is_builtin = false;
 	bp.created_time = 123456789;
 
-	/* Track tile with cross tracks and path signal */
+	/* Track tile with a native-compatible path signal */
 	BlueprintTile t1;
 	t1.dx = 1;
 	t1.dy = 1;
 	t1.type = BlueprintTileType::Track;
 	t1.railtype = RAILTYPE_BEGIN;
-	t1.trackbits = TrackBits{Track::X, Track::Y};
+	t1.trackbits = TrackBits{Track::X};
 	BlueprintSignal s1;
 	s1.track = Track::X;
 	s1.sigtype = SignalType::PathOneWay;
@@ -125,7 +181,7 @@ TEST_CASE("Blueprint Data Model and JSON Round-Trip", "[blueprint]")
 
 	REQUIRE(bp.IsValid());
 	CHECK(bp.GetTileCount() == 3);
-	CHECK(bp.GetTrackPieceCount() == 2);
+	CHECK(bp.GetTrackPieceCount() == 1);
 	CHECK(bp.GetSignalCount() == 1);
 	CHECK(bp.GetDepotCount() == 1);
 	CHECK(bp.GetStationCount() == 1);
@@ -151,7 +207,7 @@ TEST_CASE("Blueprint Data Model and JSON Round-Trip", "[blueprint]")
 	CHECK(loaded.tiles[0].dx == 1);
 	CHECK(loaded.tiles[0].dy == 1);
 	CHECK(loaded.tiles[0].type == BlueprintTileType::Track);
-	CHECK(loaded.tiles[0].trackbits == TrackBits{Track::X, Track::Y});
+	CHECK(loaded.tiles[0].trackbits == TrackBits{Track::X});
 	REQUIRE(loaded.tiles[0].signals.size() == 1);
 	CHECK(loaded.tiles[0].signals[0].track == Track::X);
 	CHECK(loaded.tiles[0].signals[0].sigtype == SignalType::PathOneWay);
@@ -220,14 +276,14 @@ TEST_CASE("Blueprint Rotation 90, 180, 270 and Invariance", "[blueprint]")
 	CHECK(rot90.tiles[0].trackbits == TrackBits{Track::Y});
 	REQUIRE(rot90.tiles[0].signals.size() == 1);
 	CHECK(rot90.tiles[0].signals[0].track == Track::Y);
-	/* Trackdir X_SW rotated 90 CW faces NW on Y-axis (Trackdir::Y_NW) */
-	CHECK(rot90.tiles[0].signals[0].signals_copy == SignalAlongTrackdir(Trackdir::Y_NW));
+	/* X_SW's exit direction transforms to Y_SE with the tile coordinates. */
+	CHECK(rot90.tiles[0].signals[0].signals_copy == SignalAlongTrackdir(Trackdir::Y_SE));
 
 	/* Old (1, 0) -> New ((2 - 1) - 0, 1) = (1, 1) */
 	CHECK(rot90.tiles[1].dx == 1);
 	CHECK(rot90.tiles[1].dy == 1);
 	CHECK(rot90.tiles[1].type == BlueprintTileType::Depot);
-	CHECK(rot90.tiles[1].dir == DiagDirection::SE); // NE + 90 CW = SE
+	CHECK(rot90.tiles[1].dir == DiagDirection::NW); // NE offset rotates to NW
 
 	/* Old (2, 0) -> New ((2 - 1) - 0, 2) = (1, 2) */
 	CHECK(rot90.tiles[2].dx == 1);
@@ -236,7 +292,8 @@ TEST_CASE("Blueprint Rotation 90, 180, 270 and Invariance", "[blueprint]")
 	CHECK(rot90.tiles[2].axis == Axis::Y); // Axis X + 90 CW = Axis Y
 
 	/* Rotate 360 degrees (4 steps): should equal original */
-	Blueprint rot360 = bp.Rotate(4);
+	Blueprint rot360 = bp;
+	for (int step = 0; step < 4; ++step) rot360 = rot360.Rotate(1);
 	CHECK(rot360.width == bp.width);
 	CHECK(rot360.height == bp.height);
 	REQUIRE(rot360.tiles.size() == bp.tiles.size());
@@ -333,11 +390,23 @@ TEST_CASE("Blueprint Capture from Game Map", "[blueprint]")
 	/* Verify t1 had signal */
 	CHECK(bp.tiles[0].signals.size() == 1);
 	CHECK(bp.tiles[0].signals[0].sigtype == SignalType::PathOneWay);
+	CHECK_FALSE(BlueprintManager::CaptureArea(TileXY(30, 30), TileXY(31, 31)).has_value());
+	MakeRailNormal(t2, CompanyID{1}, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	CHECK_FALSE(BlueprintManager::CaptureArea(t1, t2, "Foreign capture").has_value());
 }
 
 TEST_CASE("Blueprint Manager Storage and Builtin Protection", "[blueprint]")
 {
 	SetupBlueprintTestEnv();
+	extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+	const auto root = std::filesystem::temp_directory_path() / ("ost-bp-legacy-test-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+	REQUIRE(std::filesystem::create_directory(root));
+	AutoRestoreBackup personal(_searchpaths[Searchpath::PersonalDir], root.string() + "/");
+	AutoRestoreBackup valid_paths(_valid_searchpaths, std::vector<Searchpath>{Searchpath::PersonalDir});
+	struct Cleanup {
+		std::filesystem::path root;
+		~Cleanup() { BlueprintManager::Reset(); std::error_code ec; std::filesystem::remove_all(root, ec); }
+	} cleanup{root};
 	BlueprintManager::Initialize();
 
 	const auto &bps = BlueprintManager::GetBlueprints();
@@ -455,4 +524,332 @@ TEST_CASE("Deterministic Blueprint Placement Command", "[blueprint]")
 	REQUIRE(overlap.Succeeded());
 	/* Zero additional cost for already built identical pieces */
 	CHECK(overlap.GetCost() == 0);
+}
+
+TEST_CASE("Blueprint depot quote matches execution", "[blueprint][blueprint-regression]")
+{
+	SetupBlueprintTestEnv();
+	Blueprint bp;
+	bp.name = "Depot cost regression";
+	bp.width = bp.height = 1;
+	BlueprintTile depot;
+	depot.type = BlueprintTileType::Depot;
+	depot.railtype = RAILTYPE_BEGIN;
+	depot.dir = DiagDirection::NE;
+	bp.tiles.push_back(depot);
+	const TileIndex tile = TileXY(30, 30);
+	const auto query = CmdPlaceBlueprint({}, tile, bp.ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(query.Succeeded());
+	CHECK(!IsRailDepotTile(tile));
+	const auto canonical = CmdBuildTrainDepot({}, tile, RAILTYPE_BEGIN, depot.dir);
+	REQUIRE(canonical.Succeeded());
+	REQUIRE(RailBuildCost(RAILTYPE_BEGIN) == 100);
+	CHECK(query.GetCost() == canonical.GetCost());
+	const auto execute = CmdPlaceBlueprint(DoCommandFlag::Execute, tile, bp.ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(execute.Succeeded());
+	CHECK(query.GetCost() == execute.GetCost());
+	CHECK(IsRailDepotTile(tile));
+}
+
+/* Inspect the complete map, including metadata, when a rejected command must be atomic. */
+static std::vector<std::array<uint32_t, 10>> BlueprintMapSnapshot()
+{
+	std::vector<std::array<uint32_t, 10>> result;
+	result.reserve(Map::Size());
+	for (TileIndex index{0}; index < Map::Size(); ++index) {
+		Tile tile(index);
+		result.push_back({tile.type(), tile.height(), tile.m1(), tile.m2(), tile.m3(), tile.m4(), tile.m5(), tile.m6(), tile.m7(), tile.m8()});
+	}
+	return result;
+}
+
+static Blueprint BlueprintStraight(uint16_t length)
+{
+	Blueprint bp;
+	bp.name = "Placement regression";
+	bp.width = length;
+	bp.height = 1;
+	for (uint16_t x = 0; x < length; ++x) {
+		BlueprintTile tile;
+		tile.dx = x;
+		tile.trackbits = TrackBits{Track::X};
+		bp.tiles.push_back(tile);
+	}
+	return bp;
+}
+
+TEST_CASE("Blueprint rejected placement preserves map money and materials", "[blueprint][blueprint-regression]")
+{
+	SetupBlueprintTestEnv();
+	Blueprint bp = BlueprintStraight(3);
+	const TileIndex origin = TileXY(30, 30);
+	Company *company = Company::Get(_current_company);
+	bool insufficient_cash = false;
+	const CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	const CargoType steel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	StockpileManager::AddCargo(WorldID{0}, _current_company, ballast, 5);
+	StockpileManager::AddCargo(WorldID{0}, _current_company, steel, 3);
+
+	SECTION("late foreign track") {
+		REQUIRE(Company::CanAllocateItem());
+		Company *foreign = Company::Create();
+		MakeRailNormal(TileXY(32, 30), foreign->index, TrackBits{Track::X}, RAILTYPE_BEGIN);
+	}
+	SECTION("late incompatible rail") {
+		MakeRailNormal(TileXY(32, 30), _current_company, TrackBits{Track::X}, RAILTYPE_ELECTRIC);
+	}
+	SECTION("late slope with building on slopes disabled") {
+		_settings_game.construction.build_on_slopes = false;
+		SetTileHeight(TileXY(33, 31), 1);
+	}
+	SECTION("late invalid signal") {
+		bp.tiles.front().type = BlueprintTileType::Depot;
+		bp.tiles[1].type = BlueprintTileType::Station;
+		BlueprintSignal signal;
+		signal.track = Track::Y;
+		bp.tiles.back().signals.push_back(signal);
+	}
+	SECTION("aggregate materials short by one") {
+		FabricationManager::SetFabricateFromStockpile(_current_company, true);
+	}
+	SECTION("aggregate cash short by one") {
+		company->money = 299;
+		insufficient_cash = true;
+	}
+	SECTION("frontier forbids maglev") {
+		company->avail_railtypes.Set(RAILTYPE_MAGLEV);
+		REQUIRE(PlanetManager::SetWorldPhase(WorldID{0}, WorldPhase::Phase3_Frontier));
+		for (auto &tile : bp.tiles) tile.railtype = RAILTYPE_MAGLEV;
+	}
+
+	const auto before = BlueprintMapSnapshot();
+	const Money money = company->money;
+	const size_t depots = Depot::GetNumItems();
+	const size_t stations = Station::GetNumItems();
+	const auto query = CmdPlaceBlueprint({}, origin, bp.ToJson(), INVALID_RAILTYPE, false);
+	CHECK(query.Failed() == !insufficient_cash);
+	CHECK((BlueprintMapSnapshot() == before));
+	CHECK_FALSE(Command<Commands::PlaceBlueprint>::Post(StringID{0}, origin, bp.ToJson(), INVALID_RAILTYPE, false));
+	const auto execute = CmdPlaceBlueprint(DoCommandFlag::Execute, origin, bp.ToJson(), INVALID_RAILTYPE, false);
+	CHECK(execute.Failed());
+	CHECK((BlueprintMapSnapshot() == before));
+	CHECK(company->money == money);
+	CHECK(Depot::GetNumItems() == depots);
+	CHECK(Station::GetNumItems() == stations);
+	CHECK(StockpileManager::GetStock(WorldID{0}, _current_company, ballast) == 5);
+	CHECK(StockpileManager::GetStock(WorldID{0}, _current_company, steel) == 3);
+}
+
+TEST_CASE("Blueprint Mainline placement clears trees with exact fabrication materials", "[blueprint][blueprint-regression]")
+{
+	const bool fabricate = GENERATE(false, true);
+	SetupBlueprintTestEnv();
+	BlueprintManager::Initialize();
+	const Blueprint *bp = BlueprintManager::FindBuiltin("CST Mainline Double Straight");
+	REQUIRE(bp != nullptr);
+	const TileIndex origin = TileXY(30, 30);
+	MakeTree(origin, TREE_TEMPERATE, 2, TreeGrowthStage::Grown, TreeGround::Grass, 3);
+	const auto ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	const auto steel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	const auto wiring = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+	StockpileManager::AddCargo(WorldID{0}, _current_company, ballast, 32);
+	StockpileManager::AddCargo(WorldID{0}, _current_company, steel, 18);
+	StockpileManager::AddCargo(WorldID{0}, _current_company, wiring, 2);
+	FabricationManager::SetFabricateFromStockpile(_current_company, fabricate);
+	const auto before = BlueprintMapSnapshot();
+	const Money money = Company::Get(_current_company)->money;
+	const auto rating = Town::Get(TownID{0})->ratings[_current_company];
+	const auto query = CmdPlaceBlueprint({}, origin, bp->ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(query.Succeeded());
+	CHECK(query.GetCost() == (fabricate ? 361 : 1721));
+	CHECK((BlueprintMapSnapshot() == before));
+	CHECK(Town::Get(TownID{0})->ratings[_current_company] == rating);
+	REQUIRE(Command<Commands::PlaceBlueprint>::Post(StringID{0}, origin, bp->ToJson(), RAILTYPE_BEGIN, false));
+	CHECK(Company::Get(_current_company)->money == money - query.GetCost());
+	CHECK(Town::Get(TownID{0})->ratings[_current_company] == rating + RATING_TREE_DOWN_STEP);
+	for (const auto &piece : bp->tiles) {
+		const auto tile = TileAddWrap(origin, piece.dx, piece.dy);
+		REQUIRE(IsPlainRailTile(tile));
+		CHECK(GetTrackBits(tile) == piece.trackbits);
+	}
+	CHECK(StockpileManager::GetStock(WorldID{0}, _current_company, ballast) == (fabricate ? 0 : 32));
+	CHECK(StockpileManager::GetStock(WorldID{0}, _current_company, steel) == (fabricate ? 0 : 18));
+	CHECK(StockpileManager::GetStock(WorldID{0}, _current_company, wiring) == (fabricate ? 0 : 2));
+}
+
+TEST_CASE("Blueprint dispatcher charges quote exactly once", "[blueprint][blueprint-regression]")
+{
+	SetupBlueprintTestEnv();
+	Blueprint bp = BlueprintStraight(1);
+	bp.tiles.front().type = BlueprintTileType::Depot;
+	const TileIndex origin = TileXY(30, 30);
+	const Money before = Company::Get(_current_company)->money;
+	const auto query = CmdPlaceBlueprint({}, origin, bp.ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(query.Succeeded());
+	REQUIRE(query.GetCost() == 600);
+	REQUIRE(Command<Commands::PlaceBlueprint>::Post(StringID{0}, origin, bp.ToJson(), RAILTYPE_BEGIN, false));
+	CHECK(IsRailDepotTile(origin));
+	CHECK(Company::Get(_current_company)->money == before - query.GetCost());
+	REQUIRE(Command<Commands::PlaceBlueprint>::Post(StringID{0}, origin, bp.ToJson(), RAILTYPE_BEGIN, false));
+	CHECK(Company::Get(_current_company)->money == before - query.GetCost());
+}
+
+TEST_CASE("Blueprint unsupported station layouts reject without changes", "[blueprint][blueprint-regression]")
+{
+	const int layout = GENERATE(0, 1, 2, 3, 4);
+	CAPTURE(layout);
+	SetupBlueprintTestEnv();
+	Blueprint bp = BlueprintStraight(3);
+	for (auto &tile : bp.tiles) tile.type = BlueprintTileType::Station;
+	const TileIndex origin = TileXY(30, 30);
+	switch (layout) {
+		case 0: // Irregular L-shaped group.
+			bp.width = bp.height = 2;
+			bp.tiles.back().dx = 0;
+			bp.tiles.back().dy = 1;
+			break;
+		case 1: // Two separate new station groups.
+			bp.width = 4;
+			bp.tiles.back().dx = 3;
+			break;
+		case 2: // Custom station specification.
+			bp.tiles.front().spec_index = 1;
+			break;
+		case 3: // Trees under a new station.
+			MakeTree(origin, TREE_TEMPERATE, 0, TreeGrowthStage::Grown, TreeGround::Grass, 3);
+			break;
+		case 4: { // Part of the rectangle already belongs to a station.
+			Blueprint existing = bp;
+			existing.tiles.resize(1);
+			existing.width = 1;
+			REQUIRE(CmdPlaceBlueprint(DoCommandFlag::Execute, origin, existing.ToJson(), RAILTYPE_BEGIN, false).Succeeded());
+			break;
+		}
+	}
+	const auto before = BlueprintMapSnapshot();
+	const auto stations = Station::GetNumItems();
+	const auto money = Company::Get(_current_company)->money;
+	CHECK(CmdPlaceBlueprint({}, origin, bp.ToJson(), RAILTYPE_BEGIN, false).Failed());
+	CHECK(CmdPlaceBlueprint(DoCommandFlag::Execute, origin, bp.ToJson(), RAILTYPE_BEGIN, false).Failed());
+	CHECK((BlueprintMapSnapshot() == before));
+	CHECK(Station::GetNumItems() == stations);
+	CHECK(Company::Get(_current_company)->money == money);
+}
+
+TEST_CASE("Blueprint clearing foundation and signal replacement use canonical costs", "[blueprint][blueprint-regression]")
+{
+	SetupBlueprintTestEnv();
+	Blueprint bp = BlueprintStraight(1);
+	const TileIndex origin = TileXY(30, 30);
+	CommandCost canonical;
+	SECTION("three trees") {
+		MakeTree(origin, TREE_TEMPERATE, 2, TreeGrowthStage::Grown, TreeGround::Grass, 3);
+		canonical = CmdBuildSingleRail(DoCommandFlag::Auto, origin, RAILTYPE_BEGIN, Track::X, false);
+		REQUIRE(canonical.GetCost() == 121);
+	}
+	SECTION("depot foundation") {
+		bp.tiles.front().type = BlueprintTileType::Depot;
+		bp.tiles.front().dir = DiagDirection::NE;
+		SetTileHeight(origin, 1);
+		canonical = CmdBuildTrainDepot(DoCommandFlag::Auto, origin, RAILTYPE_BEGIN, DiagDirection::NE);
+		REQUIRE(canonical.GetCost() == 675);
+	}
+	SECTION("signal variant conversion") {
+		MakeRailNormal(origin, _current_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+		REQUIRE(CmdBuildSingleSignal(DoCommandFlag::Execute, origin, Track::X, SignalType::Block, SignalVariant::Semaphore,
+			false, false, false, SignalType::Block, SignalType::Block, 0, SignalOnTrack(Track::X)).Succeeded());
+		BlueprintSignal signal;
+		signal.sigtype = SignalType::PathOneWay;
+		signal.sigvar = SignalVariant::Electric;
+		signal.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+		bp.tiles.front().signals.push_back(signal);
+		canonical = CmdBuildSingleSignal({}, origin, Track::X, signal.sigtype, signal.sigvar,
+			false, false, false, SignalType::Block, SignalType::Block, 0, signal.signals_copy);
+		REQUIRE(canonical.GetCost() == 65);
+	}
+	REQUIRE(canonical.Succeeded());
+	const auto before = BlueprintMapSnapshot();
+	const auto query = CmdPlaceBlueprint({}, origin, bp.ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(query.Succeeded());
+	CHECK((BlueprintMapSnapshot() == before));
+	CHECK(query.GetCost() == canonical.GetCost());
+	const auto execute = CmdPlaceBlueprint(DoCommandFlag::Execute, origin, bp.ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(execute.Succeeded());
+	CHECK(execute.GetCost() == canonical.GetCost());
+	if (!bp.tiles.front().signals.empty()) {
+		CHECK(GetSignalVariant(origin, Track::X) == SignalVariant::Electric);
+		CHECK(GetSignalType(origin, Track::X) == SignalType::PathOneWay);
+		CHECK((GetPresentSignals(origin) & SignalOnTrack(Track::X)) == SignalAlongTrackdir(Trackdir::X_NE));
+	}
+}
+
+TEST_CASE("Blueprint infrastructure money and materials survive save reload", "[blueprint][blueprint-regression]")
+{
+	SetupBlueprintTestEnv();
+	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
+	Blueprint bp = BlueprintStraight(3);
+	bp.height = 2;
+	bp.tiles.back().type = BlueprintTileType::Depot;
+	BlueprintSignal signal;
+	signal.signals_copy = SignalAlongTrackdir(Trackdir::X_NE);
+	bp.tiles.front().signals.push_back(signal);
+	for (int16_t x = 0; x < 2; ++x) {
+		BlueprintTile station;
+		station.type = BlueprintTileType::Station;
+		station.dx = x;
+		station.dy = 1;
+		bp.tiles.push_back(station);
+	}
+	const CompanyID company = _current_company;
+	/* Availability is rebuilt from engines on load; provide a real conventional
+	 * engine as well as the manually enabled construction types in the fixture. */
+	_engine_mngr.ResetToDefaultMapping();
+	SetupEngines();
+	TimerGameCalendar::SetDate(TimerGameCalendar::ConvertYMDToDate(TimerGameCalendar::Year{1950}, 0, 1), 0);
+	StartupEngines();
+	REQUIRE(HasRailTypeAvail(company, RAILTYPE_BEGIN));
+	const TileIndex origin = TileXY(30, 30);
+	FabricationManager::SetFabricateFromStockpile(company, true);
+	for (auto role : {FabricationRole::Ballast, FabricationRole::StructuralMetal, FabricationRole::Wiring}) {
+		StockpileManager::AddCargo(WorldID{0}, company, StockpileManager::RoleToDefaultCargo(role), 100);
+	}
+	REQUIRE(Command<Commands::PlaceBlueprint>::Post(StringID{0}, origin, bp.ToJson(), RAILTYPE_BEGIN, false));
+	const auto money = Company::Get(company)->money;
+	const auto ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	const auto steel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	const auto wiring = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+	CHECK(StockpileManager::GetStock(WorldID{0}, company, ballast) == 91);
+	CHECK(StockpileManager::GetStock(WorldID{0}, company, steel) == 87);
+	CHECK(StockpileManager::GetStock(WorldID{0}, company, wiring) == 99);
+	const auto dir = std::filesystem::temp_directory_path() /
+		("openspacettd-blueprint-test-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+	REQUIRE(std::filesystem::create_directory(dir));
+	const auto path = dir / "roundtrip.sav";
+	REQUIRE(SaveOrLoad(path.string(), SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(path.string(), SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	/* Without a video driver, AfterLoadGame skips the graphics/NewGRF path that
+	 * creates engines. Restore the vanilla catalogue through its normal rules;
+	 * this test verifies infrastructure/ledger persistence, not engine loading. */
+	SetupEngines();
+	StartupEngines();
+	_current_company = _local_company = company;
+	REQUIRE(HasRailTypeAvail(company, RAILTYPE_BEGIN));
+	CHECK(Company::Get(company)->money == money);
+	CHECK(FabricationManager::IsFabricateFromStockpileEnabled(company));
+	CHECK(StockpileManager::GetStock(WorldID{0}, company, ballast) == 91);
+	CHECK(StockpileManager::GetStock(WorldID{0}, company, steel) == 87);
+	CHECK(StockpileManager::GetStock(WorldID{0}, company, wiring) == 99);
+	REQUIRE(IsPlainRailTile(origin));
+	CHECK(HasSignalOnTrack(origin, Track::X));
+	CHECK((GetPresentSignals(origin) & SignalOnTrack(Track::X)) == signal.signals_copy);
+	REQUIRE(IsRailDepotTile(TileXY(32, 30)));
+	CHECK(GetRailDepotDirection(TileXY(32, 30)) == DiagDirection::NE);
+	REQUIRE(IsRailStationTile(TileXY(30, 31)));
+	REQUIRE(IsRailStationTile(TileXY(31, 31)));
+	CHECK(GetStationIndex(TileXY(30, 31)) == GetStationIndex(TileXY(31, 31)));
+	const auto overlap = CmdPlaceBlueprint({}, origin, bp.ToJson(), RAILTYPE_BEGIN, false);
+	REQUIRE(overlap.Succeeded());
+	CHECK(overlap.GetCost() == 0);
+	std::filesystem::remove(path);
+	std::filesystem::remove(dir);
 }

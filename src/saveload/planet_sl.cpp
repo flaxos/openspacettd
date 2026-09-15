@@ -37,6 +37,7 @@ struct SlPlanetRegion {
 	uint32_t max_x;
 	uint32_t max_y;
 	uint32_t development_score;
+	uint32_t outpost_tile = INVALID_TILE.base(); ///< Missing in older named PLNT tables.
 };
 
 static const SaveLoad _planet_region_desc[] = {
@@ -49,6 +50,7 @@ static const SaveLoad _planet_region_desc[] = {
 	    SLE_VAR(SlPlanetRegion, max_x,             VarTypes::U32),
 	    SLE_VAR(SlPlanetRegion, max_y,             VarTypes::U32),
 	    SLE_VAR(SlPlanetRegion, development_score, VarTypes::U32),
+	    SLE_VAR(SlPlanetRegion, outpost_tile,      VarTypes::U32),
 };
 
 /** Chunk handler for planetary worlds (PLNT). */
@@ -71,6 +73,7 @@ struct PLNTChunkHandler : ChunkHandler {
 				.max_x = r.max_x,
 				.max_y = r.max_y,
 				.development_score = r.development_score,
+				.outpost_tile = r.outpost_tile.base(),
 			};
 			SlSetArrayIndex(i++);
 			SlObject(&sl_reg, _planet_region_desc);
@@ -84,7 +87,7 @@ struct PLNTChunkHandler : ChunkHandler {
 
 		SlPlanetRegion sl_reg{};
 		while (SlIterateArray() != -1) {
-			sl_reg = {};
+			sl_reg = {}; // Restores INVALID_TILE when older PLNT rows omit this named column.
 			SlObject(&sl_reg, slt);
 			PlanetRegion r{
 				.id = WorldID{sl_reg.id},
@@ -96,6 +99,7 @@ struct PLNTChunkHandler : ChunkHandler {
 				.max_x = sl_reg.max_x,
 				.max_y = sl_reg.max_y,
 				.development_score = sl_reg.development_score,
+				.outpost_tile = TileIndex{sl_reg.outpost_tile},
 			};
 			PlanetManager::RegisterRegion(r);
 		}

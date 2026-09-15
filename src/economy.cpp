@@ -521,6 +521,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	}
 
 	ProductionChainManager::ChangeCompanyOwner(old_owner, new_owner);
+	LogisticsHubManager::ChangeCompanyOwner(old_owner, new_owner);
 
 	/* do the same for waypoints (we need to do this here so deleted waypoints are converted too) */
 	for (Waypoint *wp : Waypoint::Iterate()) {
@@ -1029,6 +1030,21 @@ Money GetTransportedGoodsIncome(uint num_pieces, uint dist, uint16_t transit_per
 /** The industries we've currently brought cargo to. */
 static SmallIndustryList _cargo_delivery_destinations;
 
+/** A registered hub may receive its owner's freight even without native station acceptance. */
+static const LogisticsHub *GetOwnedFreightHub(StationID station, CompanyID company, CargoType cargo_type)
+{
+	if (!CargoSpec::Get(cargo_type)->is_freight) return nullptr;
+	const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(station);
+	return hub != nullptr && hub->company_id == company && hub->tile != INVALID_TILE && hub->world_id != INVALID_WORLD ? hub : nullptr;
+}
+
+/** Use the same acceptance rule when staging cargo and when unloading it. */
+static bool AcceptsCargoForDelivery(const Station *st, CompanyID company, CargoType cargo_type)
+{
+	return st->goods[cargo_type].status.Test(GoodsEntry::State::Acceptance) ||
+			GetOwnedFreightHub(st->index, company, cargo_type) != nullptr;
+}
+
 /**
  * Transfer goods from station to industry.
  * All cargo is delivered to the nearest (Manhattan) industry to the station sign, which is inside the acceptance rectangle and actually accepts the cargo.
@@ -1102,25 +1118,34 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 
 	/* Station production consumes its inputs first. Each piece has exactly one destination. */
 	uint accepted_facility = ProductionChainManager::DeliverToStation(dest, cargo_type, num_pieces);
-	uint accepted_ind = DeliverGoodsToIndustry(st, cargo_type, num_pieces - accepted_facility, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
+	uint remaining = num_pieces - accepted_facility;
+	const LogisticsHub *hub = GetOwnedFreightHub(dest, company->index, cargo_type);
+	uint stored = 0;
+	uint accepted_ind = 0;
+	if (hub != nullptr) {
+		/* Freight at an owned hub is stored instead of being sold to nearby consumers. */
+		if (remaining > 0 && LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, remaining)) stored = remaining;
+	} else {
+		accepted_ind = DeliverGoodsToIndustry(st, cargo_type, remaining, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
+	}
 
 	/* If this cargo type is always accepted, the town accepts the remainder. */
-	uint accepted_total = st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
+	uint accepted_total = hub == nullptr && st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
 
 	/* Update station statistics */
-	if (accepted_total > 0) {
+	if (accepted_total + stored > 0) {
 		st->goods[cargo_type].status.Set({GoodsEntry::State::EverAccepted, GoodsEntry::State::CurrentMonth, GoodsEntry::State::AcceptedBigtick});
-		if (SpaceportManager::IsSpaceport(dest)) {
-			SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
-		}
-		PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
-		if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
-			MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility);
-		}
-		const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(dest);
-		if (hub != nullptr && hub->company_id == company->index) {
-			LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, accepted_total - accepted_facility);
-		}
+	}
+
+	/* Stockpiled cargo is not a delivery to an industry, town, or world. */
+	if (accepted_total == 0) return 0;
+
+	if (SpaceportManager::IsSpaceport(dest)) {
+		SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
+	}
+	PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
+	if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
+		MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility);
 	}
 
 	/* Update company statistics */
@@ -1316,7 +1341,7 @@ void PrepareUnload(Vehicle *front_v)
 			const GoodsEntry *ge = &st->goods[v->cargo_type];
 			if (v->cargo_cap > 0 && v->cargo.TotalCount() > 0) {
 				v->cargo.Stage(
-						ge->status.Test(GoodsEntry::State::Acceptance),
+						AcceptsCargoForDelivery(st, front_v->owner, v->cargo_type),
 						front_v->last_station_visited, next_station,
 						front_v->current_order.GetUnloadType(), ge,
 						v->cargo_type, front_v->cargo_payment,
@@ -1707,8 +1732,8 @@ static void LoadUnloadVehicle(Vehicle *front)
 			uint amount_unloaded = _settings_game.order.gradual_loading ? std::min(cargo_count, GetLoadAmount(v)) : cargo_count;
 			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
 
-			if (!ge->status.Test(GoodsEntry::State::Acceptance) && v->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) > 0) {
-				/* The station does not accept our goods anymore. */
+			if (!AcceptsCargoForDelivery(st, front->owner, v->cargo_type) && v->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) > 0) {
+				/* Neither native consumers nor an owned hub accept this cargo anymore. */
 				if (front->current_order.GetUnloadType() == OrderUnloadType::Transfer || front->current_order.GetUnloadType() == OrderUnloadType::Unload) {
 					/* Transfer instead of delivering. */
 					v->cargo.Reassign<VehicleCargoList::MoveToAction::Deliver, VehicleCargoList::MoveToAction::Transfer>(
@@ -1811,15 +1836,17 @@ static void LoadUnloadVehicle(Vehicle *front)
 
 			/* Check if an attached Company Logistics Hub can provide surplus cargo from planetary stockpile */
 			const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(st->index);
-			if (hub != nullptr && hub->company_id == front->owner && cap_left > ge->AvailableCount()) {
-				uint32_t needed = cap_left - ge->AvailableCount();
+			if (hub != nullptr && hub->company_id == front->owner && cap_left > ge->AvailableCount() &&
+					MayLoadUnderExclusiveRights(st, v) && CargoPacket::CanAllocateItem()) {
+				uint32_t needed = std::min<uint32_t>(cap_left - ge->AvailableCount(), CargoPacket::MAX_COUNT);
+				Source source = (st->town != nullptr) ? Source{st->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
+				/* Secure storage before withdrawing; a reserve-limited empty pickup releases it. */
+				std::unique_ptr<CargoPacket> packet(CargoPacket::Create(st->index, needed, source));
 				uint32_t withdrawn = LogisticsHubManager::WithdrawFromStockpile(hub->tile, front->owner, v->cargo_type, needed);
 				if (withdrawn > 0) {
-					Source source = (st->town != nullptr) ? Source{st->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
+					if (withdrawn < needed) packet->Reduce(needed - withdrawn);
 					StationID next = ge->GetVia(st->index);
-					if (CargoPacket::CanAllocateItem()) {
-						ge->GetOrCreateData().cargo.Append(CargoPacket::Create(st->index, withdrawn, source), next);
-					}
+					ge->GetOrCreateData().cargo.Append(packet.release(), next);
 				}
 			}
 

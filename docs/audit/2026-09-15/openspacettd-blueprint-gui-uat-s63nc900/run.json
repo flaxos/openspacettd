@@ -1,0 +1,56 @@
+{
+  "utc": "2026-09-15T12:20:59.686179+00:00",
+  "binary": "/home/flax/games/openspacettd/build/openttd",
+  "binary_sha256": "e1071d481c3464f96c9e6a6eaaf6aa8f0a877927f8dd2c8cf382cfa0fa9816e2",
+  "temporary_directory": "/tmp/openspacettd-blueprint-gui-uat-s63nc900",
+  "evidence_directory": "/home/flax/games/openspacettd/docs/audit/2026-09-15/openspacettd-blueprint-gui-uat-s63nc900",
+  "fixtures": [
+    {
+      "fixture": "BC",
+      "original": "/home/flax/.local/share/openttd/crash20260915082450.sav",
+      "copy": "/tmp/openspacettd-blueprint-gui-uat-s63nc900/blueprint-crash-copy.sav",
+      "sha256": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03",
+      "copy_sha256": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03"
+    },
+    {
+      "fixture": "M1",
+      "original": "/home/flax/games/openspacettd/demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav",
+      "copy": "/tmp/openspacettd-blueprint-gui-uat-s63nc900/uat-v1.1-copy.sav",
+      "sha256": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b",
+      "copy_sha256": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b"
+    }
+  ],
+  "fresh_clear_pad": "Not prepared: GUI control unavailable",
+  "requested_cases": [
+    "UAT-00",
+    "UAT-04a",
+    "UAT-04b",
+    "UAT-04c",
+    "UAT-09"
+  ],
+  "cli": "orca-ide",
+  "cli_error": "FileNotFoundError: [Errno 2] No such file or directory: 'orca-ide'",
+  "launch_command": [
+    "/home/flax/games/openspacettd/build/openttd",
+    "-c",
+    "/tmp/openspacettd-blueprint-gui-uat-s63nc900/openttd.cfg",
+    "-x",
+    "-v",
+    "sdl",
+    "-s",
+    "null",
+    "-m",
+    "null",
+    "-g",
+    "/tmp/openspacettd-blueprint-gui-uat-s63nc900/blueprint-crash-copy.sav"
+  ],
+  "launch_timeout": true,
+  "originals_and_copies_unchanged_after_probe": true,
+  "results": {
+    "UAT-00": "Blocked: no native GUI control; no interaction or visual verification",
+    "UAT-04a": "Blocked: no native GUI control; no interaction or visual verification",
+    "UAT-04b": "Blocked: no native GUI control; no interaction or visual verification",
+    "UAT-04c": "Blocked: no native GUI control; no interaction or visual verification",
+    "UAT-09": "Blocked: no native GUI control; no interaction or visual verification"
+  }
+}

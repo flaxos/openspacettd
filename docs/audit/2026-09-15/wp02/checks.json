@@ -1,0 +1,86 @@
+[
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Regression fixture with original delivery implementation.",
+    "log": "logs/baseline-build.log",
+    "log_written_at_utc": "2026-09-15T11:49:55.054945+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub unloading'",
+    "exit_code": 8,
+    "note": "Expected failures: physical120 from60 and hub-only cargo waiting instead of stored.",
+    "log": "logs/baseline-tests.log",
+    "log_written_at_utc": "2026-09-15T11:50:08.233920+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd openttd_test",
+    "exit_code": 1,
+    "note": "Fixture compile error: std::to_string blocked by safeguards; changed to fmt::format.",
+    "log": "logs/fix-build.log",
+    "log_written_at_utc": "2026-09-15T11:51:43.709738+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd openttd_test",
+    "exit_code": 0,
+    "note": "Game and tests linked.",
+    "log": "logs/fix-build-2.log",
+    "log_written_at_utc": "2026-09-15T11:52:04.652697+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^(Hub unloading|Production gameplay)'",
+    "exit_code": 8,
+    "note": "Three existing production tests passed; five new tests aborted because fixture engine mappings were uninitialized.",
+    "log": "logs/fixed-targeted-tests.log",
+    "log_written_at_utc": "2026-09-15T11:52:16.779673+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Fixture resets default engine mappings before SetupEngines; no production assertion suppressed.",
+    "log": "logs/fix-build-3.log",
+    "log_written_at_utc": "2026-09-15T11:52:47.429611+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub unloading'",
+    "exit_code": 0,
+    "note": "Five new cases pass.",
+    "log": "logs/fixed-hub-tests-2.log",
+    "log_written_at_utc": "2026-09-15T11:52:56.185593+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R 'Blueprint|CST Prefabs|Sprint 39|Sprint 40|Sprint 41|Sprint 42|Spaceport'",
+    "exit_code": 0,
+    "note": "48 distinct broader cases pass.",
+    "log": "logs/broader-tests.log",
+    "log_written_at_utc": "2026-09-15T11:53:19.789545+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd openttd_test",
+    "exit_code": 0,
+    "note": "Added invalid destination sentinel guard and regression; initializer warnings subsequently removed.",
+    "log": "logs/final-build.log",
+    "log_written_at_utc": "2026-09-15T11:54:39.540378+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub unloading'",
+    "exit_code": 0,
+    "note": "Six new cases pass, including invalid destination sentinels.",
+    "log": "logs/final-hub-tests.log",
+    "log_written_at_utc": "2026-09-15T11:55:26.899276+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Final test-only initializer cleanup compiles without warnings.",
+    "log": "logs/final-clean-build.log",
+    "log_written_at_utc": "2026-09-15T11:56:26.449145+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub unloading - invalid stored'",
+    "exit_code": 0,
+    "note": "Affected case passes after initializer cleanup.",
+    "log": "logs/final-initializer-check.log",
+    "log_written_at_utc": "2026-09-15T11:58:03.603928+00:00"
+  }
+]

@@ -15,10 +15,19 @@
 #include "direction_type.h"
 #include "rail_type.h"
 #include "signal_type.h"
+#include "slope_type.h"
+#include "portal/planet_type.h"
+#include "company_type.h"
 
 CommandCost CmdBuildRailroadTrack(DoCommandFlags flags, TileIndex end_tile, TileIndex start_tile, RailType railtype, Track track, bool auto_remove_signals, bool fail_on_obstacle);
 CommandCost CmdRemoveRailroadTrack(DoCommandFlags flags, TileIndex end_tile, TileIndex start_tile, Track track);
 CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType railtype, Track track, bool auto_remove_signals);
+/** Validate the next track piece against prospective bits and quote its foundation. */
+CommandCost CheckRailSlope(Slope tileh, TrackBits rail_bits, TrackBits existing, TileIndex tile);
+/** Cash cost of adding one new track piece, shared by rail and blueprint commands. */
+Money GetNewRailTrackCost(RailType railtype, WorldID world, CompanyID company);
+/** Cash cost of adding one new signal, shared by rail and blueprint commands. */
+Money GetNewRailSignalCost(WorldID world, CompanyID company);
 CommandCost CmdRemoveSingleRail(DoCommandFlags flags, TileIndex tile, Track track);
 CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType railtype, DiagDirection dir);
 CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track track, SignalType sigtype, SignalVariant sigvar, bool convert_signal, bool skip_existing_signals, bool ctrl_pressed, SignalType cycle_start, SignalType cycle_stop, uint8_t num_dir_cycle, uint8_t signals_copy);

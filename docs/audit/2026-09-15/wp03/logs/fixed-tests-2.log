@@ -1,0 +1,86 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 301: Hub loading - full packet pool preserves inventory and recovers
+1/4 Test #301: Hub loading - full packet pool preserves inventory and recovers .......***Exception: SegFault  0.15 sec
+Filters: Hub loading - full packet pool preserves inventory and recovers
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub loading - full packet pool preserves inventory and recovers
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:865
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:874: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 31 | 30 passed | 1 failed
+
+
+    Start 302: Hub loading - capacity reserve and rights boundaries conserve cargo
+2/4 Test #302: Hub loading - capacity reserve and rights boundaries conserve cargo ...***Exception: SegFault  0.14 sec
+Filters: Hub loading - capacity reserve and rights boundaries conserve cargo
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub loading - capacity reserve and rights boundaries conserve cargo
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:910
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:924: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 58 | 57 passed | 1 failed
+
+
+    Start 303: Hub loading - failed pickup survives reload and retries
+3/4 Test #303: Hub loading - failed pickup survives reload and retries ...............   Passed    0.03 sec
+    Start 304: Hub loading - failed packet split keeps cargo available
+4/4 Test #304: Hub loading - failed packet split keeps cargo available ...............***Exception: SegFault  0.14 sec
+Filters: Hub loading - failed packet split keeps cargo available
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub loading - failed packet split keeps cargo available
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1003
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1003: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 23 | 22 passed | 1 failed
+
+
+
+25% tests passed, 3 tests failed out of 4
+
+Total Test time (real) =   0.48 sec
+
+The following tests FAILED:
+	301 - Hub loading - full packet pool preserves inventory and recovers (SEGFAULT)
+	302 - Hub loading - capacity reserve and rights boundaries conserve cargo (SEGFAULT)
+	304 - Hub loading - failed packet split keeps cargo available (SEGFAULT)
+Errors while running CTest

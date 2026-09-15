@@ -1,0 +1,107 @@
+[
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Original runtime plus full-pool regression.",
+    "log": "logs/baseline-build.log",
+    "log_written_at_utc": "2026-09-15T12:01:39.160428+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub loading'",
+    "exit_code": 8,
+    "note": "Expected original failure:100 stock became40 with no physical recipient.",
+    "log": "logs/baseline-tests.log",
+    "log_written_at_utc": "2026-09-15T12:02:06.947363+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd openttd_test",
+    "exit_code": 1,
+    "note": "Fixture used const engine accessor for load-amount override; corrected.",
+    "log": "logs/fix-build.log",
+    "log_written_at_utc": "2026-09-15T12:04:52.482966+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd openttd_test",
+    "exit_code": 0,
+    "note": "Runtime and expanded tests linked; fixture signedness warnings subsequently removed.",
+    "log": "logs/fix-build-2.log",
+    "log_written_at_utc": "2026-09-15T12:05:41.016848+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub loading'",
+    "exit_code": 8,
+    "note": "Fixture global cleanup retained owned cargo; missing consist initialization caused crashes.",
+    "log": "logs/fixed-tests.log",
+    "log_written_at_utc": "2026-09-15T12:05:59.992802+00:00"
+  },
+  {
+    "command": "gdb -batch -ex run -ex 'bt 14' --args ./build/openttd_test 'Hub loading - failed packet split keeps cargo available'",
+    "exit_code": 127,
+    "note": "gdb unavailable.",
+    "log": "logs/split-fixture-backtrace.log",
+    "log_written_at_utc": "2026-09-15T12:06:14.831766+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Explicit cargo cleanup, vehicle hash reset and warning fixes.",
+    "log": "logs/fixture-build.log",
+    "log_written_at_utc": "2026-09-15T12:07:38.931561+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub loading'",
+    "exit_code": 8,
+    "note": "Refusal/reload case passes; remaining consist fixture crashes investigated.",
+    "log": "logs/fixed-tests-2.log",
+    "log_written_at_utc": "2026-09-15T12:07:43.207550+00:00"
+  },
+  {
+    "command": "./build/openttd_test 'Hub loading - failed packet split keeps cargo available' -s",
+    "exit_code": 139,
+    "note": "Verbose evidence: stock/waiting save-load passes before crash on pickup refresh.",
+    "log": "logs/split-verbose.log",
+    "log_written_at_utc": "2026-09-15T12:07:53.713524+00:00"
+  },
+  {
+    "command": "LD_PRELOAD=/tmp/wp03-backtrace.so ./build/openttd_test 'Hub loading - failed packet split keeps cargo available'",
+    "exit_code": 139,
+    "note": "Diagnostic-only signal trace identified VehicleLengthChanged from uninitialized fixture consist.",
+    "log": "logs/split-backtrace.log",
+    "log_written_at_utc": "2026-09-15T12:08:32.358429+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Initialize matching engine cargo/capacity and native consist cache.",
+    "log": "logs/consist-fixture-build.log",
+    "log_written_at_utc": "2026-09-15T12:09:53.421229+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub loading'",
+    "exit_code": 8,
+    "note": "Three cases pass; retry test needed to reset native StopLoading state after earlier partial pickup.",
+    "log": "logs/fixed-tests-3.log",
+    "log_written_at_utc": "2026-09-15T12:10:19.817164+00:00"
+  },
+  {
+    "command": "ninja -C build -j 2 openttd_test",
+    "exit_code": 0,
+    "note": "Final fixture reset and explicit retry; no warnings.",
+    "log": "logs/final-build.log",
+    "log_written_at_utc": "2026-09-15T12:11:13.496031+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^Hub loading'",
+    "exit_code": 0,
+    "note": "Four cases pass, including12 boundaries and2 full-pool scenarios.",
+    "log": "logs/final-targeted-tests.log",
+    "log_written_at_utc": "2026-09-15T12:11:28.758993+00:00"
+  },
+  {
+    "command": "ctest --test-dir build --output-on-failure -R '^(Hub unloading|Production gameplay)|Blueprint|CST Prefabs|Sprint 39|Sprint 40|Sprint 41|Sprint 42|Spaceport'",
+    "exit_code": 0,
+    "note": "57 distinct broader cases pass.",
+    "log": "logs/broader-tests.log",
+    "log_written_at_utc": "2026-09-15T12:11:42.914958+00:00"
+  }
+]

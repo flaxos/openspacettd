@@ -1,0 +1,126 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+      Start  83: Placement Restrictions - Industry Rules Matrix
+ 1/60 Test  #83: Placement Restrictions - Industry Rules Matrix ........................................   Passed    0.02 sec
+      Start  84: Placement Restrictions - Train Depot Rules Matrix
+ 2/60 Test  #84: Placement Restrictions - Train Depot Rules Matrix .....................................   Passed    0.02 sec
+      Start  85: Placement Restrictions - CmdBuildTrainDepot Integration
+ 3/60 Test  #85: Placement Restrictions - CmdBuildTrainDepot Integration ...............................   Passed    0.02 sec
+      Start  95: Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length)
+ 4/60 Test  #95: Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length) ..........   Passed    0.02 sec
+      Start  96: Portal Wormhole - YAPF Track Follower Traversal
+ 5/60 Test  #96: Portal Wormhole - YAPF Track Follower Traversal .......................................   Passed    0.02 sec
+      Start  97: Portal Wormhole - Unlinked gate is a closed rail terminal
+ 6/60 Test  #97: Portal Wormhole - Unlinked gate is a closed rail terminal .............................   Passed    0.02 sec
+      Start  98: Portal Wormhole - Stale non-tunnel endpoint is rejected
+ 7/60 Test  #98: Portal Wormhole - Stale non-tunnel endpoint is rejected ...............................   Passed    0.02 sec
+      Start  99: Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation
+ 8/60 Test  #99: Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation ...   Passed    0.02 sec
+      Start 100: Portal Wormhole - Routing follows every exit orientation with rail turns disabled
+ 9/60 Test #100: Portal Wormhole - Routing follows every exit orientation with rail turns disabled .....   Passed    0.02 sec
+      Start 101: Portal Wormhole - Neutral Generated Gateway Is Shared Rail
+10/60 Test #101: Portal Wormhole - Neutral Generated Gateway Is Shared Rail ............................   Passed    0.02 sec
+      Start 102: Portal Wormhole - Legacy Generated Gateway Direction Repair
+11/60 Test #102: Portal Wormhole - Legacy Generated Gateway Direction Repair ...........................   Passed    0.02 sec
+      Start 103: Portal Wormhole - Exit Emergence Coordinates Calculation
+12/60 Test #103: Portal Wormhole - Exit Emergence Coordinates Calculation ..............................   Passed    0.02 sec
+      Start 104: Portal Wormhole - Consist Distance Decoupling Across Wormhole
+13/60 Test #104: Portal Wormhole - Consist Distance Decoupling Across Wormhole .........................   Passed    0.02 sec
+      Start 155: Portal Construction - Unlinked Gate Lifecycle and Restrictions
+14/60 Test #155: Portal Construction - Unlinked Gate Lifecycle and Restrictions ........................   Passed    0.02 sec
+      Start 156: Portal Construction - High-capacity terminal topology and PBS directions
+15/60 Test #156: Portal Construction - High-capacity terminal topology and PBS directions ..............   Passed    0.02 sec
+      Start 157: Portal Construction - UAT adopts complete neutral terminals only
+16/60 Test #157: Portal Construction - UAT adopts complete neutral terminals only ......................   Passed    0.04 sec
+      Start 158: Portal Construction - Terminal footprint rejection is atomic
+17/60 Test #158: Portal Construction - Terminal footprint rejection is atomic ..........................   Passed    0.02 sec
+      Start 159: Portal Construction - Authoritative world and Phase placement rules
+18/60 Test #159: Portal Construction - Authoritative world and Phase placement rules ...................   Passed    0.02 sec
+      Start 160: Portal Construction - Cross-World Gate Linking
+19/60 Test #160: Portal Construction - Cross-World Gate Linking ........................................   Passed    0.02 sec
+      Start 161: Portal Construction - Atomic Pair Builder
+20/60 Test #161: Portal Construction - Atomic Pair Builder .............................................   Passed    0.02 sec
+      Start 162: Portal Construction - Demolition Safeguards While Consist In Transit
+21/60 Test #162: Portal Construction - Demolition Safeguards While Consist In Transit ..................   Passed    0.02 sec
+      Start 163: Portal Construction - Partial Demolition Unlinking
+22/60 Test #163: Portal Construction - Partial Demolition Unlinking ....................................   Passed    0.02 sec
+      Start 164: Portal Construction - Area demolition safely removes a reserved linked pair
+23/60 Test #164: Portal Construction - Area demolition safely removes a reserved linked pair ...........   Passed    0.02 sec
+      Start 165: Portal Construction - Savegame Persistence of Unlinked and Linked Portals
+24/60 Test #165: Portal Construction - Savegame Persistence of Unlinked and Linked Portals .............   Passed    0.04 sec
+      Start 179: Edge Conduit - Boundary Void Adjacency Rules
+25/60 Test #179: Edge Conduit - Boundary Void Adjacency Rules ..........................................   Passed    0.02 sec
+      Start 180: Edge Conduit - Construction and Demolition Commands
+26/60 Test #180: Edge Conduit - Construction and Demolition Commands ...................................   Passed    0.02 sec
+      Start 181: Edge Conduit - Frontier World Extraction Multiplier
+27/60 Test #181: Edge Conduit - Frontier World Extraction Multiplier ...................................   Passed    0.02 sec
+      Start 183: Edge Conduit - One-ended head is safe for signal updates
+28/60 Test #183: Edge Conduit - One-ended head is safe for signal updates ..............................   Passed    0.02 sec
+      Start 185: Edge Conduit - Physical map edges and corners are coordinate-safe
+29/60 Test #185: Edge Conduit - Physical map edges and corners are coordinate-safe .....................   Passed    0.02 sec
+      Start 186: Edge Conduit - Invalid boundaries, orientation and terrain fail atomically
+30/60 Test #186: Edge Conduit - Invalid boundaries, orientation and terrain fail atomically ............   Passed    0.02 sec
+      Start 187: Edge Conduit - Logical boundary, phases and adjacent rail remain supported
+31/60 Test #187: Edge Conduit - Logical boundary, phases and adjacent rail remain supported ............   Passed    0.02 sec
+      Start 188: Edge Conduit - Constructed tile survives save, reload and signal refresh
+32/60 Test #188: Edge Conduit - Constructed tile survives save, reload and signal refresh ..............   Passed    0.06 sec
+      Start 191: Edge Conduit Feeder - Configuration and Direct Inter-World Piping
+33/60 Test #191: Edge Conduit Feeder - Configuration and Direct Inter-World Piping .....................   Passed    0.02 sec
+      Start 192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation
+34/60 Test #192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation ................   Passed    0.02 sec
+      Start 246: Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase
+35/60 Test #246: Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase ...........   Passed    0.02 sec
+      Start 264: Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage
+36/60 Test #264: Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage ................................   Passed    0.02 sec
+      Start 267: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation
+37/60 Test #267: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation ..........................   Passed    0.02 sec
+      Start 268: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption
+38/60 Test #268: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption ..............   Passed    0.02 sec
+      Start 269: Sprint 39 Stockpile - Role Mappings and Deserialization
+39/60 Test #269: Sprint 39 Stockpile - Role Mappings and Deserialization ...............................   Passed    0.02 sec
+      Start 270: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors
+40/60 Test #270: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors .................   Passed    0.02 sec
+      Start 271: Sprint 39 Corporate HQ - Placement Rules & Validation
+41/60 Test #271: Sprint 39 Corporate HQ - Placement Rules & Validation .................................   Passed    0.02 sec
+      Start 272: Sprint 39 Corporate HQ - Tier Advancement & Serialization
+42/60 Test #272: Sprint 39 Corporate HQ - Tier Advancement & Serialization .............................   Passed    0.02 sec
+      Start 273: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub
+43/60 Test #273: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub ...........................   Passed    0.02 sec
+      Start 274: Sprint 40 Fabrication - BOM Recipes & Catalog
+44/60 Test #274: Sprint 40 Fabrication - BOM Recipes & Catalog .........................................   Passed    0.02 sec
+      Start 275: Sprint 40 Fabrication - Mode Toggling and Company Isolation
+45/60 Test #275: Sprint 40 Fabrication - Mode Toggling and Company Isolation ...........................   Passed    0.02 sec
+      Start 276: Sprint 40 Fabrication - Track Building Interception
+46/60 Test #276: Sprint 40 Fabrication - Track Building Interception ...................................   Passed    0.02 sec
+      Start 277: Sprint 40 Fabrication - Signal and Depot Interception
+47/60 Test #277: Sprint 40 Fabrication - Signal and Depot Interception .................................   Passed    0.02 sec
+      Start 278: Sprint 40 Fabrication - Save/Load Serialization
+48/60 Test #278: Sprint 40 Fabrication - Save/Load Serialization .......................................   Passed    0.02 sec
+      Start 280: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites
+49/60 Test #280: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites ........................   Passed    0.02 sec
+      Start 283: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration
+50/60 Test #283: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration ..........................   Passed    0.02 sec
+      Start 285: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog
+51/60 Test #285: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog ....................   Passed    0.02 sec
+      Start 286: Sprint 42 Production Chains - World Phase Placement Constraints
+52/60 Test #286: Sprint 42 Production Chains - World Phase Placement Constraints .......................   Passed    0.02 sec
+      Start 287: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion
+53/60 Test #287: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion .........   Passed    0.02 sec
+      Start 288: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk
+54/60 Test #288: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk ...........   Passed    0.02 sec
+      Start 289: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop
+55/60 Test #289: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop ................   Passed    0.02 sec
+      Start 290: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering
+56/60 Test #290: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering ..................   Passed    0.02 sec
+      Start 291: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)
+57/60 Test #291: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk) ....................   Passed    0.02 sec
+      Start 292: Production gameplay - command validation and station lifecycle
+58/60 Test #292: Production gameplay - command validation and station lifecycle ........................   Passed    0.03 sec
+      Start 293: Production gameplay - real cargo unloading conversion and onward loading
+59/60 Test #293: Production gameplay - real cargo unloading conversion and onward loading ..............   Passed    0.03 sec
+      Start 294: Production gameplay - station facility survives actual save and reload
+60/60 Test #294: Production gameplay - station facility survives actual save and reload ................   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 60
+
+Total Test time (real) =   1.35 sec

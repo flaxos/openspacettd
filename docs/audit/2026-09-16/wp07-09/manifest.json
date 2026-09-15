@@ -1,0 +1,66 @@
+{
+  "fixture_version": 1,
+  "git_head": "abbcd7e07737bcd83c3f830f539313a45bef5f01",
+  "working_tree": "Contains earlier recovery work; hashes identify the tested local source and binaries, not a clean commit or package-only patch.",
+  "commands": {
+    "build": "ninja -C build -j2 openttd openttd_test",
+    "tests": "ctest --test-dir build --output-on-failure -j2"
+  },
+  "ctest": {
+    "passed": 363,
+    "failed": 0
+  },
+  "native_routes": {
+    "movements": 39,
+    "transforms_per_movement": 8,
+    "runs": 312,
+    "signals": "intact",
+    "forbid_90_degree_turns": true
+  },
+  "fixtures": "Generated reproductions of pre-repair empty-town state, in the current native save schema; these are not historical user saves.",
+  "legacy_policy": "Preserve saved towns/infrastructure; reject colony retries without mutation. Automatic repair is unsupported.",
+  "gui_acceptance": "Pending; orca-ide: command not found; native app control unavailable.",
+  "sha256": {
+    "build/openttd": "e16199b91a59ef24f11fda687c7a7f83bd397ce0492876b76d23fd0fba3749b1",
+    "build/openttd_test": "77dd6e9f706de983b643611099eae9b3547ba7583e1e07330321ea1dfe11297d",
+    "src/blueprint/blueprint.h": "a4999b39266f71dc6b7e67ff6b84517c8541a3c3dacef57374cf4befe7ddc714",
+    "src/blueprint/blueprint.cpp": "618ce1a4d845fb4af26f1dff24bf0a3533dbf4e38465bdc824e9d702cf874c33",
+    "src/blueprint/blueprint_manager.cpp": "cfd25a77e4f6c814edaff6ad89f8b68a6a998be8e2c7755a63fc89edb88aa763",
+    "src/blueprint/blueprint_gui.cpp": "03e86f72c889e09baff8b0a85fd49dc84724b1c94f494090588db35cf1125740",
+    "src/portal/corporate_hq.cpp": "6edaf35d3e554de6f00b9e135096b2cdf1150895aeaa2efda5d79ceee20e3e57",
+    "src/portal/corporate_hq_gui.cpp": "c948cb474da9e8970c2f07c3185574ca298d68207ee561ebcd045ddb22607e3b",
+    "src/portal/portal_cmd.cpp": "05288a67e7fc2d7d1dc1c50c2629238ed986ff56e347c917db18d2d12d7cd114",
+    "src/town_cmd.cpp": "fe17aef3b4d83cd466b4c5a1e64c7e85c4703d1e671afa701c4ffd1b0b10b4d0",
+    "src/tests/test_cst_prefabs.cpp": "8da83401bf620a4e78ae1830e8ffcaeca1db4392b781c6a86d377e8232e60d20",
+    "src/tests/test_command_authority.cpp": "1348f993c3f576531e065e10e863760d071d630cec25212e1922768c9cf74a03",
+    "src/tests/test_blueprint_file_gui.cpp": "4bf9d3fbbc90fd5a4d478ae8015e19ac4b0675030fb928af4a8921363cc73c48",
+    "src/tests/test_blueprint_storage.cpp": "605f5cfcd1ef0f23ae5762fbc464b2539280d7c371f7f898f3994b4f28fccbeb",
+    "src/tests/test_blueprint_validation.cpp": "3b421acccb30c6b43d675e692df775c37dc8034811cf326fe7370a1c0966a727",
+    "src/tests/test_sprint30_biomes_colonization.cpp": "859f24ab90cf57a328bf9e3e9d5d7fae66dcff923ee90ecb9954cc2194755266",
+    "src/tests/CMakeLists.txt": "9e5e8a1334de36746a70c737f0fc2c38d2d1615f6f4a3fd735f59b250a983d05",
+    "src/tests/wp09_gui_persistence.cmake": "c0e00c94f6799406a90f639b7f2b6191a78af959cab9d41f2ac6e3f3e3572300",
+    "src/lang/english.txt": "1804da1333d019bf4c27a065d685aa63e0a6dbb784fc98cc6f4c03429444c911",
+    "docs/audit/2026-09-16/wp07-09/fixtures/empty-outpost-v1-expansion.sav": "09fb83728816f7e99c6030b81cfff4f74a3c05f6699964038efcff104d4c95c0",
+    "docs/audit/2026-09-16/wp07-09/fixtures/empty-outpost-v1-frontier.sav": "009c61db136a71066fa2b5a20016974637e6a22142df2d6474baaf756282da54"
+  },
+  "cargo_journey": {
+    "start": "Native depot with locomotive and two coal wagons; 60 units seeded before departure.",
+    "movement": "Native station order and train ticks; no vehicle repositioning or later cargo injections.",
+    "conservation": "Every tick: onboard + world stock + station waiting = 60.",
+    "after_exchange_and_process_reload": {
+      "onboard": 20,
+      "reserved_stock": 40,
+      "deposited": 60,
+      "dispatched": 20
+    }
+  },
+  "tool_switch_regression": {
+    "controls": [
+      "Blueprint Capture/Place",
+      "Corporate HQ/Hub"
+    ],
+    "behavior": "Switching or re-clicking leaves the newly selected tool active after the old tool aborts.",
+    "before": "logs/tool-switch-before.log",
+    "after": "logs/tool-switch-after.log"
+  }
+}

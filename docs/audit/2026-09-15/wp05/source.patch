@@ -1,0 +1,1203 @@
+diff --git a/src/command_type.h b/src/command_type.h
+--- a/src/command_type.h
++++ b/src/command_type.h
+@@ -402,6 +402,7 @@
+ 
+ 	BuildProcessingFacility, ///< attach a production recipe to a company rail station
+ 	RemoveProcessingFacility, ///< retire a station production facility
++	UpgradeCorporateHQ, ///< advance an owned corporate headquarters by exactly one tier
+ 
+ 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
+ };
+diff --git a/src/portal/portal_cmd.h b/src/portal/portal_cmd.h
+--- a/src/portal/portal_cmd.h
++++ b/src/portal/portal_cmd.h
+@@ -18,6 +18,7 @@
+ #include "portal_type.h"
+ #include "tech_tree.h"
+ #include "production_chain.h"
++#include "corporate_hq.h"
+ 
+ /**
+  * Build a single unlinked portal gate head on a tile.
+@@ -146,6 +147,9 @@
+  * @return Command cost or failure.
+  */
+ CommandCost CmdPlaceCorporateHQ(DoCommandFlags flags, TileIndex tile, const std::string &hq_name);
++
++/** Advance the current company's HQ to the requested next tier. */
++CommandCost CmdUpgradeCorporateHQ(DoCommandFlags flags, CompanyID company, CorporateHQTier target_tier);
+ 
+ /**
+  * Establish a dedicated company logistics hub warehouse for bi-directional inventory buffering.
+@@ -201,6 +205,7 @@
+ DEF_CMD_TRAIT(Commands::ColonizeOutpost,           CmdColonizeOutpost,           CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+ DEF_CMD_TRAIT(Commands::PromoteWorld,              CmdPromoteWorld,              CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
+ DEF_CMD_TRAIT(Commands::PlaceCorporateHQ,          CmdPlaceCorporateHQ,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
++DEF_CMD_TRAIT(Commands::UpgradeCorporateHQ,        CmdUpgradeCorporateHQ,        {},                                                   CommandType::CompanySetting)
+ DEF_CMD_TRAIT(Commands::BuildLogisticsHub,         CmdBuildLogisticsHub,         CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+ DEF_CMD_TRAIT(Commands::SetFabricationMode,        CmdSetFabricationMode,        {},                                                   CommandType::CompanySetting)
+ DEF_CMD_TRAIT(Commands::SelectResearchProject,     CmdSelectResearchProject,     {},                                                   CommandType::CompanySetting)
+diff --git a/src/portal/portal_cmd.cpp b/src/portal/portal_cmd.cpp
+--- a/src/portal/portal_cmd.cpp
++++ b/src/portal/portal_cmd.cpp
+@@ -590,6 +590,7 @@
+ 
+ CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::string &outpost_name)
+ {
++	if (!Company::IsValidID(_current_company)) return CMD_ERROR;
+ 	CommandCost placement = PlanetManager::CheckConstructionPlacement(tile);
+ 	if (placement.Failed()) return placement;
+ 
+@@ -614,7 +615,8 @@
+ 			name = fmt::format("Outpost {}", region->name);
+ 		}
+ 
+-		PlanetManager::ColonizeWorld(world, name, tile);
++		if (!PlanetManager::ColonizeWorld(world, name, tile)) return CMD_ERROR;
++		UniverseAuthorityService::Instance().SyncLocalWorld(world);
+ 
+ 		/* Spawn initial frontier settlement if none exists on this world */
+ 		Town *existing_town = PlanetManager::GetWorldPrimaryTown(world);
+@@ -630,6 +632,7 @@
+ 
+ 		/* Broadcast colony founding news */
+ 		AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_COLONIZED, name), NewsType::CompanyInfo, tile);
++		SetWindowDirty(WindowClass::UniverseDirectory, 0);
+ 	}
+ 
+ 	return cost;
+@@ -637,6 +640,7 @@
+ 
+ CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
+ {
++	if (!Company::IsValidID(_current_company)) return CMD_ERROR;
+ 	const PlanetRegion *region = PlanetManager::GetRegion(world);
+ 	if (region == nullptr) return CMD_ERROR;
+ 
+@@ -653,7 +657,8 @@
+ 
+ 	if (flags.Test(DoCommandFlag::Execute)) {
+ 		WorldPhase prev_phase = region->phase;
+-		PlanetManager::PromoteWorldPhase(world);
++		if (!PlanetManager::PromoteWorldPhase(world)) return CMD_ERROR;
++		UniverseAuthorityService::Instance().SyncLocalWorld(world);
+ 
+ 		TileIndex news_tile = region->outpost_tile != INVALID_TILE ?
+ 			region->outpost_tile :
+@@ -670,7 +675,7 @@
+ 			}
+ 		}
+ 
+-		UniverseAuthorityService::Instance().PromoteWorld(world);
++		SetWindowDirty(WindowClass::UniverseDirectory, 0);
+ 	}
+ 
+ 	return cost;
+@@ -712,6 +717,23 @@
+ 	}
+ 
+ 	return cost;
++}
++
++CommandCost CmdUpgradeCorporateHQ(DoCommandFlags flags, CompanyID company, CorporateHQTier target_tier)
++{
++	if (!Company::IsValidID(_current_company) || !Company::IsValidID(company)) return CMD_ERROR;
++	CommandCost ownership = CheckOwnership(company);
++	if (ownership.Failed()) return ownership;
++	const CorporateHQProfile *hq = CorporateHQManager::GetHQ(company);
++	if (hq == nullptr) return CMD_ERROR;
++	const uint8_t current = static_cast<uint8_t>(hq->tier);
++	const uint8_t target = static_cast<uint8_t>(target_tier);
++	if (current < 1 || current >= 4 || target != current + 1) return CMD_ERROR;
++	if (flags.Test(DoCommandFlag::Execute)) {
++		if (!CorporateHQManager::UpgradeHQTier(company)) return CMD_ERROR;
++		SetWindowDirty(WindowClass::CorporateHQ, company.base());
++	}
++	return CommandCost(ExpensesType::Construction);
+ }
+ 
+ CommandCost CmdBuildLogisticsHub(DoCommandFlags flags, TileIndex tile, StationID st, const std::string &hub_name)
+diff --git a/src/portal/corporate_hq_gui.cpp b/src/portal/corporate_hq_gui.cpp
+--- a/src/portal/corporate_hq_gui.cpp
++++ b/src/portal/corporate_hq_gui.cpp
+@@ -87,7 +87,7 @@
+ 		this->CreateNestedTree();
+ 		this->vscroll = this->GetScrollbar(WID_CHQ_SCROLLBAR);
+ 		this->vscroll->SetStepSize(1);
+-		this->company = (window_number != 0 && window_number < MAX_COMPANIES) ?
++		this->company = (window_number < MAX_COMPANIES) ?
+ 			CompanyID(static_cast<uint8_t>(window_number)) : _local_company;
+ 		if (this->company == CompanyID::Invalid() || !Company::IsValidID(this->company)) {
+ 			this->company = _local_company;
+@@ -114,11 +114,13 @@
+ 	{
+ 		bool has_hq = CorporateHQManager::HasHQ(this->company);
+ 		const CorporateHQProfile *profile = CorporateHQManager::GetHQ(this->company);
++		bool own_company = Company::IsValidID(_local_company) && this->company == _local_company;
+ 
+ 		this->SetWidgetDisabledState(WID_CHQ_LOCATE, !has_hq || profile == nullptr || profile->tile == INVALID_TILE);
+-		this->SetWidgetDisabledState(WID_CHQ_UPGRADE, !has_hq || (profile != nullptr && profile->tier >= CorporateHQTier::CST_Arcology));
+-		this->SetWidgetDisabledState(WID_CHQ_TECH_RESEARCH_BTN, this->active_tab != CorporateHQTab::TechTree || !has_hq);
+-		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, this->active_tab != CorporateHQTab::TechTree || !has_hq);
++		this->SetWidgetDisabledState(WID_CHQ_UPGRADE, !own_company || !has_hq || (profile != nullptr && profile->tier >= CorporateHQTier::CST_Arcology));
++		this->SetWidgetDisabledState(WID_CHQ_TECH_RESEARCH_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
++		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
++		this->SetWidgetDisabledState(WID_CHQ_FABRICATION_TOGGLE, !own_company);
+ 
+ 		if (this->active_tab == CorporateHQTab::Stockpiles) {
+ 			auto stockpiles = StockpileManager::GetAllStockpiles();
+@@ -139,6 +141,7 @@
+ 		} else {
+ 			this->vscroll->SetCount(0);
+ 		}
++		this->DrawWidgets();
+ 	}
+ 
+ 	void DrawWidget(const Rect &r, WidgetID widget) const override
+@@ -370,6 +373,8 @@
+ 
+ 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
+ 	{
++		if ((widget == WID_CHQ_UPGRADE || widget == WID_CHQ_TECH_RESEARCH_BTN || widget == WID_CHQ_TECH_BUDGET_BTN || widget == WID_CHQ_FABRICATION_TOGGLE) &&
++			(!Company::IsValidID(_local_company) || this->company != _local_company)) return;
+ 		switch (widget) {
+ 			case WID_CHQ_TAB_OVERVIEW:
+ 				this->active_tab = CorporateHQTab::Overview;
+@@ -446,8 +451,11 @@
+ 			}
+ 
+ 			case WID_CHQ_UPGRADE: {
+-				CorporateHQManager::UpgradeHQTier(this->company);
+-				this->SetDirty();
++				const CorporateHQProfile *profile = CorporateHQManager::GetHQ(this->company);
++				if (profile != nullptr && profile->tier < CorporateHQTier::CST_Arcology) {
++					CorporateHQTier next = static_cast<CorporateHQTier>(static_cast<uint8_t>(profile->tier) + 1);
++					Command<Commands::UpgradeCorporateHQ>::Post(this->company, next);
++				}
+ 				break;
+ 			}
+ 		}
+diff --git a/src/portal/universe_directory_gui.cpp b/src/portal/universe_directory_gui.cpp
+--- a/src/portal/universe_directory_gui.cpp
++++ b/src/portal/universe_directory_gui.cpp
+@@ -13,6 +13,8 @@
+ #include "megacity_gui.h"
+ #include "megacity_manager.h"
+ #include "../command_func.h"
++#include "../company_base.h"
++#include "../company_func.h"
+ #include "../town.h"
+ #include "../window_gui.h"
+ #include "../strings_func.h"
+@@ -71,23 +73,7 @@
+ 		this->vscroll->SetStepSize(1);
+ 		this->FinishInitNested(window_number);
+ 
+-		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
+-		if (worlds.empty() && PlanetManager::Count() > 0) {
+-			for (const auto &reg : PlanetManager::GetAllRegions()) {
+-				RegisteredWorld rw{
+-					.world_id = reg.id,
+-					.phase = reg.phase,
+-					.name = reg.name,
+-					.last_heartbeat_tick = 1,
+-					.address = "Local Node",
+-					.description = fmt::format("{} ecosystem", PlanetManager::GetWorldBiomeName(reg.biome)),
+-					.status = WorldOnlineStatus::Online,
+-					.biome = reg.biome,
+-				};
+-				UniverseAuthorityService::Instance().RegisterWorld(rw);
+-			}
+-			worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
+-		}
++		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectoryForGUI();
+ 		if (!worlds.empty()) {
+ 			this->selected_world = worlds.front().world_id;
+ 		}
+@@ -95,14 +81,16 @@
+ 
+ 	void OnPaint() override
+ 	{
+-		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
++		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectoryForGUI();
+ 		this->vscroll->SetCount(worlds.size());
+ 
+-		const RegisteredWorld *selected = UniverseAuthorityService::Instance().GetWorld(this->selected_world);
++		const RegisteredWorld *selected = nullptr;
++		for (const RegisteredWorld &world : worlds) if (world.world_id == this->selected_world) { selected = &world; break; }
+ 		const PlanetRegion *local_reg = (this->selected_world != INVALID_WORLD) ? PlanetManager::GetRegion(this->selected_world) : nullptr;
+ 		WorldPhase phase = (selected != nullptr) ? selected->phase : (local_reg != nullptr ? local_reg->phase : WorldPhase::Phase3_Frontier);
+-		bool can_colonize = (phase == WorldPhase::Phase4_Expansion);
+-		bool can_promote = (this->selected_world != INVALID_WORLD) && PlanetManager::CanPromoteWorld(this->selected_world) && (phase != WorldPhase::Phase4_Expansion);
++		bool local_action = local_reg != nullptr && Company::IsValidID(_local_company);
++		bool can_colonize = local_action && (phase == WorldPhase::Phase4_Expansion);
++		bool can_promote = local_action && PlanetManager::CanPromoteWorld(this->selected_world) && (phase != WorldPhase::Phase4_Expansion);
+ 		bool can_view_megacity = (this->selected_world != INVALID_WORLD) && (phase == WorldPhase::Phase1_Core || (selected != nullptr && selected->is_megacity));
+ 		if (!can_view_megacity && this->selected_world != INVALID_WORLD) {
+ 			for (const auto &prof : MegacityManager::GetAllMegacities()) {
+@@ -123,7 +111,7 @@
+ 	void DrawWidget(const Rect &r, WidgetID widget) const override
+ 	{
+ 		auto &service = UniverseAuthorityService::Instance();
+-		auto worlds = service.GetWorldDirectory();
++		auto worlds = service.GetWorldDirectoryForGUI();
+ 
+ 		switch (widget) {
+ 			case WID_UD_HEADER_PANEL: {
+@@ -216,7 +204,8 @@
+ 
+ 			case WID_UD_DETAILS_PANEL: {
+ 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
+-				const RegisteredWorld *selected = service.GetWorld(this->selected_world);
++				const RegisteredWorld *selected = nullptr;
++				for (const RegisteredWorld &world : worlds) if (world.world_id == this->selected_world) { selected = &world; break; }
+ 
+ 				if (selected == nullptr) {
+ 					DrawString(tr, "Select a world from the directory above to inspect server details.", TextColour::Silver);
+@@ -280,36 +269,31 @@
+ 
+ 		switch (widget) {
+ 			case WID_UD_REFRESH: {
+-				service.PruneStaleWorlds(0, 300);
+ 				this->SetDirty();
+ 				break;
+ 			}
+ 
+ 			case WID_UD_JUMP_BTN: {
+-				if (this->selected_world != INVALID_WORLD) {
++				if (this->selected_world != INVALID_WORLD && PlanetManager::GetRegion(this->selected_world) != nullptr) {
+ 					PlanetManager::JumpToPlanet(this->selected_world);
+ 				}
+ 				break;
+ 			}
+ 
+ 			case WID_UD_COLONIZE_BTN: {
+-				if (this->selected_world != INVALID_WORLD) {
++				if (this->selected_world != INVALID_WORLD && Company::IsValidID(_local_company)) {
+ 					const PlanetRegion *local_reg = PlanetManager::GetRegion(this->selected_world);
+ 					if (local_reg != nullptr && local_reg->phase == WorldPhase::Phase4_Expansion) {
+ 						TileIndex outpost_tile = TileXY((local_reg->min_x + local_reg->max_x) / 2, (local_reg->min_y + local_reg->max_y) / 2);
+ 						Command<Commands::ColonizeOutpost>::Post(STR_ERROR_CAN_T_COLONIZE_OUTPOST, outpost_tile, "");
+ 					}
+-					service.ColonizeWorld(this->selected_world);
+-					this->SetDirty();
+ 				}
+ 				break;
+ 			}
+ 
+ 			case WID_UD_PROMOTE_BTN: {
+-				if (this->selected_world != INVALID_WORLD) {
++				if (this->selected_world != INVALID_WORLD && Company::IsValidID(_local_company) && PlanetManager::GetRegion(this->selected_world) != nullptr && PlanetManager::CanPromoteWorld(this->selected_world)) {
+ 					Command<Commands::PromoteWorld>::Post(STR_ERROR_CAN_T_PROMOTE_WORLD, this->selected_world);
+-					service.PromoteWorld(this->selected_world);
+-					this->SetDirty();
+ 				}
+ 				break;
+ 			}
+@@ -335,7 +319,7 @@
+ 			}
+ 
+ 			case WID_UD_WORLD_LIST: {
+-				auto worlds = service.GetWorldDirectory();
++				auto worlds = service.GetWorldDirectoryForGUI();
+ 				if (worlds.empty()) return;
+ 
+ 				int row = this->vscroll->GetScrolledRowFromWidget(pt.y, this, WID_UD_WORLD_LIST, WidgetDimensions::scaled.framerect.top);
+diff --git a/src/portal/universe_authority.h b/src/portal/universe_authority.h
+--- a/src/portal/universe_authority.h
++++ b/src/portal/universe_authority.h
+@@ -183,6 +183,10 @@
+ 	size_t PruneStaleWorlds(uint64_t current_tick, uint64_t timeout_ticks = 300);
+ 	std::vector<RegisteredWorld> FindWorldsByPhase(WorldPhase phase) const;
+ 	std::vector<RegisteredWorld> GetWorldDirectory() const;
++	/** Read-only union for GUI; local map phase/name/biome take precedence. */
++	std::vector<RegisteredWorld> GetWorldDirectoryForGUI() const;
++	/** Called by successful world commands after the canonical local region changes. */
++	void SyncLocalWorld(WorldID world_id);
+ 	bool ColonizeWorld(WorldID world_id, const std::string &outpost_name = "");
+ 	bool PromoteWorld(WorldID world_id);
+ 	bool UpdateMegacityStatus(
+diff --git a/src/portal/universe_authority.cpp b/src/portal/universe_authority.cpp
+--- a/src/portal/universe_authority.cpp
++++ b/src/portal/universe_authority.cpp
+@@ -8,6 +8,7 @@
+ #include "../stdafx.h"
+ #include "universe_authority.h"
+ #include "consist_snapshot.h"
++#include "planet_manager.h"
+ 
+ #include <algorithm>
+ #include <iomanip>
+@@ -105,6 +106,48 @@
+ 		result.push_back(world);
+ 	}
+ 	return result;
++}
++
++std::vector<RegisteredWorld> UniverseAuthorityService::GetWorldDirectoryForGUI() const
++{
++	auto result = this->GetWorldDirectory();
++	for (const PlanetRegion &region : PlanetManager::GetAllRegions()) {
++		auto it = std::find_if(result.begin(), result.end(), [&](const RegisteredWorld &world) { return world.world_id == region.id; });
++		if (it == result.end()) {
++			RegisteredWorld world{};
++			world.world_id = region.id;
++			world.address = "Local Node";
++			world.status = WorldOnlineStatus::Online;
++			result.push_back(world);
++			it = std::prev(result.end());
++		}
++		it->phase = region.phase;
++		it->name = region.name;
++		it->biome = region.biome;
++	}
++	std::sort(result.begin(), result.end(), [](const RegisteredWorld &a, const RegisteredWorld &b) { return a.world_id < b.world_id; });
++	return result;
++}
++
++void UniverseAuthorityService::SyncLocalWorld(WorldID world_id)
++{
++	const PlanetRegion *region = PlanetManager::GetRegion(world_id);
++	if (region == nullptr) return;
++	auto it = this->_worlds.find(world_id);
++	if (it == this->_worlds.end()) {
++		RegisteredWorld world{};
++		world.world_id = world_id;
++		world.address = "Local Node";
++		world.status = WorldOnlineStatus::Online;
++		it = this->_worlds.emplace(world_id, std::move(world)).first;
++	}
++	it->second.phase = region->phase;
++	it->second.name = region->name;
++	it->second.biome = region->biome;
++	if (region->phase == WorldPhase::Phase1_Core) {
++		it->second.is_megacity = true;
++		if (it->second.megacity_growth_state.empty()) it->second.megacity_growth_state = "Subsistence";
++	}
+ }
+ 
+ bool UniverseAuthorityService::ColonizeWorld(WorldID world_id, const std::string &outpost_name)
+diff --git a/src/tests/CMakeLists.txt b/src/tests/CMakeLists.txt
+--- a/src/tests/CMakeLists.txt
++++ b/src/tests/CMakeLists.txt
+@@ -3,6 +3,8 @@
+     bitmath_func.cpp
+     enum_over_optimisation.cpp
+     test_error_gui.cpp
++    test_command_authority.cpp
++    test_command_authority_network.cpp
+     flatset_type.cpp
+     history_func.cpp
+     landscape_partial_pixel_z.cpp
+diff --git a/src/tests/test_sprint32_lifecycle_and_tech.cpp b/src/tests/test_sprint32_lifecycle_and_tech.cpp
+--- a/src/tests/test_sprint32_lifecycle_and_tech.cpp
++++ b/src/tests/test_sprint32_lifecycle_and_tech.cpp
+@@ -150,6 +150,10 @@
+ 
+ TEST_CASE("Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating")
+ {
++	(void)MockEnvironment::Instance();
++	_company_pool.CleanPool();
++	Company::CreateAtIndex(CompanyID{0});
++	_current_company = CompanyID{0};
+ 	PlanetManager::Reset();
+ 	UniverseAuthorityService::Instance().Reset();
+ 	Map::Allocate(512, 512);
+diff --git a/src/saveload/planet_sl.cpp b/src/saveload/planet_sl.cpp
+--- a/src/saveload/planet_sl.cpp
++++ b/src/saveload/planet_sl.cpp
+@@ -37,6 +37,7 @@
+ 	uint32_t max_x;
+ 	uint32_t max_y;
+ 	uint32_t development_score;
++	uint32_t outpost_tile = INVALID_TILE.base(); ///< Missing in older named PLNT tables.
+ };
+ 
+ static const SaveLoad _planet_region_desc[] = {
+@@ -49,6 +50,7 @@
+ 	    SLE_VAR(SlPlanetRegion, max_x,             VarTypes::U32),
+ 	    SLE_VAR(SlPlanetRegion, max_y,             VarTypes::U32),
+ 	    SLE_VAR(SlPlanetRegion, development_score, VarTypes::U32),
++	    SLE_VAR(SlPlanetRegion, outpost_tile,      VarTypes::U32),
+ };
+ 
+ /** Chunk handler for planetary worlds (PLNT). */
+@@ -71,6 +73,7 @@
+ 				.max_x = r.max_x,
+ 				.max_y = r.max_y,
+ 				.development_score = r.development_score,
++				.outpost_tile = r.outpost_tile.base(),
+ 			};
+ 			SlSetArrayIndex(i++);
+ 			SlObject(&sl_reg, _planet_region_desc);
+@@ -84,7 +87,7 @@
+ 
+ 		SlPlanetRegion sl_reg{};
+ 		while (SlIterateArray() != -1) {
+-			sl_reg = {};
++			sl_reg = {}; // Restores INVALID_TILE when older PLNT rows omit this named column.
+ 			SlObject(&sl_reg, slt);
+ 			PlanetRegion r{
+ 				.id = WorldID{sl_reg.id},
+@@ -96,6 +99,7 @@
+ 				.max_x = sl_reg.max_x,
+ 				.max_y = sl_reg.max_y,
+ 				.development_score = sl_reg.development_score,
++				.outpost_tile = TileIndex{sl_reg.outpost_tile},
+ 			};
+ 			PlanetManager::RegisterRegion(r);
+ 		}
+diff --git a/src/tests/test_command_authority.cpp b/src/tests/test_command_authority.cpp
+--- /dev/null
++++ b/src/tests/test_command_authority.cpp
+@@ -0,0 +1,338 @@
++/* This file is part of OpenSpaceTTD, licensed under the GNU GPL version 2. */
++
++/** @file test_command_authority.cpp Command and real GUI regressions for WP-05. */
++#include "../stdafx.h"
++#include "../3rdparty/catch2/catch.hpp"
++#include "mock_environment.h"
++#include "../command_func.h"
++#include "../company_base.h"
++#include "../company_func.h"
++#include "../clear_map.h"
++#include "../void_map.h"
++#include "../town.h"
++#include "../town_kdtree.h"
++#include "../station_base.h"
++#include "../station_kdtree.h"
++#include "../vehicle_func.h"
++#include "../vehicle_base.h"
++#include "../engine_func.h"
++#include "../engine_base.h"
++#include "../cargotype.h"
++#include "../industry.h"
++#include "../economy_base.h"
++#include "../gfx_func.h"
++#include "../language.h"
++#include "../genworld.h"
++#include "../strings_func.h"
++#include "../fileio_func.h"
++#include "../saveload/saveload.h"
++#include "../window_gui.h"
++#include "../window_func.h"
++#include "../network/network.h"
++#include "../network/network_internal.h"
++#include "../network/network_func.h"
++#include "../portal/corporate_hq.h"
++#include "../portal/corporate_hq_gui.h"
++#include "../portal/universe_authority.h"
++#include "../portal/universe_directory_gui.h"
++#include "../portal/planet_manager.h"
++#include "../portal/portal_cmd.h"
++#include "../portal/portal_registry.h"
++#include "../portal/megacity_manager.h"
++#include "../portal/logistics_hub.h"
++#include "../portal/company_stockpile.h"
++#include "../portal/production_chain.h"
++#include "../portal/tech_tree.h"
++#include "../portal/fabrication_manager.h"
++#include "../widgets/corporate_hq_widget.h"
++#include "../widgets/universe_directory_widget.h"
++#include "../table/strings.h"
++#include "../table/sprites.h"
++#include <filesystem>
++#include <chrono>
++#include <sstream>
++
++#include "../safeguards.h"
++
++/** Shared by isolated network workers; all persistent state is real engine state. */
++void SetupCommandAuthorityWorld(WorldPhase phase, uint32_t score)
++{
++	(void)MockEnvironment::Instance();
++	if (_current_language == nullptr) {
++		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
++		auto paths = _valid_searchpaths;
++		auto binary = _searchpaths[Searchpath::BinaryDir];
++		_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
++		_valid_searchpaths = {Searchpath::BinaryDir};
++		InitializeLanguagePacks();
++		_valid_searchpaths = std::move(paths);
++		_searchpaths[Searchpath::BinaryDir] = std::move(binary);
++	}
++	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
++	UnInitWindowSystem();
++	_networking = _network_server = false;
++	NetworkFreeLocalCommandQueue();
++	PlanetManager::Reset();
++	CorporateHQManager::Reset();
++	UniverseAuthorityService::Instance().Reset();
++	MegacityManager::Reset();
++	PortalRegistry::Reset();
++	LogisticsHubManager::Reset();
++	StockpileManager::Reset();
++	ProductionChainManager::Reset();
++	TechTreeManager::Reset();
++	FabricationManager::Reset();
++	_cargo_payment_pool.CleanPool();
++	_vehicle_pool.CleanPool();
++	ResetVehicleHash();
++	_station_pool.CleanPool();
++	_industry_pool.CleanPool();
++	_town_pool.CleanPool();
++	_company_pool.CleanPool();
++	_cargopacket_pool.CleanPool();
++	Map::Allocate(64, 64);
++	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
++		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
++		else MakeVoid(tile);
++	}
++	SetupCargoForClimate(LandscapeType::Temperate);
++	_engine_mngr.ResetToDefaultMapping();
++	SetupEngines();
++	for (uint8_t id = 0; id < 2; ++id) {
++		Company *company = Company::CreateAtIndex(CompanyID{id});
++		company->money = 10000000;
++		company->name = id == 0 ? "Authority owner" : "Other company";
++	}
++	_current_company = _local_company = CompanyID{0};
++	_game_mode = GameMode::Normal;
++	_pause_mode = {};
++	_generating_world = false;
++	_settings_client.network.commands_per_frame = 16;
++	_settings_client.network.commands_per_frame_server = 16;
++	_price[Price::BuildTown] = 1000;
++	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{0}, .name = "Authority world", .phase = phase,
++		.biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1, .max_x = 62, .max_y = 62, .development_score = score}));
++	REQUIRE(Town::CanAllocateItem());
++	Town *town = Town::Create(TileXY(10, 10));
++	// An existing initialized settlement isolates WP-05 from the separate WP-08 town creation repair.
++	town->name = "Authority settlement";
++	town->townnametype = SPECSTR_TOWNNAME_START;
++	RebuildTownKdtree();
++	RebuildStationKdtree();
++	REQUIRE(CorporateHQManager::RegisterHQ(CompanyID{0}, WorldID{0}, TileXY(20, 20), "Authority HQ"));
++	_screen.width = _screen.pitch = 1024;
++	_screen.height = 768;
++	ScreenSizeChanged();
++	InitWindowSystem();
++	if (_valid_searchpaths.empty()) _valid_searchpaths.push_back(Searchpath::WorkingDir);
++}
++
++/** Compact canonical comparison, deliberately excluding transient window/connectivity data. */
++std::string CommandAuthorityState()
++{
++	std::ostringstream out;
++	for (const Company *company : Company::Iterate()) out << "company:" << static_cast<int>(company->index.base()) << ':' << company->money << ';';
++	for (const auto &hq : CorporateHQManager::GetAllHQ()) out << "hq:" << static_cast<int>(hq.company_id.base()) << ':' << static_cast<int>(hq.tier) << ':' << hq.campus_name << ';';
++	for (const auto &world : PlanetManager::GetAllRegions()) out << "world:" << world.id.base() << ':' << static_cast<int>(world.phase) << ':' << world.development_score << ':' << world.name << ':' << world.outpost_tile.base() << ';';
++	for (const auto &world : UniverseAuthorityService::Instance().GetWorldDirectoryForGUI()) out << "directory:" << world.world_id.base() << ':' << static_cast<int>(world.phase) << ':' << world.name << ';';
++	out << "towns:" << Town::GetNumItems();
++	return out.str();
++}
++
++void SaveReloadCommandAuthority()
++{
++	UnInitWindowSystem();
++	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-{}", std::chrono::steady_clock::now().time_since_epoch().count());
++	REQUIRE(std::filesystem::create_directory(dir));
++	const auto path = (dir / "authority.sav").string();
++	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
++	// Registry is transient: local display must derive from the restored canonical world.
++	UniverseAuthorityService::Instance().Reset();
++	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
++	std::filesystem::remove(path);
++	std::filesystem::remove(dir);
++}
++
++TEST_CASE("Command authority - HQ rejects foreign invalid and stale tier requests", "[command-authority]")
++{
++	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
++	CompanyID company{0};
++	CorporateHQTier target = CorporateHQTier::PlanetaryHQ;
++	SECTION("Foreign HQ") { _current_company = CompanyID{1}; }
++	SECTION("Invalid company") { company = CompanyID::Invalid(); }
++	SECTION("Spectator") { _current_company = COMPANY_SPECTATOR; }
++	SECTION("Absent HQ") { CorporateHQManager::Reset(); }
++	SECTION("Invalid target") { target = static_cast<CorporateHQTier>(255); }
++	SECTION("Skip tier") { target = CorporateHQTier::CST_Arcology; }
++	SECTION("Same tier") { target = CorporateHQTier::RegionalBranch; }
++	SECTION("Malformed saved tier") {
++		auto hq = *CorporateHQManager::GetHQ(company);
++		hq.tier = static_cast<CorporateHQTier>(0);
++		CorporateHQManager::RestoreHQ(hq);
++	}
++	SECTION("Already maximum") {
++		auto hq = *CorporateHQManager::GetHQ(company);
++		hq.tier = CorporateHQTier::CST_Arcology;
++		CorporateHQManager::RestoreHQ(hq);
++	}
++	const auto before = CommandAuthorityState();
++	CHECK(Command<Commands::UpgradeCorporateHQ>::Do({}, company, target).Failed());
++	CHECK(CommandAuthorityState() == before);
++	CHECK(Command<Commands::UpgradeCorporateHQ>::Do(DoCommandFlag::Execute, company, target).Failed());
++	CHECK(CommandAuthorityState() == before);
++}
++
++TEST_CASE("Command authority - HQ advances once per requested tier and persists", "[command-authority]")
++{
++	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
++	Company::Get(CompanyID{0})->money = 0; // Existing upgrades have no fee; WP-05 does not add one.
++	for (auto tier : {CorporateHQTier::PlanetaryHQ, CorporateHQTier::Interstellar, CorporateHQTier::CST_Arcology}) {
++		const auto before = CommandAuthorityState();
++		auto query = Command<Commands::UpgradeCorporateHQ>::Do({}, CompanyID{0}, tier);
++		REQUIRE(query.Succeeded());
++		CHECK(query.GetCost() == 0);
++		CHECK(CommandAuthorityState() == before);
++		REQUIRE(Command<Commands::UpgradeCorporateHQ>::Post(CompanyID{0}, tier));
++		CHECK(CorporateHQManager::GetHQ(CompanyID{0})->tier == tier);
++		CHECK(Company::Get(CompanyID{0})->money == 0);
++		const auto after = CommandAuthorityState();
++		CHECK_FALSE(Command<Commands::UpgradeCorporateHQ>::Post(CompanyID{0}, tier));
++		CHECK(CommandAuthorityState() == after);
++	}
++	const auto before = CommandAuthorityState();
++	SaveReloadCommandAuthority();
++	CHECK(CommandAuthorityState() == before);
++}
++
++TEST_CASE("Command authority - world commands preserve state on denial and charge once on success", "[command-authority]")
++{
++	const bool colony = GENERATE(false, true);
++	SetupCommandAuthorityWorld(colony ? WorldPhase::Phase4_Expansion : WorldPhase::Phase3_Frontier, colony ? 0 : 2100);
++	WorldID world{0};
++	TileIndex tile = TileXY(20, 20);
++	bool succeeds = false;
++	SECTION("Unaffordable") { Company::Get(CompanyID{0})->money = 0; }
++	SECTION("Invalid destination") { world = WorldID{100}; tile = INVALID_TILE; }
++	SECTION("Wrong phase or insufficient development") {
++		SetupCommandAuthorityWorld(WorldPhase::Phase3_Frontier, 0);
++	}
++	SECTION("Spectator") { _current_company = _local_company = COMPANY_SPECTATOR; }
++	SECTION("Ready and affordable") { succeeds = true; }
++	const auto before = CommandAuthorityState();
++	const auto query = colony ? Command<Commands::ColonizeOutpost>::Do({}, tile, "Authority colony") : Command<Commands::PromoteWorld>::Do({}, world);
++	CHECK(query.Succeeded() == succeeds);
++	CHECK(CommandAuthorityState() == before);
++	const bool posted = colony ? Command<Commands::ColonizeOutpost>::Post(tile, "Authority colony") : Command<Commands::PromoteWorld>::Post(world);
++	CHECK(posted == succeeds);
++	if (!succeeds) {
++		CHECK(CommandAuthorityState() == before);
++	} else {
++		CHECK(Company::Get(CompanyID{0})->money == 10000000 - (colony ? 5000 : 8000));
++		CHECK(PlanetManager::GetRegion(world)->phase == (colony ? WorldPhase::Phase3_Frontier : WorldPhase::Phase2_Developed));
++		CHECK(PlanetManager::GetRegion(world)->development_score == (colony ? 100 : 2350));
++		REQUIRE(UniverseAuthorityService::Instance().GetWorld(world) != nullptr);
++		CHECK(UniverseAuthorityService::Instance().GetWorld(world)->phase == PlanetManager::GetRegion(world)->phase);
++		const auto after = CommandAuthorityState();
++		CHECK_FALSE((colony ? Command<Commands::ColonizeOutpost>::Post(tile, "Authority colony") : Command<Commands::PromoteWorld>::Post(world)));
++		CHECK(CommandAuthorityState() == after);
++		SaveReloadCommandAuthority();
++		CHECK(CommandAuthorityState() == after);
++	}
++}
++
++static void ExecuteAuthorityQueue()
++{
++	_settings_client.network.commands_per_frame = 16;
++	_settings_client.network.commands_per_frame_server = 16;
++	NetworkDistributeCommands();
++	_frame_counter = _frame_counter_max + 1;
++	NetworkExecuteLocalCommandQueue();
++}
++
++TEST_CASE("Command authority - actual HQ GUI queues an upgrade without local mutation", "[command-authority][gui]")
++{
++	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
++	AutoRestoreBackup networking(_networking, true);
++	AutoRestoreBackup server(_network_server, true);
++	ShowCorporateHQ(CompanyID{0});
++	Window *window = FindWindowById(WindowClass::CorporateHQ, 0);
++	REQUIRE(window != nullptr);
++	const auto before = CommandAuthorityState();
++	window->OnClick({}, WID_CHQ_UPGRADE, 1);
++	window->OnClick({}, WID_CHQ_UPGRADE, 1); // Two pending clicks carry the same target tier.
++	CHECK(CommandAuthorityState() == before);
++	ExecuteAuthorityQueue();
++	CHECK(CorporateHQManager::GetHQ(CompanyID{0})->tier == CorporateHQTier::PlanetaryHQ);
++	NetworkFreeLocalCommandQueue();
++	UnInitWindowSystem();
++}
++
++TEST_CASE("Command authority - foreign HQ window never upgrades either company", "[command-authority][gui]")
++{
++	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
++	REQUIRE(CorporateHQManager::RegisterHQ(CompanyID{1}, WorldID{0}, TileXY(21, 20), "Other HQ"));
++	_current_company = _local_company = CompanyID{1};
++	ShowCorporateHQ(CompanyID{0}); // Company zero must not be mistaken for 'use local company'.
++	Window *window = FindWindowById(WindowClass::CorporateHQ, 0);
++	REQUIRE(window != nullptr);
++	const auto before = CommandAuthorityState();
++	window->OnClick({}, WID_CHQ_UPGRADE, 1);
++	CHECK(CommandAuthorityState() == before);
++	window->OnClick({}, WID_CHQ_TECH_BUDGET_BTN, 1);
++	window->OnClick({}, WID_CHQ_TECH_RESEARCH_BTN, 1);
++	window->OnClick({}, WID_CHQ_FABRICATION_TOGGLE, 1);
++	for (CompanyID company : {CompanyID{0}, CompanyID{1}}) {
++		CHECK(TechTreeManager::GetMonthlyBudget(company) == 0);
++		CHECK_FALSE(FabricationManager::IsFabricateFromStockpileEnabled(company));
++	}
++	UnInitWindowSystem();
++}
++
++TEST_CASE("Command authority - actual Directory GUI observes successful queued commands only", "[command-authority][gui]")
++{
++	const bool colony = GENERATE(false, true);
++	SetupCommandAuthorityWorld(colony ? WorldPhase::Phase4_Expansion : WorldPhase::Phase3_Frontier, colony ? 0 : 2100);
++	const bool affordable = GENERATE(false, true);
++	if (!affordable) Company::Get(CompanyID{0})->money = 0;
++	AutoRestoreBackup networking(_networking, true);
++	AutoRestoreBackup server(_network_server, true);
++	const auto before = CommandAuthorityState();
++	ShowUniverseDirectory();
++	Window *window = FindWindowById(WindowClass::UniverseDirectory, 0);
++	REQUIRE(window != nullptr);
++	CHECK(UniverseAuthorityService::Instance().GetWorldDirectory().empty());
++	window->OnClick({}, WID_UD_REFRESH, 1);
++	window->OnClick({}, colony ? WID_UD_COLONIZE_BTN : WID_UD_PROMOTE_BTN, 1);
++	CHECK(CommandAuthorityState() == before);
++	CHECK(UniverseAuthorityService::Instance().GetWorldDirectory().empty());
++	ExecuteAuthorityQueue();
++	if (affordable) {
++		CHECK(PlanetManager::GetRegion(WorldID{0})->phase == (colony ? WorldPhase::Phase3_Frontier : WorldPhase::Phase2_Developed));
++		CHECK(UniverseAuthorityService::Instance().GetWorld(WorldID{0})->phase == PlanetManager::GetRegion(WorldID{0})->phase);
++	} else {
++		CHECK(CommandAuthorityState() == before);
++	}
++	NetworkFreeLocalCommandQueue();
++	UnInitWindowSystem();
++}
++
++TEST_CASE("Command authority - directory projection is read only and canonical despite stale metadata", "[command-authority]")
++{
++	SetupCommandAuthorityWorld(WorldPhase::Phase3_Frontier, 2100);
++	auto &service = UniverseAuthorityService::Instance();
++	REQUIRE(service.RegisterWorld({.world_id = WorldID{0}, .phase = WorldPhase::Phase1_Core,
++		.name = "Stale name", .address = "Local connection", .description = "Local telemetry", .active_clients = 7}));
++	REQUIRE(service.RegisterWorld({.world_id = WorldID{99}, .phase = WorldPhase::Phase4_Expansion,
++		.name = "Remote only", .address = "Remote node", .description = "Remote telemetry"}));
++	const auto worlds = service.GetWorldDirectoryForGUI();
++	REQUIRE(worlds.size() == 2);
++	CHECK(worlds[0].phase == WorldPhase::Phase3_Frontier);
++	CHECK(worlds[0].name == "Authority world");
++	CHECK(worlds[0].active_clients == 7);
++	CHECK(worlds[1].name == "Remote only");
++	CHECK(service.GetWorld(WorldID{0})->phase == WorldPhase::Phase1_Core);
++	REQUIRE(Command<Commands::PromoteWorld>::Post(WorldID{0}));
++	CHECK(service.GetWorld(WorldID{0})->phase == WorldPhase::Phase2_Developed);
++	CHECK(service.GetWorld(WorldID{0})->active_clients == 7);
++	CHECK(service.GetWorld(WorldID{99})->phase == WorldPhase::Phase4_Expansion);
++}
+diff --git a/src/tests/test_command_authority_network.cpp b/src/tests/test_command_authority_network.cpp
+--- /dev/null
++++ b/src/tests/test_command_authority_network.cpp
+@@ -0,0 +1,217 @@
++/* This file is part of OpenSpaceTTD, licensed under the GNU GPL version 2. */
++/** @file test_command_authority_network.cpp Independent-process replication fixture for WP-05. */
++#include "../stdafx.h"
++#include "../3rdparty/catch2/catch.hpp"
++#include "../command_func.h"
++#include "../company_func.h"
++#include "../company_base.h"
++#include "../network/network.h"
++#include "../network/network_client.h"
++#include "../network/network_internal.h"
++#include "../network/core/packet.h"
++#include "../portal/portal_cmd.h"
++#include "../portal/corporate_hq.h"
++#include "mock_environment.h"
++
++#include <array>
++#include <cstdlib>
++#include <stdexcept>
++#include <string>
++#ifndef _WIN32
++#include <sys/socket.h>
++#include <unistd.h>
++#endif
++
++/* Shared with the local authority tests; each process starts from the same real engine fixture. */
++extern void SetupCommandAuthorityWorld(WorldPhase phase, uint32_t score);
++extern std::string CommandAuthorityState();
++extern void SaveReloadCommandAuthority();
++
++namespace {
++#ifndef _WIN32
++constexpr size_t MAX_MESSAGE = 65536;
++
++void ReadExact(int fd, void *dst, size_t count)
++{
++	auto *p = static_cast<uint8_t *>(dst);
++	while (count != 0) {
++		ssize_t n = recv(fd, p, count, 0);
++		if (n <= 0) throw std::runtime_error("loopback peer closed");
++		p += n;
++		count -= n;
++	}
++}
++
++void WriteExact(int fd, const void *src, size_t count)
++{
++	const auto *p = static_cast<const uint8_t *>(src);
++	while (count != 0) {
++		ssize_t n = send(fd, p, count, MSG_NOSIGNAL);
++		if (n <= 0) throw std::runtime_error("loopback peer closed");
++		p += n;
++		count -= n;
++	}
++}
++
++std::pair<char, std::vector<uint8_t>> ReadMessage(int fd)
++{
++	std::array<uint8_t, 5> header{};
++	ReadExact(fd, header.data(), header.size());
++	uint32_t size = uint32_t(header[1]) | (uint32_t(header[2]) << 8) | (uint32_t(header[3]) << 16) | (uint32_t(header[4]) << 24);
++	if (size > MAX_MESSAGE) throw std::runtime_error("oversized loopback message");
++	std::vector<uint8_t> data(size);
++	if (size != 0) ReadExact(fd, data.data(), size);
++	return {static_cast<char>(header[0]), std::move(data)};
++}
++
++void WriteMessage(int fd, char op, std::span<const uint8_t> data = {})
++{
++	uint32_t size = static_cast<uint32_t>(data.size());
++	std::array<uint8_t, 5> header{static_cast<uint8_t>(op), static_cast<uint8_t>(size), static_cast<uint8_t>(size >> 8), static_cast<uint8_t>(size >> 16), static_cast<uint8_t>(size >> 24)};
++	WriteExact(fd, header.data(), header.size());
++	if (!data.empty()) WriteExact(fd, data.data(), data.size());
++}
++
++void WriteState(int fd)
++{
++	std::string state = CommandAuthorityState();
++	WriteMessage(fd, 'S', std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(state.data()), state.size()));
++}
++
++std::vector<uint8_t> WirePacket(NetworkGameSocketHandler &handler, const CommandPacket &cp)
++{
++	Packet packet(nullptr, PacketGameType::ClientCommand);
++	handler.SendCommand(packet, cp);
++	packet.PrepareToSend();
++	std::vector<uint8_t> bytes(packet.Size());
++	size_t offset = 0;
++	while (offset < bytes.size()) {
++		ssize_t n = packet.TransferOut([&](std::span<const uint8_t> part) -> ssize_t {
++			std::copy(part.begin(), part.end(), bytes.begin() + offset);
++			return part.size();
++		});
++		if (n <= 0) throw std::runtime_error("packet export failed");
++		offset += n;
++	}
++	return bytes;
++}
++
++CommandPacket ParseWirePacket(NetworkGameSocketHandler &handler, std::span<const uint8_t> bytes)
++{
++	if (bytes.size() < 3 || bytes.size() > MAX_MESSAGE) throw std::runtime_error("invalid game packet length");
++	Packet packet(&handler, bytes.size());
++	size_t offset = 0;
++	auto transfer = [&](std::span<uint8_t> part) -> ssize_t {
++		std::copy_n(bytes.begin() + offset, part.size(), part.begin());
++		offset += part.size();
++		return part.size();
++	};
++	if (packet.TransferIn(transfer) != 2 || !packet.ParsePacketSize() || packet.Size() != bytes.size()) throw std::runtime_error("invalid game packet header");
++	while (offset < bytes.size()) if (packet.TransferIn(transfer) <= 0) throw std::runtime_error("truncated game packet");
++	if (!packet.PrepareToRead() || packet.Recv_uint8() != to_underlying(PacketGameType::ClientCommand)) throw std::runtime_error("wrong game packet type");
++	CommandPacket cp;
++	if (auto error = handler.ReceiveCommand(packet, cp)) throw std::runtime_error(std::string(*error));
++	return cp;
++}
++
++CommandPacket MakeCommand(char op)
++{
++	CommandPacket cp;
++	cp.company = CompanyID{0};
++	cp.err_msg = StringID{0};
++	cp.callback = nullptr;
++	switch (op) {
++		case 'U':
++			cp.cmd = Commands::UpgradeCorporateHQ;
++			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(CompanyID{0}, CorporateHQTier::PlanetaryHQ));
++			break;
++		case 'D':
++			cp.cmd = Commands::UpgradeCorporateHQ;
++			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(CompanyID{1}, CorporateHQTier::PlanetaryHQ));
++			break;
++		case 'I':
++			cp.cmd = Commands::UpgradeCorporateHQ;
++			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(CompanyID{0}, static_cast<CorporateHQTier>(255)));
++			break;
++		case 'C':
++			cp.cmd = Commands::ColonizeOutpost;
++			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(TileXY(20, 20), std::string("Relay Outpost")));
++			break;
++		case 'P':
++			cp.cmd = Commands::PromoteWorld;
++			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(WorldID{0}));
++			break;
++		case 'V':
++			cp.cmd = Commands::PromoteWorld;
++			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(WorldID{250}));
++			break;
++		default: throw std::runtime_error("unknown command request");
++	}
++	return cp;
++}
++#endif
++}
++
++TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]")
++{
++#ifdef _WIN32
++	SUCCEED("POSIX TCP worker is exercised by the Python relay on supported hosts");
++#else
++	const char *fd_env = std::getenv("OSTTD_AUTHORITY_LOOPBACK_FD");
++	if (fd_env == nullptr) return; // Ordinary suite does not start the worker protocol.
++	int fd = std::atoi(fd_env);
++	REQUIRE(fd >= 3);
++	(void)MockEnvironment::Instance();
++	SetupCommandAuthorityWorld(WorldPhase::Phase4_Expansion, 10000);
++	_networking = true;
++	const char *role = std::getenv("OSTTD_AUTHORITY_LOOPBACK_ROLE");
++	const bool server = role != nullptr && std::string_view(role) == "server";
++	_network_server = server;
++	_local_company = CompanyID{0};
++	_current_company = _local_company;
++	_frame_counter = 0;
++	_frame_counter_max = 0;
++	ClientNetworkGameSocketHandler handler(INVALID_SOCKET, "loopback-test");
++	WriteState(fd);
++	for (;;) {
++		auto [op, payload] = ReadMessage(fd);
++		if (op == 'Z') break;
++		if (op == 'S') { WriteState(fd); continue; }
++		if (op == 'R') { SaveReloadCommandAuthority(); WriteState(fd); continue; }
++		if (op == 'L' || op == 'H') {
++			Company::Get(CompanyID{0})->money = op == 'L' ? 0 : 10000000;
++			WriteState(fd);
++			continue;
++		}
++		if (op == 'B') {
++			CommandPacket cp = ParseWirePacket(handler, payload);
++			if (server) {
++				/* The server accepts the sanitized packet, schedules and distributes it
++				 * through the engine's server command queues, then executes frame N. */
++				_frame_counter_max = _frame_counter;
++				NetworkSendCommand(cp.cmd, cp.err_msg, nullptr, cp.company, cp.data);
++				NetworkDistributeCommands();
++				++_frame_counter;
++				NetworkExecuteLocalCommandQueue();
++				/* Forward the canonical, sanitized command payload to the two clients. */
++				auto canonical = WirePacket(handler, cp);
++				WriteMessage(fd, 'W', canonical);
++			} else {
++				cp.frame = ++_frame_counter;
++				cp.my_cmd = false;
++				handler.incoming_queue.push_back(std::move(cp));
++				NetworkExecuteLocalCommandQueue();
++			}
++			WriteState(fd);
++			continue;
++		}
++		if (op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V') {
++			auto bytes = WirePacket(handler, MakeCommand(op));
++			WriteMessage(fd, 'K', bytes);
++			continue;
++		}
++		throw std::runtime_error("unknown loopback operation");
++	}
++	close(fd);
++#endif
++}
+diff --git a/scripts/test_command_authority_network.py b/scripts/test_command_authority_network.py
+--- /dev/null
++++ b/scripts/test_command_authority_network.py
+@@ -0,0 +1,186 @@
++#!/usr/bin/env python3
++"""WP-05: three independent engine workers, native command packets over TCP loopback.
++
++This exercises game command serialization, sanitizing receive, and the native
++server and client execution queues. It does not exercise the join/map-transfer handshake.
++"""
++
++import argparse
++import os
++import socket
++import struct
++import subprocess
++import sys
++
++CASE = "WP-05 isolated loopback command worker"
++LIMIT = 65536
++
++
++def exact(sock, count):
++    out = bytearray()
++    while len(out) < count:
++        part = sock.recv(count - len(out))
++        if not part:
++            raise RuntimeError("worker closed loopback socket")
++        out.extend(part)
++    return bytes(out)
++
++
++def send(sock, op, payload=b""):
++    sock.sendall(op.encode("ascii") + struct.pack("<I", len(payload)) + payload)
++
++
++def receive(sock, expected):
++    header = exact(sock, 5)
++    op = chr(header[0])
++    size = struct.unpack("<I", header[1:])[0]
++    if size > LIMIT or op != expected:
++        raise RuntimeError(f"expected {expected}, received {op} with {size} bytes")
++    return exact(sock, size)
++
++
++def assert_equal(states, label):
++    if len(set(states)) != 1:
++        raise AssertionError(f"{label}: server and clients diverged: {states!r}")
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("test_binary", help="built openttd_test executable")
++    args = parser.parse_args()
++    workers = []
++    sockets = []
++    try:
++        for role in ("server", "client1", "client2"):
++            listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++            listener.bind(("127.0.0.1", 0))
++            listener.listen(1)
++            parent = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++            parent.connect(listener.getsockname())
++            child, _ = listener.accept()
++            listener.close()
++            parent.settimeout(15)
++            env = os.environ.copy()
++            env["OSTTD_AUTHORITY_LOOPBACK_FD"] = str(child.fileno())
++            env["OSTTD_AUTHORITY_LOOPBACK_ROLE"] = role
++            process = subprocess.Popen(
++                [args.test_binary, CASE],
++                env=env,
++                pass_fds=(child.fileno(),),
++                stdout=subprocess.PIPE,
++                stderr=subprocess.STDOUT,
++                text=True,
++            )
++            child.close()
++            workers.append(process)
++            sockets.append(parent)
++
++        states = [receive(sock, "S") for sock in sockets]
++        assert_equal(states, "initial fixture")
++        baseline = states[0]
++        changed = 0
++
++        for origin, command, success in (
++            (1, "D", False),  # company 0 attempts company 1 HQ
++            (1, "I", False),  # invalid HQ tier
++            (1, "U", True),   # one HQ tier
++            (2, "C", False),  # insufficient company funds; money lowered below
++            (2, "C", True),   # colony and canonical directory
++            (1, "P", True),   # one world phase promotion
++            (2, "U", False),  # duplicate HQ target
++            (1, "C", False),  # already colonized world
++            (2, "V", False),  # unknown world
++        ):
++            if command == "C" and not success and states[0] != baseline and changed == 1:
++                # Set the same low cash balance in all independent fixtures.
++                for sock in sockets:
++                    send(sock, "L")
++                states = [receive(sock, "S") for sock in sockets]
++                assert_equal(states, "low funds setup")
++            if command == "C" and success:
++                for sock in sockets:
++                    send(sock, "H")
++                states = [receive(sock, "S") for sock in sockets]
++                assert_equal(states, "funds restored")
++            before = states[0]
++            send(sockets[origin], command)
++            packet = receive(sockets[origin], "K")
++            if not packet or packet[0:2] != struct.pack("<H", len(packet)):
++                raise AssertionError("origin did not serialize a native game packet")
++            # The command has left its origin, but no worker may have applied it yet.
++            for sock in sockets:
++                send(sock, "S")
++            states = [receive(sock, "S") for sock in sockets]
++            assert_equal(states, f"pre-broadcast {command}")
++            if states[0] != before:
++                raise AssertionError(f"origin eagerly mutated on {command}")
++
++            # The server accepts and sanitizes the originating packet, schedules
++            # it through NetworkSendCommand/NetworkDistributeCommands, executes
++            # its native server queue, then returns the canonical payload.
++            send(sockets[0], "B", packet)
++            canonical = receive(sockets[0], "W")
++            server_state = receive(sockets[0], "S")
++            for sock in sockets[1:]:
++                send(sock, "B", canonical)
++            states = [server_state] + [receive(sock, "S") for sock in sockets[1:]]
++            assert_equal(states, f"post-broadcast {command}")
++            if success and states[0] == before:
++                raise AssertionError(f"successful {command} made no state change")
++            if not success and states[0] != before:
++                raise AssertionError(f"denied {command} changed state")
++            state = states[0].decode("utf-8")
++            if success:
++                required = {
++                    "U": ("hq:0:2:Authority HQ;", "company:0:10000000;"),
++                    "C": ("world:0:3:10100:Relay Outpost:", "company:0:9995000;"),
++                    "P": ("world:0:2:10350:Relay Outpost:", "company:0:9987000;"),
++                }[command]
++                if any(value not in state for value in required):
++                    raise AssertionError(f"{command} did not apply exactly one expected change: {state}")
++            changed += int(states[0] != before)
++            print(f"{command}: {'accepted' if success else 'denied'}; frame state {states[0].decode('utf-8', 'replace')}")
++
++        if changed != 3 or states[0] == baseline:
++            raise AssertionError("expected exactly HQ upgrade, colonization, promotion")
++
++        for sock in sockets:
++            send(sock, "R")
++        reloaded = [receive(sock, "S") for sock in sockets]
++        assert_equal(reloaded, "save/reload")
++        if reloaded[0] != states[0]:
++            raise AssertionError("save/reload changed canonical authority state")
++
++        for sock in sockets:
++            send(sock, "Z")
++        for role, process in zip(("server", "client1", "client2"), workers):
++            output, _ = process.communicate(timeout=15)
++            if process.returncode != 0:
++                raise RuntimeError(f"{role} failed ({process.returncode}):\n{output}")
++        print(f"save/reload: {reloaded[0].decode('utf-8', 'replace')}")
++        print("WP-05 TCP loopback: native server queue and two independent client queues, denial, save/reload equality PASS")
++    finally:
++        for sock in sockets:
++            sock.close()
++        for process in workers:
++            if process.poll() is None:
++                process.terminate()
++                try:
++                    output, _ = process.communicate(timeout=5)
++                except subprocess.TimeoutExpired:
++                    process.kill()
++                    output, _ = process.communicate()
++                if output:
++                    print(f"interrupted worker output:\n{output[-10000:]}", file=sys.stderr)
++            elif process.stdout is not None and not process.stdout.closed:
++                remaining = process.stdout.read()
++                if remaining and process.returncode != 0:
++                    print(f"worker output:\n{remaining}", file=sys.stderr)
++
++
++if __name__ == "__main__":
++    try:
++        main()
++    except Exception as exc:
++        print(f"WP-05 loopback FAIL: {exc}", file=sys.stderr)
++        sys.exit(1)

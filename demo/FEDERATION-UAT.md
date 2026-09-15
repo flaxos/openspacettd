@@ -1,5 +1,10 @@
 # Sprint 29 Federation UAT: Protocol and Cluster-Supervisor Guide
 
+> **Recovery qualification:** [Master plan](../docs/RECOVERY_PLAN_2026-09-15.md),
+> OST-FED-001/003 and UAT-16 govern current acceptance. Native external entry is
+> source-confirmed blocked; full physical custody/order/recovery fixture is pending.
+> This guide retains protocol/operator procedures, not player-route proof.
+
 Current qualification: see UAT-16 in [the player checklist](ALL-FEATURES-UAT.md).
 The Sprint 35 runner manually dispatches both directions. Record natural entry,
 exact arrival, visible cargo/consist, return orders, mismatch, obstruction,
@@ -10,7 +15,7 @@ This historical protocol guide and the solo save cannot establish those passes.
 **Target:** Universe Authority protocol plus cluster process supervision  
 **Supervisors & Runners:** `scripts/run_acceptance_kit.sh`, `scripts/run_cluster.py`  
 
-> **Evidence boundary:** The automated runner starts the Python Universe Authority and drives world registration, transfer, congestion, recovery and ledger endpoints directly. It does not launch trains inside independent OpenSpaceTTD game processes. `run_cluster.py` can launch three dedicated game processes, but the documented manual HTTP lifecycle is not proof of an engine-driven cross-process handoff. That work is planned for Sprint 35.
+> **Evidence boundary:** The automated runner starts the Python Universe Authority and drives world registration, transfer, congestion, recovery and ledger endpoints directly. It does not launch trains inside independent OpenSpaceTTD game processes. `run_cluster.py` can launch three dedicated game processes, but the documented manual HTTP lifecycle is not proof of an engine-driven cross-process handoff. Sprint 35 later delivered transport and a manual-dispatch process runner; natural entry and recovery remain unaccepted.
 
 ---
 
@@ -43,17 +48,22 @@ For an operator inspecting the supervisor and authority against running server p
 
 ### Step 1: Launch Federation Cluster with Persistent Authority
 
-Start the 3-node world cluster and Universe Authority daemon:
+Operator-only synthetic fixture: create a new `/tmp/openspace-federation-uat/`
+directory first, check configured ports are unused, and preserve any existing state.
+The following bounded command uses current config port38080; it does not create
+the full F1 natural train/cargo/order acceptance fixture. Start the 3-node world
+cluster and Universe Authority daemon:
 
 ```bash
 # Terminal 1: Launch cluster supervisor with state persistence
 python3 scripts/run_cluster.py \
   --config config/cluster.json \
-  --state-file demo/authority_state.json
+  --state-file /tmp/openspace-federation-uat/authority_state.json \
+  --duration 300
 ```
 
 Verify the supervisor output:
-- Universe Authority online on `http://127.0.0.1:8080`
+- Universe Authority online on `http://127.0.0.1:38080`
 - World 1 (Earth Core) online on port `3979`
 - World 2 (Vulcan Forge) online on port `3980`
 - World 3 (Haven Rim) online on port `3981`
@@ -65,10 +75,10 @@ In another terminal, query the directory:
 
 ```bash
 # Query all registered worlds
-curl -s http://127.0.0.1:8080/directory | jq .
+curl -s http://127.0.0.1:38080/directory | jq .
 
 # Query developed and frontier worlds only (min_phase=2)
-curl -s "http://127.0.0.1:8080/directory?min_phase=2" | jq .
+curl -s "http://127.0.0.1:38080/directory?min_phase=2" | jq .
 ```
 
 Confirm that Earth Core (Phase 1), Vulcan Forge (Phase 2), and Haven Rim (Phase 3) report status `ONLINE` with active heartbeat timestamps.
@@ -78,7 +88,7 @@ Confirm that Earth Core (Phase 1), Vulcan Forge (Phase 2), and Haven Rim (Phase 
 Initiate a test transfer from World 3 to World 2 with a portable order itinerary:
 
 ```bash
-curl -X POST http://127.0.0.1:8080/transfers/initiate \
+curl -X POST http://127.0.0.1:38080/transfers/initiate \
   -H "Content-Type: application/json" \
   -d '{
     "source_world": 3,
@@ -101,17 +111,17 @@ Take the returned `transfer_id` (e.g. `TRANSFER-X000000001`):
 
 ```bash
 # Depart transfer into corridor wormhole
-curl -X POST http://127.0.0.1:8080/transfers/depart \
+curl -X POST http://127.0.0.1:38080/transfers/depart \
   -H "Content-Type: application/json" \
   -d '{"transfer_id": "TRANSFER-X000000001"}' | jq .
 
 # World 2 claims transfer
-curl -X POST http://127.0.0.1:8080/transfers/claim \
+curl -X POST http://127.0.0.1:38080/transfers/claim \
   -H "Content-Type: application/json" \
   -d '{"transfer_id": "TRANSFER-X000000001", "dest_world": 2}' | jq .
 
 # World 2 confirms arrival and materialization
-curl -X POST http://127.0.0.1:8080/transfers/confirm \
+curl -X POST http://127.0.0.1:38080/transfers/confirm \
   -H "Content-Type: application/json" \
   -d '{"transfer_id": "TRANSFER-X000000001", "dest_world": 2, "success": true}' | jq .
 ```
@@ -123,7 +133,7 @@ Observe that `current_order_index` has advanced from `0` to `1`.
 Attempt to inject an incompatible NewGRF token:
 
 ```bash
-curl -X POST http://127.0.0.1:8080/transfers/initiate \
+curl -X POST http://127.0.0.1:38080/transfers/initiate \
   -H "Content-Type: application/json" \
   -d '{
     "source_world": 3,
@@ -142,7 +152,7 @@ Verify response:
 
 Verify commodity audit:
 ```bash
-curl -s http://127.0.0.1:8080/ledger/commodity-audit | jq .
+curl -s http://127.0.0.1:38080/ledger/commodity-audit | jq .
 ```
 Confirm that `total_cargo_initiated` was **not** incremented, guaranteeing zero cargo leakage.
 
@@ -151,7 +161,7 @@ Confirm that `total_cargo_initiated` was **not** incremented, guaranteeing zero 
 Query corridor congestion levels:
 
 ```bash
-curl -s http://127.0.0.1:8080/corridors/congestion | jq .
+curl -s http://127.0.0.1:38080/corridors/congestion | jq .
 ```
 
 Dispatch multiple consists along Route 1 until utilization exceeds capacity.
@@ -166,24 +176,24 @@ Confirm arrivals to relieve backpressure back to `CLEAR`.
 
 1. Dispatch a transfer to World 2:
    ```bash
-   curl -X POST http://127.0.0.1:8080/transfers/initiate \
+   curl -X POST http://127.0.0.1:38080/transfers/initiate \
      -H "Content-Type: application/json" \
      -d '{"source_world": 1, "dest_world": 2, "total_cargo": 75, "cargo_breakdown": {"2": 75}}'
    ```
 2. While the consist is `IN_TRANSIT`, simulate a sudden process drop on World 2:
    ```bash
-   curl -X POST http://127.0.0.1:8080/transfers/quarantine \
+   curl -X POST http://127.0.0.1:38080/transfers/quarantine \
      -H "Content-Type: application/json" \
      -d '{"world_id": 2, "reason": "Server dropped offline (SIGTERM)"}' | jq .
    ```
 3. Inspect quarantine bay:
    ```bash
-   curl -s http://127.0.0.1:8080/transfers/quarantined | jq .
+   curl -s http://127.0.0.1:38080/transfers/quarantined | jq .
    ```
    Confirm transfer state is `RECOVERY_REQUIRED`.
 4. Trigger recovery once World 2 is restored:
    ```bash
-   curl -X POST http://127.0.0.1:8080/transfers/recover \
+   curl -X POST http://127.0.0.1:38080/transfers/recover \
      -H "Content-Type: application/json" \
      -d '{"world_id": 2}' | jq .
    ```
@@ -193,7 +203,7 @@ Confirm arrivals to relieve backpressure back to `CLEAR`.
 
 1. Send a checkpoint command (or rely on automatic background save):
    ```bash
-   curl -X POST http://127.0.0.1:8080/admin/state/save \
+   curl -X POST http://127.0.0.1:38080/admin/state/save \
      -H "Content-Type: application/json" \
      -d '{"filepath": "demo/authority_state.json"}' | jq .
    ```
@@ -203,7 +213,8 @@ Confirm arrivals to relieve backpressure back to `CLEAR`.
    ```
 3. Restart the daemon pointing to the checkpoint file:
    ```bash
-   python3 scripts/universe_authority.py --state-file demo/authority_state.json
+   python3 scripts/universe_authority.py --state-file /tmp/openspace-federation-uat/authority_state.json \
+  --duration 300
    ```
 4. Query `/transfers/active` and `/ledger/commodity-audit`. Confirm 100% state restoration with zero loss of accounts, charters, or in-flight shipments.
 
@@ -212,8 +223,8 @@ Confirm arrivals to relieve backpressure back to `CLEAR`.
 Execute the final ledger audit:
 
 ```bash
-curl -s http://127.0.0.1:8080/ledger/commodity-audit | jq .
-curl -s http://127.0.0.1:8080/ledger/trade-balances | jq .
+curl -s http://127.0.0.1:38080/ledger/commodity-audit | jq .
+curl -s http://127.0.0.1:38080/ledger/trade-balances | jq .
 ```
 
 Verify that:

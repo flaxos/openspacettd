@@ -1,0 +1,93 @@
+{
+  "package": "WP-04 / OST-HUB-002",
+  "ref": {
+    "branch": "fix/portal-gate-lifecycle-crashes",
+    "head": "abbcd7e07737bcd83c3f830f539313a45bef5f01",
+    "dirty": true
+  },
+  "baseline": {
+    "directory": "/tmp/openspacettd-wp04-base-pqs37cfj",
+    "files": [
+      "src/portal/logistics_hub.h",
+      "src/portal/logistics_hub.cpp",
+      "src/portal/portal_cmd.cpp",
+      "src/station.cpp",
+      "src/station_cmd.cpp",
+      "src/economy.cpp",
+      "src/saveload/afterload.cpp",
+      "src/tests/test_sprint42_production_chains.cpp",
+      "src/tests/test_sprint39_corporate_hq_and_stockpile.cpp"
+    ]
+  },
+  "build": {
+    "directory": "build",
+    "config": "Release, OPTION_USE_ASSERTS=ON; reused existing build",
+    "jobs": 2,
+    "command": "ninja -C build -j 2 openttd openttd_test",
+    "exit_code": 0,
+    "log": "logs/build-final.log",
+    "later_test_fixture_rebuild": {
+      "command": "ninja -C build -j 2 openttd_test",
+      "exit_code": 0,
+      "log": "logs/build-fixture-final.log"
+    }
+  },
+  "tests": [
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^Hub authority'",
+      "stage": "before implementation: initial negative command regression",
+      "exit_code": 8,
+      "cases": 1,
+      "failed_assertions": 39,
+      "log": "logs/baseline-test.log"
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^Hub authority'",
+      "stage": "first implementation: six cases",
+      "exit_code": 0,
+      "cases": 6,
+      "log": "logs/authority-tests-first.log"
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^(Hub (authority|unloading|loading)|Production gameplay)|Blueprint|CST Prefabs|Sprint 39|Sprint 40|Sprint 41|Sprint 42|Spaceport'",
+      "stage": "after final source/edge case changes",
+      "exit_code": 8,
+      "cases": 68,
+      "passed": 67,
+      "failed": 1,
+      "log": "logs/related-tests.log",
+      "failure": "Old exclusive-rights fixture expected unowned station to access hub stock; now invalid by WP-04 ownership rule."
+    },
+    {
+      "command": "ctest --test-dir build --output-on-failure -R '^Hub loading - capacity reserve and rights boundaries conserve cargo$'",
+      "stage": "corrected fixture: unowned hub inactive, ordinary waiting cargo loads, owned-hub town exclusivity control",
+      "exit_code": 0,
+      "cases": 1,
+      "passed": 1,
+      "log": "logs/rights-fixture-final.log"
+    }
+  ],
+  "final_distinct_selected_cases": 68,
+  "new_hub_authority_cases": 7,
+  "registered_ctests": 330,
+  "artifacts": {
+    "build/openttd": "d51c0adfe55d0908c94bc5cd471e03cf36158c3a8818b1b9dfb2821b5e120b61",
+    "build/openttd_test": "d760d5063d26cd616d08de732b0f656cfbe5f747cbe8c8022538288c72161af0",
+    "src/portal/logistics_hub.h": "40072d4af9424d258f0e422305a661bc96683a7a40aa7b459a85eb8007501142",
+    "src/portal/logistics_hub.cpp": "0ddb3b587e72d87a595bbda7a3e2a28fe401bd96b3bf4050e3e0383428808995",
+    "src/portal/portal_cmd.cpp": "cbc7f1d23e5eb4f1b3bf41a91b0ae9fbb50e53da684e265393478f18eb42b12a",
+    "src/station.cpp": "308ec51c9cef9fe9d97107a4231395d5a84a1770a2afc62589ed57ee1ebdb8ae",
+    "src/station_cmd.cpp": "765b3912ce20a80b1347da2bb9b49c41beed124cbe23e40167f0dd89f49130d7",
+    "src/economy.cpp": "04b33e7bc461ba7569c4e440ee6c3864c1337d77ccc2e5d33b3551537722ab1e",
+    "src/saveload/afterload.cpp": "54b1e00303154583c286181af0b5f6e4a1b2d48644ad29c82ebe5b8546f19f4a",
+    "src/tests/test_sprint42_production_chains.cpp": "9f922e8ba11b95bb49110718fbc79eb853b3bad5f92d5ec8d1e994e0688950c1",
+    "src/tests/test_sprint39_corporate_hq_and_stockpile.cpp": "363ff884846089e7df133ba050294fab31881ddbde45718390c2644f366c3394"
+  },
+  "save_safety": "Only uniquely named temporary generated 64x64 fixture saves were written; user/original crash saves were not modified.",
+  "limits": [
+    "No native GUI pass is claimed for WP-04.",
+    "No two-client multiplayer run.",
+    "Company-wide stockpile/HQ/research takeover migration is separate; hub binding transfer does not merge old inventory.",
+    "Existing Release configuration reused; no new assertion-enabled CI run."
+  ]
+}

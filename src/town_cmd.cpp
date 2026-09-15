@@ -2093,9 +2093,9 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32_t townnameparts, TownSi
  * @param check_surrounding Should we ensure surrounding tiles are free too?
  * @return A zero cost if allowed, otherwise an error.
  */
-static CommandCost TownCanBePlacedHere(TileIndex tile, bool check_surrounding)
+static CommandCost TownCanBePlacedHere(TileIndex tile, bool check_surrounding, bool frontier_founding = false)
 {
-	CommandCost planet_check = PlanetManager::CheckTownPlacement(tile);
+	CommandCost planet_check = frontier_founding ? PlanetManager::CheckConstructionPlacement(tile) : PlanetManager::CheckTownPlacement(tile);
 	if (planet_check.Failed()) return planet_check;
 
 	/* Check if too close to the edge of map */
@@ -2160,6 +2160,38 @@ static bool IsUniqueTownName(std::string_view name)
 	}
 
 	return true;
+}
+
+CommandCost CheckFrontierTownSite(TileIndex tile, std::string_view name)
+{
+	if (name.empty() || Utf8StringLength(name) >= MAX_LENGTH_TOWN_NAME_CHARS) return CMD_ERROR;
+	if (!IsUniqueTownName(name)) return CommandCost(STR_ERROR_NAME_MUST_BE_UNIQUE);
+	if (!Town::CanAllocateItem()) return CommandCost(STR_ERROR_TOO_MANY_TOWNS);
+	return TownCanBePlacedHere(tile, true, true);
+}
+
+Town *FoundFrontierTownAtSite(TileIndex tile, std::string_view name)
+{
+	if (CheckFrontierTownSite(tile, name).Failed()) return nullptr;
+	Town *t = Town::Create(tile);
+	if (t == nullptr) return nullptr;
+	t->name = name;
+	/* Match CmdFoundTown's native initialization context: town roads and
+	 * houses are generated as world-owned infrastructure during founding. */
+	Backup<bool> old_generating_world(_generating_world, true);
+	bool road_pending = UpdateNearestTownForRoadTiles(true);
+	DoCreateTown(t, tile, 0, TownSize::Small, false, _settings_game.economy.town_layout, true);
+	if (road_pending) UpdateNearestTownForRoadTiles(false);
+	old_generating_world.Restore();
+	if (t->cache.population == 0 || t->cache.num_houses == 0) {
+		/* Native generation likewise discards settlements that failed to grow. */
+		Backup<bool> old_generating_world(_generating_world, true);
+		AutoRestoreBackup cur_company(_current_company, OWNER_TOWN);
+		[[maybe_unused]] CommandCost removed = Command<Commands::DeleteTown>::Do(DoCommandFlag::Execute, t->index);
+		old_generating_world.Restore();
+		return nullptr;
+	}
+	return t;
 }
 
 /**

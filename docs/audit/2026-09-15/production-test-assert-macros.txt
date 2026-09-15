@@ -1,0 +1,4 @@
+#define NDEBUG 1
+#define assert_perror(errnum) (__ASSERT_VOID_CAST (0))
+#define WITH_ASSERT 1
+#define assert(expr) (__ASSERT_VOID_CAST (0))

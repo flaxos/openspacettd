@@ -8,6 +8,7 @@
 #include "../stdafx.h"
 #include "universe_authority.h"
 #include "consist_snapshot.h"
+#include "planet_manager.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -105,6 +106,48 @@ std::vector<RegisteredWorld> UniverseAuthorityService::GetWorldDirectory() const
 		result.push_back(world);
 	}
 	return result;
+}
+
+std::vector<RegisteredWorld> UniverseAuthorityService::GetWorldDirectoryForGUI() const
+{
+	auto result = this->GetWorldDirectory();
+	for (const PlanetRegion &region : PlanetManager::GetAllRegions()) {
+		auto it = std::find_if(result.begin(), result.end(), [&](const RegisteredWorld &world) { return world.world_id == region.id; });
+		if (it == result.end()) {
+			RegisteredWorld world{};
+			world.world_id = region.id;
+			world.address = "Local Node";
+			world.status = WorldOnlineStatus::Online;
+			result.push_back(world);
+			it = std::prev(result.end());
+		}
+		it->phase = region.phase;
+		it->name = region.name;
+		it->biome = region.biome;
+	}
+	std::sort(result.begin(), result.end(), [](const RegisteredWorld &a, const RegisteredWorld &b) { return a.world_id < b.world_id; });
+	return result;
+}
+
+void UniverseAuthorityService::SyncLocalWorld(WorldID world_id)
+{
+	const PlanetRegion *region = PlanetManager::GetRegion(world_id);
+	if (region == nullptr) return;
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) {
+		RegisteredWorld world{};
+		world.world_id = world_id;
+		world.address = "Local Node";
+		world.status = WorldOnlineStatus::Online;
+		it = this->_worlds.emplace(world_id, std::move(world)).first;
+	}
+	it->second.phase = region->phase;
+	it->second.name = region->name;
+	it->second.biome = region->biome;
+	if (region->phase == WorldPhase::Phase1_Core) {
+		it->second.is_megacity = true;
+		if (it->second.megacity_growth_state.empty()) it->second.megacity_growth_state = "Subsistence";
+	}
 }
 
 bool UniverseAuthorityService::ColonizeWorld(WorldID world_id, const std::string &outpost_name)
