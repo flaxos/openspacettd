@@ -17,6 +17,7 @@
 #include "../blueprint/blueprint_cmd.h"
 #include "../rail_map.h"
 #include "../rail_cmd.h"
+#include "../tunnel_map.h"
 #include "../clear_map.h"
 #include "../void_map.h"
 #include "../depot_base.h"
@@ -621,6 +622,103 @@ TEST_CASE("CST prefabs run every advertised route with native trains and intact 
 		CHECK(arrived());
 		CHECK_FALSE(train->vehstatus.Test(VehState::Crashed));
 	}
+}
+
+TEST_CASE("Portal YAPF routes native trains through short off-axis wormholes", "[portal][yapf-regression]")
+{
+	const bool reverse = GENERATE(false, true);
+	SetupCSTPrefabTestEnv();
+	for (const SettingVariant &setting : GetSaveLoadSettingTable()) {
+		const SettingDesc *desc = GetSettingDesc(setting);
+		if (desc->GetName().starts_with("pf.")) desc->ResetToDefault(&_settings_game);
+	}
+	_settings_game.pf.forbid_90_deg = true;
+	const TileIndex a = TileXY(50, 50);
+	const TileIndex b = TileXY(190, 190);
+	MakeRailTunnel(a, _current_company, DiagDirection::SW, RAILTYPE_RAIL);
+	MakeRailTunnel(b, _current_company, DiagDirection::NW, RAILTYPE_RAIL);
+	REQUIRE(PortalRegistry::RegisterPortalPair(a, DiagDirection::SW, WorldID{0},
+		b, DiagDirection::NW, WorldID{1}, 1, true) != INVALID_PORTAL);
+	const TileIndex entry = reverse ? b : a;
+	const TileIndex exit = reverse ? a : b;
+	const DiagDirection entering = reverse ? DiagDirection::NW : DiagDirection::SW;
+	const DiagDirection leaving = reverse ? DiagDirection::NE : DiagDirection::SE;
+	TileIndex depot = entry;
+	for (uint i = 0; i < 8; ++i) depot = TileAddByDiagDir(depot, ReverseDiagDir(entering));
+	REQUIRE(Command<Commands::BuildRailDepot>::Do(DoCommandFlag::Execute, depot,
+		RAILTYPE_RAIL, entering).Succeeded());
+	for (TileIndex tile = TileAddByDiagDir(depot, entering); tile != entry; tile = TileAddByDiagDir(tile, entering)) {
+		REQUIRE(Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, tile,
+			RAILTYPE_RAIL, DiagDirToDiagTrack(entering), false).Succeeded());
+		if (TileAddByDiagDir(tile, entering) == entry) {
+			for (Track track : {Track::Upper, Track::Lower, Track::Left, Track::Right}) {
+				if (TrackExitdirToTrackdir(track, ReverseDiagDir(entering)) == Trackdir::Invalid) continue;
+				REQUIRE(Command<Commands::BuildRail>::Do(DoCommandFlag::Execute,
+					tile, RAILTYPE_RAIL, track, false).Succeeded());
+				break;
+			}
+		}
+	}
+	TileIndex destination = exit;
+	for (uint i = 1; i <= 8; ++i) {
+		destination = TileAddByDiagDir(destination, leaving);
+		if (i == 8) break;
+		REQUIRE(Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, destination,
+			RAILTYPE_RAIL, DiagDirToDiagTrack(leaving), false).Succeeded());
+		if (i == 2) {
+			/* End the post-portal segment at a genuine track choice. The old
+			 * geographic estimate decreases across this cheap, distant jump. */
+			for (Track track : {Track::Upper, Track::Lower, Track::Left, Track::Right}) {
+				if (TrackExitdirToTrackdir(track, ReverseDiagDir(leaving)) == Trackdir::Invalid) continue;
+				REQUIRE(Command<Commands::BuildRail>::Do(DoCommandFlag::Execute,
+					destination, RAILTYPE_RAIL, track, false).Succeeded());
+				break;
+			}
+		}
+	}
+	REQUIRE(Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, destination,
+		RAILTYPE_RAIL, DiagDirToAxis(leaving), 1, 1, STAT_CLASS_DFLT, 0, NEW_STATION, true).Succeeded());
+	_settings_game.game_creation.landscape = LandscapeType::Temperate;
+	_game_mode = GameMode::Normal;
+	TimerGameCalendar::SetDate(TimerGameCalendar::ConvertYMDToDate(TimerGameCalendar::Year{1950}, 0, 1), 0);
+	SetupCargoForClimate(LandscapeType::Temperate);
+	_engine_mngr.ResetToDefaultMapping();
+	SetupEngines();
+	for (Engine *engine : Engine::Iterate()) {
+		if (const CargoLabel *label = std::get_if<CargoLabel>(&engine->info.cargo_label)) {
+			const CargoType cargo = GetCargoTypeByLabel(*label);
+			if (IsValidCargoType(cargo)) engine->info.cargo_type = cargo;
+		}
+	}
+	StartupEngines();
+	_settings_game.vehicle.max_trains = 10;
+	_settings_game.vehicle.max_train_length = 10;
+	auto [cost, id, capacity, mail, capacities] = Command<Commands::BuildVehicle>::Do(
+		DoCommandFlag::Execute, depot, EngineID{0}, false, INVALID_CARGO, ClientID::Invalid);
+	REQUIRE(cost.Succeeded());
+	Train *train = Train::Get(id);
+	Order order;
+	order.MakeGoToStation(GetStationIndex(destination));
+	REQUIRE(Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, id, VehicleOrderID{0}, order).Succeeded());
+	train->current_order = order;
+	train->dest_tile = destination;
+	bool path_found = false;
+	(void)YapfTrainChooseTrack(train, depot, entering, TrackBits{DiagDirToDiagTrack(entering)},
+		path_found, false, nullptr, nullptr);
+	REQUIRE(path_found);
+	REQUIRE(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, id, false).Succeeded());
+	bool crossed = false;
+	for (uint ticks = 0; ticks < 4096 && !train->current_order.IsType(OT_LOADING); ++ticks) {
+		REQUIRE(train->Tick());
+		crossed |= train->tile == exit;
+		for (Station *station : Station::Iterate()) LoadUnloadStation(station);
+		UpdateSignalsInBuffer();
+	}
+	CHECK(crossed);
+	CHECK(train->tile == destination);
+	CHECK(train->last_station_visited == GetStationIndex(destination));
+	CHECK(train->current_order.IsType(OT_LOADING));
+	CHECK_FALSE(train->vehstatus.Test(VehState::Crashed));
 }
 
 TEST_CASE("CST prefab routes survive sequential rotations and mirrors", "[cst_prefab][blueprint-route]")

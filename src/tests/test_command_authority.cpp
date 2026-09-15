@@ -13,6 +13,8 @@
 #include "../newgrf_house.h"
 #include "../road.h"
 #include "../timer/timer_game_calendar.h"
+#include "../openttd.h"
+#include "../timer/timer_game_tick.h"
 #include "../town_kdtree.h"
 #include "../station_base.h"
 #include "../station_kdtree.h"
@@ -23,6 +25,7 @@
 #include "../rail_cmd.h"
 #include "../train.h"
 #include "../train_cmd.h"
+#include "../pathfinder/yapf/yapf.h"
 #include "../order_cmd.h"
 #include "../signal_func.h"
 #include "../settings_internal.h"
@@ -592,10 +595,9 @@ TEST_CASE("Corporate HQ GUI lets an eligible player found the first HQ", "[.][co
 	}
 }
 
-TEST_CASE("WP09 fresh HQ hub and reserve survive process reload", "[.][wp09-reload]")
+/** Load real base graphics and engine data without creating personal directories. */
+static void SetupNativeAuthorityReload()
 {
-	const char *save_path = std::getenv("OSTTD_WP09_SAVE_PATH");
-	REQUIRE(save_path != nullptr);
 	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 0);
 	UnInitWindowSystem();
 	REQUIRE(VideoDriver::GetInstance() == nullptr);
@@ -615,6 +617,13 @@ TEST_CASE("WP09 fresh HQ hub and reserve survive process reload", "[.][wp09-relo
 	INFO("The process-reload integration test requires base graphics in a normal OpenTTD data folder or build/baseset");
 	REQUIRE(BaseGraphics::SetSet(nullptr));
 	DriverFactoryBase::SelectDriver("null", Driver::Type::Video);
+}
+
+TEST_CASE("WP09 fresh HQ hub and reserve survive process reload", "[.][wp09-reload]")
+{
+	const char *save_path = std::getenv("OSTTD_WP09_SAVE_PATH");
+	REQUIRE(save_path != nullptr);
+	SetupNativeAuthorityReload();
 	REQUIRE(SaveOrLoad(save_path, SaveLoadOperation::Load, DetailedFileType::GameFile,
 		Subdirectory::None, false) == SaveLoadResult::Ok);
 	REQUIRE(CorporateHQManager::GetHQ(CompanyID{0}) != nullptr);
@@ -636,6 +645,63 @@ TEST_CASE("WP09 fresh HQ hub and reserve survive process reload", "[.][wp09-relo
 	}
 	CHECK(onboard == 20);
 	CHECK(Company::Get(CompanyID{0})->money == 10000000 - 2500000 - 75000);
+}
+
+TEST_CASE("Saved portal train resumes native pathfinding", "[.][yapf-crash-replay]")
+{
+	const char *save_path = std::getenv("OSTTD_YAPF_CRASH_SAVE_PATH");
+	REQUIRE(save_path != nullptr);
+	SetupNativeAuthorityReload();
+	REQUIRE(SaveOrLoad(save_path, SaveLoadOperation::Load, DetailedFileType::GameFile,
+		Subdirectory::None, false) == SaveLoadResult::Ok);
+	Train *train = nullptr;
+	for (Train *candidate : Train::Iterate()) {
+		if (!candidate->IsPrimaryVehicle()) continue;
+		REQUIRE(train == nullptr);
+		train = candidate;
+	}
+	REQUIRE(train != nullptr);
+	fmt::print(stderr, "Loaded train {} at ({},{}), stopped={}, paused={}, order={}\n",
+		train->index.base(), TileX(train->tile), TileY(train->tile),
+		train->vehstatus.Test(VehState::Stopped), _pause_mode.Any(), static_cast<int>(train->current_order.GetType()));
+	_current_company = _local_company = train->owner;
+	bool path_found = false;
+	const Trackdir trackdir = train->GetVehicleTrackdir();
+	REQUIRE(IsValidTrackdir(trackdir));
+	(void)YapfTrainChooseTrack(train, train->tile, TrackdirToExitdir(trackdir),
+		TrackBits{TrackdirToTrack(trackdir)}, path_found, false, nullptr, nullptr);
+	REQUIRE(path_found);
+	/* The reported abort occurred after TryPathReserve tentatively reserved
+	 * the depot. That transient bit survives the crash save. With this sole
+	 * train entirely inside, no other train can own it. Release only that
+	 * stale reservation in the loaded copy so normal ticks can retry. */
+	REQUIRE(train->IsChainInDepot());
+	REQUIRE(HasDepotReservation(train->tile));
+	fmt::print(stderr, "Route found; releasing the crash save's tentative depot reservation\n");
+	SetDepotReservation(train->tile, false);
+	if (const char *recovered_path = std::getenv("OSTTD_YAPF_RECOVERED_SAVE_PATH")) {
+		REQUIRE(std::filesystem::weakly_canonical(recovered_path) != std::filesystem::weakly_canonical(save_path));
+		REQUIRE(SaveOrLoad(recovered_path, SaveLoadOperation::Save, DetailedFileType::GameFile,
+			Subdirectory::None, false) == SaveLoadResult::Ok);
+	}
+	if (train->vehstatus.Test(VehState::Stopped)) {
+		REQUIRE(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, train->index, false).Succeeded());
+	}
+	/* Crash saves may be paused. Resume simulation without moving the train
+	 * or changing its saved route, signals, portal links or pathfinder settings. */
+	_pause_mode = {};
+	const TileIndex start = train->tile;
+	const auto start_tick = TimerGameTick::counter;
+	bool moved = false;
+	for (uint ticks = 0; ticks < 4096; ++ticks) {
+		StateGameLoop();
+		moved |= train->tile != start;
+	}
+	CHECK(moved);
+	CHECK_FALSE(train->vehstatus.Test(VehState::Crashed));
+	CHECK(TimerGameTick::counter - start_tick == 4096);
+	fmt::print(stderr, "Train resumed for {} ticks; tile=({},{}), moved={}\n",
+		TimerGameTick::counter - start_tick, TileX(train->tile), TileY(train->tile), moved);
 }
 
 static void ExecuteAuthorityQueue()

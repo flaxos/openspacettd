@@ -13,6 +13,7 @@
 #include "../../train.h"
 #include "../pathfinder_func.h"
 #include "../pathfinder_type.h"
+#include "yapf_rail_portal_heuristic.hpp"
 
 class CYapfDestinationRailBase {
 protected:
@@ -116,6 +117,7 @@ protected:
 	TrackdirBits dest_trackdirs;
 	StationID dest_station_id;
 	bool any_depot;
+	YapfRailPortalHeuristic portal_heuristic;
 
 	/** @copydoc CYapfBaseT::Yapf */
 	Tpf &Yapf()
@@ -157,6 +159,7 @@ public:
 				this->dest_trackdirs = GetTileTrackStatus(this->dest_tile, TransportType::Rail, RoadTramType::Invalid).trackdirs;
 				break;
 		}
+		this->portal_heuristic.SetDestination(this->dest_tile);
 		this->CYapfDestinationRailBase::SetDestination(v);
 	}
 
@@ -190,7 +193,11 @@ public:
 			return true;
 		}
 
-		n.estimate = n.cost + OctileDistanceCost(n.GetLastTile(), n.GetLastTrackdir(), this->dest_tile);
+		/* Geographic distance can overestimate travel through a short portal
+		 * and make the estimate decrease when a search crosses that jump. */
+		n.estimate = n.cost + (this->portal_heuristic.Empty()
+			? OctileDistanceCost(n.GetLastTile(), n.GetLastTrackdir(), this->dest_tile)
+			: this->portal_heuristic.Estimate(n.GetLastTile(), n.GetLastTrackdir()));
 		assert(n.estimate >= n.parent->estimate);
 		return true;
 	}

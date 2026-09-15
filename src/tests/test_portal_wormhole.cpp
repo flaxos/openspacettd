@@ -16,11 +16,80 @@
 #include "../tunnelbridge.h"
 #include "../rail_map.h"
 #include "../pathfinder/follow_track.hpp"
+#include "../pathfinder/yapf/yapf_rail_portal_heuristic.hpp"
+#include "../pathfinder/yapf/yapf_common.hpp"
 #include "../portal/portal_registry.h"
 #include "../train.h"
 #include "../vehicle_base.h"
 
 #include "../safeguards.h"
+
+TEST_CASE("Portal rail estimates retain normal distances and use chained shortcuts", "[portal][yapf-regression]")
+{
+	Map::Allocate(256, 256);
+	PortalRegistry::Reset();
+	const TileIndex a = TileXY(20, 20);
+	const TileIndex b = TileXY(100, 100);
+	const TileIndex c = TileXY(100, 103);
+	const TileIndex d = TileXY(220, 220);
+	const TileIndex destination = TileXY(220, 230);
+	YapfRailPortalHeuristic estimate;
+	estimate.SetDestination(destination);
+	CHECK(estimate.Empty());
+	CHECK(estimate.Estimate(a, Trackdir::X_SW) == OctileDistanceCost(a, Trackdir::X_SW, destination));
+	for (bool reverse_registration : {false, true}) {
+		PortalRegistry::Reset();
+		auto first = [&]() { REQUIRE(PortalRegistry::RegisterPortalPair(a, DiagDirection::SW, WorldID{0},
+			b, DiagDirection::NW, WorldID{1}, 1, false) != INVALID_PORTAL); };
+		auto second = [&]() { REQUIRE(PortalRegistry::RegisterPortalPair(c, DiagDirection::SE, WorldID{1},
+			d, DiagDirection::NW, WorldID{2}, 1, false) != INVALID_PORTAL); };
+		if (reverse_registration) { second(); first(); } else { first(); second(); }
+		estimate.SetDestination(destination);
+		CHECK_FALSE(estimate.Empty());
+		/* Two 200-cost jumps, 300 between their heads, then 900 to the target. */
+		CHECK(estimate.Estimate(a, Trackdir::X_SW) == 1600);
+		estimate.SetDestination(a);
+		CHECK(estimate.Estimate(d, Trackdir::Y_NW) == OctileDistanceCost(d, Trackdir::Y_NW, a));
+	}
+	PortalRegistry::Reset();
+	estimate.SetDestination(destination);
+	CHECK(estimate.Empty());
+	CHECK(estimate.Estimate(a, Trackdir::X_SW) == OctileDistanceCost(a, Trackdir::X_SW, destination));
+}
+
+TEST_CASE("Portal rail estimates remain consistent over rail steps and every head orientation", "[portal][yapf-regression]")
+{
+	Map::Allocate(128, 128);
+	const uint32_t length = GENERATE(0, 1, 25);
+	const DiagDirection entering = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	const DiagDirection other_entering = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	PortalRegistry::Reset();
+	const TileIndex a = TileXY(20, 20);
+	const TileIndex b = TileXY(100, 100);
+	REQUIRE(PortalRegistry::RegisterPortalPair(a, entering, WorldID{0}, b, other_entering, WorldID{1}, length, true) != INVALID_PORTAL);
+	const uint32_t canonical_length = PortalRegistry::GetPortalVirtualLength(a);
+	CHECK(canonical_length == std::max(uint32_t{1}, length));
+	YapfRailPortalHeuristic estimate;
+	estimate.SetDestination(TileXY(105, 105));
+	CHECK(estimate.Estimate(a, DiagDirToDiagTrackdir(entering)) <=
+		static_cast<int>((canonical_length + 1) * YAPF_TILE_LENGTH) + estimate.Estimate(b, DiagDirToDiagTrackdir(ReverseDiagDir(other_entering))));
+	CHECK(estimate.Estimate(b, DiagDirToDiagTrackdir(other_entering)) <=
+		static_cast<int>((canonical_length + 1) * YAPF_TILE_LENGTH) + estimate.Estimate(a, DiagDirToDiagTrackdir(ReverseDiagDir(entering))));
+	for (TileIndex tile : {TileXY(19, 20), a, TileXY(21, 20), b, TileXY(104, 105)}) {
+		for (Trackdir td : TrackdirBits{TRACKDIR_BIT_MASK}) {
+			const DiagDirection exit = TrackdirToExitdir(td);
+			const TileIndex next = TileAddByDiagDir(tile, exit);
+			for (Track track : {Track::X, Track::Y, Track::Upper, Track::Lower, Track::Left, Track::Right}) {
+				Trackdir next_td = TrackExitdirToTrackdir(track, ReverseDiagDir(exit));
+				if (next_td == Trackdir::Invalid) continue;
+				next_td = ReverseTrackdir(next_td);
+				const int cost = IsDiagonalTrack(track) ? YAPF_TILE_LENGTH : YAPF_TILE_CORNER_LENGTH;
+				CHECK(estimate.Estimate(tile, td) <= cost + estimate.Estimate(next, next_td));
+			}
+		}
+	}
+	PortalRegistry::Reset();
+}
 
 TEST_CASE("PortalRegistry - Basic Pairing and Lookups")
 {
