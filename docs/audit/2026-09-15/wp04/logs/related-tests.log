@@ -1,0 +1,178 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+      Start 177: Spaceport Manager - Lifecycle and Trade Calculation
+ 1/68 Test #177: Spaceport Manager - Lifecycle and Trade Calculation .........................................   Passed    0.02 sec
+      Start 178: Spaceport Command - CmdDesignateSpaceport
+ 2/68 Test #178: Spaceport Command - CmdDesignateSpaceport ...................................................   Passed    0.02 sec
+      Start 189: Spaceport Bridge - Configuration and Command Execution
+ 3/68 Test #189: Spaceport Bridge - Configuration and Command Execution ......................................   Passed    0.02 sec
+      Start 190: Spaceport Bridge - Interplanetary Trade Dispatch and Reception
+ 4/68 Test #190: Spaceport Bridge - Interplanetary Trade Dispatch and Reception ..............................   Passed    0.02 sec
+      Start 192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation
+ 5/68 Test #192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation ......................   Passed    0.02 sec
+      Start 202: Blueprint Data Model and JSON Round-Trip
+ 6/68 Test #202: Blueprint Data Model and JSON Round-Trip ....................................................   Passed    0.02 sec
+      Start 203: Blueprint Rotation 90, 180, 270 and Invariance
+ 7/68 Test #203: Blueprint Rotation 90, 180, 270 and Invariance ..............................................   Passed    0.03 sec
+      Start 204: Blueprint Horizontal Flip/Mirror
+ 8/68 Test #204: Blueprint Horizontal Flip/Mirror ............................................................   Passed    0.02 sec
+      Start 205: Blueprint Capture from Game Map
+ 9/68 Test #205: Blueprint Capture from Game Map .............................................................   Passed    0.02 sec
+      Start 206: Blueprint Manager Storage and Builtin Protection
+10/68 Test #206: Blueprint Manager Storage and Builtin Protection ............................................   Passed    0.02 sec
+      Start 207: Deterministic Blueprint Placement Command
+11/68 Test #207: Deterministic Blueprint Placement Command ...................................................   Passed    0.03 sec
+      Start 208: Blueprint depot quote matches execution
+12/68 Test #208: Blueprint depot quote matches execution .....................................................   Passed    0.03 sec
+      Start 209: Blueprint rejected placement preserves map money and materials
+13/68 Test #209: Blueprint rejected placement preserves map money and materials ..............................   Passed    0.06 sec
+      Start 210: Blueprint Mainline placement clears trees with exact fabrication materials
+14/68 Test #210: Blueprint Mainline placement clears trees with exact fabrication materials ..................   Passed    0.03 sec
+      Start 211: Blueprint dispatcher charges quote exactly once
+15/68 Test #211: Blueprint dispatcher charges quote exactly once .............................................   Passed    0.02 sec
+      Start 212: Blueprint unsupported station layouts reject without changes
+16/68 Test #212: Blueprint unsupported station layouts reject without changes ................................   Passed    0.04 sec
+      Start 213: Blueprint clearing foundation and signal replacement use canonical costs
+17/68 Test #213: Blueprint clearing foundation and signal replacement use canonical costs ....................   Passed    0.04 sec
+      Start 214: Blueprint infrastructure money and materials survive save reload
+18/68 Test #214: Blueprint infrastructure money and materials survive save reload ............................   Passed    0.05 sec
+      Start 215: CST Prefabs - Complete 8-Layout Catalogue Registration
+19/68 Test #215: CST Prefabs - Complete 8-Layout Catalogue Registration ......................................   Passed    0.02 sec
+      Start 216: CST Prefabs - Structural & Functional Integrity
+20/68 Test #216: CST Prefabs - Structural & Functional Integrity .............................................   Passed    0.02 sec
+      Start 217: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+21/68 Test #217: CST Prefabs - Geometric Transforms & RHD/LHD Invariance .....................................   Passed    0.02 sec
+      Start 218: CST Prefabs - Deterministic In-Game Map Placement
+22/68 Test #218: CST Prefabs - Deterministic In-Game Map Placement ...........................................   Passed    0.21 sec
+      Start 219: CST Prefabs - Immutability & Builtin Deletion Protection
+23/68 Test #219: CST Prefabs - Immutability & Builtin Deletion Protection ....................................   Passed    0.02 sec
+      Start 268: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation
+24/68 Test #268: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation ................................   Passed    0.02 sec
+      Start 269: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption
+25/68 Test #269: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption ....................   Passed    0.02 sec
+      Start 270: Sprint 39 Stockpile - Role Mappings and Deserialization
+26/68 Test #270: Sprint 39 Stockpile - Role Mappings and Deserialization .....................................   Passed    0.03 sec
+      Start 271: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors
+27/68 Test #271: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors .......................   Passed    0.02 sec
+      Start 272: Sprint 39 Corporate HQ - Placement Rules & Validation
+28/68 Test #272: Sprint 39 Corporate HQ - Placement Rules & Validation .......................................   Passed    0.02 sec
+      Start 273: Sprint 39 Corporate HQ - Tier Advancement & Serialization
+29/68 Test #273: Sprint 39 Corporate HQ - Tier Advancement & Serialization ...................................   Passed    0.02 sec
+      Start 274: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub
+30/68 Test #274: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub .................................   Passed    0.02 sec
+      Start 275: Sprint 40 Fabrication - BOM Recipes & Catalog
+31/68 Test #275: Sprint 40 Fabrication - BOM Recipes & Catalog ...............................................   Passed    0.02 sec
+      Start 276: Sprint 40 Fabrication - Mode Toggling and Company Isolation
+32/68 Test #276: Sprint 40 Fabrication - Mode Toggling and Company Isolation .................................   Passed    0.02 sec
+      Start 277: Sprint 40 Fabrication - Track Building Interception
+33/68 Test #277: Sprint 40 Fabrication - Track Building Interception .........................................   Passed    0.02 sec
+      Start 278: Sprint 40 Fabrication - Signal and Depot Interception
+34/68 Test #278: Sprint 40 Fabrication - Signal and Depot Interception .......................................   Passed    0.02 sec
+      Start 279: Sprint 40 Fabrication - Save/Load Serialization
+35/68 Test #279: Sprint 40 Fabrication - Save/Load Serialization .............................................   Passed    0.02 sec
+      Start 280: Sprint 41 Tech Tree - Catalog & Branches
+36/68 Test #280: Sprint 41 Tech Tree - Catalog & Branches ....................................................   Passed    0.02 sec
+      Start 281: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites
+37/68 Test #281: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites ..............................   Passed    0.02 sec
+      Start 282: Sprint 41 Tech Tree - Server Commands & Budget Allocation
+38/68 Test #282: Sprint 41 Tech Tree - Server Commands & Budget Allocation ...................................   Passed    0.02 sec
+      Start 283: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning
+39/68 Test #283: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning ...............................   Passed    0.03 sec
+      Start 284: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration
+40/68 Test #284: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration ................................   Passed    0.03 sec
+      Start 285: Sprint 41 Tech Tree - Save/Load State Restoration
+41/68 Test #285: Sprint 41 Tech Tree - Save/Load State Restoration ...........................................   Passed    0.03 sec
+      Start 286: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog
+42/68 Test #286: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog ..........................   Passed    0.02 sec
+      Start 287: Sprint 42 Production Chains - World Phase Placement Constraints
+43/68 Test #287: Sprint 42 Production Chains - World Phase Placement Constraints .............................   Passed    0.02 sec
+      Start 288: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion
+44/68 Test #288: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion ...............   Passed    0.02 sec
+      Start 289: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk
+45/68 Test #289: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk .................   Passed    0.02 sec
+      Start 290: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop
+46/68 Test #290: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop ......................   Passed    0.02 sec
+      Start 291: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering
+47/68 Test #291: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering ........................   Passed    0.02 sec
+      Start 292: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)
+48/68 Test #292: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk) ..........................   Passed    0.02 sec
+      Start 293: Hub authority - invalid attachments reject query and execute without mutation
+49/68 Test #293: Hub authority - invalid attachments reject query and execute without mutation ...............   Passed    0.03 sec
+      Start 294: Hub authority - explicit and automatic placement share cost and eligibility
+50/68 Test #294: Hub authority - explicit and automatic placement share cost and eligibility .................   Passed    0.03 sec
+      Start 295: Hub authority - automatic placement chooses nearest eligible platform deterministically
+51/68 Test #295: Hub authority - automatic placement chooses nearest eligible platform deterministically .....   Passed    0.02 sec
+      Start 296: Hub authority - platform removal and station deletion retire only invalid bindings
+52/68 Test #296: Hub authority - platform removal and station deletion retire only invalid bindings ..........   Passed    0.02 sec
+      Start 297: Hub authority - native company acquisition transfers attachment and bankruptcy removes it
+53/68 Test #297: Hub authority - native company acquisition transfers attachment and bankruptcy removes it ...   Passed    0.05 sec
+      Start 298: Hub authority - save reload retains valid bindings and retires legacy invalid duplicates
+54/68 Test #298: Hub authority - save reload retains valid bindings and retires legacy invalid duplicates ....   Passed    0.21 sec
+      Start 299: Hub authority - maximum saved hub ID preserves binding and future construction
+55/68 Test #299: Hub authority - maximum saved hub ID preserves binding and future construction ..............   Passed    0.04 sec
+      Start 300: Production gameplay - command validation and station lifecycle
+56/68 Test #300: Production gameplay - command validation and station lifecycle ..............................   Passed    0.02 sec
+      Start 301: Production gameplay - real cargo unloading conversion and onward loading
+57/68 Test #301: Production gameplay - real cargo unloading conversion and onward loading ....................   Passed    0.03 sec
+      Start 302: Hub unloading - industry cargo has exactly one destination
+58/68 Test #302: Hub unloading - industry cargo has exactly one destination ..................................   Passed    0.03 sec
+      Start 303: Hub unloading - isolated freight hub accepts real unloading
+59/68 Test #303: Hub unloading - isolated freight hub accepts real unloading .................................   Passed    0.02 sec
+      Start 304: Hub unloading - town and nonfreight delivery controls
+60/68 Test #304: Hub unloading - town and nonfreight delivery controls .......................................   Passed    0.02 sec
+      Start 305: Hub unloading - explicit transfer and no unload keep their meaning
+61/68 Test #305: Hub unloading - explicit transfer and no unload keep their meaning ..........................   Passed    0.02 sec
+      Start 306: Hub unloading - deposited cargo survives actual save and reload
+62/68 Test #306: Hub unloading - deposited cargo survives actual save and reload .............................   Passed    0.03 sec
+      Start 307: Hub unloading - invalid stored destination cannot consume cargo
+63/68 Test #307: Hub unloading - invalid stored destination cannot consume cargo .............................   Passed    0.02 sec
+      Start 308: Hub loading - full packet pool preserves inventory and recovers
+64/68 Test #308: Hub loading - full packet pool preserves inventory and recovers .............................   Passed    0.02 sec
+      Start 309: Hub loading - capacity reserve and rights boundaries conserve cargo
+65/68 Test #309: Hub loading - capacity reserve and rights boundaries conserve cargo .........................***Failed    0.03 sec
+Filters: Hub loading - capacity reserve and rights boundaries conserve cargo
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub loading - capacity reserve and rights boundaries conserve cargo
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1205
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1250: FAILED:
+  CHECK( StockpileManager::GetStock(WorldID{0}, owner, iron) == stock - expected )
+with expansion:
+  100 == 40
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1251: FAILED:
+  CHECK( LogisticsHubManager::GetHub(hub_id)->total_dispatched == expected )
+with expansion:
+  0 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1252: FAILED:
+  CHECK( train->cargo.StoredCount() == onboard + waiting + expected )
+with expansion:
+  0 == 60
+
+===============================================================================
+test cases:   1 |   0 passed | 1 failed
+assertions: 166 | 163 passed | 3 failed
+
+
+      Start 310: Hub loading - failed pickup survives reload and retries
+66/68 Test #310: Hub loading - failed pickup survives reload and retries .....................................   Passed    0.03 sec
+      Start 311: Hub loading - failed packet split keeps cargo available
+67/68 Test #311: Hub loading - failed packet split keeps cargo available .....................................   Passed    0.03 sec
+      Start 312: Production gameplay - station facility survives actual save and reload
+68/68 Test #312: Production gameplay - station facility survives actual save and reload ......................   Passed    0.04 sec
+
+99% tests passed, 1 tests failed out of 68
+
+Total Test time (real) =   2.12 sec
+
+The following tests FAILED:
+	309 - Hub loading - capacity reserve and rights boundaries conserve cargo (Failed)
+Errors while running CTest

@@ -1,0 +1,342 @@
+diff --git a/src/economy.cpp b/src/economy.cpp
+index fac420d73b..25be8252d3 100644
+--- a/src/economy.cpp
++++ b/src/economy.cpp
+@@ -1029,6 +1029,21 @@ Money GetTransportedGoodsIncome(uint num_pieces, uint dist, uint16_t transit_per
+ /** The industries we've currently brought cargo to. */
+ static SmallIndustryList _cargo_delivery_destinations;
+ 
++/** A registered hub may receive its owner's freight even without native station acceptance. */
++static const LogisticsHub *GetOwnedFreightHub(StationID station, CompanyID company, CargoType cargo_type)
++{
++	if (!CargoSpec::Get(cargo_type)->is_freight) return nullptr;
++	const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(station);
++	return hub != nullptr && hub->company_id == company && hub->tile != INVALID_TILE && hub->world_id != INVALID_WORLD ? hub : nullptr;
++}
++
++/** Use the same acceptance rule when staging cargo and when unloading it. */
++static bool AcceptsCargoForDelivery(const Station *st, CompanyID company, CargoType cargo_type)
++{
++	return st->goods[cargo_type].status.Test(GoodsEntry::State::Acceptance) ||
++			GetOwnedFreightHub(st->index, company, cargo_type) != nullptr;
++}
++
+ /**
+  * Transfer goods from station to industry.
+  * All cargo is delivered to the nearest (Manhattan) industry to the station sign, which is inside the acceptance rectangle and actually accepts the cargo.
+@@ -1102,25 +1117,34 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest,
+ 
+ 	/* Station production consumes its inputs first. Each piece has exactly one destination. */
+ 	uint accepted_facility = ProductionChainManager::DeliverToStation(dest, cargo_type, num_pieces);
+-	uint accepted_ind = DeliverGoodsToIndustry(st, cargo_type, num_pieces - accepted_facility, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
++	uint remaining = num_pieces - accepted_facility;
++	const LogisticsHub *hub = GetOwnedFreightHub(dest, company->index, cargo_type);
++	uint stored = 0;
++	uint accepted_ind = 0;
++	if (hub != nullptr) {
++		/* Freight at an owned hub is stored instead of being sold to nearby consumers. */
++		if (remaining > 0 && LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, remaining)) stored = remaining;
++	} else {
++		accepted_ind = DeliverGoodsToIndustry(st, cargo_type, remaining, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
++	}
+ 
+ 	/* If this cargo type is always accepted, the town accepts the remainder. */
+-	uint accepted_total = st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
++	uint accepted_total = hub == nullptr && st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
+ 
+ 	/* Update station statistics */
+-	if (accepted_total > 0) {
++	if (accepted_total + stored > 0) {
+ 		st->goods[cargo_type].status.Set({GoodsEntry::State::EverAccepted, GoodsEntry::State::CurrentMonth, GoodsEntry::State::AcceptedBigtick});
+-		if (SpaceportManager::IsSpaceport(dest)) {
+-			SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
+-		}
+-		PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
+-		if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
+-			MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility);
+-		}
+-		const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(dest);
+-		if (hub != nullptr && hub->company_id == company->index) {
+-			LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, accepted_total - accepted_facility);
+-		}
++	}
++
++	/* Stockpiled cargo is not a delivery to an industry, town, or world. */
++	if (accepted_total == 0) return 0;
++
++	if (SpaceportManager::IsSpaceport(dest)) {
++		SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
++	}
++	PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
++	if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
++		MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility);
+ 	}
+ 
+ 	/* Update company statistics */
+@@ -1316,7 +1340,7 @@ void PrepareUnload(Vehicle *front_v)
+ 			const GoodsEntry *ge = &st->goods[v->cargo_type];
+ 			if (v->cargo_cap > 0 && v->cargo.TotalCount() > 0) {
+ 				v->cargo.Stage(
+-						ge->status.Test(GoodsEntry::State::Acceptance),
++						AcceptsCargoForDelivery(st, front_v->owner, v->cargo_type),
+ 						front_v->last_station_visited, next_station,
+ 						front_v->current_order.GetUnloadType(), ge,
+ 						v->cargo_type, front_v->cargo_payment,
+@@ -1707,8 +1731,8 @@ static void LoadUnloadVehicle(Vehicle *front)
+ 			uint amount_unloaded = _settings_game.order.gradual_loading ? std::min(cargo_count, GetLoadAmount(v)) : cargo_count;
+ 			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
+ 
+-			if (!ge->status.Test(GoodsEntry::State::Acceptance) && v->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) > 0) {
+-				/* The station does not accept our goods anymore. */
++			if (!AcceptsCargoForDelivery(st, front->owner, v->cargo_type) && v->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) > 0) {
++				/* Neither native consumers nor an owned hub accept this cargo anymore. */
+ 				if (front->current_order.GetUnloadType() == OrderUnloadType::Transfer || front->current_order.GetUnloadType() == OrderUnloadType::Unload) {
+ 					/* Transfer instead of delivering. */
+ 					v->cargo.Reassign<VehicleCargoList::MoveToAction::Deliver, VehicleCargoList::MoveToAction::Transfer>(
+diff --git a/src/tests/test_sprint42_production_chains.cpp b/src/tests/test_sprint42_production_chains.cpp
+index 33e54decfd..b88ac316df 100644
+--- a/src/tests/test_sprint42_production_chains.cpp
++++ b/src/tests/test_sprint42_production_chains.cpp
+@@ -34,6 +34,11 @@
+ #include "../map_func.h"
+ #include "../cargotype.h"
+ #include "../economy_base.h"
++#include "../economy_func.h"
++#include "../industry.h"
++#include "../void_map.h"
++#include "../engine_base.h"
++#include "../engine_func.h"
+ #include "../saveload/saveload.h"
+ #include "../fileio_func.h"
+ #include "../gfx_func.h"
+@@ -41,6 +46,7 @@
+ #include "../strings_func.h"
+ #include "../table/sprites.h"
+ #include <filesystem>
++#include <chrono>
+ 
+ #include "../safeguards.h"
+ 
+@@ -446,12 +452,17 @@ static Station *SetupProductionGameplay()
+ 	_cargo_payment_pool.CleanPool();
+ 	_vehicle_pool.CleanPool();
+ 	_station_pool.CleanPool();
++	_industry_pool.CleanPool();
+ 	_town_pool.CleanPool();
+ 	_company_pool.CleanPool();
+ 	_cargopacket_pool.CleanPool();
+ 	Map::Allocate(64, 64);
+ 	for (uint y = 0; y < 64; ++y) {
+-		for (uint x = 0; x < 64; ++x) MakeClear(TileXY(x, y), ClearGround::Grass, 3);
++		for (uint x = 0; x < 64; ++x) {
++			TileIndex tile = TileXY(x, y);
++			if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
++			else MakeVoid(tile);
++		}
+ 	}
+ 	SetupCargoForClimate(LandscapeType::Temperate);
+ 	Company *company = Company::CreateAtIndex(CompanyID{0});
+@@ -609,6 +620,203 @@ TEST_CASE("Production gameplay - real cargo unloading conversion and onward load
+ 	_vehicle_pool.CleanPool();
+ }
+ 
++/** A real cargo packet entering the normal station unloading preparation path. */
++static Train *PrepareHubDelivery(Station *station, CargoType cargo, OrderUnloadType unload = OrderUnloadType::Unload)
++{
++	if (Engine::GetIfValid(EngineID{0}) == nullptr) {
++		_engine_mngr.ResetToDefaultMapping();
++		SetupEngines();
++	}
++	REQUIRE(Train::CanAllocateItem());
++	Train *train = Train::Create();
++	train->SetFrontEngine();
++	train->engine_type = EngineID{0};
++	train->owner = station->owner;
++	train->last_station_visited = station->index;
++	train->tile = station->xy;
++	train->cargo_type = cargo;
++	train->cargo_cap = 60;
++	train->current_order.MakeLoading(false);
++	train->current_order.SetUnloadType(unload);
++	train->current_order.SetLoadType(OrderLoadType::NoLoad);
++	REQUIRE(CargoPacket::CanAllocateItem());
++	CargoPacket *input = CargoPacket::Create(60, 1, StationID::Invalid(), TileXY(5, 5), 0);
++	input->UpdateLoadingTile(TileXY(5, 5));
++	train->cargo.Append(input, VehicleCargoList::MoveToAction::Keep);
++	PrepareUnload(train);
++	return train;
++}
++
++TEST_CASE("Hub unloading - industry cargo has exactly one destination", "[hub-unloading][production-gameplay]")
++{
++	Station *station = SetupProductionGameplay();
++	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
++	CargoSpec::Get(iron)->current_payment = 1000;
++	REQUIRE(Industry::CanAllocateItem());
++	Industry *industry = Industry::Create(TileXY(21, 20));
++	industry->town = station->town;
++	industry->accepted.push_back({.cargo = iron});
++	station->industries_near.insert({0, industry});
++	station->goods[iron].status.Set(GoodsEntry::State::Acceptance);
++	const bool has_hub = GENERATE(false, true);
++	CAPTURE(has_hub);
++	if (has_hub) REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Conservation hub") != 0);
++	Train *train = PrepareHubDelivery(station, iron);
++	REQUIRE(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 60);
++	CargoPayment *payment = train->cargo_payment;
++	const uint32_t development = PlanetManager::GetRegion(WorldID{0})->development_score;
++	const auto town_effect = CargoSpec::Get(iron)->town_acceptance_effect;
++	for (uint moved : {17u, 43u}) {
++		REQUIRE(train->cargo.Unload(moved, &station->goods[iron].GetOrCreateData().cargo, iron, payment, station->xy) == moved);
++		uint delivered = 60 - train->cargo.StoredCount();
++		uint stock = StockpileManager::GetStock(WorldID{0}, station->owner, iron);
++		CHECK(industry->accepted[0].waiting + stock + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 60);
++		CHECK(industry->accepted[0].waiting == (has_hub ? 0 : delivered));
++		CHECK(stock == (has_hub ? delivered : 0));
++		CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == (has_hub ? 0 : delivered));
++		CHECK(station->town->received[town_effect].new_act == (has_hub ? 0 : delivered));
++		if (has_hub) {
++			CHECK(payment->route_profit == 0);
++			CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == development);
++			CHECK(LogisticsHubManager::GetHubForStation(station->index)->total_deposited == delivered);
++		} else {
++			CHECK(payment->route_profit > 0);
++			CHECK(PlanetManager::GetRegion(WorldID{0})->development_score > development);
++		}
++	}
++	/* Finish the station cycle so native production flushes its deferred list. */
++	LoadUnloadStation(station);
++	station->loading_vehicles.clear();
++	_cargo_payment_pool.CleanPool();
++	_vehicle_pool.CleanPool();
++}
++
++TEST_CASE("Hub unloading - isolated freight hub accepts real unloading", "[hub-unloading][production-gameplay]")
++{
++	Station *station = SetupProductionGameplay();
++	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
++	REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Isolated hub") != 0);
++	REQUIRE_FALSE(station->goods[iron].status.Test(GoodsEntry::State::Acceptance));
++	Train *train = PrepareHubDelivery(station, iron);
++	CHECK(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 60);
++	AutoRestoreBackup gradual_loading(_settings_game.order.gradual_loading, false);
++	/* Exercise both PrepareUnload and the acceptance recheck in the station tick. */
++	LoadUnloadStation(station);
++	CHECK(train->cargo.StoredCount() == 0);
++	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 60);
++	CHECK(station->goods[iron].AvailableCount() == 0);
++	CHECK(train->cargo_payment->route_profit == 0);
++	station->loading_vehicles.clear();
++	_cargo_payment_pool.CleanPool();
++	_vehicle_pool.CleanPool();
++}
++
++TEST_CASE("Hub unloading - town and nonfreight delivery controls", "[hub-unloading][production-gameplay]")
++{
++	Station *station = SetupProductionGameplay();
++	const CargoLabel label = GENERATE(CT_GOODS, CT_PASSENGERS, CT_MAIL);
++	const CargoType cargo = GetCargoTypeByLabel(label);
++	const int hub_owner = GENERATE(-1, 0, 1);
++	CAPTURE(label, hub_owner);
++	CargoSpec::Get(cargo)->current_payment = 1000;
++	station->always_accepted.Set(cargo);
++	station->goods[cargo].status.Set(GoodsEntry::State::Acceptance);
++	if (hub_owner >= 0) {
++		if (hub_owner == 1) {
++			REQUIRE(Company::CanAllocateItem());
++			REQUIRE(Company::Create()->index == CompanyID{1});
++		}
++		REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, CompanyID{static_cast<uint8_t>(hub_owner)}, station->index, "Town hub") != 0);
++	}
++	Train *train = PrepareHubDelivery(station, cargo);
++	REQUIRE(train->cargo.Unload(60, &station->goods[cargo].GetOrCreateData().cargo, cargo, train->cargo_payment, station->xy) == 60);
++	const uint stored = hub_owner == 0 && CargoSpec::Get(cargo)->is_freight ? 60 : 0;
++	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, cargo) == stored);
++	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{1}, cargo) == 0);
++	CHECK(station->town->GetOrCreateCargoAccepted(cargo).history[THIS_MONTH].accepted == 60 - stored);
++	CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[cargo] == 60 - stored);
++	CHECK((train->cargo_payment->route_profit == 0) == (stored == 60));
++	CHECK(station->goods[cargo].AvailableCount() + train->cargo.StoredCount() == 0);
++	station->loading_vehicles.clear();
++	_cargo_payment_pool.CleanPool();
++	_vehicle_pool.CleanPool();
++}
++
++TEST_CASE("Hub unloading - explicit transfer and no unload keep their meaning", "[hub-unloading][production-gameplay]")
++{
++	Station *station = SetupProductionGameplay();
++	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
++	REQUIRE(LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Order hub") != 0);
++	const OrderUnloadType order = GENERATE(OrderUnloadType::Transfer, OrderUnloadType::NoUnload);
++	Train *train = PrepareHubDelivery(station, iron, order);
++	CHECK(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 0);
++	if (order == OrderUnloadType::Transfer) {
++		CHECK(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, train->cargo_payment, station->xy) == 60);
++		CHECK(station->goods[iron].AvailableCount() == 60);
++	} else {
++		CHECK(train->cargo.StoredCount() == 60);
++		CHECK(train->cargo.UnloadCount() == 0);
++	}
++	CHECK(StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 0);
++	CHECK(train->cargo_payment->route_profit == 0);
++	CHECK(Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == 0);
++	station->loading_vehicles.clear();
++	_cargo_payment_pool.CleanPool();
++	_vehicle_pool.CleanPool();
++}
++
++TEST_CASE("Hub unloading - deposited cargo survives actual save and reload", "[hub-unloading][production-gameplay]")
++{
++	Station *station = SetupProductionGameplay();
++	const StationID sid = station->index;
++	const CompanyID owner = station->owner;
++	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
++	const uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, owner, sid, "Persistent hub");
++	REQUIRE(hub_id != 0);
++	/* Existing balances remain intact; unloading adds only the physical delivery. */
++	StockpileManager::AddCargo(WorldID{0}, owner, iron, 11);
++	Train *train = PrepareHubDelivery(station, iron);
++	REQUIRE(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, train->cargo_payment, station->xy) == 60);
++	const Money money = Company::Get(owner)->money;
++	delete train->cargo_payment;
++	CHECK(Company::Get(owner)->money == money);
++	station->loading_vehicles.clear();
++	_vehicle_pool.CleanPool();
++	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-hub-wp02-{}", std::chrono::steady_clock::now().time_since_epoch().count());
++	REQUIRE(std::filesystem::create_directory(dir));
++	const auto path = (dir / "hub.sav").string();
++	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
++	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
++	CHECK(StockpileManager::GetStock(WorldID{0}, owner, iron) == 71);
++	REQUIRE(LogisticsHubManager::GetHub(hub_id) != nullptr);
++	CHECK(LogisticsHubManager::GetHub(hub_id)->total_deposited == 60);
++	CHECK(LogisticsHubManager::GetHub(hub_id)->station_id == sid);
++	CHECK(Company::Get(owner)->money == money);
++	CHECK(Company::Get(owner)->cur_economy.delivered_cargo[iron] == 0);
++	CHECK(PlanetManager::GetRegion(WorldID{0})->development_score == 0);
++	CHECK(Station::Get(sid)->goods[iron].AvailableCount() == 0);
++	std::filesystem::remove(path);
++	std::filesystem::remove(dir);
++}
++
++TEST_CASE("Hub unloading - invalid stored destination cannot consume cargo", "[hub-unloading][production-gameplay]")
++{
++	Station *station = SetupProductionGameplay();
++	const CargoType iron = GetCargoTypeByLabel(CT_IRON_ORE);
++	const bool invalid_tile = GENERATE(false, true);
++	LogisticsHubManager::RestoreHub({.hub_id = 1, .tile = invalid_tile ? INVALID_TILE : station->xy,
++		.world_id = invalid_tile ? WorldID{0} : INVALID_WORLD, .company_id = station->owner, .station_id = station->index,
++		.name = "Invalid destination", .reserve_floors = {}});
++	Train *train = PrepareHubDelivery(station, iron);
++	CHECK(train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 0);
++	REQUIRE(train->cargo.Unload(60, &station->goods[iron].GetOrCreateData().cargo, iron, train->cargo_payment, station->xy) == 60);
++	CHECK(station->goods[iron].AvailableCount() == 60);
++	CHECK(LogisticsHubManager::GetHub(1)->total_deposited == 0);
++	station->loading_vehicles.clear();
++	_cargo_payment_pool.CleanPool();
++	_vehicle_pool.CleanPool();
++}
++
+ TEST_CASE("Production gameplay - station facility survives actual save and reload", "[production-gameplay]")
+ {
+ 	Station *station = SetupProductionGameplay();

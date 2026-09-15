@@ -3,10 +3,37 @@
 Status: **CANONICAL**  
 As of: **2026-09-15**
 
-Audited implementation commit: `a6b79add0362b847ce01457c7875ae21a5523157`
+Audited implementation commit: `abbcd7e07737bcd83c3f830f539313a45bef5f01`
 Audited branch: `fix/portal-gate-lifecycle-crashes`
 
 This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status.
+
+## Current recovery decision
+
+The [master recovery plan](RECOVERY_PLAN_2026-09-15.md) is the single delivery plan.
+The [feature matrix](FEATURE_UI_UAT_COVERAGE.md), [defect register](CRITICAL_BUG_REVIEW_2026-09-15.md)
+and [player UAT](../demo/ALL-FEATURES-UAT.md) govern current acceptance. Feature
+expansion is paused pending crash/conservation/authority and vertical-slice gates.
+No new sprint sequence is assigned.
+
+User-confirmed Blueprint **placement** crash has saved assertion/stack/screenshot
+evidence. The later WP-01 local diff repairs Blueprint preflight/cost/material
+handling, with 78 selected automated tests passing; graphical retest is pending.
+See [WP-01 evidence](audit/2026-09-15/wp01/README.md). The later WP-02 repair makes
+owned-hub freight storage exclusive of consumer delivery and accepts hub-only
+freight; [WP-02 evidence](audit/2026-09-15/wp02/README.md) records regressions and
+save/reload. WP-03 now allocates before hub withdrawal and preserves cargo when
+allocation or a later split fails; [WP-03 evidence](audit/2026-09-15/wp03/README.md)
+records failure injection, reserve/rights boundaries and save/reload.
+Human acceptance is pending. Native external gate entry is
+blocked; HQ/hub/reserve and colonisation workflows are incomplete. These are
+concrete repair needs, not simply “more UAT”. No fix was implemented by this audit.
+Audit checks:306 registered CTests,67 selected existing cases pass, two copied-save
+load smokes pass. No current graphical acceptance or full-suite rerun. Live-main CI later failed three production fixtures; local assert-macro coverage is qualified by OST-TEST-001. Live main
+is ahead of this checkout with CI repairs; see exact refs/checks in master plan.
+
+Historical milestone descriptions below retain previous scope/test claims; they
+must not override this correction or be read as current player acceptance.
 
 ## Current acceptance correction — v1.1 UAT refresh
 
@@ -16,7 +43,7 @@ acceptance claims below. The user's v1.0 ownership failure is reproduced by
 generated gate heads/terminals using OWNER_NONE. v1.1 assigns complete demo
 terminals to human Company 0; ordinary world generation is unchanged.
 
-All human cases start **Not run**, except explicit blockers. Sprint 35's runner
+Current-build human cases remain **Not run**, except explicit blockers; the recorded prior-build Blueprint placement is **Fail**, pending current retest. Sprint 35's runner
 uses manual `federation_dispatch`; natural gate-entry and complete recovery UAT
 remain unproven. Sprint 37 content is not active in the migrated save. Sprint 42
 now has station-based facility construction, delivery, output and lifecycle integration; human chain acceptance is pending. Sprint 38 original
@@ -36,7 +63,7 @@ sprint reports say completed. The v1.1 artifact refresh itself added no missing 
 | **Vision** | Desired direction without an assigned delivery commitment. |
 | **Historical** | Superseded plan or point-in-time evidence retained for traceability. |
 
-The latest blocker-fix validation passes **306/306 CTest cases** (2026-09-15), including production lifecycle and delayed HTTP callback regressions. See [the critical review](CRITICAL_BUG_REVIEW_2026-09-15.md). This automated result does not close the human UAT cases.
+The earlier blocker-fix record reports **306/306 CTest cases** (2026-09-15), including production lifecycle and delayed HTTP callback regressions. See [the critical review](CRITICAL_BUG_REVIEW_2026-09-15.md). This automated result does not close the human UAT cases.
 
 ## Completed spikes and stabilisation gates
 
@@ -77,8 +104,8 @@ The latest blocker-fix validation passes **306/306 CTest cases** (2026-09-15), i
 | 22 | Round-trip order restoration and scheduling | Implemented; in-process automated verified |
 | 23 | Scope, art and UAT audit | Complete historical documentation milestone |
 | 24 | Procedural styling for three showcase biomes and portal palette states | Implemented; automated verified; manual visual evidence outstanding |
-| 25 | Player rail blueprints, portable JSON and deterministic placement | Implemented; automated verified |
-| 26 | Eight built-in CST prefab rail blocks | Implemented; automated verified |
+| 25 | Player rail blueprints, portable JSON and placement | Partial: WP-01 placement and WP-06 parser/I/O repaired locally; capture workflow/routing and graphical acceptance remain |
+| 26 | Eight built-in CST prefab rail blocks | Catalogue implemented; functional routing and complete command parity not accepted |
 | 27 | Trade ledger and federation account/charter UI | Implemented; automated verified |
 | 28 | Guided v0.4 solo UAT for features through Sprint 27 | Playable artifact delivered; manual results are tester-dependent |
 | 29 | Authority API acceptance, persistence, congestion and recovery suite | Protocol accepted; live game-process handoff not proven |
@@ -108,14 +135,17 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Player rail construction | Implemented | Portal terminals, blueprints and eight CST prefabs are present. |
 | Planetary economy | Implemented foundation & 12-cargo chains | Revenue, development, Megacity demand, basic phase/biome restrictions, infrastructure throughput, and 12-cargo Commonwealth multi-world production pipelines (Pipelines A–D) with `PROD` persistence are present. |
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
-| Federation runtime | Implemented & Verified | Independent dedicated servers connect to external Python Universe Authority. Live cross-process consist transfer, departure despawn, network transport, arrival materialization, order restoration, deduplication, and return trip verified in test_sprint35_cross_process.py. |
+| Federation runtime | Partial; repair/acceptance required | Transport exists; runner manually dispatches. External native entry is blocked in source; exact identity/orders/custody and recovery require WP-F1/F2. |
 | Player and operator UI | Implemented through Sprint 41 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, and Commonwealth Tech Tree R&D tab. Operator console commands allow runtime federation link management and status inspection. |
 | Guided UAT | Coverage refreshed; human acceptance pending | v1.1 maps Sprints 1–42, repairs player terminal ownership and hub attachment, and explicitly records blocked concepts. v1.0/v0.4 preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
 | Commonwealth Track B — gameplay/content/art | Partial | In-tree NML industry/cargo pack (`OST\x01`) and CST rolling-stock pack (`OST\x02`) implemented with reproducible Python GRF generator, Tech Tree vehicle gating, and closed 12-cargo loops. Bespoke terrain, flora, portal and arcology art packs remain open for Sprint 38. |
 | Corporate HQ, Stockpiles, Fabrication, Tech Tree & Industry | Implemented; automated verified | Sprints 39–42 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine (`FABR`), Commonwealth Tech Tree R&D manager (`TECH`), and Factorio-scale 12-cargo production chains (`PROD`) across Pipelines A–D. |
 
-## Planned sprints
+## Historical milestone descriptions and remaining art direction
+
+“Completed” labels below reproduce implementation milestones, not current acceptance.
+Use the recovery plan and matrix for open defects/workflow/content gates.
 
 ### Sprint 35 — Real cross-process federation transport [COMPLETED]
 
@@ -163,3 +193,21 @@ These remain ideas rather than incomplete commitments: space combat or planetary
 - Bespoke Sprint 38 art and required biome comparison captures remain outstanding.
 
 See [the critical bug review](CRITICAL_BUG_REVIEW_2026-09-15.md) for the Sprint 37 engine-identity fix and prioritised follow-up.
+
+
+## Recovery supersedes unqualified milestone completion
+
+Finish WP-01 graphical acceptance and WP-02/03 hub delivery/pickup acceptance with
+the rebuilt local executable; the user has reported no further Blueprint crash.
+WP-04 hub binding, station lifecycle and persistence are now repaired locally
+([evidence](audit/2026-09-15/wp04/README.md)); human hub acceptance remains open.
+WP-05 HQ/Directory command authority and outpost-location persistence are also
+repaired locally:95 selected CTests and a native-command TCP server/two-client
+replay pass ([evidence](audit/2026-09-15/wp05/README.md)). Graphical UAT-08/10 and
+full multiplayer join acceptance remain separate. WP-06 Blueprint parser/storage
+safety is now implemented:35 selected CTests and six real I/O fault injections pass
+([evidence](audit/2026-09-15/wp06/README.md)); UAT-04f/g graphical acceptance is pending.
+WP-07 capture and prefab routes is next. Independent provenance work may proceed.
+Do not start Sprint38 art or new features to bypass these gates. The current
+13-cargo content, actual player establishment, durable federation and graphical
+acceptance gaps are detailed in the master plan; preserve original product intent.

@@ -1,5 +1,10 @@
 # Station production gameplay integration — 2026-09-15
 
+> **Recovery audit:** This records implemented integration, not accepted complete
+> gameplay. [OST-HUB-001/002 and OST-CONT-001](CRITICAL_BUG_REVIEW_2026-09-15.md)
+> qualify ordinary consumer/hub conservation and distinct cargo mappings. UAT-14
+> now separates unhubbed P0 and hubbed P1 fixtures; World2 cannot be assumed P0.
+
 ## Player behaviour
 
 An owned rail station can host one processing facility. Its station window

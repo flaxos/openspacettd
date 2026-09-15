@@ -1,0 +1,49 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 301: Hub loading - full packet pool preserves inventory and recovers
+1/1 Test #301: Hub loading - full packet pool preserves inventory and recovers ...***Failed    0.02 sec
+Filters: Hub loading - full packet pool preserves inventory and recovers
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub loading - full packet pool preserves inventory and recovers
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:829
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:846: FAILED:
+  CHECK( StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 100 )
+with expansion:
+  40 == 100
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:847: FAILED:
+  CHECK( LogisticsHubManager::GetHub(hub_id)->total_dispatched == 0 )
+with expansion:
+  60 == 0
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:858: FAILED:
+  CHECK( train->cargo.StoredCount() == 60 )
+with expansion:
+  0 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:860: FAILED:
+  CHECK( StockpileManager::GetStock(WorldID{0}, station->owner, iron) + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 100 )
+with expansion:
+  40 == 100
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 20 | 16 passed | 4 failed
+
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.05 sec
+
+The following tests FAILED:
+	301 - Hub loading - full packet pool preserves inventory and recovers (Failed)
+Errors while running CTest

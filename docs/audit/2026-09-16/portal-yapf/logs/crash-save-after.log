@@ -1,0 +1,7 @@
+Loaded train 18 at (236,246), stopped=false, paused=false, order=1
+Route found; releasing the crash save's tentative depot reservation
+Train resumed for 4096 ticks; tile=(241,245), moved=true
+Filters: Saved portal train resumes native pathfinding
+===============================================================================
+All tests passed (19 assertions in 1 test case)
+

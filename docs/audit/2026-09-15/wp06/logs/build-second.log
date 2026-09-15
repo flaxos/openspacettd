@@ -1,0 +1,36 @@
+ninja: Entering directory `build'
+[1/23] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/22] Generating no_music.obm baseset metadata file
+[3/22] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o
+[4/22] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_manager.cpp.o
+[5/22] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint_validation.cpp.o
+[6/22] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o
+[7/22] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint_storage.cpp.o
+[8/22] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o
+FAILED: CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o 
+/usr/bin/c++ -DGLOBAL_DATA_DIR=\"/usr/local/share/games/openttd\" -DPERSONAL_DIR=\".openttd\" -DPOINTER_IS_64BIT -DUNIX -DWITH_ASSERT -DWITH_CURL -DWITH_FLUIDSYNTH -DWITH_FONTCONFIG -DWITH_FREETYPE -DWITH_HARFBUZZ -DWITH_ICU_I18N -DWITH_ICU_UC -DWITH_LIBLZMA -DWITH_LZO -DWITH_OPENGL -DWITH_OPUSFILE -DWITH_PERSONAL_DIR -DWITH_PNG -DWITH_SDL2 -DWITH_SOXR -DWITH_SSE -DWITH_ZLIB -I/home/flax/games/openspacettd/src/3rdparty/squirrel/include -I/usr/include/harfbuzz -I/home/flax/games/openspacettd/build/generated -I/home/flax/games/openspacettd/build/generated/script/api -I/home/flax/games/openspacettd/src/script/api -I/home/flax/games/openspacettd/build/generated/script -I/home/flax/games/openspacettd/build/generated/script/api/ai -I/home/flax/games/openspacettd/src/script/api/ai -I/home/flax/games/openspacettd/build/generated/script/api/game -I/home/flax/games/openspacettd/src/script/api/game -I/home/flax/games/openspacettd/build/generated/script/api/template -I/home/flax/games/openspacettd/src/script/api/template -isystem /usr/include/SDL2 -isystem /usr/include/freetype2 -isystem /usr/include/opus -isystem /usr/include/ogg -O3 -DNDEBUG -std=c++20 -finput-charset=utf-8 -D_FORTIFY_SOURCE=2 -W -Wall -Wcast-qual -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wformat-security -Wformat=2 -Winit-self -Wnon-virtual-dtor -Wsuggest-override -fno-strict-enums -fno-strict-overflow -Wno-redundant-move -MD -MT CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o -MF CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o.d -o CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o -c /home/flax/games/openspacettd/src/tests/test_blueprint_file_gui.cpp
+/home/flax/games/openspacettd/src/tests/test_blueprint_file_gui.cpp: In function ‘void {anonymous}::SubmitFileQuery(Window*, WidgetID, const std::string&)’:
+/home/flax/games/openspacettd/src/tests/test_blueprint_file_gui.cpp:76:41: error: invalid use of incomplete type ‘struct QueryString’
+   76 |         query->querystrings[WID_QS_TEXT]->text.Assign(value);
+      |                                         ^~
+In file included from /home/flax/games/openspacettd/src/tests/../blueprint/../dropdown_type.h:19,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/../rail_gui.h:14,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/../settings_type.h:25,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/../tile_map.h:16,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/../rail_map.h:17,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/../station_map.h:13,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/../newgrf_station.h:21,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/blueprint.h:16,
+                 from /home/flax/games/openspacettd/src/tests/../blueprint/blueprint_manager.h:11,
+                 from /home/flax/games/openspacettd/src/tests/test_blueprint_file_gui.cpp:6:
+/home/flax/games/openspacettd/src/tests/../blueprint/../window_gui.h:260:8: note: forward declaration of ‘struct QueryString’
+  260 | struct QueryString;
+      |        ^~~~~~~~~~~
+[9/22] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_cst_prefabs.cpp.o
+ninja: build stopped: subcommand failed.

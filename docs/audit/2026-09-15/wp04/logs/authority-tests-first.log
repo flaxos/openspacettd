@@ -1,0 +1,18 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 293: Hub authority - invalid attachments reject query and execute without mutation
+1/6 Test #293: Hub authority - invalid attachments reject query and execute without mutation ...............   Passed    0.03 sec
+    Start 294: Hub authority - explicit and automatic placement share cost and eligibility
+2/6 Test #294: Hub authority - explicit and automatic placement share cost and eligibility .................   Passed    0.02 sec
+    Start 295: Hub authority - automatic placement chooses nearest eligible platform deterministically
+3/6 Test #295: Hub authority - automatic placement chooses nearest eligible platform deterministically .....   Passed    0.02 sec
+    Start 296: Hub authority - platform removal and station deletion retire only invalid bindings
+4/6 Test #296: Hub authority - platform removal and station deletion retire only invalid bindings ..........   Passed    0.02 sec
+    Start 297: Hub authority - native company acquisition transfers attachment and bankruptcy removes it
+5/6 Test #297: Hub authority - native company acquisition transfers attachment and bankruptcy removes it ...   Passed    0.03 sec
+    Start 298: Hub authority - save reload retains valid bindings and retires legacy invalid duplicates
+6/6 Test #298: Hub authority - save reload retains valid bindings and retires legacy invalid duplicates ....   Passed    0.17 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =   0.33 sec

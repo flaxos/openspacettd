@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "portal/production_chain.h"
+#include "portal/logistics_hub.h"
 #include "core/flatset_type.hpp"
 #include "company_func.h"
 #include "company_base.h"
@@ -96,6 +97,7 @@ Station::~Station()
 	}
 
 	ProductionChainManager::RemoveForStation(this->index);
+	LogisticsHubManager::RemoveForStation(this->index);
 
 	while (!this->loading_vehicles.empty()) {
 		this->loading_vehicles.front()->LeaveStation();

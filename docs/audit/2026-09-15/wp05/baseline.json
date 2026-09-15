@@ -1,0 +1,24 @@
+{
+  "directory": "/tmp/openspacettd-wp05-base-ow208ec1",
+  "files": [
+    "src/command_type.h",
+    "src/portal/portal_cmd.h",
+    "src/portal/portal_cmd.cpp",
+    "src/portal/corporate_hq.cpp",
+    "src/portal/corporate_hq.h",
+    "src/portal/corporate_hq_gui.cpp",
+    "src/portal/universe_directory_gui.cpp",
+    "src/portal/universe_authority.h",
+    "src/portal/universe_authority.cpp",
+    "src/lang/english.txt",
+    "src/tests/CMakeLists.txt",
+    "src/tests/test_sprint39_corporate_hq_and_stockpile.cpp",
+    "src/tests/test_sprint32_lifecycle_and_tech.cpp",
+    "src/saveload/planet_sl.cpp"
+  ],
+  "new_files": [
+    "src/tests/test_command_authority.cpp",
+    "src/tests/test_command_authority_network.cpp",
+    "scripts/test_command_authority_network.py"
+  ]
+}

@@ -1,0 +1,148 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 295: Hub unloading - industry cargo has exactly one destination
+1/2 Test #295: Hub unloading - industry cargo has exactly one destination ....***Failed    0.02 sec
+Filters: Hub unloading - industry cargo has exactly one destination
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - industry cargo has exactly one destination
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:641
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:664: FAILED:
+  CHECK( industry->accepted[0].waiting + stock + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 60 )
+with expansion:
+  77 == 60
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:665: FAILED:
+  CHECK( industry->accepted[0].waiting == (has_hub ? 0 : delivered) )
+with expansion:
+  17 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:667: FAILED:
+  CHECK( Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == (has_hub ? 0 : delivered) )
+with expansion:
+  17 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:668: FAILED:
+  CHECK( station->town->received[town_effect].new_act == (has_hub ? 0 : delivered) )
+with expansion:
+  17 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:670: FAILED:
+  CHECK( payment->route_profit == 0 )
+with expansion:
+  62 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:671: FAILED:
+  CHECK( PlanetManager::GetRegion(WorldID{0})->development_score == development )
+with expansion:
+  1 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:664: FAILED:
+  CHECK( industry->accepted[0].waiting + stock + train->cargo.StoredCount() + station->goods[iron].AvailableCount() == 60 )
+with expansion:
+  120 == 60
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:665: FAILED:
+  CHECK( industry->accepted[0].waiting == (has_hub ? 0 : delivered) )
+with expansion:
+  60 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:667: FAILED:
+  CHECK( Company::Get(station->owner)->cur_economy.delivered_cargo[iron] == (has_hub ? 0 : delivered) )
+with expansion:
+  60 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:668: FAILED:
+  CHECK( station->town->received[town_effect].new_act == (has_hub ? 0 : delivered) )
+with expansion:
+  60 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:670: FAILED:
+  CHECK( payment->route_profit == 0 )
+with expansion:
+  218 == 0
+with message:
+  has_hub := true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:671: FAILED:
+  CHECK( PlanetManager::GetRegion(WorldID{0})->development_score == development )
+with expansion:
+  5 == 0
+with message:
+  has_hub := true
+
+===============================================================================
+test cases:  1 |  0 passed |  1 failed
+assertions: 49 | 37 passed | 12 failed
+
+
+    Start 296: Hub unloading - isolated freight hub accepts real unloading
+2/2 Test #296: Hub unloading - isolated freight hub accepts real unloading ...***Failed    0.02 sec
+Filters: Hub unloading - isolated freight hub accepts real unloading
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub unloading - isolated freight hub accepts real unloading
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:683
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:690: FAILED:
+  CHECK( train->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) == 60 )
+with expansion:
+  0 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:692: FAILED:
+  CHECK( StockpileManager::GetStock(WorldID{0}, station->owner, iron) == 60 )
+with expansion:
+  0 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:693: FAILED:
+  CHECK( station->goods[iron].AvailableCount() == 0 )
+with expansion:
+  60 == 0
+
+===============================================================================
+test cases:  1 | 1 failed
+assertions: 12 | 9 passed | 3 failed
+
+
+
+0% tests passed, 2 tests failed out of 2
+
+Total Test time (real) =   0.07 sec
+
+The following tests FAILED:
+	295 - Hub unloading - industry cargo has exactly one destination (Failed)
+	296 - Hub unloading - isolated freight hub accepts real unloading (Failed)
+Errors while running CTest

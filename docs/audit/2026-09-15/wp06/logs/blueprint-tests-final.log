@@ -1,0 +1,66 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+      Start 210: Blueprint Data Model and JSON Round-Trip
+ 1/30 Test #210: Blueprint Data Model and JSON Round-Trip ............................................   Passed    0.03 sec
+      Start 211: Blueprint Rotation 90, 180, 270 and Invariance
+ 2/30 Test #211: Blueprint Rotation 90, 180, 270 and Invariance ......................................   Passed    0.03 sec
+      Start 212: Blueprint Horizontal Flip/Mirror
+ 3/30 Test #212: Blueprint Horizontal Flip/Mirror ....................................................   Passed    0.02 sec
+      Start 213: Blueprint Capture from Game Map
+ 4/30 Test #213: Blueprint Capture from Game Map .....................................................   Passed    0.03 sec
+      Start 214: Blueprint Manager Storage and Builtin Protection
+ 5/30 Test #214: Blueprint Manager Storage and Builtin Protection ....................................   Passed    0.04 sec
+      Start 215: Deterministic Blueprint Placement Command
+ 6/30 Test #215: Deterministic Blueprint Placement Command ...........................................   Passed    0.02 sec
+      Start 216: Blueprint depot quote matches execution
+ 7/30 Test #216: Blueprint depot quote matches execution .............................................   Passed    0.02 sec
+      Start 217: Blueprint rejected placement preserves map money and materials
+ 8/30 Test #217: Blueprint rejected placement preserves map money and materials ......................   Passed    0.05 sec
+      Start 218: Blueprint Mainline placement clears trees with exact fabrication materials
+ 9/30 Test #218: Blueprint Mainline placement clears trees with exact fabrication materials ..........   Passed    0.03 sec
+      Start 219: Blueprint dispatcher charges quote exactly once
+10/30 Test #219: Blueprint dispatcher charges quote exactly once .....................................   Passed    0.02 sec
+      Start 220: Blueprint unsupported station layouts reject without changes
+11/30 Test #220: Blueprint unsupported station layouts reject without changes ........................   Passed    0.04 sec
+      Start 221: Blueprint clearing foundation and signal replacement use canonical costs
+12/30 Test #221: Blueprint clearing foundation and signal replacement use canonical costs ............   Passed    0.03 sec
+      Start 222: Blueprint infrastructure money and materials survive save reload
+13/30 Test #222: Blueprint infrastructure money and materials survive save reload ....................   Passed    0.05 sec
+      Start 223: Blueprint strict JSON schema rejects malformed values
+14/30 Test #223: Blueprint strict JSON schema rejects malformed values ...............................   Passed    0.02 sec
+      Start 224: Blueprint central validity protects transforms
+15/30 Test #224: Blueprint central validity protects transforms ......................................   Passed    0.02 sec
+      Start 225: Blueprint v1 bounds and metadata round trip
+16/30 Test #225: Blueprint v1 bounds and metadata round trip .........................................   Passed    0.04 sec
+      Start 226: Blueprint file export and import preserve content and reject existing destination
+17/30 Test #226: Blueprint file export and import preserve content and reject existing destination ...   Passed    0.03 sec
+      Start 227: Blueprint rename and delete retain actual backing filename
+18/30 Test #227: Blueprint rename and delete retain actual backing filename ..........................   Passed    0.03 sec
+      Start 228: Blueprint malformed files and name collisions leave library and bytes intact
+19/30 Test #228: Blueprint malformed files and name collisions leave library and bytes intact ........   Passed    0.03 sec
+      Start 229: Blueprint failed commit and missing backing file do not mutate memory
+20/30 Test #229: Blueprint failed commit and missing backing file do not mutate memory ...............   Passed    0.02 sec
+      Start 230: Blueprint symlinks and oversized files are skipped without changing real files
+21/30 Test #230: Blueprint symlinks and oversized files are skipped without changing real files ......   Passed    0.02 sec
+      Start 231: Blueprint long names use bounded filenames and NUL paths are rejected
+22/30 Test #231: Blueprint long names use bounded filenames and NUL paths are rejected ...............   Passed    0.03 sec
+      Start 233: CST Prefabs - Complete 8-Layout Catalogue Registration
+23/30 Test #233: CST Prefabs - Complete 8-Layout Catalogue Registration ..............................   Passed    0.02 sec
+      Start 234: CST Prefabs - Structural & Functional Integrity
+24/30 Test #234: CST Prefabs - Structural & Functional Integrity .....................................   Passed    0.02 sec
+      Start 235: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+25/30 Test #235: CST Prefabs - Geometric Transforms & RHD/LHD Invariance .............................   Passed    0.02 sec
+      Start 236: CST Prefabs - Deterministic In-Game Map Placement
+26/30 Test #236: CST Prefabs - Deterministic In-Game Map Placement ...................................   Passed    0.25 sec
+      Start 237: CST Prefabs - Immutability & Builtin Deletion Protection
+27/30 Test #237: CST Prefabs - Immutability & Builtin Deletion Protection ............................   Passed    0.02 sec
+      Start 345: Blueprint_GUI_exports_the_transformed_selection_and_imports_a_real_file
+28/30 Test #345: Blueprint_GUI_exports_the_transformed_selection_and_imports_a_real_file .............   Passed    0.05 sec
+      Start 346: Blueprint_GUI_reports_invalid_imports_collisions_and_export_failures_truthfully
+29/30 Test #346: Blueprint_GUI_reports_invalid_imports_collisions_and_export_failures_truthfully .....   Passed    0.04 sec
+      Start 347: Blueprint_GUI_default_export_remains_separate_from_the_library_scan
+30/30 Test #347: Blueprint_GUI_default_export_remains_separate_from_the_library_scan .................   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 30
+
+Total Test time (real) =   1.14 sec

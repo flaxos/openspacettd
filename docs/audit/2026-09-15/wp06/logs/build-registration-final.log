@@ -1,0 +1,40 @@
+ninja: Entering directory `build'
+[0/1] Re-running CMake...
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Could NOT find unofficial-breakpad (missing: unofficial-breakpad_DIR)
+-- Could NOT find Allegro (missing: Allegro_LIBRARY Allegro_INCLUDE_DIR) 
+-- Found the following ICU libraries:
+--   i18n (optional): /usr/lib/x86_64-linux-gnu/libicui18n.so
+--   uc (optional): /usr/lib/x86_64-linux-gnu/libicuuc.so
+-- Option Package Dependencies - OFF
+-- Option Dedicated - OFF
+-- Option Install FHS - ON
+-- Option Use assert - ON
+-- Option Use NSIS - OFF
+-- Option Survey Key - NOT USED
+-- PNG found -- -DWITH_PNG -- PNG::PNG
+-- ZLIB found -- -DWITH_ZLIB -- ZLIB::ZLIB
+-- LIBLZMA found -- -DWITH_LIBLZMA -- LibLZMA::LibLZMA
+-- LZO found -- -DWITH_LZO -- /usr/include /usr/include -- /usr/lib/x86_64-linux-gnu/liblzo2.so /usr/lib/x86_64-linux-gnu/liblzo2.so
+-- CURL found -- -DWITH_CURL -- /usr/include/x86_64-linux-gnu /usr/include/x86_64-linux-gnu -- /usr/lib/x86_64-linux-gnu/libcurl.so /usr/lib/x86_64-linux-gnu/libcurl.so
+-- Fluidsynth found -- -DWITH_FLUIDSYNTH -- /usr/include /usr/include -- /usr/lib/x86_64-linux-gnu/libfluidsynth.so /usr/lib/x86_64-linux-gnu/libfluidsynth.so
+-- SDL2 found -- -DWITH_SDL2 -- SDL2::SDL2
+-- FREETYPE found -- -DWITH_FREETYPE -- Freetype::Freetype
+-- Fontconfig found -- -DWITH_FONTCONFIG -- Fontconfig::Fontconfig
+-- Harfbuzz found -- -DWITH_HARFBUZZ -- /usr/include/harfbuzz /usr/include/harfbuzz -- /usr/lib/x86_64-linux-gnu/libharfbuzz.so /usr/lib/x86_64-linux-gnu/libharfbuzz.so
+-- ICU_I18N found -- -DWITH_ICU_I18N -- ICU::i18n
+-- ICU_UC found -- -DWITH_ICU_UC -- ICU::uc
+-- OpusFile found -- -DWITH_OPUSFILE -- OpusFile::opusfile
+-- Soxr found -- -DWITH_SOXR -- Soxr::soxr
+-- OpenGL found -- -DWITH_OPENGL -- (via SDL2)
+-- SSE found -- -DWITH_SSE --   --  
+-- Configuring done (0.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/flax/games/openspacettd/build
+[1/4] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS

@@ -5,11 +5,11 @@
 
 ## A. Current State
 
-OpenSpaceTTD is an operational OpenTTD fork with gameplay implementation through Sprint 33. The authoritative current status, evidence boundaries and future sprint assignments are maintained in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). This document defines the stable design and architecture; its older roadmap sections are retained as historical context.
+OpenSpaceTTD is an OpenTTD fork with substantial gameplay implementation and unresolved player blockers. The [recovery plan](RECOVERY_PLAN_2026-09-15.md) governs delivery; earlier test totals and completion claims in this design are historical. The authoritative current status, evidence boundaries and future sprint assignments are maintained in [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). This document defines the stable design and architecture; its older roadmap sections are retained as historical context.
 
 ### Established Codebase Assets
 - **Engine Baseline:** Upstream OpenTTD compiled with full optional library support (SDL2, OpenGL, FreeType, Fontconfig, HarfBuzz, ICU, PNG, ZLIB, LZMA, LZO, CURL, FluidSynth, OpusFile, Soxr).
-- **Test Inventory:** The configured build currently registers 258 CTest cases. The Sprint 34 documentation audit did not rerun them; historical pass counts belong to their recorded sprint commits.
+- **Test Inventory:** The Sprint 34 snapshot registered 258 CTest cases (current audit inventory: 306; see recovery plan for checks actually run). The Sprint 34 documentation audit did not rerun them; historical pass counts belong to their recorded sprint commits.
 - **Core Repository Rules (`AGENTS.md`):** Strict preservation of `TileIndex`, single 2D coordinate space, deterministic simulation, and wormhole-derived portal architecture.
 - **Initial Prototype (`src/portal/`):**
   - `PortalRegistry` implemented in `src/portal/portal_registry.h` / `src/portal/portal_registry.cpp`.

@@ -1,0 +1,21 @@
+ninja: Entering directory `build'
+[1/15] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/14] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_gui.cpp.o
+[3/14] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_cmd.cpp.o
+[4/14] Building CXX object CMakeFiles/openttd_lib.dir/src/rail_cmd.cpp.o
+[5/14] Building CXX object CMakeFiles/openttd_lib.dir/src/rail_gui.cpp.o
+[6/14] Building CXX object CMakeFiles/openttd_lib.dir/src/road_cmd.cpp.o
+[7/14] Building CXX object CMakeFiles/openttd_lib.dir/src/terraform_gui.cpp.o
+[8/14] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_placement_restrictions.cpp.o
+[9/14] Building CXX object CMakeFiles/openttd_lib.dir/src/station_cmd.cpp.o
+[10/14] Linking CXX executable openttd
+[11/14] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_portal_construction.cpp.o
+[12/14] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_spaceports_and_conduits.cpp.o
+[13/14] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_sprint40_fabrication_engine.cpp.o
+[14/14] Linking CXX executable openttd_test

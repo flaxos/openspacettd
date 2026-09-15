@@ -57,10 +57,17 @@ struct BlueprintTile {
 
 /** A self-contained rail blueprint template. */
 struct Blueprint {
+	static constexpr size_t MAX_JSON_BYTES = 2 * 1024 * 1024;
+	static constexpr uint16_t MAX_DIMENSION = 64;
+	static constexpr size_t MAX_TILES = 4096;
+	static constexpr size_t MAX_NAME_BYTES = 256;
+	static constexpr size_t MAX_METADATA_BYTES = 4096;
+	static constexpr size_t MAX_JSON_DEPTH = 16;
 	std::string name = "New Blueprint";            ///< Player-assigned or prefab name.
 	std::string description = "";                  ///< Optional description or operating notes.
 	std::string author = "";                       ///< Creator name or organization.
 	uint32_t version = 1;                          ///< Blueprint format version.
+	uint32_t layout_revision = 1;                  ///< Layout revision, independent of the JSON format; absent in older exports.
 	uint16_t width = 0;                            ///< Footprint size along X axis.
 	uint16_t height = 0;                           ///< Footprint size along Y axis.
 	bool is_builtin = false;                       ///< True if this is a factory prefab (read-only).

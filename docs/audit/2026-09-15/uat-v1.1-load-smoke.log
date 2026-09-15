@@ -1,0 +1,192 @@
+[2026-09-15 20:25:04] dbg: [misc:1] /tmp/openspacettd-audit-20260915/ found as config directory
+[2026-09-15 20:25:04] dbg: [misc:1] /tmp/openspacettd-audit-20260915/ found as personal directory
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_dos_de.obg for base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos_de.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRG1.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos_de.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGI.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos_de.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGC.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos_de.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGH.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos_de.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGT.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_dos_de ([0]) as base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_dos.obg for base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRG1.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGI.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGC.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGH.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGT.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Removing original_dos_de (0) as base graphics set (duplicate, lower version)
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_dos (1) as base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_win.obg for base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRG1R.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGIR.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGCR.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGHR.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base graphicsset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obg
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: TRGTR.GRF
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_windows ([0]) as base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/opengfx/opengfx.obg for base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Adding OpenGFX ([7938]) as base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /usr/local/share/games/openttd/baseset/opengfx/opengfx.obg for base graphics set
+[2026-09-15 20:25:04] dbg: [misc:1] Not adding OpenGFX (7938) as base graphics set (duplicate, lower version)
+[2026-09-15 20:25:04] dbg: [misc:1] Loading blitter...
+[2026-09-15 20:25:04] dbg: [misc:1] Forcing blitter 'null'...
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_dos.obs for base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base soundsset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obs
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: SAMPLE.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_dos ([0]) as base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_win.obs for base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base soundsset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obs
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: SAMPLE.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Not adding original_windows (0) as base sounds set (duplicate, lower version)
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/no_sound.obs for base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Adding NoSound ([2]) as base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /usr/local/share/games/openttd/baseset/opensfx/opensfx.obs for base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Adding OpenSFX ([7974]) as base sounds set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_dos.obm for base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_dos.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_dos ([1]) as base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_win.obm for base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT00.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT02.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT06.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT03.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT12.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT08.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT13.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT14.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT10.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT04.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT01.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT05.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT15.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT11.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT16.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT09.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT18.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT19.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT21.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT17.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT20.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_win.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM_TT07.GM
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_windows ([1]) as base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/orig_tto.obm for base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Loading base musicset details failed: /home/flax/games/openspacettd/build/baseset/orig_tto.obm
+[2026-09-15 20:25:04] dbg: [misc:1]   File is missing: GM-TTO.CAT
+[2026-09-15 20:25:04] dbg: [misc:1] Adding original_tto ([1]) as base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /home/flax/games/openspacettd/build/baseset/no_music.obm for base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Adding NoMusic ([0]) as base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Checking /usr/local/share/games/openttd/baseset/openmsx/openmsx.obm for base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Adding OpenMSX ([7974]) as base music set
+[2026-09-15 20:25:04] dbg: [misc:1] Loading sound effects...
+[2026-09-15 20:25:05] dbg: [misc:1] Loading sound effects...
+[2026-09-15 20:25:05] dbg: [misc:1] Loading sound effects...

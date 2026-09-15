@@ -1,0 +1,3 @@
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-ubuntu--lv  115G  106G  3.7G  97% /home/flax/games/openspacettd
+/dev/mapper/ubuntu--vg-ubuntu--lv  115G  106G  3.7G  97% /tmp

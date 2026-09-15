@@ -150,6 +150,10 @@ TEST_CASE("Sprint 32 Economy - Cargo Delivery and Development Points Accumulatio
 
 TEST_CASE("Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating")
 {
+	(void)MockEnvironment::Instance();
+	_company_pool.CleanPool();
+	Company::CreateAtIndex(CompanyID{0});
+	_current_company = CompanyID{0};
 	PlanetManager::Reset();
 	UniverseAuthorityService::Instance().Reset();
 	Map::Allocate(512, 512);

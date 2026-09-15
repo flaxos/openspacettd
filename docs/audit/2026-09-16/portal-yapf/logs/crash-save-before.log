@@ -1,0 +1,23 @@
+Loaded train 18 at (236,246), stopped=false, paused=false, order=1
+Filters: Saved portal train resumes native pathfinding
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Saved portal train resumes native pathfinding
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:649
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:649: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 12 | 11 passed | 1 failed
+
+timeout: the monitored command dumped core

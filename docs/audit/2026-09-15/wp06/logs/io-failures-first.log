@@ -1,0 +1,31 @@
+open: PASS
+Filters: Blueprint storage injected IO failures preserve the prior file and memory
+===============================================================================
+All tests passed (13 assertions in 1 test case)
+
+write: PASS
+Filters: Blueprint storage injected IO failures preserve the prior file and memory
+===============================================================================
+All tests passed (13 assertions in 1 test case)
+
+fsync: PASS
+Filters: Blueprint storage injected IO failures preserve the prior file and memory
+===============================================================================
+All tests passed (13 assertions in 1 test case)
+
+close: PASS
+Filters: Blueprint storage injected IO failures preserve the prior file and memory
+===============================================================================
+All tests passed (13 assertions in 1 test case)
+
+rename: PASS
+Filters: Blueprint storage injected IO failures preserve the prior file and memory
+===============================================================================
+All tests passed (13 assertions in 1 test case)
+
+link: PASS
+Filters: Blueprint storage injected IO failures preserve the prior file and memory
+===============================================================================
+All tests passed (13 assertions in 1 test case)
+
+Six real IO failure points preserve old bytes and memory, survive reopen, and allow retry: PASS

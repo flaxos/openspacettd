@@ -183,6 +183,10 @@ public:
 	size_t PruneStaleWorlds(uint64_t current_tick, uint64_t timeout_ticks = 300);
 	std::vector<RegisteredWorld> FindWorldsByPhase(WorldPhase phase) const;
 	std::vector<RegisteredWorld> GetWorldDirectory() const;
+	/** Read-only union for GUI; local map phase/name/biome take precedence. */
+	std::vector<RegisteredWorld> GetWorldDirectoryForGUI() const;
+	/** Called by successful world commands after the canonical local region changes. */
+	void SyncLocalWorld(WorldID world_id);
 	bool ColonizeWorld(WorldID world_id, const std::string &outpost_name = "");
 	bool PromoteWorld(WorldID world_id);
 	bool UpdateMegacityStatus(

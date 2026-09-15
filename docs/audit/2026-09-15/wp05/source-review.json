@@ -1,0 +1,32 @@
+{
+  "source_files": {
+    "src/command_type.h": "7f94000de4171fe68dce0b5e753d7ddde4ee797ff8b672e5b2c9d267d5b524be",
+    "src/portal/portal_cmd.h": "ee8904e9d4a3f360db3ae8eb0bc9df6f3b3b240fa6f859b268a84e1c5ceaf99e",
+    "src/portal/portal_cmd.cpp": "0350abf035cd4e106c2be05c6bd8c8f00a70859fea35593f0cafaa8bae2a7264",
+    "src/portal/corporate_hq_gui.cpp": "a3097e54ce183ee9fb5c3663db1b0fc68128697ee97cf68712d57b07649ade77",
+    "src/portal/universe_directory_gui.cpp": "7eab1d644680e59492cfa48786ed42b323c5e0fcef2080a909d64c2e7c241a52",
+    "src/portal/universe_authority.h": "74ea9b4971c8ef64cd43eadb724b6ffd9552d26820aea5bac9c65bb66bd53fa8",
+    "src/portal/universe_authority.cpp": "0f3e70943ce50720f9a2165ab1ea3429edac5318785f0abd34e968aa85f82d6b",
+    "src/saveload/planet_sl.cpp": "eb6769d362eabbc13b0b3331f750a264914a0a901c782b07837f13cee8ecb397"
+  },
+  "hq_review": {
+    "command": "Append ID; CompanySetting, normal test/execute; validate current and target owner/HQ/exact next tier; existing free upgrade; successful execute dirties window",
+    "gui": "Post target tier; no direct manager write; foreign actions disabled/guarded; company zero correctly displayed",
+    "rendering": "OnPaint now calls DrawWidgets after state/count updates; graphical acceptance remains pending"
+  },
+  "directory_review": {
+    "gui": "Readonly merged local/remote view; open/refresh/selection do not write registry; only Post eligible local actions",
+    "commands": "Successful Execute synchronizes registered phase/name/biome to canonical result, retains telemetry; failure/query no sync",
+    "progression": "Existing construction fees and development thresholds unchanged; raw new-town creation remains WP-08"
+  },
+  "baseline_evidence": {
+    "hq": "baseline corporate_hq_gui.cpp directly invokes UpgradeHQTier in WID_CHQ_UPGRADE",
+    "directory": "baseline constructor RegisterWorld; refresh PruneStaleWorlds; ColonizeWorld/PromoteWorld immediately after Post"
+  },
+  "persistence_review": {
+    "finding": "Before fix, real colony reload retained phase/name/money but reset outpost_tile1300 to INVALID_TILE.",
+    "change": "PLNT named U32 outpost_tile with invalid per-row default, saved/loaded explicitly.",
+    "compatibility": "SlTableHeader loads fields by names present in the saved table. Old absent column retains invalid; no guessed legacy location; unchanged field types require no version bump.",
+    "evidence": "All local save tests and all three TCP workers now retain the location; old crash/M1 copies exit0 under real null video."
+  }
+}

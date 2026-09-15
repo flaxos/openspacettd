@@ -1,0 +1,11 @@
+D: denied; frame state company:0:10000000;company:1:10000000;hq:0:1:Authority HQ;world:0:4:10000:Authority world:4294967295;directory:0:4:Authority world;towns:1
+I: denied; frame state company:0:10000000;company:1:10000000;hq:0:1:Authority HQ;world:0:4:10000:Authority world:4294967295;directory:0:4:Authority world;towns:1
+U: accepted; frame state company:0:10000000;company:1:10000000;hq:0:2:Authority HQ;world:0:4:10000:Authority world:4294967295;directory:0:4:Authority world;towns:1
+C: denied; frame state company:0:0;company:1:10000000;hq:0:2:Authority HQ;world:0:4:10000:Authority world:4294967295;directory:0:4:Authority world;towns:1
+C: accepted; frame state company:0:9995000;company:1:10000000;hq:0:2:Authority HQ;world:0:3:10100:Relay Outpost:1300;directory:0:3:Relay Outpost;towns:1
+P: accepted; frame state company:0:9987000;company:1:10000000;hq:0:2:Authority HQ;world:0:2:10350:Relay Outpost:1300;directory:0:2:Relay Outpost;towns:1
+U: denied; frame state company:0:9987000;company:1:10000000;hq:0:2:Authority HQ;world:0:2:10350:Relay Outpost:1300;directory:0:2:Relay Outpost;towns:1
+C: denied; frame state company:0:9987000;company:1:10000000;hq:0:2:Authority HQ;world:0:2:10350:Relay Outpost:1300;directory:0:2:Relay Outpost;towns:1
+V: denied; frame state company:0:9987000;company:1:10000000;hq:0:2:Authority HQ;world:0:2:10350:Relay Outpost:1300;directory:0:2:Relay Outpost;towns:1
+save/reload: company:0:9987000;company:1:10000000;hq:0:2:Authority HQ;world:0:2:10350:Relay Outpost:1300;directory:0:2:Relay Outpost;towns:1
+WP-05 TCP loopback: native server queue and two independent client queues, denial, save/reload equality PASS

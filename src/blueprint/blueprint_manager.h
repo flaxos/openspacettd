@@ -20,7 +20,7 @@ public:
 	static void Initialize();
 
 	/** Rescan the blueprint directory on disk. */
-	static void RescanLibrary();
+	static bool RescanLibrary(std::string *error_msg = nullptr);
 
 	/** Retrieve all currently available blueprints (built-in and player-saved). */
 	static const std::vector<Blueprint> &GetBlueprints();
@@ -29,13 +29,17 @@ public:
 	static const Blueprint *GetBlueprint(size_t index);
 
 	/** Save or update a player blueprint to disk. */
-	static bool SaveBlueprint(const Blueprint &bp);
+	static bool SaveBlueprint(const Blueprint &bp, std::string *error_msg = nullptr);
 
 	/** Delete a player blueprint by index (built-ins cannot be deleted). */
-	static bool DeleteBlueprint(size_t index);
+	static bool DeleteBlueprint(size_t index, std::string *error_msg = nullptr);
 
 	/** Rename a player blueprint by index. */
-	static bool RenameBlueprint(size_t index, const std::string &new_name);
+	static bool RenameBlueprint(size_t index, const std::string &new_name, std::string *error_msg = nullptr);
+
+	static bool ExportToFile(const Blueprint &bp, const std::string &path, std::string *error_msg = nullptr);
+	static bool ImportFromFile(const std::string &path, std::string *error_msg = nullptr);
+	static std::string GetDefaultExportPath(const Blueprint &bp);
 
 	/** Capture the rail infrastructure within the bounding box between start_tile and end_tile. */
 	static std::optional<Blueprint> CaptureArea(TileIndex start_tile, TileIndex end_tile, const std::string &name = "");

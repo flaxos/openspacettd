@@ -1,0 +1,14 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 301: Hub loading - full packet pool preserves inventory and recovers
+1/4 Test #301: Hub loading - full packet pool preserves inventory and recovers .......   Passed    0.02 sec
+    Start 302: Hub loading - capacity reserve and rights boundaries conserve cargo
+2/4 Test #302: Hub loading - capacity reserve and rights boundaries conserve cargo ...   Passed    0.03 sec
+    Start 303: Hub loading - failed pickup survives reload and retries
+3/4 Test #303: Hub loading - failed pickup survives reload and retries ...............   Passed    0.04 sec
+    Start 304: Hub loading - failed packet split keeps cargo available
+4/4 Test #304: Hub loading - failed packet split keeps cargo available ...............   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   0.15 sec

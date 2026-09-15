@@ -1,0 +1,1833 @@
+diff --git a/src/blueprint/blueprint.h b/src/blueprint/blueprint.h
+--- a/src/blueprint/blueprint.h
++++ b/src/blueprint/blueprint.h
+@@ -57,6 +57,12 @@
+ 
+ /** A self-contained rail blueprint template. */
+ struct Blueprint {
++	static constexpr size_t MAX_JSON_BYTES = 2 * 1024 * 1024;
++	static constexpr uint16_t MAX_DIMENSION = 64;
++	static constexpr size_t MAX_TILES = 4096;
++	static constexpr size_t MAX_NAME_BYTES = 256;
++	static constexpr size_t MAX_METADATA_BYTES = 4096;
++	static constexpr size_t MAX_JSON_DEPTH = 16;
+ 	std::string name = "New Blueprint";            ///< Player-assigned or prefab name.
+ 	std::string description = "";                  ///< Optional description or operating notes.
+ 	std::string author = "";                       ///< Creator name or organization.
+diff --git a/src/blueprint/blueprint.cpp b/src/blueprint/blueprint.cpp
+--- a/src/blueprint/blueprint.cpp
++++ b/src/blueprint/blueprint.cpp
+@@ -13,8 +13,122 @@
+ #include "../3rdparty/nlohmann/json.hpp"
+ 
+ #include <algorithm>
++#include <limits>
++#include <set>
++#include <type_traits>
+ 
+ using json = nlohmann::json;
++
++namespace {
++
++/** Reject oversized, deeply nested, or ambiguous input before building a JSON DOM. */
++struct BlueprintJsonPreflight : nlohmann::json_sax<json> {
++	std::vector<std::optional<std::set<std::string>>> scopes;
++	bool null() override { return true; }
++	bool boolean(bool) override { return true; }
++	bool number_integer(number_integer_t) override { return true; }
++	bool number_unsigned(number_unsigned_t) override { return true; }
++	bool number_float(number_float_t, const string_t &) override { return true; }
++	bool string(string_t &) override { return true; }
++	bool binary(binary_t &) override { return false; }
++	bool start_object(std::size_t) override
++	{
++		if (this->scopes.size() >= Blueprint::MAX_JSON_DEPTH) return false;
++		this->scopes.emplace_back(std::set<std::string>{});
++		return true;
++	}
++	bool key(string_t &value) override
++	{
++		return !this->scopes.empty() && this->scopes.back().has_value() && this->scopes.back()->insert(value).second;
++	}
++	bool end_object() override { this->scopes.pop_back(); return true; }
++	bool start_array(std::size_t) override
++	{
++		if (this->scopes.size() >= Blueprint::MAX_JSON_DEPTH) return false;
++		this->scopes.emplace_back(std::nullopt);
++		return true;
++	}
++	bool end_array() override { this->scopes.pop_back(); return true; }
++	bool parse_error(std::size_t, const std::string &, const nlohmann::detail::exception &) override { return false; }
++};
++
++template <typename T> bool ReadInteger(const json &object, const char *key, T &result, uint64_t max_value, bool required = true)
++{
++	if (!object.is_object()) return false;
++	auto it = object.find(key);
++	if (it == object.end()) return !required;
++	if (!it->is_number_integer()) return false;
++	uint64_t value;
++	if (it->is_number_unsigned()) {
++		value = it->get<uint64_t>();
++	} else {
++		int64_t signed_value = it->get<int64_t>();
++		if (signed_value < 0) return false;
++		value = static_cast<uint64_t>(signed_value);
++	}
++	if (value > max_value) return false;
++	result = static_cast<T>(value);
++	return true;
++}
++
++bool ReadString(const json &object, const char *key, std::string &result, size_t max_bytes, bool required = false)
++{
++	if (!object.is_object()) return false;
++	auto it = object.find(key);
++	if (it == object.end()) return !required;
++	if (!it->is_string()) return false;
++	result = it->get<std::string>();
++	return result.size() <= max_bytes;
++}
++
++bool ReadBool(const json &object, const char *key, bool &result)
++{
++	auto it = object.find(key);
++	if (it == object.end()) return true;
++	if (!it->is_boolean()) return false;
++	result = it->get<bool>();
++	return true;
++}
++
++bool ReadTime(const json &object, int64_t &result)
++{
++	auto it = object.find("created_time");
++	if (it == object.end()) return true;
++	if (!it->is_number_integer()) return false;
++	if (it->is_number_unsigned()) {
++		uint64_t value = it->get<uint64_t>();
++		if (value > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) return false;
++		result = static_cast<int64_t>(value);
++	} else {
++		result = it->get<int64_t>();
++	}
++	return true;
++}
++
++bool ValidMetadata(const std::string &s, size_t max_bytes)
++{
++	if (s.size() > max_bytes) return false;
++	for (size_t i = 0; i < s.size();) {
++		unsigned char lead = static_cast<unsigned char>(s[i]);
++		if (lead < 0x80) {
++			if (lead < 0x20 || lead == 0x7F) return false;
++			++i;
++			continue;
++		}
++		size_t trailing = lead >= 0xC2 && lead <= 0xDF ? 1 : lead >= 0xE0 && lead <= 0xEF ? 2 : lead >= 0xF0 && lead <= 0xF4 ? 3 : 0;
++		if (trailing == 0 || trailing >= s.size() - i) return false;
++		unsigned char first = static_cast<unsigned char>(s[i + 1]);
++		if ((first & 0xC0) != 0x80 || (lead == 0xE0 && first < 0xA0) || (lead == 0xED && first >= 0xA0) ||
++			(lead == 0xF0 && first < 0x90) || (lead == 0xF4 && first >= 0x90)) return false;
++		for (size_t j = 2; j <= trailing; ++j) {
++			if ((static_cast<unsigned char>(s[i + j]) & 0xC0) != 0x80) return false;
++		}
++		i += trailing + 1;
++	}
++	return true;
++}
++
++} // namespace
+ 
+ Track RotateTrack90CW(Track track)
+ {
+@@ -82,12 +196,35 @@
+ 
+ bool Blueprint::IsValid() const
+ {
+-	if (this->width == 0 || this->height == 0) return false;
+-	if (this->tiles.empty()) return false;
+-
++	if (this->version != 1 || this->width == 0 || this->height == 0 || this->width > MAX_DIMENSION || this->height > MAX_DIMENSION) return false;
++	if (this->tiles.empty() || this->tiles.size() > MAX_TILES) return false;
++	if (this->name.empty() || !ValidMetadata(this->name, MAX_NAME_BYTES) || !ValidMetadata(this->description, MAX_METADATA_BYTES) || !ValidMetadata(this->author, MAX_METADATA_BYTES)) return false;
++	std::set<std::pair<int16_t, int16_t>> positions;
+ 	for (const auto &tile : this->tiles) {
+ 		if (tile.dx < 0 || tile.dx >= this->width) return false;
+ 		if (tile.dy < 0 || tile.dy >= this->height) return false;
++		if (!positions.emplace(tile.dx, tile.dy).second) return false;
++		if (to_underlying(tile.railtype) >= RAILTYPE_END) return false;
++		switch (tile.type) {
++			case BlueprintTileType::Track: {
++				if (tile.trackbits.base() == 0 || (tile.trackbits.base() & ~TRACK_BIT_ALL.base()) != 0 || tile.signals.size() > static_cast<size_t>(Track::End)) return false;
++				std::set<Track> tracks_with_signals;
++				for (const auto &signal : tile.signals) {
++					if (!IsValidTrack(signal.track) || !tile.trackbits.Test(signal.track) || !tracks_with_signals.insert(signal.track).second) return false;
++					if (signal.sigtype >= SignalType::End || signal.sigvar >= SignalVariant::End) return false;
++					if (signal.signals_copy == 0 || (signal.signals_copy & ~SignalOnTrack(signal.track)) != 0) return false;
++				}
++				if (!tile.signals.empty() && TracksOverlap(tile.trackbits)) return false;
++				break;
++			}
++			case BlueprintTileType::Depot:
++				if (tile.dir >= DiagDirection::End || tile.trackbits.base() != 0 || !tile.signals.empty()) return false;
++				break;
++			case BlueprintTileType::Station:
++				if (tile.axis >= Axis::End || tile.spec_class.base() == UINT16_MAX || tile.trackbits.base() != 0 || !tile.signals.empty()) return false;
++				break;
++			default: return false;
++		}
+ 	}
+ 	return true;
+ }
+@@ -184,50 +321,63 @@
+ std::optional<Blueprint> Blueprint::FromJson(const std::string &json_str)
+ {
+ 	try {
++		if (json_str.empty() || json_str.size() > MAX_JSON_BYTES) return std::nullopt;
++		BlueprintJsonPreflight preflight;
++		if (!json::sax_parse(json_str, &preflight)) return std::nullopt;
+ 		json j = json::parse(json_str);
+-		if (!j.contains("format") || j["format"] != "OpenSpaceTTD_Blueprint") {
+-			return std::nullopt;
+-		}
++		if (!j.is_object() || !j.contains("format") || !j["format"].is_string() || j["format"] != "OpenSpaceTTD_Blueprint") return std::nullopt;
+ 
+ 		Blueprint bp;
+-		bp.version = j.value("version", 1u);
+-		bp.name = j.value("name", "Imported Blueprint");
+-		bp.description = j.value("description", "");
+-		bp.author = j.value("author", "");
+-		bp.width = j.value("width", static_cast<uint16_t>(0));
+-		bp.height = j.value("height", static_cast<uint16_t>(0));
+-		bp.is_builtin = j.value("is_builtin", false);
+-		bp.created_time = j.value("created_time", static_cast<int64_t>(0));
+-
+-		if (!j.contains("tiles") || !j["tiles"].is_array()) {
+-			return std::nullopt;
+-		}
++		if (!ReadInteger(j, "version", bp.version, 1) || !ReadString(j, "name", bp.name, MAX_NAME_BYTES, true) ||
++			!ReadString(j, "description", bp.description, MAX_METADATA_BYTES) || !ReadString(j, "author", bp.author, MAX_METADATA_BYTES) ||
++			!ReadInteger(j, "width", bp.width, MAX_DIMENSION) || !ReadInteger(j, "height", bp.height, MAX_DIMENSION) ||
++			!ReadBool(j, "is_builtin", bp.is_builtin) || !ReadTime(j, bp.created_time)) return std::nullopt;
++		if (!j.contains("tiles") || !j["tiles"].is_array() || j["tiles"].empty() || j["tiles"].size() > MAX_TILES) return std::nullopt;
+ 
+ 		for (const auto &t : j["tiles"]) {
++			if (!t.is_object()) return std::nullopt;
+ 			BlueprintTile tile;
+-			tile.dx = t.value("dx", static_cast<int16_t>(0));
+-			tile.dy = t.value("dy", static_cast<int16_t>(0));
+-			tile.type = static_cast<BlueprintTileType>(t.value("type", static_cast<uint8_t>(0)));
+-			tile.railtype = static_cast<RailType>(t.value("railtype", static_cast<uint8_t>(RAILTYPE_BEGIN)));
++			uint64_t value = 0;
++			if (!ReadInteger(t, "dx", tile.dx, MAX_DIMENSION - 1) || !ReadInteger(t, "dy", tile.dy, MAX_DIMENSION - 1) ||
++				!ReadInteger(t, "type", value, 2)) return std::nullopt;
++			tile.type = static_cast<BlueprintTileType>(value);
++			if (!ReadInteger(t, "railtype", value, RAILTYPE_END - 1)) return std::nullopt;
++			tile.railtype = static_cast<RailType>(value);
+ 
+ 			if (tile.type == BlueprintTileType::Track) {
+-				tile.trackbits = TrackBits{static_cast<uint8_t>(t.value("trackbits", static_cast<uint8_t>(0)))};
+-				if (t.contains("signals") && t["signals"].is_array()) {
++				if (!ReadInteger(t, "trackbits", value, TRACK_BIT_ALL.base())) return std::nullopt;
++				tile.trackbits = TrackBits{static_cast<uint8_t>(value)};
++				if (t.contains("signals")) {
++					if (!t["signals"].is_array() || t["signals"].size() > static_cast<size_t>(Track::End)) return std::nullopt;
+ 					for (const auto &s : t["signals"]) {
++						if (!s.is_object()) return std::nullopt;
+ 						BlueprintSignal sig;
+-						sig.track = static_cast<Track>(s.value("track", static_cast<uint8_t>(0)));
+-						sig.sigtype = static_cast<SignalType>(s.value("sigtype", static_cast<uint8_t>(0)));
+-						sig.sigvar = static_cast<SignalVariant>(s.value("sigvar", static_cast<uint8_t>(0)));
+-						sig.signals_copy = s.value("signals_copy", static_cast<uint8_t>(0));
++						if (!ReadInteger(s, "track", value, to_underlying(Track::End) - 1)) return std::nullopt;
++						sig.track = static_cast<Track>(value);
++						if (!ReadInteger(s, "sigtype", value, to_underlying(SignalType::End) - 1)) return std::nullopt;
++						sig.sigtype = static_cast<SignalType>(value);
++						if (!ReadInteger(s, "sigvar", value, to_underlying(SignalVariant::End) - 1)) return std::nullopt;
++						sig.sigvar = static_cast<SignalVariant>(value);
++						if (!ReadInteger(s, "signals_copy", sig.signals_copy, UINT8_MAX)) return std::nullopt;
+ 						tile.signals.push_back(sig);
+ 					}
+ 				}
+ 			} else if (tile.type == BlueprintTileType::Depot) {
+-				tile.dir = static_cast<DiagDirection>(t.value("dir", static_cast<uint8_t>(0)));
++				if (!ReadInteger(t, "dir", value, to_underlying(DiagDirection::End) - 1)) return std::nullopt;
++				tile.dir = static_cast<DiagDirection>(value);
+ 			} else if (tile.type == BlueprintTileType::Station) {
+-				tile.axis = static_cast<Axis>(t.value("axis", static_cast<uint8_t>(0)));
+-				tile.spec_class = StationClassID{t.value("spec_class", STAT_CLASS_DFLT.base())};
+-				tile.spec_index = t.value("spec_index", static_cast<uint16_t>(0));
++				if (!ReadInteger(t, "axis", value, to_underlying(Axis::End) - 1)) return std::nullopt;
++				tile.axis = static_cast<Axis>(value);
++				if (!ReadInteger(t, "spec_class", value, UINT16_MAX - 1)) return std::nullopt;
++				tile.spec_class = StationClassID{static_cast<uint16_t>(value)};
++				if (!ReadInteger(t, "spec_index", tile.spec_index, UINT16_MAX)) return std::nullopt;
++			}
++			/* Fields for the other tile shapes must not be silently ignored. */
++			for (const char *field : {"trackbits", "signals", "dir", "axis", "spec_class", "spec_index"}) {
++				bool relevant = (tile.type == BlueprintTileType::Track && (std::string(field) == "trackbits" || std::string(field) == "signals")) ||
++					(tile.type == BlueprintTileType::Depot && std::string(field) == "dir") ||
++					(tile.type == BlueprintTileType::Station && (std::string(field) == "axis" || std::string(field) == "spec_class" || std::string(field) == "spec_index"));
++				if (!relevant && t.contains(field)) return std::nullopt;
+ 			}
+ 
+ 			bp.tiles.push_back(tile);
+@@ -242,6 +392,7 @@
+ 
+ Blueprint Blueprint::Rotate(int steps_90_cw) const
+ {
++	if (!this->IsValid()) return Blueprint{};
+ 	int steps = ((steps_90_cw % 4) + 4) % 4;
+ 	if (steps == 0) return *this;
+ 
+@@ -306,11 +457,12 @@
+ 		current = next;
+ 	}
+ 
+-	return current;
++	return current.IsValid() ? current : Blueprint{};
+ }
+ 
+ Blueprint Blueprint::Mirror() const
+ {
++	if (!this->IsValid()) return Blueprint{};
+ 	Blueprint mirrored;
+ 	mirrored.name = this->name;
+ 	mirrored.description = this->description;
+@@ -373,5 +525,5 @@
+ 		mirrored.tiles.push_back(mtile);
+ 	}
+ 
+-	return mirrored;
+-}
++	return mirrored.IsValid() ? mirrored : Blueprint{};
++}
+diff --git a/src/blueprint/blueprint_manager.h b/src/blueprint/blueprint_manager.h
+--- a/src/blueprint/blueprint_manager.h
++++ b/src/blueprint/blueprint_manager.h
+@@ -20,7 +20,7 @@
+ 	static void Initialize();
+ 
+ 	/** Rescan the blueprint directory on disk. */
+-	static void RescanLibrary();
++	static bool RescanLibrary(std::string *error_msg = nullptr);
+ 
+ 	/** Retrieve all currently available blueprints (built-in and player-saved). */
+ 	static const std::vector<Blueprint> &GetBlueprints();
+@@ -29,13 +29,17 @@
+ 	static const Blueprint *GetBlueprint(size_t index);
+ 
+ 	/** Save or update a player blueprint to disk. */
+-	static bool SaveBlueprint(const Blueprint &bp);
++	static bool SaveBlueprint(const Blueprint &bp, std::string *error_msg = nullptr);
+ 
+ 	/** Delete a player blueprint by index (built-ins cannot be deleted). */
+-	static bool DeleteBlueprint(size_t index);
++	static bool DeleteBlueprint(size_t index, std::string *error_msg = nullptr);
+ 
+ 	/** Rename a player blueprint by index. */
+-	static bool RenameBlueprint(size_t index, const std::string &new_name);
++	static bool RenameBlueprint(size_t index, const std::string &new_name, std::string *error_msg = nullptr);
++
++	static bool ExportToFile(const Blueprint &bp, const std::string &path, std::string *error_msg = nullptr);
++	static bool ImportFromFile(const std::string &path, std::string *error_msg = nullptr);
++	static std::string GetDefaultExportPath(const Blueprint &bp);
+ 
+ 	/** Capture the rail infrastructure within the bounding box between start_tile and end_tile. */
+ 	static std::optional<Blueprint> CaptureArea(TileIndex start_tile, TileIndex end_tile, const std::string &name = "");
+diff --git a/src/blueprint/blueprint_manager.cpp b/src/blueprint/blueprint_manager.cpp
+--- a/src/blueprint/blueprint_manager.cpp
++++ b/src/blueprint/blueprint_manager.cpp
+@@ -16,9 +16,48 @@
+ #include <filesystem>
+ #include <fstream>
+ #include <algorithm>
++#include <cerrno>
++#include <cstring>
++#include <fcntl.h>
++#include <sys/stat.h>
++#if defined(_WIN32)
++#include <io.h>
++#include <windows.h>
++#else
++#include <unistd.h>
++#endif
++#include <limits>
++#include <climits>
+ 
+ static std::vector<Blueprint> _blueprints;
+ static std::vector<Blueprint> _builtins;
++static std::vector<std::filesystem::path> _source_paths;
++static unsigned long _temporary_counter = 0;
++
++#if defined(_WIN32)
++using ssize_t = std::ptrdiff_t;
++static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return _wopen(path.c_str(), flags | _O_BINARY, mode); }
++static int StorageClose(int fd) { return _close(fd); }
++static int StorageFstat(int fd, struct stat *st) { return _fstat(fd, st); }
++static bool StorageIsRegular(const struct stat &st) { return (st.st_mode & _S_IFMT) == _S_IFREG; }
++static ssize_t StorageRead(int fd, void *buf, size_t size) { return _read(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
++static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return _write(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
++static int StorageFlush(int fd) { return _commit(fd); }
++static bool StoragePublish(const std::filesystem::path &tmp, const std::filesystem::path &target, bool replace) { return replace ? MoveFileExW(tmp.c_str(), target.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0 : MoveFileExW(tmp.c_str(), target.c_str(), 0) != 0; }
++static std::string StoragePublishFailure() { return std::error_code(static_cast<int>(GetLastError()), std::system_category()).message(); }
++static unsigned long StorageProcessId() { return GetCurrentProcessId(); }
++#else
++static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return open(path.c_str(), flags | O_NOFOLLOW, mode); }
++static int StorageClose(int fd) { return close(fd); }
++static int StorageFstat(int fd, struct stat *st) { return fstat(fd, st); }
++static bool StorageIsRegular(const struct stat &st) { return S_ISREG(st.st_mode); }
++static ssize_t StorageRead(int fd, void *buf, size_t size) { return read(fd, buf, size); }
++static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return write(fd, buf, size); }
++static int StorageFlush(int fd) { return fsync(fd); }
++static bool StoragePublish(const std::filesystem::path &tmp, const std::filesystem::path &target, bool replace) { if (replace) return rename(tmp.c_str(), target.c_str()) == 0; if (link(tmp.c_str(), target.c_str()) != 0) return false; unlink(tmp.c_str()); return true; }
++static std::string StoragePublishFailure() { return std::strerror(errno); }
++static unsigned long StorageProcessId() { return getpid(); }
++#endif
+ static bool _initialized = false;
+ 
+ static std::string CleanBlueprintFilename(const std::string &name)
+@@ -32,6 +71,7 @@
+ 		}
+ 	}
+ 	if (clean.empty()) clean = "blueprint";
++	if (clean.size() > 100) clean.resize(100);
+ 	return clean;
+ }
+ 
+@@ -603,11 +643,7 @@
+ 
+ void BlueprintManager::Initialize()
+ {
+-	if (_initialized) return;
+-	_initialized = true;
+-
+-	CreateBuiltinCSTPrefabs();
+-	RescanLibrary();
++	if (!_initialized) RescanLibrary();
+ }
+ 
+ size_t BlueprintManager::GetBuiltinCount()
+@@ -628,6 +664,7 @@
+ void BlueprintManager::Reset()
+ {
+ 	_blueprints.clear();
++	_source_paths.clear();
+ 	_builtins.clear();
+ 	_initialized = false;
+ }
+@@ -644,47 +681,161 @@
+ 	});
+ 	if (it == _blueprints.end()) {
+ 		_blueprints.push_back(copy);
+-	}
+-}
+-
+-void BlueprintManager::RescanLibrary()
+-{
+-	_blueprints.clear();
+-
+-	/* Add all registered built-in prefabs first */
+-	for (const auto &b : _builtins) {
+-		_blueprints.push_back(b);
+-	}
+-
+-	/* Locate user blueprint directory */
+-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
+-	if (dir.empty()) {
+-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
+-	}
+-	if (dir.empty()) return;
+-
++		_source_paths.emplace_back();
++	}
++}
++
++static bool StorageError(std::string *error, const std::string &message)
++{
++	if (error != nullptr) *error = message;
++	return false;
++}
++
++static std::filesystem::path LibraryDirectory()
++{
++	try {
++		std::string dir = FioFindDirectory(Subdirectory::Blueprint);
++		if (dir.empty()) dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
++		return OTTD2FS(dir);
++	} catch (const std::exception &) {
++		return {};
++	}
++}
++
++static bool EnsureDirectory(const std::filesystem::path &dir, std::string *error)
++{
+ 	std::error_code ec;
+-	std::filesystem::path dir_path = OTTD2FS(dir);
+-	if (!std::filesystem::exists(dir_path, ec)) {
+-		std::filesystem::create_directories(dir_path, ec);
+-		return;
+-	}
+-
+-	for (const auto &entry : std::filesystem::directory_iterator(dir_path, ec)) {
+-		if (ec) break;
+-		if (!entry.is_regular_file()) continue;
+-		if (entry.path().extension() != ".json") continue;
+-
+-		std::ifstream file(entry.path());
+-		if (!file.is_open()) continue;
+-
+-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
++	if (dir.empty()) return StorageError(error, "Personal blueprint directory is unavailable.");
++	std::filesystem::create_directories(dir, ec);
++	if (ec) return StorageError(error, "Cannot create blueprint directory: " + ec.message());
++	if (!std::filesystem::is_directory(dir, ec) || ec) return StorageError(error, "Blueprint path is not a directory.");
++	return true;
++}
++
++static bool SafeRegularFile(const std::filesystem::path &path, std::string *error)
++{
++	std::error_code ec;
++	auto status = std::filesystem::symlink_status(path, ec);
++	if (ec || !std::filesystem::is_regular_file(status)) return StorageError(error, "Blueprint backing file is missing, unreadable or not a regular file: " + FS2OTTD(path.native()));
++	return true;
++}
++
++static bool ReadBounded(const std::filesystem::path &path, std::string &content, std::string *error)
++{
++	if (path.native().find(std::filesystem::path::value_type{}) != std::filesystem::path::string_type::npos) return StorageError(error, "Blueprint path contains a NUL byte.");
++	if (!SafeRegularFile(path, error)) return false;
++	int fd = StorageOpen(path, O_RDONLY);
++	if (fd < 0) return StorageError(error, "Cannot open blueprint file: " + std::string(std::strerror(errno)));
++	struct stat st{};
++	if (StorageFstat(fd, &st) != 0 || !StorageIsRegular(st) || st.st_size < 0 || static_cast<uint64_t>(st.st_size) > Blueprint::MAX_JSON_BYTES) {
++		StorageClose(fd);
++		return StorageError(error, "Blueprint file is invalid or exceeds 2 MiB.");
++	}
++	std::string result(static_cast<size_t>(st.st_size), '\0');
++	size_t pos = 0;
++	while (pos < result.size()) {
++		ssize_t n = StorageRead(fd, result.data() + pos, result.size() - pos);
++		if (n < 0 && errno == EINTR) continue;
++		if (n <= 0) { int saved = errno; StorageClose(fd); return StorageError(error, n == 0 ? "Blueprint file ended during reading." : "Cannot read blueprint file: " + std::string(std::strerror(saved))); }
++		pos += static_cast<size_t>(n);
++	}
++	char trailing_byte;
++	ssize_t trailing = StorageRead(fd, &trailing_byte, 1);
++	if (trailing != 0) { int saved = errno; StorageClose(fd); return StorageError(error, trailing > 0 ? "Blueprint file grew while reading." : "Cannot finish reading blueprint file: " + std::string(std::strerror(saved))); }
++	if (StorageClose(fd) != 0) return StorageError(error, "Cannot close blueprint file: " + std::string(std::strerror(errno)));
++	content = std::move(result);
++	return true;
++}
++
++/* A temporary file is exclusive and resides beside its destination. Failed writes
++ * leave the previous file and in-memory row untouched. */
++static bool AtomicWrite(const std::filesystem::path &target, const std::string &bytes, bool replace, std::string *error)
++{
++	if (target.native().find(std::filesystem::path::value_type{}) != std::filesystem::path::string_type::npos) return StorageError(error, "Blueprint path contains a NUL byte.");
++	std::error_code ec;
++	if (replace) {
++		if (!SafeRegularFile(target, error)) return false;
++	} else {
++		auto status = std::filesystem::symlink_status(target, ec);
++		if (ec && ec != std::errc::no_such_file_or_directory) return StorageError(error, "Cannot inspect destination: " + ec.message());
++		if (!ec && std::filesystem::exists(status)) return StorageError(error, "Blueprint destination already exists: " + FS2OTTD(target.native()));
++	}
++	std::filesystem::path tmp;
++	int fd = -1;
++	for (int attempt = 0; attempt < 32; ++attempt) {
++		tmp = std::filesystem::path(target.native() + OTTD2FS(".tmp-" + std::to_string(StorageProcessId()) + "-" + std::to_string(++_temporary_counter)));
++		fd = StorageOpen(tmp, O_WRONLY | O_CREAT | O_EXCL, 0600);
++		if (fd >= 0) break;
++		if (errno != EEXIST) return StorageError(error, "Cannot create temporary blueprint file: " + std::string(std::strerror(errno)));
++	}
++	if (fd < 0) return StorageError(error, "Cannot reserve a temporary blueprint file.");
++	auto fail = [&](const std::string &message) {
++		StorageClose(fd);
++		std::filesystem::remove(tmp, ec);
++		return StorageError(error, message);
++	};
++	size_t pos = 0;
++	while (pos < bytes.size()) {
++		ssize_t n = StorageWrite(fd, bytes.data() + pos, bytes.size() - pos);
++		if (n < 0 && errno == EINTR) continue;
++		if (n <= 0) return fail("Cannot write blueprint file: " + std::string(std::strerror(errno)));
++		pos += static_cast<size_t>(n);
++	}
++	if (StorageFlush(fd) != 0) return fail("Cannot flush blueprint file: " + std::string(std::strerror(errno)));
++	if (StorageClose(fd) != 0) {
++		int saved = errno;
++		fd = -1;
++		std::filesystem::remove(tmp, ec);
++		return StorageError(error, "Cannot close blueprint file: " + std::string(std::strerror(saved)));
++	}
++	fd = -1;
++	if (replace && !SafeRegularFile(target, error)) { std::filesystem::remove(tmp, ec); return false; }
++	if (!StoragePublish(tmp, target, replace)) {
++		std::string reason = StoragePublishFailure();
++		std::filesystem::remove(tmp, ec);
++		return StorageError(error, "Cannot commit blueprint file: " + reason);
++	}
++	return true;
++}
++
++bool BlueprintManager::RescanLibrary(std::string *error_msg)
++{
++	if (!_initialized) {
++		_initialized = true;
++		CreateBuiltinCSTPrefabs();
++		_blueprints = _builtins;
++		_source_paths.assign(_blueprints.size(), {});
++	}
++	if (error_msg != nullptr) error_msg->clear();
++	std::vector<Blueprint> next = _builtins;
++	std::vector<std::filesystem::path> paths(next.size());
++	const auto dir = LibraryDirectory();
++	if (!EnsureDirectory(dir, error_msg)) return false;
++	std::error_code ec;
++	std::filesystem::directory_iterator it(dir, ec), end;
++	if (ec) return StorageError(error_msg, "Cannot scan blueprint directory: " + ec.message());
++	std::vector<std::filesystem::path> files;
++	for (; it != end; it.increment(ec)) {
++		if (ec) return StorageError(error_msg, "Cannot scan blueprint directory: " + ec.message());
++		if (it->path().extension() == ".json") files.push_back(it->path());
++	}
++	if (ec) return StorageError(error_msg, "Cannot scan blueprint directory: " + ec.message());
++	std::sort(files.begin(), files.end());
++	std::string skipped;
++	for (const auto &path : files) {
++		std::string content, reason;
++		if (!ReadBounded(path, content, &reason)) { skipped += path.filename().string() + ": " + reason + "\n"; continue; }
+ 		auto bp = Blueprint::FromJson(content);
+-		if (bp.has_value() && bp->IsValid()) {
+-			bp->is_builtin = false;
+-			_blueprints.push_back(*bp);
+-		}
+-	}
++		if (!bp.has_value() || !bp->IsValid()) { skipped += path.filename().string() + ": invalid blueprint JSON\n"; continue; }
++		bp->is_builtin = false;
++		next.push_back(std::move(*bp));
++		paths.push_back(path);
++	}
++	_blueprints = std::move(next);
++	_source_paths = std::move(paths);
++	bool clean = skipped.empty();
++	if (error_msg != nullptr) *error_msg = std::move(skipped);
++	return clean;
+ }
+ 
+ const std::vector<Blueprint> &BlueprintManager::GetBlueprints()
+@@ -700,92 +851,130 @@
+ 	return &_blueprints[index];
+ }
+ 
+-bool BlueprintManager::SaveBlueprint(const Blueprint &bp)
+-{
+-	if (!bp.IsValid()) return false;
+-
+-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
+-	if (dir.empty()) {
+-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
+-	}
+-	if (dir.empty()) return false;
+-
++static size_t FindPlayerName(const std::string &name)
++{
++	for (size_t i = 0; i < _blueprints.size(); ++i) if (!_blueprints[i].is_builtin && _blueprints[i].name == name) return i;
++	return _blueprints.size();
++}
++
++static bool UniquePlayerName(const std::string &name, std::string *error)
++{
++	size_t matches = 0;
++	for (const auto &bp : _blueprints) if (!bp.is_builtin && bp.name == name) ++matches;
++	if (matches > 1) return StorageError(error, "Multiple player blueprints have this name; choose a row and rename it first.");
++	return true;
++}
++
++bool BlueprintManager::SaveBlueprint(const Blueprint &bp, std::string *error_msg)
++{
++	if (!_initialized) Initialize();
++	if (error_msg != nullptr) error_msg->clear();
++	if (!bp.IsValid()) return StorageError(error_msg, "Blueprint is invalid.");
++	if (!UniquePlayerName(bp.name, error_msg)) return false;
++	Blueprint copy = bp;
++	copy.is_builtin = false;
++	std::string bytes = copy.ToJson();
++	if (bytes.size() > Blueprint::MAX_JSON_BYTES) return StorageError(error_msg, "Blueprint JSON exceeds 2 MiB.");
++	auto dir = LibraryDirectory();
++	if (!EnsureDirectory(dir, error_msg)) return false;
++	size_t index = FindPlayerName(copy.name);
++	std::filesystem::path path;
++	if (index < _blueprints.size()) {
++		path = _source_paths[index];
++		if (path.empty()) return StorageError(error_msg, "Blueprint source path is unknown.");
++		if (!AtomicWrite(path, bytes, true, error_msg)) return false;
++		_blueprints[index] = std::move(copy);
++	} else {
++		std::string base = CleanBlueprintFilename(copy.name);
++		if (base.size() > 100) base.resize(100);
++		for (size_t suffix = 0; suffix < 10000; ++suffix) {
++			path = dir / OTTD2FS(base + (suffix == 0 ? "" : "-" + std::to_string(suffix)) + ".json");
++			std::error_code ec;
++			auto status = std::filesystem::symlink_status(path, ec);
++			if (ec && ec != std::errc::no_such_file_or_directory) return StorageError(error_msg, "Cannot inspect blueprint destination: " + ec.message());
++			if (ec == std::errc::no_such_file_or_directory || !std::filesystem::exists(status)) break;
++			if (suffix == 9999) return StorageError(error_msg, "No free blueprint filename is available.");
++		}
++		if (!AtomicWrite(path, bytes, false, error_msg)) return false;
++		_blueprints.push_back(std::move(copy));
++		_source_paths.push_back(path);
++	}
++	return true;
++}
++
++bool BlueprintManager::DeleteBlueprint(size_t index, std::string *error_msg)
++{
++	if (error_msg != nullptr) error_msg->clear();
++	if (!_initialized) Initialize();
++	if (index >= _blueprints.size() || _blueprints[index].is_builtin) return StorageError(error_msg, "Cannot delete a built-in or missing blueprint.");
++	const auto &path = _source_paths[index];
++	if (!SafeRegularFile(path, error_msg)) return false;
+ 	std::error_code ec;
+-	std::filesystem::path dir_path = OTTD2FS(dir);
+-	if (!std::filesystem::exists(dir_path, ec)) {
+-		std::filesystem::create_directories(dir_path, ec);
+-	}
+-
+-	std::string filename = CleanBlueprintFilename(bp.name) + ".json";
+-	std::filesystem::path file_path = dir_path / OTTD2FS(filename);
+-
+-	std::ofstream out(file_path);
+-	if (!out.is_open()) return false;
+-
+-	out << bp.ToJson();
+-	out.close();
+-
+-	/* Update or append in memory list */
+-	auto it = std::find_if(_blueprints.begin(), _blueprints.end(), [&](const Blueprint &b) {
+-		return !b.is_builtin && b.name == bp.name;
+-	});
+-	if (it != _blueprints.end()) {
+-		*it = bp;
+-		it->is_builtin = false;
+-	} else {
+-		Blueprint copy = bp;
+-		copy.is_builtin = false;
+-		_blueprints.push_back(copy);
+-	}
+-
++	bool removed = std::filesystem::remove(path, ec);
++	if (ec || !removed) return StorageError(error_msg, "Cannot delete blueprint file: " + ec.message());
++	_blueprints.erase(_blueprints.begin() + index);
++	_source_paths.erase(_source_paths.begin() + index);
+ 	return true;
+ }
+ 
+-bool BlueprintManager::DeleteBlueprint(size_t index)
+-{
++bool BlueprintManager::RenameBlueprint(size_t index, const std::string &new_name, std::string *error_msg)
++{
++	if (error_msg != nullptr) error_msg->clear();
+ 	if (!_initialized) Initialize();
+-	if (index >= _blueprints.size()) return false;
+-	if (_blueprints[index].is_builtin) return false;
+-
+-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
+-	if (dir.empty()) {
+-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
+-	}
+-
+-	if (!dir.empty()) {
+-		std::string filename = CleanBlueprintFilename(_blueprints[index].name) + ".json";
+-		std::filesystem::path file_path = std::filesystem::path(OTTD2FS(dir)) / OTTD2FS(filename);
++	if (index >= _blueprints.size() || _blueprints[index].is_builtin) return StorageError(error_msg, "Cannot rename a built-in or missing blueprint.");
++	if (new_name.empty()) return StorageError(error_msg, "Blueprint name cannot be empty.");
++	for (size_t i = 0; i < _blueprints.size(); ++i) if (i != index && !_blueprints[i].is_builtin && _blueprints[i].name == new_name) return StorageError(error_msg, "A player blueprint already has this name.");
++	Blueprint copy = _blueprints[index];
++	copy.name = new_name;
++	if (!copy.IsValid()) return StorageError(error_msg, "Renamed blueprint is invalid.");
++	std::string bytes = copy.ToJson();
++	if (bytes.size() > Blueprint::MAX_JSON_BYTES) return StorageError(error_msg, "Blueprint JSON exceeds 2 MiB.");
++	if (!AtomicWrite(_source_paths[index], bytes, true, error_msg)) return false;
++	_blueprints[index] = std::move(copy);
++	return true;
++}
++
++bool BlueprintManager::ExportToFile(const Blueprint &bp, const std::string &path, std::string *error_msg)
++{
++	if (error_msg != nullptr) error_msg->clear();
++	if (!bp.IsValid() || path.empty()) return StorageError(error_msg, "Invalid blueprint or export path.");
++	if (path.find('\0') != std::string::npos) return StorageError(error_msg, "Export path contains a NUL byte.");
++	std::string bytes = bp.ToJson();
++	if (bytes.size() > Blueprint::MAX_JSON_BYTES) return StorageError(error_msg, "Blueprint JSON exceeds 2 MiB.");
++	try {
++		std::filesystem::path target = OTTD2FS(path);
+ 		std::error_code ec;
+-		std::filesystem::remove(file_path, ec);
+-	}
+-
+-	_blueprints.erase(_blueprints.begin() + index);
+-	return true;
+-}
+-
+-bool BlueprintManager::RenameBlueprint(size_t index, const std::string &new_name)
+-{
+-	if (!_initialized) Initialize();
+-	if (index >= _blueprints.size()) return false;
+-	if (_blueprints[index].is_builtin) return false;
+-	if (new_name.empty()) return false;
+-
+-	std::string old_name = _blueprints[index].name;
+-
+-	/* Delete old file */
+-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
+-	if (dir.empty()) {
+-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
+-	}
+-	if (!dir.empty()) {
+-		std::string old_filename = CleanBlueprintFilename(old_name) + ".json";
+-		std::filesystem::path old_path = std::filesystem::path(OTTD2FS(dir)) / OTTD2FS(old_filename);
+-		std::error_code ec;
+-		std::filesystem::remove(old_path, ec);
+-	}
+-
+-	_blueprints[index].name = new_name;
+-	return SaveBlueprint(_blueprints[index]);
++		if (!std::filesystem::is_directory(target.has_parent_path() ? target.parent_path() : std::filesystem::path{"."}, ec) || ec) return StorageError(error_msg, "Export parent directory does not exist.");
++		return AtomicWrite(target, bytes, false, error_msg);
++	} catch (const std::exception &e) {
++		return StorageError(error_msg, "Cannot use export path: " + std::string(e.what()));
++	}
++}
++
++std::string BlueprintManager::GetDefaultExportPath(const Blueprint &bp)
++{
++	try {
++		auto dir = LibraryDirectory();
++		if (dir.empty()) return {};
++		/* Keep exports outside the scanned library so reopening does not import them implicitly. */
++		auto path = (dir / ".." / OTTD2FS(CleanBlueprintFilename(bp.name) + "-export.json")).lexically_normal();
++		return FS2OTTD(path.native());
++	} catch (const std::exception &) {
++		return {};
++	}
++}
++
++bool BlueprintManager::ImportFromFile(const std::string &path, std::string *error_msg)
++{
++	if (error_msg != nullptr) error_msg->clear();
++	if (path.empty() || path.find('\0') != std::string::npos) return StorageError(error_msg, "Import path is empty or contains a NUL byte.");
++	std::string bytes;
++	try {
++		if (!ReadBounded(OTTD2FS(path), bytes, error_msg)) return false;
++	} catch (const std::exception &e) {
++		return StorageError(error_msg, "Cannot use import path: " + std::string(e.what()));
++	}
++	return ImportFromString(bytes, error_msg);
+ }
+ 
+ std::optional<Blueprint> BlueprintManager::CaptureArea(TileIndex start_tile, TileIndex end_tile, const std::string &name)
+@@ -897,5 +1086,7 @@
+ 	}
+ 
+ 	bp->is_builtin = false;
+-	return SaveBlueprint(*bp);
+-}
++	if (!_initialized) Initialize();
++	if (FindPlayerName(bp->name) < _blueprints.size()) return StorageError(error_msg, "A player blueprint already has this name.");
++	return SaveBlueprint(*bp, error_msg);
++}
+diff --git a/src/blueprint/blueprint_gui.cpp b/src/blueprint/blueprint_gui.cpp
+--- a/src/blueprint/blueprint_gui.cpp
++++ b/src/blueprint/blueprint_gui.cpp
+@@ -10,6 +10,7 @@
+ #include "blueprint_manager.h"
+ #include "blueprint_cmd.h"
+ #include "../window_gui.h"
++#include "../window_func.h"
+ #include "../strings_func.h"
+ #include "../viewport_func.h"
+ #include "../gfx_func.h"
+@@ -30,6 +31,8 @@
+ 	Capturing,
+ 	Placing,
+ };
++
++enum class BlueprintQuery : uint8_t { None, Rename, Export, Import };
+ 
+ static constexpr std::initializer_list<NWidgetPart> _nested_blueprint_library_widgets = {
+ 	NWidget(NWID_HORIZONTAL),
+@@ -77,12 +80,16 @@
+ 
+ 	Blueprint working_bp;
+ 	bool has_working_bp = false;
++	BlueprintQuery pending_query = BlueprintQuery::None;
++	size_t pending_index = 0;
++	Blueprint pending_export;
+ 
+ 	BlueprintLibraryWindow(WindowDesc &desc, WindowNumber window_number) : Window(desc)
+ 	{
+ 		this->CreateNestedTree();
+ 		this->vscroll = this->GetScrollbar(WID_BPL_SCROLLBAR);
+-		BlueprintManager::Initialize();
++		std::string scan_error;
++		if (!BlueprintManager::RescanLibrary(&scan_error)) this->status_message = "Library scan: " + scan_error;
+ 		this->FinishInitNested(window_number);
+ 		this->UpdateSelection();
+ 	}
+@@ -107,6 +114,7 @@
+ 
+ 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
+ 	{
++		if (widget == WID_BPL_STATUS_BAR) return this->status_message;
+ 		if (widget == WID_BPL_CAPTION) {
+ 			return GetString(STR_BLUEPRINT_VIEW_CAPTION);
+ 		}
+@@ -206,11 +214,13 @@
+ 		Rect sr = status_wid->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
+ 		TextColour status_tc = (this->mode == BlueprintWindowMode::Placing) ? TextColour::Yellow :
+ 		                       ((this->mode == BlueprintWindowMode::Capturing) ? TextColour::Orange : TextColour::Silver);
+-		DrawString(sr.left + 4, sr.right - 4, sr.top + 4, this->status_message, status_tc);
++		DrawString(sr.left + 4, sr.right - 4, sr.top + 4, this->GetWidgetString(WID_BPL_STATUS_BAR, STR_NULL), status_tc);
+ 	}
+ 
+ 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
+ 	{
++		/* A new library action cancels any earlier path/name query before its target changes. */
++		CloseWindowByClass(WindowClass::QueryString);
+ 		switch (widget) {
+ 			case WID_BPL_LIST_PANEL: {
+ 				const NWidgetBase *list_wid = this->GetWidget<NWidgetBase>(WID_BPL_LIST_PANEL);
+@@ -280,32 +290,40 @@
+ 			}
+ 
+ 			case WID_BPL_RENAME: {
+-				if (!this->has_working_bp) break;
+-				ShowQueryString(this->working_bp.name, STR_BLUEPRINT_RENAME_CAPTION, 64, this, CS_ALPHANUMERAL, QueryStringFlag::EnableDefault);
++				const Blueprint *selected = BlueprintManager::GetBlueprint(this->selected_index);
++				if (selected == nullptr || selected->is_builtin) break;
++				this->pending_query = BlueprintQuery::Rename;
++				this->pending_index = this->selected_index;
++				ShowQueryString(selected->name, STR_BLUEPRINT_RENAME_CAPTION, Blueprint::MAX_NAME_BYTES + 1, this, CS_ALPHANUMERAL, QueryStringFlag::AcceptUnchanged);
+ 				break;
+ 			}
+ 
+ 			case WID_BPL_DELETE: {
+-				if (BlueprintManager::DeleteBlueprint(this->selected_index)) {
++				std::string error;
++				if (BlueprintManager::DeleteBlueprint(this->selected_index, &error)) {
+ 					this->status_message = "Blueprint deleted.";
+ 					this->UpdateSelection();
+-					this->SetDirty();
+-				}
++				} else {
++					this->status_message = "Delete failed: " + error;
++				}
++				this->SetDirty();
+ 				break;
+ 			}
+ 
+ 			case WID_BPL_EXPORT: {
+ 				if (!this->has_working_bp) break;
+-				std::string json_str = this->working_bp.ToJson();
+-				this->status_message = fmt::format("Exported '{}' ({} chars) to template file.", this->working_bp.name, json_str.size());
++				this->pending_query = BlueprintQuery::Export;
++				this->pending_export = this->working_bp;
++				this->status_message = "Export: enter a new JSON file path. Existing files are preserved.";
++				ShowQueryString(BlueprintManager::GetDefaultExportPath(this->working_bp), STR_BLUEPRINT_BUTTON_EXPORT, 4096, this, CS_ALPHANUMERAL, QueryStringFlag::AcceptUnchanged);
+ 				this->SetDirty();
+ 				break;
+ 			}
+ 
+ 			case WID_BPL_IMPORT: {
+-				BlueprintManager::RescanLibrary();
+-				this->UpdateSelection();
+-				this->status_message = "Refreshed blueprint templates from disk.";
++				this->pending_query = BlueprintQuery::Import;
++				this->status_message = "Import: enter the path to a Blueprint JSON file.";
++				ShowQueryString({}, STR_BLUEPRINT_BUTTON_IMPORT, 4096, this, CS_ALPHANUMERAL, {});
+ 				this->SetDirty();
+ 				break;
+ 			}
+@@ -314,14 +332,44 @@
+ 
+ 	void OnQueryTextFinished(std::optional<std::string> str) override
+ 	{
+-		if (str.has_value() && !str->empty()) {
+-			if (BlueprintManager::RenameBlueprint(this->selected_index, *str)) {
+-				this->working_bp.name = *str;
+-				this->status_message = fmt::format("Renamed blueprint to '{}'.", *str);
+-				this->UpdateSelection();
+-				this->SetDirty();
+-			}
+-		}
++		BlueprintQuery query = this->pending_query;
++		this->pending_query = BlueprintQuery::None;
++		if (query == BlueprintQuery::None) return;
++		if (!str.has_value() || str->empty()) {
++			this->status_message = "Operation cancelled.";
++			this->SetDirty();
++			return;
++		}
++		std::string error;
++		switch (query) {
++			case BlueprintQuery::Rename:
++				if (BlueprintManager::RenameBlueprint(this->pending_index, *str, &error)) {
++					this->selected_index = this->pending_index;
++					this->UpdateSelection();
++					this->status_message = fmt::format("Renamed blueprint to '{}'.", *str);
++				} else {
++					this->status_message = "Rename failed: " + error;
++				}
++				break;
++			case BlueprintQuery::Export:
++				if (BlueprintManager::ExportToFile(this->pending_export, *str, &error)) {
++					this->status_message = fmt::format("Exported '{}' to '{}'.", this->pending_export.name, *str);
++				} else {
++					this->status_message = "Export failed: " + error;
++				}
++				break;
++			case BlueprintQuery::Import:
++				if (BlueprintManager::ImportFromFile(*str, &error)) {
++					this->selected_index = BlueprintManager::GetBlueprints().size() - 1;
++					this->UpdateSelection();
++					this->status_message = fmt::format("Imported '{}' from '{}'.", this->working_bp.name, *str);
++				} else {
++					this->status_message = "Import failed: " + error;
++				}
++				break;
++			case BlueprintQuery::None: break;
++		}
++		this->SetDirty();
+ 	}
+ 
+ 	EventState OnKeyPress([[maybe_unused]] char32_t key, uint16_t keycode) override
+@@ -354,14 +402,16 @@
+ 	{
+ 		if (this->mode == BlueprintWindowMode::Capturing) {
+ 			auto bp = BlueprintManager::CaptureArea(start_tile, end_tile);
+-			if (bp.has_value()) {
+-				BlueprintManager::SaveBlueprint(*bp);
++			std::string error;
++			if (bp.has_value() && BlueprintManager::SaveBlueprint(*bp, &error)) {
+ 				this->UpdateSelection();
+ 				this->selected_index = BlueprintManager::GetBlueprints().size() - 1;
+ 				this->working_bp = *bp;
+ 				this->has_working_bp = true;
+ 				this->status_message = fmt::format("Captured and saved '{}' ({}x{}, {} pieces, {} signals).",
+ 					bp->name, bp->width, bp->height, bp->GetTrackPieceCount(), bp->GetSignalCount());
++			} else if (bp.has_value()) {
++				this->status_message = "Capture could not be saved: " + error;
+ 			} else {
+ 				this->status_message = "Capture failed: No rail infrastructure found, or area exceeds 64x64.";
+ 			}
+diff --git a/src/tests/test_blueprint.cpp b/src/tests/test_blueprint.cpp
+--- a/src/tests/test_blueprint.cpp
++++ b/src/tests/test_blueprint.cpp
+@@ -144,13 +144,13 @@
+ 	bp.is_builtin = false;
+ 	bp.created_time = 123456789;
+ 
+-	/* Track tile with cross tracks and path signal */
++	/* Track tile with a native-compatible path signal */
+ 	BlueprintTile t1;
+ 	t1.dx = 1;
+ 	t1.dy = 1;
+ 	t1.type = BlueprintTileType::Track;
+ 	t1.railtype = RAILTYPE_BEGIN;
+-	t1.trackbits = TrackBits{Track::X, Track::Y};
++	t1.trackbits = TrackBits{Track::X};
+ 	BlueprintSignal s1;
+ 	s1.track = Track::X;
+ 	s1.sigtype = SignalType::PathOneWay;
+@@ -181,7 +181,7 @@
+ 
+ 	REQUIRE(bp.IsValid());
+ 	CHECK(bp.GetTileCount() == 3);
+-	CHECK(bp.GetTrackPieceCount() == 2);
++	CHECK(bp.GetTrackPieceCount() == 1);
+ 	CHECK(bp.GetSignalCount() == 1);
+ 	CHECK(bp.GetDepotCount() == 1);
+ 	CHECK(bp.GetStationCount() == 1);
+@@ -207,7 +207,7 @@
+ 	CHECK(loaded.tiles[0].dx == 1);
+ 	CHECK(loaded.tiles[0].dy == 1);
+ 	CHECK(loaded.tiles[0].type == BlueprintTileType::Track);
+-	CHECK(loaded.tiles[0].trackbits == TrackBits{Track::X, Track::Y});
++	CHECK(loaded.tiles[0].trackbits == TrackBits{Track::X});
+ 	REQUIRE(loaded.tiles[0].signals.size() == 1);
+ 	CHECK(loaded.tiles[0].signals[0].track == Track::X);
+ 	CHECK(loaded.tiles[0].signals[0].sigtype == SignalType::PathOneWay);
+@@ -394,6 +394,15 @@
+ TEST_CASE("Blueprint Manager Storage and Builtin Protection", "[blueprint]")
+ {
+ 	SetupBlueprintTestEnv();
++	extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
++	const auto root = std::filesystem::temp_directory_path() / ("ost-bp-legacy-test-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
++	REQUIRE(std::filesystem::create_directory(root));
++	AutoRestoreBackup personal(_searchpaths[Searchpath::PersonalDir], root.string() + "/");
++	AutoRestoreBackup valid_paths(_valid_searchpaths, std::vector<Searchpath>{Searchpath::PersonalDir});
++	struct Cleanup {
++		std::filesystem::path root;
++		~Cleanup() { BlueprintManager::Reset(); std::error_code ec; std::filesystem::remove_all(root, ec); }
++	} cleanup{root};
+ 	BlueprintManager::Initialize();
+ 
+ 	const auto &bps = BlueprintManager::GetBlueprints();
+diff --git a/src/tests/CMakeLists.txt b/src/tests/CMakeLists.txt
+--- a/src/tests/CMakeLists.txt
++++ b/src/tests/CMakeLists.txt
+@@ -40,6 +40,9 @@
+     test_gateway_arrays_and_telemetry.cpp
+     test_sprint24_alien_biomes.cpp
+     test_blueprint.cpp
++    test_blueprint_validation.cpp
++    test_blueprint_storage.cpp
++    test_blueprint_file_gui.cpp
+     test_cst_prefabs.cpp
+     test_sprint27_feature_ui.cpp
+     test_sprint28_guided_uat.cpp
+@@ -59,3 +62,15 @@
+     tilearea.cpp
+     utf8.cpp
+ )
++
++# These editbox cases install a null video driver and must run in isolated
++# processes. Catch's default discovery excludes their hidden tag.
++foreach(case IN ITEMS
++    "Blueprint GUI exports the transformed selection and imports a real file"
++    "Blueprint GUI reports invalid imports collisions and export failures truthfully"
++    "Blueprint GUI default export remains separate from the library scan"
++)
++    string(MAKE_C_IDENTIFIER "${case}" case_name)
++    add_test(NAME "${case_name}" COMMAND openttd_test "${case}")
++    set_tests_properties("${case_name}" PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
++endforeach()
+diff --git a/src/lang/english.txt b/src/lang/english.txt
+--- a/src/lang/english.txt
++++ b/src/lang/english.txt
+@@ -6223,9 +6223,9 @@
+ STR_BLUEPRINT_BUTTON_DELETE                                      :Delete
+ STR_BLUEPRINT_BUTTON_DELETE_TOOLTIP                              :{BLACK}Delete the selected player blueprint from disk
+ STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
+-STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
++STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export the current blueprint to a new JSON file
+ STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
+-STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
++STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Import a Blueprint JSON file by path
+ STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
+ STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
+ STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
+diff --git a/src/lang/english_AU.txt b/src/lang/english_AU.txt
+--- a/src/lang/english_AU.txt
++++ b/src/lang/english_AU.txt
+@@ -6129,9 +6129,9 @@
+ STR_BLUEPRINT_BUTTON_DELETE                                      :Delete
+ STR_BLUEPRINT_BUTTON_DELETE_TOOLTIP                              :{BLACK}Delete the selected player blueprint from disk
+ STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
+-STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
++STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export the current blueprint to a new JSON file
+ STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
+-STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
++STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Import a Blueprint JSON file by path
+ STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
+ STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
+ STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
+diff --git a/src/lang/english_US.txt b/src/lang/english_US.txt
+--- a/src/lang/english_US.txt
++++ b/src/lang/english_US.txt
+@@ -6129,9 +6129,9 @@
+ STR_BLUEPRINT_BUTTON_DELETE                                      :Delete
+ STR_BLUEPRINT_BUTTON_DELETE_TOOLTIP                              :{BLACK}Delete the selected player blueprint from disk
+ STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
+-STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
++STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export the current blueprint to a new JSON file
+ STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
+-STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
++STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Import a Blueprint JSON file by path
+ STR_ERROR_BLUEPRINT_EMPTY                                        :{WHITE}No rail infrastructure in selected area
+ STR_ERROR_BLUEPRINT_TOO_LARGE                                    :{WHITE}Selected area is too large (maximum 64x64 tiles)
+ STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
+diff --git a/src/tests/test_blueprint_validation.cpp b/src/tests/test_blueprint_validation.cpp
+--- /dev/null
++++ b/src/tests/test_blueprint_validation.cpp
+@@ -0,0 +1,148 @@
++/*
++ * This file is part of OpenSpaceTTD.
++ * OpenSpaceTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
++ */
++
++/** @file test_blueprint_validation.cpp Untrusted blueprint admission and transform regressions. */
++
++#include "../stdafx.h"
++#include "../3rdparty/catch2/catch.hpp"
++#include "../blueprint/blueprint.h"
++#include "../signal_func.h"
++#include "../track_func.h"
++
++#include <string>
++#include <vector>
++
++static Blueprint ValidBlueprint()
++{
++	Blueprint bp;
++	bp.name = "Valid layout";
++	bp.width = 1;
++	bp.height = 1;
++	BlueprintTile tile;
++	tile.trackbits = TrackBits{Track::X};
++	bp.tiles.push_back(tile);
++	return bp;
++}
++
++static std::string ValidJson()
++{
++	return ValidBlueprint().ToJson();
++}
++
++TEST_CASE("Blueprint strict JSON schema rejects malformed values", "[blueprint][blueprint-validation]")
++{
++	const std::string base = ValidJson();
++	const std::vector<std::pair<std::string, std::string>> substitutions = {
++		{"\"version\": 1", "\"version\": 2"},
++		{"\"version\": 1", "\"version\": true"},
++		{"\"width\": 1", "\"width\": 1.5"},
++		{"\"width\": 1", "\"width\": 65537"},
++		{"\"height\": 1", "\"height\": -1"},
++		{"\"dx\": 0", "\"dx\": 4294967296"},
++		{"\"type\": 0", "\"type\": 256"},
++		{"\"railtype\": 0", "\"railtype\": 64"},
++		{"\"trackbits\": 1", "\"trackbits\": 128"},
++		{"\"trackbits\": 1", "\"trackbits\": false"},
++		{"\"is_builtin\": false", "\"is_builtin\": 0"},
++		{"\"description\": \"\"", "\"description\": 42"},
++		{"\"created_time\": 0", "\"created_time\": 18446744073709551615"},
++	};
++	for (const auto &[before, after] : substitutions) {
++		std::string changed = base;
++		auto pos = changed.find(before);
++		REQUIRE(pos != std::string::npos);
++		changed.replace(pos, before.size(), after);
++		CHECK_FALSE(Blueprint::FromJson(changed).has_value());
++	}
++
++	const std::vector<std::string> malformed = {
++		R"({"format":"OpenSpaceTTD_Blueprint","version":1,"name":"a","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":0,"railtype":0}]})",
++		R"({"format":"OpenSpaceTTD_Blueprint","version":1,"name":"a","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":1,"railtype":0}]})",
++		R"({"format":"OpenSpaceTTD_Blueprint","version":1,"name":"a","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":2,"railtype":0,"axis":0,"spec_class":0}]})",
++		R"({"format":"OpenSpaceTTD_Blueprint","version":1,"name":"a","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":0,"railtype":0,"trackbits":1,"signals":{}}]})",
++		R"({"format":"OpenSpaceTTD_Blueprint","version":1,"name":"a","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":0,"railtype":0,"trackbits":1,"dir":0}]})",
++		R"({"format":"OpenSpaceTTD_Blueprint","version":1,"version":1,"name":"a","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":0,"railtype":0,"trackbits":1}]})",
++	};
++	for (const auto &input : malformed) CHECK_FALSE(Blueprint::FromJson(input).has_value());
++	Blueprint signaled = ValidBlueprint();
++	signaled.tiles.front().signals.push_back(BlueprintSignal{Track::X, SignalType::Block, SignalVariant::Electric, SignalAlongTrackdir(Trackdir::X_NE)});
++	REQUIRE(signaled.IsValid());
++	const std::string signal_json = signaled.ToJson();
++	const std::vector<std::pair<std::string, std::string>> signal_substitutions = {
++		{"\"track\": 0", "\"track\": 6"},
++		{"\"sigtype\": 0", "\"sigtype\": 6"},
++		{"\"sigvar\": 0", "\"sigvar\": 2"},
++		{"\"signals_copy\": " + std::to_string(signaled.tiles.front().signals.front().signals_copy), "\"signals_copy\": 256"},
++	};
++	for (const auto &[before, after] : signal_substitutions) {
++		std::string changed = signal_json;
++		auto pos = changed.find(before);
++		REQUIRE(pos != std::string::npos);
++		changed.replace(pos, before.size(), after);
++		CHECK_FALSE(Blueprint::FromJson(changed).has_value());
++	}
++	CHECK_FALSE(Blueprint::FromJson(std::string(Blueprint::MAX_JSON_BYTES + 1, ' ')).has_value());
++	CHECK_FALSE(Blueprint::FromJson(std::string(Blueprint::MAX_JSON_DEPTH + 1, '[') + "0" + std::string(Blueprint::MAX_JSON_DEPTH + 1, ']')).has_value());
++}
++
++TEST_CASE("Blueprint central validity protects transforms", "[blueprint][blueprint-validation]")
++{
++	Blueprint valid = ValidBlueprint();
++	REQUIRE(valid.IsValid());
++	CHECK(Blueprint::FromJson(valid.ToJson()).has_value());
++	CHECK(valid.Rotate(1).IsValid());
++	CHECK(valid.Mirror().IsValid());
++
++	std::vector<Blueprint> invalid;
++	Blueprint changed = valid;
++	changed.version = 2; invalid.push_back(changed);
++	changed = valid; changed.width = 65; invalid.push_back(changed);
++	changed = valid; changed.name.clear(); invalid.push_back(changed);
++	changed = valid; changed.tiles.push_back(changed.tiles.front()); invalid.push_back(changed);
++	changed = valid; changed.tiles.front().trackbits = TrackBits{0x80}; invalid.push_back(changed);
++	changed = valid; changed.tiles.front().type = static_cast<BlueprintTileType>(255); invalid.push_back(changed);
++	changed = valid; changed.tiles.front().railtype = INVALID_RAILTYPE; invalid.push_back(changed);
++	changed = valid; changed.tiles.front().signals.push_back(BlueprintSignal{Track::Invalid, SignalType::Block, SignalVariant::Electric, 1}); invalid.push_back(changed);
++	changed = valid; changed.tiles.front().signals.push_back(BlueprintSignal{Track::Y, SignalType::Block, SignalVariant::Electric, 1}); invalid.push_back(changed);
++	changed = valid; changed.tiles.front().signals.push_back(BlueprintSignal{Track::X, SignalType::Block, SignalVariant::Electric, 0}); invalid.push_back(changed);
++	changed = valid; changed.tiles.front().trackbits = TRACK_BIT_CROSS; changed.tiles.front().signals.push_back(BlueprintSignal{Track::X, SignalType::Block, SignalVariant::Electric, SignalAlongTrackdir(Trackdir::X_NE)}); invalid.push_back(changed);
++	for (const auto &bp : invalid) {
++		CHECK_FALSE(bp.IsValid());
++		CHECK_FALSE(bp.Rotate(1).IsValid());
++		CHECK_FALSE(bp.Rotate(0).IsValid());
++		CHECK_FALSE(bp.Mirror().IsValid());
++	}
++}
++
++TEST_CASE("Blueprint v1 bounds and metadata round trip", "[blueprint][blueprint-validation]")
++{
++	Blueprint bp = ValidBlueprint();
++	bp.width = Blueprint::MAX_DIMENSION;
++	bp.height = Blueprint::MAX_DIMENSION;
++	bp.name = std::string(Blueprint::MAX_NAME_BYTES, 'n');
++	bp.description = std::string(Blueprint::MAX_METADATA_BYTES, 'd');
++	bp.author = std::string(Blueprint::MAX_METADATA_BYTES, 'a');
++	bp.tiles.clear();
++	for (int dy = 0; dy < Blueprint::MAX_DIMENSION; ++dy) {
++		for (int dx = 0; dx < Blueprint::MAX_DIMENSION; ++dx) {
++			BlueprintTile tile;
++			tile.dx = dx;
++			tile.dy = dy;
++			tile.trackbits = TrackBits{Track::X};
++			bp.tiles.push_back(tile);
++		}
++	}
++	REQUIRE(bp.tiles.size() == Blueprint::MAX_TILES);
++	REQUIRE(bp.IsValid());
++	std::string output = bp.ToJson();
++	REQUIRE(output.size() <= Blueprint::MAX_JSON_BYTES);
++	auto loaded = Blueprint::FromJson(output);
++	REQUIRE(loaded.has_value());
++	CHECK(loaded->IsValid());
++	CHECK(loaded->tiles.size() == bp.tiles.size());
++	CHECK(loaded->name == bp.name);
++	CHECK(loaded->description == bp.description);
++	CHECK(loaded->author == bp.author);
++}
+diff --git a/src/tests/test_blueprint_storage.cpp b/src/tests/test_blueprint_storage.cpp
+--- /dev/null
++++ b/src/tests/test_blueprint_storage.cpp
+@@ -0,0 +1,222 @@
++/* Storage regressions use a private temporary library, never the player's files. */
++#include "../stdafx.h"
++#include "../3rdparty/catch2/catch.hpp"
++#include "../blueprint/blueprint_manager.h"
++#include "../fileio_func.h"
++#include <filesystem>
++#include <fstream>
++#include <chrono>
++
++
++extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
++
++class PrivateBlueprintLibrary {
++public:
++	std::filesystem::path root;
++	std::string old_personal;
++	std::vector<Searchpath> old_valid;
++	PrivateBlueprintLibrary()
++	{
++		old_personal = _searchpaths[Searchpath::PersonalDir];
++		old_valid = _valid_searchpaths;
++		root = std::filesystem::temp_directory_path() / ("ost-bp-storage-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
++		std::filesystem::create_directories(root / "blueprint");
++		_searchpaths[Searchpath::PersonalDir] = root.string() + "/";
++		_valid_searchpaths = {Searchpath::PersonalDir};
++		BlueprintManager::Reset();
++	}
++	~PrivateBlueprintLibrary()
++	{
++		BlueprintManager::Reset();
++		_valid_searchpaths = std::move(old_valid);
++		_searchpaths[Searchpath::PersonalDir] = std::move(old_personal);
++		std::error_code ec;
++		std::filesystem::remove_all(root, ec);
++	}
++	std::filesystem::path dir() const { return root / "blueprint"; }
++};
++
++static Blueprint StorageBlueprint(const std::string &name)
++{
++	Blueprint bp;
++	bp.name = name;
++	bp.width = bp.height = 1;
++	BlueprintTile tile;
++	tile.type = BlueprintTileType::Track;
++	tile.trackbits = TrackBits{Track::X};
++	bp.tiles.push_back(tile);
++	return bp;
++}
++
++static std::string FileBytes(const std::filesystem::path &path)
++{
++	std::ifstream in(path, std::ios::binary);
++	return {std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
++}
++
++TEST_CASE("Blueprint file export and import preserve content and reject existing destination", "[blueprint][storage]")
++{
++	PrivateBlueprintLibrary fixture;
++	auto bp = StorageBlueprint("Round Trip");
++	auto export_path = fixture.root / "shared.json";
++	std::string error;
++	REQUIRE(BlueprintManager::ExportToFile(bp, export_path.string(), &error));
++	CHECK(FileBytes(export_path) == bp.ToJson());
++	CHECK_FALSE(BlueprintManager::ExportToFile(bp, export_path.string(), &error));
++	CHECK_FALSE(error.empty());
++	CHECK(FileBytes(export_path) == bp.ToJson());
++	REQUIRE(BlueprintManager::ImportFromFile(export_path.string(), &error));
++	CHECK(BlueprintManager::GetBlueprints().back().name == bp.name);
++	CHECK_FALSE(BlueprintManager::ImportFromFile(export_path.string(), &error));
++	CHECK_FALSE(error.empty());
++	CHECK(BlueprintManager::GetBlueprints().back().name == bp.name);
++}
++
++TEST_CASE("Blueprint rename and delete retain actual backing filename", "[blueprint][storage]")
++{
++	PrivateBlueprintLibrary fixture;
++	auto original = StorageBlueprint("Original Name");
++	auto unusual = fixture.dir() / "not-derived-from-name.json";
++	{ std::ofstream out(unusual); out << original.ToJson(); }
++	std::string error;
++	REQUIRE(BlueprintManager::RescanLibrary(&error));
++	size_t index = BlueprintManager::GetBlueprints().size() - 1;
++	REQUIRE(BlueprintManager::GetBlueprint(index)->name == "Original Name");
++	REQUIRE(BlueprintManager::RenameBlueprint(index, "Renamed", &error));
++	CHECK(std::filesystem::exists(unusual));
++	auto reopened = Blueprint::FromJson(FileBytes(unusual));
++	REQUIRE(reopened.has_value());
++	CHECK(reopened->name == "Renamed");
++	CHECK_FALSE(std::filesystem::exists(fixture.dir() / "Renamed.json"));
++	BlueprintManager::Reset();
++	BlueprintManager::Initialize();
++	index = BlueprintManager::GetBlueprints().size() - 1;
++	REQUIRE(BlueprintManager::GetBlueprint(index)->name == "Renamed");
++	REQUIRE(BlueprintManager::DeleteBlueprint(index, &error));
++	CHECK_FALSE(std::filesystem::exists(unusual));
++}
++
++TEST_CASE("Blueprint malformed files and name collisions leave library and bytes intact", "[blueprint][storage]")
++{
++	PrivateBlueprintLibrary fixture;
++	std::string error;
++	auto a = StorageBlueprint("A/B");
++	auto b = StorageBlueprint("A?B");
++	REQUIRE(BlueprintManager::SaveBlueprint(a, &error));
++	REQUIRE(BlueprintManager::SaveBlueprint(b, &error));
++	CHECK(std::filesystem::exists(fixture.dir() / "A_B.json"));
++	CHECK(std::filesystem::exists(fixture.dir() / "A_B-1.json"));
++	auto first_bytes = FileBytes(fixture.dir() / "A_B.json");
++	{ std::ofstream out(fixture.dir() / "broken.json"); out << "not-json"; }
++	CHECK_FALSE(BlueprintManager::RescanLibrary(&error));
++	CHECK(error.find("broken.json") != std::string::npos);
++	CHECK(BlueprintManager::GetBlueprints().size() == BlueprintManager::GetBuiltinCount() + 2);
++	CHECK_FALSE(BlueprintManager::ImportFromFile((fixture.dir() / "broken.json").string(), &error));
++	CHECK(FileBytes(fixture.dir() / "A_B.json") == first_bytes);
++	size_t a_index = BlueprintManager::GetBuiltinCount();
++	while (a_index < BlueprintManager::GetBlueprints().size() && BlueprintManager::GetBlueprint(a_index)->name != "A/B") ++a_index;
++	REQUIRE(a_index < BlueprintManager::GetBlueprints().size());
++	CHECK_FALSE(BlueprintManager::RenameBlueprint(a_index, "A?B", &error));
++	CHECK(FileBytes(fixture.dir() / "A_B.json") == first_bytes);
++}
++
++TEST_CASE("Blueprint failed commit and missing backing file do not mutate memory", "[blueprint][storage]")
++{
++	PrivateBlueprintLibrary fixture;
++	std::string error;
++	auto bp = StorageBlueprint("Cannot Commit");
++	REQUIRE(BlueprintManager::SaveBlueprint(bp, &error));
++	size_t index = BlueprintManager::GetBlueprints().size() - 1;
++	auto path = fixture.dir() / "Cannot Commit.json";
++	auto old_bytes = FileBytes(path);
++	std::filesystem::remove(path);
++	std::filesystem::create_directory(path);
++	CHECK_FALSE(BlueprintManager::RenameBlueprint(index, "New Name", &error));
++	CHECK(BlueprintManager::GetBlueprint(index)->name == "Cannot Commit");
++	CHECK_FALSE(BlueprintManager::DeleteBlueprint(index, &error));
++	CHECK(BlueprintManager::GetBlueprint(index)->name == "Cannot Commit");
++	CHECK_FALSE(BlueprintManager::SaveBlueprint(StorageBlueprint("Cannot Commit"), &error));
++	CHECK(std::filesystem::is_directory(path));
++	CHECK_FALSE(old_bytes.empty());
++}
++
++TEST_CASE("Blueprint symlinks and oversized files are skipped without changing real files", "[blueprint][storage]")
++{
++	PrivateBlueprintLibrary fixture;
++	auto real = fixture.root / "external.json";
++	auto bp = StorageBlueprint("External");
++	{ std::ofstream out(real); out << bp.ToJson(); }
++	auto link_path = fixture.dir() / "linked.json";
++	std::filesystem::create_symlink(real, link_path);
++	std::string error;
++	CHECK_FALSE(BlueprintManager::RescanLibrary(&error));
++	CHECK(error.find("linked.json") != std::string::npos);
++	CHECK(BlueprintManager::GetBlueprints().size() == BlueprintManager::GetBuiltinCount());
++	CHECK_FALSE(BlueprintManager::ImportFromFile(link_path.string(), &error));
++	CHECK(FileBytes(real) == bp.ToJson());
++	{ std::ofstream out(fixture.dir() / "large.json", std::ios::binary); out.seekp(Blueprint::MAX_JSON_BYTES); out.put('x'); }
++	CHECK_FALSE(BlueprintManager::RescanLibrary(&error));
++	CHECK(error.find("large.json") != std::string::npos);
++	CHECK(BlueprintManager::GetBlueprints().size() == BlueprintManager::GetBuiltinCount());
++}
++
++TEST_CASE("Blueprint long names use bounded filenames and NUL paths are rejected", "[blueprint][storage]")
++{
++	PrivateBlueprintLibrary fixture;
++	std::string error;
++	auto bp = StorageBlueprint(std::string(220, 'N'));
++	REQUIRE(BlueprintManager::SaveBlueprint(bp, &error));
++	CHECK(std::filesystem::exists(fixture.dir() / (std::string(100, 'N') + ".json")));
++	CHECK_FALSE(BlueprintManager::ExportToFile(bp, fixture.root.string() + std::string("/bad\0path", 9), &error));
++	CHECK_FALSE(error.empty());
++	CHECK_FALSE(BlueprintManager::ImportFromFile(std::string("bad\0path", 8), &error));
++	CHECK_FALSE(error.empty());
++}
++
++#if defined(__linux__)
++#include <dlfcn.h>
++#include <cstdlib>
++#endif
++
++TEST_CASE("Blueprint storage injected IO failures preserve the prior file and memory", "[blueprint-io-worker]")
++{
++#if defined(__linux__)
++	const char *operation = std::getenv("OST_BP_FAULT_OP");
++	if (operation == nullptr) return; // Invoked by scripts/test_blueprint_io_failures.py.
++	using Arm = void (*)(int);
++	using Hits = int (*)();
++	auto arm = reinterpret_cast<Arm>(dlsym(RTLD_DEFAULT, "BlueprintTestFaultArm"));
++	auto hits = reinterpret_cast<Hits>(dlsym(RTLD_DEFAULT, "BlueprintTestFaultHits"));
++	REQUIRE(arm != nullptr);
++	REQUIRE(hits != nullptr);
++	PrivateBlueprintLibrary fixture;
++	std::string error;
++	auto original = StorageBlueprint("Failure survivor");
++	REQUIRE(BlueprintManager::SaveBlueprint(original, &error));
++	const size_t index = BlueprintManager::GetBlueprints().size() - 1;
++	const auto path = fixture.dir() / "Failure survivor.json";
++	const auto bytes = FileBytes(path);
++	const auto state = BlueprintManager::GetBlueprint(index)->ToJson();
++	arm(1);
++	bool result = std::string_view(operation) == "link" ?
++		BlueprintManager::ExportToFile(original, (fixture.root / "publish.json").string(), &error) :
++		BlueprintManager::RenameBlueprint(index, "Renamed survivor", &error);
++	arm(0);
++	REQUIRE(hits() == 1); // Prove the real file operation reached the requested failure point.
++	CHECK_FALSE(result);
++	CHECK_FALSE(error.empty());
++	CHECK(FileBytes(path) == bytes);
++	CHECK(BlueprintManager::GetBlueprint(index)->ToJson() == state);
++	CHECK_FALSE(std::filesystem::exists(fixture.root / "publish.json"));
++	for (const auto &entry : std::filesystem::directory_iterator(fixture.dir())) {
++		CHECK(entry.path().filename().string().find(".tmp-") == std::string::npos);
++	}
++	BlueprintManager::Reset();
++	BlueprintManager::Initialize();
++	CHECK(BlueprintManager::GetBlueprints().back().ToJson() == state);
++	REQUIRE(BlueprintManager::RenameBlueprint(BlueprintManager::GetBlueprints().size() - 1, "Successful retry", &error));
++	CHECK(BlueprintManager::GetBlueprints().back().name == "Successful retry");
++#else
++	SUCCEED("Linux fault interposer runs through the dedicated script");
++#endif
++}
+diff --git a/src/tests/test_blueprint_file_gui.cpp b/src/tests/test_blueprint_file_gui.cpp
+--- /dev/null
++++ b/src/tests/test_blueprint_file_gui.cpp
+@@ -0,0 +1,190 @@
++/* This file is part of OpenSpaceTTD, licensed under the GNU GPL version 2. */
++/** @file test_blueprint_file_gui.cpp Real file-dialog callback coverage using a private library. */
++#include "../stdafx.h"
++#include "../3rdparty/catch2/catch.hpp"
++#include "mock_environment.h"
++#include "../blueprint/blueprint_manager.h"
++#include "../blueprint/blueprint_gui.h"
++#include "../fileio_func.h"
++#include "../strings_func.h"
++#include "../language.h"
++#include "../gfx_func.h"
++#include "../driver.h"
++#include "../video/video_driver.hpp"
++#include "../window_gui.h"
++#include "../window_func.h"
++#include "../textbuf_gui.h"
++#include "../querystring_gui.h"
++#include "../widgets/blueprint_widget.h"
++#include "../widgets/misc_widget.h"
++#include "../table/strings.h"
++#include "../table/sprites.h"
++#include <filesystem>
++#include <fstream>
++#include <chrono>
++
++extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
++
++namespace {
++class BlueprintFileGUIFixture {
++	decltype(_searchpaths) paths = _searchpaths;
++	std::vector<Searchpath> valid = _valid_searchpaths;
++public:
++	std::filesystem::path root;
++	BlueprintFileGUIFixture()
++	{
++		(void)MockEnvironment::Instance();
++		if (_current_language == nullptr) {
++			_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
++			_valid_searchpaths = {Searchpath::BinaryDir};
++			InitializeLanguagePacks();
++		}
++		UnInitWindowSystem();
++		/* Real editbox focus requires a video driver. These hidden Catch cases are
++		 * run as separate CTest processes, avoiding driver leakage into save tests. */
++		if (VideoDriver::GetInstance() == nullptr) DriverFactoryBase::SelectDriver("null", Driver::Type::Video);
++		_screen.width = _screen.pitch = 1024;
++		_screen.height = 768;
++		ScreenSizeChanged();
++		SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
++		InitWindowSystem();
++		root = std::filesystem::temp_directory_path() / ("ost-bp-gui-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
++		REQUIRE(std::filesystem::create_directory(root));
++		_searchpaths[Searchpath::PersonalDir] = root.string() + "/";
++		_valid_searchpaths = {Searchpath::PersonalDir};
++		BlueprintManager::Reset();
++	}
++	~BlueprintFileGUIFixture()
++	{
++		UnInitWindowSystem();
++		BlueprintManager::Reset();
++		_searchpaths = std::move(paths);
++		_valid_searchpaths = std::move(valid);
++		std::error_code ec;
++		std::filesystem::remove_all(root, ec);
++	}
++};
++
++Window *LibraryWindow()
++{
++	ShowBlueprintLibrary();
++	Window *window = FindWindowById(WindowClass::BlueprintLibrary, 0);
++	REQUIRE(window != nullptr);
++	return window;
++}
++
++void SubmitFileQuery(Window *library, WidgetID action, const std::string &value)
++{
++	library->OnClick({}, action, 1);
++	Window *query = FindWindowByClass(WindowClass::QueryString);
++	REQUIRE(query != nullptr);
++	REQUIRE(query->querystrings.count(WID_QS_TEXT) == 1);
++	query->querystrings[WID_QS_TEXT]->text.Assign(value);
++	query->OnClick({}, WID_QS_OK, 1); // Native query acceptance calls the real library callback.
++}
++
++std::string Status(Window *window) { return window->GetWidgetString(WID_BPL_STATUS_BAR, STR_NULL); }
++std::string Bytes(const std::filesystem::path &path)
++{
++	std::ifstream file(path, std::ios::binary);
++	return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
++}
++}
++
++TEST_CASE("Blueprint GUI exports the transformed selection and imports a real file", "[.][blueprint-file-gui]")
++{
++	BlueprintFileGUIFixture fixture;
++	Window *window = LibraryWindow();
++	const Blueprint original = *BlueprintManager::GetBlueprint(0);
++	window->OnClick({}, WID_BPL_ROTATE, 1);
++	window->OnClick({}, WID_BPL_FLIP, 1);
++	const Blueprint expected = original.Rotate().Mirror();
++	const auto exported = fixture.root / "shared.json";
++	SubmitFileQuery(window, WID_BPL_EXPORT, exported.string());
++	REQUIRE(std::filesystem::is_regular_file(exported));
++	CHECK(Bytes(exported) == expected.ToJson());
++	CHECK(Status(window).find(exported.string()) != std::string::npos);
++	CHECK(Status(window).find("Exported") == 0);
++	const size_t before = BlueprintManager::GetBlueprints().size();
++	SubmitFileQuery(window, WID_BPL_IMPORT, exported.string());
++	REQUIRE(BlueprintManager::GetBlueprints().size() == before + 1);
++	auto imported = BlueprintManager::GetBlueprints().back();
++	CHECK_FALSE(imported.is_builtin);
++	imported.is_builtin = expected.is_builtin;
++	CHECK(imported.ToJson() == expected.ToJson());
++	CHECK(Status(window).find("Imported") == 0);
++	SubmitFileQuery(window, WID_BPL_RENAME, "Imported module");
++	CHECK(BlueprintManager::GetBlueprints().back().name == "Imported module");
++	CHECK(Status(window).find("Renamed") == 0);
++	CloseWindowByClass(WindowClass::BlueprintLibrary);
++	BlueprintManager::Reset();
++	window = LibraryWindow();
++	CHECK(BlueprintManager::GetBlueprints().back().name == "Imported module");
++}
++
++TEST_CASE("Blueprint GUI reports invalid imports collisions and export failures truthfully", "[.][blueprint-file-gui]")
++{
++	BlueprintFileGUIFixture fixture;
++	Window *window = LibraryWindow();
++	const size_t before = BlueprintManager::GetBlueprints().size();
++	const auto malformed = fixture.root / "malformed.json";
++	{ std::ofstream out(malformed); out << "{broken"; }
++	SubmitFileQuery(window, WID_BPL_IMPORT, malformed.string());
++	CHECK(BlueprintManager::GetBlueprints().size() == before);
++	CHECK(Status(window).find("Import failed:") == 0);
++	CHECK(Bytes(malformed) == "{broken");
++	const auto invalid_enum = fixture.root / "invalid-signal.json";
++	{ std::ofstream out(invalid_enum); out << R"({"format":"OpenSpaceTTD_Blueprint","version":1,"name":"Invalid signal","width":1,"height":1,"tiles":[{"dx":0,"dy":0,"type":0,"railtype":0,"trackbits":1,"signals":[{"track":255,"sigtype":0,"sigvar":0,"signals_copy":1}]}]})"; }
++	SubmitFileQuery(window, WID_BPL_IMPORT, invalid_enum.string());
++	CHECK(BlueprintManager::GetBlueprints().size() == before);
++	CHECK(Status(window).find("Import failed:") == 0);
++	SubmitFileQuery(window, WID_BPL_EXPORT, malformed.string());
++	CHECK(Status(window).find("Export failed:") == 0);
++	CHECK(Bytes(malformed) == "{broken");
++	SubmitFileQuery(window, WID_BPL_EXPORT, (fixture.root / "missing" / "new.json").string());
++	CHECK(Status(window).find("Export failed:") == 0);
++	CHECK_FALSE(std::filesystem::exists(fixture.root / "missing"));
++	const auto shared = fixture.root / "valid.json";
++	SubmitFileQuery(window, WID_BPL_EXPORT, shared.string());
++	SubmitFileQuery(window, WID_BPL_IMPORT, shared.string());
++	REQUIRE(BlueprintManager::GetBlueprints().size() == before + 1);
++	const std::string state = BlueprintManager::GetBlueprints().back().ToJson();
++	SubmitFileQuery(window, WID_BPL_IMPORT, shared.string());
++	CHECK(BlueprintManager::GetBlueprints().size() == before + 1);
++	CHECK(BlueprintManager::GetBlueprints().back().ToJson() == state);
++	CHECK(Status(window).find("Import failed:") == 0);
++	window->OnClick({}, WID_BPL_EXPORT, 1);
++	Window *query = FindWindowByClass(WindowClass::QueryString);
++	REQUIRE(query != nullptr);
++	query->OnClick({}, WID_QS_CANCEL, 1);
++	CHECK(Status(window) == "Operation cancelled.");
++	CHECK(BlueprintManager::GetBlueprints().size() == before + 1);
++}
++
++TEST_CASE("Blueprint GUI default export remains separate from the library scan", "[.][blueprint-file-gui]")
++{
++	BlueprintFileGUIFixture fixture;
++	Window *window = LibraryWindow();
++	const size_t before = BlueprintManager::GetBlueprints().size();
++	window->OnClick({}, WID_BPL_EXPORT, 1);
++	Window *query = FindWindowByClass(WindowClass::QueryString);
++	REQUIRE(query != nullptr);
++	const std::filesystem::path path(query->querystrings[WID_QS_TEXT]->text.GetText());
++	CHECK(path.parent_path() == fixture.root);
++	query->OnClick({}, WID_QS_OK, 1);
++	REQUIRE(std::filesystem::is_regular_file(path));
++	CHECK(Status(window).find("Exported") == 0);
++	CloseWindowByClass(WindowClass::BlueprintLibrary);
++	BlueprintManager::Reset();
++	window = LibraryWindow();
++	CHECK(BlueprintManager::GetBlueprints().size() == before);
++	SubmitFileQuery(window, WID_BPL_IMPORT, path.string());
++	CHECK(BlueprintManager::GetBlueprints().size() == before + 1);
++	const auto broken = fixture.root / "blueprint" / "broken.json";
++	{ std::ofstream out(broken); out << "malformed"; }
++	CloseWindowByClass(WindowClass::BlueprintLibrary);
++	window = LibraryWindow();
++	CHECK(Status(window).find("Library scan:") == 0);
++	CHECK(Status(window).find("broken.json") != std::string::npos);
++	CHECK(BlueprintManager::GetBlueprints().size() == before + 1);
++}
+diff --git a/src/tests/blueprint_io_faults.c b/src/tests/blueprint_io_faults.c
+--- /dev/null
++++ b/src/tests/blueprint_io_faults.c
+@@ -0,0 +1,63 @@
++/* Test-only Linux interposer. Built in a temporary directory by the fault runner;
++ * never linked into the game. It fails one armed Blueprint temporary-file call. */
++#define _GNU_SOURCE
++#include <dlfcn.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <stdarg.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++static int armed, hits, partial_write;
++static unsigned char temporary[4096];
++void BlueprintTestFaultArm(int enable) { armed = enable; if (enable) { hits = 0; partial_write = 0; } }
++int BlueprintTestFaultHits(void) { return hits; }
++static int fail(const char *op) {
++ const char *wanted = getenv("OST_BP_FAULT_OP");
++ if (!armed || hits || !wanted || strcmp(wanted, op)) return 0;
++ ++hits; errno = EIO; return 1;
++}
++int open(const char *path, int flags, ...) {
++ int mode = 0;
++ if (flags & O_CREAT) { va_list args; va_start(args, flags); mode = va_arg(args, int); va_end(args); }
++ int (*real)(const char*, int, ...) = dlsym(RTLD_NEXT, "open");
++ if (strstr(path, ".tmp-") && fail("open")) return -1;
++ int fd = real(path, flags, mode);
++ if (fd >= 0 && fd < 4096) temporary[fd] = strstr(path, ".tmp-") != NULL;
++ return fd;
++}
++ssize_t write(int fd, const void *buf, size_t count) {
++ ssize_t (*real)(int,const void*,size_t) = dlsym(RTLD_NEXT,"write");
++ if (fd >= 0 && fd < 4096 && temporary[fd]) {
++  const char *wanted = getenv("OST_BP_FAULT_OP");
++  if (armed && !partial_write && wanted && !strcmp(wanted, "write") && count > 1) {
++   partial_write = 1;
++   return real(fd,buf,count / 2); /* Write actual partial contents before failing the next call. */
++  }
++  if (fail("write")) return -1;
++ }
++ return real(fd,buf,count);
++}
++int fsync(int fd) {
++ int (*real)(int) = dlsym(RTLD_NEXT,"fsync");
++ if (fd >= 0 && fd < 4096 && temporary[fd] && fail("fsync")) return -1;
++ return real(fd);
++}
++int close(int fd) {
++ int (*real)(int) = dlsym(RTLD_NEXT,"close");
++ int injected = fd >= 0 && fd < 4096 && temporary[fd] && fail("close");
++ if (fd >= 0 && fd < 4096) temporary[fd] = 0;
++ int result = real(fd);
++ if (injected) { errno = EIO; return -1; }
++ return result;
++}
++int rename(const char *old, const char *new_path) {
++ int (*real)(const char*,const char*) = dlsym(RTLD_NEXT,"rename");
++ if (strstr(old,".tmp-") && fail("rename")) return -1;
++ return real(old,new_path);
++}
++int link(const char *old, const char *new_path) {
++ int (*real)(const char*,const char*) = dlsym(RTLD_NEXT,"link");
++ if (strstr(old,".tmp-") && fail("link")) return -1;
++ return real(old,new_path);
++}
+diff --git a/scripts/test_blueprint_io_failures.py b/scripts/test_blueprint_io_failures.py
+--- /dev/null
++++ b/scripts/test_blueprint_io_failures.py
+@@ -0,0 +1,39 @@
++#!/usr/bin/env python3
++"""Inject real Blueprint file operation failures in isolated Linux test processes."""
++import argparse
++import os
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("test_binary")
++    args = parser.parse_args()
++    if not sys.platform.startswith("linux"):
++        parser.error("The test-only LD_PRELOAD interposer requires Linux.")
++    root = Path(__file__).resolve().parent.parent
++    binary = Path(args.test_binary).resolve()
++    case = "Blueprint storage injected IO failures preserve the prior file and memory"
++    with tempfile.TemporaryDirectory(prefix="ost-bp-io-faults-") as directory:
++        library = Path(directory) / "faults.so"
++        subprocess.run(["cc", "-shared", "-fPIC", str(root / "src/tests/blueprint_io_faults.c"), "-o", str(library), "-ldl"], check=True, timeout=30)
++        for operation in ("open", "write", "fsync", "close", "rename", "link"):
++            env = os.environ.copy()
++            env["LD_PRELOAD"] = str(library)
++            env["OST_BP_FAULT_OP"] = operation
++            result = subprocess.run([str(binary), case], cwd=root, env=env, capture_output=True, text=True, timeout=30)
++            print(f"{operation}: {'PASS' if result.returncode == 0 else 'FAIL'}", flush=True)
++            print(result.stdout, end="")
++            if result.stderr:
++                print(result.stderr, file=sys.stderr, end="")
++            if result.returncode != 0:
++                return result.returncode
++    print("Six real IO failure points preserve old bytes and memory, survive reopen, and allow retry: PASS")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

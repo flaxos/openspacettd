@@ -20,6 +20,9 @@
 #include "../portal/logistics_hub.h"
 #include "../portal/fabrication_manager.h"
 #include "../portal/world_gen.h"
+#include "../company_base.h"
+#include "../station_base.h"
+#include "../station_map.h"
 #include "../blueprint/blueprint_manager.h"
 #include "../script/api/script_goal.hpp"
 #include "../script/api/script_story_page.hpp"
@@ -204,10 +207,19 @@ TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - Mid/Late Game Fixtures & E
 	FabricationManager::Reset();
 	PlanetManager::Reset();
 	MegacityManager::Reset();
+	Map::Allocate(512, 512);
+	_company_pool.CleanPool();
+	_station_pool.CleanPool();
 
 	WorldID w0{0};
 	WorldID w1{1};
 	CompanyID c0{0};
+	Company::CreateAtIndex(c0);
+	_current_company = c0;
+	PlanetRegion pr0{.id = w0, .name = "World 0", .phase = WorldPhase::Phase1_Core, .biome = WorldBiome::Temperate, .min_x = 0, .min_y = 0, .max_x = 100, .max_y = 100, .development_score = 0};
+	PlanetRegion pr1{.id = w1, .name = "World 1", .phase = WorldPhase::Phase2_Developed, .biome = WorldBiome::AridDesert, .min_x = 110, .min_y = 0, .max_x = 210, .max_y = 100, .development_score = 0};
+	REQUIRE(PlanetManager::RegisterRegion(pr0));
+	REQUIRE(PlanetManager::RegisterRegion(pr1));
 
 	/* 1. Corporate HQ Registration and Tiers */
 	TileIndex hq_tile = TileXY(83, 265);
@@ -245,8 +257,14 @@ TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - Mid/Late Game Fixtures & E
 	CHECK(StockpileManager::GetStock(w0, c0, wire)    == (wire == comp ? 400 : 300));
 
 	/* 3. Logistics Hub & Reserve Floor */
-	TileIndex hub_tile = TileXY(240, 240);
-	StationID st_id{5};
+	TileIndex hub_tile = TileXY(150, 50);
+	REQUIRE(Station::CanAllocateItem());
+	Station *station = Station::Create(hub_tile);
+	station->owner = c0;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(hub_tile, 1, 1);
+	StationID st_id = station->index;
+	MakeRailStation(hub_tile, c0, st_id, Axis::X, 0, RAILTYPE_RAIL);
 	uint32_t hub_id = LogisticsHubManager::RegisterHub(hub_tile, w1, c0, st_id, "Merredin Planetary Logistics Hub");
 	REQUIRE(hub_id != 0);
 
@@ -265,10 +283,6 @@ TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - Mid/Late Game Fixtures & E
 	CHECK(bom_rail.discount_percent == 80);
 
 	/* 5. Planetary Development Scoring */
-	PlanetRegion pr0{.id = w0, .name = "World 0", .phase = WorldPhase::Phase1_Core, .biome = WorldBiome::Temperate, .min_x = 0, .min_y = 0, .max_x = 100, .max_y = 100, .development_score = 0};
-	PlanetRegion pr1{.id = w1, .name = "World 1", .phase = WorldPhase::Phase2_Developed, .biome = WorldBiome::AridDesert, .min_x = 110, .min_y = 0, .max_x = 210, .max_y = 100, .development_score = 0};
-	PlanetManager::RegisterRegion(pr0);
-	PlanetManager::RegisterRegion(pr1);
 
 	PlanetManager::AddDevelopmentScore(w0, 25000);
 	PlanetManager::AddDevelopmentScore(w1, 8000);

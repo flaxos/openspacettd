@@ -1,0 +1,51 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+UpdateCTestConfiguration  from :/home/flax/games/openspacettd/build/DartConfiguration.tcl
+Parse Config file:/home/flax/games/openspacettd/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/flax/games/openspacettd/build/DartConfiguration.tcl
+Parse Config file:/home/flax/games/openspacettd/build/DartConfiguration.tcl
+Test project /home/flax/games/openspacettd/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 214
+    Start 214: Blueprint infrastructure money and materials survive save reload
+
+214: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint infrastructure money and materials survive save reload"
+214: Working Directory: /home/flax/games/openspacettd/build
+214: Test timeout computed to be: 30
+214: Error: Assertion failed at line 1696 of /home/flax/games/openspacettd/src/gfx.cpp: !_cursor.sprites.empty()
+214: Filters: Blueprint infrastructure money and materials survive save reload
+214: 
+214: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+214: openttd_test is a Catch v2.13.10 host application.
+214: Run with -? for options
+214: 
+214: -------------------------------------------------------------------------------
+214: Blueprint infrastructure money and materials survive save reload
+214: -------------------------------------------------------------------------------
+214: /home/flax/games/openspacettd/src/tests/test_blueprint.cpp:769
+214: ...............................................................................
+214: 
+214: /home/flax/games/openspacettd/src/tests/test_blueprint.cpp:769: FAILED:
+214:   {Unknown expression after the reported line}
+214: due to a fatal error condition:
+214:   SIGABRT - Abort (abnormal termination) signal
+214: 
+214: ===============================================================================
+214: test cases:  1 | 1 failed
+214: assertions: 10 | 9 passed | 1 failed
+214: 
+1/1 Test #214: Blueprint infrastructure money and materials survive save reload ...Subprocess aborted***Exception:   0.16 sec
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.18 sec
+
+The following tests FAILED:
+	214 - Blueprint infrastructure money and materials survive save reload (Subprocess aborted)
+Errors while running CTest
+Output from these tests are in: /home/flax/games/openspacettd/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

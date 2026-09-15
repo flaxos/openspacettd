@@ -1,0 +1,222 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+UpdateCTestConfiguration  from :/home/flax/games/openspacettd/build/DartConfiguration.tcl
+Parse Config file:/home/flax/games/openspacettd/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/flax/games/openspacettd/build/DartConfiguration.tcl
+Parse Config file:/home/flax/games/openspacettd/build/DartConfiguration.tcl
+Test project /home/flax/games/openspacettd/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 202
+      Start 202: Blueprint Data Model and JSON Round-Trip
+
+202: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint Data Model and JSON Round-Trip"
+202: Working Directory: /home/flax/games/openspacettd/build
+202: Test timeout computed to be: 30
+202: Filters: Blueprint Data Model and JSON Round-Trip
+202: ===============================================================================
+202: All tests passed (31 assertions in 1 test case)
+202: 
+ 1/17 Test #202: Blueprint Data Model and JSON Round-Trip .....................................   Passed    0.02 sec
+test 203
+      Start 203: Blueprint Rotation 90, 180, 270 and Invariance
+
+203: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint Rotation 90\, 180\, 270 and Invariance"
+203: Working Directory: /home/flax/games/openspacettd/build
+203: Test timeout computed to be: 30
+203: Filters: Blueprint Rotation 90\, 180\, 270 and Invariance
+203: ===============================================================================
+203: All tests passed (34 assertions in 1 test case)
+203: 
+ 2/17 Test #203: Blueprint Rotation 90, 180, 270 and Invariance ...............................   Passed    0.03 sec
+test 204
+      Start 204: Blueprint Horizontal Flip/Mirror
+
+204: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint Horizontal Flip/Mirror"
+204: Working Directory: /home/flax/games/openspacettd/build
+204: Test timeout computed to be: 30
+204: Filters: Blueprint Horizontal Flip/Mirror
+204: ===============================================================================
+204: All tests passed (14 assertions in 1 test case)
+204: 
+ 3/17 Test #204: Blueprint Horizontal Flip/Mirror .............................................   Passed    0.02 sec
+test 205
+      Start 205: Blueprint Capture from Game Map
+
+205: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint Capture from Game Map"
+205: Working Directory: /home/flax/games/openspacettd/build
+205: Test timeout computed to be: 30
+205: Filters: Blueprint Capture from Game Map
+205: ===============================================================================
+205: All tests passed (13 assertions in 1 test case)
+205: 
+ 4/17 Test #205: Blueprint Capture from Game Map ..............................................   Passed    0.02 sec
+test 206
+      Start 206: Blueprint Manager Storage and Builtin Protection
+
+206: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint Manager Storage and Builtin Protection"
+206: Working Directory: /home/flax/games/openspacettd/build
+206: Test timeout computed to be: 30
+206: Filters: Blueprint Manager Storage and Builtin Protection
+206: ===============================================================================
+206: All tests passed (15 assertions in 1 test case)
+206: 
+ 5/17 Test #206: Blueprint Manager Storage and Builtin Protection .............................   Passed    0.03 sec
+test 207
+      Start 207: Deterministic Blueprint Placement Command
+
+207: Test command: /home/flax/games/openspacettd/build/openttd_test "Deterministic Blueprint Placement Command"
+207: Working Directory: /home/flax/games/openspacettd/build
+207: Test timeout computed to be: 30
+207: Filters: Deterministic Blueprint Placement Command
+207: ===============================================================================
+207: All tests passed (22 assertions in 1 test case)
+207: 
+ 6/17 Test #207: Deterministic Blueprint Placement Command ....................................   Passed    0.03 sec
+test 208
+      Start 208: Blueprint depot quote matches execution
+
+208: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint depot quote matches execution"
+208: Working Directory: /home/flax/games/openspacettd/build
+208: Test timeout computed to be: 30
+208: Filters: Blueprint depot quote matches execution
+208: ===============================================================================
+208: All tests passed (12 assertions in 1 test case)
+208: 
+ 7/17 Test #208: Blueprint depot quote matches execution ......................................   Passed    0.02 sec
+test 209
+      Start 209: Blueprint rejected placement preserves map money and materials
+
+209: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint rejected placement preserves map money and materials"
+209: Working Directory: /home/flax/games/openspacettd/build
+209: Test timeout computed to be: 30
+209: Filters: Blueprint rejected placement preserves map money and materials
+209: ===============================================================================
+209: All tests passed (100 assertions in 1 test case)
+209: 
+ 8/17 Test #209: Blueprint rejected placement preserves map money and materials ...............   Passed    0.05 sec
+test 210
+      Start 210: Blueprint Mainline placement clears trees with exact fabrication materials
+
+210: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint Mainline placement clears trees with exact fabrication materials"
+210: Working Directory: /home/flax/games/openspacettd/build
+210: Test timeout computed to be: 30
+210: Filters: Blueprint Mainline placement clears trees with exact fabrication materials
+210: ===============================================================================
+210: All tests passed (94 assertions in 1 test case)
+210: 
+ 9/17 Test #210: Blueprint Mainline placement clears trees with exact fabrication materials ...   Passed    0.03 sec
+test 211
+      Start 211: Blueprint dispatcher charges quote exactly once
+
+211: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint dispatcher charges quote exactly once"
+211: Working Directory: /home/flax/games/openspacettd/build
+211: Test timeout computed to be: 30
+211: Filters: Blueprint dispatcher charges quote exactly once
+211: ===============================================================================
+211: All tests passed (11 assertions in 1 test case)
+211: 
+10/17 Test #211: Blueprint dispatcher charges quote exactly once ..............................   Passed    0.02 sec
+test 212
+      Start 212: Blueprint unsupported station layouts reject without changes
+
+212: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint unsupported station layouts reject without changes"
+212: Working Directory: /home/flax/games/openspacettd/build
+212: Test timeout computed to be: 30
+212: Filters: Blueprint unsupported station layouts reject without changes
+212: ===============================================================================
+212: All tests passed (46 assertions in 1 test case)
+212: 
+11/17 Test #212: Blueprint unsupported station layouts reject without changes .................   Passed    0.04 sec
+test 213
+      Start 213: Blueprint clearing foundation and signal replacement use canonical costs
+
+213: Test command: /home/flax/games/openspacettd/build/openttd_test "Blueprint clearing foundation and signal replacement use canonical costs"
+213: Working Directory: /home/flax/games/openspacettd/build
+213: Test timeout computed to be: 30
+213: Filters: Blueprint clearing foundation and signal replacement use canonical costs
+213: ===============================================================================
+213: All tests passed (37 assertions in 1 test case)
+213: 
+12/17 Test #213: Blueprint clearing foundation and signal replacement use canonical costs .....   Passed    0.04 sec
+test 214
+      Start 214: CST Prefabs - Complete 8-Layout Catalogue Registration
+
+214: Test command: /home/flax/games/openspacettd/build/openttd_test "CST Prefabs - Complete 8-Layout Catalogue Registration"
+214: Working Directory: /home/flax/games/openspacettd/build
+214: Test timeout computed to be: 30
+214: Filters: CST Prefabs - Complete 8-Layout Catalogue Registration
+214: ===============================================================================
+214: All tests passed (49 assertions in 1 test case)
+214: 
+13/17 Test #214: CST Prefabs - Complete 8-Layout Catalogue Registration .......................   Passed    0.02 sec
+test 215
+      Start 215: CST Prefabs - Structural & Functional Integrity
+
+215: Test command: /home/flax/games/openspacettd/build/openttd_test "CST Prefabs - Structural & Functional Integrity"
+215: Working Directory: /home/flax/games/openspacettd/build
+215: Test timeout computed to be: 30
+215: Filters: CST Prefabs - Structural & Functional Integrity
+215: ===============================================================================
+215: All tests passed (42 assertions in 1 test case)
+215: 
+14/17 Test #215: CST Prefabs - Structural & Functional Integrity ..............................   Passed    0.02 sec
+test 216
+      Start 216: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+
+216: Test command: /home/flax/games/openspacettd/build/openttd_test "CST Prefabs - Geometric Transforms & RHD/LHD Invariance"
+216: Working Directory: /home/flax/games/openspacettd/build
+216: Test timeout computed to be: 30
+216: Filters: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+216: ===============================================================================
+216: All tests passed (184 assertions in 1 test case)
+216: 
+15/17 Test #216: CST Prefabs - Geometric Transforms & RHD/LHD Invariance ......................   Passed    0.02 sec
+test 217
+      Start 217: CST Prefabs - Deterministic In-Game Map Placement
+
+217: Test command: /home/flax/games/openspacettd/build/openttd_test "CST Prefabs - Deterministic In-Game Map Placement"
+217: Working Directory: /home/flax/games/openspacettd/build
+217: Test timeout computed to be: 30
+217: Filters: CST Prefabs - Deterministic In-Game Map Placement
+217: ===============================================================================
+217: All tests passed (26512 assertions in 1 test case)
+217: 
+16/17 Test #217: CST Prefabs - Deterministic In-Game Map Placement ............................   Passed    0.19 sec
+test 218
+      Start 218: CST Prefabs - Immutability & Builtin Deletion Protection
+
+218: Test command: /home/flax/games/openspacettd/build/openttd_test "CST Prefabs - Immutability & Builtin Deletion Protection"
+218: Working Directory: /home/flax/games/openspacettd/build
+218: Test timeout computed to be: 30
+218: Filters: CST Prefabs - Immutability & Builtin Deletion Protection
+218: ===============================================================================
+218: All tests passed (17 assertions in 1 test case)
+218: 
+17/17 Test #218: CST Prefabs - Immutability & Builtin Deletion Protection .....................   Passed    0.02 sec
+
+The following tests passed:
+	Blueprint Data Model and JSON Round-Trip
+	Blueprint Rotation 90, 180, 270 and Invariance
+	Blueprint Horizontal Flip/Mirror
+	Blueprint Capture from Game Map
+	Blueprint Manager Storage and Builtin Protection
+	Deterministic Blueprint Placement Command
+	Blueprint depot quote matches execution
+	Blueprint rejected placement preserves map money and materials
+	Blueprint Mainline placement clears trees with exact fabrication materials
+	Blueprint dispatcher charges quote exactly once
+	Blueprint unsupported station layouts reject without changes
+	Blueprint clearing foundation and signal replacement use canonical costs
+	CST Prefabs - Complete 8-Layout Catalogue Registration
+	CST Prefabs - Structural & Functional Integrity
+	CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+	CST Prefabs - Deterministic In-Game Map Placement
+	CST Prefabs - Immutability & Builtin Deletion Protection
+
+100% tests passed, 0 tests failed out of 17
+
+Total Test time (real) =   0.66 sec

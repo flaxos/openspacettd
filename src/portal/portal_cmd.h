@@ -18,6 +18,7 @@
 #include "portal_type.h"
 #include "tech_tree.h"
 #include "production_chain.h"
+#include "corporate_hq.h"
 
 /**
  * Build a single unlinked portal gate head on a tile.
@@ -147,6 +148,9 @@ CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world);
  */
 CommandCost CmdPlaceCorporateHQ(DoCommandFlags flags, TileIndex tile, const std::string &hq_name);
 
+/** Advance the current company's HQ to the requested next tier. */
+CommandCost CmdUpgradeCorporateHQ(DoCommandFlags flags, CompanyID company, CorporateHQTier target_tier);
+
 /**
  * Establish a dedicated company logistics hub warehouse for bi-directional inventory buffering.
  *
@@ -201,7 +205,10 @@ DEF_CMD_TRAIT(Commands::ConfigureEdgeConduitFeeder, CmdConfigureEdgeConduitFeede
 DEF_CMD_TRAIT(Commands::ColonizeOutpost,           CmdColonizeOutpost,           CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::PromoteWorld,              CmdPromoteWorld,              CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::PlaceCorporateHQ,          CmdPlaceCorporateHQ,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::UpgradeCorporateHQ,        CmdUpgradeCorporateHQ,        {},                                                   CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::BuildLogisticsHub,         CmdBuildLogisticsHub,         CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
+CommandCost CmdSetLogisticsHubReserve(DoCommandFlags flags, uint32_t hub_id, CargoType cargo, uint32_t amount);
+DEF_CMD_TRAIT(Commands::SetLogisticsHubReserve, CmdSetLogisticsHubReserve, {}, CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::SetFabricationMode,        CmdSetFabricationMode,        {},                                                   CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::SelectResearchProject,     CmdSelectResearchProject,     {},                                                   CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::SetResearchBudget,         CmdSetResearchBudget,         {},                                                   CommandType::CompanySetting)

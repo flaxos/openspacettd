@@ -19,6 +19,8 @@ enum class TownAcceptanceEffect : uint8_t;
 using HouseID = uint16_t;
 
 std::tuple<CommandCost, Money, TownID> CmdFoundTown(DoCommandFlags flags, TileIndex tile, TownSize size, bool city, TownLayout layout, bool random_location, uint32_t townnameparts, const std::string &text);
+CommandCost CheckFrontierTownSite(TileIndex tile, std::string_view name);
+Town *FoundFrontierTownAtSite(TileIndex tile, std::string_view name);
 CommandCost CmdRenameTown(DoCommandFlags flags, TownID town_id, const std::string &text);
 CommandCost CmdDoTownAction(DoCommandFlags flags, TownID town_id, TownAction action);
 CommandCost CmdTownGrowthRate(DoCommandFlags flags, TownID town_id, uint16_t growth_rate);

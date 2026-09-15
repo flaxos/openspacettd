@@ -1,0 +1,8 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 228: Blueprint malformed files and name collisions leave library and bytes intact
+1/1 Test #228: Blueprint malformed files and name collisions leave library and bytes intact ...   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.06 sec

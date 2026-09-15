@@ -1,0 +1,14 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+    Start 354: Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name
+1/2 Test #354: Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name ...   Passed    0.04 sec
+    Start 359: WP09_GUI_establishment_and_process_reload
+2/2 Test #359: WP09_GUI_establishment_and_process_reload ...................................   Passed    0.11 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+integration         =   0.11 sec*proc (1 test)
+requires-baseset    =   0.11 sec*proc (1 test)
+
+Total Test time (real) =   0.17 sec

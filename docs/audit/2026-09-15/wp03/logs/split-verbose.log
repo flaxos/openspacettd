@@ -1,0 +1,131 @@
+Filters: Hub loading - failed packet split keeps cargo available
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Hub loading - failed packet split keeps cargo available
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1003
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:480: PASSED:
+  REQUIRE( PlanetManager::RegisterRegion(region) )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:482: PASSED:
+  REQUIRE( Town::CanAllocateItem() )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:486: PASSED:
+  REQUIRE( Station::CanAllocateItem() )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1009: PASSED:
+  REQUIRE( hub_id != 0 )
+with expansion:
+  1 != 0
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:632: PASSED:
+  REQUIRE( Train::CanAllocateItem() )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:644: PASSED:
+  REQUIRE( CargoPacket::CanAllocateItem() )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:838: PASSED:
+  REQUIRE( _cargopacket_pool.items + free_slots <= CargoPacketPool::MAX_SIZE )
+with expansion:
+  1 <= 16773120 (0xfff000)
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1019: PASSED:
+  CHECK( _cargopacket_pool.items == CargoPacketPool::MAX_SIZE )
+with expansion:
+  16773120 (0xfff000) == 16773120 (0xfff000)
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1021: PASSED:
+  CHECK( CargoPacket::GetNumItems() == 1 )
+with expansion:
+  1 == 1
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1022: PASSED:
+  CHECK( StockpileManager::GetStock(WorldID{0}, owner, iron) == 40 )
+with expansion:
+  40 == 40
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1023: PASSED:
+  CHECK( station->goods[iron].AvailableCount() == 60 )
+with expansion:
+  60 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1024: PASSED:
+  CHECK( train->cargo.StoredCount() == 0 )
+with expansion:
+  0 == 0
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1025: PASSED:
+  CHECK( LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60 )
+with expansion:
+  60 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:848: PASSED:
+  REQUIRE( train->cargo.StoredCount() == 0 )
+with expansion:
+  0 == 0
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:856: PASSED:
+  REQUIRE( std::filesystem::create_directory(dir) )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:858: PASSED:
+  REQUIRE( SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok )
+with expansion:
+  0 == 0
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:859: PASSED:
+  REQUIRE( SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok )
+with expansion:
+  0 == 0
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1027: PASSED:
+  CHECK( StockpileManager::GetStock(WorldID{0}, owner, iron) == 40 )
+with expansion:
+  40 == 40
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1028: PASSED:
+  CHECK( station->goods[iron].AvailableCount() == 60 )
+with expansion:
+  60 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:1029: PASSED:
+  CHECK( LogisticsHubManager::GetHub(hub_id)->total_dispatched == 60 )
+with expansion:
+  60 == 60
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:632: PASSED:
+  REQUIRE( Train::CanAllocateItem() )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:644: PASSED:
+  REQUIRE( CargoPacket::CanAllocateItem() )
+with expansion:
+  true
+
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:644: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 23 | 22 passed | 1 failed
+

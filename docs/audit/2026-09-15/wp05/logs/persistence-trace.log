@@ -1,0 +1,23 @@
+Loading your savegame caused OpenTTD to crash.
+This is probably caused by a corruption in the savegame.
+Please file a bug report and attach this savegame.
+
+/tmp/wp05-backtrace.so(+0x11d1)[0x7959b53f91d1]
+./build/openttd_test(+0x926708)[0x59133ce31708]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7959b3e45330]
+/lib/x86_64-linux-gnu/libc.so.6(+0x1897c9)[0x7959b3f897c9]
+./build/openttd_test(_Z13AddDirtyBlockiiii+0xf1)[0x59133d021dc1]
+./build/openttd_test(_Z13AfterLoadGamev+0x2de7)[0x59133ce34ac7]
+./build/openttd_test(+0x98d812)[0x59133ce98812]
+./build/openttd_test(_Z10SaveOrLoadSt17basic_string_viewIcSt11char_traitsIcEE17SaveLoadOperation16DetailedFileType12Subdirectoryb+0x3c6)[0x59133ce9ae36]
+./build/openttd_test(_Z26SaveReloadCommandAuthorityv+0x698)[0x59133d4b6c78]
+./build/openttd_test(+0xfb1c4f)[0x59133d4bcc4f]
+./build/openttd_test(_ZN5Catch10RunContext20invokeActiveTestCaseEv+0xf3)[0x59133d517683]
+./build/openttd_test(_ZN5Catch10RunContext14runCurrentTestERNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_+0x3a0)[0x59133d53ef30]
+./build/openttd_test(_ZN5Catch10RunContext7runTestERKNS_8TestCaseE+0x1db)[0x59133d53f16b]
+./build/openttd_test(_ZN5Catch7Session11runInternalEv+0xc64)[0x59133d547f34]
+./build/openttd_test(_ZN5Catch7Session3runEv+0x1e)[0x59133d5486ee]
+./build/openttd_test(main+0x8b)[0x59133c9fb8db]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7959b3e2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7959b3e2a28b]
+./build/openttd_test(_start+0x25)[0x59133ca07025]

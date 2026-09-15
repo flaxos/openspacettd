@@ -1,0 +1,23 @@
+ninja: Entering directory `build'
+[1/17] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/16] Generating no_sound.obs baseset metadata file
+[3/16] Building CXX object CMakeFiles/openttd_lib.dir/src/blueprint/blueprint_manager.cpp.o
+[4/16] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint_file_gui.cpp.o
+[5/16] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_sprint28_guided_uat.cpp.o
+[6/16] Generating orig_dos.obg baseset metadata file
+[7/16] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_sprint36_all_features_uat.cpp.o
+[8/16] Generating orig_dos.obm baseset metadata file
+[9/16] Generating orig_dos.obs baseset metadata file
+[10/16] Linking CXX executable openttd_test
+[11/16] Generating orig_dos_de.obg baseset metadata file
+[12/16] Generating orig_tto.obm baseset metadata file
+[13/16] Generating orig_win.obg baseset metadata file
+[14/16] Generating orig_win.obm baseset metadata file
+[15/16] Generating orig_win.obs baseset metadata file
+[16/16] Linking CXX executable openttd

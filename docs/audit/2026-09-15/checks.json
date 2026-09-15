@@ -1,0 +1,369 @@
+[
+  {
+    "id": "build-help",
+    "command": [
+      "./build/openttd",
+      "-h"
+    ],
+    "time_utc": "2026-09-15T10:23:35.097279+00:00",
+    "exit": 0,
+    "log": "build-help.txt",
+    "ref": "abbcd7e077 source; binary identity see binary-identities.txt",
+    "config": "existing build: Release, OPTION_USE_ASSERTS=ON"
+  },
+  {
+    "id": "ctest-inventory",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--show-only=json-v1"
+    ],
+    "time_utc": "2026-09-15T10:23:35.165701+00:00",
+    "exit": 0,
+    "log": "ctest-inventory.txt",
+    "ref": "abbcd7e077 source; binary identity see binary-identities.txt",
+    "config": "existing build: Release, OPTION_USE_ASSERTS=ON"
+  },
+  {
+    "id": "build-dry-run",
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-n",
+      "openttd",
+      "openttd_test"
+    ],
+    "time_utc": "2026-09-15T10:23:35.194355+00:00",
+    "exit": 0,
+    "log": "build-dry-run.txt",
+    "ref": "abbcd7e077 source; binary identity see binary-identities.txt",
+    "config": "existing build: Release, OPTION_USE_ASSERTS=ON"
+  },
+  {
+    "id": "binary-identities",
+    "command": [
+      "sha256sum",
+      "build/openttd",
+      "build/openttd_test"
+    ],
+    "time_utc": "2026-09-15T10:23:35.241981+00:00",
+    "exit": 0,
+    "log": "binary-identities.txt",
+    "ref": "abbcd7e077 source; binary identity see binary-identities.txt",
+    "config": "existing build: Release, OPTION_USE_ASSERTS=ON"
+  },
+  {
+    "id": "git-remotes",
+    "command": [
+      "git",
+      "remote",
+      "-v"
+    ],
+    "time_utc": "2026-09-15T10:23:35.351384+00:00",
+    "exit": 0,
+    "log": "git-remotes.txt",
+    "ref": "abbcd7e077 source; binary identity see binary-identities.txt",
+    "config": "existing build: Release, OPTION_USE_ASSERTS=ON"
+  },
+  {
+    "id": "targeted-ctest",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--output-on-failure",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint|CST Prefabs|Conduit|Portal Construction|Portal Wormhole|Production|Stockpile|Corporate HQ|Logistics|Fabrication"
+    ],
+    "time_utc": "2026-09-15T10:24:20.683825+00:00",
+    "exit": 0,
+    "log": "targeted-ctest.log",
+    "ref": "existing binary SHA256 in binary-identities.txt; reports abbcd7e077",
+    "config": "Release, asserts ON; one process, timeout 30/test; no rebuild"
+  },
+  {
+    "id": "blueprint-crash-load-smoke",
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/openspacettd-audit-20260915/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=1000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-d",
+      "misc=1,script=2",
+      "-g",
+      "/tmp/openspacettd-audit-20260915/blueprint-crash.sav"
+    ],
+    "cwd": "/tmp/openspacettd-audit-20260915",
+    "time_utc": "2026-09-15T10:25:04.570582+00:00",
+    "exit": 0,
+    "log": "blueprint-crash-load-smoke.log",
+    "ref": "existing abbcd7e077 binary (binary-identities.txt)",
+    "config": "Release/asserts ON, copied demo config; autosaves OFF; null-video 1000 loop iterations; installed base assets, original saved NewGRFs unaltered",
+    "source_sha256": "503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03"
+  },
+  {
+    "id": "uat-v1.1-load-smoke",
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/openspacettd-audit-20260915/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=1000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-d",
+      "misc=1,script=2",
+      "-g",
+      "/tmp/openspacettd-audit-20260915/uat-v1.1.sav"
+    ],
+    "cwd": "/tmp/openspacettd-audit-20260915",
+    "time_utc": "2026-09-15T10:25:04.937061+00:00",
+    "exit": 0,
+    "log": "uat-v1.1-load-smoke.log",
+    "ref": "existing abbcd7e077 binary (binary-identities.txt)",
+    "config": "Release/asserts ON, copied demo config; autosaves OFF; null-video 1000 loop iterations; installed base assets, original saved NewGRFs unaltered",
+    "source_sha256": "20f9057fccf0262f7b17a5a1aef4bb6999354ac0ee31f3f9a940b64f4d884f0b"
+  },
+  {
+    "id": "build-staleness",
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-n",
+      "-d",
+      "explain",
+      "openttd",
+      "openttd_test"
+    ],
+    "exit": 0,
+    "log": "build-staleness.txt",
+    "time_utc": "2026-09-15T10:28:05.288636+00:00",
+    "ref": "abbcd7e077",
+    "config": "read-only existing build/artifacts"
+  },
+  {
+    "id": "resources",
+    "command": [
+      "df",
+      "-h",
+      ".",
+      "/tmp"
+    ],
+    "exit": 0,
+    "log": "resources.txt",
+    "time_utc": "2026-09-15T10:28:05.292053+00:00",
+    "ref": "abbcd7e077",
+    "config": "read-only existing build/artifacts"
+  },
+  {
+    "id": "build-sizes",
+    "command": [
+      "du",
+      "-sh",
+      "build",
+      "logs"
+    ],
+    "exit": 0,
+    "log": "build-sizes.txt",
+    "time_utc": "2026-09-15T10:28:05.375418+00:00",
+    "ref": "abbcd7e077",
+    "config": "read-only existing build/artifacts"
+  },
+  {
+    "id": "processes",
+    "command": [
+      "ps",
+      "-eo",
+      "pid,etime,args"
+    ],
+    "exit": 0,
+    "log": "processes.txt",
+    "time_utc": "2026-09-15T10:28:05.380313+00:00",
+    "ref": "abbcd7e077",
+    "config": "read-only existing build/artifacts"
+  },
+  {
+    "id": "crash-save-info",
+    "command": [
+      "./build/openttd",
+      "-q",
+      "/home/flax/.local/share/openttd/crash20260915082450.sav"
+    ],
+    "exit": 0,
+    "log": "crash-save-info.txt",
+    "time_utc": "2026-09-15T10:28:05.508874+00:00",
+    "ref": "abbcd7e077",
+    "config": "read-only existing build/artifacts"
+  },
+  {
+    "id": "uat-save-info",
+    "command": [
+      "./build/openttd",
+      "-q",
+      "demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav"
+    ],
+    "exit": 0,
+    "log": "uat-save-info.txt",
+    "time_utc": "2026-09-15T10:28:05.571128+00:00",
+    "ref": "abbcd7e077",
+    "config": "read-only existing build/artifacts"
+  },
+  {
+    "id": "production-test-assert-macros",
+    "command": [
+      "/usr/bin/c++",
+      "-DGLOBAL_DATA_DIR=\"/usr/local/share/games/openttd\"",
+      "-DPERSONAL_DIR=\".openttd\"",
+      "-DPOINTER_IS_64BIT",
+      "-DUNIX",
+      "-DWITH_ASSERT",
+      "-DWITH_CURL",
+      "-DWITH_FLUIDSYNTH",
+      "-DWITH_FONTCONFIG",
+      "-DWITH_FREETYPE",
+      "-DWITH_HARFBUZZ",
+      "-DWITH_ICU_I18N",
+      "-DWITH_ICU_UC",
+      "-DWITH_LIBLZMA",
+      "-DWITH_LZO",
+      "-DWITH_OPENGL",
+      "-DWITH_OPUSFILE",
+      "-DWITH_PERSONAL_DIR",
+      "-DWITH_PNG",
+      "-DWITH_SDL2",
+      "-DWITH_SOXR",
+      "-DWITH_SSE",
+      "-DWITH_ZLIB",
+      "-I/home/flax/games/openspacettd/src/3rdparty/squirrel/include",
+      "-I/usr/include/harfbuzz",
+      "-I/home/flax/games/openspacettd/build/generated",
+      "-I/home/flax/games/openspacettd/build/generated/script/api",
+      "-I/home/flax/games/openspacettd/src/script/api",
+      "-I/home/flax/games/openspacettd/build/generated/script",
+      "-I/home/flax/games/openspacettd/build/generated/script/api/ai",
+      "-I/home/flax/games/openspacettd/src/script/api/ai",
+      "-I/home/flax/games/openspacettd/build/generated/script/api/game",
+      "-I/home/flax/games/openspacettd/src/script/api/game",
+      "-I/home/flax/games/openspacettd/build/generated/script/api/template",
+      "-I/home/flax/games/openspacettd/src/script/api/template",
+      "-isystem",
+      "/usr/include/SDL2",
+      "-isystem",
+      "/usr/include/freetype2",
+      "-isystem",
+      "/usr/include/opus",
+      "-isystem",
+      "/usr/include/ogg",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-finput-charset=utf-8",
+      "-D_FORTIFY_SOURCE=2",
+      "-W",
+      "-Wall",
+      "-Wcast-qual",
+      "-Wextra",
+      "-Wsign-compare",
+      "-Wundef",
+      "-Wpointer-arith",
+      "-Wwrite-strings",
+      "-Wredundant-decls",
+      "-Wformat-security",
+      "-Wformat=2",
+      "-Winit-self",
+      "-Wnon-virtual-dtor",
+      "-Wsuggest-override",
+      "-fno-strict-enums",
+      "-fno-strict-overflow",
+      "-Wno-redundant-move",
+      "-E",
+      "/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp",
+      "-dM"
+    ],
+    "cwd": "build",
+    "exit": 0,
+    "time_utc": "2026-09-15T10:47:26.652684+00:00",
+    "config": "exact existing production-test compiler flags; preprocess only, no object/build mutation",
+    "ref": "abbcd7e077",
+    "log": "production-test-assert-macros.txt"
+  },
+  {
+    "id": "documentation-links",
+    "command": "Python local Markdown-target scan; git diff master HEAD -- *.md inventory",
+    "result": "missing historical targets recorded; no invented contents",
+    "log": "documentation-links.md",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480719+00:00"
+  },
+  {
+    "id": "diff-check",
+    "command": "git diff --check",
+    "result": 0,
+    "log": "diff-check.txt",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480739+00:00"
+  },
+  {
+    "id": "final-status",
+    "command": "git status --short",
+    "result": 0,
+    "log": "final-git-status.txt",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480742+00:00"
+  },
+  {
+    "id": "gui-availability",
+    "command": "orca-ide skills get computer-use --json",
+    "result": 127,
+    "log": "gui-availability.txt",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480747+00:00"
+  },
+  {
+    "id": "github-repository",
+    "command": "gh api repos/flaxos/openspacettd --jq metadata",
+    "result": 0,
+    "log": "github-repository.json",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480749+00:00"
+  },
+  {
+    "id": "github-main-ci-final",
+    "command": "gh run view 34956427967 --repo flaxos/openspacettd --json status,conclusion,headSha,jobs,url",
+    "result": "CI completed failure",
+    "log": "ci-main-final-snapshot.json",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480751+00:00"
+  },
+  {
+    "id": "github-linux-failure",
+    "command": "gh run view 34956427967 --repo flaxos/openspacettd --job 104339490455 --log-failed",
+    "result": "303/306 pass;3 production fixture aborts",
+    "log": "ci-main-linux-failure-context.log",
+    "ref": "abbcd7e077 audit docs; remote main345e258867 where noted",
+    "config": "read-only metadata/documentation verification",
+    "recorded_utc": "2026-09-15T10:57:33.480753+00:00"
+  }
+]

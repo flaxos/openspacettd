@@ -1,0 +1,4 @@
+openspace	https://github.com/flaxos/openspacettd.git (fetch)
+openspace	https://github.com/flaxos/openspacettd.git (push)
+upstream	https://github.com/OpenTTD/OpenTTD.git (fetch)
+upstream	https://github.com/OpenTTD/OpenTTD.git (push)

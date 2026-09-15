@@ -1,0 +1,736 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+        Start 358: Corporate_HQ_GUI_establishes_an_owned_station_hub_and_edits_its_reserve
+        Start 359: WP09_GUI_establishment_and_process_reload
+  1/363 Test #358: Corporate_HQ_GUI_establishes_an_owned_station_hub_and_edits_its_reserve .........................................................   Passed    0.03 sec
+        Start 354: Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name
+  2/363 Test #354: Blueprint_GUI_captures_a_selected_map_rectangle_and_saves_the_chosen_name .......................................................   Passed    0.03 sec
+        Start 355: Blueprint_GUI_exports_the_transformed_selection_and_imports_a_real_file
+  3/363 Test #355: Blueprint_GUI_exports_the_transformed_selection_and_imports_a_real_file .........................................................   Passed    0.04 sec
+        Start 356: Blueprint_GUI_reports_invalid_imports_collisions_and_export_failures_truthfully
+  4/363 Test #359: WP09_GUI_establishment_and_process_reload .......................................................................................   Passed    0.11 sec
+        Start 357: Blueprint_GUI_default_export_remains_separate_from_the_library_scan
+  5/363 Test #356: Blueprint_GUI_reports_invalid_imports_collisions_and_export_failures_truthfully .................................................   Passed    0.05 sec
+        Start  90: Authentication_Combined
+  6/363 Test #357: Blueprint_GUI_default_export_remains_separate_from_the_library_scan .............................................................   Passed    0.05 sec
+        Start  88: Authentication_PAKE
+  7/363 Test  #90: Authentication_Combined .........................................................................................................   Passed    0.02 sec
+        Start   5: EnumOverOptimisation_Bitmask
+  8/363 Test  #88: Authentication_PAKE .............................................................................................................   Passed    0.02 sec
+        Start  70: InPlaceReplacement
+  9/363 Test   #5: EnumOverOptimisation_Bitmask ....................................................................................................   Passed    0.02 sec
+        Start  82: StrTrimView
+ 10/363 Test  #70: InPlaceReplacement ..............................................................................................................   Passed    0.02 sec
+        Start  87: Authentication_KeyExchangeOnly
+ 11/363 Test  #82: StrTrimView .....................................................................................................................   Passed    0.02 sec
+        Start  89: Authentication_AuthorizedKey
+ 12/363 Test  #87: Authentication_KeyExchangeOnly ..................................................................................................   Passed    0.02 sec
+        Start  80: ConvertHexToBytes
+ 13/363 Test  #80: ConvertHexToBytes ...............................................................................................................   Passed    0.02 sec
+        Start  79: FormatArrayAsHex
+ 14/363 Test  #89: Authentication_AuthorizedKey ....................................................................................................   Passed    0.02 sec
+        Start  54: ClampTo
+ 15/363 Test  #79: FormatArrayAsHex ................................................................................................................   Passed    0.02 sec
+        Start  55: SoftClamp
+ 16/363 Test  #54: ClampTo .........................................................................................................................   Passed    0.02 sec
+        Start  84: FixSCCEncodedNegative
+ 17/363 Test  #84: FixSCCEncodedNegative ...........................................................................................................   Passed    0.02 sec
+        Start  81: StrTrimInPlace
+ 18/363 Test  #55: SoftClamp .......................................................................................................................   Passed    0.02 sec
+        Start  83: FixSCCEncoded
+ 19/363 Test  #83: FixSCCEncoded ...................................................................................................................   Passed    0.02 sec
+        Start   4: EnumOverOptimisation_BoundsCheck
+ 20/363 Test  #81: StrTrimInPlace ..................................................................................................................   Passed    0.02 sec
+        Start   1: ICU ScriptRun
+ 21/363 Test   #4: EnumOverOptimisation_BoundsCheck ................................................................................................   Passed    0.02 sec
+        Start   2: AlternatingIterator tests
+ 22/363 Test   #1: ICU ScriptRun ...................................................................................................................   Passed    0.02 sec
+        Start   3: SetBitIterator tests
+ 23/363 Test   #2: AlternatingIterator tests .......................................................................................................   Passed    0.02 sec
+        Start   6: Ownership errors only show manager faces for real companies
+ 24/363 Test   #3: SetBitIterator tests ............................................................................................................   Passed    0.02 sec
+        Start   7: WP08 legacy empty outpost fixture v1 preserves saved identity and infrastructure
+ 25/363 Test   #6: Ownership errors only show manager faces for real companies .....................................................................   Passed    0.02 sec
+        Start   8: Command authority - HQ rejects foreign invalid and stale tier requests
+ 26/363 Test   #7: WP08 legacy empty outpost fixture v1 preserves saved identity and infrastructure ................................................   Passed    0.04 sec
+        Start   9: Command authority - HQ advances once per requested tier and persists
+ 27/363 Test   #8: Command authority - HQ rejects foreign invalid and stale tier requests ..........................................................   Passed    0.02 sec
+        Start  10: Command authority - world commands preserve state on denial and charge once on success
+ 28/363 Test   #9: Command authority - HQ advances once per requested tier and persists ............................................................   Passed    0.04 sec
+        Start  11: Command authority - actual HQ GUI queues an upgrade without local mutation
+ 29/363 Test  #10: Command authority - world commands preserve state on denial and charge once on success ..........................................   Passed    0.04 sec
+        Start  12: Command authority - foreign HQ window never upgrades either company
+ 30/363 Test  #11: Command authority - actual HQ GUI queues an upgrade without local mutation ......................................................   Passed    0.02 sec
+        Start  13: Command authority - actual Directory GUI observes successful queued commands only
+ 31/363 Test  #12: Command authority - foreign HQ window never upgrades either company .............................................................   Passed    0.02 sec
+        Start  14: Command authority - directory projection is read only and canonical despite stale metadata
+ 32/363 Test  #13: Command authority - actual Directory GUI observes successful queued commands only ...............................................   Passed    0.02 sec
+        Start  15: WP-05 isolated loopback command worker
+ 33/363 Test  #14: Command authority - directory projection is read only and canonical despite stale metadata ......................................   Passed    0.02 sec
+        Start  16: FlatSet - basic
+ 34/363 Test  #15: WP-05 isolated loopback command worker ..........................................................................................   Passed    0.02 sec
+        Start  17: History Rotation and Reporting tests
+ 35/363 Test  #16: FlatSet - basic .................................................................................................................   Passed    0.02 sec
+        Start  18: PartialPixelSlopeAdditionTest - A one corner slope, plus the opposite three corner slope results in a flat but elevated slope
+ 36/363 Test  #17: History Rotation and Reporting tests ............................................................................................   Passed    0.02 sec
+        Start  19: PartialPixelSlopeAdditionTest - Diagonal slopes with their opposite slope result in a flat but elevated slope
+ 37/363 Test  #18: PartialPixelSlopeAdditionTest - A one corner slope, plus the opposite three corner slope results in a flat but elevated slope ...   Passed    0.02 sec
+        Start  20: PartialPixelSlopeAdditionTest - Half tile slopes with their opposite half tile slope result in a flat but elevated slope
+ 38/363 Test  #19: PartialPixelSlopeAdditionTest - Diagonal slopes with their opposite slope result in a flat but elevated slope ...................   Passed    0.02 sec
+        Start  21: PartialPixelSlopeAdditionTest - Two opposite one corner slopes result in the two corner slope with opposite corners
+ 39/363 Test  #20: PartialPixelSlopeAdditionTest - Half tile slopes with their opposite half tile slope result in a flat but elevated slope ........   Passed    0.02 sec
+        Start  22: PartialPixelSlopeAdditionTest - A steep slope is a one corner slope on top of a three corner slope
+ 40/363 Test  #21: PartialPixelSlopeAdditionTest - Two opposite one corner slopes result in the two corner slope with opposite corners .............   Passed    0.02 sec
+        Start  23: PartialPixelSlopeAdditionTest - A half tile steep slope is a one corner half tile on top of a three corner slope
+ 41/363 Test  #22: PartialPixelSlopeAdditionTest - A steep slope is a one corner slope on top of a three corner slope ..............................   Passed    0.02 sec
+        Start  24: PartialPixelTest - One corner up slopes - SLOPE_N
+ 42/363 Test  #23: PartialPixelSlopeAdditionTest - A half tile steep slope is a one corner half tile on top of a three corner slope ................   Passed    0.02 sec
+        Start  25: PartialPixelTest - One corner up slopes - SLOPE_E
+ 43/363 Test  #24: PartialPixelTest - One corner up slopes - SLOPE_N ...............................................................................   Passed    0.02 sec
+        Start  26: PartialPixelTest - One corner up slopes - SLOPE_S
+ 44/363 Test  #25: PartialPixelTest - One corner up slopes - SLOPE_E ...............................................................................   Passed    0.02 sec
+        Start  27: PartialPixelTest - One corner up slopes - SLOPE_W
+ 45/363 Test  #26: PartialPixelTest - One corner up slopes - SLOPE_S ...............................................................................   Passed    0.02 sec
+        Start  28: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NE
+ 46/363 Test  #27: PartialPixelTest - One corner up slopes - SLOPE_W ...............................................................................   Passed    0.02 sec
+        Start  29: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SE
+ 47/363 Test  #28: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NE ....................................................................   Passed    0.02 sec
+        Start  30: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SW
+ 48/363 Test  #29: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SE ....................................................................   Passed    0.02 sec
+        Start  31: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NW
+ 49/363 Test  #30: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_SW ....................................................................   Passed    0.02 sec
+        Start  32: PartialPixelTest - Two opposite corner up slopes - SLOPE_NS
+ 50/363 Test  #31: PartialPixelTest - Two corner up, diagonal slopes - SLOPE_NW ....................................................................   Passed    0.02 sec
+        Start  33: PartialPixelTest - Two opposite corner up slopes - SLOPE_EW
+ 51/363 Test  #32: PartialPixelTest - Two opposite corner up slopes - SLOPE_NS .....................................................................   Passed    0.02 sec
+        Start  34: PartialPixelTest - Three corner up slopes - SLOPE_ENW
+ 52/363 Test  #34: PartialPixelTest - Three corner up slopes - SLOPE_ENW ...........................................................................   Passed    0.02 sec
+        Start  35: PartialPixelTest - Three corner up slopes - SLOPE_SEN
+ 53/363 Test  #33: PartialPixelTest - Two opposite corner up slopes - SLOPE_EW .....................................................................   Passed    0.02 sec
+        Start  36: PartialPixelTest - Three corner up slopes - SLOPE_WSE
+ 54/363 Test  #36: PartialPixelTest - Three corner up slopes - SLOPE_WSE ...........................................................................   Passed    0.02 sec
+        Start  37: PartialPixelTest - Three corner up slopes - SLOPE_NWS
+ 55/363 Test  #35: PartialPixelTest - Three corner up slopes - SLOPE_SEN ...........................................................................   Passed    0.02 sec
+        Start  38: PartialPixelTest - Normal half tile slopes - SLOPE_N/Corner::N
+ 56/363 Test  #37: PartialPixelTest - Three corner up slopes - SLOPE_NWS ...........................................................................   Passed    0.02 sec
+        Start  39: PartialPixelTest - Normal half tile slopes - SLOPE_E/Corner::E
+ 57/363 Test  #38: PartialPixelTest - Normal half tile slopes - SLOPE_N/Corner::N ..................................................................   Passed    0.02 sec
+        Start  40: PartialPixelTest - Normal half tile slopes - SLOPE_S/Corner::S
+ 58/363 Test  #39: PartialPixelTest - Normal half tile slopes - SLOPE_E/Corner::E ..................................................................   Passed    0.02 sec
+        Start  41: PartialPixelTest - Normal half tile slopes - SLOPE_W/Corner::W
+ 59/363 Test  #40: PartialPixelTest - Normal half tile slopes - SLOPE_S/Corner::S ..................................................................   Passed    0.02 sec
+        Start  42: PartialPixelTest - Steep slopes - SLOPE_STEEP_N
+ 60/363 Test  #41: PartialPixelTest - Normal half tile slopes - SLOPE_W/Corner::W ..................................................................   Passed    0.02 sec
+        Start  43: PartialPixelTest - Steep slopes - SLOPE_STEEP_E
+ 61/363 Test  #42: PartialPixelTest - Steep slopes - SLOPE_STEEP_N .................................................................................   Passed    0.02 sec
+        Start  44: PartialPixelTest - Steep slopes - SLOPE_STEEP_S
+ 62/363 Test  #43: PartialPixelTest - Steep slopes - SLOPE_STEEP_E .................................................................................   Passed    0.02 sec
+        Start  45: PartialPixelTest - Steep slopes - SLOPE_STEEP_W
+ 63/363 Test  #44: PartialPixelTest - Steep slopes - SLOPE_STEEP_S .................................................................................   Passed    0.02 sec
+        Start  46: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::N
+ 64/363 Test  #45: PartialPixelTest - Steep slopes - SLOPE_STEEP_W .................................................................................   Passed    0.02 sec
+        Start  47: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::E
+ 65/363 Test  #46: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::N .....................................................   Passed    0.02 sec
+        Start  48: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::S
+ 66/363 Test  #47: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::E .....................................................   Passed    0.02 sec
+        Start  49: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::W
+ 67/363 Test  #48: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::S .....................................................   Passed    0.02 sec
+        Start  50: DivideApproxTest - Negative
+ 68/363 Test  #49: PartialPixelTest - Half tile on top of steep slopes - SLOPE_STEEP/Corner::W .....................................................   Passed    0.02 sec
+        Start  51: DivideApproxTest, Divide
+ 69/363 Test  #50: DivideApproxTest - Negative .....................................................................................................   Passed    0.02 sec
+        Start  52: IntSqrtTest - Zero
+ 70/363 Test  #51: DivideApproxTest, Divide ........................................................................................................   Passed    0.02 sec
+        Start  53: IntSqrtTest - FindSqRt
+ 71/363 Test  #52: IntSqrtTest - Zero ..............................................................................................................   Passed    0.02 sec
+        Start  56: StringBuilder - basic
+ 72/363 Test  #53: IntSqrtTest - FindSqRt ..........................................................................................................   Passed    0.02 sec
+        Start  57: StringBuilder - binary
+ 73/363 Test  #56: StringBuilder - basic ...........................................................................................................   Passed    0.02 sec
+        Start  58: StringBuilder - text
+ 74/363 Test  #57: StringBuilder - binary ..........................................................................................................   Passed    0.02 sec
+        Start  59: StringConsumer - basic
+ 75/363 Test  #58: StringBuilder - text ............................................................................................................   Passed    0.02 sec
+        Start  60: StringConsumer - binary8
+ 76/363 Test  #59: StringConsumer - basic ..........................................................................................................   Passed    0.02 sec
+        Start  61: StringConsumer - binary16
+ 77/363 Test  #60: StringConsumer - binary8 ........................................................................................................   Passed    0.02 sec
+        Start  62: StringConsumer - binary32
+ 78/363 Test  #61: StringConsumer - binary16 .......................................................................................................   Passed    0.02 sec
+        Start  63: StringConsumer - binary64
+ 79/363 Test  #62: StringConsumer - binary32 .......................................................................................................   Passed    0.02 sec
+        Start  64: StringConsumer - utf8
+ 80/363 Test  #63: StringConsumer - binary64 .......................................................................................................   Passed    0.02 sec
+        Start  65: StringConsumer - conditions
+ 81/363 Test  #64: StringConsumer - utf8 ...........................................................................................................   Passed    0.02 sec
+        Start  66: StringConsumer - ascii
+ 82/363 Test  #65: StringConsumer - conditions .....................................................................................................   Passed    0.02 sec
+        Start  67: StringConsumer - parse int
+ 83/363 Test  #66: StringConsumer - ascii ..........................................................................................................   Passed    0.02 sec
+        Start  68: StringConsumer - invalid int
+ 84/363 Test  #67: StringConsumer - parse int ......................................................................................................   Passed    0.02 sec
+        Start  69: StringConsumer - most negative
+ 85/363 Test  #68: StringConsumer - invalid int ....................................................................................................   Passed    0.02 sec
+        Start  71: StrCompareIgnoreCase - std::string
+ 86/363 Test  #69: StringConsumer - most negative ..................................................................................................   Passed    0.02 sec
+        Start  72: StrCompareIgnoreCase - std::string_view
+ 87/363 Test  #71: StrCompareIgnoreCase - std::string ..............................................................................................   Passed    0.02 sec
+        Start  73: StrEqualsIgnoreCase - std::string
+ 88/363 Test  #72: StrCompareIgnoreCase - std::string_view .........................................................................................   Passed    0.02 sec
+        Start  74: StrEqualsIgnoreCase - std::string_view
+ 89/363 Test  #73: StrEqualsIgnoreCase - std::string ...............................................................................................   Passed    0.02 sec
+        Start  75: StrStartsWithIgnoreCase - std::string
+ 90/363 Test  #74: StrEqualsIgnoreCase - std::string_view ..........................................................................................   Passed    0.02 sec
+        Start  76: StrStartsWithIgnoreCase - std::string_view
+ 91/363 Test  #75: StrStartsWithIgnoreCase - std::string ...........................................................................................   Passed    0.02 sec
+        Start  77: StrEndsWithIgnoreCase - std::string
+ 92/363 Test  #76: StrStartsWithIgnoreCase - std::string_view ......................................................................................   Passed    0.02 sec
+        Start  78: StrEndsWithIgnoreCase - std::string_view
+ 93/363 Test  #77: StrEndsWithIgnoreCase - std::string .............................................................................................   Passed    0.02 sec
+        Start  85: EncodedString::ReplaceParam - positive
+ 94/363 Test  #78: StrEndsWithIgnoreCase - std::string_view ........................................................................................   Passed    0.02 sec
+        Start  86: EncodedString::ReplaceParam - negative
+ 95/363 Test  #85: EncodedString::ReplaceParam - positive ..........................................................................................   Passed    0.02 sec
+        Start  91: Encryption handling
+ 96/363 Test  #86: EncodedString::ReplaceParam - negative ..........................................................................................   Passed    0.02 sec
+        Start  92: Placement Restrictions - Industry Rules Matrix
+ 97/363 Test  #91: Encryption handling .............................................................................................................   Passed    0.02 sec
+        Start  93: Placement Restrictions - Train Depot Rules Matrix
+ 98/363 Test  #93: Placement Restrictions - Train Depot Rules Matrix ...............................................................................   Passed    0.02 sec
+        Start  94: Placement Restrictions - CmdBuildTrainDepot Integration
+ 99/363 Test  #92: Placement Restrictions - Industry Rules Matrix ..................................................................................   Passed    0.03 sec
+        Start  95: PlanetManager - Registration and Validation
+100/363 Test  #95: PlanetManager - Registration and Validation .....................................................................................   Passed    0.02 sec
+        Start  96: PlanetManager - Multi-World Spatial Partitioning and Buffer Zones
+101/363 Test  #94: Placement Restrictions - CmdBuildTrainDepot Integration .........................................................................   Passed    0.03 sec
+        Start  97: PlanetManager - Arbitrary Non-Cell-Aligned Boundary Precision
+102/363 Test  #97: PlanetManager - Arbitrary Non-Cell-Aligned Boundary Precision ...................................................................   Passed    0.02 sec
+        Start  98: Planet UI - Phase & Biome Names
+103/363 Test  #96: PlanetManager - Multi-World Spatial Partitioning and Buffer Zones ...............................................................   Passed    0.05 sec
+        Start  99: Planet UI - Viewport Status & Navigation
+104/363 Test  #98: Planet UI - Phase & Biome Names .................................................................................................   Passed    0.02 sec
+        Start 100: Planet SaveLoad - Multi-World Serialization Round-Trip
+105/363 Test  #99: Planet UI - Viewport Status & Navigation ........................................................................................   Passed    0.03 sec
+        Start 101: Planet SaveLoad - Empty / Single-World Game Round-Trip
+106/363 Test #101: Planet SaveLoad - Empty / Single-World Game Round-Trip ..........................................................................   Passed    0.03 sec
+        Start 102: PortalRegistry - Basic Pairing and Lookups
+107/363 Test #102: PortalRegistry - Basic Pairing and Lookups ......................................................................................   Passed    0.02 sec
+        Start 103: PortalRegistry - Multi-World Topologies and Validation
+108/363 Test #103: PortalRegistry - Multi-World Topologies and Validation ..........................................................................   Passed    0.02 sec
+        Start 104: Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length)
+109/363 Test #104: Portal Wormhole - Engine Hook Integration (GetOtherTunnelBridgeEnd & Length) ....................................................   Passed    0.02 sec
+        Start 105: Portal Wormhole - YAPF Track Follower Traversal
+110/363 Test #105: Portal Wormhole - YAPF Track Follower Traversal .................................................................................   Passed    0.02 sec
+        Start 106: Portal Wormhole - Unlinked gate is a closed rail terminal
+111/363 Test #106: Portal Wormhole - Unlinked gate is a closed rail terminal .......................................................................   Passed    0.02 sec
+        Start 107: Portal Wormhole - Stale non-tunnel endpoint is rejected
+112/363 Test #107: Portal Wormhole - Stale non-tunnel endpoint is rejected .........................................................................   Passed    0.02 sec
+        Start 108: Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation
+113/363 Test #108: Portal Wormhole - Crashing a stale train on an unlinked head clears its reservation .............................................   Passed    0.02 sec
+        Start 109: Portal Wormhole - Routing follows every exit orientation with rail turns disabled
+114/363 Test #109: Portal Wormhole - Routing follows every exit orientation with rail turns disabled ...............................................   Passed    0.02 sec
+        Start 110: Portal Wormhole - Neutral Generated Gateway Is Shared Rail
+115/363 Test #110: Portal Wormhole - Neutral Generated Gateway Is Shared Rail ......................................................................   Passed    0.02 sec
+        Start 111: Portal Wormhole - Legacy Generated Gateway Direction Repair
+116/363 Test #111: Portal Wormhole - Legacy Generated Gateway Direction Repair .....................................................................   Passed    0.02 sec
+        Start 112: Portal Wormhole - Exit Emergence Coordinates Calculation
+117/363 Test #112: Portal Wormhole - Exit Emergence Coordinates Calculation ........................................................................   Passed    0.02 sec
+        Start 113: Portal Wormhole - Consist Distance Decoupling Across Wormhole
+118/363 Test #113: Portal Wormhole - Consist Distance Decoupling Across Wormhole ...................................................................   Passed    0.02 sec
+        Start 114: ConsistTraversal - Progress Tracking API
+119/363 Test #114: ConsistTraversal - Progress Tracking API ........................................................................................   Passed    0.02 sec
+        Start 115: ConsistTraversal - Following Wagon Enters Plain Rail Tile
+120/363 Test #115: ConsistTraversal - Following Wagon Enters Plain Rail Tile .......................................................................   Passed    0.02 sec
+        Start 116: ConsistTraversal - Company Train Traverses Neutral Gateway
+121/363 Test #116: ConsistTraversal - Company Train Traverses Neutral Gateway ......................................................................   Passed    0.02 sec
+        Start 117: ConsistTraversal - Single Locomotive Portal Emergence
+122/363 Test #117: ConsistTraversal - Single Locomotive Portal Emergence ...........................................................................   Passed    0.02 sec
+        Start 118: ConsistTraversal - Complete consist clears every portal orientation forwards and backwards
+123/363 Test #118: ConsistTraversal - Complete consist clears every portal orientation forwards and backwards ......................................   Passed    0.02 sec
+        Start 119: ConsistTraversal - Multi-Wagon Traversal Across Worlds
+124/363 Test #119: ConsistTraversal - Multi-Wagon Traversal Across Worlds ..........................................................................   Passed    0.02 sec
+        Start 120: ConsistTraversal - Vehicle Destruction Clears Transit Tracker
+125/363 Test #120: ConsistTraversal - Vehicle Destruction Clears Transit Tracker ...................................................................   Passed    0.02 sec
+        Start 121: Content Manifest - canonical codec and digest
+126/363 Test #121: Content Manifest - canonical codec and digest ...................................................................................   Passed    0.02 sec
+        Start 122: Content Manifest - strict compatibility diagnostics
+127/363 Test #122: Content Manifest - strict compatibility diagnostics .............................................................................   Passed    0.02 sec
+        Start 123: Federation Identity - deterministic namespace and consist lifecycle
+128/363 Test #123: Federation Identity - deterministic namespace and consist lifecycle .............................................................   Passed    0.02 sec
+        Start 124: Consist Snapshot - canonical round trip and validation
+129/363 Test #124: Consist Snapshot - canonical round trip and validation ..........................................................................   Passed    0.02 sec
+        Start 125: Consist Snapshot - capture is non-spatial and leaves the train unchanged
+130/363 Test #100: Planet SaveLoad - Multi-World Serialization Round-Trip ..........................................................................   Passed    0.53 sec
+        Start 126: Federation Identity - company and station lifecycle
+131/363 Test #125: Consist Snapshot - capture is non-spatial and leaves the train unchanged ........................................................   Passed    0.02 sec
+        Start 127: Federation Identity - cargo source and order destination provenance
+132/363 Test #126: Federation Identity - company and station lifecycle .............................................................................   Passed    0.02 sec
+        Start 128: Consist Snapshot - v2 encode/decode with company, cargo source, and orders
+133/363 Test #127: Federation Identity - cargo source and order destination provenance .............................................................   Passed    0.02 sec
+        Start 129: Consist Snapshot - v1 wire format backward compatibility decoding
+134/363 Test #128: Consist Snapshot - v2 encode/decode with company, cargo source, and orders ......................................................   Passed    0.02 sec
+        Start 130: Federation Identity - savegame FIDS round-trip with all mappings
+135/363 Test #129: Consist Snapshot - v1 wire format backward compatibility decoding ...............................................................   Passed    0.02 sec
+        Start 131: Federation Transfer - Checkpoint transitions reject conflicting receipts
+136/363 Test #131: Federation Transfer - Checkpoint transitions reject conflicting receipts ........................................................   Passed    0.02 sec
+        Start 132: Federation Transfer - Inter-Server Portal Registration and Query
+137/363 Test #130: Federation Identity - savegame FIDS round-trip with all mappings ................................................................   Passed    0.03 sec
+        Start 133: Federation Transfer - Universe Authority Lifecycle and State Machine
+138/363 Test #132: Federation Transfer - Inter-Server Portal Registration and Query ................................................................   Passed    0.02 sec
+        Start 134: Federation Transfer - Commodity Conservation Invariant Audit
+139/363 Test #133: Federation Transfer - Universe Authority Lifecycle and State Machine ............................................................   Passed    0.02 sec
+        Start 135: Federation Transfer - Consist Despawn for Transfer
+140/363 Test #134: Federation Transfer - Commodity Conservation Invariant Audit ....................................................................   Passed    0.02 sec
+        Start 136: Federation Transfer - Consist Materialization on Destination Gate
+141/363 Test #135: Federation Transfer - Consist Despawn for Transfer ..............................................................................   Passed    0.02 sec
+        Start 137: Federation Transfer - Coordinator retries only the exact destination gate
+142/363 Test #137: Federation Transfer - Coordinator retries only the exact destination gate .......................................................   Passed    0.02 sec
+        Start 138: Federation Transfer - Obstruction and Manifest Rejection
+143/363 Test #136: Federation Transfer - Consist Materialization on Destination Gate ...............................................................   Passed    0.02 sec
+        Start 139: Federation Transport - AuthorityRequest Protocol and Envelope Handling
+144/363 Test #139: Federation Transport - AuthorityRequest Protocol and Envelope Handling ..........................................................   Passed    0.02 sec
+        Start 140: Federation Transport - Late callbacks after request timeout or destruction
+145/363 Test #138: Federation Transfer - Obstruction and Manifest Rejection ........................................................................   Passed    0.02 sec
+        Start 141: Federation Transport - Late successful completion after request destruction
+146/363 Test #140: Federation Transport - Late callbacks after request timeout or destruction ......................................................   Passed    0.02 sec
+        Start 142: Federation Transport - Base64 Round Trip
+147/363 Test #141: Federation Transport - Late successful completion after request destruction .....................................................   Passed    0.02 sec
+        Start 143: Federation Transfer - Journal Deduplication and Authority URL Config
+148/363 Test #142: Federation Transport - Base64 Round Trip ........................................................................................   Passed    0.02 sec
+        Start 144: Federation Persistent Universe - Player Registration and Authentication
+149/363 Test #143: Federation Transfer - Journal Deduplication and Authority URL Config ............................................................   Passed    0.02 sec
+        Start 145: Federation Persistent Universe - Corporate Charters and Multi-World Ownership
+150/363 Test #144: Federation Persistent Universe - Player Registration and Authentication .........................................................   Passed    0.02 sec
+        Start 146: Federation Persistent Universe - Dynamic World Directory & Heartbeats
+151/363 Test #145: Federation Persistent Universe - Corporate Charters and Multi-World Ownership ...................................................   Passed    0.02 sec
+        Start 147: Federation Persistent Universe - Detailed Per-Cargo Commodity Conservation & Trade Balances
+152/363 Test #146: Federation Persistent Universe - Dynamic World Directory & Heartbeats ...........................................................   Passed    0.02 sec
+        Start 148: Federation Megacity - Registration, Quotas, and Monthly Evaluation Lifecycle
+153/363 Test #147: Federation Persistent Universe - Detailed Per-Cargo Commodity Conservation & Trade Balances .....................................   Passed    0.02 sec
+        Start 149: Federation Freight Corridors - Congestion Escalation, Dynamic Delay & Priority QoS
+154/363 Test #148: Federation Megacity - Registration, Quotas, and Monthly Evaluation Lifecycle ....................................................   Passed    0.02 sec
+        Start 150: Federation Empire Supply Chain Matrix & Conservation Accounting
+155/363 Test #149: Federation Freight Corridors - Congestion Escalation, Dynamic Delay & Priority QoS ..............................................   Passed    0.02 sec
+        Start 151: Sprint 18 GUI - WindowDesc Registration & Widget Tree Validity
+156/363 Test #150: Federation Empire Supply Chain Matrix & Conservation Accounting .................................................................   Passed    0.02 sec
+        Start 152: Sprint 18 GUI - Megacity Profile Presentation and Growth Multipliers
+157/363 Test #151: Sprint 18 GUI - WindowDesc Registration & Widget Tree Validity ..................................................................   Passed    0.02 sec
+        Start 153: Sprint 18 GUI - Freight Corridor Monitor Utilization and Delays
+158/363 Test #152: Sprint 18 GUI - Megacity Profile Presentation and Growth Multipliers ............................................................   Passed    0.02 sec
+        Start 154: Sprint 18 GUI - Universe Directory World Status and Heartbeats
+159/363 Test #153: Sprint 18 GUI - Freight Corridor Monitor Utilization and Delays .................................................................   Passed    0.02 sec
+        Start 155: Sprint 18 GUI - TownView Megacity Status Button Widget
+160/363 Test #155: Sprint 18 GUI - TownView Megacity Status Button Widget ..........................................................................   Passed    0.02 sec
+        Start 156: Federation Cluster - Topology Registration and Phase Hierarchy
+161/363 Test #154: Sprint 18 GUI - Universe Directory World Status and Heartbeats ..................................................................   Passed    0.02 sec
+        Start 157: Federation Cluster - Multi-Phase Freight Transit & Supply Chain Accounting
+162/363 Test #156: Federation Cluster - Topology Registration and Phase Hierarchy ..................................................................   Passed    0.02 sec
+        Start 158: Federation Cluster - Node Drop, Quarantine Bay & Invariant Preservation
+163/363 Test #157: Federation Cluster - Multi-Phase Freight Transit & Supply Chain Accounting ......................................................   Passed    0.02 sec
+        Start 159: Federation Cluster - Server Recovery and Consist Re-Activation
+164/363 Test #159: Federation Cluster - Server Recovery and Consist Re-Activation ..................................................................   Passed    0.02 sec
+        Start 160: Consist Snapshot - current_order_index serialization round-trip
+165/363 Test #158: Federation Cluster - Node Drop, Quarantine Bay & Invariant Preservation .........................................................   Passed    0.02 sec
+        Start 161: Federation Identity - Order destination resolution across worlds
+166/363 Test #160: Consist Snapshot - current_order_index serialization round-trip .................................................................   Passed    0.02 sec
+        Start 162: Consist Materializer - Restores Orders and Advances Order Index on Arrival
+167/363 Test #161: Federation Identity - Order destination resolution across worlds ................................................................   Passed    0.02 sec
+        Start 163: Consist Materializer - End-to-end Autonomous Round-Trip Order Cycling
+168/363 Test #163: Consist Materializer - End-to-end Autonomous Round-Trip Order Cycling ...........................................................   Passed    0.02 sec
+        Start 164: Portal Construction - Unlinked Gate Lifecycle and Restrictions
+169/363 Test #162: Consist Materializer - Restores Orders and Advances Order Index on Arrival ......................................................   Passed    0.02 sec
+        Start 165: Portal Construction - High-capacity terminal topology and PBS directions
+170/363 Test #164: Portal Construction - Unlinked Gate Lifecycle and Restrictions ..................................................................   Passed    0.02 sec
+        Start 166: Portal Construction - UAT adopts complete neutral terminals only
+171/363 Test #165: Portal Construction - High-capacity terminal topology and PBS directions ........................................................   Passed    0.02 sec
+        Start 167: Portal Construction - Terminal footprint rejection is atomic
+172/363 Test #167: Portal Construction - Terminal footprint rejection is atomic ....................................................................   Passed    0.02 sec
+        Start 168: Portal Construction - Authoritative world and Phase placement rules
+173/363 Test #168: Portal Construction - Authoritative world and Phase placement rules .............................................................   Passed    0.02 sec
+        Start 169: Portal Construction - Cross-World Gate Linking
+174/363 Test #166: Portal Construction - UAT adopts complete neutral terminals only ................................................................   Passed    0.05 sec
+        Start 170: Portal Construction - Atomic Pair Builder
+175/363 Test #169: Portal Construction - Cross-World Gate Linking ..................................................................................   Passed    0.02 sec
+        Start 171: Portal Construction - Demolition Safeguards While Consist In Transit
+176/363 Test #170: Portal Construction - Atomic Pair Builder .......................................................................................   Passed    0.02 sec
+        Start 172: Portal Construction - Partial Demolition Unlinking
+177/363 Test #171: Portal Construction - Demolition Safeguards While Consist In Transit ............................................................   Passed    0.02 sec
+        Start 173: Portal Construction - Area demolition safely removes a reserved linked pair
+178/363 Test #172: Portal Construction - Partial Demolition Unlinking ..............................................................................   Passed    0.02 sec
+        Start 174: Portal Construction - Savegame Persistence of Unlinked and Linked Portals
+179/363 Test #173: Portal Construction - Area demolition safely removes a reserved linked pair .....................................................   Passed    0.02 sec
+        Start 175: MultiWorldGen - Layout Calculation Geometry
+180/363 Test #175: MultiWorldGen - Layout Calculation Geometry .....................................................................................   Passed    0.02 sec
+        Start 176: MultiWorldGen - Map Partitioning and Void Isolation
+181/363 Test #174: Portal Construction - Savegame Persistence of Unlinked and Linked Portals .......................................................   Passed    0.05 sec
+        Start 177: MultiWorldGen - Gateway Initialization and Pairing
+182/363 Test #176: MultiWorldGen - Map Partitioning and Void Isolation .............................................................................   Passed    0.03 sec
+        Start 178: MultiWorldGen - Asymmetric Map Partitioning along X
+183/363 Test #177: MultiWorldGen - Gateway Initialization and Pairing ..............................................................................   Passed    0.02 sec
+        Start 179: MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain
+184/363 Test #178: MultiWorldGen - Asymmetric Map Partitioning along X .............................................................................   Passed    0.02 sec
+        Start 180: MultiWorldGen - Partitioning Preserves Terrain Heights and Shores
+185/363 Test #179: MultiWorldGen - Gateway Sites Avoid Unsuitable Terrain ..........................................................................   Passed    0.02 sec
+        Start 181: Interplanetary Cargo - Trade Premium Matrix
+186/363 Test #180: MultiWorldGen - Partitioning Preserves Terrain Heights and Shores ...............................................................   Passed    0.02 sec
+        Start 182: Interplanetary Cargo - Edge Case Handling and Profit Preservation
+187/363 Test #182: Interplanetary Cargo - Edge Case Handling and Profit Preservation ...............................................................   Passed    0.03 sec
+        Start 183: Interplanetary Cargo - Industry Supply Chain Restrictions
+188/363 Test #181: Interplanetary Cargo - Trade Premium Matrix .....................................................................................   Passed    0.04 sec
+        Start 184: Interplanetary Cargo - CargoPacket Source Tracking
+189/363 Test #183: Interplanetary Cargo - Industry Supply Chain Restrictions .......................................................................   Passed    0.03 sec
+        Start 185: Interplanetary Cargo - Procedural Layout Revenue Scaling
+190/363 Test #184: Interplanetary Cargo - CargoPacket Source Tracking ..............................................................................   Passed    0.03 sec
+        Start 186: Spaceport Manager - Lifecycle and Trade Calculation
+191/363 Test #186: Spaceport Manager - Lifecycle and Trade Calculation .............................................................................   Passed    0.02 sec
+        Start 187: Spaceport Command - CmdDesignateSpaceport
+192/363 Test #185: Interplanetary Cargo - Procedural Layout Revenue Scaling ........................................................................   Passed    0.02 sec
+        Start 188: Edge Conduit - Boundary Void Adjacency Rules
+193/363 Test #187: Spaceport Command - CmdDesignateSpaceport .......................................................................................   Passed    0.02 sec
+        Start 189: Edge Conduit - Construction and Demolition Commands
+194/363 Test #188: Edge Conduit - Boundary Void Adjacency Rules ....................................................................................   Passed    0.02 sec
+        Start 190: Edge Conduit - Frontier World Extraction Multiplier
+195/363 Test #189: Edge Conduit - Construction and Demolition Commands .............................................................................   Passed    0.02 sec
+        Start 191: Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)
+196/363 Test #190: Edge Conduit - Frontier World Extraction Multiplier .............................................................................   Passed    0.02 sec
+        Start 192: Edge Conduit - One-ended head is safe for signal updates
+197/363 Test #192: Edge Conduit - One-ended head is safe for signal updates ........................................................................   Passed    0.02 sec
+        Start 193: Portal rail conversion rejects a stale remote endpoint
+198/363 Test #193: Portal rail conversion rejects a stale remote endpoint ..........................................................................   Passed    0.02 sec
+        Start 194: Edge Conduit - Physical map edges and corners are coordinate-safe
+199/363 Test #191: Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND) ......................................................................   Passed    0.04 sec
+        Start 195: Edge Conduit - Invalid boundaries, orientation and terrain fail atomically
+200/363 Test #194: Edge Conduit - Physical map edges and corners are coordinate-safe ...............................................................   Passed    0.02 sec
+        Start 196: Edge Conduit - Logical boundary, phases and adjacent rail remain supported
+201/363 Test #195: Edge Conduit - Invalid boundaries, orientation and terrain fail atomically ......................................................   Passed    0.02 sec
+        Start 197: Edge Conduit - Constructed tile survives save, reload and signal refresh
+202/363 Test #196: Edge Conduit - Logical boundary, phases and adjacent rail remain supported ......................................................   Passed    0.02 sec
+        Start 198: Spaceport Bridge - Configuration and Command Execution
+203/363 Test #198: Spaceport Bridge - Configuration and Command Execution ..........................................................................   Passed    0.02 sec
+        Start 199: Spaceport Bridge - Interplanetary Trade Dispatch and Reception
+204/363 Test #197: Edge Conduit - Constructed tile survives save, reload and signal refresh ........................................................   Passed    0.06 sec
+        Start 200: Edge Conduit Feeder - Configuration and Direct Inter-World Piping
+205/363 Test #199: Spaceport Bridge - Interplanetary Trade Dispatch and Reception ..................................................................   Passed    0.02 sec
+        Start 201: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation
+206/363 Test #200: Edge Conduit Feeder - Configuration and Direct Inter-World Piping ...............................................................   Passed    0.02 sec
+        Start 202: Twin Gateway Arrays - Spatial Recognition and Pairing
+207/363 Test #201: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation ..........................................................   Passed    0.02 sec
+        Start 203: Twin Gateway Arrays - Corridor Capacity and Congestion Mitigation
+208/363 Test #202: Twin Gateway Arrays - Spatial Recognition and Pairing ...........................................................................   Passed    0.02 sec
+        Start 204: In-Transit Consist Telemetry - Querying and Lifecycle Updates
+209/363 Test #203: Twin Gateway Arrays - Corridor Capacity and Congestion Mitigation ...............................................................   Passed    0.02 sec
+        Start 205: Portal Maintenance Economics - Upkeep Fees and Calculation
+210/363 Test #204: In-Transit Consist Telemetry - Querying and Lifecycle Updates ...................................................................   Passed    0.02 sec
+        Start 206: Viewport World-Hopping and Gate Resolution
+211/363 Test #205: Portal Maintenance Economics - Upkeep Fees and Calculation ......................................................................   Passed    0.02 sec
+        Start 207: Alien Biomes - PlanetManager GetTileBiome O(1) query
+212/363 Test #206: Viewport World-Hopping and Gate Resolution ......................................................................................   Passed    0.02 sec
+        Start 208: Alien Biomes - Procedural MultiWorldGen Biome Environmental Styling
+213/363 Test #207: Alien Biomes - PlanetManager GetTileBiome O(1) query ............................................................................   Passed    0.02 sec
+        Start 209: Alien Biomes - Tree Foliage Transformation per Biome
+214/363 Test #209: Alien Biomes - Tree Foliage Transformation per Biome ............................................................................   Passed    0.02 sec
+        Start 210: Alien Biomes - CST Portal Gate Classification and Visual Styling
+215/363 Test #208: Alien Biomes - Procedural MultiWorldGen Biome Environmental Styling .............................................................   Passed    0.02 sec
+        Start 211: Blueprint Data Model and JSON Round-Trip
+216/363 Test #210: Alien Biomes - CST Portal Gate Classification and Visual Styling ................................................................   Passed    0.02 sec
+        Start 212: Blueprint Rotation 90, 180, 270 and Invariance
+217/363 Test #211: Blueprint Data Model and JSON Round-Trip ........................................................................................   Passed    0.02 sec
+        Start 213: Blueprint Horizontal Flip/Mirror
+218/363 Test #212: Blueprint Rotation 90, 180, 270 and Invariance ..................................................................................   Passed    0.02 sec
+        Start 214: Blueprint Capture from Game Map
+219/363 Test #213: Blueprint Horizontal Flip/Mirror ................................................................................................   Passed    0.02 sec
+        Start 215: Blueprint Manager Storage and Builtin Protection
+220/363 Test #214: Blueprint Capture from Game Map .................................................................................................   Passed    0.02 sec
+        Start 216: Deterministic Blueprint Placement Command
+221/363 Test #215: Blueprint Manager Storage and Builtin Protection ................................................................................   Passed    0.03 sec
+        Start 217: Blueprint depot quote matches execution
+222/363 Test #216: Deterministic Blueprint Placement Command .......................................................................................   Passed    0.02 sec
+        Start 218: Blueprint rejected placement preserves map money and materials
+223/363 Test #217: Blueprint depot quote matches execution .........................................................................................   Passed    0.02 sec
+        Start 219: Blueprint Mainline placement clears trees with exact fabrication materials
+224/363 Test #219: Blueprint Mainline placement clears trees with exact fabrication materials ......................................................   Passed    0.03 sec
+        Start 220: Blueprint dispatcher charges quote exactly once
+225/363 Test #218: Blueprint rejected placement preserves map money and materials ..................................................................   Passed    0.05 sec
+        Start 221: Blueprint unsupported station layouts reject without changes
+226/363 Test #220: Blueprint dispatcher charges quote exactly once .................................................................................   Passed    0.02 sec
+        Start 222: Blueprint clearing foundation and signal replacement use canonical costs
+227/363 Test #221: Blueprint unsupported station layouts reject without changes ....................................................................   Passed    0.04 sec
+        Start 223: Blueprint infrastructure money and materials survive save reload
+228/363 Test #222: Blueprint clearing foundation and signal replacement use canonical costs ........................................................   Passed    0.03 sec
+        Start 224: Blueprint strict JSON schema rejects malformed values
+229/363 Test #224: Blueprint strict JSON schema rejects malformed values ...........................................................................   Passed    0.02 sec
+        Start 225: Blueprint central validity protects transforms
+230/363 Test #223: Blueprint infrastructure money and materials survive save reload ................................................................   Passed    0.05 sec
+        Start 226: Blueprint v1 bounds and metadata round trip
+231/363 Test #225: Blueprint central validity protects transforms ..................................................................................   Passed    0.02 sec
+        Start 227: Blueprint file export and import preserve content and reject existing destination
+232/363 Test #227: Blueprint file export and import preserve content and reject existing destination ...............................................   Passed    0.03 sec
+        Start 228: CST revision updates preserve imported older layouts with the same name
+233/363 Test #226: Blueprint v1 bounds and metadata round trip .....................................................................................   Passed    0.04 sec
+        Start 229: Blueprint rename and delete retain actual backing filename
+234/363 Test #228: CST revision updates preserve imported older layouts with the same name .........................................................   Passed    0.03 sec
+        Start 230: Blueprint malformed files and name collisions leave library and bytes intact
+235/363 Test #229: Blueprint rename and delete retain actual backing filename ......................................................................   Passed    0.02 sec
+        Start 231: Blueprint failed commit and missing backing file do not mutate memory
+236/363 Test #230: Blueprint malformed files and name collisions leave library and bytes intact ....................................................   Passed    0.04 sec
+        Start 232: Blueprint symlinks and oversized files are skipped without changing real files
+237/363 Test #231: Blueprint failed commit and missing backing file do not mutate memory ...........................................................   Passed    0.04 sec
+        Start 233: Blueprint long names use bounded filenames and NUL paths are rejected
+238/363 Test #232: Blueprint symlinks and oversized files are skipped without changing real files ..................................................   Passed    0.03 sec
+        Start 234: Blueprint storage injected IO failures preserve the prior file and memory
+239/363 Test #233: Blueprint long names use bounded filenames and NUL paths are rejected ...........................................................   Passed    0.04 sec
+        Start 235: CST Prefabs - Complete 8-Layout Catalogue Registration
+240/363 Test #234: Blueprint storage injected IO failures preserve the prior file and memory .......................................................   Passed    0.03 sec
+        Start 236: CST Prefabs - Structural & Functional Integrity
+241/363 Test #235: CST Prefabs - Complete 8-Layout Catalogue Registration ..........................................................................   Passed    0.04 sec
+        Start 237: CST Wye and RoRo advertise traversable ports
+242/363 Test #236: CST Prefabs - Structural & Functional Integrity .................................................................................   Passed    0.03 sec
+        Start 238: CST compact roundabout connects every cardinal corridor
+243/363 Test #238: CST compact roundabout connects every cardinal corridor .........................................................................   Passed    0.03 sec
+        Start 239: CST bulk balloon turns both platforms into the return lead
+244/363 Test #237: CST Wye and RoRo advertise traversable ports ....................................................................................   Passed    0.04 sec
+        Start 240: CST staging yard reaches both depots and rejoins the bypass
+245/363 Test #239: CST bulk balloon turns both platforms into the return lead ......................................................................   Passed    0.03 sec
+        Start 241: CST straight siding and corridor retain their advertised routes
+246/363 Test #240: CST staging yard reaches both depots and rejoins the bypass .....................................................................   Passed    0.03 sec
+        Start 242: CST prefabs run every advertised route with native trains and intact signals
+247/363 Test #241: CST straight siding and corridor retain their advertised routes .................................................................   Passed    0.03 sec
+        Start 243: CST prefab routes survive sequential rotations and mirrors
+248/363 Test #243: CST prefab routes survive sequential rotations and mirrors ......................................................................   Passed    0.04 sec
+        Start 244: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+249/363 Test #244: CST Prefabs - Geometric Transforms & RHD/LHD Invariance .........................................................................   Passed    0.03 sec
+        Start 245: CST Prefabs - Deterministic In-Game Map Placement
+250/363 Test #245: CST Prefabs - Deterministic In-Game Map Placement ...............................................................................   Passed    0.29 sec
+        Start 246: CST Prefabs - Immutability & Builtin Deletion Protection
+251/363 Test #246: CST Prefabs - Immutability & Builtin Deletion Protection ........................................................................   Passed    0.02 sec
+        Start 247: Sprint 27 GUI - WindowDesc Registration & Widget Tree Compilation
+252/363 Test #247: Sprint 27 GUI - WindowDesc Registration & Widget Tree Compilation ...............................................................   Passed    0.02 sec
+        Start 248: Sprint 27 GUI - Empire Supply Chain Matrix & Feeder Presentation
+253/363 Test #242: CST prefabs run every advertised route with native trains and intact signals ....................................................   Passed    0.42 sec
+        Start 249: Sprint 27 GUI - Inter-World Trade Balances & Conservation Auditing
+254/363 Test #248: Sprint 27 GUI - Empire Supply Chain Matrix & Feeder Presentation ................................................................   Passed    0.02 sec
+        Start 250: Sprint 27 GUI - Federation Player Authentication & Active Session Management
+255/363 Test #249: Sprint 27 GUI - Inter-World Trade Balances & Conservation Auditing ..............................................................   Passed    0.02 sec
+        Start 251: Sprint 27 GUI - Corporate Charter Operations & Delegation Permissions
+256/363 Test #250: Sprint 27 GUI - Federation Player Authentication & Active Session Management ....................................................   Passed    0.02 sec
+        Start 252: Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata
+257/363 Test #251: Sprint 27 GUI - Corporate Charter Operations & Delegation Permissions ...........................................................   Passed    0.02 sec
+        Start 253: Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration
+258/363 Test #252: Sprint 28 UAT - Savegame File Artifact & Reproducibility Metadata ...............................................................   Passed    0.02 sec
+        Start 254: Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance
+259/363 Test #253: Sprint 28 UAT - GameScript OpenSpaceTTD-UAT-Demo v7 Registration ................................................................   Passed    0.02 sec
+        Start 255: Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States
+260/363 Test #254: Sprint 28 UAT - CST Prefab Rail Blocks Catalog & Invariance .....................................................................   Passed    0.02 sec
+        Start 256: Sprint 28 UAT - Script Goal & Story Page Enums and Types
+261/363 Test #255: Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States ......................................................................   Passed    0.02 sec
+        Start 257: Sprint 29 Federation - Dynamic World Directory Discovery & Liveliness
+262/363 Test #256: Sprint 28 UAT - Script Goal & Story Page Enums and Types ........................................................................   Passed    0.02 sec
+        Start 258: Sprint 29 Federation - Strict Content Admission Rejection & Invariant Guard
+263/363 Test #257: Sprint 29 Federation - Dynamic World Directory Discovery & Liveliness ...........................................................   Passed    0.02 sec
+        Start 259: Sprint 29 Federation - Freight Corridor Congestion & Dynamic Priority Relief
+264/363 Test #259: Sprint 29 Federation - Freight Corridor Congestion & Dynamic Priority Relief ....................................................   Passed    0.02 sec
+        Start 260: Sprint 29 Federation - Cross-Server Multi-Hop Round Trip & Order Progression
+265/363 Test #258: Sprint 29 Federation - Strict Content Admission Rejection & Invariant Guard .....................................................   Passed    0.02 sec
+        Start 261: Sprint 29 Federation - Destination Node Crash, Quarantine Bay & Auto-Recovery
+266/363 Test #261: Sprint 29 Federation - Destination Node Crash, Quarantine Bay & Auto-Recovery ...................................................   Passed    0.02 sec
+        Start 262: Sprint 29 Federation - Empire-Wide Multi-Commodity Conservation & Bilateral Trade Balances
+267/363 Test #260: Sprint 29 Federation - Cross-Server Multi-Hop Round Trip & Order Progression ....................................................   Passed    0.02 sec
+        Start 263: Sprint 30 Biomes - All 6 Biomes Environmental Styling & Spatial Resolution
+268/363 Test #262: Sprint 29 Federation - Empire-Wide Multi-Commodity Conservation & Bilateral Trade Balances ......................................   Passed    0.02 sec
+        Start 264: Sprint 30 Biomes - MultiWorldGen Biome Partitioning for 4+ Worlds
+269/363 Test #263: Sprint 30 Biomes - All 6 Biomes Environmental Styling & Spatial Resolution ......................................................   Passed    0.02 sec
+        Start 265: Sprint 30 Biomes - Procedural Environmental Styling and Foliage
+270/363 Test #264: Sprint 30 Biomes - MultiWorldGen Biome Partitioning for 4+ Worlds ...............................................................   Passed    0.02 sec
+        Start 266: Sprint 30 Colonization - Phase 4 Expansion World Pre-Colonization Restrictions
+271/363 Test #265: Sprint 30 Biomes - Procedural Environmental Styling and Foliage .................................................................   Passed    0.02 sec
+        Start 267: Sprint 30 Colonization - PlanetManager ColonizeWorld and Promotion Hierarchy
+272/363 Test #266: Sprint 30 Colonization - Phase 4 Expansion World Pre-Colonization Restrictions ..................................................   Passed    0.02 sec
+        Start 268: Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock
+273/363 Test #267: Sprint 30 Colonization - PlanetManager ColonizeWorld and Promotion Hierarchy ....................................................   Passed    0.02 sec
+        Start 269: Sprint 30 Colonization - Save/Load Persistence of Promoted World Phase
+274/363 Test #268: Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock .............................................................   Passed    0.02 sec
+        Start 270: Sprint 31 GUI - Universe Directory Widget Hierarchy and Button States
+275/363 Test #269: Sprint 30 Colonization - Save/Load Persistence of Promoted World Phase ..........................................................   Passed    0.03 sec
+        Start 271: Sprint 31 Origin - Outpost Origin Coordinate Assignment and Viewport Navigation
+276/363 Test #270: Sprint 31 GUI - Universe Directory Widget Hierarchy and Button States ...........................................................   Passed    0.02 sec
+        Start 272: Sprint 31 Authority - RegisteredWorld Biome Tracking and Directory Sync
+277/363 Test #271: Sprint 31 Origin - Outpost Origin Coordinate Assignment and Viewport Navigation .................................................   Passed    0.02 sec
+        Start 273: Sprint 31 Authority - Remote ColonizeWorld Lifecycle
+278/363 Test #272: Sprint 31 Authority - RegisteredWorld Biome Tracking and Directory Sync .........................................................   Passed    0.02 sec
+        Start 274: Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase
+279/363 Test #273: Sprint 31 Authority - Remote ColonizeWorld Lifecycle ............................................................................   Passed    0.02 sec
+        Start 275: Sprint 32 Economy - Cargo Delivery and Development Points Accumulation
+280/363 Test #274: Sprint 32 Tech - Track Infrastructure Placement Restrictions by World Phase .....................................................   Passed    0.02 sec
+        Start 276: Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating
+281/363 Test #275: Sprint 32 Economy - Cargo Delivery and Development Points Accumulation ..........................................................   Passed    0.02 sec
+        Start 277: Sprint 32 Authority - Universe Authority Remote World Promotion
+282/363 Test #276: Sprint 32 Lifecycle - Multi-Tier Phase Promotion and Threshold Gating ...........................................................   Passed    0.02 sec
+        Start 278: Sprint 33 - Planetary Town Placement Protection by World Phase
+283/363 Test #277: Sprint 32 Authority - Universe Authority Remote World Promotion .................................................................   Passed    0.02 sec
+        Start 279: Sprint 33 - Biome-Specific Industry Placement Protection
+284/363 Test #278: Sprint 33 - Planetary Town Placement Protection by World Phase ..................................................................   Passed    0.02 sec
+        Start 280: Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation Integration
+285/363 Test #279: Sprint 33 - Biome-Specific Industry Placement Protection ........................................................................   Passed    0.02 sec
+        Start 281: Sprint 33 - Megacity Multipliers and Town Growth Controls
+286/363 Test #280: Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation Integration ..................................................   Passed    0.02 sec
+        Start 282: Sprint 33 - Universe Authority Megacity Federation Tracking & State
+287/363 Test #281: Sprint 33 - Megacity Multipliers and Town Growth Controls .......................................................................   Passed    0.02 sec
+        Start 283: Sprint 36 UAT - Savegame File Artifact & Invariants
+288/363 Test #282: Sprint 33 - Universe Authority Megacity Federation Tracking & State .............................................................   Passed    0.02 sec
+        Start 284: Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v9 Metadata & Backwards Compatibility
+289/363 Test #283: Sprint 36 UAT - Savegame File Artifact & Invariants .............................................................................   Passed    0.02 sec
+        Start 285: Sprint 36 UAT - Six-World Biome Partition & Layout Geometry
+290/363 Test #284: Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v9 Metadata & Backwards Compatibility ..........................................   Passed    0.02 sec
+        Start 286: Sprint 36 UAT - Mid/Late Game Fixtures & Engine System Validation
+291/363 Test #285: Sprint 36 UAT - Six-World Biome Partition & Layout Geometry .....................................................................   Passed    0.02 sec
+        Start 287: Sprint 37: In-Tree NML Package Source Integrity
+292/363 Test #286: Sprint 36 UAT - Mid/Late Game Fixtures & Engine System Validation ...............................................................   Passed    0.02 sec
+        Start 288: Sprint 37: Reproducible Binary GRF Container Synthesis
+293/363 Test #287: Sprint 37: In-Tree NML Package Source Integrity .................................................................................   Passed    0.02 sec
+        Start 289: Sprint 37: Content Admission Boundary and Manifest Integration
+294/363 Test #288: Sprint 37: Reproducible Binary GRF Container Synthesis ..........................................................................   Passed    0.02 sec
+        Start 290: Sprint 37: CST Rolling Stock Specifications and Tech Tree Gating
+295/363 Test #289: Sprint 37: Content Admission Boundary and Manifest Integration ..................................................................   Passed    0.02 sec
+        Start 291: Sprint 37: World Phase Operational Restrictions
+296/363 Test #290: Sprint 37: CST Rolling Stock Specifications and Tech Tree Gating ................................................................   Passed    0.02 sec
+        Start 292: Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage
+297/363 Test #291: Sprint 37: World Phase Operational Restrictions .................................................................................   Passed    0.02 sec
+        Start 293: Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops
+298/363 Test #292: Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage ..........................................................................   Passed    0.02 sec
+        Start 294: Sprint 37: Runtime gating uses pack identity and local engine IDs
+299/363 Test #293: Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops ......................................................................   Passed    0.02 sec
+        Start 295: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation
+300/363 Test #294: Sprint 37: Runtime gating uses pack identity and local engine IDs ...............................................................   Passed    0.02 sec
+        Start 296: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption
+301/363 Test #295: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation ....................................................................   Passed    0.02 sec
+        Start 297: Sprint 39 Stockpile - Role Mappings and Deserialization
+302/363 Test #296: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption ........................................................   Passed    0.02 sec
+        Start 298: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors
+303/363 Test #297: Sprint 39 Stockpile - Role Mappings and Deserialization .........................................................................   Passed    0.02 sec
+        Start 299: Sprint 39 Corporate HQ - Placement Rules & Validation
+304/363 Test #298: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors ...........................................................   Passed    0.02 sec
+        Start 300: Sprint 39 Corporate HQ - Tier Advancement & Serialization
+305/363 Test #299: Sprint 39 Corporate HQ - Placement Rules & Validation ...........................................................................   Passed    0.02 sec
+        Start 301: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub
+306/363 Test #300: Sprint 39 Corporate HQ - Tier Advancement & Serialization .......................................................................   Passed    0.02 sec
+        Start 302: Sprint 40 Fabrication - BOM Recipes & Catalog
+307/363 Test #301: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub .....................................................................   Passed    0.02 sec
+        Start 303: Sprint 40 Fabrication - Mode Toggling and Company Isolation
+308/363 Test #302: Sprint 40 Fabrication - BOM Recipes & Catalog ...................................................................................   Passed    0.02 sec
+        Start 304: Sprint 40 Fabrication - Track Building Interception
+309/363 Test #303: Sprint 40 Fabrication - Mode Toggling and Company Isolation .....................................................................   Passed    0.03 sec
+        Start 305: Sprint 40 Fabrication - Signal and Depot Interception
+310/363 Test #304: Sprint 40 Fabrication - Track Building Interception .............................................................................   Passed    0.03 sec
+        Start 306: Sprint 40 Fabrication - Save/Load Serialization
+311/363 Test #305: Sprint 40 Fabrication - Signal and Depot Interception ...........................................................................   Passed    0.02 sec
+        Start 307: Sprint 41 Tech Tree - Catalog & Branches
+312/363 Test #306: Sprint 40 Fabrication - Save/Load Serialization .................................................................................   Passed    0.02 sec
+        Start 308: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites
+313/363 Test #307: Sprint 41 Tech Tree - Catalog & Branches ........................................................................................   Passed    0.02 sec
+        Start 309: Sprint 41 Tech Tree - Server Commands & Budget Allocation
+314/363 Test #308: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites ..................................................................   Passed    0.02 sec
+        Start 310: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning
+315/363 Test #309: Sprint 41 Tech Tree - Server Commands & Budget Allocation .......................................................................   Passed    0.02 sec
+        Start 311: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration
+316/363 Test #310: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning ...................................................................   Passed    0.02 sec
+        Start 312: Sprint 41 Tech Tree - Save/Load State Restoration
+317/363 Test #312: Sprint 41 Tech Tree - Save/Load State Restoration ...............................................................................   Passed    0.02 sec
+        Start 313: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog
+318/363 Test #311: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration ....................................................................   Passed    0.02 sec
+        Start 314: Sprint 42 Production Chains - World Phase Placement Constraints
+319/363 Test #313: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog ..............................................................   Passed    0.02 sec
+        Start 315: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion
+320/363 Test #314: Sprint 42 Production Chains - World Phase Placement Constraints .................................................................   Passed    0.02 sec
+        Start 316: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk
+321/363 Test #316: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk .....................................................   Passed    0.02 sec
+        Start 317: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop
+322/363 Test #315: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion ...................................................   Passed    0.02 sec
+        Start 318: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering
+323/363 Test #317: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop ..........................................................   Passed    0.02 sec
+        Start 319: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)
+324/363 Test #318: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering ............................................................   Passed    0.02 sec
+        Start 320: Hub authority - invalid attachments reject query and execute without mutation
+325/363 Test #319: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk) ..............................................................   Passed    0.02 sec
+        Start 321: Hub authority - explicit and automatic placement share cost and eligibility
+326/363 Test #320: Hub authority - invalid attachments reject query and execute without mutation ...................................................   Passed    0.02 sec
+        Start 322: Hub authority - automatic placement chooses nearest eligible platform deterministically
+327/363 Test #321: Hub authority - explicit and automatic placement share cost and eligibility .....................................................   Passed    0.02 sec
+        Start 323: Hub authority - platform removal and station deletion retire only invalid bindings
+328/363 Test #322: Hub authority - automatic placement chooses nearest eligible platform deterministically .........................................   Passed    0.03 sec
+        Start 324: Hub authority - native company acquisition transfers attachment and bankruptcy removes it
+329/363 Test #323: Hub authority - platform removal and station deletion retire only invalid bindings ..............................................   Passed    0.03 sec
+        Start 325: Hub authority - save reload retains valid bindings and retires legacy invalid duplicates
+330/363 Test #324: Hub authority - native company acquisition transfers attachment and bankruptcy removes it .......................................   Passed    0.04 sec
+        Start 326: Hub authority - maximum saved hub ID preserves binding and future construction
+331/363 Test #326: Hub authority - maximum saved hub ID preserves binding and future construction ..................................................   Passed    0.03 sec
+        Start 327: Production gameplay - command validation and station lifecycle
+332/363 Test #327: Production gameplay - command validation and station lifecycle ..................................................................   Passed    0.03 sec
+        Start 328: Production gameplay - real cargo unloading conversion and onward loading
+333/363 Test #328: Production gameplay - real cargo unloading conversion and onward loading ........................................................   Passed    0.02 sec
+        Start 329: Hub unloading - industry cargo has exactly one destination
+334/363 Test #329: Hub unloading - industry cargo has exactly one destination ......................................................................   Passed    0.02 sec
+        Start 330: Hub unloading - isolated freight hub accepts real unloading
+335/363 Test #330: Hub unloading - isolated freight hub accepts real unloading .....................................................................   Passed    0.02 sec
+        Start 331: Hub unloading - town and nonfreight delivery controls
+336/363 Test #331: Hub unloading - town and nonfreight delivery controls ...........................................................................   Passed    0.03 sec
+        Start 332: Hub unloading - explicit transfer and no unload keep their meaning
+337/363 Test #325: Hub authority - save reload retains valid bindings and retires legacy invalid duplicates ........................................   Passed    0.20 sec
+        Start 333: Hub unloading - deposited cargo survives actual save and reload
+338/363 Test #332: Hub unloading - explicit transfer and no unload keep their meaning ..............................................................   Passed    0.02 sec
+        Start 334: Hub unloading - invalid stored destination cannot consume cargo
+339/363 Test #333: Hub unloading - deposited cargo survives actual save and reload .................................................................   Passed    0.04 sec
+        Start 335: Hub loading - full packet pool preserves inventory and recovers
+340/363 Test #334: Hub unloading - invalid stored destination cannot consume cargo .................................................................   Passed    0.03 sec
+        Start 336: Hub loading - capacity reserve and rights boundaries conserve cargo
+341/363 Test #335: Hub loading - full packet pool preserves inventory and recovers .................................................................   Passed    0.02 sec
+        Start 337: Hub loading - failed pickup survives reload and retries
+342/363 Test #336: Hub loading - capacity reserve and rights boundaries conserve cargo .............................................................   Passed    0.03 sec
+        Start 338: Hub loading - failed packet split keeps cargo available
+343/363 Test #337: Hub loading - failed pickup survives reload and retries .........................................................................   Passed    0.04 sec
+        Start 339: Production gameplay - station facility survives actual save and reload
+344/363 Test #338: Hub loading - failed packet split keeps cargo available .........................................................................   Passed    0.04 sec
+        Start 340: Squirrel -> JSON conversion
+345/363 Test #340: Squirrel -> JSON conversion .....................................................................................................   Passed    0.02 sec
+        Start 341: JSON -> Squirrel conversion
+346/363 Test #339: Production gameplay - station facility survives actual save and reload ..........................................................   Passed    0.03 sec
+        Start 342: WindowDesc - ini_key uniqueness
+347/363 Test #341: JSON -> Squirrel conversion .....................................................................................................   Passed    0.02 sec
+        Start 343: WindowDesc - ini_key validity
+348/363 Test #342: WindowDesc - ini_key uniqueness .................................................................................................   Passed    0.02 sec
+        Start 344: WindowDesc - NWidgetParts properly closed
+349/363 Test #343: WindowDesc - ini_key validity ...................................................................................................   Passed    0.02 sec
+        Start 345: WindowDesc - NWidgetPart validity
+350/363 Test #344: WindowDesc - NWidgetParts properly closed .......................................................................................   Passed    0.02 sec
+        Start 346: SpiralTileSequence - minimum
+351/363 Test #346: SpiralTileSequence - minimum ....................................................................................................   Passed    0.02 sec
+        Start 347: SpiralTileSequence - odd
+352/363 Test #345: WindowDesc - NWidgetPart validity ...............................................................................................   Passed    0.02 sec
+        Start 348: SpiralTileSequence - even
+353/363 Test #347: SpiralTileSequence - odd ........................................................................................................   Passed    0.02 sec
+        Start 349: SpiralTileSequence - zero hole
+354/363 Test #348: SpiralTileSequence - even .......................................................................................................   Passed    0.02 sec
+        Start 350: SpiralTileSequence - normal hole
+355/363 Test #349: SpiralTileSequence - zero hole ..................................................................................................   Passed    0.02 sec
+        Start 351: Utf8View - empty
+356/363 Test #350: SpiralTileSequence - normal hole ................................................................................................   Passed    0.02 sec
+        Start 352: Utf8View - invalid
+357/363 Test #351: Utf8View - empty ................................................................................................................   Passed    0.02 sec
+        Start 353: Utf8View - iterate
+358/363 Test #352: Utf8View - invalid ..............................................................................................................   Passed    0.02 sec
+359/363 Test #353: Utf8View - iterate ..............................................................................................................   Passed    0.02 sec
+        Start 360: regression_regression
+360/363 Test #360: regression_regression ...........................................................................................................   Passed    0.63 sec
+        Start 361: regression_stationlist
+361/363 Test #361: regression_stationlist ..........................................................................................................   Passed    0.50 sec
+        Start 362: regression_gs
+362/363 Test #362: regression_gs ...................................................................................................................   Passed    0.23 sec
+        Start 363: regression_gs_compat
+363/363 Test #363: regression_gs_compat ............................................................................................................   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 363
+
+Label Time Summary:
+integration         =   0.11 sec*proc (1 test)
+requires-baseset    =   0.11 sec*proc (1 test)
+
+Total Test time (real) =   6.47 sec

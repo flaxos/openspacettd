@@ -26,6 +26,7 @@
 #include "../window_func.h"
 #include "../cargotype.h"
 #include "../town.h"
+#include "../town_cmd.h"
 #include "../station_base.h"
 #include "../command_func.h"
 #include "../company_base.h"
@@ -590,6 +591,7 @@ CommandCost CmdConfigureEdgeConduitFeeder(DoCommandFlags flags, TileIndex tile, 
 
 CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::string &outpost_name)
 {
+	if (!Company::IsValidID(_current_company)) return CMD_ERROR;
 	CommandCost placement = PlanetManager::CheckConstructionPlacement(tile);
 	if (placement.Failed()) return placement;
 
@@ -607,29 +609,29 @@ CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::
 
 	/* Capital colonization and outpost expedition fee */
 	CommandCost cost(ExpensesType::Construction, _price[Price::BuildTown] * 5);
+	if (cost.GetCost() > GetAvailableMoneyForCommand()) return CMD_ERROR;
+	std::string name = outpost_name.empty() ? fmt::format("Outpost {}", region->name) : outpost_name;
+	Town *existing_town = PlanetManager::GetWorldPrimaryTown(world);
+	/* Older saves may contain a synthetic outpost town with no native houses.
+	 * Reject it in both query and execute rather than silently promoting an
+	 * empty settlement or regenerating houses in an existing save. */
+	if (existing_town != nullptr && (existing_town->cache.num_houses == 0 || existing_town->cache.population == 0)) {
+		return CommandCost(STR_ERROR_CANNOT_COLONIZE_INCOMPLETE_OUTPOST);
+	}
+	if (existing_town == nullptr) {
+		CommandCost town_site = CheckFrontierTownSite(tile, name);
+		if (town_site.Failed()) return town_site;
+	}
 
 	if (flags.Test(DoCommandFlag::Execute)) {
-		std::string name = outpost_name;
-		if (name.empty()) {
-			name = fmt::format("Outpost {}", region->name);
-		}
-
-		PlanetManager::ColonizeWorld(world, name, tile);
-
-		/* Spawn initial frontier settlement if none exists on this world */
-		Town *existing_town = PlanetManager::GetWorldPrimaryTown(world);
-		if (existing_town == nullptr && Town::CanAllocateItem() && IsValidTile(tile)) {
-			Town *t = Town::Create(tile);
-			if (t != nullptr) {
-				t->name = name;
-				if (_current_language != nullptr) {
-					t->UpdateVirtCoord();
-				}
-			}
-		}
+		/* Native town initialization must succeed before canonical world state changes. */
+		if (existing_town == nullptr && FoundFrontierTownAtSite(tile, name) == nullptr) return CMD_ERROR;
+		if (!PlanetManager::ColonizeWorld(world, name, tile)) return CMD_ERROR;
+		UniverseAuthorityService::Instance().SyncLocalWorld(world);
 
 		/* Broadcast colony founding news */
 		AddTileNewsItem(GetEncodedString(STR_NEWS_WORLD_COLONIZED, name), NewsType::CompanyInfo, tile);
+		SetWindowDirty(WindowClass::UniverseDirectory, 0);
 	}
 
 	return cost;
@@ -637,6 +639,7 @@ CommandCost CmdColonizeOutpost(DoCommandFlags flags, TileIndex tile, const std::
 
 CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
 {
+	if (!Company::IsValidID(_current_company)) return CMD_ERROR;
 	const PlanetRegion *region = PlanetManager::GetRegion(world);
 	if (region == nullptr) return CMD_ERROR;
 
@@ -653,7 +656,8 @@ CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
 
 	if (flags.Test(DoCommandFlag::Execute)) {
 		WorldPhase prev_phase = region->phase;
-		PlanetManager::PromoteWorldPhase(world);
+		if (!PlanetManager::PromoteWorldPhase(world)) return CMD_ERROR;
+		UniverseAuthorityService::Instance().SyncLocalWorld(world);
 
 		TileIndex news_tile = region->outpost_tile != INVALID_TILE ?
 			region->outpost_tile :
@@ -670,7 +674,7 @@ CommandCost CmdPromoteWorld(DoCommandFlags flags, WorldID world)
 			}
 		}
 
-		UniverseAuthorityService::Instance().PromoteWorld(world);
+		SetWindowDirty(WindowClass::UniverseDirectory, 0);
 	}
 
 	return cost;
@@ -714,11 +718,28 @@ CommandCost CmdPlaceCorporateHQ(DoCommandFlags flags, TileIndex tile, const std:
 	return cost;
 }
 
+CommandCost CmdUpgradeCorporateHQ(DoCommandFlags flags, CompanyID company, CorporateHQTier target_tier)
+{
+	if (!Company::IsValidID(_current_company) || !Company::IsValidID(company)) return CMD_ERROR;
+	CommandCost ownership = CheckOwnership(company);
+	if (ownership.Failed()) return ownership;
+	const CorporateHQProfile *hq = CorporateHQManager::GetHQ(company);
+	if (hq == nullptr) return CMD_ERROR;
+	const uint8_t current = static_cast<uint8_t>(hq->tier);
+	const uint8_t target = static_cast<uint8_t>(target_tier);
+	if (current < 1 || current >= 4 || target != current + 1) return CMD_ERROR;
+	if (flags.Test(DoCommandFlag::Execute)) {
+		if (!CorporateHQManager::UpgradeHQTier(company)) return CMD_ERROR;
+		SetWindowDirty(WindowClass::CorporateHQ, company.base());
+	}
+	return CommandCost(ExpensesType::Construction);
+}
+
 CommandCost CmdBuildLogisticsHub(DoCommandFlags flags, TileIndex tile, StationID st, const std::string &hub_name)
 {
-	if (tile == INVALID_TILE) return CMD_ERROR;
+	if (tile >= Map::Size()) return CMD_ERROR;
 	CompanyID company = _current_company;
-	if (company == CompanyID::Invalid()) return CMD_ERROR;
+	if (!Company::IsValidID(company)) return CMD_ERROR;
 
 	WorldID world_id = PlanetManager::GetTileWorld(tile);
 	if (world_id == INVALID_WORLD) {
@@ -730,31 +751,33 @@ CommandCost CmdBuildLogisticsHub(DoCommandFlags flags, TileIndex tile, StationID
 	if (region->phase == WorldPhase::Phase4_Expansion && region->development_score == 0 && region->outpost_tile == INVALID_TILE) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
 	}
+	StationID resolved = LogisticsHubManager::ResolveStation(tile, world_id, company, st);
+	if (resolved == StationID::Invalid() || LogisticsHubManager::GetHubAtTile(tile) != nullptr || LogisticsHubManager::GetHubForStation(resolved) != nullptr) return CMD_ERROR;
+	for (const LogisticsHub &hub : LogisticsHubManager::GetAllHubs()) {
+		if (hub.station_id == resolved) return CMD_ERROR;
+	}
 
 	/* Construction cost: 75,000 Cr */
 	CommandCost cost(ExpensesType::Construction, 75000);
 
 	if (flags.Test(DoCommandFlag::Execute)) {
-		if (st == StationID::Invalid()) {
-			if (IsTileType(tile, TileType::Station)) {
-				const Station *station = Station::GetByTile(tile);
-				if (station != nullptr) st = station->index;
-			}
-			if (st == StationID::Invalid()) {
-				for (const Station *s : Station::Iterate()) {
-					if (s->owner == company && DistanceManhattan(tile, s->xy) <= 4) {
-						st = s->index;
-						break;
-					}
-				}
-			}
-		}
-
 		std::string name = hub_name.empty() ? ("Logistics Hub " + region->name) : hub_name;
-		LogisticsHubManager::RegisterHub(tile, region->id, company, st, name);
+		if (LogisticsHubManager::RegisterHub(tile, region->id, company, resolved, name) == 0) return CMD_ERROR;
 	}
 
 	return cost;
+}
+
+CommandCost CmdSetLogisticsHubReserve(DoCommandFlags flags, uint32_t hub_id, CargoType cargo, uint32_t amount)
+{
+	if (!Company::IsValidID(_current_company) || !IsValidCargoType(cargo)) return CMD_ERROR;
+	const LogisticsHub *hub = LogisticsHubManager::GetHub(hub_id);
+	if (hub == nullptr || hub->company_id != _current_company || !LogisticsHubManager::ValidateForStation(*hub)) return CMD_ERROR;
+	if (flags.Test(DoCommandFlag::Execute)) {
+		LogisticsHubManager::SetReserveFloor(hub_id, cargo, amount);
+		SetWindowDirty(WindowClass::CorporateHQ, _current_company.base());
+	}
+	return CommandCost(ExpensesType::Construction);
 }
 
 CommandCost CmdSetFabricationMode(DoCommandFlags flags, bool enabled)

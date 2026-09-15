@@ -1,0 +1,102 @@
+Internal ctest changing into directory: /home/flax/games/openspacettd/build
+Test project /home/flax/games/openspacettd/build
+      Start 177: Spaceport Manager - Lifecycle and Trade Calculation
+ 1/48 Test #177: Spaceport Manager - Lifecycle and Trade Calculation .............................   Passed    0.02 sec
+      Start 178: Spaceport Command - CmdDesignateSpaceport
+ 2/48 Test #178: Spaceport Command - CmdDesignateSpaceport .......................................   Passed    0.02 sec
+      Start 189: Spaceport Bridge - Configuration and Command Execution
+ 3/48 Test #189: Spaceport Bridge - Configuration and Command Execution ..........................   Passed    0.02 sec
+      Start 190: Spaceport Bridge - Interplanetary Trade Dispatch and Reception
+ 4/48 Test #190: Spaceport Bridge - Interplanetary Trade Dispatch and Reception ..................   Passed    0.02 sec
+      Start 192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation
+ 5/48 Test #192: Planetary Infrastructure - Concurrent Spaceport and Conduit Federation ..........   Passed    0.02 sec
+      Start 202: Blueprint Data Model and JSON Round-Trip
+ 6/48 Test #202: Blueprint Data Model and JSON Round-Trip ........................................   Passed    0.02 sec
+      Start 203: Blueprint Rotation 90, 180, 270 and Invariance
+ 7/48 Test #203: Blueprint Rotation 90, 180, 270 and Invariance ..................................   Passed    0.02 sec
+      Start 204: Blueprint Horizontal Flip/Mirror
+ 8/48 Test #204: Blueprint Horizontal Flip/Mirror ................................................   Passed    0.02 sec
+      Start 205: Blueprint Capture from Game Map
+ 9/48 Test #205: Blueprint Capture from Game Map .................................................   Passed    0.03 sec
+      Start 206: Blueprint Manager Storage and Builtin Protection
+10/48 Test #206: Blueprint Manager Storage and Builtin Protection ................................   Passed    0.10 sec
+      Start 207: Deterministic Blueprint Placement Command
+11/48 Test #207: Deterministic Blueprint Placement Command .......................................   Passed    0.02 sec
+      Start 208: Blueprint depot quote matches execution
+12/48 Test #208: Blueprint depot quote matches execution .........................................   Passed    0.03 sec
+      Start 209: Blueprint rejected placement preserves map money and materials
+13/48 Test #209: Blueprint rejected placement preserves map money and materials ..................   Passed    0.06 sec
+      Start 210: Blueprint Mainline placement clears trees with exact fabrication materials
+14/48 Test #210: Blueprint Mainline placement clears trees with exact fabrication materials ......   Passed    0.03 sec
+      Start 211: Blueprint dispatcher charges quote exactly once
+15/48 Test #211: Blueprint dispatcher charges quote exactly once .................................   Passed    0.02 sec
+      Start 212: Blueprint unsupported station layouts reject without changes
+16/48 Test #212: Blueprint unsupported station layouts reject without changes ....................   Passed    0.04 sec
+      Start 213: Blueprint clearing foundation and signal replacement use canonical costs
+17/48 Test #213: Blueprint clearing foundation and signal replacement use canonical costs ........   Passed    0.04 sec
+      Start 214: Blueprint infrastructure money and materials survive save reload
+18/48 Test #214: Blueprint infrastructure money and materials survive save reload ................   Passed    0.05 sec
+      Start 215: CST Prefabs - Complete 8-Layout Catalogue Registration
+19/48 Test #215: CST Prefabs - Complete 8-Layout Catalogue Registration ..........................   Passed    0.02 sec
+      Start 216: CST Prefabs - Structural & Functional Integrity
+20/48 Test #216: CST Prefabs - Structural & Functional Integrity .................................   Passed    0.02 sec
+      Start 217: CST Prefabs - Geometric Transforms & RHD/LHD Invariance
+21/48 Test #217: CST Prefabs - Geometric Transforms & RHD/LHD Invariance .........................   Passed    0.02 sec
+      Start 218: CST Prefabs - Deterministic In-Game Map Placement
+22/48 Test #218: CST Prefabs - Deterministic In-Game Map Placement ...............................   Passed    0.21 sec
+      Start 219: CST Prefabs - Immutability & Builtin Deletion Protection
+23/48 Test #219: CST Prefabs - Immutability & Builtin Deletion Protection ........................   Passed    0.02 sec
+      Start 268: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation
+24/48 Test #268: Sprint 39 Stockpile - Multi-World & Company Ledger Isolation ....................   Passed    0.02 sec
+      Start 269: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption
+25/48 Test #269: Sprint 39 Stockpile - Bill of Materials (BOM) Validation and Consumption ........   Passed    0.02 sec
+      Start 270: Sprint 39 Stockpile - Role Mappings and Deserialization
+26/48 Test #270: Sprint 39 Stockpile - Role Mappings and Deserialization .........................   Passed    0.02 sec
+      Start 271: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors
+27/48 Test #271: Sprint 39 Logistics Hub - Bi-Directional Buffering and Reserve Floors ...........   Passed    0.02 sec
+      Start 272: Sprint 39 Corporate HQ - Placement Rules & Validation
+28/48 Test #272: Sprint 39 Corporate HQ - Placement Rules & Validation ...........................   Passed    0.02 sec
+      Start 273: Sprint 39 Corporate HQ - Tier Advancement & Serialization
+29/48 Test #273: Sprint 39 Corporate HQ - Tier Advancement & Serialization .......................   Passed    0.02 sec
+      Start 274: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub
+30/48 Test #274: Sprint 39 Commands - PlaceCorporateHQ and BuildLogisticsHub .....................   Passed    0.03 sec
+      Start 275: Sprint 40 Fabrication - BOM Recipes & Catalog
+31/48 Test #275: Sprint 40 Fabrication - BOM Recipes & Catalog ...................................   Passed    0.02 sec
+      Start 276: Sprint 40 Fabrication - Mode Toggling and Company Isolation
+32/48 Test #276: Sprint 40 Fabrication - Mode Toggling and Company Isolation .....................   Passed    0.02 sec
+      Start 277: Sprint 40 Fabrication - Track Building Interception
+33/48 Test #277: Sprint 40 Fabrication - Track Building Interception .............................   Passed    0.02 sec
+      Start 278: Sprint 40 Fabrication - Signal and Depot Interception
+34/48 Test #278: Sprint 40 Fabrication - Signal and Depot Interception ...........................   Passed    0.02 sec
+      Start 279: Sprint 40 Fabrication - Save/Load Serialization
+35/48 Test #279: Sprint 40 Fabrication - Save/Load Serialization .................................   Passed    0.02 sec
+      Start 280: Sprint 41 Tech Tree - Catalog & Branches
+36/48 Test #280: Sprint 41 Tech Tree - Catalog & Branches ........................................   Passed    0.02 sec
+      Start 281: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites
+37/48 Test #281: Sprint 41 Tech Tree - Corporate HQ Eligibility & Prerequisites ..................   Passed    0.02 sec
+      Start 282: Sprint 41 Tech Tree - Server Commands & Budget Allocation
+38/48 Test #282: Sprint 41 Tech Tree - Server Commands & Budget Allocation .......................   Passed    0.02 sec
+      Start 283: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning
+39/48 Test #283: Sprint 41 Tech Tree - Monthly Progression & Feedstock Burning ...................   Passed    0.02 sec
+      Start 284: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration
+40/48 Test #284: Sprint 41 Tech Tree - Fabrication Bonus Discount Integration ....................   Passed    0.02 sec
+      Start 285: Sprint 41 Tech Tree - Save/Load State Restoration
+41/48 Test #285: Sprint 41 Tech Tree - Save/Load State Restoration ...............................   Passed    0.02 sec
+      Start 286: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog
+42/48 Test #286: Sprint 42 Production Chains - Canonical Cargoes and Recipe Catalog ..............   Passed    0.02 sec
+      Start 287: Sprint 42 Production Chains - World Phase Placement Constraints
+43/48 Test #287: Sprint 42 Production Chains - World Phase Placement Constraints .................   Passed    0.02 sec
+      Start 288: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion
+44/48 Test #288: Sprint 42 Production Chains - Facility Lifecycle & Input-to-Output Conversion ...   Passed    0.02 sec
+      Start 289: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk
+45/48 Test #289: Sprint 42 Production Chains - Multi-Input Superalloy Foundry & Nanofab Perk .....   Passed    0.02 sec
+      Start 290: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop
+46/48 Test #290: Sprint 42 Production Chains - Quantum Observatory Telemetry & R&D Loop ..........   Passed    0.02 sec
+      Start 291: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering
+47/48 Test #291: Sprint 42 Production Chains - Logistics Hub Stockpile Auto-Buffering ............   Passed    0.02 sec
+      Start 292: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk)
+48/48 Test #292: Sprint 42 Production Chains - Save/Load Serialization (PROD Chunk) ..............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 48
+
+Total Test time (real) =   1.42 sec

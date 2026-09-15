@@ -13,6 +13,8 @@
 #include "megacity_gui.h"
 #include "megacity_manager.h"
 #include "../command_func.h"
+#include "../company_base.h"
+#include "../company_func.h"
 #include "../town.h"
 #include "../window_gui.h"
 #include "../strings_func.h"
@@ -71,23 +73,7 @@ struct UniverseDirectoryWindow : Window {
 		this->vscroll->SetStepSize(1);
 		this->FinishInitNested(window_number);
 
-		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
-		if (worlds.empty() && PlanetManager::Count() > 0) {
-			for (const auto &reg : PlanetManager::GetAllRegions()) {
-				RegisteredWorld rw{
-					.world_id = reg.id,
-					.phase = reg.phase,
-					.name = reg.name,
-					.last_heartbeat_tick = 1,
-					.address = "Local Node",
-					.description = fmt::format("{} ecosystem", PlanetManager::GetWorldBiomeName(reg.biome)),
-					.status = WorldOnlineStatus::Online,
-					.biome = reg.biome,
-				};
-				UniverseAuthorityService::Instance().RegisterWorld(rw);
-			}
-			worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
-		}
+		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectoryForGUI();
 		if (!worlds.empty()) {
 			this->selected_world = worlds.front().world_id;
 		}
@@ -95,14 +81,16 @@ struct UniverseDirectoryWindow : Window {
 
 	void OnPaint() override
 	{
-		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectory();
+		auto worlds = UniverseAuthorityService::Instance().GetWorldDirectoryForGUI();
 		this->vscroll->SetCount(worlds.size());
 
-		const RegisteredWorld *selected = UniverseAuthorityService::Instance().GetWorld(this->selected_world);
+		const RegisteredWorld *selected = nullptr;
+		for (const RegisteredWorld &world : worlds) if (world.world_id == this->selected_world) { selected = &world; break; }
 		const PlanetRegion *local_reg = (this->selected_world != INVALID_WORLD) ? PlanetManager::GetRegion(this->selected_world) : nullptr;
 		WorldPhase phase = (selected != nullptr) ? selected->phase : (local_reg != nullptr ? local_reg->phase : WorldPhase::Phase3_Frontier);
-		bool can_colonize = (phase == WorldPhase::Phase4_Expansion);
-		bool can_promote = (this->selected_world != INVALID_WORLD) && PlanetManager::CanPromoteWorld(this->selected_world) && (phase != WorldPhase::Phase4_Expansion);
+		bool local_action = local_reg != nullptr && Company::IsValidID(_local_company);
+		bool can_colonize = local_action && (phase == WorldPhase::Phase4_Expansion);
+		bool can_promote = local_action && PlanetManager::CanPromoteWorld(this->selected_world) && (phase != WorldPhase::Phase4_Expansion);
 		bool can_view_megacity = (this->selected_world != INVALID_WORLD) && (phase == WorldPhase::Phase1_Core || (selected != nullptr && selected->is_megacity));
 		if (!can_view_megacity && this->selected_world != INVALID_WORLD) {
 			for (const auto &prof : MegacityManager::GetAllMegacities()) {
@@ -123,7 +111,7 @@ struct UniverseDirectoryWindow : Window {
 	void DrawWidget(const Rect &r, WidgetID widget) const override
 	{
 		auto &service = UniverseAuthorityService::Instance();
-		auto worlds = service.GetWorldDirectory();
+		auto worlds = service.GetWorldDirectoryForGUI();
 
 		switch (widget) {
 			case WID_UD_HEADER_PANEL: {
@@ -216,7 +204,8 @@ struct UniverseDirectoryWindow : Window {
 
 			case WID_UD_DETAILS_PANEL: {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
-				const RegisteredWorld *selected = service.GetWorld(this->selected_world);
+				const RegisteredWorld *selected = nullptr;
+				for (const RegisteredWorld &world : worlds) if (world.world_id == this->selected_world) { selected = &world; break; }
 
 				if (selected == nullptr) {
 					DrawString(tr, "Select a world from the directory above to inspect server details.", TextColour::Silver);
@@ -280,36 +269,31 @@ struct UniverseDirectoryWindow : Window {
 
 		switch (widget) {
 			case WID_UD_REFRESH: {
-				service.PruneStaleWorlds(0, 300);
 				this->SetDirty();
 				break;
 			}
 
 			case WID_UD_JUMP_BTN: {
-				if (this->selected_world != INVALID_WORLD) {
+				if (this->selected_world != INVALID_WORLD && PlanetManager::GetRegion(this->selected_world) != nullptr) {
 					PlanetManager::JumpToPlanet(this->selected_world);
 				}
 				break;
 			}
 
 			case WID_UD_COLONIZE_BTN: {
-				if (this->selected_world != INVALID_WORLD) {
+				if (this->selected_world != INVALID_WORLD && Company::IsValidID(_local_company)) {
 					const PlanetRegion *local_reg = PlanetManager::GetRegion(this->selected_world);
 					if (local_reg != nullptr && local_reg->phase == WorldPhase::Phase4_Expansion) {
 						TileIndex outpost_tile = TileXY((local_reg->min_x + local_reg->max_x) / 2, (local_reg->min_y + local_reg->max_y) / 2);
 						Command<Commands::ColonizeOutpost>::Post(STR_ERROR_CAN_T_COLONIZE_OUTPOST, outpost_tile, "");
 					}
-					service.ColonizeWorld(this->selected_world);
-					this->SetDirty();
 				}
 				break;
 			}
 
 			case WID_UD_PROMOTE_BTN: {
-				if (this->selected_world != INVALID_WORLD) {
+				if (this->selected_world != INVALID_WORLD && Company::IsValidID(_local_company) && PlanetManager::GetRegion(this->selected_world) != nullptr && PlanetManager::CanPromoteWorld(this->selected_world)) {
 					Command<Commands::PromoteWorld>::Post(STR_ERROR_CAN_T_PROMOTE_WORLD, this->selected_world);
-					service.PromoteWorld(this->selected_world);
-					this->SetDirty();
 				}
 				break;
 			}
@@ -335,7 +319,7 @@ struct UniverseDirectoryWindow : Window {
 			}
 
 			case WID_UD_WORLD_LIST: {
-				auto worlds = service.GetWorldDirectory();
+				auto worlds = service.GetWorldDirectoryForGUI();
 				if (worlds.empty()) return;
 
 				int row = this->vscroll->GetScrolledRowFromWidget(pt.y, this, WID_UD_WORLD_LIST, WidgetDimensions::scaled.framerect.top);

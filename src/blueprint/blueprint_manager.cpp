@@ -10,15 +10,56 @@
 #include "../rail_map.h"
 #include "../station_map.h"
 #include "../fileio_func.h"
+#include "../company_func.h"
+#include "../company_base.h"
 #include "../portal/portal_registry.h"
 #include "../core/format.hpp"
 
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <cerrno>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#if defined(_WIN32)
+#include <io.h>
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+#include <limits>
+#include <climits>
 
 static std::vector<Blueprint> _blueprints;
 static std::vector<Blueprint> _builtins;
+static std::vector<std::filesystem::path> _source_paths;
+static unsigned long _temporary_counter = 0;
+
+#if defined(_WIN32)
+using ssize_t = std::ptrdiff_t;
+static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return _wopen(path.c_str(), flags | _O_BINARY, mode); }
+static int StorageClose(int fd) { return _close(fd); }
+static int StorageFstat(int fd, struct stat *st) { return _fstat(fd, st); }
+static bool StorageIsRegular(const struct stat &st) { return (st.st_mode & _S_IFMT) == _S_IFREG; }
+static ssize_t StorageRead(int fd, void *buf, size_t size) { return _read(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
+static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return _write(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
+static int StorageFlush(int fd) { return _commit(fd); }
+static bool StoragePublish(const std::filesystem::path &tmp, const std::filesystem::path &target, bool replace) { return replace ? MoveFileExW(tmp.c_str(), target.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0 : MoveFileExW(tmp.c_str(), target.c_str(), 0) != 0; }
+static std::string StoragePublishFailure() { return std::error_code(static_cast<int>(GetLastError()), std::system_category()).message(); }
+static unsigned long StorageProcessId() { return GetCurrentProcessId(); }
+#else
+static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return open(path.c_str(), flags | O_NOFOLLOW, mode); }
+static int StorageClose(int fd) { return close(fd); }
+static int StorageFstat(int fd, struct stat *st) { return fstat(fd, st); }
+static bool StorageIsRegular(const struct stat &st) { return S_ISREG(st.st_mode); }
+static ssize_t StorageRead(int fd, void *buf, size_t size) { return read(fd, buf, size); }
+static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return write(fd, buf, size); }
+static int StorageFlush(int fd) { return fsync(fd); }
+static bool StoragePublish(const std::filesystem::path &tmp, const std::filesystem::path &target, bool replace) { if (replace) return rename(tmp.c_str(), target.c_str()) == 0; if (link(tmp.c_str(), target.c_str()) != 0) return false; unlink(tmp.c_str()); return true; }
+static std::string StoragePublishFailure() { return std::strerror(errno); }
+static unsigned long StorageProcessId() { return getpid(); }
+#endif
 static bool _initialized = false;
 
 static std::string CleanBlueprintFilename(const std::string &name)
@@ -32,6 +73,7 @@ static std::string CleanBlueprintFilename(const std::string &name)
 		}
 	}
 	if (clean.empty()) clean = "blueprint";
+	if (clean.size() > 100) clean.resize(100);
 	return clean;
 }
 
@@ -105,8 +147,8 @@ static void CreateBuiltinCSTPrefabs()
 			m1.railtype = RAILTYPE_BEGIN;
 			if (x == 1) {
 				m1.trackbits = TrackBits{Track::X, Track::Upper};
-			} else if (x == 12) {
-				m1.trackbits = TrackBits{Track::X, Track::Right};
+			} else if (x == 11) {
+				m1.trackbits = TrackBits{Track::X, Track::Left};
 			} else {
 				m1.trackbits = TrackBits{Track::X};
 			}
@@ -138,11 +180,11 @@ static void CreateBuiltinCSTPrefabs()
 		}
 
 		BlueprintTile s_in;
-		s_in.dx = 2; s_in.dy = 0; s_in.type = BlueprintTileType::Track; s_in.railtype = RAILTYPE_BEGIN;
+		s_in.dx = 1; s_in.dy = 0; s_in.type = BlueprintTileType::Track; s_in.railtype = RAILTYPE_BEGIN;
 		s_in.trackbits = TrackBits{Track::Lower};
 		bp.tiles.push_back(s_in);
 
-		for (int16_t x = 3; x <= 10; ++x) {
+		for (int16_t x = 2; x <= 10; ++x) {
 			BlueprintTile st;
 			st.dx = x; st.dy = 0; st.type = BlueprintTileType::Track; st.railtype = RAILTYPE_BEGIN;
 			st.trackbits = TrackBits{Track::X};
@@ -159,7 +201,7 @@ static void CreateBuiltinCSTPrefabs()
 
 		BlueprintTile s_out;
 		s_out.dx = 11; s_out.dy = 0; s_out.type = BlueprintTileType::Track; s_out.railtype = RAILTYPE_BEGIN;
-		s_out.trackbits = TrackBits{Track::Left};
+		s_out.trackbits = TrackBits{Track::Right};
 		bp.tiles.push_back(s_out);
 
 		_builtins.push_back(bp);
@@ -180,7 +222,11 @@ static void CreateBuiltinCSTPrefabs()
 			BlueprintTile in_t;
 			in_t.dx = x; in_t.dy = 1; in_t.type = BlueprintTileType::Track; in_t.railtype = RAILTYPE_BEGIN;
 			if (x == 4) {
-				in_t.trackbits = TrackBits{Track::X, Track::Lower};
+				in_t.trackbits = TrackBits{Track::X, Track::Right};
+			} else if (x == 5) {
+				in_t.trackbits = TrackBits{Track::X, Track::Y};
+			} else if (x == 7) {
+				in_t.trackbits = TrackBits{Track::X, Track::Left};
 			} else {
 				in_t.trackbits = TrackBits{Track::X};
 			}
@@ -196,8 +242,12 @@ static void CreateBuiltinCSTPrefabs()
 
 			BlueprintTile out_t;
 			out_t.dx = x; out_t.dy = 2; out_t.type = BlueprintTileType::Track; out_t.railtype = RAILTYPE_BEGIN;
-			if (x == 5) {
-				out_t.trackbits = TrackBits{Track::X, Track::Upper};
+			if (x == 2) {
+				out_t.trackbits = TrackBits{Track::X, Track::Right};
+			} else if (x == 4) {
+				out_t.trackbits = TrackBits{Track::X, Track::Y};
+			} else if (x == 5) {
+				out_t.trackbits = TrackBits{Track::X, Track::Left};
 			} else {
 				out_t.trackbits = TrackBits{Track::X};
 			}
@@ -211,6 +261,17 @@ static void CreateBuiltinCSTPrefabs()
 			}
 			bp.tiles.push_back(out_t);
 		}
+		/* The outer rows give both turnbacks a straight segment between opposing
+		 * curves, so the loops work with the native ban on 90-degree turns. */
+		struct LoopPiece { int16_t x; int16_t y; Track track; };
+		for (const LoopPiece piece : {LoopPiece{5, 0, Track::Lower}, {6, 0, Track::X}, {7, 0, Track::Right},
+				{2, 3, Track::Left}, {3, 3, Track::X}, {4, 3, Track::Upper}}) {
+			BlueprintTile loop;
+			loop.dx = piece.x;
+			loop.dy = piece.y;
+			loop.trackbits = TrackBits{piece.track};
+			bp.tiles.push_back(loop);
+		}
 		_builtins.push_back(bp);
 	}
 
@@ -218,7 +279,7 @@ static void CreateBuiltinCSTPrefabs()
 	{
 		Blueprint bp;
 		bp.name = "CST High-Speed 3-Way Wye Junction";
-		bp.description = "Grade-separated high-speed triangular junction (12x12). Connects three dual-track corridors (West, East, North) with complete directional path signaling and zero diamond crossing conflicts.";
+		bp.description = "At-grade directional 3-way Wye (12x12). Connects west, east and north dual-track corridors with path signals; keep approach speed and spacing appropriate for an at-grade junction.";
 		bp.author = "Commonwealth Synergy Transport (CST)";
 		bp.version = 1;
 		bp.width = 12;
@@ -228,14 +289,16 @@ static void CreateBuiltinCSTPrefabs()
 		for (int16_t x = 0; x < 12; ++x) {
 			BlueprintTile t1;
 			t1.dx = x; t1.dy = 5; t1.type = BlueprintTileType::Track; t1.railtype = RAILTYPE_BEGIN;
-			if (x == 2) {
-				t1.trackbits = TrackBits{Track::X, Track::Upper};
-			} else if (x == 9) {
-				t1.trackbits = TrackBits{Track::X, Track::Left};
+			if (x == 5) {
+				/* North arrivals continue south to the westbound lane or turn east. */
+				t1.trackbits = TrackBits{Track::X, Track::Y, Track::Left};
+			} else if (x == 6) {
+				/* West arrivals turn north; east arrivals cross on the northbound line. */
+				t1.trackbits = TrackBits{Track::X, Track::Y, Track::Upper};
 			} else {
 				t1.trackbits = TrackBits{Track::X};
 			}
-			if (x == 0 || x == 6 || x == 10) {
+			if (x == 0 || x == 7 || x == 10) {
 				BlueprintSignal s;
 				s.track = Track::X;
 				s.sigtype = SignalType::PathOneWay;
@@ -247,14 +310,14 @@ static void CreateBuiltinCSTPrefabs()
 
 			BlueprintTile t2;
 			t2.dx = x; t2.dy = 6; t2.type = BlueprintTileType::Track; t2.railtype = RAILTYPE_BEGIN;
-			if (x == 3) {
-				t2.trackbits = TrackBits{Track::X, Track::Lower};
-			} else if (x == 8) {
-				t2.trackbits = TrackBits{Track::X, Track::Right};
+			if (x == 5) {
+				t2.trackbits = TrackBits{Track::X, Track::Upper};
+			} else if (x == 6) {
+				t2.trackbits = TrackBits{Track::X, Track::Left};
 			} else {
 				t2.trackbits = TrackBits{Track::X};
 			}
-			if (x == 1 || x == 5 || x == 11) {
+			if (x == 1 || x == 7 || x == 11) {
 				BlueprintSignal s;
 				s.track = Track::X;
 				s.sigtype = SignalType::PathOneWay;
@@ -299,7 +362,7 @@ static void CreateBuiltinCSTPrefabs()
 	{
 		Blueprint bp;
 		bp.name = "CST 4-Way Compact Roundabout Junction";
-		bp.description = "Symmetric 4-way circular distribution junction (10x10). Provides full turning and interchange capability across four cardinal directions. Recommended for trains up to length 5.";
+		bp.description = "Compact at-grade four-way distribution junction (10x10). Two parallel tracks on each approach provide straight routes and directional turns between all four cardinal corridors. Recommended for trains up to length 5.";
 		bp.author = "Commonwealth Synergy Transport (CST)";
 		bp.version = 1;
 		bp.width = 10;
@@ -346,7 +409,7 @@ static void CreateBuiltinCSTPrefabs()
 					s.track = Track::Y;
 					s.sigtype = SignalType::PathOneWay;
 					s.sigvar = SignalVariant::Electric;
-					s.signals_copy = SignalAlongTrackdir(Trackdir::Y_SE);
+					s.signals_copy = SignalAlongTrackdir(Trackdir::Y_NW);
 					n1.signals.push_back(s);
 				}
 				bp.tiles.push_back(n1);
@@ -359,7 +422,7 @@ static void CreateBuiltinCSTPrefabs()
 					s.track = Track::Y;
 					s.sigtype = SignalType::PathOneWay;
 					s.sigvar = SignalVariant::Electric;
-					s.signals_copy = SignalAlongTrackdir(Trackdir::Y_NW);
+					s.signals_copy = SignalAlongTrackdir(Trackdir::Y_SE);
 					n2.signals.push_back(s);
 				}
 				bp.tiles.push_back(n2);
@@ -370,10 +433,16 @@ static void CreateBuiltinCSTPrefabs()
 			for (int16_t x = 3; x <= 6; ++x) {
 				BlueprintTile r;
 				r.dx = x; r.dy = y; r.type = BlueprintTileType::Track; r.railtype = RAILTYPE_BEGIN;
-				if (y == 3 || y == 6) {
-					r.trackbits = TrackBits{Track::X};
+				/* Four central intersections carry turns in both entry directions.
+				 * Continuous X/Y approaches keep each straight movement. */
+				if ((x == 4 || x == 5) && (y == 4 || y == 5)) {
+					r.trackbits = (x == 4 && y == 4) || (x == 5 && y == 5) ?
+						TrackBits{Track::X, Track::Y, Track::Upper, Track::Lower} :
+						TrackBits{Track::X, Track::Y, Track::Left, Track::Right};
+				} else if (x == 4 || x == 5) {
+					r.trackbits = TrackBits{Track::X, Track::Y};
 				} else {
-					r.trackbits = TrackBits{Track::Y};
+					r.trackbits = TrackBits{Track::X};
 				}
 				bp.tiles.push_back(r);
 			}
@@ -409,7 +478,10 @@ static void CreateBuiltinCSTPrefabs()
 			for (int16_t x = 1; x <= 2; ++x) {
 				BlueprintTile th;
 				th.dx = x; th.dy = y; th.type = BlueprintTileType::Track; th.railtype = RAILTYPE_BEGIN;
-				th.trackbits = TrackBits{Track::X};
+				/* The left ladder branches from the single incoming lead to all platforms. */
+				th.trackbits = x == 1 && y == 2 ? TrackBits{Track::X, Track::Right} :
+					x == 1 && y < 5 ? TrackBits{Track::Y, Track::Left} :
+					x == 1 ? TrackBits{Track::Left} : TrackBits{Track::X};
 				if (x == 2) {
 					BlueprintSignal s;
 					s.track = Track::X;
@@ -437,7 +509,10 @@ static void CreateBuiltinCSTPrefabs()
 			for (int16_t x = 9; x <= 10; ++x) {
 				BlueprintTile th;
 				th.dx = x; th.dy = y; th.type = BlueprintTileType::Track; th.railtype = RAILTYPE_BEGIN;
-				th.trackbits = TrackBits{Track::X};
+				/* The right ladder gathers all platforms into the single outgoing lead. */
+				th.trackbits = x == 10 && y == 2 ? TrackBits{Track::X, Track::Lower} :
+					x == 10 && y < 5 ? TrackBits{Track::Y, Track::Upper} :
+					x == 10 ? TrackBits{Track::Upper} : TrackBits{Track::X};
 				if (x == 9) {
 					BlueprintSignal s;
 					s.track = Track::X;
@@ -472,7 +547,7 @@ static void CreateBuiltinCSTPrefabs()
 		for (int16_t x = 0; x <= 4; ++x) {
 			BlueprintTile in_t;
 			in_t.dx = x; in_t.dy = 3; in_t.type = BlueprintTileType::Track; in_t.railtype = RAILTYPE_BEGIN;
-			in_t.trackbits = TrackBits{Track::X};
+			in_t.trackbits = x == 4 ? TrackBits{Track::X, Track::Right} : TrackBits{Track::X};
 			if (x == 2) {
 				BlueprintSignal s;
 				s.track = Track::X;
@@ -483,6 +558,12 @@ static void CreateBuiltinCSTPrefabs()
 			}
 			bp.tiles.push_back(in_t);
 		}
+		BlueprintTile second_platform_entry;
+		second_platform_entry.dx = 4; second_platform_entry.dy = 4;
+		second_platform_entry.type = BlueprintTileType::Track;
+		second_platform_entry.railtype = RAILTYPE_BEGIN;
+		second_platform_entry.trackbits = TrackBits{Track::Left};
+		bp.tiles.push_back(second_platform_entry);
 
 		for (int16_t y = 3; y <= 4; ++y) {
 			for (int16_t x = 5; x <= 9; ++x) {
@@ -495,11 +576,13 @@ static void CreateBuiltinCSTPrefabs()
 			}
 		}
 
-		for (int16_t y = 1; y <= 8; ++y) {
+		for (int16_t y = 3; y <= 6; ++y) {
 			BlueprintTile lp;
 			lp.dx = 13; lp.dy = y; lp.type = BlueprintTileType::Track; lp.railtype = RAILTYPE_BEGIN;
-			lp.trackbits = TrackBits{Track::Y};
-			if (y == 4) {
+			lp.trackbits = y == 3 ? TrackBits{Track::Right} :
+				y == 4 ? TrackBits{Track::Y, Track::Right} :
+				y == 6 ? TrackBits{Track::Upper} : TrackBits{Track::Y};
+			if (y == 5) {
 				BlueprintSignal s;
 				s.track = Track::Y;
 				s.sigtype = SignalType::PathOneWay;
@@ -508,6 +591,16 @@ static void CreateBuiltinCSTPrefabs()
 				lp.signals.push_back(s);
 			}
 			bp.tiles.push_back(lp);
+		}
+		for (int16_t y = 3; y <= 4; ++y) {
+			for (int16_t x = 10; x <= 12; ++x) {
+				BlueprintTile lead;
+				lead.dx = x; lead.dy = y;
+				lead.type = BlueprintTileType::Track;
+				lead.railtype = RAILTYPE_BEGIN;
+				lead.trackbits = TrackBits{Track::X};
+				bp.tiles.push_back(lead);
+			}
 		}
 
 		for (int16_t x = 0; x <= 12; ++x) {
@@ -531,7 +624,7 @@ static void CreateBuiltinCSTPrefabs()
 	{
 		Blueprint bp;
 		bp.name = "CST Depot Maintenance Staging Yard";
-		bp.description = "Offline dual-depot service facility (10x6). Mainline double-track bypass with dedicated depot branch, two service bays, and an acceleration merge track preventing mainline disruptions.";
+		bp.description = "Offline dual-depot service facility (10x6). The double-track mainline bypass has a bidirectional service lead, two reachable depot bays, and a return merge onto the lower mainline.";
 		bp.author = "Commonwealth Synergy Transport (CST)";
 		bp.version = 1;
 		bp.width = 10;
@@ -554,8 +647,9 @@ static void CreateBuiltinCSTPrefabs()
 
 			BlueprintTile m2;
 			m2.dx = x; m2.dy = 2; m2.type = BlueprintTileType::Track; m2.railtype = RAILTYPE_BEGIN;
-			m2.trackbits = TrackBits{Track::X};
-			if (x == 5) {
+			m2.trackbits = x == 1 ? TrackBits{Track::X, Track::Lower} :
+				x == 2 ? TrackBits{Track::X, Track::Right} : TrackBits{Track::X};
+			if (x == 0 || x == 5) {
 				BlueprintSignal s;
 				s.track = Track::X;
 				s.sigtype = SignalType::PathOneWay;
@@ -566,11 +660,19 @@ static void CreateBuiltinCSTPrefabs()
 			bp.tiles.push_back(m2);
 		}
 
-		for (int16_t x = 1; x <= 3; ++x) {
-			BlueprintTile b1;
-			b1.dx = x; b1.dy = 4; b1.type = BlueprintTileType::Track; b1.railtype = RAILTYPE_BEGIN;
-			b1.trackbits = TrackBits{Track::X};
-			bp.tiles.push_back(b1);
+		for (int16_t y = 3; y <= 5; ++y) {
+			for (int16_t x = 1; x <= 3; ++x) {
+				if (y == 3 && x == 3) continue;
+				BlueprintTile lead;
+				lead.dx = x; lead.dy = y;
+				lead.type = BlueprintTileType::Track;
+				lead.railtype = RAILTYPE_BEGIN;
+				lead.trackbits = y == 3 ? TrackBits{Track::Y} :
+					y == 4 && x < 3 ? TrackBits{Track::X, Track::Y, Track::Left} :
+					y == 5 && x == 1 ? TrackBits{Track::Left} :
+					y == 5 && x == 2 ? TrackBits{Track::X, Track::Y, Track::Left} : TrackBits{Track::X};
+				bp.tiles.push_back(lead);
+			}
 		}
 
 		BlueprintTile d1;
@@ -583,31 +685,16 @@ static void CreateBuiltinCSTPrefabs()
 		d2.dir = DiagDirection::NE;
 		bp.tiles.push_back(d2);
 
-		for (int16_t x = 5; x <= 8; ++x) {
-			BlueprintTile esc;
-			esc.dx = x; esc.dy = 4; esc.type = BlueprintTileType::Track; esc.railtype = RAILTYPE_BEGIN;
-			esc.trackbits = TrackBits{Track::X};
-			if (x == 8) {
-				BlueprintSignal s;
-				s.track = Track::X;
-				s.sigtype = SignalType::PathOneWay;
-				s.sigvar = SignalVariant::Electric;
-				s.signals_copy = SignalAlongTrackdir(Trackdir::X_SW);
-				esc.signals.push_back(s);
-			}
-			bp.tiles.push_back(esc);
-		}
 		_builtins.push_back(bp);
 	}
+	/* Revision 2 identifies the repaired CST catalogue. Imported exports stay
+	 * independent player layouts, including revision 1 and unversioned files. */
+	for (Blueprint &bp : _builtins) bp.layout_revision = 2;
 }
 
 void BlueprintManager::Initialize()
 {
-	if (_initialized) return;
-	_initialized = true;
-
-	CreateBuiltinCSTPrefabs();
-	RescanLibrary();
+	if (!_initialized) RescanLibrary();
 }
 
 size_t BlueprintManager::GetBuiltinCount()
@@ -628,6 +715,7 @@ const Blueprint *BlueprintManager::FindBuiltin(const std::string &name)
 void BlueprintManager::Reset()
 {
 	_blueprints.clear();
+	_source_paths.clear();
 	_builtins.clear();
 	_initialized = false;
 }
@@ -644,47 +732,161 @@ void BlueprintManager::RegisterBuiltin(const Blueprint &bp)
 	});
 	if (it == _blueprints.end()) {
 		_blueprints.push_back(copy);
+		_source_paths.emplace_back();
 	}
 }
 
-void BlueprintManager::RescanLibrary()
+static bool StorageError(std::string *error, const std::string &message)
 {
-	_blueprints.clear();
+	if (error != nullptr) *error = message;
+	return false;
+}
 
-	/* Add all registered built-in prefabs first */
-	for (const auto &b : _builtins) {
-		_blueprints.push_back(b);
+static std::filesystem::path LibraryDirectory()
+{
+	try {
+		std::string dir = FioFindDirectory(Subdirectory::Blueprint);
+		if (dir.empty()) dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
+		return OTTD2FS(dir);
+	} catch (const std::exception &) {
+		return {};
 	}
+}
 
-	/* Locate user blueprint directory */
-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
-	if (dir.empty()) {
-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
-	}
-	if (dir.empty()) return;
-
+static bool EnsureDirectory(const std::filesystem::path &dir, std::string *error)
+{
 	std::error_code ec;
-	std::filesystem::path dir_path = OTTD2FS(dir);
-	if (!std::filesystem::exists(dir_path, ec)) {
-		std::filesystem::create_directories(dir_path, ec);
-		return;
+	if (dir.empty()) return StorageError(error, "Personal blueprint directory is unavailable.");
+	std::filesystem::create_directories(dir, ec);
+	if (ec) return StorageError(error, "Cannot create blueprint directory: " + ec.message());
+	if (!std::filesystem::is_directory(dir, ec) || ec) return StorageError(error, "Blueprint path is not a directory.");
+	return true;
+}
+
+static bool SafeRegularFile(const std::filesystem::path &path, std::string *error)
+{
+	std::error_code ec;
+	auto status = std::filesystem::symlink_status(path, ec);
+	if (ec || !std::filesystem::is_regular_file(status)) return StorageError(error, "Blueprint backing file is missing, unreadable or not a regular file: " + FS2OTTD(path.native()));
+	return true;
+}
+
+static bool ReadBounded(const std::filesystem::path &path, std::string &content, std::string *error)
+{
+	if (path.native().find(std::filesystem::path::value_type{}) != std::filesystem::path::string_type::npos) return StorageError(error, "Blueprint path contains a NUL byte.");
+	if (!SafeRegularFile(path, error)) return false;
+	int fd = StorageOpen(path, O_RDONLY);
+	if (fd < 0) return StorageError(error, "Cannot open blueprint file: " + std::string(std::strerror(errno)));
+	struct stat st{};
+	if (StorageFstat(fd, &st) != 0 || !StorageIsRegular(st) || st.st_size < 0 || static_cast<uint64_t>(st.st_size) > Blueprint::MAX_JSON_BYTES) {
+		StorageClose(fd);
+		return StorageError(error, "Blueprint file is invalid or exceeds 2 MiB.");
 	}
+	std::string result(static_cast<size_t>(st.st_size), '\0');
+	size_t pos = 0;
+	while (pos < result.size()) {
+		ssize_t n = StorageRead(fd, result.data() + pos, result.size() - pos);
+		if (n < 0 && errno == EINTR) continue;
+		if (n <= 0) { int saved = errno; StorageClose(fd); return StorageError(error, n == 0 ? "Blueprint file ended during reading." : "Cannot read blueprint file: " + std::string(std::strerror(saved))); }
+		pos += static_cast<size_t>(n);
+	}
+	char trailing_byte;
+	ssize_t trailing = StorageRead(fd, &trailing_byte, 1);
+	if (trailing != 0) { int saved = errno; StorageClose(fd); return StorageError(error, trailing > 0 ? "Blueprint file grew while reading." : "Cannot finish reading blueprint file: " + std::string(std::strerror(saved))); }
+	if (StorageClose(fd) != 0) return StorageError(error, "Cannot close blueprint file: " + std::string(std::strerror(errno)));
+	content = std::move(result);
+	return true;
+}
 
-	for (const auto &entry : std::filesystem::directory_iterator(dir_path, ec)) {
-		if (ec) break;
-		if (!entry.is_regular_file()) continue;
-		if (entry.path().extension() != ".json") continue;
+/* A temporary file is exclusive and resides beside its destination. Failed writes
+ * leave the previous file and in-memory row untouched. */
+static bool AtomicWrite(const std::filesystem::path &target, const std::string &bytes, bool replace, std::string *error)
+{
+	if (target.native().find(std::filesystem::path::value_type{}) != std::filesystem::path::string_type::npos) return StorageError(error, "Blueprint path contains a NUL byte.");
+	std::error_code ec;
+	if (replace) {
+		if (!SafeRegularFile(target, error)) return false;
+	} else {
+		auto status = std::filesystem::symlink_status(target, ec);
+		if (ec && ec != std::errc::no_such_file_or_directory) return StorageError(error, "Cannot inspect destination: " + ec.message());
+		if (!ec && std::filesystem::exists(status)) return StorageError(error, "Blueprint destination already exists: " + FS2OTTD(target.native()));
+	}
+	std::filesystem::path tmp;
+	int fd = -1;
+	for (int attempt = 0; attempt < 32; ++attempt) {
+		tmp = std::filesystem::path(target.native() + OTTD2FS(".tmp-" + std::to_string(StorageProcessId()) + "-" + std::to_string(++_temporary_counter)));
+		fd = StorageOpen(tmp, O_WRONLY | O_CREAT | O_EXCL, 0600);
+		if (fd >= 0) break;
+		if (errno != EEXIST) return StorageError(error, "Cannot create temporary blueprint file: " + std::string(std::strerror(errno)));
+	}
+	if (fd < 0) return StorageError(error, "Cannot reserve a temporary blueprint file.");
+	auto fail = [&](const std::string &message) {
+		StorageClose(fd);
+		std::filesystem::remove(tmp, ec);
+		return StorageError(error, message);
+	};
+	size_t pos = 0;
+	while (pos < bytes.size()) {
+		ssize_t n = StorageWrite(fd, bytes.data() + pos, bytes.size() - pos);
+		if (n < 0 && errno == EINTR) continue;
+		if (n <= 0) return fail("Cannot write blueprint file: " + std::string(std::strerror(errno)));
+		pos += static_cast<size_t>(n);
+	}
+	if (StorageFlush(fd) != 0) return fail("Cannot flush blueprint file: " + std::string(std::strerror(errno)));
+	if (StorageClose(fd) != 0) {
+		int saved = errno;
+		fd = -1;
+		std::filesystem::remove(tmp, ec);
+		return StorageError(error, "Cannot close blueprint file: " + std::string(std::strerror(saved)));
+	}
+	fd = -1;
+	if (replace && !SafeRegularFile(target, error)) { std::filesystem::remove(tmp, ec); return false; }
+	if (!StoragePublish(tmp, target, replace)) {
+		std::string reason = StoragePublishFailure();
+		std::filesystem::remove(tmp, ec);
+		return StorageError(error, "Cannot commit blueprint file: " + reason);
+	}
+	return true;
+}
 
-		std::ifstream file(entry.path());
-		if (!file.is_open()) continue;
-
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+bool BlueprintManager::RescanLibrary(std::string *error_msg)
+{
+	if (!_initialized) {
+		_initialized = true;
+		CreateBuiltinCSTPrefabs();
+		_blueprints = _builtins;
+		_source_paths.assign(_blueprints.size(), {});
+	}
+	if (error_msg != nullptr) error_msg->clear();
+	std::vector<Blueprint> next = _builtins;
+	std::vector<std::filesystem::path> paths(next.size());
+	const auto dir = LibraryDirectory();
+	if (!EnsureDirectory(dir, error_msg)) return false;
+	std::error_code ec;
+	std::filesystem::directory_iterator it(dir, ec), end;
+	if (ec) return StorageError(error_msg, "Cannot scan blueprint directory: " + ec.message());
+	std::vector<std::filesystem::path> files;
+	for (; it != end; it.increment(ec)) {
+		if (ec) return StorageError(error_msg, "Cannot scan blueprint directory: " + ec.message());
+		if (it->path().extension() == ".json") files.push_back(it->path());
+	}
+	if (ec) return StorageError(error_msg, "Cannot scan blueprint directory: " + ec.message());
+	std::sort(files.begin(), files.end());
+	std::string skipped;
+	for (const auto &path : files) {
+		std::string content, reason;
+		if (!ReadBounded(path, content, &reason)) { skipped += path.filename().string() + ": " + reason + "\n"; continue; }
 		auto bp = Blueprint::FromJson(content);
-		if (bp.has_value() && bp->IsValid()) {
-			bp->is_builtin = false;
-			_blueprints.push_back(*bp);
-		}
+		if (!bp.has_value() || !bp->IsValid()) { skipped += path.filename().string() + ": invalid blueprint JSON\n"; continue; }
+		bp->is_builtin = false;
+		next.push_back(std::move(*bp));
+		paths.push_back(path);
 	}
+	_blueprints = std::move(next);
+	_source_paths = std::move(paths);
+	bool clean = skipped.empty();
+	if (error_msg != nullptr) *error_msg = std::move(skipped);
+	return clean;
 }
 
 const std::vector<Blueprint> &BlueprintManager::GetBlueprints()
@@ -700,96 +902,135 @@ const Blueprint *BlueprintManager::GetBlueprint(size_t index)
 	return &_blueprints[index];
 }
 
-bool BlueprintManager::SaveBlueprint(const Blueprint &bp)
+static size_t FindPlayerName(const std::string &name)
 {
-	if (!bp.IsValid()) return false;
+	for (size_t i = 0; i < _blueprints.size(); ++i) if (!_blueprints[i].is_builtin && _blueprints[i].name == name) return i;
+	return _blueprints.size();
+}
 
-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
-	if (dir.empty()) {
-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
-	}
-	if (dir.empty()) return false;
+static bool UniquePlayerName(const std::string &name, std::string *error)
+{
+	size_t matches = 0;
+	for (const auto &bp : _blueprints) if (!bp.is_builtin && bp.name == name) ++matches;
+	if (matches > 1) return StorageError(error, "Multiple player blueprints have this name; choose a row and rename it first.");
+	return true;
+}
 
-	std::error_code ec;
-	std::filesystem::path dir_path = OTTD2FS(dir);
-	if (!std::filesystem::exists(dir_path, ec)) {
-		std::filesystem::create_directories(dir_path, ec);
-	}
-
-	std::string filename = CleanBlueprintFilename(bp.name) + ".json";
-	std::filesystem::path file_path = dir_path / OTTD2FS(filename);
-
-	std::ofstream out(file_path);
-	if (!out.is_open()) return false;
-
-	out << bp.ToJson();
-	out.close();
-
-	/* Update or append in memory list */
-	auto it = std::find_if(_blueprints.begin(), _blueprints.end(), [&](const Blueprint &b) {
-		return !b.is_builtin && b.name == bp.name;
-	});
-	if (it != _blueprints.end()) {
-		*it = bp;
-		it->is_builtin = false;
+bool BlueprintManager::SaveBlueprint(const Blueprint &bp, std::string *error_msg)
+{
+	if (!_initialized) Initialize();
+	if (error_msg != nullptr) error_msg->clear();
+	if (!bp.IsValid()) return StorageError(error_msg, "Blueprint is invalid.");
+	if (!UniquePlayerName(bp.name, error_msg)) return false;
+	Blueprint copy = bp;
+	copy.is_builtin = false;
+	std::string bytes = copy.ToJson();
+	if (bytes.size() > Blueprint::MAX_JSON_BYTES) return StorageError(error_msg, "Blueprint JSON exceeds 2 MiB.");
+	auto dir = LibraryDirectory();
+	if (!EnsureDirectory(dir, error_msg)) return false;
+	size_t index = FindPlayerName(copy.name);
+	std::filesystem::path path;
+	if (index < _blueprints.size()) {
+		path = _source_paths[index];
+		if (path.empty()) return StorageError(error_msg, "Blueprint source path is unknown.");
+		if (!AtomicWrite(path, bytes, true, error_msg)) return false;
+		_blueprints[index] = std::move(copy);
 	} else {
-		Blueprint copy = bp;
-		copy.is_builtin = false;
-		_blueprints.push_back(copy);
+		std::string base = CleanBlueprintFilename(copy.name);
+		if (base.size() > 100) base.resize(100);
+		for (size_t suffix = 0; suffix < 10000; ++suffix) {
+			path = dir / OTTD2FS(base + (suffix == 0 ? "" : "-" + std::to_string(suffix)) + ".json");
+			std::error_code ec;
+			auto status = std::filesystem::symlink_status(path, ec);
+			if (ec && ec != std::errc::no_such_file_or_directory) return StorageError(error_msg, "Cannot inspect blueprint destination: " + ec.message());
+			if (ec == std::errc::no_such_file_or_directory || !std::filesystem::exists(status)) break;
+			if (suffix == 9999) return StorageError(error_msg, "No free blueprint filename is available.");
+		}
+		if (!AtomicWrite(path, bytes, false, error_msg)) return false;
+		_blueprints.push_back(std::move(copy));
+		_source_paths.push_back(path);
 	}
-
 	return true;
 }
 
-bool BlueprintManager::DeleteBlueprint(size_t index)
+bool BlueprintManager::DeleteBlueprint(size_t index, std::string *error_msg)
 {
+	if (error_msg != nullptr) error_msg->clear();
 	if (!_initialized) Initialize();
-	if (index >= _blueprints.size()) return false;
-	if (_blueprints[index].is_builtin) return false;
-
-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
-	if (dir.empty()) {
-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
-	}
-
-	if (!dir.empty()) {
-		std::string filename = CleanBlueprintFilename(_blueprints[index].name) + ".json";
-		std::filesystem::path file_path = std::filesystem::path(OTTD2FS(dir)) / OTTD2FS(filename);
-		std::error_code ec;
-		std::filesystem::remove(file_path, ec);
-	}
-
+	if (index >= _blueprints.size() || _blueprints[index].is_builtin) return StorageError(error_msg, "Cannot delete a built-in or missing blueprint.");
+	const auto &path = _source_paths[index];
+	if (!SafeRegularFile(path, error_msg)) return false;
+	std::error_code ec;
+	bool removed = std::filesystem::remove(path, ec);
+	if (ec || !removed) return StorageError(error_msg, "Cannot delete blueprint file: " + ec.message());
 	_blueprints.erase(_blueprints.begin() + index);
+	_source_paths.erase(_source_paths.begin() + index);
 	return true;
 }
 
-bool BlueprintManager::RenameBlueprint(size_t index, const std::string &new_name)
+bool BlueprintManager::RenameBlueprint(size_t index, const std::string &new_name, std::string *error_msg)
 {
+	if (error_msg != nullptr) error_msg->clear();
 	if (!_initialized) Initialize();
-	if (index >= _blueprints.size()) return false;
-	if (_blueprints[index].is_builtin) return false;
-	if (new_name.empty()) return false;
+	if (index >= _blueprints.size() || _blueprints[index].is_builtin) return StorageError(error_msg, "Cannot rename a built-in or missing blueprint.");
+	if (new_name.empty()) return StorageError(error_msg, "Blueprint name cannot be empty.");
+	for (size_t i = 0; i < _blueprints.size(); ++i) if (i != index && !_blueprints[i].is_builtin && _blueprints[i].name == new_name) return StorageError(error_msg, "A player blueprint already has this name.");
+	Blueprint copy = _blueprints[index];
+	copy.name = new_name;
+	if (!copy.IsValid()) return StorageError(error_msg, "Renamed blueprint is invalid.");
+	std::string bytes = copy.ToJson();
+	if (bytes.size() > Blueprint::MAX_JSON_BYTES) return StorageError(error_msg, "Blueprint JSON exceeds 2 MiB.");
+	if (!AtomicWrite(_source_paths[index], bytes, true, error_msg)) return false;
+	_blueprints[index] = std::move(copy);
+	return true;
+}
 
-	std::string old_name = _blueprints[index].name;
-
-	/* Delete old file */
-	std::string dir = FioFindDirectory(Subdirectory::Blueprint);
-	if (dir.empty()) {
-		dir = FioGetDirectory(Searchpath::PersonalDir, Subdirectory::Blueprint);
-	}
-	if (!dir.empty()) {
-		std::string old_filename = CleanBlueprintFilename(old_name) + ".json";
-		std::filesystem::path old_path = std::filesystem::path(OTTD2FS(dir)) / OTTD2FS(old_filename);
+bool BlueprintManager::ExportToFile(const Blueprint &bp, const std::string &path, std::string *error_msg)
+{
+	if (error_msg != nullptr) error_msg->clear();
+	if (!bp.IsValid() || path.empty()) return StorageError(error_msg, "Invalid blueprint or export path.");
+	if (path.find('\0') != std::string::npos) return StorageError(error_msg, "Export path contains a NUL byte.");
+	std::string bytes = bp.ToJson();
+	if (bytes.size() > Blueprint::MAX_JSON_BYTES) return StorageError(error_msg, "Blueprint JSON exceeds 2 MiB.");
+	try {
+		std::filesystem::path target = OTTD2FS(path);
 		std::error_code ec;
-		std::filesystem::remove(old_path, ec);
+		if (!std::filesystem::is_directory(target.has_parent_path() ? target.parent_path() : std::filesystem::path{"."}, ec) || ec) return StorageError(error_msg, "Export parent directory does not exist.");
+		return AtomicWrite(target, bytes, false, error_msg);
+	} catch (const std::exception &e) {
+		return StorageError(error_msg, "Cannot use export path: " + std::string(e.what()));
 	}
+}
 
-	_blueprints[index].name = new_name;
-	return SaveBlueprint(_blueprints[index]);
+std::string BlueprintManager::GetDefaultExportPath(const Blueprint &bp)
+{
+	try {
+		auto dir = LibraryDirectory();
+		if (dir.empty()) return {};
+		/* Keep exports outside the scanned library so reopening does not import them implicitly. */
+		auto path = (dir / ".." / OTTD2FS(CleanBlueprintFilename(bp.name) + "-export.json")).lexically_normal();
+		return FS2OTTD(path.native());
+	} catch (const std::exception &) {
+		return {};
+	}
+}
+
+bool BlueprintManager::ImportFromFile(const std::string &path, std::string *error_msg)
+{
+	if (error_msg != nullptr) error_msg->clear();
+	if (path.empty() || path.find('\0') != std::string::npos) return StorageError(error_msg, "Import path is empty or contains a NUL byte.");
+	std::string bytes;
+	try {
+		if (!ReadBounded(OTTD2FS(path), bytes, error_msg)) return false;
+	} catch (const std::exception &e) {
+		return StorageError(error_msg, "Cannot use import path: " + std::string(e.what()));
+	}
+	return ImportFromString(bytes, error_msg);
 }
 
 std::optional<Blueprint> BlueprintManager::CaptureArea(TileIndex start_tile, TileIndex end_tile, const std::string &name)
 {
+	if (!Company::IsValidID(_current_company)) return std::nullopt;
 	if (!IsValidTile(start_tile) || !IsValidTile(end_tile)) return std::nullopt;
 
 	uint x1 = TileX(start_tile), y1 = TileY(start_tile);
@@ -820,6 +1061,7 @@ std::optional<Blueprint> BlueprintManager::CaptureArea(TileIndex start_tile, Til
 				if (PortalRegistry::IsPortalTile(tile) || PortalRegistry::IsUnlinkedGate(tile)) {
 					continue;
 				}
+				if (GetTileOwner(tile) != _current_company) return std::nullopt;
 
 				if (IsRailDepot(tile)) {
 					BlueprintTile bt;
@@ -852,6 +1094,7 @@ std::optional<Blueprint> BlueprintManager::CaptureArea(TileIndex start_tile, Til
 					bp.tiles.push_back(bt);
 				}
 			} else if (IsTileType(tile, TileType::Station) && IsRailStation(tile)) {
+				if (GetTileOwner(tile) != _current_company) return std::nullopt;
 				BlueprintTile bt;
 				bt.dx = static_cast<int16_t>(x - min_x);
 				bt.dy = static_cast<int16_t>(y - min_y);
@@ -897,5 +1140,7 @@ bool BlueprintManager::ImportFromString(const std::string &json_data, std::strin
 	}
 
 	bp->is_builtin = false;
-	return SaveBlueprint(*bp);
+	if (!_initialized) Initialize();
+	if (FindPlayerName(bp->name) < _blueprints.size()) return StorageError(error_msg, "A player blueprint already has this name.");
+	return SaveBlueprint(*bp, error_msg);
 }

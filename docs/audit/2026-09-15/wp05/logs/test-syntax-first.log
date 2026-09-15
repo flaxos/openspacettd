@@ -1,0 +1,38 @@
+In file included from /home/flax/games/openspacettd/src/tests/test_command_authority.cpp:5:
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp: In function ‘void C_A_T_C_H_T_E_S_T_12()’:
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:226:17: error: could not convert ‘Catch::Decomposer().Catch::Decomposer::operator<=(((int)((bool)colony)))’ from ‘Catch::ExprLhs<bool>’ to ‘bool’
+  226 |                 CHECK_FALSE(colony ? Command<Commands::ColonizeOutpost>::Post(tile, "Authority colony") : Command<Commands::PromoteWorld>::Post(world));
+      |                 ^
+      |                 |
+      |                 Catch::ExprLhs<bool>
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp: In function ‘void C_A_T_C_H_T_E_S_T_28()’:
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:306:38: warning: missing initializer for member ‘RegisteredWorld::description’ [-Wmissing-field-initializers]
+  306 |         REQUIRE(service.RegisterWorld({.world_id = WorldID{0}, .phase = WorldPhase::Phase1_Core,
+      |                 ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  307 |                 .name = "Stale name", .address = "Local connection", .active_clients = 7}));
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:306:38: warning: missing initializer for member ‘RegisteredWorld::description’ [-Wmissing-field-initializers]
+  306 |         REQUIRE(service.RegisterWorld({.world_id = WorldID{0}, .phase = WorldPhase::Phase1_Core,
+      |                 ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  307 |                 .name = "Stale name", .address = "Local connection", .active_clients = 7}));
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:306:38: warning: missing initializer for member ‘RegisteredWorld::description’ [-Wmissing-field-initializers]
+  306 |         REQUIRE(service.RegisterWorld({.world_id = WorldID{0}, .phase = WorldPhase::Phase1_Core,
+      |                 ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  307 |                 .name = "Stale name", .address = "Local connection", .active_clients = 7}));
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:308:38: warning: missing initializer for member ‘RegisteredWorld::description’ [-Wmissing-field-initializers]
+  308 |         REQUIRE(service.RegisterWorld({.world_id = WorldID{99}, .phase = WorldPhase::Phase4_Expansion,
+      |                 ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  309 |                 .name = "Remote only", .address = "Remote node"}));
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:308:38: warning: missing initializer for member ‘RegisteredWorld::description’ [-Wmissing-field-initializers]
+  308 |         REQUIRE(service.RegisterWorld({.world_id = WorldID{99}, .phase = WorldPhase::Phase4_Expansion,
+      |                 ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  309 |                 .name = "Remote only", .address = "Remote node"}));
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_command_authority.cpp:308:38: warning: missing initializer for member ‘RegisteredWorld::description’ [-Wmissing-field-initializers]
+  308 |         REQUIRE(service.RegisterWorld({.world_id = WorldID{99}, .phase = WorldPhase::Phase4_Expansion,
+      |                 ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  309 |                 .name = "Remote only", .address = "Remote node"}));
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

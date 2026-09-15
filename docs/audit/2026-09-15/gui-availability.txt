@@ -1,0 +1,4 @@
+orca-ide skills get computer-use --json
+exit127
+/bin/bash: line 1: orca-ide: command not found
+Native CUA disabled by tool surface. No GUI reproduction executed.

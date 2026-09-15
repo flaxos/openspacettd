@@ -1,0 +1,718 @@
+[
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 1,
+    "result_note": "Fixture compile error: obsolete CLEAR_GRASS name.",
+    "log": "regression-build.log",
+    "log_written_at_utc": "2026-09-15T11:02:44.762865+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Initial depot fixture compiled but railtype multipliers were uninitialized.",
+    "log": "regression-build-retry.log",
+    "log_written_at_utc": "2026-09-15T11:03:10.868794+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "ResetRailTypes now yields real100 rail cost; production command unchanged.",
+    "log": "regression-build-initialized.log",
+    "log_written_at_utc": "2026-09-15T11:03:41.500711+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 1,
+    "result_note": "Fixture names ClearTree/GetRegionMutable do not exist.",
+    "log": "expanded-tests-compile.log",
+    "log_written_at_utc": "2026-09-15T11:07:01.693166+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o",
+      "CMakeFiles/openttd_test.dir/src/tests/test_cst_prefabs.cpp.o"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Expanded fixture object compilation.",
+    "log": "expanded-tests-compile-retry.log",
+    "log_written_at_utc": "2026-09-15T11:08:24.520939+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "",
+    "log": "mainline-tests-compile.log",
+    "log_written_at_utc": "2026-09-15T11:09:32.871785+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "",
+    "log": "expanded-tests-final-compile.log",
+    "log_written_at_utc": "2026-09-15T11:10:40.648627+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 1,
+    "result_note": "Missing command_func.h for CMD_ERROR; corrected.",
+    "log": "fix-build.log",
+    "log_written_at_utc": "2026-09-15T11:12:44.978330+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Both game and test binary rebuilt.",
+    "log": "fix-build-retry.log",
+    "log_written_at_utc": "2026-09-15T11:13:42.884187+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Added required Town/Company pool allocation checks.",
+    "log": "fixture-build.log",
+    "log_written_at_utc": "2026-09-15T11:14:26.272080+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 1,
+    "result_note": "Language fixture needed language.h.",
+    "log": "station-fixture-build.log",
+    "log_written_at_utc": "2026-09-15T11:16:25.045780+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Real station sign rendering uses build language pack.",
+    "log": "station-fixture-build-retry.log",
+    "log_written_at_utc": "2026-09-15T11:17:19.960640+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Added explicit unsupported station layout regressions.",
+    "log": "final-tests-build.log",
+    "log_written_at_utc": "2026-09-15T11:18:22.991477+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "",
+    "log": "persistence-test-build.log",
+    "log_written_at_utc": "2026-09-15T11:20:31.336142+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Save/load fixture initialized mouse cursor.",
+    "log": "persistence-fixture-build.log",
+    "log_written_at_utc": "2026-09-15T11:21:27.829993+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Investigated availability using a sample engine.",
+    "log": "persistence-engine-build.log",
+    "log_written_at_utc": "2026-09-15T11:22:38.168807+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Investigated default engine mappings.",
+    "log": "persistence-mapping-build.log",
+    "log_written_at_utc": "2026-09-15T11:24:07.322570+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Initialized full vanilla catalogue and1950 calendar.",
+    "log": "persistence-catalogue-build.log",
+    "log_written_at_utc": "2026-09-15T11:25:09.506403+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Instrumented empty post-load engine pool.",
+    "log": "persistence-diagnostics-build.log",
+    "log_written_at_utc": "2026-09-15T11:26:16.339224+00:00"
+  },
+  {
+    "command": [
+      "ninja",
+      "-C",
+      "build",
+      "-j",
+      "2",
+      "openttd_test"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Restore normal vanilla catalogue in no-video harness after load.",
+    "log": "persistence-runtime-fixture-build.log",
+    "log_written_at_utc": "2026-09-15T11:27:45.747983+00:00"
+  },
+  {
+    "command": [
+      "./build/openttd_test",
+      "Blueprint depot quote matches execution"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + test-only regression; original command",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Invalid evidence for cost parity: rail build multiplier was0; superseded by initialized fixture.",
+    "log": "depot-before.log",
+    "log_written_at_utc": "2026-09-15T11:03:18.555773+00:00"
+  },
+  {
+    "command": [
+      "./build/openttd_test",
+      "Blueprint depot quote matches execution"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + test-only initialized regression; original command",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 2,
+    "result_note": "Expected regression failure: Blueprint500 versus canonical/Execute600;2 failed of11 assertions.",
+    "log": "depot-before-initialized.log",
+    "log_written_at_utc": "2026-09-15T11:03:41.519711+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--output-on-failure",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint|CST Prefabs"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "7/16 pass;9 fixture aborts on missing Town::CanAllocateItem precondition.",
+    "log": "blueprint-ctest-first.log",
+    "log_written_at_utc": "2026-09-15T11:13:58.530149+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--output-on-failure",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint|CST Prefabs"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "14/16 pass; invalid slope-negative expectation timed out printing whole map; real station labels lacked a language pack.",
+    "log": "blueprint-ctest-fixture-fixed.log.gz",
+    "log_written_at_utc": "2026-09-15T11:15:17.712951+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--output-on-failure",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint rejected|CST Prefabs - Deterministic"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "2/2 pass after fixture corrections; includes128 prefab variants.",
+    "log": "blueprint-two-retest.log",
+    "log_written_at_utc": "2026-09-15T11:17:40.791586+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint|CST Prefabs"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "17/17 pass; CST full-footprint test26512 assertions,128 variants plus identical overlaps.",
+    "log": "blueprint-ctest-final.log",
+    "log_written_at_utc": "2026-09-15T11:18:55.750392+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--output-on-failure",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Conduit|Portal Construction|Portal Wormhole|Production|Stockpile|Corporate HQ|Logistics|Fabrication|Placement Restrictions"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "60/60 pass; production assert-coverage caveat OST-TEST-001 still applies.",
+    "log": "broader-ctest.log",
+    "log_written_at_utc": "2026-09-15T11:19:04.526369+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "Save/load needed a mock cursor; assertion preserved.",
+    "log": "persistence-ctest.log",
+    "log_written_at_utc": "2026-09-15T11:21:00.906065+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "Layout/ledger persisted; subsequent quote lacked rail availability in no-video fixture.",
+    "log": "persistence-ctest-final.log",
+    "log_written_at_utc": "2026-09-15T11:21:42.661954+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "Sample engine did not solve the no-video load path.",
+    "log": "persistence-ctest-engine-fixture.log",
+    "log_written_at_utc": "2026-09-15T11:22:57.985754+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "Default mappings did not solve the no-video load path.",
+    "log": "persistence-ctest-mapping-fixture.log",
+    "log_written_at_utc": "2026-09-15T11:24:24.429524+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "Normal pre-load catalogue/date did not solve skipped engine initialization on load.",
+    "log": "persistence-ctest-catalogue-fixture.log",
+    "log_written_at_utc": "2026-09-15T11:25:30.402347+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 8,
+    "result_note": "Confirmed post-load engine pool0: no VideoDriver means AfterLoadGame skips graphics/NewGRF engine setup.",
+    "log": "persistence-ctest-diagnostics.log",
+    "log_written_at_utc": "2026-09-15T11:26:36.119170+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--verbose",
+      "-j",
+      "1",
+      "--timeout",
+      "30",
+      "-R",
+      "Blueprint infrastructure money"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "1/1 pass,28 assertions. Actual save/reload preserves infrastructure/money/materials; normal vanilla catalogue initialization restores no-video harness availability before repeat quote.",
+    "log": "persistence-ctest-passed.log",
+    "log_written_at_utc": "2026-09-15T11:28:11.611913+00:00"
+  },
+  {
+    "command": [
+      "./build/openttd",
+      "-h"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Rebuilt executable version/help.",
+    "log": "built-game-help.log",
+    "log_written_at_utc": "2026-09-15T11:28:34.885850+00:00"
+  },
+  {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "build",
+      "--show-only=json-v1"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "313 individually registered test cases; full suite not run.",
+    "log": "ctest-inventory-final.json",
+    "log_written_at_utc": "2026-09-15T11:28:34.464851+00:00"
+  },
+  {
+    "command": [
+      "sha256sum",
+      "build/openttd",
+      "build/openttd_test",
+      "src/blueprint/blueprint_cmd.cpp",
+      "src/rail_cmd.cpp",
+      "src/rail_cmd.h",
+      "src/tests/test_blueprint.cpp",
+      "src/tests/test_cst_prefabs.cpp"
+    ],
+    "ref": "abbcd7e07737bcd83c3f830f539313a45bef5f01 + WP-01 working diff",
+    "configuration": "Existing build; Release; GCC 13; OPTION_USE_ASSERTS=ON; SDL2; -j2 incremental builds; no second build",
+    "exit_code": 0,
+    "result_note": "Final source and executable identities; source.patch contains final gameplay/test diff.",
+    "log": "sha256.txt",
+    "log_written_at_utc": "2026-09-15T11:30:45.997494+00:00"
+  },
+  {
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/openspacettd-audit-20260915/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=1000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-d",
+      "misc=1,script=2",
+      "-g",
+      "/tmp/openspacettd-audit-20260915/blueprint-crash.sav"
+    ],
+    "cwd": "/tmp/openspacettd-audit-20260915",
+    "ref": "abbcd7e077 + final WP-01 source.patch; binary sha256.txt",
+    "configuration": "Existing Release/asserts ON; copied config; autosave OFF; real null video driver1000 loops; original content unchanged",
+    "exit_code": 0,
+    "log": "blueprint-crash-load-smoke.log",
+    "result_note": "Load/engine smoke only; no Blueprint placement or graphical acceptance.",
+    "log_written_at_utc": "2026-09-15T11:32:44.711403+00:00"
+  },
+  {
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/openspacettd-audit-20260915/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=1000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-d",
+      "misc=1,script=2",
+      "-g",
+      "/tmp/openspacettd-audit-20260915/uat-v1.1.sav"
+    ],
+    "cwd": "/tmp/openspacettd-audit-20260915",
+    "ref": "abbcd7e077 + final WP-01 source.patch; binary sha256.txt",
+    "configuration": "Existing Release/asserts ON; copied config; autosave OFF; real null video driver1000 loops; original content unchanged",
+    "exit_code": 0,
+    "log": "uat-v1.1-load-smoke.log",
+    "result_note": "Load/engine smoke only; no Blueprint placement or graphical acceptance.",
+    "log_written_at_utc": "2026-09-15T11:32:45.076390+00:00"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "ref": "abbcd7e077 + final WP-01 source.patch and documentation follow-up",
+    "configuration": "Existing local workspace",
+    "exit_code": 0,
+    "log": "diff-check.log",
+    "result_note": "No whitespace errors."
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "ref": "abbcd7e077 + final WP-01 source.patch and documentation follow-up",
+    "configuration": "Existing local workspace",
+    "exit_code": 0,
+    "log": "git-status-final.txt",
+    "result_note": "Audit/user changes preserved; only five gameplay/test source files changed by WP-01."
+  },
+  {
+    "command": [
+      "python3",
+      "- (inline hashlib/json/pathlib/Markdown-link validation)"
+    ],
+    "ref": "abbcd7e077 + final WP-01 source.patch and documentation follow-up",
+    "configuration": "Existing local workspace",
+    "exit_code": 0,
+    "log": "integrity-check.log",
+    "result_note": "Verified source/binary hashes, all recorded log paths and46 local Markdown file links."
+  }
+]

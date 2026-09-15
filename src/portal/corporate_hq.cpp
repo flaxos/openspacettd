@@ -14,6 +14,7 @@
 #include "federation_player.h"
 #include "../company_base.h"
 #include "../company_func.h"
+#include "../station_base.h"
 #include "../timer/timer_game_calendar.h"
 
 #include <algorithm>
@@ -114,11 +115,11 @@ bool CorporateHQManager::CanPlaceHQ(CompanyID company, TileIndex tile, std::stri
 		}
 	}
 
-	/* Also consider all colonized worlds known to PlanetManager */
-	for (const auto &p : PlanetManager::GetAllRegions()) {
-		if (p.phase != WorldPhase::Phase4_Expansion && p.development_score > 0) {
-			phases_present.insert(p.phase);
-		}
+	/* Local operations count only when this company owns a live rail station. */
+	for (const Station *station : Station::Iterate()) {
+		if (station->owner != company || !station->facilities.Test(StationFacility::Train)) continue;
+		const PlanetRegion *operated = PlanetManager::GetRegionByTile(station->xy);
+		if (operated != nullptr && operated->phase != WorldPhase::Phase4_Expansion) phases_present.insert(operated->phase);
 	}
 
 	if (phases_present.size() < 3) {

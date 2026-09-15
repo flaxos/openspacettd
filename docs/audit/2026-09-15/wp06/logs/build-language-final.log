@@ -1,0 +1,21 @@
+ninja: Entering directory `build'
+[1/17] Compiling language english_AU
+[2/17] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[3/14] Compiling language english_US
+[4/14] Generating no_music.obm baseset metadata file
+[5/14] Generating desktop file
+[6/14] Generating no_sound.obs baseset metadata file
+[7/14] Generating orig_dos.obg baseset metadata file
+[8/14] Generating orig_dos.obm baseset metadata file
+[9/14] Generating orig_dos.obs baseset metadata file
+[10/14] Generating orig_dos_de.obg baseset metadata file
+[11/14] Generating orig_tto.obm baseset metadata file
+[12/14] Generating orig_win.obg baseset metadata file
+[13/14] Generating orig_win.obm baseset metadata file
+[14/14] Generating orig_win.obs baseset metadata file

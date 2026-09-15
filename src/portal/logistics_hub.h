@@ -55,6 +55,14 @@ public:
 	 * @return Assigned hub_id, or 0 on failure.
 	 */
 	static uint32_t RegisterHub(TileIndex tile, WorldID world, CompanyID company, StationID st, const std::string &name);
+	/** Resolve an owned rail station within four platform tiles of the hub. */
+	static StationID ResolveStation(TileIndex tile, WorldID world, CompanyID company, StationID requested);
+	/** True only while the saved attachment still meets the construction rules. */
+	static bool ValidateForStation(const LogisticsHub &hub);
+	static void RemoveForStation(StationID station);
+	static void RefreshForStation(StationID station);
+	static void ChangeCompanyOwner(CompanyID old_owner, CompanyID new_owner);
+	static void ValidateAfterLoad();
 
 	/**
 	 * Remove a logistics hub (e.g. upon demolition).

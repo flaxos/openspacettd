@@ -1,0 +1,6 @@
+Name:         
+Savegame ver: 367
+NewGRF ver:   0x00000000
+Modified:     0
+NewGRFs:
+

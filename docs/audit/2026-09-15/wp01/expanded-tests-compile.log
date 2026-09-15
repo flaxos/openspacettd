@@ -1,0 +1,21 @@
+ninja: Entering directory `build'
+[1/2] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/2] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o
+FAILED: CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o 
+/usr/bin/c++ -DGLOBAL_DATA_DIR=\"/usr/local/share/games/openttd\" -DPERSONAL_DIR=\".openttd\" -DPOINTER_IS_64BIT -DUNIX -DWITH_ASSERT -DWITH_CURL -DWITH_FLUIDSYNTH -DWITH_FONTCONFIG -DWITH_FREETYPE -DWITH_HARFBUZZ -DWITH_ICU_I18N -DWITH_ICU_UC -DWITH_LIBLZMA -DWITH_LZO -DWITH_OPENGL -DWITH_OPUSFILE -DWITH_PERSONAL_DIR -DWITH_PNG -DWITH_SDL2 -DWITH_SOXR -DWITH_SSE -DWITH_ZLIB -I/home/flax/games/openspacettd/src/3rdparty/squirrel/include -I/usr/include/harfbuzz -I/home/flax/games/openspacettd/build/generated -I/home/flax/games/openspacettd/build/generated/script/api -I/home/flax/games/openspacettd/src/script/api -I/home/flax/games/openspacettd/build/generated/script -I/home/flax/games/openspacettd/build/generated/script/api/ai -I/home/flax/games/openspacettd/src/script/api/ai -I/home/flax/games/openspacettd/build/generated/script/api/game -I/home/flax/games/openspacettd/src/script/api/game -I/home/flax/games/openspacettd/build/generated/script/api/template -I/home/flax/games/openspacettd/src/script/api/template -isystem /usr/include/SDL2 -isystem /usr/include/freetype2 -isystem /usr/include/opus -isystem /usr/include/ogg -O3 -DNDEBUG -std=c++20 -finput-charset=utf-8 -D_FORTIFY_SOURCE=2 -W -Wall -Wcast-qual -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wformat-security -Wformat=2 -Winit-self -Wnon-virtual-dtor -Wsuggest-override -fno-strict-enums -fno-strict-overflow -Wno-redundant-move -MD -MT CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o -MF CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o.d -o CMakeFiles/openttd_test.dir/src/tests/test_blueprint.cpp.o -c /home/flax/games/openspacettd/src/tests/test_blueprint.cpp
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp: In function ‘void SetupBlueprintTestEnv(uint32_t, uint32_t)’:
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:87:23: error: ‘ClearTree’ is not a member of ‘Price’; did you mean ‘ClearTrees’?
+   87 |         _price[Price::ClearTree] = 7;
+      |                       ^~~~~~~~~
+      |                       ClearTrees
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp: In function ‘void C_A_T_C_H_T_E_S_T_14()’:
+/home/flax/games/openspacettd/src/tests/test_blueprint.cpp:579:32: error: ‘GetRegionMutable’ is not a member of ‘PlanetManager’
+  579 |                 PlanetManager::GetRegionMutable(WorldID{0})->phase = WorldPhase::Phase3_Frontier;
+      |                                ^~~~~~~~~~~~~~~~
+ninja: build stopped: subcommand failed.

@@ -6128,9 +6128,9 @@ STR_BLUEPRINT_BUTTON_RENAME_TOOLTIP                              :{BLACK}Rename 
 STR_BLUEPRINT_BUTTON_DELETE                                      :Delete
 STR_BLUEPRINT_BUTTON_DELETE_TOOLTIP                              :{BLACK}Delete the selected player blueprint from disk
 STR_BLUEPRINT_BUTTON_EXPORT                                      :Export
-STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export selected blueprint as JSON template
+STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP                              :{BLACK}Export the current blueprint to a new JSON file
 STR_BLUEPRINT_BUTTON_IMPORT                                      :Import
-STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Scan disk and import blueprints from template directory
+STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP                              :{BLACK}Import a Blueprint JSON file by path
 STR_ERROR_BLUEPRINT_INVALID                                      :{WHITE}Blueprint template data is invalid or corrupted
 STR_ERROR_CAN_T_PLACE_BLUEPRINT                                  :{WHITE}Can't place blueprint...
 
@@ -6158,4 +6158,3 @@ STR_FEDERATION_AUTH_NO_CHARTERS                                     :{SILVER}No 
 STR_FEDERATION_AUTH_LOGIN_CAPTION                                   :{WHITE}Federation Player Username
 STR_FEDERATION_AUTH_CHARTER_CAPTION                                 :{WHITE}New Corporation Name
 STR_FEDERATION_AUTH_DELEGATE_CAPTION                                :{WHITE}Delegate Player Sequence ID
-

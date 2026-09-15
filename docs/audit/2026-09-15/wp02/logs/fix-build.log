@@ -1,0 +1,21 @@
+ninja: Entering directory `build'
+[1/6] cd /home/flax/games/openspacettd && /usr/bin/cmake -DFIND_VERSION_BINARY_DIR=/home/flax/games/openspacettd/build/generated -DCPACK_BINARY_DIR=/home/flax/games/openspacettd/build -DREV_MAJOR=16 -DREV_MINOR=0 -DWINDOWS= -DDOXYGEN_WARN_FORMAT_LINE=line -DDOXYGEN_WARN_FILE= -DDOXYGEN_GS_WARN_FILE= -DDOXYGEN_AI_WARN_FILE= -P /home/flax/games/openspacettd/cmake/scripts/FindVersion.cmake
+-- Version string: 20260915-portal-gate-lifecycle-crashes-mabbcd7e077
+-- Generating rev.cpp
+-- Generating CPackProperties.cmake
+-- Generating Doxyfile
+-- Generating Doxyfile_AI
+-- Generating Doxyfile_GS
+[2/5] Building CXX object CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o
+FAILED: CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o 
+/usr/bin/c++ -DGLOBAL_DATA_DIR=\"/usr/local/share/games/openttd\" -DPERSONAL_DIR=\".openttd\" -DPOINTER_IS_64BIT -DUNIX -DWITH_ASSERT -DWITH_CURL -DWITH_FLUIDSYNTH -DWITH_FONTCONFIG -DWITH_FREETYPE -DWITH_HARFBUZZ -DWITH_ICU_I18N -DWITH_ICU_UC -DWITH_LIBLZMA -DWITH_LZO -DWITH_OPENGL -DWITH_OPUSFILE -DWITH_PERSONAL_DIR -DWITH_PNG -DWITH_SDL2 -DWITH_SOXR -DWITH_SSE -DWITH_ZLIB -I/home/flax/games/openspacettd/src/3rdparty/squirrel/include -I/usr/include/harfbuzz -I/home/flax/games/openspacettd/build/generated -I/home/flax/games/openspacettd/build/generated/script/api -I/home/flax/games/openspacettd/src/script/api -I/home/flax/games/openspacettd/build/generated/script -I/home/flax/games/openspacettd/build/generated/script/api/ai -I/home/flax/games/openspacettd/src/script/api/ai -I/home/flax/games/openspacettd/build/generated/script/api/game -I/home/flax/games/openspacettd/src/script/api/game -I/home/flax/games/openspacettd/build/generated/script/api/template -I/home/flax/games/openspacettd/src/script/api/template -isystem /usr/include/SDL2 -isystem /usr/include/freetype2 -isystem /usr/include/opus -isystem /usr/include/ogg -O3 -DNDEBUG -std=c++20 -finput-charset=utf-8 -D_FORTIFY_SOURCE=2 -W -Wall -Wcast-qual -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wformat-security -Wformat=2 -Winit-self -Wnon-virtual-dtor -Wsuggest-override -fno-strict-enums -fno-strict-overflow -Wno-redundant-move -MD -MT CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o -MF CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o.d -o CMakeFiles/openttd_test.dir/src/tests/test_sprint42_production_chains.cpp.o -c /home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp
+In file included from /home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:51:
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp: In function ‘void C_A_T_C_H_T_E_S_T_39()’:
+/home/flax/games/openspacettd/src/tests/../safeguards.h:90:19: error: ‘SAFEGUARD_DO_NOT_USE_THIS_METHOD’ is not a member of ‘std’
+   90 | #define to_string SAFEGUARD_DO_NOT_USE_THIS_METHOD
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/flax/games/openspacettd/src/tests/test_sprint42_production_chains.cpp:782:100: note: in expansion of macro ‘to_string’
+  782 |         const auto dir = std::filesystem::temp_directory_path() / ("openspacettd-hub-wp02-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+      |                                                                                                    ^~~~~~~~~
+[3/5] Building CXX object CMakeFiles/openttd_lib.dir/src/economy.cpp.o
+ninja: build stopped: subcommand failed.
