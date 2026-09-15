@@ -25,6 +25,18 @@ assistant-observed per-subcase record. It supersedes the earlier assistant GUI
 access blocker as the latest gameplay evidence. Preserve unreported subcase
 boundaries in `demo/UAT-RESULTS.md`. WP-04 has since been implemented below.
 
+## Subsequent portal train crash — 16 September
+
+The user subsequently reported a separate YAPF rail-estimate assertion. Native
+route requests reproduce it in a fresh portal layout and abort on the supplied
+crash save. Portal-aware distance estimates now account for short distant jumps,
+directions and chains while retaining the assertion and native route costs.
+Both binaries are rebuilt; **366/366 CTests pass**. The copied saved train resumes
+for 4,096 native ticks after releasing a tentative depot reservation left by the
+abort. The original save is unchanged; a recovered copy is retained locally.
+[Reproduction, verification and limitations](audit/2026-09-16/portal-yapf/README.md).
+Visual acceptance remains pending; the earlier crash-smoke report is historical.
+
 ## WP-07–09 implementation follow-up — 16 September
 
 **Implemented locally; visual acceptance remains pending.** Both binaries are

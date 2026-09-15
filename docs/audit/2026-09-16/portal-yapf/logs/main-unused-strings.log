@@ -1,0 +1,6 @@
+ERROR: STR_ERROR_PREREQUISITE_RESEARCH_LOCKED is (possibly) no longer needed.
+ERROR: STR_TECH_TREE_BRANCH_MATERIALS is (possibly) no longer needed.
+ERROR: STR_TECH_TREE_BRANCH_PORTAL is (possibly) no longer needed.
+ERROR: STR_TECH_TREE_BRANCH_TRACTION is (possibly) no longer needed.
+ERROR: STR_TECH_TREE_STATUS_ACTIVE is (possibly) no longer needed.
+ERROR: STR_TECH_TREE_STATUS_NO_ACTIVE is (possibly) no longer needed.

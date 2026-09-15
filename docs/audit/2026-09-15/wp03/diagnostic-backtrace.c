@@ -1,4 +1,4 @@
-
+/** @file diagnostic-backtrace.c Temporary crash backtrace interposer used during WP03 diagnosis. */
 #define _GNU_SOURCE
 #include <signal.h>
 #include <execinfo.h>

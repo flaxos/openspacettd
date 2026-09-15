@@ -1,7 +1,10 @@
 # WP-07–09 local implementation evidence — 16 September 2026
 
-Both `build/openttd` and `build/openttd_test` are rebuilt. The full CTest suite
-passes **363/363**, including native regression scripts. [Manifest](manifest.json)
+This is the earlier WP07–09 verification snapshot. The later rebase and portal
+crash repair have [separate evidence and current hashes](../portal-yapf/README.md).
+
+At this checkpoint both `build/openttd` and `build/openttd_test` were rebuilt. The full CTest suite
+passed **363/363**, including native regression scripts. [Manifest](manifest.json)
 records source/binary/fixture hashes; the working tree includes earlier recovery
 packages and is not a clean release commit.
 

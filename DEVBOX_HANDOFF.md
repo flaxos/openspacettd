@@ -1,6 +1,23 @@
 # OpenSpaceTTD recovery checkpoint — 2026-09-15
 
-## Current checkpoint — 16 September, WP-07–09
+## Current checkpoint — 16 September, portal routing and PR
+
+All recovery work is committed on `fix/recovery-wp01-wp09`, based on current main
+`345e258867`. The subsequent user-reported YAPF assertion is fixed in `174e571780`:
+rail distance estimates account for local portal shortcuts and retain the engine
+assertion. Both binaries are rebuilt and **366/366 CTests pass**. The crash-save
+route request succeeds and a copied train resumes for 4,096 native ticks after
+clearing the tentative depot reservation left by the abort. Original saves are
+unchanged; the recovered copy is in `build/Testing/yapf-crash-replay/`.
+[Current verification](docs/audit/2026-09-16/portal-yapf/README.md).
+
+The unused-string check has six findings identical to base main. The first remote
+commit-style check also rejects retained raw audit formatting and indentation in
+the original fault-injection helper commit. File-description failures were fixed.
+CI cleanup and visual acceptance remain pending; keep PR #6 draft and the earlier
+goal open for acceptance.
+
+## Earlier checkpoint — 16 September, WP-07–09
 
 User goal: resolve WP-07/08/09. Local changes are implemented and verified;
 **363/363 CTests pass** and both binaries are rebuilt. Capture drag/naming/cancel,

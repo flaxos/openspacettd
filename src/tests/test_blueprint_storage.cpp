@@ -1,4 +1,4 @@
-/* Storage regressions use a private temporary library, never the player's files. */
+/** @file test_blueprint_storage.cpp Blueprint storage regressions using a private temporary library. */
 #include "../stdafx.h"
 #include "../3rdparty/catch2/catch.hpp"
 #include "../blueprint/blueprint_manager.h"

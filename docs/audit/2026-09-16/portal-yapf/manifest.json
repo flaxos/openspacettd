@@ -1,0 +1,73 @@
+{
+  "source_commit": "174e57178089be5cf5927b7915bd21ea1700a175",
+  "base_commit": "345e258867079cb6ee8a0c21245761d38d9c43ee",
+  "verification_snapshot": "Tests ran against the source committed as source_commit. The final clean rebuild changed only generated version metadata and relinked both binaries; hashes below identify those rebuilt binaries. Earlier WP07\u201309 evidence remains a separate historical snapshot.",
+  "build_command": "ninja -C build -j2 openttd openttd_test",
+  "ctest": {
+    "command": "ctest --test-dir build --output-on-failure -j2",
+    "passed": 366,
+    "failed": 0
+  },
+  "focused_regressions": {
+    "test_cases": 3,
+    "assertions": 10258,
+    "before": "native-before.log: abort at yapf_destrail.hpp:194",
+    "after": "regressions-after.log: pass"
+  },
+  "crash_save_replay": {
+    "input": "/home/flax/.local/share/openttd/crash20260915215730.sav",
+    "input_sha256": "1b2d9df12650d3edaa84697380ad1d636fbcc83283056a6649d738a4234c82c1",
+    "input_preserved": true,
+    "before": "native YAPF route request on the loaded state aborts",
+    "after": "same route request succeeds; clearing only the tentative depot reservation in memory permits 4096 native game ticks and train movement",
+    "assertions": 19,
+    "recovered_copy": "/home/flax/games/openspacettd/build/Testing/yapf-crash-replay/crash20260915215730-recovered.sav",
+    "recovered_sha256": "fb57918823b451b4d7e1653f10eac6f2a74a8c004a76db60c1f6ae7d865d59d8"
+  },
+  "rebuilt_game_smoke": {
+    "command": [
+      "/home/flax/games/openspacettd/build/openttd",
+      "-c",
+      "/tmp/ost-yapf-crash-eafcgrko/openttd.cfg",
+      "-x",
+      "-v",
+      "null:ticks=20000",
+      "-s",
+      "null",
+      "-m",
+      "null",
+      "-g",
+      "/home/flax/games/openspacettd/build/Testing/yapf-crash-replay/crash20260915215730-recovered.sav"
+    ],
+    "exit_code": 0,
+    "driver_loops": 20000,
+    "note": "Null-video loops are not a count of simulation ticks or a visual UAT result."
+  },
+  "reload_portability": "WP09 fresh GUI establishment and process reload pass with a copied test binary and lang link in a temporary directory containing no baseset directory; graphics are found in normal installed data folders.",
+  "unused_strings": {
+    "status": "6 pre-existing findings",
+    "main_and_branch_outputs_identical": true
+  },
+  "human_acceptance": "Pending visual UAT-04,08,10\u201312 and09 save/reload; no GUI acceptance claimed.",
+  "sha256": {
+    "build/openttd": "884b7ab636749c3554c5185480168b1bfeaec822ab1c4f423dea903758b955dd",
+    "build/openttd_test": "20d62090550ef9f19a4b84e9c86f6bce6477042a11e19c12d0e895425290760d",
+    "src/pathfinder/yapf/CMakeLists.txt": "f39c845c2b55638fa6fead4e28d5de6d4316807d2224fdde9ffc620a4600187c",
+    "src/pathfinder/yapf/yapf_destrail.hpp": "857f7e8af9128805d3b5960f20e3ffca37d2b2a64912a609d8207a29a8f22054",
+    "src/pathfinder/yapf/yapf_rail_portal_heuristic.hpp": "0ad7849f3482d5cbfb2e00355123a312660e707292e278ff8d406d20a38bb8a4",
+    "src/tests/test_command_authority.cpp": "375c0a9b627ffabe6ac99bddfc7769bddd8c6d1e0eba0dff76b7e28f30daacc8",
+    "src/tests/test_cst_prefabs.cpp": "f97c6efee1bc7cfa223b38a26edd0412f154ed4d2ba5d51c576501d29f81d154",
+    "src/tests/test_portal_wormhole.cpp": "2b6ec89637dfecce3f8747f106a463a913fcf04b42352c8f47b5e5c82d54492f"
+  },
+  "log_sha256": {
+    "native-before.log": "5ed5ded38072098dfc9f146bcf79e5570d295a09375dd01748f20cbab01ff8ca",
+    "crash-save-before.log": "bd26f9e2b0e2b1f173a8daefff6db8e5adb43d47bd91fe02a96f03c37b399bb0",
+    "regressions-after.log": "0a44df38d75a7cfe16e47cd85f577c27277d40248ceaa99a27ac3033eee7025d",
+    "crash-save-after.log": "a28897c26627d563a043fe66281ddae5df18782da2624bd8180e8ce33e6c5608",
+    "build.log": "ace24b24389a7e68f69fe2b8f9e3617daf7734f00aafcff44881023d2d11474b",
+    "ctest.log": "97034840258b8cc748d8cff24951104b94dd001b463a00fb6a67bb7f37cfeb04",
+    "standard-baseset.log": "e4f5e6f68499a5be1e5802a6e5ef00d25f14582c054db36521eba7fff7c3db8f",
+    "unused-strings.log": "96c0d52f0bec78b0ffff73aa781e39eaa3e1c9c767bfab847bfdc4f61211d99b",
+    "main-unused-strings.log": "96c0d52f0bec78b0ffff73aa781e39eaa3e1c9c767bfab847bfdc4f61211d99b"
+  }
+}
