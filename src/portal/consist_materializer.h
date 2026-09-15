@@ -11,6 +11,7 @@
 #include "consist_snapshot.h"
 #include "../direction_type.h"
 #include "../tile_type.h"
+#include <functional>
 
 struct Train;
 
@@ -48,9 +49,15 @@ public:
 	 *
 	 * @param consist Front engine or any unit in the consist to despawn.
 	 * @param owner_token Authorization token of the owning company.
+	 * @param admit Optional synchronous admission callback, invoked after encoding
+	 *              but before any vehicle or reservation is removed. Must not mutate
+	 *              the consist. Rejection leaves the physical train intact.
 	 * @return ConsistDespawnResult with snapshot payload and status.
 	 */
-	static ConsistDespawnResult DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token);
+	static ConsistDespawnResult DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token,
+		const std::function<bool(const ConsistSnapshot &, const ConsistSnapshotBytes &)> &admit);
+	static ConsistDespawnResult DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token,
+		const std::function<bool(const ConsistSnapshotBytes &)> &admit = {});
 
 	/**
 	 * Check whether the receiving portal throat is clear for consist emergence.

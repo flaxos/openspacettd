@@ -384,6 +384,12 @@ add_files(
     portal/logistics_hub.h
     portal/fabrication_manager.cpp
     portal/fabrication_manager.h
+    portal/tech_tree.cpp
+    portal/tech_tree.h
+    portal/production_chain.cpp
+    portal/production_chain.h
+    portal/commonwealth_pack.cpp
+    portal/commonwealth_pack.h
     portal/content_manifest.cpp
     portal/content_manifest.h
     portal/consist_materializer.cpp
@@ -391,6 +397,8 @@ add_files(
     portal/consist_snapshot.cpp
     portal/consist_snapshot.h
     portal/federation_cmd.cpp
+    portal/authority_transport.cpp
+    portal/authority_transport.h
     portal/federation_cmd.h
     portal/federation_auth_gui.cpp
     portal/federation_auth_gui.h

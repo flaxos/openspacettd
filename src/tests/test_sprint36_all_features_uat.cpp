@@ -76,12 +76,12 @@ TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - Savegame File Artifact & I
 	}
 }
 
-TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v8 Metadata & Backwards Compatibility", "[sprint36],[gamescript]")
+TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - GameScript OpenSpaceTTD-UAT-Demo v9 Metadata & Backwards Compatibility", "[sprint36],[gamescript]")
 {
 	const std::string info_path = ResolveRepoPath("bin/game/openspacettd_uat/info.nut");
 	const std::string main_path = ResolveRepoPath("bin/game/openspacettd_uat/main.nut");
 
-	SECTION("info.nut advertises version 8 with full backwards compatibility to version 1")
+	SECTION("info.nut advertises version 9 with full backwards compatibility to version 1")
 	{
 		REQUIRE(std::filesystem::exists(info_path));
 		std::ifstream f(info_path);
@@ -89,9 +89,9 @@ TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - GameScript OpenSpaceTTD-UA
 
 		CHECK(content.find("OpenSpaceTTD-UAT-Demo") != std::string::npos);
 		CHECK(content.find("OSUD") != std::string::npos);
-		CHECK(content.find("GetVersion()     { return 8; }") != std::string::npos);
+		CHECK(content.find("GetVersion()     { return 9; }") != std::string::npos);
 		CHECK(content.find("MinVersionToLoad() { return 1; }") != std::string::npos);
-		CHECK(content.find("GetDate()        { return \"2026-09-14\"; }") != std::string::npos);
+		CHECK(content.find("GetDate()        { return \"2026-09-15\"; }") != std::string::npos);
 	}
 
 	SECTION("main.nut implements all 12 Story Book chapters and 25 measurable acceptance goals")
@@ -145,6 +145,10 @@ TEST_CASE_METHOD(Sprint36UatFixture, "Sprint 36 UAT - GameScript OpenSpaceTTD-UA
 		CHECK(content.find("BuildSprint10Fixtures") != std::string::npos);
 		CHECK(content.find("BuildSprint28Fixtures") != std::string::npos);
 		CHECK(content.find("BuildSprint36Fixtures") != std::string::npos);
+		CHECK(content.find("13. START HERE: Player Ownership & UAT Results") != std::string::npos);
+		CHECK(content.find("14. Commonwealth Research & Content Checks") != std::string::npos);
+		CHECK(content.find("15. Unproven Concepts & Separate Federation UAT") != std::string::npos);
+		CHECK(content.find("coverage42_added") != std::string::npos);
 	}
 }
 

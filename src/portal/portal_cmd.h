@@ -16,6 +16,8 @@
 #include "../station_type.h"
 #include "../cargo_type.h"
 #include "portal_type.h"
+#include "tech_tree.h"
+#include "production_chain.h"
 
 /**
  * Build a single unlinked portal gate head on a tile.
@@ -165,6 +167,24 @@ CommandCost CmdBuildLogisticsHub(DoCommandFlags flags, TileIndex tile, StationID
  */
 CommandCost CmdSetFabricationMode(DoCommandFlags flags, bool enabled);
 
+/**
+ * Select active Commonwealth Tech Tree research project focus for the company.
+ *
+ * @param flags Command flags.
+ * @param project_id Project TechID to begin researching (0 / TECH_NONE to cancel).
+ * @return Command cost or failure.
+ */
+CommandCost CmdSelectResearchProject(DoCommandFlags flags, TechID project_id);
+
+/**
+ * Set monthly Commonwealth R&D cash budget for the company.
+ *
+ * @param flags Command flags.
+ * @param budget Monthly budget in credits.
+ * @return Command cost or failure.
+ */
+CommandCost CmdSetResearchBudget(DoCommandFlags flags, uint32_t budget);
+
 /** GUI completion callback for portal gate linking. */
 CommandCallback CcPortalLink;
 
@@ -183,5 +203,14 @@ DEF_CMD_TRAIT(Commands::PromoteWorld,              CmdPromoteWorld,             
 DEF_CMD_TRAIT(Commands::PlaceCorporateHQ,          CmdPlaceCorporateHQ,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::BuildLogisticsHub,         CmdBuildLogisticsHub,         CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::SetFabricationMode,        CmdSetFabricationMode,        {},                                                   CommandType::CompanySetting)
+DEF_CMD_TRAIT(Commands::SelectResearchProject,     CmdSelectResearchProject,     {},                                                   CommandType::CompanySetting)
+DEF_CMD_TRAIT(Commands::SetResearchBudget,         CmdSetResearchBudget,         {},                                                   CommandType::CompanySetting)
+
+
+/** Attach a recipe to an owned rail station; query mode performs validation only. */
+CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, RecipeID recipe);
+CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station);
+DEF_CMD_TRAIT(Commands::BuildProcessingFacility, CmdBuildProcessingFacility, {}, CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::RemoveProcessingFacility, CmdRemoveProcessingFacility, {}, CommandType::LandscapeConstruction)
 
 #endif /* PORTAL_CMD_H */

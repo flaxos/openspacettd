@@ -370,7 +370,9 @@ std::vector<std::string> UniverseAuthorityService::QueryPendingTransfers(WorldID
 {
 	std::vector<std::string> pending;
 	for (const auto &[id, rec] : this->_transfers) {
-		if (rec.dest_world == dest_world && rec.state == TransferState::InTransit && current_tick >= rec.arrival_tick) {
+		if (rec.dest_world == dest_world &&
+				(rec.state == TransferState::InTransit || rec.state == TransferState::ArrivalPending) &&
+				current_tick >= rec.arrival_tick) {
 			pending.push_back(id);
 		}
 	}

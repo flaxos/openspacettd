@@ -58,6 +58,7 @@
 #include "core/random_func.hpp"
 #include "rail_gui.h"
 #include "road_gui.h"
+#include "portal/federation_cmd.h"
 #include "core/backup_type.hpp"
 #include "hotkeys.h"
 #include "newgrf.h"
@@ -1263,6 +1264,7 @@ void StateGameLoop()
 		RunTileLoop();
 		CallVehicleTicks();
 		CallLandscapeTick();
+		FederationTransferManager::OnGameTick(TimerGameTick::counter);
 		BasePersistentStorageArray::SwitchMode(PSM_LEAVE_GAMELOOP);
 
 #ifndef DEBUG_DUMP_COMMANDS

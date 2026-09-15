@@ -8,6 +8,7 @@
 /** @file station.cpp Implementation of the station base class. */
 
 #include "stdafx.h"
+#include "portal/production_chain.h"
 #include "core/flatset_type.hpp"
 #include "company_func.h"
 #include "company_base.h"
@@ -93,6 +94,8 @@ Station::~Station()
 		}
 		return;
 	}
+
+	ProductionChainManager::RemoveForStation(this->index);
 
 	while (!this->loading_vehicles.empty()) {
 		this->loading_vehicles.front()->LeaveStation();

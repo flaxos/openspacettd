@@ -15,11 +15,14 @@
 #include "../portal/spaceport_manager.h"
 #include "../portal/edge_conduit.h"
 #include "../portal/federation_identity.h"
+#include "../portal/transfer_journal.h"
 #include "../portal/megacity_manager.h"
 #include "../portal/company_stockpile.h"
 #include "../portal/logistics_hub.h"
 #include "../portal/corporate_hq.h"
 #include "../portal/fabrication_manager.h"
+#include "../portal/tech_tree.h"
+#include "../portal/production_chain.h"
 
 #include "../safeguards.h"
 
@@ -892,6 +895,346 @@ struct FABRChunkHandler : ChunkHandler {
 	}
 };
 
+static const SaveLoad _transfer_checkpoint_desc[] = {
+	SLE_SSTR(TransferCheckpoint, request_id, VarTypes::STR),
+	SLE_SSTR(TransferCheckpoint, transfer_id, VarTypes::STR),
+	SLE_SSTR(TransferCheckpoint, arrival_receipt, VarTypes::STR),
+	SLE_VAR(TransferCheckpoint, namespace_high, VarTypes::U64),
+	SLE_VAR(TransferCheckpoint, namespace_low, VarTypes::U64),
+	SLE_VAR(TransferCheckpoint, consist_sequence, VarTypes::U64),
+	SLE_VAR(TransferCheckpoint, source_world, VarTypes::U32),
+	SLE_VAR(TransferCheckpoint, destination_world, VarTypes::U32),
+	SLE_VAR(TransferCheckpoint, state, VarTypes::U8),
+	SLE_CONDVECTOR(TransferCheckpoint, snapshot, VarTypes::U8, SaveLoadVersion::MinVersion, SaveLoadVersion::MaxVersion),
+};
+
+struct FTJRChunkHandler : ChunkHandler {
+	FTJRChunkHandler() : ChunkHandler("FTJR", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_transfer_checkpoint_desc);
+		int index = 0;
+		for (const auto &[key, record] : TransferJournal::GetAll()) {
+			SlSetArrayIndex(index++);
+			auto copy = record;
+			SlObject(&copy, _transfer_checkpoint_desc);
+		}
+	}
+	void Load() const override
+	{
+		TransferJournal::Reset();
+		const auto table = SlTableHeader(_transfer_checkpoint_desc);
+		while (SlIterateArray() != -1) {
+			TransferCheckpoint record;
+			SlObject(&record, table);
+			if (!TransferJournal::Restore(record)) SlErrorCorrupt("Invalid or conflicting federation checkpoint");
+		}
+	}
+};
+
+/** Temporary storage for InterServerPortalLink serialization. */
+struct SlInterServerPortal {
+	uint32_t id;
+	uint32_t tile;
+	uint8_t enter_dir;
+	uint32_t local_world;
+	uint32_t remote_world;
+	uint32_t remote_gate_id;
+	uint32_t virtual_length;
+};
+
+static const SaveLoad _interserver_portal_desc[] = {
+	SLE_VAR(SlInterServerPortal, id,             VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, tile,           VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, enter_dir,      VarTypes::U8),
+	SLE_VAR(SlInterServerPortal, local_world,    VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, remote_world,   VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, remote_gate_id, VarTypes::U32),
+	SLE_VAR(SlInterServerPortal, virtual_length, VarTypes::U32),
+};
+
+/** Chunk handler for inter-server portal links (ISPR). */
+struct ISPRChunkHandler : ChunkHandler {
+	ISPRChunkHandler() : ChunkHandler("ISPR", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_interserver_portal_desc);
+		int i = 0;
+		for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
+			SlInterServerPortal sl_link{
+				.id = link.id.base(),
+				.tile = link.local_endpoint.tile.base(),
+				.enter_dir = to_underlying(link.local_endpoint.enter_dir),
+				.local_world = link.local_endpoint.world_id.base(),
+				.remote_world = link.remote_world.base(),
+				.remote_gate_id = link.remote_gate_id,
+				.virtual_length = link.virtual_length,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&sl_link, _interserver_portal_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		const std::vector<SaveLoad> slt = SlTableHeader(_interserver_portal_desc);
+		SlInterServerPortal sl_link{};
+		while (SlIterateArray() != -1) {
+			sl_link = {};
+			SlObject(&sl_link, slt);
+			InterServerPortalLink link;
+			link.id = PortalID{sl_link.id};
+			link.local_endpoint = PortalEndpoint{
+				TileIndex{sl_link.tile},
+				static_cast<DiagDirection>(sl_link.enter_dir),
+				WorldID{sl_link.local_world}
+			};
+			link.remote_world = WorldID{sl_link.remote_world};
+			link.remote_gate_id = sl_link.remote_gate_id;
+			link.virtual_length = sl_link.virtual_length;
+			PortalRegistry::RestoreInterServerPortal(link);
+		}
+	}
+};
+
+/** Temporary storage for Commonwealth Tech Tree serialization (TECH). */
+struct SlTechRecord {
+	uint8_t kind;             ///< 0 = Company research state, 1 = Unlocked technology node
+	uint8_t company_id;       ///< Company ID
+	uint16_t tech_id;         ///< Active project (when kind=0) or Unlocked tech ID (when kind=1)
+	uint32_t accumulated_rp;  ///< RP accumulated (when kind=0)
+	uint32_t monthly_budget;   ///< Monthly budget (when kind=0)
+};
+
+static const SaveLoad _tech_desc[] = {
+	SLE_VAR(SlTechRecord, kind,           VarTypes::U8),
+	SLE_VAR(SlTechRecord, company_id,     VarTypes::U8),
+	SLE_VAR(SlTechRecord, tech_id,        VarTypes::U16),
+	SLE_VAR(SlTechRecord, accumulated_rp, VarTypes::U32),
+	SLE_VAR(SlTechRecord, monthly_budget, VarTypes::U32),
+};
+
+/** Chunk handler for Commonwealth Tech Tree (TECH). */
+struct TECHChunkHandler : ChunkHandler {
+	TECHChunkHandler() : ChunkHandler("TECH", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_tech_desc);
+
+		int i = 0;
+		for (const auto &state : TechTreeManager::GetAllCompanyTechStates()) {
+			/* Save company state record */
+			SlTechRecord state_rec{
+				.kind = 0,
+				.company_id = state.company_id.base(),
+				.tech_id = state.active_project,
+				.accumulated_rp = state.accumulated_rp,
+				.monthly_budget = state.monthly_budget,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&state_rec, _tech_desc);
+
+			/* Save unlocked technologies */
+			for (TechID unlocked_id : state.unlocked_techs) {
+				SlTechRecord unlocked_rec{
+					.kind = 1,
+					.company_id = state.company_id.base(),
+					.tech_id = unlocked_id,
+					.accumulated_rp = 0,
+					.monthly_budget = 0,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&unlocked_rec, _tech_desc);
+			}
+		}
+	}
+
+	void Load() const override
+	{
+		TechTreeManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_tech_desc);
+
+		struct TempState {
+			TechID active_project = TECH_NONE;
+			uint32_t accumulated_rp = 0;
+			uint32_t monthly_budget = 0;
+			std::vector<TechID> unlocked;
+		};
+		std::map<CompanyID, TempState> loaded_states;
+
+		SlTechRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			CompanyID cid{rec.company_id};
+			if (rec.kind == 0) {
+				loaded_states[cid].active_project = rec.tech_id;
+				loaded_states[cid].accumulated_rp = rec.accumulated_rp;
+				loaded_states[cid].monthly_budget = rec.monthly_budget;
+			} else if (rec.kind == 1) {
+				loaded_states[cid].unlocked.push_back(rec.tech_id);
+			}
+		}
+
+		for (const auto &[cid, s] : loaded_states) {
+			TechTreeManager::RestoreCompanyTech(cid, s.active_project, s.accumulated_rp, s.monthly_budget, s.unlocked);
+		}
+	}
+};
+
+/** Temporary record for Commonwealth production facility serialization (PROD). */
+struct SlProdRecord {
+	uint8_t kind;             ///< 0 = Facility definition, 1 = Input buffer entry, 2 = Output buffer entry
+	uint32_t facility_id;     ///< Facility ID
+	uint32_t tile;            ///< Facility tile index
+	uint16_t world_id;        ///< Planetary world ID
+	uint16_t recipe_id;       ///< Recipe ID
+	uint8_t owner;            ///< Owner company ID (0xFF = invalid/neutral)
+	uint16_t station_id;      ///< Linked station ID (0xFFFF = invalid)
+	uint32_t capacity;        ///< Monthly capacity
+	uint32_t last_production; ///< Last month production count
+	uint32_t total_produced;  ///< Lifetime production count
+	uint8_t cargo_type;       ///< Cargo type (for kind 1 and 2)
+	uint32_t amount;          ///< Cargo amount (for kind 1 and 2)
+};
+
+static const SaveLoad _prod_desc[] = {
+	SLE_VAR(SlProdRecord, kind,            VarTypes::U8),
+	SLE_VAR(SlProdRecord, facility_id,     VarTypes::U32),
+	SLE_VAR(SlProdRecord, tile,            VarTypes::U32),
+	SLE_VAR(SlProdRecord, world_id,        VarTypes::U16),
+	SLE_VAR(SlProdRecord, recipe_id,       VarTypes::U16),
+	SLE_VAR(SlProdRecord, owner,           VarTypes::U8),
+	SLE_VAR(SlProdRecord, station_id,      VarTypes::U16),
+	SLE_VAR(SlProdRecord, capacity,        VarTypes::U32),
+	SLE_VAR(SlProdRecord, last_production, VarTypes::U32),
+	SLE_VAR(SlProdRecord, total_produced,  VarTypes::U32),
+	SLE_VAR(SlProdRecord, cargo_type,      VarTypes::U8),
+	SLE_VAR(SlProdRecord, amount,          VarTypes::U32),
+};
+
+/** Chunk handler for Commonwealth Production Chains (PROD). */
+struct PRODChunkHandler : ChunkHandler {
+	PRODChunkHandler() : ChunkHandler("PROD", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_prod_desc);
+
+		int i = 0;
+		for (const auto &f : ProductionChainManager::GetAllFacilities()) {
+			/* Save facility record */
+			SlProdRecord rec{
+				.kind = 0,
+				.facility_id = f.id,
+				.tile = f.tile.base(),
+				.world_id = static_cast<uint16_t>(f.world_id.base()),
+				.recipe_id = f.recipe_id,
+				.owner = (f.owner != CompanyID::Invalid()) ? static_cast<uint8_t>(f.owner.base()) : static_cast<uint8_t>(0xFF),
+				.station_id = (f.linked_station != StationID::Invalid()) ? static_cast<uint16_t>(f.linked_station.base()) : static_cast<uint16_t>(0xFFFF),
+				.capacity = f.monthly_capacity,
+				.last_production = f.last_month_production,
+				.total_produced = f.total_produced,
+				.cargo_type = 0,
+				.amount = 0,
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&rec, _prod_desc);
+
+			/* Save input buffers */
+			for (const auto &[cargo, qty] : f.input_buffers) {
+				if (qty == 0) continue;
+				SlProdRecord in_rec{
+					.kind = 1,
+					.facility_id = f.id,
+					.tile = 0,
+					.world_id = 0,
+					.recipe_id = 0,
+					.owner = 0xFF,
+					.station_id = 0xFFFF,
+					.capacity = 0,
+					.last_production = 0,
+					.total_produced = 0,
+					.cargo_type = static_cast<uint8_t>(cargo),
+					.amount = qty,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&in_rec, _prod_desc);
+			}
+
+			/* Save output buffers */
+			for (const auto &[cargo, qty] : f.output_buffers) {
+				if (qty == 0) continue;
+				SlProdRecord out_rec{
+					.kind = 2,
+					.facility_id = f.id,
+					.tile = 0,
+					.world_id = 0,
+					.recipe_id = 0,
+					.owner = 0xFF,
+					.station_id = 0xFFFF,
+					.capacity = 0,
+					.last_production = 0,
+					.total_produced = 0,
+					.cargo_type = static_cast<uint8_t>(cargo),
+					.amount = qty,
+				};
+				SlSetArrayIndex(i++);
+				SlObject(&out_rec, _prod_desc);
+			}
+		}
+	}
+
+	void Load() const override
+	{
+		ProductionChainManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_prod_desc);
+
+		struct TempFacility {
+			TileIndex tile = INVALID_TILE;
+			WorldID world_id = INVALID_WORLD;
+			RecipeID recipe_id = RECIPE_NONE;
+			CompanyID owner = CompanyID::Invalid();
+			StationID linked_station = StationID::Invalid();
+			uint32_t capacity = 100;
+			uint32_t last_production = 0;
+			uint32_t total_produced = 0;
+			std::map<CargoType, uint32_t> inputs;
+			std::map<CargoType, uint32_t> outputs;
+		};
+		std::map<FacilityID, TempFacility> loaded;
+
+		SlProdRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {};
+			SlObject(&rec, slt);
+			if (rec.kind == 0) {
+				TempFacility &tf = loaded[rec.facility_id];
+				tf.tile = TileIndex{rec.tile};
+				tf.world_id = WorldID{rec.world_id};
+				tf.recipe_id = rec.recipe_id;
+				tf.owner = (rec.owner != 0xFF) ? CompanyID{rec.owner} : CompanyID::Invalid();
+				tf.linked_station = (rec.station_id != 0xFFFF) ? StationID{rec.station_id} : StationID::Invalid();
+				tf.capacity = rec.capacity;
+				tf.last_production = rec.last_production;
+				tf.total_produced = rec.total_produced;
+			} else if (rec.kind == 1) {
+				loaded[rec.facility_id].inputs[CargoType{rec.cargo_type}] = rec.amount;
+			} else if (rec.kind == 2) {
+				loaded[rec.facility_id].outputs[CargoType{rec.cargo_type}] = rec.amount;
+			}
+		}
+
+		for (const auto &[fid, f] : loaded) {
+			ProductionChainManager::RestoreFacility(fid, f.tile, f.world_id, f.recipe_id, f.owner, f.linked_station, f.capacity, f.last_production, f.total_produced, f.inputs, f.outputs);
+		}
+	}
+};
+
+static const FTJRChunkHandler FTJR;
+static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
@@ -903,10 +1246,13 @@ static const STCKChunkHandler STCK;
 static const LHUBChunkHandler LHUB;
 static const CHQSChunkHandler CHQS;
 static const FABRChunkHandler FABR;
+static const TECHChunkHandler TECH;
+static const PRODChunkHandler PROD;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
 	PORT,
+	ISPR,
 	PRTX,
 	FIDS,
 	SPRT,
@@ -916,6 +1262,9 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	LHUB,
 	CHQS,
 	FABR,
+	FTJR,
+	TECH,
+	PROD,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

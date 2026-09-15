@@ -37,6 +37,7 @@
 
 #include "table/strings.h"
 #include "table/engines.h"
+#include "portal/commonwealth_pack.h"
 
 #include "safeguards.h"
 
@@ -1306,6 +1307,7 @@ bool IsEngineBuildable(EngineID engine, VehicleType type, CompanyID company)
 		/* Check if the rail type is available to this company */
 		const Company *c = Company::Get(company);
 		if (!GetAllCompatibleRailTypes(e->VehInfo<RailVehicleInfo>().railtypes).Any(c->avail_railtypes)) return false;
+		if (!CommonwealthPackManager::IsVehicleBuildableForCompany(company, engine, INVALID_WORLD)) return false;
 	}
 	if (type == VehicleType::Road && company != OWNER_DEITY) {
 		/* Check if the road type is available to this company */

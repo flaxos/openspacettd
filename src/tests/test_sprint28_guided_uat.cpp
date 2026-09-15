@@ -74,9 +74,9 @@ TEST_CASE_METHOD(Sprint28UatFixture, "Sprint 28 UAT - GameScript OpenSpaceTTD-UA
 
 		CHECK(content.find("OpenSpaceTTD-UAT-Demo") != std::string::npos);
 		CHECK(content.find("OSUD") != std::string::npos);
-		CHECK((content.find("GetVersion()     { return 7; }") != std::string::npos || content.find("GetVersion()     { return 8; }") != std::string::npos));
+		CHECK(content.find("GetVersion()     { return 9; }") != std::string::npos);
 		CHECK(content.find("MinVersionToLoad() { return 1; }") != std::string::npos);
-		CHECK((content.find("GetDate()        { return \"2026-09-13\"; }") != std::string::npos || content.find("GetDate()        { return \"2026-09-14\"; }") != std::string::npos));
+		CHECK(content.find("GetDate()        { return \"2026-09-15\"; }") != std::string::npos);
 	}
 
 	SECTION("main.nut implements all 7 Story Book chapters and 16 measurable acceptance goals")

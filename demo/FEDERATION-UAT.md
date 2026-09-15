@@ -1,5 +1,11 @@
 # Sprint 29 Federation UAT: Protocol and Cluster-Supervisor Guide
 
+Current qualification: see UAT-16 in [the player checklist](ALL-FEATURES-UAT.md).
+The Sprint 35 runner manually dispatches both directions. Record natural entry,
+exact arrival, visible cargo/consist, return orders, mismatch, obstruction,
+duplicates and restart recovery separately in [UAT-RESULTS.md](UAT-RESULTS.md).
+This historical protocol guide and the solo save cannot establish those passes.
+
 **Milestone:** Sprint 29 (Federation Acceptance Kit)  
 **Target:** Universe Authority protocol plus cluster process supervision  
 **Supervisors & Runners:** `scripts/run_acceptance_kit.sh`, `scripts/run_cluster.py`  

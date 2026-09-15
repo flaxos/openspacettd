@@ -1,0 +1,22 @@
+{
+  "commonwealth_packages": [
+    {
+      "name": "openspacettd_industry.grf",
+      "grfid": "OST\u0001",
+      "grfid_hex": "0154534f",
+      "version": 1,
+      "bytes": 605,
+      "md5": "25afbb73bd84e6931272d669deaf745b",
+      "sha256": "3fa31728f59ff17844d0c06eaab2a45c014262b984e68c6ca3a385822b3dbfc2"
+    },
+    {
+      "name": "openspacettd_rail.grf",
+      "grfid": "OST\u0002",
+      "grfid_hex": "0254534f",
+      "version": 1,
+      "bytes": 759,
+      "md5": "3ec32cacf1631237efe241872d4f18cb",
+      "sha256": "706c093400ef4755fe4190d25dfb1025ab821e60b6c6a70a9c86db18d2c04e45"
+    }
+  ]
+}

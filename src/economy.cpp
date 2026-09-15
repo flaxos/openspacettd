@@ -55,6 +55,8 @@
 #include "portal/megacity_manager.h"
 #include "portal/logistics_hub.h"
 #include "portal/company_stockpile.h"
+#include "portal/tech_tree.h"
+#include "portal/production_chain.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -517,6 +519,8 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 			st->owner = new_owner == INVALID_OWNER ? OWNER_NONE : new_owner;
 		}
 	}
+
+	ProductionChainManager::ChangeCompanyOwner(old_owner, new_owner);
 
 	/* do the same for waypoints (we need to do this here so deleted waypoints are converted too) */
 	for (Waypoint *wp : Waypoint::Iterate()) {
@@ -1096,11 +1100,12 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 
 	Station *st = Station::Get(dest);
 
-	/* Give the goods to the industry. */
-	uint accepted_ind = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
+	/* Station production consumes its inputs first. Each piece has exactly one destination. */
+	uint accepted_facility = ProductionChainManager::DeliverToStation(dest, cargo_type, num_pieces);
+	uint accepted_ind = DeliverGoodsToIndustry(st, cargo_type, num_pieces - accepted_facility, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
 
-	/* If this cargo type is always accepted, accept all */
-	uint accepted_total = st->always_accepted.Test(cargo_type) ? num_pieces : accepted_ind;
+	/* If this cargo type is always accepted, the town accepts the remainder. */
+	uint accepted_total = st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
 
 	/* Update station statistics */
 	if (accepted_total > 0) {
@@ -1110,11 +1115,11 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		}
 		PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
 		if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
-			MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total);
+			MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility);
 		}
 		const LogisticsHub *hub = LogisticsHubManager::GetHubForStation(dest);
 		if (hub != nullptr && hub->company_id == company->index) {
-			LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, accepted_total);
+			LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, accepted_total - accepted_facility);
 		}
 	}
 
@@ -1123,10 +1128,10 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 
 	/* Increase town's counter for town effects */
 	const CargoSpec *cs = CargoSpec::Get(cargo_type);
-	st->town->received[cs->town_acceptance_effect].new_act += accepted_total;
-	if (accepted_total - accepted_ind > 0) {
-		/* Cargo not delivered to an industry must go to the town. */
-		st->town->GetOrCreateCargoAccepted(cargo_type).history[THIS_MONTH].accepted += accepted_total - accepted_ind;
+	if (st->town != nullptr) {
+		st->town->received[cs->town_acceptance_effect].new_act += accepted_total - accepted_facility;
+		uint accepted_town = accepted_total - accepted_ind - accepted_facility;
+		if (accepted_town > 0) st->town->GetOrCreateCargoAccepted(cargo_type).history[THIS_MONTH].accepted += accepted_town;
 	}
 
 	/* Determine profit */
@@ -2037,6 +2042,8 @@ static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthl
 	SpaceportManager::ProcessOffWorldTrade();
 	EdgeConduitManager::ProduceAllConduits();
 	MegacityManager::EvaluateMonthlySupply();
+	ProductionChainManager::ProcessMonthlyProduction();
+	TechTreeManager::ProcessMonthlyResearch();
 });
 
 static void DoAcquireCompany(Company *c, bool hostile_takeover)

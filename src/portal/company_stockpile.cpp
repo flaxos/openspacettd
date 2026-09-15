@@ -143,9 +143,8 @@ CargoType StockpileManager::RoleToDefaultCargo(FabricationRole role)
 			return (c != INVALID_CARGO) ? c : CargoType{5};
 		case FabricationRole::BlankCrystals:
 		case FabricationRole::EnrichedCrystals:
-			c = GetCargoTypeByLabel(CT_VALUABLES);
-			if (c == INVALID_CARGO) c = GetCargoTypeByLabel(CT_GOLD);
-			return (c != INVALID_CARGO) ? c : CargoType{10};
+			c = GetCargoTypeByLabel(CT_MAIL);
+			return (c != INVALID_CARGO) ? c : CargoType{2};
 		default:
 			return CargoType{0};
 	}

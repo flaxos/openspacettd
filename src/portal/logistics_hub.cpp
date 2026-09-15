@@ -85,6 +85,17 @@ const LogisticsHub *LogisticsHubManager::GetHubForStation(StationID st)
 	return nullptr;
 }
 
+bool LogisticsHubManager::HasLogisticsHub(WorldID world, CompanyID company)
+{
+	std::lock_guard<std::mutex> lock(_hub_mutex);
+	for (const auto &[id, hub] : _logistics_hubs) {
+		if (hub.world_id == world && hub.company_id == company) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void LogisticsHubManager::SetReserveFloor(uint32_t hub_id, CargoType cargo, uint32_t min_amount)
 {
 	std::lock_guard<std::mutex> lock(_hub_mutex);

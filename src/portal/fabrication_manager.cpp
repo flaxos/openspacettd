@@ -9,6 +9,7 @@
 
 #include "../stdafx.h"
 #include "fabrication_manager.h"
+#include "tech_tree.h"
 #include "../engine_base.h"
 #include "../rail_type.h"
 #include "../train.h"
@@ -38,6 +39,14 @@ void FabricationManager::SetFabricateFromStockpile(CompanyID company, bool enabl
 	if (company == CompanyID::Invalid()) return;
 	std::lock_guard<std::mutex> lock(_fabrication_mutex);
 	_company_fabrication_modes[company] = enabled;
+}
+
+uint8_t FabricationManager::GetBOMDiscountPercent(CompanyID company)
+{
+	if (TechTreeManager::IsTechUnlocked(company, TECH_MATERIALS_3)) {
+		return 90;
+	}
+	return 80;
 }
 
 BillOfMaterials FabricationManager::GetTrackBOM(RailType railtype)

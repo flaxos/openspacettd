@@ -14,6 +14,7 @@
 #include "../portal/planet_manager.h"
 #include "../portal/portal_registry.h"
 #include "../portal/federation_identity.h"
+#include "../portal/transfer_journal.h"
 #include "../portal/megacity_manager.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload.h"
@@ -161,6 +162,30 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	MegacityManager::RecordDelivery(TownID{1}, MegacityDemandTier::Tier3_Prosperity, 10);
 	MegacityManager::EvaluateMonthlySupply();
 
+	TransferCheckpoint checkpoint;
+	checkpoint.request_id = "save-round-trip";
+	checkpoint.transfer_id = "TRANSFER-1";
+	checkpoint.namespace_high = 42;
+	checkpoint.consist_sequence = 7;
+	checkpoint.source_world = 1;
+	checkpoint.destination_world = 2;
+	checkpoint.snapshot = {0, 255, 13, 0, 128};
+	checkpoint.state = TransferCheckpointState::Departed;
+	REQUIRE(TransferJournal::Restore(checkpoint));
+	TransferCheckpoint receipt = checkpoint;
+	receipt.request_id = "arrival-round-trip";
+	receipt.state = TransferCheckpointState::Confirmed;
+	receipt.arrival_receipt = "durable-receipt-1";
+	REQUIRE(TransferJournal::Restore(receipt));
+
+	InterServerPortalLink islink;
+	islink.id = PortalID{105};
+	islink.local_endpoint = PortalEndpoint{TileXY(50, 50), DiagDirection::NE, WorldID{0}};
+	islink.remote_world = WorldID{2};
+	islink.remote_gate_id = 205;
+	islink.virtual_length = 15;
+	REQUIRE(PortalRegistry::RestoreInterServerPortal(islink));
+
 	/* Save the game */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(save_res == SaveLoadResult::Ok);
@@ -171,6 +196,7 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	PlanetManager::Reset();
 	PortalRegistry::Reset();
 	MegacityManager::Reset();
+	CHECK(TransferJournal::GetAll().empty());
 	CHECK(PlanetManager::Count() == 0);
 	CHECK(PortalRegistry::Count() == 0);
 	CHECK(MegacityManager::GetAllMegacities().empty());
@@ -181,6 +207,10 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 	/* Load the game back from disk */
 	SaveLoadResult load_res = SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(load_res == SaveLoadResult::Ok);
+	REQUIRE(TransferJournal::Find(1, checkpoint.request_id) != nullptr);
+	CHECK(*TransferJournal::Find(1, checkpoint.request_id) == checkpoint);
+	REQUIRE(TransferJournal::Find(1, receipt.request_id) != nullptr);
+	CHECK(*TransferJournal::Find(1, receipt.request_id) == receipt);
 	const Company *loaded_company = Company::Get(saved_company);
 	CHECK(loaded_company->president_name_1 == SPECSTR_PRESIDENT_NAME);
 	CHECK(loaded_company->president_name_2 == 123456);
@@ -191,6 +221,16 @@ TEST_CASE("Planet SaveLoad - Multi-World Serialization Round-Trip")
 
 	/* 1. Verify all planetary regions restored with accurate attributes */
 	CHECK(PlanetManager::Count() == 4);
+
+	const InterServerPortalLink *loaded_islink = PortalRegistry::GetInterServerPortal(TileXY(50, 50));
+	REQUIRE(loaded_islink != nullptr);
+	CHECK(loaded_islink->id.base() == 105);
+	CHECK(loaded_islink->local_endpoint.tile == TileXY(50, 50));
+	CHECK(loaded_islink->local_endpoint.enter_dir == DiagDirection::NE);
+	CHECK(loaded_islink->local_endpoint.world_id == WorldID{0});
+	CHECK(loaded_islink->remote_world == WorldID{2});
+	CHECK(loaded_islink->remote_gate_id == 205);
+	CHECK(loaded_islink->virtual_length == 15);
 
 	const PlanetRegion *r0 = PlanetManager::GetRegion(WorldID{0});
 	REQUIRE(r0 != nullptr);

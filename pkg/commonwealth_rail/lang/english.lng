@@ -1,0 +1,22 @@
+##grflangid 0x01
+##plural 0
+
+# GRF metadata
+STR_GRF_NAME                                            :OpenSpaceTTD Commonwealth Rolling-Stock Pack
+STR_GRF_DESC                                            :Canonical Commonwealth Space Transportation (CST) locomotive families and 12-cargo rolling stock.
+
+# Locomotive Names
+STR_NAME_CST_PIONEER                                    :CST Pioneer 0-6-0 'Surveyor' (Steam)
+STR_NAME_VULCAN_STEAM                                   :Vulcan 2-8-0 'Frontier Hauler' (Steam)
+STR_NAME_TITAN_DIESEL                                   :Titan D-100 Twin-Engine Hauler (Diesel)
+STR_NAME_CST_E40                                        :CST E-40 Inter-World Catenary Hauler (Electric)
+STR_NAME_CST_MARK4                                      :CST Mark IV 'Chimaera' Hyper-Maglev (Maglev)
+
+# Wagons & Consists
+STR_NAME_CST_COACH                                      :Commonwealth Passenger Coach
+STR_NAME_VAULT_CAR                                      :Data Crystal & Valuables Vault Van
+STR_NAME_ORE_HOPPER                                     :Heavy Mineral & Ore Hopper
+STR_NAME_STEEL_FLATCAR                                  :Structural Steel Flatcar
+STR_NAME_CRYO_CONTAINER                                 :Cryogenic Intermodal Container Car
+STR_NAME_POLY_TANKER                                    :Pressurized Chemical Tanker
+STR_NAME_MAGLEV_POD                                     :CST High-Speed Maglev Cargo Pod

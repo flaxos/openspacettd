@@ -4,6 +4,7 @@ class OpenSpaceUATDemo extends GSController {
 	sprint10_built = false;
 	sprint28_built = false;
 	sprint36_built = false;
+	coverage42_added = false;
 
 	function Start();
 	function Save();
@@ -32,7 +33,8 @@ function OpenSpaceUATDemo::Save()
 		service_built = this.service_built,
 		sprint10_built = this.sprint10_built,
 		sprint28_built = this.sprint28_built,
-		sprint36_built = this.sprint36_built
+		sprint36_built = this.sprint36_built,
+		coverage42_added = this.coverage42_added
 	};
 }
 
@@ -41,7 +43,11 @@ function OpenSpaceUATDemo::Load(version, data)
 	/* Goals, Story Book pages, signs, and renamed towns are engine objects and
 	 * are restored independently. Never create duplicate fixtures on load. */
 	this.initialized = ("initialized" in data) ? data.initialized : true;
+	this.coverage42_added = ("coverage42_added" in data) ? data.coverage42_added : false;
 	this.service_built = ("service_built" in data) ? data.service_built : false;
+	/* Legacy short approaches overlap the modern 18-tile terminal. Never let
+	 * an old pending builder demolish a migrated player's complete gate throat. */
+	if (version < 9) this.service_built = true;
 	this.sprint10_built = ("sprint10_built" in data) ? data.sprint10_built : false;
 	this.sprint28_built = ("sprint28_built" in data) ? data.sprint28_built : false;
 	this.sprint36_built = ("sprint36_built" in data) ? data.sprint36_built : false;
@@ -685,6 +691,40 @@ function OpenSpaceUATDemo::Start()
 		GSStoryPage.Show(overview_page);
 	}
 
+	if (!this.coverage42_added) {
+		/* The old hub was a registry marker without a station. Build a real
+		 * player station using normal commands; never attach to a remote station. */
+		local company_mode = GSCompanyMode(GSCompany.COMPANY_FIRST);
+		local dev = this.CalculateRegions()[1];
+		local hx = (dev.min_x + dev.max_x) / 2 - 10;
+		local hy = (dev.min_y + dev.max_y) / 2 - 10;
+		local hub_station = GSMap.GetTileIndex(hx, hy);
+		local railtypes = GSRailTypeList();
+		local railtype = railtypes.Begin();
+		if (!railtypes.IsEnd()) {
+			GSRail.SetCurrentRailType(railtype);
+			GSTile.LevelTiles(hub_station, GSMap.GetTileIndex(hx + 3, hy));
+			if (GSRail.BuildRailStation(hub_station, GSRail.RAILTRACK_NE_SW, 1, 3, GSStation.STATION_NEW)) {
+				GSBaseStation.SetName(GSStation.GetStationID(hub_station), "Merredin UAT Logistics Hub");
+			} else {
+				GSLog.Warning("UAT hub station fixture blocked: " + GSError.GetLastErrorString());
+			}
+		}
+		local owner_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "13. START HERE: Player Ownership & UAT Results");
+		this.AddText(owner_page, "UAT v1.1 covers Sprints 1-42. Play as the first human company (internal Company 0). Use Land Area Information on both gate heads and their complete approach tracks: every demo rail must show YOUR company. Extend the outer approach, change a path signal, connect a depot, and send your train through Gateway Alpha. Never modify a tile occupied or reserved by a train. Save a working copy and reload to verify ownership persists.");
+		this.AddGoal(owner_page, null, "UAT-01: Verify player ownership; extend gate track, change signal, connect depot and run a train. Record Pass/Fail in demo/UAT-RESULTS.md.");
+		this.AddText(owner_page, "Earlier chapters are legacy orientation, not proof of acceptance. The current exact checklist is demo/ALL-FEATURES-UAT.md. All human results start Not run. Record screenshots and observed errors. Reload a fresh demo copy before independent tests. World 1 in the guide is internal world ID 0.");
+		local research_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "14. Commonwealth Research & Content Checks");
+		this.AddText(research_page, "UAT-12 / Sprint 41: Open Map > Corporate Headquarters, then Tech Tree. Select an eligible project, set a cash budget and observe progress over a game month. Compare cash, local feedstock and prerequisites. Verify completed research survives save/reload. Test Materials tier 3 discount only after genuinely unlocking it, not by assuming the demo has it.");
+		this.AddGoal(research_page, null, "UAT-12: Research advances, locked prerequisites explain rejection, and completion persists.");
+		this.AddText(research_page, "UAT-13 / Sprint 37: Inspect active NewGRFs, cargo payment names and depot purchase lists before claiming the 12-cargo/CST pack is playable. This migrated save does not activate new content. Missing stock or cargos are Blocked, not a pass and not a reason to enable incompatible GRFs in an existing save.");
+		local gaps_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "15. Unproven Concepts & Separate Federation UAT");
+		this.AddText(gaps_page, "UAT-14 / Sprint 42: Production recipes have domain tests, but facility registration currently has no gameplay caller. Player-built closed production loops are BLOCKED pending integration. UAT-15 / Sprint 38: Bespoke alien/CST art is pending; inspect existing biomes without claiming original assets are complete.");
+		this.AddText(gaps_page, "UAT-16: External federation needs two servers and an authority, not this solo save. Follow demo/FEDERATION-UAT.md. Manual federation_dispatch proves an operator path only; natural gate-entry departure, visible return orders, mismatched content and restart recovery each need separate evidence. Do not mark these passed from a conserved ledger alone.");
+		this.coverage42_added = true;
+		GSLog.Info("UAT v1.1 coverage ready: ownership onboarding and Sprints 37/41/42 plus explicit blockers.");
+		GSStoryPage.Show(owner_page);
+	}
 	while (true) {
 		local regions = this.CalculateRegions();
 		if (!this.service_built) {

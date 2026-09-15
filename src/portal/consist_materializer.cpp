@@ -30,7 +30,17 @@
 
 #include "../safeguards.h"
 
-ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token)
+ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token,
+	const std::function<bool(const ConsistSnapshotBytes &)> &admit)
+{
+	return DespawnForTransfer(consist, owner_token,
+		[admit](const ConsistSnapshot &, const ConsistSnapshotBytes &bytes) {
+			return !admit || admit(bytes);
+		});
+}
+
+ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token,
+	const std::function<bool(const ConsistSnapshot &, const ConsistSnapshotBytes &)> &admit)
 {
 	ConsistDespawnResult result;
 	if (consist == nullptr) {
@@ -62,6 +72,12 @@ ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, con
 	/* 3. Compute cargo units */
 	for (const auto &unit : result.snapshot.units) {
 		result.total_cargo += unit.cargo_count;
+	}
+
+	/* Admission must succeed before relinquishing the physical consist. */
+	if (admit && !admit(result.snapshot, result.snapshot_bytes)) {
+		result.error_message = "Consist transfer admission rejected";
+		return result;
 	}
 
 	/* 4. Release vehicle transit progress in portal registry */

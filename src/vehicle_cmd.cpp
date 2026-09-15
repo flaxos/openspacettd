@@ -40,6 +40,7 @@
 #include <charconv>
 #include "portal/planet_manager.h"
 #include "portal/fabrication_manager.h"
+#include "portal/commonwealth_pack.h"
 
 #include "widgets/vehicle_widget.h"
 
@@ -128,12 +129,16 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 	const Engine *e = Engine::Get(eid);
 	Money veh_cost = e->GetCost();
 	WorldID veh_world = PlanetManager::GetTileWorld(tile);
+	if (type == VehicleType::Train && !CommonwealthPackManager::IsVehicleBuildableForCompany(_current_company, eid, veh_world)) {
+		return { CommandCost(STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE + to_underlying(type)), VehicleID::Invalid(), 0, 0, {} };
+	}
 	bool use_veh_fab = (type == VehicleType::Train && veh_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
 	if (use_veh_fab) {
 		if (!FabricationManager::CanFabricateVehicle(veh_world, _current_company, e)) {
 			return { CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS), VehicleID::Invalid(), 0, 0, {} };
 		}
-		veh_cost = veh_cost * 20 / 100;
+		uint8_t labor_factor = 100 - FabricationManager::GetBOMDiscountPercent(_current_company);
+		veh_cost = veh_cost * labor_factor / 100;
 	}
 	CommandCost value(ExpensesType::NewVehicles, veh_cost);
 
