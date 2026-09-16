@@ -171,6 +171,8 @@ struct DetailedCommodityAudit {
  * world discovery directory, inter-server routes, transfer state machines,
  * per-cargo commodity ledgers, and trade balance accounting.
  */
+struct TransferCheckpoint;
+
 class UniverseAuthorityService {
 public:
 	static UniverseAuthorityService &Instance();
@@ -223,6 +225,10 @@ public:
 	std::vector<std::string> QueryPendingTransfers(WorldID dest_world, uint64_t current_tick) const;
 
 	std::optional<UniverseTransferRecord> ClaimTransfer(const std::string &transfer_id, WorldID dest_world);
+
+	/** Rehydrate authority custody from durable local journal checkpoints after restart. */
+	size_t ReconcileFromJournal(uint64_t current_tick = 0);
+	bool RestoreTransferFromCheckpoint(const TransferCheckpoint &checkpoint, uint64_t current_tick = 0);
 
 	bool ConfirmTransferArrival(
 		const std::string &transfer_id,

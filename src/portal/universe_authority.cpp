@@ -9,6 +9,7 @@
 #include "universe_authority.h"
 #include "consist_snapshot.h"
 #include "planet_manager.h"
+#include "transfer_journal.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -21,6 +22,41 @@ UniverseAuthorityService &UniverseAuthorityService::Instance()
 	static UniverseAuthorityService instance;
 	return instance;
 }
+
+namespace {
+
+uint64_t ParseTransferSequence(const std::string &transfer_id)
+{
+	constexpr std::string_view prefix = "TRANSFER-X";
+	if (transfer_id.size() <= prefix.size() || transfer_id.compare(0, prefix.size(), prefix) != 0) return 0;
+	uint64_t value = 0;
+	for (size_t i = prefix.size(); i < transfer_id.size(); ++i) {
+		char c = transfer_id[i];
+		if (c < '0' || c > '9') return 0;
+		value = value * 10 + static_cast<uint64_t>(c - '0');
+	}
+	return value;
+}
+
+ContentManifestToken ExtractSnapshotManifestToken(const std::vector<uint8_t> &bytes)
+{
+	ContentManifestToken token{};
+	if (bytes.size() >= 12 + token.size()) {
+		std::copy_n(bytes.begin() + 12, token.size(), token.begin());
+	}
+	return token;
+}
+
+bool HasSameJournalIdentity(const UniverseTransferRecord &record, const TransferCheckpoint &checkpoint)
+{
+	return record.transfer_id == checkpoint.transfer_id &&
+			record.request_id == checkpoint.request_id &&
+			record.source_world.base() == checkpoint.source_world &&
+			record.dest_world.base() == checkpoint.destination_world &&
+			record.snapshot_bytes.bytes == checkpoint.snapshot;
+}
+
+} // namespace
 
 void UniverseAuthorityService::Reset()
 {
@@ -434,6 +470,144 @@ bool UniverseAuthorityService::DepartTransfer(const std::string &transfer_id, ui
 	it->second.departure_tick = current_tick;
 	it->second.arrival_tick = current_tick + duration;
 	it->second.state = TransferState::InTransit;
+	return true;
+}
+
+
+size_t UniverseAuthorityService::ReconcileFromJournal(uint64_t current_tick)
+{
+	size_t restored = 0;
+	for (const auto &[key, checkpoint] : TransferJournal::GetAll()) {
+		if (this->RestoreTransferFromCheckpoint(checkpoint, current_tick)) restored++;
+	}
+	return restored;
+}
+
+bool UniverseAuthorityService::RestoreTransferFromCheckpoint(const TransferCheckpoint &checkpoint, uint64_t current_tick)
+{
+	if (!checkpoint.IsValid() || checkpoint.state == TransferCheckpointState::Prepared || checkpoint.transfer_id.empty()) return false;
+	if (checkpoint.state == TransferCheckpointState::Departed && (checkpoint.source_gate_id == 0 || checkpoint.destination_gate_id == 0)) return false;
+
+	auto existing = this->_transfers.find(checkpoint.transfer_id);
+	if (existing != this->_transfers.end()) {
+		if (!HasSameJournalIdentity(existing->second, checkpoint)) return false;
+		switch (checkpoint.state) {
+			case TransferCheckpointState::Departed:
+				return existing->second.state == TransferState::InTransit ||
+					existing->second.state == TransferState::ArrivalPending ||
+					existing->second.state == TransferState::Completed;
+			case TransferCheckpointState::Materialized:
+				if (existing->second.state == TransferState::InTransit) existing->second.state = TransferState::ArrivalPending;
+				return existing->second.state == TransferState::ArrivalPending || existing->second.state == TransferState::Completed;
+			case TransferCheckpointState::Confirmed:
+				return existing->second.state == TransferState::Completed;
+			case TransferCheckpointState::Prepared:
+			default:
+				return false;
+		}
+	}
+
+	if (!checkpoint.request_id.empty()) {
+		auto req_it = this->_request_index.find({WorldID{checkpoint.source_world}, checkpoint.request_id});
+		if (req_it != this->_request_index.end() && req_it->second != checkpoint.transfer_id) return false;
+	}
+
+	ConsistSnapshotBytes snapshot_bytes;
+	snapshot_bytes.bytes = checkpoint.snapshot;
+	ContentManifestToken token = ExtractSnapshotManifestToken(snapshot_bytes.bytes);
+	auto decoded = ConsistSnapshotCodec::Decode(snapshot_bytes.bytes, token);
+	if (!decoded.Succeeded()) return false;
+
+	UniverseTransferRecord record;
+	record.transfer_id = checkpoint.transfer_id;
+	record.request_id = checkpoint.request_id;
+	record.source_world = WorldID{checkpoint.source_world};
+	record.dest_world = WorldID{checkpoint.destination_world};
+	record.source_gate_id = checkpoint.source_gate_id;
+	record.dest_gate_id = checkpoint.destination_gate_id;
+	record.snapshot_bytes = std::move(snapshot_bytes);
+	record.snapshot = *decoded.snapshot;
+	record.departure_tick = current_tick;
+	record.arrival_tick = current_tick;
+	record.effective_transit_ticks = 0;
+
+	switch (checkpoint.state) {
+		case TransferCheckpointState::Departed:
+			record.state = TransferState::InTransit;
+			record.status_message = "Rehydrated from departed transfer journal checkpoint";
+			break;
+		case TransferCheckpointState::Materialized:
+			record.state = TransferState::ArrivalPending;
+			record.status_message = "Rehydrated from materialized transfer journal checkpoint";
+			break;
+		case TransferCheckpointState::Confirmed:
+			record.state = TransferState::Completed;
+			record.status_message = "Rehydrated from confirmed transfer journal checkpoint";
+			break;
+		case TransferCheckpointState::Prepared:
+		default:
+			return false;
+	}
+
+	for (const auto &unit : record.snapshot.units) {
+		record.total_cargo_units += unit.cargo_count;
+		if (unit.cargo_count == 0) continue;
+		record.cargo_by_type[unit.cargo_type] += unit.cargo_count;
+		this->_detailed_initiated[unit.cargo_type] += unit.cargo_count;
+		this->_trade_balances[record.source_world].world_id = record.source_world;
+		this->_trade_balances[record.source_world].exported_cargo[unit.cargo_type] += unit.cargo_count;
+	}
+
+	const bool completed = record.state == TransferState::Completed;
+	for (const auto &[cargo_type, count] : record.cargo_by_type) {
+		if (completed) {
+			this->_detailed_completed[cargo_type] += count;
+			this->_trade_balances[record.dest_world].world_id = record.dest_world;
+			this->_trade_balances[record.dest_world].imported_cargo[cargo_type] += count;
+			int64_t trade_val = static_cast<int64_t>(count) * 10;
+			this->_trade_balances[record.source_world].net_trade_balance_credits += trade_val;
+			this->_trade_balances[record.dest_world].net_trade_balance_credits -= trade_val;
+		} else {
+			this->_detailed_in_transit[cargo_type] += count;
+		}
+	}
+
+	InterServerRoute *route = nullptr;
+	for (auto &[id, r] : this->_routes) {
+		if (r.source_world == record.source_world && r.source_gate_id == record.source_gate_id &&
+				r.dest_world == record.dest_world && r.dest_gate_id == record.dest_gate_id) {
+			route = &r;
+			break;
+		}
+	}
+	if (route != nullptr) {
+		record.route_id = route->route_id;
+		if (!completed) {
+			route->current_in_transit_count++;
+			this->EvaluateCorridorCongestion(route->route_id);
+		}
+	}
+
+	const auto *src_w = this->GetWorld(record.source_world);
+	const auto *dst_w = this->GetWorld(record.dest_world);
+	if (src_w != nullptr && dst_w != nullptr && record.total_cargo_units > 0) {
+		this->_supply_chain_matrix.total_interplanetary_cargo += record.total_cargo_units;
+		this->_supply_chain_matrix.total_tariffs_generated += (record.total_cargo_units * 10);
+		if (src_w->phase == WorldPhase::Phase3_Frontier && dst_w->phase == WorldPhase::Phase2_Developed) {
+			this->_supply_chain_matrix.frontier_to_refinery_cargo += record.total_cargo_units;
+		} else if (src_w->phase == WorldPhase::Phase2_Developed && dst_w->phase == WorldPhase::Phase1_Core) {
+			this->_supply_chain_matrix.refinery_to_core_cargo += record.total_cargo_units;
+		} else if (src_w->phase == WorldPhase::Phase3_Frontier && dst_w->phase == WorldPhase::Phase1_Core) {
+			this->_supply_chain_matrix.frontier_to_core_cargo += record.total_cargo_units;
+		} else if (src_w->phase == WorldPhase::Phase1_Core) {
+			this->_supply_chain_matrix.core_export_cargo += record.total_cargo_units;
+		}
+	}
+
+	uint64_t seq = ParseTransferSequence(record.transfer_id);
+	if (seq >= this->_next_transfer_seq) this->_next_transfer_seq = seq + 1;
+	if (!record.request_id.empty()) this->_request_index[{record.source_world, record.request_id}] = record.transfer_id;
+	this->_transfers[record.transfer_id] = std::move(record);
 	return true;
 }
 
