@@ -30,13 +30,16 @@ railtypetable {
 /* CST Pioneer 0-6-0 'Surveyor' (Steam - Baseline Unlocked) */
 item(FEAT_TRAINS, cst_pioneer_steam, 0x20) {
 	property {
+		cargo_capacity: 0;
+		default_cargo_type: PASS;
+		dual_headed: 0;
 		name: string(STR_NAME_CST_PIONEER);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
 		model_life: 255;
 		vehicle_life: 25;
 		reliability_decay: 20;
-		refittable_cargo_classes: bitmask(CC_PASSENGERS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [PASS];
 		loading_speed: 5;
 		cost_factor: 15;
@@ -53,13 +56,16 @@ item(FEAT_TRAINS, cst_pioneer_steam, 0x20) {
 /* Vulcan 2-8-0 'Frontier Hauler' (Steam - TECH_TRACTION_1) */
 item(FEAT_TRAINS, cst_vulcan_steam, 0x21) {
 	property {
+		cargo_capacity: 0;
+		default_cargo_type: PASS;
+		dual_headed: 0;
 		name: string(STR_NAME_VULCAN_STEAM);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
 		model_life: 255;
 		vehicle_life: 30;
 		reliability_decay: 18;
-		refittable_cargo_classes: bitmask(CC_PASSENGERS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [PASS];
 		loading_speed: 5;
 		cost_factor: 35;
@@ -76,13 +82,16 @@ item(FEAT_TRAINS, cst_vulcan_steam, 0x21) {
 /* Titan D-100 Twin-Engine Hauler (Diesel - TECH_TRACTION_2) */
 item(FEAT_TRAINS, cst_titan_diesel, 0x22) {
 	property {
+		cargo_capacity: 0;
+		default_cargo_type: PASS;
+		dual_headed: 0;
 		name: string(STR_NAME_TITAN_DIESEL);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
 		model_life: 255;
 		vehicle_life: 35;
 		reliability_decay: 15;
-		refittable_cargo_classes: bitmask(CC_PASSENGERS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [PASS];
 		loading_speed: 5;
 		cost_factor: 65;
@@ -99,13 +108,16 @@ item(FEAT_TRAINS, cst_titan_diesel, 0x22) {
 /* CST E-40 Inter-World Catenary Hauler (Electric - TECH_TRACTION_3) */
 item(FEAT_TRAINS, cst_e40_electric, 0x23) {
 	property {
+		cargo_capacity: 0;
+		default_cargo_type: PASS;
+		dual_headed: 0;
 		name: string(STR_NAME_CST_E40);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
 		model_life: 255;
 		vehicle_life: 40;
 		reliability_decay: 12;
-		refittable_cargo_classes: bitmask(CC_PASSENGERS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [PASS];
 		loading_speed: 6;
 		cost_factor: 110;
@@ -122,13 +134,16 @@ item(FEAT_TRAINS, cst_e40_electric, 0x23) {
 /* CST Mark IV 'Chimaera' Hyper-Maglev (Maglev - TECH_TRACTION_4) */
 item(FEAT_TRAINS, cst_mark4_maglev, 0x24) {
 	property {
+		cargo_capacity: 0;
+		default_cargo_type: PASS;
+		dual_headed: 0;
 		name: string(STR_NAME_CST_MARK4);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
 		model_life: 255;
 		vehicle_life: 50;
 		reliability_decay: 10;
-		refittable_cargo_classes: bitmask(CC_PASSENGERS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [PASS];
 		loading_speed: 8;
 		cost_factor: 250;
@@ -149,6 +164,7 @@ item(FEAT_TRAINS, cst_mark4_maglev, 0x24) {
 /* Commonwealth Passenger Coach */
 item(FEAT_TRAINS, cst_coach, 0x30) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_CST_COACH);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -167,6 +183,7 @@ item(FEAT_TRAINS, cst_coach, 0x30) {
 /* Secure Data Crystal & Valuables Vault Van */
 item(FEAT_TRAINS, cst_vault_car, 0x31) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_VAULT_CAR);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -177,7 +194,7 @@ item(FEAT_TRAINS, cst_vault_car, 0x31) {
 		speed: 300 km/h;
 		weight: 26 ton;
 		default_cargo_type: BCRY;
-		refittable_cargo_classes: bitmask(CC_ARMOURED, CC_MAIL, CC_EXPRESS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [BCRY, QCRY, CCRY];
 		cargo_capacity: 30;
 		track_type: RAIL;
@@ -187,6 +204,7 @@ item(FEAT_TRAINS, cst_vault_car, 0x31) {
 /* Heavy Mineral & Ore Hopper (Pipeline A: SILC, IRON; Pipeline B: COPR, SAND; Pipeline D: RARE) */
 item(FEAT_TRAINS, cst_hopper, 0x32) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_ORE_HOPPER);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -197,7 +215,7 @@ item(FEAT_TRAINS, cst_hopper, 0x32) {
 		speed: 160 km/h;
 		weight: 20 ton;
 		default_cargo_type: IRON;
-		refittable_cargo_classes: bitmask(CC_BULK);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [SILC, IRON, COPR, SAND, RARE];
 		cargo_capacity: 45;
 		track_type: RAIL;
@@ -207,6 +225,7 @@ item(FEAT_TRAINS, cst_hopper, 0x32) {
 /* Structural Steel Flatcar (Pipeline A: STEL; Pipeline B: WIRE) */
 item(FEAT_TRAINS, cst_flatcar, 0x33) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_STEEL_FLATCAR);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -217,7 +236,7 @@ item(FEAT_TRAINS, cst_flatcar, 0x33) {
 		speed: 160 km/h;
 		weight: 18 ton;
 		default_cargo_type: STEL;
-		refittable_cargo_classes: bitmask(CC_PIECE_GOODS);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [STEL, WIRE];
 		cargo_capacity: 40;
 		track_type: RAIL;
@@ -227,6 +246,7 @@ item(FEAT_TRAINS, cst_flatcar, 0x33) {
 /* Cryogenic Intermodal Container Car (Pipeline A: ALLO; Pipeline B: CHIP) */
 item(FEAT_TRAINS, cst_cryo_car, 0x34) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_CRYO_CONTAINER);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -237,7 +257,7 @@ item(FEAT_TRAINS, cst_cryo_car, 0x34) {
 		speed: 250 km/h;
 		weight: 24 ton;
 		default_cargo_type: CHIP;
-		refittable_cargo_classes: bitmask(CC_EXPRESS, CC_PIECE_GOODS, CC_SPECIAL);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [CHIP, ALLO];
 		cargo_capacity: 35;
 		track_type: RAIL;
@@ -247,6 +267,7 @@ item(FEAT_TRAINS, cst_cryo_car, 0x34) {
 /* Pressurized Chemical Tanker (Pipeline C: POLY) */
 item(FEAT_TRAINS, cst_tanker, 0x35) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_POLY_TANKER);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -257,7 +278,7 @@ item(FEAT_TRAINS, cst_tanker, 0x35) {
 		speed: 160 km/h;
 		weight: 22 ton;
 		default_cargo_type: POLY;
-		refittable_cargo_classes: bitmask(CC_LIQUID);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [POLY];
 		cargo_capacity: 35;
 		track_type: RAIL;
@@ -267,6 +288,7 @@ item(FEAT_TRAINS, cst_tanker, 0x35) {
 /* CST High-Speed Maglev Ore & Cargo Pod */
 item(FEAT_TRAINS, cst_maglev_pod, 0x36) {
 	property {
+		power: 0 hp;
 		name: string(STR_NAME_MAGLEV_POD);
 		climates_available: ALL_CLIMATES;
 		introduction_date: date(0, 1, 1);
@@ -277,7 +299,7 @@ item(FEAT_TRAINS, cst_maglev_pod, 0x36) {
 		speed: 650 km/h;
 		weight: 15 ton;
 		default_cargo_type: ALLO;
-		refittable_cargo_classes: bitmask(CC_PASSENGERS, CC_EXPRESS, CC_PIECE_GOODS, CC_BULK, CC_ARMOURED);
+		refittable_cargo_classes: 0;
 		cargo_allow_refit: [SILC, IRON, STEL, COPR, WIRE, SAND, CHIP, RARE, ALLO, POLY, BCRY, QCRY, CCRY];
 		cargo_capacity: 50;
 		track_type: MGLV;

@@ -49,6 +49,7 @@
 #include <filesystem>
 #include <chrono>
 
+#include "../table/strings.h"
 #include "../safeguards.h"
 
 static Station *SetupProductionGameplay();
@@ -438,6 +439,7 @@ static Station *SetupProductionGameplay()
 	StockpileManager::Reset();
 	LogisticsHubManager::Reset();
 	TechTreeManager::Reset();
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
 	_cargo_payment_pool.CleanPool();
 	_vehicle_pool.CleanPool();
 	ResetVehicleHash();
@@ -1367,4 +1369,22 @@ TEST_CASE("Production gameplay - station facility survives actual save and reloa
 	ProductionChainManager::ProcessMonthlyProduction();
 	CHECK(station->goods[steel].AvailableCount() == 21);
 	std::filesystem::remove(path);
+}
+
+TEST_CASE("WP11 furnace research denial is atomic for query and execution", "[wp11][production-gameplay]")
+{
+	Station *station = SetupProductionGameplay();
+	TechTreeManager::Reset();
+	Money cash = Company::Get(station->owner)->money;
+	for (DoCommandFlags flags : {DoCommandFlags{}, DoCommandFlags{DoCommandFlag::Execute}}) {
+		CHECK(Command<Commands::BuildProcessingFacility>::Do(flags, station->index, RECIPE_STEEL_SMELTING).GetErrorMessage() == STR_ERROR_COMMONWEALTH_RESEARCH);
+		CHECK(ProductionChainManager::GetFacilityForStation(station->index) == nullptr);
+		CHECK(Company::Get(station->owner)->money == cash);
+	}
+	TechTreeManager::RestoreCompanyTech(station->owner, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do({}, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	CHECK(ProductionChainManager::GetFacilityForStation(station->index) == nullptr);
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	CHECK(Company::Get(station->owner)->money == cash - 100000);
+	CHECK(ProductionChainManager::GetFacilityForStation(station->index) != nullptr);
 }

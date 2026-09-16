@@ -8,6 +8,7 @@
 /** @file industry_cmd.cpp Handling of industry tiles. */
 
 #include "stdafx.h"
+#include "portal/commonwealth_slice.h"
 #include "misc/history_type.hpp"
 #include "misc/history_func.hpp"
 #include "clear_map.h"
@@ -543,6 +544,10 @@ static bool TransportIndustryGoods(TileIndex tile)
 
 			uint am = MoveGoodsToStation(p.cargo, cw, {i->index, SourceType::Industry}, i->stations_near, i->exclusive_consumer);
 			p.history[THIS_MONTH].transported += am;
+			if (_commonwealth_slice_audit != nullptr) {
+				_commonwealth_slice_audit->produced[p.cargo] += cw;
+				_commonwealth_slice_audit->unallocated[p.cargo] += cw - am;
+			}
 
 			moved_cargo |= (am != 0);
 		}

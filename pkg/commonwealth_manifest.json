@@ -16,22 +16,22 @@
   ],
   "commonwealth_packages": [
     {
-      "bytes": 2333,
+      "bytes": 2398,
       "grfid": "OST\\u0001",
       "grfid_hex": "0154534f",
-      "md5": "66635aa33123ee4736a1b9a964517818",
+      "md5": "f08c47d60ab8ed25d63fb15e6ec3e1f1",
       "name": "openspacettd_industry.grf",
-      "sha256": "c2788e8a4d8edc8299d1382f0d96b9de91001b30216fab954d7305d3c3fd67a3",
+      "sha256": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
       "source": "pkg/commonwealth_industry/commonwealth_industry.nml",
       "version": 2
     },
     {
-      "bytes": 1644,
+      "bytes": 1695,
       "grfid": "OST\\u0002",
       "grfid_hex": "0254534f",
-      "md5": "c97ef42af3f16a370a525023f346a7a8",
+      "md5": "ec75dc10aacc2a7767c0d2f31a789cf7",
       "name": "openspacettd_rail.grf",
-      "sha256": "6cefa708d694cdf500a54ba829c0d381eab62d51a93190d9bc4a3b563a6f1009",
+      "sha256": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87",
       "source": "pkg/commonwealth_rail/commonwealth_rail.nml",
       "version": 2
     }

@@ -8,6 +8,7 @@
 /** @file newgrf.cpp Base of all NewGRF support. */
 
 #include "stdafx.h"
+#include "portal/production_chain.h"
 #include "core/backup_type.hpp"
 #include "core/container_func.hpp"
 #include "company_manager_face.h"
@@ -1879,6 +1880,7 @@ void LoadNewGRF(SpriteID load_index, uint num_baseset)
 
 	/* Call any functions that should be run after GRFs have been loaded. */
 	AfterLoadGRFs();
+	ProductionChainManager::InitDefaultRecipes();
 }
 
 /**

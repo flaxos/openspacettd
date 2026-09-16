@@ -57,6 +57,9 @@
 #include "portal/company_stockpile.h"
 #include "portal/logistics_hub.h"
 #include "portal/fabrication_manager.h"
+#include "portal/commonwealth_pack.h"
+#include "portal/commonwealth_slice.h"
+#include "industrytype.h"
 #include "tunnelbridge_map.h"
 #include "train.h"
 #include "station_base.h"
@@ -3372,6 +3375,35 @@ static bool ConPromoteWorld(std::span<std::string_view> argv)
 	return false;
 }
 
+/** Report the actual loaded Commonwealth definitions. @copydoc IConsoleCmdProc */
+static bool ConCommonwealthStatus(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "commonwealth_status: inspect active pack validity, industries, vehicles and refits.");
+		return true;
+	}
+	auto status = CommonwealthPackManager::GetContentStatus();
+	IConsolePrint(CC_DEFAULT, "Commonwealth status: {} {}", static_cast<uint>(status.mode), status.reason);
+	for (uint8_t role = 0; role < static_cast<uint8_t>(CommonwealthCargoID::Count); ++role) {
+		IConsolePrint(CC_DEFAULT, "Commonwealth cargo {} slot {}", role, ProductionChainManager::GetDefaultCargo(static_cast<CommonwealthCargoID>(role)));
+	}
+	uint industries = 0, vehicles = 0;
+	for (IndustryType type = 0; type < NUM_INDUSTRYTYPES; ++type) {
+		const IndustrySpec *spec = GetIndustrySpec(type);
+		if (spec->grf_prop.grfid != COMMONWEALTH_INDUSTRY_GRFID) continue;
+		++industries;
+		IConsolePrint(CC_DEFAULT, "Commonwealth industry {} local {} enabled {} layouts {}", type, spec->grf_prop.local_id, spec->enabled, spec->layouts.size());
+	}
+	for (const Engine *engine : Engine::Iterate()) {
+		if (engine->type != VehicleType::Train || engine->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID) continue;
+		++vehicles;
+		IConsolePrint(CC_DEFAULT, "Commonwealth vehicle {} local {} wagon {} refits {}", engine->index.base(), engine->grf_prop.local_id,
+			engine->VehInfo<RailVehicleInfo>().railveh_type == RailVehicleType::Wagon, engine->info.refit_mask.base());
+	}
+	IConsolePrint(CC_DEFAULT, "Commonwealth catalog: {} industries {} vehicles", industries, vehicles);
+	return true;
+}
+
 /** Setup all mid-to-late game corporate, stockpile, and logistics fixtures for UAT. @copydoc IConsoleCmdProc */
 static bool ConSetupUATFixtures(std::span<std::string_view> argv)
 {
@@ -3840,6 +3872,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
 	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
 	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
+	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);
+	IConsole::CmdRegister("commonwealth_status",     ConCommonwealthStatus);
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);
 
 	/* networking functions */

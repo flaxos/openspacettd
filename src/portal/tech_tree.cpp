@@ -124,7 +124,7 @@ static void EnsureNodesInitialized()
 		"Continuous-cast high-tensile structural steel alloy formulations for resilient planetary trackbeds.",
 		100,
 		{},
-		"Enables in-kind fabrication of heavy structural steel rails and depot frames."
+		"Enables steel furnaces and in-kind fabrication of heavy structural steel rails and depot frames."
 	});
 	_tech_nodes.push_back({
 		TECH_MATERIALS_2,
@@ -144,7 +144,7 @@ static void EnsureNodesInitialized()
 		"Carbon-nanotube reinforced polymers and niobium-tin superalloys reducing rolling stock mass.",
 		600,
 		{TECH_MATERIALS_2},
-		"Unlocks lightweight composite rolling stock and grants an extra 10% BOM fabrication discount."
+		"Grants a 90% cash discount on in-kind fabrication and increases processing-facility output by 15%."
 	});
 	_tech_nodes.push_back({
 		TECH_MATERIALS_4,

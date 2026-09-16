@@ -1,0 +1,92 @@
+{
+  "scope": "WP-11 structural economic slice; graphical UAT remains pending",
+  "base_commit": "3081af218de087a815ad3c4467c6bf481ac4096c",
+  "source_state": "uncommitted implementation on fix/wp11-content-economic-slice",
+  "ctest": {
+    "passed": 377,
+    "failed": 0
+  },
+  "runs": {
+    "1800": {
+      "fixture_version": 1,
+      "passed": true,
+      "binary_sha256": "3babb27abae55dadbf6cd2e38625dd99205598a8b16459c9442dc713a97d2fbf",
+      "pack_sha256": {
+        "industry": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
+        "rail": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87"
+      },
+      "availability": {
+        "passed": true,
+        "year": 1800
+      },
+      "reload_equal": true,
+      "blocked_route_conserved": true,
+      "post_reload_deliveries": 3,
+      "fabrication": {
+        "batches": 247,
+        "deposited": 120,
+        "steel_stock": 110,
+        "ballast_stock": 0,
+        "money": 94656165,
+        "cost": 120,
+        "cash_quote": 540,
+        "discount_percent": 80,
+        "exact": true,
+        "depot": true
+      },
+      "artifacts": {
+        "completed.sav": "caeb4bbce584da43456e647f5b7f5ac690dad4a2045692e53a720992e064af02",
+        "mid-route.sav": "86470deff53cc466c2a1cd2a158f31032bb922f69906189f2814a49d1cf14f8e",
+        "operational.sav": "8553231089a9517eb74c8b8bda0a2978cb3315a433611d50f797bfe2e70eeafa",
+        "construction-ready.sav": "08b3623e4bc9f4c3796e2343bb23d32b8a8097be97881607b121335bac59cdc1"
+      },
+      "advance_blocks": 65,
+      "initial_cash": 94591108,
+      "cash_reconciled": true,
+      "cargo_reconciled": true
+    },
+    "2300": {
+      "fixture_version": 1,
+      "passed": true,
+      "binary_sha256": "3babb27abae55dadbf6cd2e38625dd99205598a8b16459c9442dc713a97d2fbf",
+      "pack_sha256": {
+        "industry": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
+        "rail": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87"
+      },
+      "availability": {
+        "passed": true,
+        "year": 2300
+      },
+      "reload_equal": true,
+      "blocked_route_conserved": true,
+      "post_reload_deliveries": 3,
+      "fabrication": {
+        "batches": 247,
+        "deposited": 120,
+        "steel_stock": 110,
+        "ballast_stock": 0,
+        "money": 94656165,
+        "cost": 120,
+        "cash_quote": 540,
+        "discount_percent": 80,
+        "exact": true,
+        "depot": true
+      },
+      "artifacts": {
+        "completed.sav": "f4d898298715733714b7fe3c1576350efc0d9060cb6261b7de714c5cc2467e26",
+        "mid-route.sav": "9dbb201b1ab74deca1da7abfa4f733892671a3a0f60372c1578c797f1afd7a3c",
+        "operational.sav": "8764bde5ac85cbbe62bfd1b322f81401ec5452d3ba94bfd7cd33114a0920761e",
+        "construction-ready.sav": "26e24a2741556778447bfbd50b95ad87bcb630f91770c792a5d4171e87ce6b51"
+      },
+      "advance_blocks": 65,
+      "initial_cash": 94591108,
+      "cash_reconciled": true,
+      "cargo_reconciled": true
+    }
+  },
+  "fixtures": {
+    "demo/wp11-v1-construction-ready.sav": "08b3623e4bc9f4c3796e2343bb23d32b8a8097be97881607b121335bac59cdc1",
+    "demo/wp11-v1-operational.sav": "8553231089a9517eb74c8b8bda0a2978cb3315a433611d50f797bfe2e70eeafa",
+    "demo/wp11-v1-completed.sav": "caeb4bbce584da43456e647f5b7f5ac690dad4a2045692e53a720992e064af02"
+  }
+}

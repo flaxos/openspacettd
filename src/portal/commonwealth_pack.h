@@ -33,6 +33,14 @@ static constexpr std::array<uint8_t, 4> COMMONWEALTH_RAIL_GRFID_BYTES     = {'O'
 static const GrfID COMMONWEALTH_INDUSTRY_GRFID{"OST\x01"};
 static const GrfID COMMONWEALTH_RAIL_GRFID    {"OST\x02"};
 
+/** Runtime content state. Configured but incomplete packs must never use vanilla aliases. */
+enum class CommonwealthContentMode : uint8_t { Vanilla, Active, Invalid };
+
+struct CommonwealthContentStatus {
+	CommonwealthContentMode mode = CommonwealthContentMode::Vanilla;
+	std::string reason;
+};
+
 /** Catalog family identifiers. These are not loaded engine pool IDs or NewGRF local IDs. */
 static constexpr uint16_t CST_ENGINE_PIONEER_STEAM = 0;   ///< CST Pioneer 0-6-0 'Surveyor'
 static constexpr uint16_t CST_ENGINE_VULCAN_STEAM  = 7;   ///< Vulcan 2-8-0 'Frontier Hauler'
@@ -72,6 +80,9 @@ struct CargoDeliveryLoop {
 class CommonwealthPackManager {
 public:
 	static void Initialize();
+	static CommonwealthContentStatus GetContentStatus();
+	static CargoLabel GetCargoLabel(CommonwealthCargoID cargo);
+	static StringID GetVehicleAvailabilityError(CompanyID company, EngineID eid, WorldID world);
 
 	/** Query whether a catalog ID corresponds to a registered CST locomotive family. */
 	static bool IsCSTEngine(EngineID eid);

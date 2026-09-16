@@ -9,6 +9,12 @@ Company name: ______  Active NewGRFs: ______  Environment: ______
 Record observations, not assumed passes. Attach screenshots or logs and the
 failing working save where appropriate. Never put account credentials in evidence.
 
+**WP-11 automated update (16 September):** the separate version-1 active-content
+structural fixture passes moving ore→steel→depot, two local portals, blocked-route
+recovery, fresh-process reload and three complete deliveries in 1800 and 2300.
+377 CTests pass. No new human pass is claimed. [Quick check and saves](WP11-UAT.md)
+· [evidence](../docs/audit/2026-09-16/wp11/README.md).
+
 **WP-02 automated update:** exclusive hub unloading is implemented locally;
 57 distinct selected CTests pass, including real cargo/station ticks and save/reload.
 This is not a human UAT pass. [Evidence](../docs/audit/2026-09-15/wp02/README.md).
@@ -87,7 +93,7 @@ a fresh clear pad has not been prepared. [Attempt evidence](../docs/audit/2026-0
 | 10 HQ/stockpiles/hubs | Not run visually on current build | WP-09 controls and cargo/reload checks pass automatically; player delivery and acceptance remain pending |
 | 11 Fabrication | Not run | |
 | 12 Research | Not run | |
-| 13 Full Commonwealth content | Blocked | Migrated save has no active packs; fresh fixture + runtime labels/industry validation need WP-11 |
+| 13 Full Commonwealth content | Human check pending; structural branch automated | Separate WP-11 v1 fixture loads 13 cargoes/14 industries/12 trains; other pipeline behavior is not accepted |
 | 14 Player production pipelines | P0 Blocked / P1 Not run | Need unhubbed Developed P0 fixture; M1 World2 is hubbed. Staged integration tests pass, moving player chain not observed; content depends13 |
 | 15 Bespoke art | Blocked | Sprint 38 assets pending |
 | 16 Independent-server federation | Blocked for natural route/recovery | Source-confirmed external entry rejection; WP-F1/F2 and exact F1 fixture needed. Manual dispatch is separate |

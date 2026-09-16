@@ -13,7 +13,7 @@ Do not ask a player to run the broad suite while its crash smoke still fails.
 | **BC: recorded Blueprint failure** | Copy `/home/flax/.local/share/openttd/crash20260915082450.sav`, SHA256 `503cc9797197b5d2699c52a6cbc4808be6594b4d7a6f1b6a95b6ada113e88b03`, save367/no NewGRFs/GS9. Original build modified a6b79add, not current. | Developer-controlled placement replay, not a fresh-game content fixture. |
 | **S1: single-map route** | M1 working copy plus normal player-built depot/stations/train using setup R below. Name stations `UAT Source` and `UAT Destination` and record coordinates in result sheet. | Moving local portals, real cargo and persistence. The named stations do not preexist merely because this guide names them. |
 | **P0/P1: processing fixtures** | P0 needs a Developed world with **no company hub anywhere on it**. P1 uses M1's verified World2 hub. Existing M1 cannot be assumed P0. WP-Q must deliver/hash an unhubbed Developed fixture if none available. | P0 currently Blocked until supplied; P1 available only after station/HQ preflight. Distinct destination rules. |
-| **C1: fresh active-content** | From title→NewGRF Settings, add exact approved industry/rail versions then Apply Changes; create **New Game**. Record build/save version, IDs/hashes, seed/map/date/settings and loaded cargo/vehicle lists; save a new named fixture. Never change M1. | Currently Blocked: pack runtime/label mapping and fully specified playable fixture need WP-11. NewGRF activation alone is not acceptance. |
+| **C1: fresh active-content** | From title→NewGRF Settings, add exact approved industry/rail versions then Apply Changes; create **New Game**. Record build/save version, IDs/hashes, seed/map/date/settings and loaded cargo/vehicle lists; save a new named fixture. Never change M1. | WP-11 structural fixture available: [saves and steps](WP11-UAT.md). Runtime catalog and moving structural chain verified; human acceptance and other pipelines remain open. |
 | **F1: real federation** | Operator supplies two distinct game saves/configs + authority state, exact binary/content hashes, global/company/gate/station IDs, ports and known train/order route. | Currently Blocked for natural route/recovery; old API kit and manual dispatch are separate evidence. See UAT-16. |
 | **V1: UI/visual** | M1 for current windows/procedural visuals; C1 plus provenance-cleared art for bespoke acceptance. Record graphics set/version, zoom, resolution, UI/font scale and language. | GUI evidence required; bespoke asset acceptance currently Blocked. |
 
@@ -408,8 +408,9 @@ common + monthly ledger and actual purchase/build effect; node completion alone 
 ### UAT-13 — fresh Commonwealth content and availability
 
 **Fixture:** C1 only, company0; required date/phase/research/materials specified in
-its approved manifest. **Status:** Blocked: fresh validated fixture/runtime labels
-and pack semantics need WP-11. M1 cannot pass this case.
+its approved manifest. **Status:** [WP-11 version-1 fixture](WP11-UAT.md) is
+available with automated catalog, refit, research/date and structural-route proof.
+Human acceptance remains pending. M1 cannot pass this case.
 
 1. At title→NewGRF Settings activate exact two pack hashes for new games, then
    New Game. Inspect game NewGRF Settings, Cargo Payment Rates and station/industry
@@ -427,8 +428,10 @@ manifest/screenshots/cargo route; discard only C1 working copy and restore new-g
 
 **Fixture:** P0 unhubbed Developed world for station output, P1 for hub output;
 company0, cash >=100,000 Cr+route costs, no Materials3 for base arithmetic;
-60 units actual Iron Ore delivered by train. **Status:** P0 Blocked until fixture;
-P1 Not run after hub repairs. Distinct content branches depend on C1.
+60 units actual Iron Ore delivered by train for the isolated arithmetic check.
+**Status:** the [WP-11 structural fixture](WP11-UAT.md) provides a separate moving
+ore→steel→Core hub→depot proof, with 45-unit ore loads and 40-unit steel loads.
+Its automated acceptance passed; human acceptance and the older P1 case remain open.
 
 1. Build owned conventional rail station using setup R. Click station→**Build
    production facility (100,000 Cr)**→**Blast Furnace Structural Steel**.

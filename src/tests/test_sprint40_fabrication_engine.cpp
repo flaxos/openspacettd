@@ -15,6 +15,7 @@
 #include "../portal/portal_cmd.h"
 #include "../portal/company_stockpile.h"
 #include "../portal/fabrication_manager.h"
+#include "../portal/tech_tree.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../command_func.h"
@@ -93,6 +94,8 @@ TEST_CASE("Sprint 40 Fabrication - BOM Recipes & Catalog")
 	WorldID w0{0};
 	CompanyID c0{0};
 	StockpileManager::Reset();
+	TechTreeManager::Reset();
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
 	CHECK_FALSE(FabricationManager::CanFabricateVehicle(w0, c0, e_steam));
 	StockpileManager::AddCargo(w0, c0, StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal), 30);
 	StockpileManager::AddCargo(w0, c0, StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast), 10);
@@ -141,6 +144,8 @@ TEST_CASE("Sprint 40 Fabrication - Track Building Interception")
 	ResetRailTypes();
 	PlanetManager::Reset();
 	StockpileManager::Reset();
+	TechTreeManager::Reset();
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
 	FabricationManager::Reset();
 	_company_pool.CleanPool();
 	_town_pool.CleanPool();
@@ -226,6 +231,8 @@ TEST_CASE("Sprint 40 Fabrication - Signal and Depot Interception")
 	ResetRailTypes();
 	PlanetManager::Reset();
 	StockpileManager::Reset();
+	TechTreeManager::Reset();
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
 	FabricationManager::Reset();
 	_company_pool.CleanPool();
 	_town_pool.CleanPool();

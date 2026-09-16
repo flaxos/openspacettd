@@ -6311,3 +6311,7 @@ STR_ERROR_PRODUCTION_WORLD                   :This recipe is not available on th
 STR_ERROR_PRODUCTION_CARGO                   :This recipe requires cargo types that are not available
 STR_ERROR_PRODUCTION_BUILD                   :Cannot build production facility
 STR_ERROR_PRODUCTION_REMOVE                  :Cannot remove production facility
+
+STR_ERROR_COMMONWEALTH_CONTENT               :Commonwealth content is incomplete or incompatible; both exact v2 packs and all 13 cargoes are required
+STR_ERROR_COMMONWEALTH_RESEARCH              :Required Commonwealth research has not been completed
+STR_ERROR_COMMONWEALTH_PHASE                 :This vehicle or facility is not available in this world's phase

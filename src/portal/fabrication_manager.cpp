@@ -10,6 +10,8 @@
 #include "../stdafx.h"
 #include "fabrication_manager.h"
 #include "tech_tree.h"
+#include "commonwealth_pack.h"
+#include "../table/strings.h"
 #include "../engine_base.h"
 #include "../rail_type.h"
 #include "../train.h"
@@ -169,60 +171,72 @@ BillOfMaterials FabricationManager::GetVehicleBOM(const Engine *e)
 	return bom;
 }
 
+CommandCost FabricationManager::CheckMaterials(WorldID world, CompanyID company, const BillOfMaterials &bom)
+{
+	if (CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid ||
+			std::ranges::any_of(bom.materials, [](const auto &item) { return item.first >= NUM_CARGO; })) {
+		return CommandCost(STR_ERROR_COMMONWEALTH_CONTENT);
+	}
+	if (bom.GetRequirement(StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal)) > 0 &&
+			!TechTreeManager::IsTechUnlocked(company, TECH_MATERIALS_1)) return CommandCost(STR_ERROR_COMMONWEALTH_RESEARCH);
+	if (!StockpileManager::HasSufficient(world, company, bom.materials)) return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+	return CommandCost();
+}
+
 bool FabricationManager::CanFabricateTrack(WorldID world, CompanyID company, RailType railtype)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 	BillOfMaterials bom = GetTrackBOM(railtype);
-	return StockpileManager::HasSufficient(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded();
 }
 
 bool FabricationManager::ConsumeTrackBOM(WorldID world, CompanyID company, RailType railtype)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 	BillOfMaterials bom = GetTrackBOM(railtype);
-	return StockpileManager::ConsumeBOM(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded() && StockpileManager::ConsumeBOM(world, company, bom.materials);
 }
 
 bool FabricationManager::CanFabricateSignal(WorldID world, CompanyID company)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 	BillOfMaterials bom = GetSignalBOM();
-	return StockpileManager::HasSufficient(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded();
 }
 
 bool FabricationManager::ConsumeSignalBOM(WorldID world, CompanyID company)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 	BillOfMaterials bom = GetSignalBOM();
-	return StockpileManager::ConsumeBOM(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded() && StockpileManager::ConsumeBOM(world, company, bom.materials);
 }
 
 bool FabricationManager::CanFabricateDepot(WorldID world, CompanyID company, RailType railtype)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 	BillOfMaterials bom = GetDepotBOM(railtype);
-	return StockpileManager::HasSufficient(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded();
 }
 
 bool FabricationManager::ConsumeDepotBOM(WorldID world, CompanyID company, RailType railtype)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 	BillOfMaterials bom = GetDepotBOM(railtype);
-	return StockpileManager::ConsumeBOM(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded() && StockpileManager::ConsumeBOM(world, company, bom.materials);
 }
 
 bool FabricationManager::CanFabricateVehicle(WorldID world, CompanyID company, const Engine *e)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid() || e == nullptr) return false;
 	BillOfMaterials bom = GetVehicleBOM(e);
-	return StockpileManager::HasSufficient(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded();
 }
 
 bool FabricationManager::ConsumeVehicleBOM(WorldID world, CompanyID company, const Engine *e)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid() || e == nullptr) return false;
 	BillOfMaterials bom = GetVehicleBOM(e);
-	return StockpileManager::ConsumeBOM(world, company, bom.materials);
+	return CheckMaterials(world, company, bom).Succeeded() && StockpileManager::ConsumeBOM(world, company, bom.materials);
 }
 
 std::map<CompanyID, bool> FabricationManager::GetAllCompanyModes()

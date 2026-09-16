@@ -50,6 +50,7 @@
 #include "table/strings.h"
 #include "table/company_face.h"
 #include "portal/federation_identity.h"
+#include "portal/commonwealth_slice.h"
 
 #include "safeguards.h"
 
@@ -318,6 +319,7 @@ static void SubtractMoneyFromCompany(Company *c, const CommandCost &cost)
 	if (cost.GetCost() == 0) return;
 	assert(cost.GetExpensesType() != ExpensesType::Invalid);
 
+	if (_commonwealth_slice_audit != nullptr && c->index == CompanyID{0}) _commonwealth_slice_audit->cash_debits += static_cast<int64_t>(cost.GetCost());
 	c->money -= cost.GetCost();
 	c->yearly_expenses[0][cost.GetExpensesType()] += cost.GetCost();
 

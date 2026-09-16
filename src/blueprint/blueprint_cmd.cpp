@@ -67,6 +67,7 @@ CommandCost CheckAggregateMaterials(const RequiredMaterials &required)
 {
 	for (const auto &[world, cargos] : required) {
 		for (const auto &[cargo, amount] : cargos) {
+			if (cargo >= NUM_CARGO) return CommandCost(STR_ERROR_COMMONWEALTH_CONTENT);
 			if (StockpileManager::GetStock(world, _current_company, cargo) < amount) {
 				return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
 			}
@@ -315,7 +316,7 @@ CommandCost CmdPlaceBlueprint(DoCommandFlags flags, TileIndex origin_tile, const
 					quote.AddCost(child.GetCost());
 				} else {
 					if (fabrication && !FabricationManager::CanFabricateSignal(world, _current_company)) {
-						return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+						return FabricationManager::CheckMaterials(world, _current_company, FabricationManager::GetSignalBOM());
 					}
 					quote.AddCost(GetNewRailSignalCost(world, _current_company));
 				}

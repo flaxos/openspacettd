@@ -8,6 +8,7 @@
 /** @file station_cmd.cpp Handling of station tiles. */
 
 #include "stdafx.h"
+#include "portal/commonwealth_slice.h"
 #include "portal/production_chain.h"
 #include "portal/logistics_hub.h"
 #include "core/flatset_type.hpp"
@@ -3972,7 +3973,9 @@ static void TruncateCargo(const CargoSpec *cs, GoodsEntry *ge, uint amount = UIN
 	if (!ge->HasData()) return;
 
 	StationCargoAmountMap waiting_per_source;
+	uint before = ge->TotalCount();
 	ge->GetData().cargo.Truncate(amount, &waiting_per_source);
+	if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->discarded[cs->Index()] += before - ge->TotalCount();
 	for (StationCargoAmountMap::iterator i(waiting_per_source.begin()); i != waiting_per_source.end(); ++i) {
 		Station *source_station = Station::GetIfValid(i->first);
 		if (source_station == nullptr) continue;

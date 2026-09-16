@@ -11,11 +11,16 @@
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../portal/commonwealth_pack.h"
+#include "../portal/logistics_hub.h"
 #include "../portal/planet_manager.h"
 #include "../portal/tech_tree.h"
 #include "../portal/content_manifest.h"
 #include "../portal/fabrication_manager.h"
 #include "../engine_base.h"
+#include "../newgrf_config.h"
+#include "../newgrf.h"
+#include "../cargotype.h"
+#include "../table/strings.h"
 
 #include <fstream>
 #include <filesystem>
@@ -386,4 +391,125 @@ TEST_CASE("Sprint 37: Runtime gating uses pack identity and local engine IDs", "
 	_engine_pool.CleanPool();
 	PlanetManager::Reset();
 	TechTreeManager::Reset();
+}
+
+/** Restore global NewGRF/cargo state even when a REQUIRE aborts a section. */
+struct CommonwealthContentScope {
+	GRFConfigList configs = std::move(_grfconfig);
+	std::array<CargoSpec, NUM_CARGO> cargos;
+	GRFFile industry;
+	CommonwealthContentScope()
+	{
+		for (size_t i = 0; i < NUM_CARGO; ++i) cargos[i] = *CargoSpec::Get(i);
+		industry.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+		for (auto id : {COMMONWEALTH_INDUSTRY_GRFID, COMMONWEALTH_RAIL_GRFID}) {
+			auto config = std::make_unique<GRFConfig>();
+			config->ident.grfid = id;
+			config->version = 2;
+			config->status = GRFStatus::Activated;
+			_grfconfig.push_back(std::move(config));
+		}
+		for (size_t i = 0; i < NUM_CARGO; ++i) CargoSpec::Get(i)->bitnum = INVALID_CARGO_BITNUM;
+		for (uint8_t i = 0; i < 13; ++i) {
+			auto *cargo = CargoSpec::Get(16 + i);
+			cargo->label = CommonwealthPackManager::GetCargoLabel(static_cast<CommonwealthCargoID>(i));
+			cargo->bitnum = i;
+			cargo->grffile = &industry;
+		}
+		BuildCargoLabelMap();
+		ProductionChainManager::InitDefaultRecipes();
+	}
+	~CommonwealthContentScope()
+	{
+		_grfconfig = std::move(configs);
+		for (size_t i = 0; i < NUM_CARGO; ++i) *CargoSpec::Get(i) = cargos[i];
+		BuildCargoLabelMap();
+		ProductionChainManager::InitDefaultRecipes();
+		TechTreeManager::Reset();
+		StockpileManager::Reset();
+	}
+};
+
+TEST_CASE("Commonwealth content binds distinct loaded cargoes and rejects incomplete sets", "[wp11]")
+{
+	CommonwealthContentScope scope;
+	REQUIRE(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Active);
+	for (uint8_t i = 0; i < 13; ++i) CHECK(ProductionChainManager::GetDefaultCargo(static_cast<CommonwealthCargoID>(i)) == CargoType{static_cast<uint8_t>(16 + i)});
+	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy) != StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal));
+	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::BlankCrystals) != StockpileManager::RoleToDefaultCargo(FabricationRole::EnrichedCrystals));
+	SECTION("Missing pack") { _grfconfig.pop_back(); }
+	SECTION("Legacy version") { _grfconfig[0]->version = 1; }
+	SECTION("Compatible replacement") { _grfconfig[0]->flags.Set(GRFConfigFlag::Compatible); }
+	SECTION("Disabled pack") { _grfconfig[0]->status = GRFStatus::Disabled; }
+	SECTION("Missing label") { CargoSpec::Get(16)->bitnum = INVALID_CARGO_BITNUM; }
+	SECTION("Duplicate label") { *CargoSpec::Get(30) = *CargoSpec::Get(16); }
+	SECTION("Foreign label") { CargoSpec::Get(16)->grffile = nullptr; }
+	REQUIRE(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
+	CHECK(ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre) == INVALID_CARGO);
+	CHECK(FabricationManager::CheckMaterials(WorldID{0}, CompanyID{0}, FabricationManager::GetDepotBOM(RAILTYPE_RAIL)).GetErrorMessage() == STR_ERROR_COMMONWEALTH_CONTENT);
+}
+
+TEST_CASE("Commonwealth fabrication requires research and consumes distinct materials once", "[wp11]")
+{
+	CommonwealthContentScope scope;
+	TechTreeManager::Reset();
+	StockpileManager::Reset();
+	const WorldID world{0};
+	const CompanyID company{0};
+	auto bom = FabricationManager::GetDepotBOM(RAILTYPE_RAIL);
+	CargoType steel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	StockpileManager::AddCargo(world, company, steel, 10);
+	StockpileManager::AddCargo(world, company, ballast, 5);
+	CHECK(FabricationManager::CheckMaterials(world, company, bom).GetErrorMessage() == STR_ERROR_COMMONWEALTH_RESEARCH);
+	CHECK_FALSE(FabricationManager::ConsumeDepotBOM(world, company, RAILTYPE_RAIL));
+	CHECK(StockpileManager::GetStock(world, company, steel) == 10);
+	TechTreeManager::RestoreCompanyTech(company, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
+	CHECK_FALSE(FabricationManager::CanFabricateDepot(WorldID{1}, company, RAILTYPE_RAIL));
+	CHECK_FALSE(FabricationManager::CanFabricateDepot(world, CompanyID{1}, RAILTYPE_RAIL));
+	REQUIRE(FabricationManager::ConsumeDepotBOM(world, company, RAILTYPE_RAIL));
+	CHECK(StockpileManager::GetStock(world, company, steel) == 0);
+	CHECK(StockpileManager::GetStock(world, company, ballast) == 0);
+	CHECK_FALSE(FabricationManager::ConsumeDepotBOM(world, company, RAILTYPE_RAIL));
+}
+
+TEST_CASE("WP11 active cargo conversion preserves buffers and applies Materials III yield", "[wp11]")
+{
+	CommonwealthContentScope scope;
+	ProductionChainManager::Reset();
+	PlanetManager::Reset();
+	LogisticsHubManager::Reset();
+	TechTreeManager::Reset();
+	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{0}, .name = "WP11 refining",
+		.phase = WorldPhase::Phase2_Developed, .min_x = 1, .min_y = 1, .max_x = 30, .max_y = 30}));
+	FacilityID id = ProductionChainManager::RegisterFacility(TileIndex{65}, WorldID{0}, RECIPE_STEEL_SMELTING, CompanyID{0}, 100);
+	REQUIRE(id != INVALID_FACILITY);
+	CargoType iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	CargoType steel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
+	ProductionChainManager::DeliverCargo(id, iron, 40);
+	auto *facility = ProductionChainManager::GetFacility(id);
+	SECTION("Base conversion") {
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(facility->input_buffers[iron] == 0);
+		CHECK(facility->output_buffers[steel] == 20);
+		CHECK(FabricationManager::GetBOMDiscountPercent(CompanyID{0}) == 80);
+	}
+	SECTION("Materials III yield and discount") {
+		TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_MATERIALS_2, TECH_MATERIALS_3});
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(facility->input_buffers[iron] == 0);
+		CHECK(facility->output_buffers[steel] == 23);
+		CHECK(FabricationManager::GetBOMDiscountPercent(CompanyID{0}) == 90);
+		CHECK(FabricationManager::GetBOMDiscountPercent(CompanyID{1}) == 80);
+	}
+	SECTION("Invalid active content freezes existing buffers") {
+		_grfconfig.pop_back();
+		ProductionChainManager::InitDefaultRecipes();
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(facility->input_buffers[iron] == 40);
+		CHECK(facility->output_buffers.empty());
+		CHECK(facility->total_produced == 0);
+	}
+	ProductionChainManager::Reset();
+	PlanetManager::Reset();
 }
