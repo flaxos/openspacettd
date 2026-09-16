@@ -370,7 +370,7 @@ TEST_CASE("Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock")
 	CommandCost res_void = CmdColonizeOutpost({}, t_void, "Outpost Fail");
 	CHECK(res_void.Failed());
 	const auto phase_before_site_failure = PlanetManager::GetRegion(WorldID{0})->phase;
-	const uint towns_before_site_failure = Town::GetNumItems();
+	const size_t towns_before_site_failure = Town::GetNumItems();
 	MakeRailNormal(t_world, c->index, TrackBits{Track::X}, RAILTYPE_RAIL);
 	CHECK(CmdColonizeOutpost(DoCommandFlag::Execute, t_world, "Unsuitable Outpost").Failed());
 	CHECK(PlanetManager::GetRegion(WorldID{0})->phase == phase_before_site_failure);

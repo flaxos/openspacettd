@@ -824,7 +824,11 @@ TEST_CASE("CST Prefabs - Deterministic In-Game Map Placement", "[cst_prefab][blu
 	const TileIndex origin = TileXY(40, 40);
 	std::map<CargoType, uint32_t> required;
 	auto add_bom = [&](const BillOfMaterials &bom, size_t count) {
-		for (const auto &[cargo, amount] : bom.materials) required[cargo] += amount * count;
+		for (const auto &[cargo, amount] : bom.materials) {
+			const uint64_t total = static_cast<uint64_t>(amount) * count;
+			REQUIRE(total <= UINT32_MAX - required[cargo]);
+			required[cargo] += static_cast<uint32_t>(total);
+		}
 	};
 	add_bom(FabricationManager::GetTrackBOM(RAILTYPE_BEGIN), bp.GetTrackPieceCount());
 	add_bom(FabricationManager::GetSignalBOM(), bp.GetSignalCount());

@@ -91,7 +91,7 @@ TEST_CASE("CST revision updates preserve imported older layouts with the same na
 	REQUIRE(revision_pos != std::string::npos);
 	old_export.erase(revision_pos, revision_field.size());
 	const auto path = fixture.root / "legacy-cst-v1.json";
-	{ std::ofstream out(path); out << old_export; }
+	{ std::ofstream out(path, std::ios::binary); out << old_export; }
 	std::string error;
 	REQUIRE(BlueprintManager::ImportFromFile(path.string(), &error));
 	legacy.is_builtin = false;
@@ -178,7 +178,7 @@ TEST_CASE("Blueprint symlinks and oversized files are skipped without changing r
 	PrivateBlueprintLibrary fixture;
 	auto real = fixture.root / "external.json";
 	auto bp = StorageBlueprint("External");
-	{ std::ofstream out(real); out << bp.ToJson(); }
+	{ std::ofstream out(real, std::ios::binary); out << bp.ToJson(); }
 	auto link_path = fixture.dir() / "linked.json";
 	std::filesystem::create_symlink(real, link_path);
 	std::string error;
