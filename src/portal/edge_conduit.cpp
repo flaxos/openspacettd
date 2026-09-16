@@ -95,7 +95,11 @@ void EdgeConduitManager::RestoreConduit(const EdgeConduit &conduit)
 {
 	if (conduit.id == INVALID_CONDUIT || !ResolvePlacement(conduit.tile, conduit.dir).has_value()) return;
 	if (conduit.world_id == INVALID_WORLD || PlanetManager::GetTileWorld(conduit.tile) != conduit.world_id) return;
-	conduits[conduit.tile] = conduit;
+	EdgeConduit restored = conduit;
+	if (restored.last_delivery_status >= ConduitDeliveryStatus::End) {
+		restored.last_delivery_status = ConduitDeliveryStatus::NeverRun;
+	}
+	conduits[conduit.tile] = restored;
 	if (conduit.id >= next_conduit_id) {
 		next_conduit_id = conduit.id + 1;
 	}
@@ -167,10 +171,13 @@ uint32_t EdgeConduitManager::CalculateProduction(const EdgeConduit &conduit)
 
 void EdgeConduitManager::ProduceAllConduits()
 {
-	bool produced = false;
+	bool state_changed = false;
 	for (auto &[tile, conduit] : conduits) {
 		uint32_t amount = CalculateProduction(conduit);
 		if (amount == 0) continue;
+		conduit.last_month_potential = amount;
+		conduit.last_month_allocated = 0;
+		state_changed = true;
 
 		if (conduit.direct_feeder_enabled && conduit.target_dest_world != INVALID_WORLD) {
 			/* Direct inter-world feeder pipeline: bypass local station handling and inject directly into federation corridor */
@@ -231,20 +238,44 @@ void EdgeConduitManager::ProduceAllConduits()
 					auth.RecordEdgeConduitThroughput(amount);
 					conduit.total_piped_interplanetary += amount;
 					conduit.total_produced += amount;
-					produced = true;
+					conduit.last_delivery_status = ConduitDeliveryStatus::DirectFeederDispatched;
+				} else {
+					conduit.last_delivery_status = ConduitDeliveryStatus::DirectFeederUnavailable;
 				}
+			} else {
+				conduit.last_delivery_status = ConduitDeliveryStatus::DirectFeederUnavailable;
 			}
 		} else {
 			StationFinder finder(TileArea(conduit.tile, 1, 1));
 			const StationList &stations = finder.GetStations();
+			MoveGoodsToStationResult result = MoveGoodsToStationDetailed(
+				conduit.cargo_type,
+				amount,
+				{static_cast<SourceID>(conduit.id & 0xFFFF), SourceType::Industry},
+				stations);
+			conduit.last_month_allocated = result.moved;
+			conduit.total_allocated += result.moved;
+
+			if (result.candidate_stations == 0) {
+				conduit.last_delivery_status = ConduitDeliveryStatus::NoCatchment;
+			} else if (result.eligible_stations == 0) {
+				conduit.last_delivery_status = ConduitDeliveryStatus::NoEligibleStation;
+			} else if (result.packet_allocation_failed) {
+				conduit.last_delivery_status = ConduitDeliveryStatus::PacketAllocationFailed;
+			} else if (result.moved == 0) {
+				conduit.last_delivery_status = ConduitDeliveryStatus::NoWholeUnitsAllocated;
+			} else {
+				conduit.last_delivery_status = ConduitDeliveryStatus::Allocated;
+			}
+
+			/* Retain the legacy nominal counter for compatibility with existing saves
+			 * and federation tests. Player-facing delivery totals use total_allocated. */
 			if (!stations.empty()) {
-				MoveGoodsToStation(conduit.cargo_type, amount, {static_cast<SourceID>(conduit.id & 0xFFFF), SourceType::Industry}, stations);
 				conduit.total_produced += amount;
-				produced = true;
 			}
 		}
 	}
-	if (produced) InvalidateWindowData(WindowClass::LandInfo, 0, 1);
+	if (state_changed) InvalidateWindowData(WindowClass::LandInfo, 0, 1);
 }
 
 bool EdgeConduitManager::ConfigureDirectFeeder(TileIndex tile, bool enabled, WorldID dest_world, uint32_t route_id)

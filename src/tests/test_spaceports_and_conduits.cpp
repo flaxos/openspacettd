@@ -17,7 +17,9 @@
 #include "../portal/portal_cmd.h"
 #include "../portal/portal_registry.h"
 #include "../station_base.h"
+#include "../station_map.h"
 #include "../town.h"
+#include "../cargopacket.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../command_func.h"
@@ -153,6 +155,57 @@ static void SetupMapEdgeWorld(WorldPhase phase = WorldPhase::Phase3_Frontier)
 	REQUIRE(PlanetManager::RegisterRegion(edge_world));
 	PlanetManager::RebuildSpatialGrid();
 }
+
+static Station *CreateConduitTestStation(TileIndex tile, Town *town = nullptr, uint8_t rating = 255)
+{
+	if (town == nullptr) {
+		REQUIRE(Town::CanAllocateItem());
+		town = Town::Create(TileXY(10, 10));
+		town->name = "Conduit Test Town";
+		town->townnametype = SPECSTR_TOWNNAME_START;
+		RebuildTownKdtree();
+	}
+
+	REQUIRE(Station::CanAllocateItem());
+	Station *station = Station::Create(tile);
+	station->name = "Conduit Test Station";
+	station->owner = _current_company;
+	station->town = town;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(tile, 1, 1);
+	station->spread = station->train_station;
+	MakeRailStation(tile, station->owner, station->index, Axis::X, 0, RAILTYPE_RAIL);
+	station->goods[CargoType{0}].rating = rating;
+	station->goods[CargoType{0}].last_speed = 1;
+	RebuildStationKdtree();
+	station->RecomputeCatchment();
+	return station;
+}
+
+static TileIndex RegisterConduitForDeliveryTest(uint32_t production_rate = 50)
+{
+	const TileIndex tile = TileXY(1, 20);
+	REQUIRE(EdgeConduitManager::RegisterConduit(tile, DiagDirection::NE, WorldID{0}, CargoType{0}, _current_company, production_rate) != INVALID_CONDUIT);
+	return tile;
+}
+
+/** Temporarily leave a bounded number of cargo-packet pool slots available. */
+class ScopedConduitCargoPacketCapacity {
+	size_t bias;
+
+public:
+	explicit ScopedConduitCargoPacketCapacity(size_t free_slots)
+	{
+		REQUIRE(_cargopacket_pool.items + free_slots <= CargoPacketPool::MAX_SIZE);
+		this->bias = CargoPacketPool::MAX_SIZE - free_slots - _cargopacket_pool.items;
+		_cargopacket_pool.items += this->bias;
+	}
+
+	~ScopedConduitCargoPacketCapacity()
+	{
+		_cargopacket_pool.items -= this->bias;
+	}
+};
 
 TEST_CASE("Spaceport Manager - Lifecycle and Trade Calculation")
 {
@@ -380,6 +433,125 @@ TEST_CASE("Edge Conduit - Frontier World Extraction Multiplier")
 	CHECK(prod_frontier == prod_core * 4);
 }
 
+TEST_CASE("Edge Conduit - Reports no station catchment without claiming delivery", "[edge-conduit][wp10]")
+{
+	SetupMapEdgeWorld();
+	const TileIndex conduit_tile = RegisterConduitForDeliveryTest();
+
+	EdgeConduitManager::ProduceAllConduits();
+
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(conduit->last_month_potential == 100);
+	CHECK(conduit->last_month_allocated == 0);
+	CHECK(conduit->total_allocated == 0);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::NoCatchment);
+}
+
+TEST_CASE("Edge Conduit - Reports stations rejected by native service rules", "[edge-conduit][wp10]")
+{
+	SetupMapEdgeWorld();
+	const TileIndex conduit_tile = RegisterConduitForDeliveryTest();
+	Station *station = CreateConduitTestStation(TileXY(3, 20), nullptr, 0);
+
+	EdgeConduitManager::ProduceAllConduits();
+
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(station->goods[CargoType{0}].TotalCount() == 0);
+	CHECK(conduit->last_month_allocated == 0);
+	CHECK(conduit->total_allocated == 0);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::NoEligibleStation);
+}
+
+TEST_CASE("Edge Conduit - Selective service rejects unserved cargo", "[edge-conduit][wp10]")
+{
+	SetupMapEdgeWorld();
+	const TileIndex conduit_tile = RegisterConduitForDeliveryTest();
+	Station *station = CreateConduitTestStation(TileXY(3, 20));
+	station->goods[CargoType{0}].last_speed = 0;
+	AutoRestoreBackup selective_service(_settings_game.order.selectgoods, true);
+
+	EdgeConduitManager::ProduceAllConduits();
+
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(station->goods[CargoType{0}].TotalCount() == 0);
+	CHECK(conduit->last_month_allocated == 0);
+	CHECK(conduit->total_allocated == 0);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::NoEligibleStation);
+}
+
+TEST_CASE("Edge Conduit - Counts only whole units accepted after rating and fractional carry", "[edge-conduit][wp10]")
+{
+	SetupMapEdgeWorld();
+	const TileIndex conduit_tile = RegisterConduitForDeliveryTest();
+	Station *station = CreateConduitTestStation(TileXY(3, 20), nullptr, 1);
+
+	EdgeConduitManager::ProduceAllConduits();
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(station->goods[CargoType{0}].TotalCount() == 0);
+	CHECK(conduit->last_month_allocated == 0);
+	CHECK(conduit->total_allocated == 0);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::NoWholeUnitsAllocated);
+
+	EdgeConduitManager::ProduceAllConduits();
+	conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(station->goods[CargoType{0}].TotalCount() == 1);
+	CHECK(conduit->last_month_allocated == 1);
+	CHECK(conduit->total_allocated == 1);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::Allocated);
+}
+
+TEST_CASE("Edge Conduit - Native competition allocation remains conserved", "[edge-conduit][wp10]")
+{
+	SetupMapEdgeWorld();
+	const TileIndex conduit_tile = RegisterConduitForDeliveryTest();
+	Station *first = CreateConduitTestStation(TileXY(3, 19));
+	Station *second = CreateConduitTestStation(TileXY(3, 21), first->town);
+
+	EdgeConduitManager::ProduceAllConduits();
+
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(first->goods[CargoType{0}].TotalCount() == 50);
+	CHECK(second->goods[CargoType{0}].TotalCount() == 50);
+	CHECK(conduit->last_month_allocated == 100);
+	CHECK(conduit->total_allocated == 100);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::Allocated);
+}
+
+TEST_CASE("Edge Conduit - Full cargo storage reports refusal and recovers", "[edge-conduit][wp10]")
+{
+	SetupMapEdgeWorld();
+	const TileIndex conduit_tile = RegisterConduitForDeliveryTest();
+	Station *station = CreateConduitTestStation(TileXY(3, 20));
+
+	{
+		ScopedConduitCargoPacketCapacity full_pool(0);
+		REQUIRE_FALSE(CargoPacket::CanAllocateItem());
+		EdgeConduitManager::ProduceAllConduits();
+	}
+
+	const EdgeConduit *conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(station->goods[CargoType{0}].TotalCount() == 0);
+	CHECK(conduit->last_month_allocated == 0);
+	CHECK(conduit->total_allocated == 0);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::PacketAllocationFailed);
+
+	REQUIRE(CargoPacket::CanAllocateItem());
+	EdgeConduitManager::ProduceAllConduits();
+	conduit = EdgeConduitManager::GetConduit(conduit_tile);
+	REQUIRE(conduit != nullptr);
+	CHECK(station->goods[CargoType{0}].TotalCount() == 100);
+	CHECK(conduit->last_month_allocated == 100);
+	CHECK(conduit->total_allocated == 100);
+	CHECK(conduit->last_delivery_status == ConduitDeliveryStatus::Allocated);
+}
+
 TEST_CASE("Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)")
 {
 	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_sprint9.sav").string();
@@ -411,6 +583,10 @@ TEST_CASE("Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)")
 		.production_rate = 50,
 		.owner = _current_company,
 		.total_produced = 200,
+		.last_month_potential = 100,
+		.last_month_allocated = 75,
+		.total_allocated = 175,
+		.last_delivery_status = ConduitDeliveryStatus::Allocated,
 	};
 	EdgeConduitManager::RestoreConduit(cond_orig);
 	CHECK(EdgeConduitManager::Count() == 1);
@@ -454,6 +630,10 @@ TEST_CASE("Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)")
 	CHECK(restored_cond->owner == _current_company);
 	CHECK(restored_cond->production_rate == 50);
 	CHECK(restored_cond->total_produced == 200);
+	CHECK(restored_cond->last_month_potential == 100);
+	CHECK(restored_cond->last_month_allocated == 75);
+	CHECK(restored_cond->total_allocated == 175);
+	CHECK(restored_cond->last_delivery_status == ConduitDeliveryStatus::Allocated);
 
 	std::filesystem::remove(test_save_file);
 }
