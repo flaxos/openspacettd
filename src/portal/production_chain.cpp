@@ -377,7 +377,7 @@ void ProductionChainManager::PublishStationOutput(ProcessingFacility &f)
 	for (auto &[cargo, amount] : f.output_buffers) {
 		if (cargo >= NUM_CARGO) continue;
 		while (amount > 0) {
-			uint16_t count = std::min<uint32_t>(amount, CargoPacket::MAX_COUNT);
+			uint16_t count = static_cast<uint16_t>(std::min<uint32_t>(amount, CargoPacket::MAX_COUNT));
 			uint moved = AddProducedCargoToStation(st, cargo, count);
 			if (moved == 0) break;
 			amount -= moved;

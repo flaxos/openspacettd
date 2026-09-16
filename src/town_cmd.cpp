@@ -3971,8 +3971,8 @@ static void UpdateTownGrowthRate(Town *t)
 			if (prof->growth_state == MegacityGrowthState::Starvation) {
 				t->growth_rate = TOWN_GROWTH_RATE_NONE;
 			} else if (prof->growth_multiplier > 1.0f && t->growth_rate != TOWN_GROWTH_RATE_NONE && t->growth_rate > 1) {
-				uint32_t accelerated = static_cast<uint32_t>(t->growth_rate / prof->growth_multiplier);
-				t->growth_rate = std::max(1u, accelerated);
+				uint16_t accelerated = static_cast<uint16_t>(t->growth_rate / prof->growth_multiplier);
+				t->growth_rate = std::max<uint16_t>(1, accelerated);
 			}
 		}
 	}
