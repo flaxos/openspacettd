@@ -29,6 +29,14 @@
 #include "../vehicle_base.h"
 #include "mock_environment.h"
 
+#include "../saveload/saveload_func.h"
+#include "../saveload/saveload.h"
+#include "../gfx_func.h"
+#include "../table/sprites.h"
+#include "../fileio_func.h"
+
+#include <filesystem>
+
 #include "../safeguards.h"
 
 static void InitTestEngines()
@@ -98,6 +106,33 @@ static uint32_t CountTrainCargo()
 	uint32_t cargo = 0;
 	for (const Train *train : Train::Iterate()) cargo += train->cargo.StoredCount();
 	return cargo;
+}
+
+static void InitSaveLoadHarness()
+{
+	Map::Allocate(64, 64);
+	(void)MockEnvironment::Instance();
+	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
+	if (_valid_searchpaths.empty()) {
+		_valid_searchpaths.push_back(Searchpath::WorkingDir);
+	}
+}
+
+static TransferCheckpoint MakeJournalCheckpoint(std::string request_id, TransferCheckpointState state)
+{
+	TransferCheckpoint cp;
+	cp.request_id = std::move(request_id);
+	cp.transfer_id = state == TransferCheckpointState::Prepared ? "" : "TX-" + cp.request_id;
+	cp.arrival_receipt = (state == TransferCheckpointState::Materialized || state == TransferCheckpointState::Confirmed)
+		? "RCPT-" + cp.request_id : "";
+	cp.namespace_high = 0x1111222233334444ULL;
+	cp.namespace_low = 0x5555666677778888ULL;
+	cp.consist_sequence = 777;
+	cp.source_world = 1;
+	cp.destination_world = 2;
+	cp.state = state;
+	cp.snapshot = {1, 2, 3, 4, static_cast<uint8_t>(to_underlying(state))};
+	return cp;
 }
 
 TEST_CASE("Federation Transfer - Checkpoint transitions reject conflicting receipts")
@@ -768,7 +803,6 @@ TEST_CASE("Federation Transfer - Journaled arrival confirmation retry does not d
 	CHECK(confirmed->state == TransferCheckpointState::Confirmed);
 	CHECK(CountTrainVehicles() == 2);
 	CHECK(CountTrainCargo() == 40);
-
 	SetTunnelBridgeReservation(gate, false);
 	delete mat.consist;
 	_vehicle_pool.CleanPool();
@@ -963,4 +997,137 @@ TEST_CASE("Federation Transfer - Journal Deduplication and Authority URL Config"
 	FederationTransferManager::Reset();
 	CHECK_FALSE(FederationTransferManager::HasExternalAuthority());
 	CHECK_FALSE(TransferJournal::HasArrival("TX-1001"));
+}
+
+TEST_CASE("Federation Transfer - Journal checkpoints survive save reload")
+{
+	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_fjrn_roundtrip.sav").string();
+	std::filesystem::remove(test_save_file);
+	InitSaveLoadHarness();
+	_company_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+	REQUIRE(Company::CanAllocateItem());
+	REQUIRE(Company::Create() != nullptr);
+	FederationTransferManager::Reset();
+
+	TransferCheckpoint prepared = MakeJournalCheckpoint("PREPARED", TransferCheckpointState::Prepared);
+	REQUIRE(TransferJournal::Prepare(prepared));
+
+	TransferCheckpoint departed = MakeJournalCheckpoint("DEPARTED", TransferCheckpointState::Prepared);
+	REQUIRE(TransferJournal::Prepare(departed));
+	REQUIRE(TransferJournal::BindTransfer(departed.source_world, departed.request_id, "TX-DEPARTED"));
+	REQUIRE(TransferJournal::MarkDeparted(departed.source_world, departed.request_id));
+
+	TransferCheckpoint materialized = MakeJournalCheckpoint("MATERIALIZED", TransferCheckpointState::Materialized);
+	REQUIRE(TransferJournal::RecordArrival(materialized));
+
+	TransferCheckpoint confirmed = MakeJournalCheckpoint("CONFIRMED", TransferCheckpointState::Materialized);
+	REQUIRE(TransferJournal::RecordArrival(confirmed));
+	REQUIRE(TransferJournal::ConfirmArrival(confirmed.source_world, confirmed.request_id, confirmed.arrival_receipt));
+
+	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(std::filesystem::exists(test_save_file));
+
+	TransferJournal::Reset();
+	CHECK(TransferJournal::GetAll().empty());
+
+	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+
+	const TransferCheckpoint *loaded_prepared = TransferJournal::Find(1, "PREPARED");
+	REQUIRE(loaded_prepared != nullptr);
+	CHECK(loaded_prepared->state == TransferCheckpointState::Prepared);
+	CHECK(loaded_prepared->snapshot == prepared.snapshot);
+
+	const TransferCheckpoint *loaded_departed = TransferJournal::Find(1, "DEPARTED");
+	REQUIRE(loaded_departed != nullptr);
+	CHECK(loaded_departed->state == TransferCheckpointState::Departed);
+	CHECK(loaded_departed->transfer_id == "TX-DEPARTED");
+
+	const TransferCheckpoint *loaded_materialized = TransferJournal::FindByTransferId(materialized.transfer_id);
+	REQUIRE(loaded_materialized != nullptr);
+	CHECK(loaded_materialized->state == TransferCheckpointState::Materialized);
+	CHECK(loaded_materialized->arrival_receipt == materialized.arrival_receipt);
+
+	const TransferCheckpoint *loaded_confirmed = TransferJournal::FindByTransferId(confirmed.transfer_id);
+	REQUIRE(loaded_confirmed != nullptr);
+	CHECK(loaded_confirmed->state == TransferCheckpointState::Confirmed);
+	CHECK(TransferJournal::HasArrival(confirmed.transfer_id));
+	CHECK(TransferJournal::ConfirmArrival(confirmed.source_world, confirmed.request_id, confirmed.arrival_receipt));
+
+	std::filesystem::remove(test_save_file);
+	FederationTransferManager::Reset();
+}
+
+TEST_CASE("Federation Transfer - Journal rejects malformed checkpoints without crashing")
+{
+	TransferJournal::Reset();
+	TransferCheckpoint malformed = MakeJournalCheckpoint("BAD", TransferCheckpointState::Prepared);
+	malformed.snapshot.clear();
+	CHECK_FALSE(TransferJournal::Restore(malformed));
+
+	malformed = MakeJournalCheckpoint("BADSTATE", TransferCheckpointState::Prepared);
+	malformed.state = static_cast<TransferCheckpointState>(255);
+	CHECK_FALSE(TransferJournal::Restore(malformed));
+
+	malformed = MakeJournalCheckpoint("", TransferCheckpointState::Prepared);
+	CHECK_FALSE(TransferJournal::Restore(malformed));
+	CHECK(TransferJournal::GetAll().empty());
+}
+
+TEST_CASE("Federation Transfer - Journaled materialization confirms after save reload without duplicate consist")
+{
+	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_fjrn_retry.sav").string();
+	std::filesystem::remove(test_save_file);
+	InitSaveLoadHarness();
+	FederationTransferManager::Reset();
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+	_company_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+	InitTestEngines();
+	REQUIRE(Company::CanAllocateItem());
+	REQUIRE(Company::Create() != nullptr);
+
+	ConsistSnapshot snapshot = CreateSampleSnapshot(40);
+	const auto encoded = ConsistSnapshotCodec::Encode(snapshot);
+	REQUIRE(encoded.Succeeded());
+	const std::string tx = authority.InitiateTransfer(WorldID{1}, WorldID{2}, 10, 20, encoded, 10);
+	REQUIRE_FALSE(tx.empty());
+	REQUIRE(authority.DepartTransfer(tx, 0));
+	REQUIRE(authority.ClaimTransfer(tx, WorldID{2}).has_value());
+	CHECK(CountTrainVehicles() == 0);
+
+	TransferCheckpoint cp;
+	cp.request_id = fmt::format("ARR-W{}-{}", 2, tx);
+	cp.transfer_id = tx;
+	cp.arrival_receipt = fmt::format("RCPT-W{}-{}", 2, tx);
+	cp.namespace_high = snapshot.consist_id.name_space.high;
+	cp.namespace_low = snapshot.consist_id.name_space.low;
+	cp.consist_sequence = snapshot.consist_id.sequence;
+	cp.source_world = 1;
+	cp.destination_world = 2;
+	cp.state = TransferCheckpointState::Materialized;
+	cp.snapshot = encoded.bytes;
+	REQUIRE(TransferJournal::RecordArrival(cp));
+
+	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	TransferJournal::Reset();
+	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(TransferJournal::FindByTransferId(tx) != nullptr);
+
+	CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 10) == 0);
+	CHECK(authority.GetTransfer(tx)->state == TransferState::Completed);
+	const TransferCheckpoint *confirmed = TransferJournal::FindByTransferId(tx);
+	REQUIRE(confirmed != nullptr);
+	CHECK(confirmed->state == TransferCheckpointState::Confirmed);
+	CHECK(CountTrainVehicles() == 0);
+	CHECK(CountTrainCargo() == 0);
+	std::filesystem::remove(test_save_file);
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	FederationTransferManager::Reset();
 }
