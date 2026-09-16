@@ -14,6 +14,7 @@
 #include "../portal/portal_registry.h"
 #include "../portal/spaceport_manager.h"
 #include "../portal/edge_conduit.h"
+#include "../portal/authority_transport.h"
 #include "../portal/federation_identity.h"
 #include "../portal/transfer_journal.h"
 #include "../portal/megacity_manager.h"
@@ -915,29 +916,57 @@ struct FABRChunkHandler : ChunkHandler {
 	}
 };
 
-static const SaveLoad _transfer_checkpoint_desc[] = {
-	SLE_SSTR(TransferCheckpoint, request_id, VarTypes::STR),
-	SLE_SSTR(TransferCheckpoint, transfer_id, VarTypes::STR),
-	SLE_SSTR(TransferCheckpoint, arrival_receipt, VarTypes::STR),
-	SLE_VAR(TransferCheckpoint, namespace_high, VarTypes::U64),
-	SLE_VAR(TransferCheckpoint, namespace_low, VarTypes::U64),
-	SLE_VAR(TransferCheckpoint, consist_sequence, VarTypes::U64),
-	SLE_VAR(TransferCheckpoint, source_world, VarTypes::U32),
-	SLE_VAR(TransferCheckpoint, destination_world, VarTypes::U32),
-	SLE_VAR(TransferCheckpoint, state, VarTypes::U8),
-	SLE_CONDVECTOR(TransferCheckpoint, snapshot, VarTypes::U8, SaveLoadVersion::MinVersion, SaveLoadVersion::MaxVersion),
+/** Save/load row for federation transfer journal checkpoints. Snapshot bytes are
+ * stored as base64 text to keep the named table shape simple and portable.
+ */
+struct SlTransferCheckpoint {
+	std::string request_id;
+	std::string transfer_id;
+	std::string arrival_receipt;
+	uint64_t namespace_high = 0;
+	uint64_t namespace_low = 0;
+	uint64_t consist_sequence = 0;
+	uint32_t source_world = 0;
+	uint32_t destination_world = 0;
+	uint8_t state = 0;
+	std::string snapshot_base64;
 };
 
-struct FTJRChunkHandler : ChunkHandler {
-	FTJRChunkHandler() : ChunkHandler("FTJR", ChunkType::Table) {}
+static const SaveLoad _transfer_checkpoint_desc[] = {
+	SLE_SSTR(SlTransferCheckpoint, request_id,      VarTypes::STR),
+	SLE_SSTR(SlTransferCheckpoint, transfer_id,     VarTypes::STR),
+	SLE_SSTR(SlTransferCheckpoint, arrival_receipt, VarTypes::STR),
+	SLE_VAR(SlTransferCheckpoint, namespace_high,   VarTypes::U64),
+	SLE_VAR(SlTransferCheckpoint, namespace_low,    VarTypes::U64),
+	SLE_VAR(SlTransferCheckpoint, consist_sequence, VarTypes::U64),
+	SLE_VAR(SlTransferCheckpoint, source_world,     VarTypes::U32),
+	SLE_VAR(SlTransferCheckpoint, destination_world, VarTypes::U32),
+	SLE_VAR(SlTransferCheckpoint, state,            VarTypes::U8),
+	SLE_SSTR(SlTransferCheckpoint, snapshot_base64, VarTypes::STR),
+};
+
+/** Chunk handler for durable federation transfer journal checkpoints (FJRN). */
+struct FJRNChunkHandler : ChunkHandler {
+	FJRNChunkHandler() : ChunkHandler("FJRN", ChunkType::Table) {}
 	void Save() const override
 	{
 		SlTableHeader(_transfer_checkpoint_desc);
 		int index = 0;
 		for (const auto &[key, record] : TransferJournal::GetAll()) {
 			SlSetArrayIndex(index++);
-			auto copy = record;
-			SlObject(&copy, _transfer_checkpoint_desc);
+			SlTransferCheckpoint row{
+				.request_id = record.request_id,
+				.transfer_id = record.transfer_id,
+				.arrival_receipt = record.arrival_receipt,
+				.namespace_high = record.namespace_high,
+				.namespace_low = record.namespace_low,
+				.consist_sequence = record.consist_sequence,
+				.source_world = record.source_world,
+				.destination_world = record.destination_world,
+				.state = to_underlying(record.state),
+				.snapshot_base64 = Base64Encode(record.snapshot),
+			};
+			SlObject(&row, _transfer_checkpoint_desc);
 		}
 	}
 	void Load() const override
@@ -945,9 +974,20 @@ struct FTJRChunkHandler : ChunkHandler {
 		TransferJournal::Reset();
 		const auto table = SlTableHeader(_transfer_checkpoint_desc);
 		while (SlIterateArray() != -1) {
+			SlTransferCheckpoint row{};
+			SlObject(&row, table);
 			TransferCheckpoint record;
-			SlObject(&record, table);
-			if (!TransferJournal::Restore(record)) SlErrorCorrupt("Invalid or conflicting federation checkpoint");
+			record.request_id = row.request_id;
+			record.transfer_id = row.transfer_id;
+			record.arrival_receipt = row.arrival_receipt;
+			record.namespace_high = row.namespace_high;
+			record.namespace_low = row.namespace_low;
+			record.consist_sequence = row.consist_sequence;
+			record.source_world = row.source_world;
+			record.destination_world = row.destination_world;
+			record.state = static_cast<TransferCheckpointState>(row.state);
+			record.snapshot = Base64Decode(row.snapshot_base64);
+			TransferJournal::Restore(record);
 		}
 	}
 };
@@ -1253,7 +1293,7 @@ struct PRODChunkHandler : ChunkHandler {
 	}
 };
 
-static const FTJRChunkHandler FTJR;
+static const FJRNChunkHandler FJRN;
 static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
@@ -1282,7 +1322,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	LHUB,
 	CHQS,
 	FABR,
-	FTJR,
+	FJRN,
 	TECH,
 	PROD,
 };
