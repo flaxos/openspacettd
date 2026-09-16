@@ -34,11 +34,16 @@ static const GrfID COMMONWEALTH_INDUSTRY_GRFID{"OST\x01"};
 static const GrfID COMMONWEALTH_RAIL_GRFID    {"OST\x02"};
 
 /** Runtime content state. Configured but incomplete packs must never use vanilla aliases. */
-enum class CommonwealthContentMode : uint8_t { Vanilla, Active, Invalid };
+enum class CommonwealthContentMode : uint8_t {
+	Vanilla, ///< No Commonwealth pack is configured; use native fallback cargo aliases.
+	Active,  ///< Both Commonwealth packs are configured, valid, and complete.
+	Invalid, ///< Commonwealth content is configured but cannot be used safely.
+};
 
+/** Result of validating the configured Commonwealth content set. */
 struct CommonwealthContentStatus {
-	CommonwealthContentMode mode = CommonwealthContentMode::Vanilla;
-	std::string reason;
+	CommonwealthContentMode mode = CommonwealthContentMode::Vanilla; ///< Effective runtime content mode.
+	std::string reason; ///< Human-readable error when mode is Invalid.
 };
 
 /** Catalog family identifiers. These are not loaded engine pool IDs or NewGRF local IDs. */
@@ -80,8 +85,24 @@ struct CargoDeliveryLoop {
 class CommonwealthPackManager {
 public:
 	static void Initialize();
+	/**
+	 * Validate the currently configured Commonwealth industry and rail packs.
+	 * @return Runtime content status, including an error reason for invalid configured packs.
+	 */
 	static CommonwealthContentStatus GetContentStatus();
+	/**
+	 * Resolve a Commonwealth cargo role to its loaded game cargo label.
+	 * @param cargo Canonical Commonwealth cargo role.
+	 * @return Active-pack label, vanilla fallback label, or INVALID_CARGO_LABEL when unavailable.
+	 */
 	static CargoLabel GetCargoLabel(CommonwealthCargoID cargo);
+	/**
+	 * Return the player-facing error for buying a loaded CST vehicle in this context.
+	 * @param company Company attempting the purchase.
+	 * @param eid Loaded engine pool ID.
+	 * @param world World where the vehicle would operate.
+	 * @return STR_NULL when the vehicle is available, otherwise the blocking error string.
+	 */
 	static StringID GetVehicleAvailabilityError(CompanyID company, EngineID eid, WorldID world);
 
 	/** Query whether a catalog ID corresponds to a registered CST locomotive family. */

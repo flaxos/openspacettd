@@ -59,7 +59,13 @@ public:
 	/** Reset all company fabrication modes (e.g. on new game or load). */
 	static void Reset();
 
-	/** Shared content, research and inventory preflight for native and Blueprint builds. */
+	/**
+	 * Shared content, research and inventory preflight for native and Blueprint builds.
+	 * @param world World whose stockpile would supply the materials.
+	 * @param company Company attempting the build.
+	 * @param bom Physical materials required by the build.
+	 * @return Success when content, research and stockpile requirements are satisfied; otherwise an explanatory command error.
+	 */
 	static CommandCost CheckMaterials(WorldID world, CompanyID company, const BillOfMaterials &bom);
 
 	/** Check whether a company has "Fabricate from Stockpile" mode enabled. */
