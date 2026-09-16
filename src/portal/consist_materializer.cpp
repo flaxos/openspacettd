@@ -188,11 +188,18 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		return result;
 	}
 
+	size_t required_cargo_packets = 0;
 	for (const auto &u_snap : snapshot.units) {
 		if (!Engine::IsValidID(EngineID{u_snap.engine_type})) {
 			result.error_message = "Invalid engine type";
 			return result;
 		}
+		if (u_snap.cargo_count > 0) required_cargo_packets++;
+	}
+
+	if (!CargoPacket::CanAllocateItem(required_cargo_packets)) {
+		result.error_message = "Cargo packet pool exhausted";
+		return result;
 	}
 
 	/* 4. Resolve local company */
@@ -233,10 +240,27 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 	Train *front = nullptr;
 	Train *prev = nullptr;
 	uint32_t total_cargo = 0;
+	auto rollback = [&]() {
+		if (front != nullptr) {
+			delete front;
+			front = nullptr;
+			prev = nullptr;
+		}
+		if (IsTunnelTile(exit_tile)) {
+			SetTunnelBridgeReservation(exit_tile, false);
+		} else if (IsPlainRailTile(exit_tile) && HasTrack(exit_tile, track) && GetRailReservationTrackBits(exit_tile).Test(track)) {
+			UnreserveTrack(exit_tile, track);
+		}
+	};
 
 	for (size_t i = 0; i < snapshot.units.size(); ++i) {
 		const auto &u_snap = snapshot.units[i];
 		Train *t = Vehicle::Create<Train>();
+		if (t == nullptr) {
+			rollback();
+			result.error_message = "Vehicle allocation failed";
+			return result;
+		}
 		t->subtype = u_snap.subtype;
 		if (i == 0) {
 			front = t;
@@ -281,7 +305,12 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		t->breakdown_chance = u_snap.breakdown_chance;
 		t->random_bits = u_snap.random_bits;
 
-		if (u_snap.cargo_count > 0 && CargoPacket::CanAllocateItem()) {
+		if (prev != nullptr) {
+			prev->SetNext(t);
+		}
+		prev = t;
+
+		if (u_snap.cargo_count > 0) {
 			StationID st_id = StationID::Invalid();
 			if (u_snap.cargo_source.IsValid() && u_snap.cargo_source.origin_station.IsValid()) {
 				st_id = StationID(static_cast<uint16_t>(u_snap.cargo_source.origin_station.sequence));
@@ -290,14 +319,14 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 				? TileXY(u_snap.cargo_source.origin_tile_x, u_snap.cargo_source.origin_tile_y)
 				: INVALID_TILE;
 			CargoPacket *cp = CargoPacket::Create(u_snap.cargo_count, 0, st_id, source_xy, 0);
+			if (cp == nullptr) {
+				rollback();
+				result.error_message = "Cargo packet allocation failed";
+				return result;
+			}
 			t->cargo.Append(cp);
 			total_cargo += u_snap.cargo_count;
 		}
-
-		if (prev != nullptr) {
-			prev->SetNext(t);
-		}
-		prev = t;
 	}
 
 	if (front == nullptr) {
