@@ -14,6 +14,7 @@
 #include "../command_func.h"
 #include "../landscape_cmd.h"
 #include "../portal/planet_manager.h"
+#include "../portal/edge_conduit.h"
 #include "../portal/portal_registry.h"
 #include "../portal/portal_terminal.h"
 #include "../portal/portal_cmd.h"
@@ -31,6 +32,7 @@
 #include "../train.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
+#include "../void_map.h"
 #include "../table/strings.h"
 #include "../gfx_func.h"
 #include "../table/sprites.h"
@@ -361,6 +363,107 @@ TEST_CASE("Portal Construction - Cross-World Gate Linking")
 	/* Gate C remains unlinked */
 	CHECK(PortalRegistry::IsUnlinkedGate(tile_c));
 	CHECK(GetOtherTunnelEnd(tile_c) == INVALID_TILE);
+}
+
+TEST_CASE("Portal Construction - WP-F1 gate classification separates local, external, stale and conduit heads")
+{
+	SetupTestWorlds();
+
+	const TileIndex local_a = TileXY(50, 50);
+	const TileIndex local_b = TileXY(180, 50);
+	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, local_a, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+
+	PortalGateClassification unlinked = PortalRegistry::ClassifyGate(local_a);
+	CHECK(unlinked.kind == PortalGateKind::LocalUnlinked);
+	CHECK(unlinked.local_endpoint.tile == local_a);
+	CHECK(unlinked.IsClosedHead());
+	CHECK_FALSE(PortalRegistry::CanEnterGate(local_a, DiagDirection::NE));
+
+	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, local_b, DiagDirection::SW, RAILTYPE_BEGIN).Succeeded());
+	REQUIRE(CmdLinkPortalGates(DoCommandFlag::Execute, local_a, local_b).Succeeded());
+	UpdateSignalsInBuffer();
+
+	PortalGateClassification linked = PortalRegistry::ClassifyGate(local_a);
+	CHECK(linked.kind == PortalGateKind::LocalLinked);
+	CHECK(linked.local_endpoint.tile == local_a);
+	CHECK(linked.opposite_endpoint.tile == local_b);
+	CHECK_FALSE(linked.IsClosedHead());
+	CHECK(PortalRegistry::CanEnterGate(local_a, DiagDirection::NE));
+	CHECK_FALSE(PortalRegistry::CanEnterGate(local_a, DiagDirection::SW));
+
+	DoClearSquare(local_b);
+	PortalGateClassification stale_local = PortalRegistry::ClassifyGate(local_a);
+	CHECK(stale_local.kind == PortalGateKind::LocalStale);
+	CHECK(stale_local.IsClosedHead());
+	CHECK_FALSE(PortalRegistry::CanEnterGate(local_a, DiagDirection::NE));
+	UpdateSignalsInBuffer();
+
+	SetupTestWorlds();
+
+	const TileIndex external = TileXY(60, 60);
+	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, external, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+	REQUIRE(PortalRegistry::RegisterInterServerPortal(external, DiagDirection::NE, WorldID{0}, WorldID{9}, 7001, 20) != INVALID_PORTAL);
+	PortalGateClassification external_linked = PortalRegistry::ClassifyGate(external);
+	CHECK(external_linked.kind == PortalGateKind::ExternalLinked);
+	CHECK(external_linked.remote_world == WorldID{9});
+	CHECK(external_linked.remote_gate_id == 7001);
+	CHECK_FALSE(external_linked.IsClosedHead());
+	CHECK(PortalRegistry::CanEnterGate(external, DiagDirection::NE));
+	CHECK_FALSE(PortalRegistry::CanEnterGate(external, DiagDirection::SW));
+
+	const auto linked_path = (std::filesystem::temp_directory_path() / "openspacettd-wpf1-external-linked.sav").string();
+	REQUIRE(SaveOrLoad(linked_path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(linked_path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	std::filesystem::remove(linked_path);
+	external_linked = PortalRegistry::ClassifyGate(external);
+	CHECK(external_linked.kind == PortalGateKind::ExternalLinked);
+	CHECK(external_linked.remote_gate_id == 7001);
+	CHECK(PortalRegistry::CanEnterGate(external, DiagDirection::NE));
+
+	REQUIRE(CmdDestroyPortalGate(DoCommandFlag::Execute, external, false).Succeeded());
+	UpdateSignalsInBuffer();
+	CHECK_FALSE(PortalRegistry::IsInterServerPortal(external));
+	CHECK(PortalRegistry::ClassifyGate(external).kind == PortalGateKind::None);
+	CHECK_FALSE(IsTunnelTile(external));
+
+	SetupTestWorlds();
+	const TileIndex external_unlinked = TileXY(70, 70);
+	REQUIRE(CmdBuildPortalGate(DoCommandFlag::Execute, external_unlinked, DiagDirection::NE, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+	REQUIRE(PortalRegistry::RegisterInterServerPortal(external_unlinked, DiagDirection::NE, WorldID{0}, WorldID{9}, 0, 20) != INVALID_PORTAL);
+	PortalGateClassification external_missing_remote = PortalRegistry::ClassifyGate(external_unlinked);
+	CHECK(external_missing_remote.kind == PortalGateKind::ExternalUnlinked);
+	CHECK(external_missing_remote.IsClosedHead());
+	CHECK_FALSE(PortalRegistry::CanEnterGate(external_unlinked, DiagDirection::NE));
+
+	DoClearSquare(external_unlinked);
+	PortalGateClassification external_stale = PortalRegistry::ClassifyGate(external_unlinked);
+	CHECK(external_stale.kind == PortalGateKind::ExternalStale);
+	CHECK(external_stale.IsClosedHead());
+	const auto stale_path = (std::filesystem::temp_directory_path() / "openspacettd-wpf1-external-stale.sav").string();
+	REQUIRE(SaveOrLoad(stale_path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	REQUIRE(SaveOrLoad(stale_path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	std::filesystem::remove(stale_path);
+	external_stale = PortalRegistry::ClassifyGate(external_unlinked);
+	CHECK(external_stale.kind == PortalGateKind::ExternalStale);
+	CHECK(external_stale.IsClosedHead());
+	REQUIRE(CmdDestroyPortalGate(DoCommandFlag::Execute, external_unlinked, false).Succeeded());
+	UpdateSignalsInBuffer();
+	CHECK_FALSE(PortalRegistry::IsInterServerPortal(external_unlinked));
+
+	const TileIndex conduit = TileXY(80, 80);
+	MakeVoid(TileXY(79, 80));
+	REQUIRE(EdgeConduitManager::RegisterConduit(conduit, DiagDirection::NE, WorldID{0}, CargoType{0}, _current_company, 50) != INVALID_CONDUIT);
+	PortalGateClassification conduit_class = PortalRegistry::ClassifyGate(conduit);
+	CHECK(conduit_class.kind == PortalGateKind::EdgeConduit);
+	CHECK(conduit_class.IsClosedHead());
+	CHECK_FALSE(PortalRegistry::CanEnterGate(conduit, DiagDirection::NE));
+
+	PortalRegistry::Reset();
+	EdgeConduitManager::Reset();
+	UpdateSignalsInBuffer();
 }
 
 TEST_CASE("Portal Construction - Atomic Pair Builder")

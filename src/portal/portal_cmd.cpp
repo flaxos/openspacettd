@@ -335,14 +335,26 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 {
 	if (!IsValidTile(tile)) return CMD_ERROR;
 
-	bool is_portal = PortalRegistry::IsPortalTile(tile);
-	bool is_unlinked = PortalRegistry::IsUnlinkedGate(tile);
-	if (!is_portal && !is_unlinked) return CommandCost(STR_ERROR_CAN_T_BUILD_TUNNEL_HERE);
+	PortalGateClassification gate = PortalRegistry::ClassifyGate(tile);
+	const bool is_local_linked = gate.kind == PortalGateKind::LocalLinked;
+	const bool is_local_unlinked = gate.kind == PortalGateKind::LocalUnlinked || gate.kind == PortalGateKind::LocalStale;
+	const bool is_external = gate.kind == PortalGateKind::ExternalLinked ||
+			gate.kind == PortalGateKind::ExternalUnlinked ||
+			gate.kind == PortalGateKind::ExternalStale;
+	if (!is_local_linked && !is_local_unlinked && !is_external) return CommandCost(STR_ERROR_CAN_T_BUILD_TUNNEL_HERE);
+
+	const bool has_physical_head = IsTunnelTile(tile) && GetTunnelBridgeTransportType(tile) == TransportType::Rail;
+	if (!has_physical_head) {
+		if (flags.Test(DoCommandFlag::Execute)) {
+			PortalRegistry::UnregisterPortalByTile(tile);
+		}
+		return CommandCost(ExpensesType::Construction);
+	}
 
 	CommandCost ret = CheckOwnership(GetTileOwner(tile));
 	if (ret.Failed()) return ret;
 
-	TileIndex endtile = is_portal ? PortalRegistry::GetOtherPortalEnd(tile) : INVALID_TILE;
+	TileIndex endtile = is_local_linked ? gate.opposite_endpoint.tile : INVALID_TILE;
 
 	/* Reject demolition if any consist is traversing the wormhole corridor */
 	if (PortalRegistry::IsPortalInTransit(tile)) {
@@ -368,6 +380,11 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 		DiagDirection dir = GetTunnelBridgeDirection(tile);
 		Track track = DiagDirToDiagTrack(dir);
 		Owner owner = GetTileOwner(tile);
+		auto notify_cleared_head = [](TileIndex head, DiagDirection head_dir, Owner head_owner) {
+			if (!IsValidDiagDirection(head_dir)) return;
+			AddSideToSignalBuffer(head, ReverseDiagDir(head_dir), head_owner);
+			YapfNotifyTrackLayoutChange(head, DiagDirToDiagTrack(head_dir));
+		};
 
 		Train *v = nullptr;
 		if (HasTunnelBridgeReservation(tile)) {
@@ -379,15 +396,13 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 			Company::Get(owner)->infrastructure.rail[GetRailType(tile)] -= TUNNELBRIDGE_TRACKBIT_FACTOR;
 		}
 
-		if (is_unlinked) {
+		if (is_local_unlinked || is_external) {
 			PortalRegistry::UnregisterPortalByTile(tile);
 			DoClearSquare(tile);
-			AddSideToSignalBuffer(tile, ReverseDiagDir(dir), owner);
-			YapfNotifyTrackLayoutChange(tile, track);
-		} else if (is_portal) {
+			notify_cleared_head(tile, dir, owner);
+		} else if (is_local_linked) {
 			if (demolish_both && endtile != INVALID_TILE) {
 				DiagDirection end_dir = GetTunnelBridgeDirection(endtile);
-				Track end_track = DiagDirToDiagTrack(end_dir);
 				Owner end_owner = GetTileOwner(endtile);
 
 				if (Company::IsValidID(end_owner)) {
@@ -398,11 +413,8 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 				DoClearSquare(tile);
 				DoClearSquare(endtile);
 
-				AddSideToSignalBuffer(tile, ReverseDiagDir(dir), owner);
-				AddSideToSignalBuffer(endtile, ReverseDiagDir(end_dir), end_owner);
-
-				YapfNotifyTrackLayoutChange(tile, track);
-				YapfNotifyTrackLayoutChange(endtile, end_track);
+				notify_cleared_head(tile, dir, owner);
+				notify_cleared_head(endtile, end_dir, end_owner);
 			} else {
 				/* Demolish only this gate; convert opposite end back to unlinked gate */
 				const PortalLink *link = PortalRegistry::GetPortalLink(tile);
@@ -412,8 +424,7 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 				PortalRegistry::RegisterUnlinkedGate(opp.tile, opp.enter_dir, opp.world_id);
 
 				DoClearSquare(tile);
-				AddSideToSignalBuffer(tile, ReverseDiagDir(dir), owner);
-				YapfNotifyTrackLayoutChange(tile, track);
+				notify_cleared_head(tile, dir, owner);
 				YapfNotifyTrackLayoutChange(opp.tile, DiagDirToDiagTrack(opp.enter_dir));
 			}
 		}

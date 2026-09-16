@@ -9,6 +9,7 @@
 
 #include "../stdafx.h"
 #include "portal_registry.h"
+#include "edge_conduit.h"
 #include "federation_identity.h"
 #include "transfer_journal.h"
 #include "../tunnelbridge_map.h"
@@ -241,6 +242,82 @@ bool PortalRegistry::IsPortalTile(TileIndex tile)
 	if (tile == INVALID_TILE) return false;
 	return tile_to_portal.find(tile) != tile_to_portal.end() ||
 	       interserver_portals.find(tile) != interserver_portals.end();
+}
+
+static bool IsPhysicalRailGateHead(TileIndex tile, DiagDirection dir)
+{
+	if (tile == INVALID_TILE || !IsValidTile(tile) || !IsTunnelTile(tile)) return false;
+	if (GetTunnelBridgeTransportType(tile) != TransportType::Rail) return false;
+	return !IsValidDiagDirection(dir) || GetTunnelBridgeDirection(tile) == dir;
+}
+
+PortalGateClassification PortalRegistry::ClassifyGate(TileIndex tile)
+{
+	PortalGateClassification result;
+	if (tile == INVALID_TILE) return result;
+
+	if (EdgeConduitManager::IsConduitTile(tile)) {
+		result.kind = PortalGateKind::EdgeConduit;
+		const EdgeConduit *conduit = EdgeConduitManager::GetConduit(tile);
+		if (conduit != nullptr) {
+			result.local_endpoint = PortalEndpoint{conduit->tile, conduit->dir, conduit->world_id};
+		}
+		return result;
+	}
+
+	auto it_un = unlinked_gates.find(tile);
+	if (it_un != unlinked_gates.end()) {
+		result.kind = IsPhysicalRailGateHead(tile, it_un->second.enter_dir) ? PortalGateKind::LocalUnlinked : PortalGateKind::LocalStale;
+		result.local_endpoint = it_un->second;
+		return result;
+	}
+
+	auto it_is = interserver_portals.find(tile);
+	if (it_is != interserver_portals.end()) {
+		const InterServerPortalLink &link = it_is->second;
+		result.id = link.id;
+		result.local_endpoint = link.local_endpoint;
+		result.remote_world = link.remote_world;
+		result.remote_gate_id = link.remote_gate_id;
+		result.virtual_length = link.virtual_length;
+
+		if (!IsPhysicalRailGateHead(tile, link.local_endpoint.enter_dir)) {
+			result.kind = PortalGateKind::ExternalStale;
+		} else if (!link.IsValid() || link.remote_gate_id == 0) {
+			result.kind = PortalGateKind::ExternalUnlinked;
+		} else {
+			result.kind = PortalGateKind::ExternalLinked;
+		}
+		return result;
+	}
+
+	const PortalLink *link = GetPortalLink(tile);
+	if (link != nullptr) {
+		result.id = link->id;
+		result.virtual_length = link->virtual_length;
+		if (link->end_a.tile == tile) {
+			result.local_endpoint = link->end_a;
+			result.opposite_endpoint = link->end_b;
+		} else if (link->end_b.tile == tile) {
+			result.local_endpoint = link->end_b;
+			result.opposite_endpoint = link->end_a;
+		}
+
+		const bool local_ok = IsPhysicalRailGateHead(result.local_endpoint.tile, result.local_endpoint.enter_dir);
+		const bool opposite_ok = IsPhysicalRailGateHead(result.opposite_endpoint.tile, result.opposite_endpoint.enter_dir);
+		result.kind = link->IsValid() && local_ok && opposite_ok ? PortalGateKind::LocalLinked : PortalGateKind::LocalStale;
+		return result;
+	}
+
+	return result;
+}
+
+bool PortalRegistry::CanEnterGate(TileIndex tile, DiagDirection vehicle_dir)
+{
+	PortalGateClassification gate = ClassifyGate(tile);
+	if (gate.kind == PortalGateKind::None) return true;
+	if (gate.kind != PortalGateKind::LocalLinked && gate.kind != PortalGateKind::ExternalLinked) return false;
+	return gate.local_endpoint.enter_dir == vehicle_dir;
 }
 
 TileIndex PortalRegistry::GetOtherPortalEnd(TileIndex tile)

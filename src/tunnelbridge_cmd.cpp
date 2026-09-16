@@ -1877,12 +1877,7 @@ static void TileLoop_TunnelBridge(TileIndex tile)
 /** Test whether an OpenSpace rail head lacks a safe remote rail tunnel head. */
 static bool IsClosedOpenSpaceRailHead(TileIndex tile)
 {
-	if (PortalRegistry::IsUnlinkedGate(tile) || EdgeConduitManager::IsConduitTile(tile)) return true;
-	if (!PortalRegistry::IsPortalTile(tile)) return false;
-
-	TileIndex other_end = PortalRegistry::GetOtherPortalEnd(tile);
-	return other_end >= Map::Size() || !IsTunnelTile(other_end) ||
-			GetTunnelBridgeTransportType(other_end) != TransportType::Rail;
+	return PortalRegistry::ClassifyGate(tile).IsClosedHead();
 }
 
 /** @copydoc GetTileTrackStatusProc */
@@ -2015,6 +2010,9 @@ static VehicleEnterTileStates VehicleEnterTile_TunnelBridge(Vehicle *v, TileInde
 			}
 
 			if (t->track != Track::Wormhole && dir == vdir) {
+				if (!PortalRegistry::CanEnterGate(tile, vdir)) {
+					return VehicleEnterTileState::CannotEnter;
+				}
 				if (t->IsMovingFront() && frame == TUNNEL_SOUND_FRAME) {
 					if (!PlayVehicleSound(t, VSE_TUNNEL) && RailVehInfo(t->engine_type)->engclass == EngineClass::Steam) {
 						SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
