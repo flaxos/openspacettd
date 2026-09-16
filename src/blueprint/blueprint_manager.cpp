@@ -22,6 +22,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #if defined(_WIN32)
 #include <io.h>
 #include <windows.h>
@@ -38,10 +39,11 @@ static unsigned long _temporary_counter = 0;
 
 #if defined(_WIN32)
 using ssize_t = std::ptrdiff_t;
+using StorageStat = struct _stat64;
 static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return _wopen(path.c_str(), flags | _O_BINARY, mode); }
 static int StorageClose(int fd) { return _close(fd); }
-static int StorageFstat(int fd, struct stat *st) { return _fstat(fd, st); }
-static bool StorageIsRegular(const struct stat &st) { return (st.st_mode & _S_IFMT) == _S_IFREG; }
+static int StorageFstat(int fd, StorageStat *st) { return _fstat64(fd, st); }
+static bool StorageIsRegular(const StorageStat &st) { return (st.st_mode & _S_IFMT) == _S_IFREG; }
 static ssize_t StorageRead(int fd, void *buf, size_t size) { return _read(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
 static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return _write(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
 static int StorageFlush(int fd) { return _commit(fd); }
@@ -49,10 +51,11 @@ static bool StoragePublish(const std::filesystem::path &tmp, const std::filesyst
 static std::string StoragePublishFailure() { return std::error_code(static_cast<int>(GetLastError()), std::system_category()).message(); }
 static unsigned long StorageProcessId() { return GetCurrentProcessId(); }
 #else
+using StorageStat = struct stat;
 static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return open(path.c_str(), flags | O_NOFOLLOW, mode); }
 static int StorageClose(int fd) { return close(fd); }
-static int StorageFstat(int fd, struct stat *st) { return fstat(fd, st); }
-static bool StorageIsRegular(const struct stat &st) { return S_ISREG(st.st_mode); }
+static int StorageFstat(int fd, StorageStat *st) { return fstat(fd, st); }
+static bool StorageIsRegular(const StorageStat &st) { return S_ISREG(st.st_mode); }
 static ssize_t StorageRead(int fd, void *buf, size_t size) { return read(fd, buf, size); }
 static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return write(fd, buf, size); }
 static int StorageFlush(int fd) { return fsync(fd); }
@@ -777,7 +780,7 @@ static bool ReadBounded(const std::filesystem::path &path, std::string &content,
 	if (!SafeRegularFile(path, error)) return false;
 	int fd = StorageOpen(path, O_RDONLY);
 	if (fd < 0) return StorageError(error, "Cannot open blueprint file: " + std::string(std::strerror(errno)));
-	struct stat st{};
+	StorageStat st{};
 	if (StorageFstat(fd, &st) != 0 || !StorageIsRegular(st) || st.st_size < 0 || static_cast<uint64_t>(st.st_size) > Blueprint::MAX_JSON_BYTES) {
 		StorageClose(fd);
 		return StorageError(error, "Blueprint file is invalid or exceeds 2 MiB.");
