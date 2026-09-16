@@ -111,10 +111,14 @@ def require(condition, message):
         raise RuntimeError(message)
 
 
+def console_payload(line):
+    return re.sub(r"^\[[^]]+\]\s*", "", line).strip()
+
+
 def catalog(engine):
     start = len(engine.lines)
     engine.command("commonwealth_status", "Commonwealth catalog:")
-    lines = engine.lines[start:]
+    lines = [console_payload(line) for line in engine.lines[start:]]
     require(any(line.startswith("Commonwealth status: 1") for line in lines), "Content is not active")
     cargos = dict(tuple(map(int, re.findall(r"\d+", line))) for line in lines if line.startswith("Commonwealth cargo "))
     require(set(cargos) == set(range(13)) and len(set(cargos.values())) == 13, "Cargo labels alias or are absent")
