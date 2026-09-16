@@ -83,6 +83,23 @@ static ConsistSnapshot CreateSampleSnapshot(uint32_t cargo_count = 50)
 	return snapshot;
 }
 
+static size_t CountTrainVehicles()
+{
+	size_t count = 0;
+	for (const Train *train : Train::Iterate()) {
+		(void)train;
+		count++;
+	}
+	return count;
+}
+
+static uint32_t CountTrainCargo()
+{
+	uint32_t cargo = 0;
+	for (const Train *train : Train::Iterate()) cargo += train->cargo.StoredCount();
+	return cargo;
+}
+
 TEST_CASE("Federation Transfer - Checkpoint transitions reject conflicting receipts")
 {
 	TransferJournal::Reset();
@@ -246,9 +263,11 @@ TEST_CASE("Federation Transfer - Universe Authority Lifecycle and State Machine"
 	rec = authority.GetTransfer(tx_id);
 	CHECK(rec->state == TransferState::ArrivalPending);
 
-	/* 11. Duplicate claim prevention */
+	/* 11. Duplicate same-destination claim is an idempotent retry */
 	auto duplicate_claim = authority.ClaimTransfer(tx_id, WorldID{2});
-	CHECK(!duplicate_claim.has_value());
+	REQUIRE(duplicate_claim.has_value());
+	CHECK(duplicate_claim->transfer_id == tx_id);
+	CHECK(duplicate_claim->state == TransferState::ArrivalPending);
 
 	/* 12. Confirm arrival */
 	REQUIRE(authority.ConfirmTransferArrival(tx_id, WorldID{2}, true));
@@ -581,8 +600,46 @@ TEST_CASE("Federation Transfer - Consist Materialization on Destination Gate")
 	CHECK(HasTunnelBridgeReservation(exit_gate));
 
 	/* Clean up */
+	SetTunnelBridgeReservation(exit_gate, false);
 	delete emerged_front;
 	PortalRegistry::Reset();
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+}
+
+TEST_CASE("Federation Transfer - Materialization failure leaves no partial consist")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	_company_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+
+	(void)MockEnvironment::Instance();
+	InitTestEngines();
+
+	REQUIRE(Company::CanAllocateItem());
+	REQUIRE(Company::Create() != nullptr);
+
+	TileIndex exit_gate = TileXY(25, 25);
+	MakeRailTunnel(exit_gate, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+
+	ConsistSnapshot snapshot = CreateSampleSnapshot(40);
+	REQUIRE(snapshot.units.size() > 1);
+	snapshot.units[1].engine_type = 65535;
+
+	ConsistMaterializeResult mat_res = ConsistMaterializer::MaterializeFromTransfer(
+		snapshot, exit_gate, DiagDirection::NE
+	);
+
+	CHECK_FALSE(mat_res.success);
+	CHECK(mat_res.error_message == "Invalid engine type");
+	CHECK(CountTrainVehicles() == 0);
+	CHECK_FALSE(HasTunnelBridgeReservation(exit_gate));
+	CHECK(CountTrainCargo() == 0);
+
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
 	_vehicle_pool.CleanPool();
 	_company_pool.CleanPool();
 }
@@ -642,15 +699,83 @@ TEST_CASE("Federation Transfer - Coordinator retries only the exact destination 
 		CHECK(authority.GetTransfer(tx)->state == TransferState::Completed);
 		CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 13) == 0);
 		CHECK(HasTunnelBridgeReservation(gate));
-		uint32_t cargo = 0;
-		for (const Train *train : Train::Iterate()) cargo += train->cargo.StoredCount();
-		CHECK(cargo == 40);
+		CHECK(CountTrainVehicles() == 2);
+		CHECK(CountTrainCargo() == 40);
+		SetTunnelBridgeReservation(gate, false);
+		const TransferCheckpoint *checkpoint = TransferJournal::FindByTransferId(tx);
+		REQUIRE(checkpoint != nullptr);
+		CHECK(checkpoint->state == TransferCheckpointState::Confirmed);
 	}
 
 	_vehicle_pool.CleanPool();
 	_company_pool.CleanPool();
 	PortalRegistry::Reset();
 	FederationIdentityRegistry::Reset();
+	TransferJournal::Reset();
+	authority.Reset();
+}
+
+TEST_CASE("Federation Transfer - Journaled arrival confirmation retry does not duplicate materialization")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	TransferJournal::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+	_company_pool.CleanPool();
+	_vehicle_pool.CleanPool();
+	(void)MockEnvironment::Instance();
+	InitTestEngines();
+	REQUIRE(Company::CanAllocateItem());
+	REQUIRE(Company::Create() != nullptr);
+
+	const TileIndex gate = TileXY(45, 45);
+	MakeRailTunnel(gate, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	const PortalID pid = PortalRegistry::RegisterInterServerPortal(
+		gate, DiagDirection::NE, WorldID{2}, WorldID{1}, 10, 100);
+	REQUIRE(pid != INVALID_PORTAL);
+
+	ConsistSnapshot snapshot = CreateSampleSnapshot(40);
+	const auto encoded = ConsistSnapshotCodec::Encode(snapshot);
+	REQUIRE(encoded.Succeeded());
+	const std::string tx = authority.InitiateTransfer(WorldID{1}, WorldID{2}, 10, pid.base(), encoded, 10);
+	REQUIRE_FALSE(tx.empty());
+	REQUIRE(authority.DepartTransfer(tx, 0));
+	REQUIRE(authority.ClaimTransfer(tx, WorldID{2}).has_value());
+
+	ConsistMaterializeResult mat = ConsistMaterializer::MaterializeFromTransfer(snapshot, gate, DiagDirection::NE);
+	REQUIRE(mat.success);
+	CHECK(CountTrainVehicles() == 2);
+
+	TransferCheckpoint cp;
+	cp.request_id = fmt::format("ARR-W{}-{}", 2, tx);
+	cp.transfer_id = tx;
+	cp.arrival_receipt = fmt::format("RCPT-W{}-{}", 2, tx);
+	cp.namespace_high = snapshot.consist_id.name_space.high;
+	cp.namespace_low = snapshot.consist_id.name_space.low;
+	cp.consist_sequence = snapshot.consist_id.sequence;
+	cp.source_world = 1;
+	cp.destination_world = 2;
+	cp.state = TransferCheckpointState::Materialized;
+	cp.snapshot = encoded.bytes;
+	REQUIRE(TransferJournal::RecordArrival(cp));
+
+	CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 10) == 0);
+	CHECK(authority.GetTransfer(tx)->state == TransferState::Completed);
+	const TransferCheckpoint *confirmed = TransferJournal::FindByTransferId(tx);
+	REQUIRE(confirmed != nullptr);
+	CHECK(confirmed->state == TransferCheckpointState::Confirmed);
+	CHECK(CountTrainVehicles() == 2);
+	CHECK(CountTrainCargo() == 40);
+
+	SetTunnelBridgeReservation(gate, false);
+	delete mat.consist;
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	TransferJournal::Reset();
 	authority.Reset();
 }
 

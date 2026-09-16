@@ -302,6 +302,15 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 
 		for (const std::string &tx_id : pending) {
 			auto &authority = UniverseAuthorityService::Instance();
+			const auto *existing_cp = TransferJournal::FindByTransferId(tx_id);
+			if (existing_cp != nullptr && (existing_cp->state == TransferCheckpointState::Materialized ||
+					existing_cp->state == TransferCheckpointState::Confirmed)) {
+				if (authority.ConfirmTransferArrival(tx_id, local_world, true)) {
+					TransferJournal::ConfirmArrival(existing_cp->source_world, existing_cp->request_id, existing_cp->arrival_receipt);
+				}
+				continue;
+			}
+
 			const UniverseTransferRecord *existing = authority.GetTransfer(tx_id);
 			auto claim_opt = existing != nullptr && existing->dest_world == local_world &&
 					existing->state == TransferState::ArrivalPending
@@ -335,7 +344,23 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 			);
 
 			if (mat_res.success) {
-				authority.ConfirmTransferArrival(tx_id, local_world, true);
+				const std::string receipt_id = fmt::format("RCPT-W{}-{}", local_world.base(), tx_id);
+				const std::string req_id = fmt::format("ARR-W{}-{}", local_world.base(), tx_id);
+				TransferCheckpoint rcpt;
+				rcpt.request_id = req_id;
+				rcpt.transfer_id = tx_id;
+				rcpt.arrival_receipt = receipt_id;
+				rcpt.namespace_high = rec.snapshot.consist_id.name_space.high;
+				rcpt.namespace_low = rec.snapshot.consist_id.name_space.low;
+				rcpt.consist_sequence = rec.snapshot.consist_id.sequence;
+				rcpt.source_world = rec.source_world.base();
+				rcpt.destination_world = local_world.base();
+				rcpt.state = TransferCheckpointState::Materialized;
+				rcpt.snapshot = rec.snapshot_bytes.bytes;
+				if (!TransferJournal::RecordArrival(rcpt)) continue;
+				if (authority.ConfirmTransferArrival(tx_id, local_world, true)) {
+					TransferJournal::ConfirmArrival(rcpt.source_world, req_id, receipt_id);
+				}
 				materialized_count++;
 			} else {
 				authority.ConfirmTransferArrival(

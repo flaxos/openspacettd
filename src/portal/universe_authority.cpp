@@ -455,9 +455,12 @@ std::optional<UniverseTransferRecord> UniverseAuthorityService::ClaimTransfer(co
 	auto it = this->_transfers.find(transfer_id);
 	if (it == this->_transfers.end()) return std::nullopt;
 
-	if (it->second.dest_world != dest_world || it->second.state != TransferState::InTransit) {
+	if (it->second.dest_world != dest_world) {
 		return std::nullopt;
 	}
+
+	if (it->second.state == TransferState::ArrivalPending) return it->second;
+	if (it->second.state != TransferState::InTransit) return std::nullopt;
 
 	it->second.state = TransferState::ArrivalPending;
 	return it->second;
@@ -472,9 +475,11 @@ bool UniverseAuthorityService::ConfirmTransferArrival(
 	auto it = this->_transfers.find(transfer_id);
 	if (it == this->_transfers.end()) return false;
 
-	if (it->second.dest_world != dest_world || it->second.state != TransferState::ArrivalPending) {
+	if (it->second.dest_world != dest_world) {
 		return false;
 	}
+	if (it->second.state == TransferState::Completed && success) return true;
+	if (it->second.state != TransferState::ArrivalPending) return false;
 
 	if (success) {
 		it->second.state = TransferState::Completed;
