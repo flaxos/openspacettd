@@ -17,6 +17,22 @@ from verification; [player checklist](../demo/ALL-FEATURES-UAT.md) and
 is a short checkpoint, not another backlog. The audit began no implementation packages;
 the subsequent user-authorized WP-01–09 execution is recorded below.
 
+## WP-11 implementation follow-up — 16 September
+
+The structural economic slice is implemented locally; human UAT remains open.
+[Evidence and limits](audit/2026-09-16/wp11/README.md) · [versioned saves and UAT](../demo/WP11-UAT.md).
+All 377 CTests pass. Active-content engine runs in 1800 and 2300 verify 13 distinct
+cargoes, 14 loaded industry definitions, 12 train definitions and freight refits;
+real ore extraction, two portal routes, monthly steel conversion, blocked-route
+recovery, exact fresh-process reload and three further complete steel deliveries.
+Cash and physical cargo reconcile throughout. Final depot fabrication consumes
+10 steel and 5 ballast once with the expected discount. Materials I gates and
+Materials III yield/discount are covered. No saved cargo remapping was added.
+Linux CI now runs the active fixture; the workflow has not run remotely yet.
+Only the structural chain has this moving proof; the other pipelines, federation,
+bespoke art and graphical acceptance remain separate. Earlier checkpoints below
+retain their historical counts and scope.
+
 ## Latest user acceptance report
 
 After being asked to run UAT-00,04a–c and09, the user reports that OpenTTD no longer

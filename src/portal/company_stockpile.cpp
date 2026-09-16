@@ -10,6 +10,7 @@
 #include "../stdafx.h"
 #include "company_stockpile.h"
 #include "../cargotype.h"
+#include "production_chain.h"
 
 #include <map>
 #include <mutex>
@@ -25,7 +26,7 @@ void StockpileManager::Reset()
 
 void StockpileManager::AddCargo(WorldID world, CompanyID company, CargoType cargo, uint32_t amount)
 {
-	if (world == INVALID_WORLD || company == CompanyID::Invalid() || amount == 0) return;
+	if (world == INVALID_WORLD || company == CompanyID::Invalid() || cargo >= NUM_CARGO || amount == 0) return;
 
 	std::lock_guard<std::mutex> lock(_stockpile_mutex);
 	auto &stockpile = _company_stockpiles[{world, company}];
@@ -36,7 +37,7 @@ void StockpileManager::AddCargo(WorldID world, CompanyID company, CargoType carg
 
 uint32_t StockpileManager::WithdrawCargo(WorldID world, CompanyID company, CargoType cargo, uint32_t amount)
 {
-	if (world == INVALID_WORLD || company == CompanyID::Invalid() || amount == 0) return 0;
+	if (world == INVALID_WORLD || company == CompanyID::Invalid() || cargo >= NUM_CARGO || amount == 0) return 0;
 
 	std::lock_guard<std::mutex> lock(_stockpile_mutex);
 	auto it = _company_stockpiles.find({world, company});
@@ -65,7 +66,7 @@ bool StockpileManager::HasSufficient(WorldID world, CompanyID company, const std
 	if (it == _company_stockpiles.end()) return bom.empty();
 
 	for (const auto &[cargo, required] : bom) {
-		if (it->second.GetStock(cargo) < required) {
+		if (cargo >= NUM_CARGO || it->second.GetStock(cargo) < required) {
 			return false;
 		}
 	}
@@ -82,7 +83,7 @@ bool StockpileManager::ConsumeBOM(WorldID world, CompanyID company, const std::m
 
 	/* Verify full BOM availability before deducting any item */
 	for (const auto &[cargo, required] : bom) {
-		if (it->second.GetStock(cargo) < required) {
+		if (cargo >= NUM_CARGO || it->second.GetStock(cargo) < required) {
 			return false;
 		}
 	}
@@ -120,32 +121,11 @@ void StockpileManager::RestoreStockpile(WorldID world, CompanyID company, const 
 
 CargoType StockpileManager::RoleToDefaultCargo(FabricationRole role)
 {
-	CargoType c = INVALID_CARGO;
-	switch (role) {
-		case FabricationRole::Ballast:
-			c = GetCargoTypeByLabel(CT_COAL);
-			return (c != INVALID_CARGO) ? c : CargoType{1};
-		case FabricationRole::StructuralMetal:
-			c = GetCargoTypeByLabel(CT_STEEL);
-			return (c != INVALID_CARGO) ? c : CargoType{9};
-		case FabricationRole::Wiring:
-			c = GetCargoTypeByLabel(CT_GOODS);
-			return (c != INVALID_CARGO) ? c : CargoType{5};
-		case FabricationRole::Electronics:
-			c = GetCargoTypeByLabel(CT_VALUABLES);
-			if (c == INVALID_CARGO) c = GetCargoTypeByLabel(CT_GOLD);
-			return (c != INVALID_CARGO) ? c : CargoType{10};
-		case FabricationRole::Superalloy:
-			c = GetCargoTypeByLabel(CT_STEEL);
-			return (c != INVALID_CARGO) ? c : CargoType{9};
-		case FabricationRole::Composites:
-			c = GetCargoTypeByLabel(CT_GOODS);
-			return (c != INVALID_CARGO) ? c : CargoType{5};
-		case FabricationRole::BlankCrystals:
-		case FabricationRole::EnrichedCrystals:
-			c = GetCargoTypeByLabel(CT_MAIL);
-			return (c != INVALID_CARGO) ? c : CargoType{2};
-		default:
-			return CargoType{0};
-	}
+	static constexpr CommonwealthCargoID roles[] = {
+		CommonwealthCargoID::StoneSlag, CommonwealthCargoID::StructuralSteel,
+		CommonwealthCargoID::ConductiveWiring, CommonwealthCargoID::SiliconChips,
+		CommonwealthCargoID::Superalloys, CommonwealthCargoID::SyntheticComposites,
+		CommonwealthCargoID::BlankCrystals, CommonwealthCargoID::EnrichedQuantumCrystals,
+	};
+	return role < FabricationRole::Count ? ProductionChainManager::GetDefaultCargo(roles[static_cast<size_t>(role)]) : INVALID_CARGO;
 }

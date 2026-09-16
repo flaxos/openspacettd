@@ -3,7 +3,7 @@
 
 # GRF metadata
 STR_GRF_NAME                                            :OpenSpaceTTD Commonwealth Industry & Cargo Pack
-STR_GRF_DESC                                            :Canonical 12-cargo Commonwealth multi-world industrial production suite and facilities across Pipelines A-D.
+STR_GRF_DESC                                            :Canonical 13-cargo Commonwealth multi-world industrial production suite and facilities across Pipelines A-D.
 
 # Cargo Names & Units
 STR_CARGO_NAME_SILC                                     :Silicates & Ballast Slag

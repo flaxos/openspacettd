@@ -3,7 +3,7 @@
 
 # GRF metadata
 STR_GRF_NAME                                            :OpenSpaceTTD Commonwealth Rolling-Stock Pack
-STR_GRF_DESC                                            :Canonical Commonwealth Space Transportation (CST) locomotive families and 12-cargo rolling stock.
+STR_GRF_DESC                                            :Canonical Commonwealth Space Transportation (CST) locomotive families and 13-cargo rolling stock.
 
 # Locomotive Names
 STR_NAME_CST_PIONEER                                    :CST Pioneer 0-6-0 'Surveyor' (Steam)

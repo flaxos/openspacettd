@@ -11,6 +11,7 @@
 #define FABRICATION_MANAGER_H
 
 #include "../cargo_type.h"
+#include "../command_type.h"
 #include "../company_type.h"
 #include "../engine_base.h"
 #include "../rail_type.h"
@@ -57,6 +58,9 @@ class FabricationManager {
 public:
 	/** Reset all company fabrication modes (e.g. on new game or load). */
 	static void Reset();
+
+	/** Shared content, research and inventory preflight for native and Blueprint builds. */
+	static CommandCost CheckMaterials(WorldID world, CompanyID company, const BillOfMaterials &bom);
 
 	/** Check whether a company has "Fabricate from Stockpile" mode enabled. */
 	static bool IsFabricateFromStockpileEnabled(CompanyID company);

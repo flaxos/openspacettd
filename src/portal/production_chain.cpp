@@ -9,6 +9,7 @@
 
 #include "../stdafx.h"
 #include "production_chain.h"
+#include "commonwealth_pack.h"
 #include "planet_manager.h"
 #include "logistics_hub.h"
 #include "tech_tree.h"
@@ -36,6 +37,9 @@ void ProductionChainManager::Reset()
 
 CargoType ProductionChainManager::GetDefaultCargo(CommonwealthCargoID cargo_id)
 {
+	auto status = CommonwealthPackManager::GetContentStatus();
+	if (status.mode == CommonwealthContentMode::Invalid) return INVALID_CARGO;
+	if (status.mode == CommonwealthContentMode::Active) return GetCargoTypeByLabel(CommonwealthPackManager::GetCargoLabel(cargo_id));
 	CargoType c = INVALID_CARGO;
 	switch (cargo_id) {
 		case CommonwealthCargoID::StoneSlag:
@@ -77,12 +81,13 @@ CargoType ProductionChainManager::GetDefaultCargo(CommonwealthCargoID cargo_id)
 			c = GetCargoTypeByLabel(CT_MAIL);
 			return (c != INVALID_CARGO) ? c : CargoType{2};
 		default:
-			return CargoType{0};
+			return INVALID_CARGO;
 	}
 }
 
 void ProductionChainManager::InitDefaultRecipes()
 {
+	_recipes.clear();
 	CargoType c_stone = GetDefaultCargo(CommonwealthCargoID::StoneSlag);
 	CargoType c_iron  = GetDefaultCargo(CommonwealthCargoID::IronOre);
 	CargoType c_steel = GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
@@ -353,6 +358,7 @@ void ProductionChainManager::ChangeCompanyOwner(CompanyID old_owner, CompanyID n
 
 bool ProductionChainManager::AcceptsCargo(StationID station, CargoType cargo)
 {
+	if (cargo >= NUM_CARGO || CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid) return false;
 	const ProcessingFacility *f = GetFacilityForStation(station);
 	const Station *st = Station::GetIfValid(station);
 	if (f == nullptr || st == nullptr || st->owner != f->owner || !st->facilities.Test(StationFacility::Train)) return false;
@@ -425,7 +431,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 {
 	for (auto &[id, f] : _facilities) {
 		const ProductionRecipe *rec = GetRecipe(f.recipe_id);
-		if (rec == nullptr) continue;
+		if (rec == nullptr || CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid) continue;
 
 		/* Determine max batches possible given available input materials */
 		uint32_t max_batches = f.monthly_capacity;

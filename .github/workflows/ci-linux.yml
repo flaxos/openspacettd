@@ -108,6 +108,20 @@ jobs:
         cmake --build . -j $(nproc)
         echo "::endgroup::"
 
+    - name: Active Commonwealth economic slice
+      timeout-minutes: 10
+      run: |
+        python3 scripts/test_wp11_slice.py --year 1800 --output build/wp11-1800
+        python3 scripts/test_wp11_slice.py --year 2300 --output build/wp11-2300
+
+    - name: Preserve economic slice evidence
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: wp11-${{ inputs.compiler }}-${{ contains(inputs.extra-cmake-parameters, 'OPTION_DEDICATED') && 'dedicated' || 'standard' }}
+        path: build/wp11-*
+        retention-days: 7
+
     - name: Test
       run: |
         (

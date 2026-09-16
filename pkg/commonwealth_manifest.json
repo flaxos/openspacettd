@@ -1,22 +1,114 @@
 {
+  "cargo_labels": [
+    "SILC",
+    "IRON",
+    "STEL",
+    "COPR",
+    "WIRE",
+    "SAND",
+    "CHIP",
+    "RARE",
+    "ALLO",
+    "POLY",
+    "BCRY",
+    "QCRY",
+    "CCRY"
+  ],
   "commonwealth_packages": [
     {
-      "name": "openspacettd_industry.grf",
-      "grfid": "OST\u0001",
+      "bytes": 2398,
+      "grfid": "OST\\u0001",
       "grfid_hex": "0154534f",
-      "version": 1,
-      "bytes": 605,
-      "md5": "25afbb73bd84e6931272d669deaf745b",
-      "sha256": "3fa31728f59ff17844d0c06eaab2a45c014262b984e68c6ca3a385822b3dbfc2"
+      "md5": "f08c47d60ab8ed25d63fb15e6ec3e1f1",
+      "name": "openspacettd_industry.grf",
+      "sha256": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
+      "source": "pkg/commonwealth_industry/commonwealth_industry.nml",
+      "version": 2
     },
     {
-      "name": "openspacettd_rail.grf",
-      "grfid": "OST\u0002",
+      "bytes": 1695,
+      "grfid": "OST\\u0002",
       "grfid_hex": "0254534f",
-      "version": 1,
-      "bytes": 759,
-      "md5": "3ec32cacf1631237efe241872d4f18cb",
-      "sha256": "706c093400ef4755fe4190d25dfb1025ab821e60b6c6a70a9c86db18d2c04e45"
+      "md5": "ec75dc10aacc2a7767c0d2f31a789cf7",
+      "name": "openspacettd_rail.grf",
+      "sha256": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87",
+      "source": "pkg/commonwealth_rail/commonwealth_rail.nml",
+      "version": 2
     }
-  ]
+  ],
+  "compiler": {
+    "name": "nmlc",
+    "version": "0.9.0"
+  },
+  "industry_local_ids": [
+    "0x10",
+    "0x11",
+    "0x12",
+    "0x13",
+    "0x14",
+    "0x15",
+    "0x16",
+    "0x17",
+    "0x18",
+    "0x19",
+    "0x1a",
+    "0x1b",
+    "0x1c",
+    "0x1d"
+  ],
+  "schema_version": 2,
+  "vehicle_local_ids": [
+    "0x20",
+    "0x21",
+    "0x22",
+    "0x23",
+    "0x24",
+    "0x30",
+    "0x31",
+    "0x32",
+    "0x33",
+    "0x34",
+    "0x35",
+    "0x36"
+  ],
+  "wagon_refits": {
+    "0x31": [
+      "BCRY",
+      "QCRY",
+      "CCRY"
+    ],
+    "0x32": [
+      "SILC",
+      "IRON",
+      "COPR",
+      "SAND",
+      "RARE"
+    ],
+    "0x33": [
+      "STEL",
+      "WIRE"
+    ],
+    "0x34": [
+      "CHIP",
+      "ALLO"
+    ],
+    "0x35": [
+      "POLY"
+    ],
+    "0x36": [
+      "SILC",
+      "IRON",
+      "STEL",
+      "COPR",
+      "WIRE",
+      "SAND",
+      "CHIP",
+      "RARE",
+      "ALLO",
+      "POLY",
+      "BCRY",
+      "QCRY",
+      "CCRY"
+    ]
+  }
 }

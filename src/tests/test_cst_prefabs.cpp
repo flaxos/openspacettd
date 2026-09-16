@@ -834,6 +834,7 @@ TEST_CASE("CST Prefabs - Deterministic In-Game Map Placement", "[cst_prefab][blu
 	add_bom(FabricationManager::GetSignalBOM(), bp.GetSignalCount());
 	add_bom(FabricationManager::GetDepotBOM(RAILTYPE_BEGIN), bp.GetDepotCount());
 	for (const auto &[cargo, amount] : required) StockpileManager::AddCargo(WorldID{0}, _current_company, cargo, amount);
+	TechTreeManager::RestoreCompanyTech(_current_company, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
 	FabricationManager::SetFabricateFromStockpile(_current_company, fabricate);
 
 	const CommandCost query = CmdPlaceBlueprint({}, origin, bp.ToJson(), RAILTYPE_BEGIN, false);

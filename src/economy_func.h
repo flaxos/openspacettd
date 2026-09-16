@@ -32,6 +32,26 @@ int UpdateCompanyRatingAndValue(Company *c, bool update);
 void StartupIndustryDailyChanges(bool init_counter);
 
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, uint16_t transit_periods, CargoType cargo_type);
+
+/** Result of allocating produced cargo among nearby stations. */
+struct MoveGoodsToStationResult {
+	uint moved{0}; ///< Whole cargo units appended to station waiting cargo.
+	size_t candidate_stations{0}; ///< Stations supplied by the caller before native eligibility checks.
+	size_t eligible_stations{0}; ///< Stations which passed ownership, rating, service, and facility checks.
+	bool packet_allocation_failed{false}; ///< Cargo could not be stored because the cargo-packet pool was full.
+};
+
+/**
+ * Allocate produced cargo among stations and report why no whole units moved.
+ * The allocation rules are identical to MoveGoodsToStation().
+ * @param cargo Cargo type to allocate.
+ * @param amount Nominal whole cargo units before station rating is applied.
+ * @param source Cargo source recorded in newly created packets.
+ * @param all_stations Stations in the producer's catchment area.
+ * @param exclusivity Optional owner restriction for eligible stations.
+ * @return Actual whole units moved and allocation diagnostics.
+ */
+MoveGoodsToStationResult MoveGoodsToStationDetailed(CargoType cargo, uint amount, Source source, const StationList &all_stations, Owner exclusivity = INVALID_OWNER);
 uint MoveGoodsToStation(CargoType cargo, uint amount, Source source, const StationList &all_stations, Owner exclusivity = INVALID_OWNER);
 
 void PrepareUnload(Vehicle *front_v);

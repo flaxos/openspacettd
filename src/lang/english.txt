@@ -3236,9 +3236,18 @@ STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Cargo ac
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
 STR_LAND_AREA_INFORMATION_EDGE_CONDUIT                          :{BLACK}Structure: {LTBLUE}Edge Conduit
 STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_WORLD                    :{BLACK}World: {LTBLUE}{RAW_STRING}
-STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_OUTPUT                   :{BLACK}Effective monthly extraction: {LTBLUE}{CARGO_LONG}
-STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_NO_CARGO                 :{BLACK}Effective monthly extraction: {LTBLUE}No compatible mineral cargo
-STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL                    :{BLACK}Total minerals extracted: {LTBLUE}{COMMA}
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_OUTPUT                   :{BLACK}Last monthly extraction potential: {LTBLUE}{CARGO_LONG}
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_NO_CARGO                 :{BLACK}Last monthly extraction potential: {LTBLUE}No compatible mineral cargo
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_LAST                     :{BLACK}Last local station allocation: {LTBLUE}{CARGO_LONG}
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL                    :{BLACK}Total local station allocation: {LTBLUE}{COMMA}
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NEVER             :{BLACK}Last delivery outcome: {LTBLUE}Not yet run
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NO_CATCHMENT      :{BLACK}Last delivery outcome: {LTBLUE}No station in catchment
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NO_ELIGIBLE       :{BLACK}Last delivery outcome: {LTBLUE}No eligible station under native service rules
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NO_WHOLE_UNITS    :{BLACK}Last delivery outcome: {LTBLUE}No whole cargo unit allocated
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_PACKET_FULL       :{BLACK}Last delivery outcome: {LTBLUE}Station cargo storage unavailable
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_ALLOCATED         :{BLACK}Last delivery outcome: {LTBLUE}Allocated under native station rules
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_DIRECT_DISPATCHED :{BLACK}Last delivery outcome: {LTBLUE}Direct feeder dispatched
+STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_DIRECT_UNAVAILABLE:{BLACK}Last delivery outcome: {LTBLUE}Direct feeder unavailable
 STR_LANG_AREA_INFORMATION_RAIL_TYPE                             :{BLACK}Rail type: {LTBLUE}{STRING}
 STR_LANG_AREA_INFORMATION_ROAD_TYPE                             :{BLACK}Road type: {LTBLUE}{STRING}
 STR_LANG_AREA_INFORMATION_TRAM_TYPE                             :{BLACK}Tram type: {LTBLUE}{STRING}
@@ -6302,3 +6311,7 @@ STR_ERROR_PRODUCTION_WORLD                   :This recipe is not available on th
 STR_ERROR_PRODUCTION_CARGO                   :This recipe requires cargo types that are not available
 STR_ERROR_PRODUCTION_BUILD                   :Cannot build production facility
 STR_ERROR_PRODUCTION_REMOVE                  :Cannot remove production facility
+
+STR_ERROR_COMMONWEALTH_CONTENT               :Commonwealth content is incomplete or incompatible; both exact v2 packs and all 13 cargoes are required
+STR_ERROR_COMMONWEALTH_RESEARCH              :Required Commonwealth research has not been completed
+STR_ERROR_COMMONWEALTH_PHASE                 :This vehicle or facility is not available in this world's phase

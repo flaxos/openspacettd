@@ -11,6 +11,10 @@
 #include "commonwealth_pack.h"
 #include "planet_manager.h"
 #include "../engine_base.h"
+#include "../newgrf_config.h"
+#include "../newgrf.h"
+#include "../cargotype.h"
+#include "../table/strings.h"
 
 #include <mutex>
 #include <sstream>
@@ -20,6 +24,46 @@ static std::map<uint16_t, size_t> _cst_index_map;
 static std::vector<CargoDeliveryLoop> _cargo_loops;
 static std::mutex _cst_mutex;
 static bool _cst_initialized = false;
+
+CargoLabel CommonwealthPackManager::GetCargoLabel(CommonwealthCargoID cargo)
+{
+	static constexpr std::array<CargoLabel, 13> labels = {
+		CargoLabel{"SILC"}, CargoLabel{"IRON"}, CargoLabel{"STEL"}, CargoLabel{"COPR"},
+		CargoLabel{"WIRE"}, CargoLabel{"SAND"}, CargoLabel{"CHIP"}, CargoLabel{"RARE"},
+		CargoLabel{"ALLO"}, CargoLabel{"POLY"}, CargoLabel{"BCRY"}, CargoLabel{"QCRY"}, CargoLabel{"CCRY"},
+	};
+	return static_cast<size_t>(cargo) < labels.size() ? labels[static_cast<size_t>(cargo)] : CT_INVALID;
+}
+
+CommonwealthContentStatus CommonwealthPackManager::GetContentStatus()
+{
+	const GRFConfig *industry = nullptr;
+	const GRFConfig *rail = nullptr;
+	for (const auto &config : _grfconfig) {
+		if (config->ident.grfid == COMMONWEALTH_INDUSTRY_GRFID) industry = config.get();
+		if (config->ident.grfid == COMMONWEALTH_RAIL_GRFID) rail = config.get();
+	}
+	if (industry == nullptr && rail == nullptr) return {};
+	for (const GRFConfig *config : {industry, rail}) {
+		if (config == nullptr || config->version != 2 || config->status != GRFStatus::Activated ||
+				config->flags.Any({GRFConfigFlag::Invalid, GRFConfigFlag::Compatible})) {
+			return {CommonwealthContentMode::Invalid, "Both exact Commonwealth v2 packs must be active"};
+		}
+	}
+	for (uint8_t i = 0; i < static_cast<uint8_t>(CommonwealthCargoID::Count); ++i) {
+		CargoLabel label = GetCargoLabel(static_cast<CommonwealthCargoID>(i));
+		uint count = 0;
+		for (const CargoSpec *cargo : CargoSpec::Iterate()) {
+			if (cargo->label != label) continue;
+			if (cargo->grffile == nullptr || cargo->grffile->grfid != COMMONWEALTH_INDUSTRY_GRFID) {
+				return {CommonwealthContentMode::Invalid, "A Commonwealth cargo is supplied by conflicting content"};
+			}
+			++count;
+		}
+		if (count != 1) return {CommonwealthContentMode::Invalid, "A Commonwealth cargo label is missing or duplicated"};
+	}
+	return {CommonwealthContentMode::Active, {}};
+}
 
 void CommonwealthPackManager::Initialize()
 {
@@ -122,7 +166,7 @@ void CommonwealthPackManager::Initialize()
 		_cst_specs.push_back(mark4);
 	}
 
-	/* 2. Register Closed Delivery Loops for the 12-Cargo Suite (+ Consumer Crystals) */
+	/* 2. Register Closed Delivery Loops for the 13-Cargo Suite */
 	_cargo_loops = {
 		{
 			CommonwealthCargoID::StoneSlag,
@@ -281,20 +325,29 @@ const std::vector<CSTRollingStockSpec> &CommonwealthPackManager::GetAllCSTRollin
 	return _cst_specs;
 }
 
-bool CommonwealthPackManager::IsVehicleBuildableForCompany(CompanyID company, EngineID eid, WorldID world)
+StringID CommonwealthPackManager::GetVehicleAvailabilityError(CompanyID company, EngineID eid, WorldID world)
 {
 	const Engine *engine = Engine::GetIfValid(eid);
-	if (engine == nullptr) return false;
-	if (engine->type != VehicleType::Train || engine->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID) return true;
-
-	/* NewGRF local IDs are stable; engine pool IDs depend on the loaded content. */
+	if (engine == nullptr) return STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE;
+	if (engine->type != VehicleType::Train || engine->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID) return {};
+	if (GetContentStatus().mode == CommonwealthContentMode::Invalid) return STR_ERROR_COMMONWEALTH_CONTENT;
 	static constexpr std::array<uint16_t, 5> families = {
 		CST_ENGINE_PIONEER_STEAM, CST_ENGINE_VULCAN_STEAM, CST_ENGINE_TITAN_DIESEL,
 		CST_ENGINE_CST_E40, CST_ENGINE_MARK4_MAGLEV,
 	};
 	uint16_t local_id = engine->grf_prop.local_id;
-	if (local_id < 0x20 || local_id >= 0x20 + families.size()) return true;
-	return IsRollingStockBuildableForCompany(company, EngineID{families[local_id - 0x20]}, world);
+	if (local_id < 0x20 || local_id >= 0x20 + families.size()) return {};
+	const auto *spec = GetRollingStockSpec(EngineID{families[local_id - 0x20]});
+	if (company != CompanyID::Invalid() && spec->tech_required != TECH_NONE &&
+			!TechTreeManager::IsTechUnlocked(company, spec->tech_required)) return STR_ERROR_COMMONWEALTH_RESEARCH;
+	const PlanetRegion *region = PlanetManager::GetRegion(world);
+	if (region != nullptr && !spec->allowed_phases.contains(region->phase)) return STR_ERROR_COMMONWEALTH_PHASE;
+	return {};
+}
+
+bool CommonwealthPackManager::IsVehicleBuildableForCompany(CompanyID company, EngineID eid, WorldID world)
+{
+	return GetVehicleAvailabilityError(company, eid, world) == StringID{};
 }
 
 bool CommonwealthPackManager::IsRollingStockBuildableForCompany(CompanyID company, EngineID eid, WorldID world)

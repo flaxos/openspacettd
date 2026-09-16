@@ -246,11 +246,26 @@ public:
 					region != nullptr ? region->name : GetString(STR_SPACEPORT_UNKNOWN_WORLD)));
 			if (IsValidCargoType(conduit->cargo_type)) {
 				this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_OUTPUT,
-						conduit->cargo_type, EdgeConduitManager::CalculateProduction(*conduit)));
+						conduit->cargo_type, conduit->last_month_potential));
+				this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_LAST,
+						conduit->cargo_type, conduit->last_month_allocated));
 			} else {
 				this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_NO_CARGO));
 			}
-			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL, conduit->total_produced));
+			this->landinfo_data.push_back(GetString(STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_TOTAL, conduit->total_allocated));
+			StringID status_string;
+			switch (conduit->last_delivery_status) {
+				case ConduitDeliveryStatus::NeverRun: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NEVER; break;
+				case ConduitDeliveryStatus::NoCatchment: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NO_CATCHMENT; break;
+				case ConduitDeliveryStatus::NoEligibleStation: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NO_ELIGIBLE; break;
+				case ConduitDeliveryStatus::NoWholeUnitsAllocated: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NO_WHOLE_UNITS; break;
+				case ConduitDeliveryStatus::PacketAllocationFailed: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_PACKET_FULL; break;
+				case ConduitDeliveryStatus::Allocated: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_ALLOCATED; break;
+				case ConduitDeliveryStatus::DirectFeederDispatched: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_DIRECT_DISPATCHED; break;
+				case ConduitDeliveryStatus::DirectFeederUnavailable: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_DIRECT_UNAVAILABLE; break;
+				case ConduitDeliveryStatus::End: status_string = STR_LAND_AREA_INFORMATION_EDGE_CONDUIT_STATUS_NEVER; break;
+			}
+			this->landinfo_data.push_back(GetString(status_string));
 		}
 
 		/* Portal heads deliberately reuse tunnel rendering; make their identity,

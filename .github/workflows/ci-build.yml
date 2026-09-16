@@ -15,6 +15,27 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
 jobs:
+  commonwealth-content:
+    name: Commonwealth content
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+        cache: pip
+        cache-dependency-path: requirements-commonwealth-grf.txt
+
+    - name: Install NML compiler
+      run: python3 -m pip install -r requirements-commonwealth-grf.txt
+
+    - name: Verify Commonwealth NewGRFs
+      run: python3 scripts/build_commonwealth_grf.py --verify
+
   emscripten:
     name: Emscripten
 
@@ -95,6 +116,7 @@ jobs:
   check_annotations:
     name: Check Annotations
     needs:
+    - commonwealth-content
     - emscripten
     - linux
     - macos

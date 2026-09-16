@@ -23,6 +23,19 @@
 using ConduitID = uint32_t;
 static constexpr ConduitID INVALID_CONDUIT{UINT32_MAX};
 
+/** Outcome of the most recent monthly Edge Conduit delivery attempt. */
+enum class ConduitDeliveryStatus : uint8_t {
+	NeverRun = 0, ///< No monthly delivery attempt has occurred.
+	NoCatchment, ///< No station covered the conduit tile.
+	NoEligibleStation, ///< Catchment stations failed native ownership, rating, service, or facility rules.
+	NoWholeUnitsAllocated, ///< Native rating and fractional carry produced no whole cargo unit.
+	PacketAllocationFailed, ///< Native cargo-packet storage was unavailable.
+	Allocated, ///< At least one whole cargo unit reached local station waiting cargo.
+	DirectFeederDispatched, ///< Direct inter-world feeder dispatch succeeded.
+	DirectFeederUnavailable, ///< Direct inter-world feeder dispatch could not be created.
+	End, ///< Sentinel value used to validate saved status values.
+};
+
 /** Representation of an edge mineral extraction conduit. */
 struct EdgeConduit {
 	ConduitID id{INVALID_CONDUIT};
@@ -32,7 +45,11 @@ struct EdgeConduit {
 	CargoType cargo_type{0};
 	uint32_t production_rate{50}; ///< Base monthly production rate in units.
 	Owner owner{INVALID_OWNER};
-	uint32_t total_produced{0};
+	uint32_t total_produced{0}; ///< Legacy nominal-output counter retained for savegame compatibility.
+	uint32_t last_month_potential{0}; ///< Extraction potential calculated for the latest monthly attempt.
+	uint32_t last_month_allocated{0}; ///< Whole units actually allocated to local station waiting cargo.
+	uint64_t total_allocated{0}; ///< Cumulative whole units actually allocated to local stations.
+	ConduitDeliveryStatus last_delivery_status{ConduitDeliveryStatus::NeverRun}; ///< Outcome of the latest monthly attempt.
 
 	/* Sprint 20 Interplanetary Feeder fields */
 	bool direct_feeder_enabled{false};          ///< Whether raw extraction feeds directly into inter-world freight queues.

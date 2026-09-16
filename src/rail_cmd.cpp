@@ -447,7 +447,7 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 	WorldID track_world = PlanetManager::GetTileWorld(tile);
 	bool use_fabrication = (track_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
 	if (use_fabrication && !FabricationManager::CanFabricateTrack(track_world, _current_company, railtype)) {
-		return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+		return FabricationManager::CheckMaterials(track_world, _current_company, FabricationManager::GetTrackBOM(railtype));
 	}
 
 	Slope tileh = GetTileSlope(tile);
@@ -1047,7 +1047,7 @@ CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType ra
 	bool use_depot_fab = (depot_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
 	if (use_depot_fab && !rotate_existing_depot) {
 		if (!FabricationManager::CanFabricateDepot(depot_world, _current_company, railtype)) {
-			return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+			return FabricationManager::CheckMaterials(depot_world, _current_company, FabricationManager::GetDepotBOM(railtype));
 		}
 	}
 
@@ -1165,7 +1165,7 @@ CommandCost CmdBuildSingleSignal(DoCommandFlags flags, TileIndex tile, Track tra
 		/* build new signals */
 		if (use_signal_fab) {
 			if (!FabricationManager::CanFabricateSignal(signal_world, _current_company)) {
-				return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+				return FabricationManager::CheckMaterials(signal_world, _current_company, FabricationManager::GetSignalBOM());
 			}
 		}
 		cost = CommandCost(ExpensesType::Construction, GetNewRailSignalCost(signal_world, _current_company));

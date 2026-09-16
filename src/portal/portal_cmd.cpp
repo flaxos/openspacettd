@@ -22,6 +22,7 @@
 #include "fabrication_manager.h"
 #include "tech_tree.h"
 #include "production_chain.h"
+#include "commonwealth_pack.h"
 #include "../station_func.h"
 #include "../window_func.h"
 #include "../cargotype.h"
@@ -836,6 +837,8 @@ CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, 
 	TileIndex tile = st->train_station.tile;
 	WorldID world = PlanetManager::GetTileWorld(tile);
 	std::string error;
+	if (CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid) return CommandCost(STR_ERROR_COMMONWEALTH_CONTENT);
+	if (recipe == RECIPE_STEEL_SMELTING && !TechTreeManager::IsTechUnlocked(_current_company, TECH_MATERIALS_1)) return CommandCost(STR_ERROR_COMMONWEALTH_RESEARCH);
 	if (world == INVALID_WORLD || !ProductionChainManager::CanConstructFacility(world, recipe, error)) return CommandCost(STR_ERROR_PRODUCTION_WORLD);
 	const ProductionRecipe *rec = ProductionChainManager::GetRecipe(recipe);
 	for (const auto &[cargo, amount] : rec->inputs) {

@@ -11,11 +11,16 @@
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../portal/commonwealth_pack.h"
+#include "../portal/logistics_hub.h"
 #include "../portal/planet_manager.h"
 #include "../portal/tech_tree.h"
 #include "../portal/content_manifest.h"
 #include "../portal/fabrication_manager.h"
 #include "../engine_base.h"
+#include "../newgrf_config.h"
+#include "../newgrf.h"
+#include "../cargotype.h"
+#include "../table/strings.h"
 
 #include <fstream>
 #include <filesystem>
@@ -92,7 +97,7 @@ TEST_CASE("Sprint 37: In-Tree NML Package Source Integrity", "[sprint37]")
 
 	std::ifstream ind_file(ind_nml);
 	std::string ind_content((std::istreambuf_iterator<char>(ind_file)), std::istreambuf_iterator<char>());
-	CHECK(ind_content.find("OST\\x01") != std::string::npos);
+	CHECK(ind_content.find("OST\\01") != std::string::npos);
 	CHECK(ind_content.find("FEAT_CARGOS") != std::string::npos);
 	CHECK(ind_content.find("FEAT_INDUSTRIES") != std::string::npos);
 	CHECK(ind_content.find("SILC") != std::string::npos);
@@ -111,7 +116,7 @@ TEST_CASE("Sprint 37: In-Tree NML Package Source Integrity", "[sprint37]")
 
 	std::ifstream rail_file(rail_nml);
 	std::string rail_content((std::istreambuf_iterator<char>(rail_file)), std::istreambuf_iterator<char>());
-	CHECK(rail_content.find("OST\\x02") != std::string::npos);
+	CHECK(rail_content.find("OST\\02") != std::string::npos);
 	CHECK(rail_content.find("FEAT_TRAINS") != std::string::npos);
 	CHECK(rail_content.find("cst_vulcan_steam") != std::string::npos);
 	CHECK(rail_content.find("cst_titan_diesel") != std::string::npos);
@@ -119,65 +124,27 @@ TEST_CASE("Sprint 37: In-Tree NML Package Source Integrity", "[sprint37]")
 	CHECK(rail_content.find("cst_mark4_maglev") != std::string::npos);
 }
 
-TEST_CASE("Sprint 37: Reproducible Binary GRF Container Synthesis", "[sprint37]")
+TEST_CASE("Sprint 37: Reproducible NML-Compiled GRF Containers", "[sprint37]")
 {
-	fs::path ind_grf_path = ResolvePath("pkg/commonwealth_industry/openspacettd_industry.grf");
-	fs::path rail_grf_path = ResolvePath("pkg/commonwealth_rail/openspacettd_rail.grf");
+	fs::path ind_grf_path = ResolvePath("bin/newgrf/openspacettd_industry.grf");
+	fs::path rail_grf_path = ResolvePath("bin/newgrf/openspacettd_rail.grf");
 
 	REQUIRE(fs::exists(ind_grf_path));
 	REQUIRE(fs::exists(rail_grf_path));
 
-	/* Verify Industry GRF Header & Action 8 */
-	{
-		std::ifstream f(ind_grf_path, std::ios::binary);
-		REQUIRE(f.is_open());
+	auto verify_grf = [](const fs::path &path, const std::array<uint8_t, 4> &grfid) {
+		std::ifstream file(path, std::ios::binary);
+		REQUIRE(file.is_open());
+		std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		static constexpr std::array<uint8_t, 10> container_v2 = {0x00, 0x00, 'G', 'R', 'F', 0x82, 0x0D, 0x0A, 0x1A, 0x0A};
+		REQUIRE(bytes.size() > 1000);
+		REQUIRE(bytes.size() >= container_v2.size());
+		CHECK(std::equal(container_v2.begin(), container_v2.end(), bytes.begin()));
+		CHECK(std::search(bytes.begin(), bytes.end(), grfid.begin(), grfid.end()) != bytes.end());
+	};
 
-		uint16_t sprite0_len = 0;
-		f.read(reinterpret_cast<char*>(&sprite0_len), sizeof(sprite0_len));
-		CHECK(sprite0_len > 0); // Container Version 1 signature
-
-		uint8_t sprite_type = 0;
-		f.read(reinterpret_cast<char*>(&sprite_type), sizeof(sprite_type));
-		CHECK(sprite_type == 0xFF); // Pseudo-sprite
-
-		uint8_t action = 0;
-		f.read(reinterpret_cast<char*>(&action), sizeof(action));
-		CHECK(action == 0x08); // Action 8
-
-		uint8_t grf_ver = 0;
-		f.read(reinterpret_cast<char*>(&grf_ver), sizeof(grf_ver));
-		CHECK(grf_ver == 8);
-
-		std::array<uint8_t, 4> grfid{};
-		f.read(reinterpret_cast<char*>(grfid.data()), 4);
-		CHECK(grfid == COMMONWEALTH_INDUSTRY_GRFID_BYTES);
-	}
-
-	/* Verify Rail GRF Header & Action 8 */
-	{
-		std::ifstream f(rail_grf_path, std::ios::binary);
-		REQUIRE(f.is_open());
-
-		uint16_t sprite0_len = 0;
-		f.read(reinterpret_cast<char*>(&sprite0_len), sizeof(sprite0_len));
-		CHECK(sprite0_len > 0); // Container Version 1 signature
-
-		uint8_t sprite_type = 0;
-		f.read(reinterpret_cast<char*>(&sprite_type), sizeof(sprite_type));
-		CHECK(sprite_type == 0xFF); // Pseudo-sprite
-
-		uint8_t action = 0;
-		f.read(reinterpret_cast<char*>(&action), sizeof(action));
-		CHECK(action == 0x08); // Action 8
-
-		uint8_t grf_ver = 0;
-		f.read(reinterpret_cast<char*>(&grf_ver), sizeof(grf_ver));
-		CHECK(grf_ver == 8);
-
-		std::array<uint8_t, 4> grfid{};
-		f.read(reinterpret_cast<char*>(grfid.data()), 4);
-		CHECK(grfid == COMMONWEALTH_RAIL_GRFID_BYTES);
-	}
+	verify_grf(ind_grf_path, COMMONWEALTH_INDUSTRY_GRFID_BYTES);
+	verify_grf(rail_grf_path, COMMONWEALTH_RAIL_GRFID_BYTES);
 }
 
 TEST_CASE("Sprint 37: Content Admission Boundary and Manifest Integration", "[sprint37]")
@@ -341,7 +308,7 @@ TEST_CASE("Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage", "[sprint37]"
 	CHECK(mark4_bom.GetRequirement(StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics)) == 15);
 }
 
-TEST_CASE("Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops", "[sprint37]")
+TEST_CASE("Sprint 37: Complete 13-Cargo Economy Closed Delivery Loops", "[sprint37]")
 {
 	SetupSprint37TestWorlds();
 
@@ -424,4 +391,125 @@ TEST_CASE("Sprint 37: Runtime gating uses pack identity and local engine IDs", "
 	_engine_pool.CleanPool();
 	PlanetManager::Reset();
 	TechTreeManager::Reset();
+}
+
+/** Restore global NewGRF/cargo state even when a REQUIRE aborts a section. */
+struct CommonwealthContentScope {
+	GRFConfigList configs = std::move(_grfconfig);
+	std::array<CargoSpec, NUM_CARGO> cargos;
+	GRFFile industry;
+	CommonwealthContentScope()
+	{
+		for (size_t i = 0; i < NUM_CARGO; ++i) cargos[i] = *CargoSpec::Get(i);
+		industry.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+		for (auto id : {COMMONWEALTH_INDUSTRY_GRFID, COMMONWEALTH_RAIL_GRFID}) {
+			auto config = std::make_unique<GRFConfig>();
+			config->ident.grfid = id;
+			config->version = 2;
+			config->status = GRFStatus::Activated;
+			_grfconfig.push_back(std::move(config));
+		}
+		for (size_t i = 0; i < NUM_CARGO; ++i) CargoSpec::Get(i)->bitnum = INVALID_CARGO_BITNUM;
+		for (uint8_t i = 0; i < 13; ++i) {
+			auto *cargo = CargoSpec::Get(16 + i);
+			cargo->label = CommonwealthPackManager::GetCargoLabel(static_cast<CommonwealthCargoID>(i));
+			cargo->bitnum = i;
+			cargo->grffile = &industry;
+		}
+		BuildCargoLabelMap();
+		ProductionChainManager::InitDefaultRecipes();
+	}
+	~CommonwealthContentScope()
+	{
+		_grfconfig = std::move(configs);
+		for (size_t i = 0; i < NUM_CARGO; ++i) *CargoSpec::Get(i) = cargos[i];
+		BuildCargoLabelMap();
+		ProductionChainManager::InitDefaultRecipes();
+		TechTreeManager::Reset();
+		StockpileManager::Reset();
+	}
+};
+
+TEST_CASE("Commonwealth content binds distinct loaded cargoes and rejects incomplete sets", "[wp11]")
+{
+	CommonwealthContentScope scope;
+	REQUIRE(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Active);
+	for (uint8_t i = 0; i < 13; ++i) CHECK(ProductionChainManager::GetDefaultCargo(static_cast<CommonwealthCargoID>(i)) == CargoType{static_cast<uint8_t>(16 + i)});
+	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy) != StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal));
+	CHECK(StockpileManager::RoleToDefaultCargo(FabricationRole::BlankCrystals) != StockpileManager::RoleToDefaultCargo(FabricationRole::EnrichedCrystals));
+	SECTION("Missing pack") { _grfconfig.pop_back(); }
+	SECTION("Legacy version") { _grfconfig[0]->version = 1; }
+	SECTION("Compatible replacement") { _grfconfig[0]->flags.Set(GRFConfigFlag::Compatible); }
+	SECTION("Disabled pack") { _grfconfig[0]->status = GRFStatus::Disabled; }
+	SECTION("Missing label") { CargoSpec::Get(16)->bitnum = INVALID_CARGO_BITNUM; }
+	SECTION("Duplicate label") { *CargoSpec::Get(30) = *CargoSpec::Get(16); }
+	SECTION("Foreign label") { CargoSpec::Get(16)->grffile = nullptr; }
+	REQUIRE(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
+	CHECK(ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre) == INVALID_CARGO);
+	CHECK(FabricationManager::CheckMaterials(WorldID{0}, CompanyID{0}, FabricationManager::GetDepotBOM(RAILTYPE_RAIL)).GetErrorMessage() == STR_ERROR_COMMONWEALTH_CONTENT);
+}
+
+TEST_CASE("Commonwealth fabrication requires research and consumes distinct materials once", "[wp11]")
+{
+	CommonwealthContentScope scope;
+	TechTreeManager::Reset();
+	StockpileManager::Reset();
+	const WorldID world{0};
+	const CompanyID company{0};
+	auto bom = FabricationManager::GetDepotBOM(RAILTYPE_RAIL);
+	CargoType steel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	StockpileManager::AddCargo(world, company, steel, 10);
+	StockpileManager::AddCargo(world, company, ballast, 5);
+	CHECK(FabricationManager::CheckMaterials(world, company, bom).GetErrorMessage() == STR_ERROR_COMMONWEALTH_RESEARCH);
+	CHECK_FALSE(FabricationManager::ConsumeDepotBOM(world, company, RAILTYPE_RAIL));
+	CHECK(StockpileManager::GetStock(world, company, steel) == 10);
+	TechTreeManager::RestoreCompanyTech(company, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
+	CHECK_FALSE(FabricationManager::CanFabricateDepot(WorldID{1}, company, RAILTYPE_RAIL));
+	CHECK_FALSE(FabricationManager::CanFabricateDepot(world, CompanyID{1}, RAILTYPE_RAIL));
+	REQUIRE(FabricationManager::ConsumeDepotBOM(world, company, RAILTYPE_RAIL));
+	CHECK(StockpileManager::GetStock(world, company, steel) == 0);
+	CHECK(StockpileManager::GetStock(world, company, ballast) == 0);
+	CHECK_FALSE(FabricationManager::ConsumeDepotBOM(world, company, RAILTYPE_RAIL));
+}
+
+TEST_CASE("WP11 active cargo conversion preserves buffers and applies Materials III yield", "[wp11]")
+{
+	CommonwealthContentScope scope;
+	ProductionChainManager::Reset();
+	PlanetManager::Reset();
+	LogisticsHubManager::Reset();
+	TechTreeManager::Reset();
+	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{0}, .name = "WP11 refining",
+		.phase = WorldPhase::Phase2_Developed, .min_x = 1, .min_y = 1, .max_x = 30, .max_y = 30}));
+	FacilityID id = ProductionChainManager::RegisterFacility(TileIndex{65}, WorldID{0}, RECIPE_STEEL_SMELTING, CompanyID{0}, 100);
+	REQUIRE(id != INVALID_FACILITY);
+	CargoType iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	CargoType steel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
+	ProductionChainManager::DeliverCargo(id, iron, 40);
+	auto *facility = ProductionChainManager::GetFacility(id);
+	SECTION("Base conversion") {
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(facility->input_buffers[iron] == 0);
+		CHECK(facility->output_buffers[steel] == 20);
+		CHECK(FabricationManager::GetBOMDiscountPercent(CompanyID{0}) == 80);
+	}
+	SECTION("Materials III yield and discount") {
+		TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_MATERIALS_2, TECH_MATERIALS_3});
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(facility->input_buffers[iron] == 0);
+		CHECK(facility->output_buffers[steel] == 23);
+		CHECK(FabricationManager::GetBOMDiscountPercent(CompanyID{0}) == 90);
+		CHECK(FabricationManager::GetBOMDiscountPercent(CompanyID{1}) == 80);
+	}
+	SECTION("Invalid active content freezes existing buffers") {
+		_grfconfig.pop_back();
+		ProductionChainManager::InitDefaultRecipes();
+		ProductionChainManager::ProcessMonthlyProduction();
+		CHECK(facility->input_buffers[iron] == 40);
+		CHECK(facility->output_buffers.empty());
+		CHECK(facility->total_produced == 0);
+	}
+	ProductionChainManager::Reset();
+	PlanetManager::Reset();
 }

@@ -104,6 +104,7 @@ void SetupCargoForClimate(LandscapeType l)
 	std::fill(insert, std::end(CargoSpec::array), CargoSpec{});
 
 	BuildCargoLabelMap();
+	ProductionChainManager::InitDefaultRecipes();
 }
 
 /**
@@ -140,7 +141,6 @@ void BuildCargoLabelMap()
 
 		CargoSpec::label_map.emplace(cs.label, cs.Index());
 	}
-	ProductionChainManager::InitDefaultRecipes();
 }
 
 /**

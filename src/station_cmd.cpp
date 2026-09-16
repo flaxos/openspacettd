@@ -8,6 +8,7 @@
 /** @file station_cmd.cpp Handling of station tiles. */
 
 #include "stdafx.h"
+#include "portal/commonwealth_slice.h"
 #include "portal/production_chain.h"
 #include "portal/logistics_hub.h"
 #include "core/flatset_type.hpp"
@@ -3972,7 +3973,9 @@ static void TruncateCargo(const CargoSpec *cs, GoodsEntry *ge, uint amount = UIN
 	if (!ge->HasData()) return;
 
 	StationCargoAmountMap waiting_per_source;
+	uint before = ge->TotalCount();
 	ge->GetData().cargo.Truncate(amount, &waiting_per_source);
+	if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->discarded[cs->Index()] += before - ge->TotalCount();
 	for (StationCargoAmountMap::iterator i(waiting_per_source.begin()); i != waiting_per_source.end(); ++i) {
 		Station *source_station = Station::GetIfValid(i->first);
 		if (source_station == nullptr) continue;
@@ -4416,11 +4419,23 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 	});
 }
 
-static uint UpdateStationWaiting(Station *st, CargoType cargo, uint amount, Source source)
+/**
+ * Append a fixed-point cargo amount to a station's waiting cargo.
+ * @param st Destination station.
+ * @param cargo Cargo type to append.
+ * @param amount Cargo amount with eight fractional bits.
+ * @param source Cargo source recorded in the new packet.
+ * @param packet_allocation_failed Optional flag set when packet storage is unavailable.
+ * @return Whole cargo units appended to station waiting cargo.
+ */
+static uint UpdateStationWaiting(Station *st, CargoType cargo, uint amount, Source source, bool *packet_allocation_failed = nullptr)
 {
 	/* We can't allocate a CargoPacket? Then don't do anything
 	 * at all; i.e. just discard the incoming cargo. */
-	if (!CargoPacket::CanAllocateItem()) return 0;
+	if (!CargoPacket::CanAllocateItem()) {
+		if (packet_allocation_failed != nullptr) *packet_allocation_failed = true;
+		return 0;
+	}
 
 	GoodsEntry &ge = st->goods[cargo];
 	amount += ge.amount_fract;
@@ -4618,11 +4633,15 @@ static bool CanMoveGoodsToStation(const Station *st, CargoType cargo)
 	return true;
 }
 
-uint MoveGoodsToStation(CargoType cargo, uint amount, Source source, const StationList &all_stations, Owner exclusivity)
+MoveGoodsToStationResult MoveGoodsToStationDetailed(CargoType cargo, uint amount, Source source, const StationList &all_stations, Owner exclusivity)
 {
+	MoveGoodsToStationResult result{
+		.candidate_stations = all_stations.size(),
+	};
+
 	/* Return if nothing to do. Also the rounding below fails for 0. */
-	if (all_stations.empty()) return 0;
-	if (amount == 0) return 0;
+	if (all_stations.empty()) return result;
+	if (amount == 0) return result;
 
 	Station *first_station = nullptr;
 	typedef std::pair<Station *, uint> StationInfo;
@@ -4631,6 +4650,7 @@ uint MoveGoodsToStation(CargoType cargo, uint amount, Source source, const Stati
 	for (Station *st : all_stations) {
 		if (exclusivity != INVALID_OWNER && exclusivity != st->owner) continue;
 		if (!CanMoveGoodsToStation(st, cargo)) continue;
+		result.eligible_stations++;
 
 		/* Avoid allocating a vector if there is only one station to significantly
 		 * improve performance in this common case. */
@@ -4646,12 +4666,13 @@ uint MoveGoodsToStation(CargoType cargo, uint amount, Source source, const Stati
 	}
 
 	/* no stations around at all? */
-	if (first_station == nullptr) return 0;
+	if (first_station == nullptr) return result;
 
 	if (used_stations.empty()) {
 		/* only one station around */
 		amount *= first_station->goods[cargo].rating + 1;
-		return UpdateStationWaiting(first_station, cargo, amount, source);
+		result.moved = UpdateStationWaiting(first_station, cargo, amount, source, &result.packet_allocation_failed);
+		return result;
 	}
 
 	TypedIndexContainer<std::array<uint32_t, OWNER_END.base()>, Owner> company_best = {};  // best rating for each company, including OWNER_NONE
@@ -4695,12 +4716,16 @@ uint MoveGoodsToStation(CargoType cargo, uint amount, Source source, const Stati
 		}
 	}
 
-	uint moved = 0;
 	for (auto &p : used_stations) {
-		moved += UpdateStationWaiting(p.first, cargo, p.second, source);
+		result.moved += UpdateStationWaiting(p.first, cargo, p.second, source, &result.packet_allocation_failed);
 	}
 
-	return moved;
+	return result;
+}
+
+uint MoveGoodsToStation(CargoType cargo, uint amount, Source source, const StationList &all_stations, Owner exclusivity)
+{
+	return MoveGoodsToStationDetailed(cargo, amount, source, all_stations, exclusivity).moved;
 }
 
 void UpdateStationDockingTiles(Station *st)

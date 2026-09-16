@@ -457,6 +457,10 @@ struct SlEdgeConduit {
 	uint32_t production_rate;
 	uint8_t owner;
 	uint32_t total_produced;
+	uint32_t last_month_potential; ///< Latest calculated extraction potential.
+	uint32_t last_month_allocated; ///< Latest actual local station allocation.
+	uint64_t total_allocated; ///< Cumulative actual local station allocation.
+	uint8_t last_delivery_status; ///< Latest ConduitDeliveryStatus value.
 };
 
 static const SaveLoad _edge_conduit_desc[] = {
@@ -468,6 +472,10 @@ static const SaveLoad _edge_conduit_desc[] = {
 	SLE_VAR(SlEdgeConduit, production_rate, VarTypes::U32),
 	SLE_VAR(SlEdgeConduit, owner,           VarTypes::U8),
 	SLE_VAR(SlEdgeConduit, total_produced,  VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, last_month_potential, VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, last_month_allocated, VarTypes::U32),
+	SLE_VAR(SlEdgeConduit, total_allocated,      VarTypes::U64),
+	SLE_VAR(SlEdgeConduit, last_delivery_status, VarTypes::U8),
 };
 
 /** Chunk handler for edge mineral extraction conduits (COND). */
@@ -489,6 +497,10 @@ struct CONDChunkHandler : ChunkHandler {
 				.production_rate = conduit.production_rate,
 				.owner = conduit.owner.base(),
 				.total_produced = conduit.total_produced,
+				.last_month_potential = conduit.last_month_potential,
+				.last_month_allocated = conduit.last_month_allocated,
+				.total_allocated = conduit.total_allocated,
+				.last_delivery_status = to_underlying(conduit.last_delivery_status),
 			};
 			SlSetArrayIndex(i++);
 			SlObject(&sl_cond, _edge_conduit_desc);
@@ -513,6 +525,10 @@ struct CONDChunkHandler : ChunkHandler {
 				.production_rate = sl_cond.production_rate,
 				.owner = Owner{sl_cond.owner},
 				.total_produced = sl_cond.total_produced,
+				.last_month_potential = sl_cond.last_month_potential,
+				.last_month_allocated = sl_cond.last_month_allocated,
+				.total_allocated = sl_cond.total_allocated,
+				.last_delivery_status = static_cast<ConduitDeliveryStatus>(sl_cond.last_delivery_status),
 			};
 			EdgeConduitManager::RestoreConduit(cond);
 		}

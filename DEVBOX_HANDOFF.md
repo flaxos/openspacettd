@@ -1,6 +1,23 @@
 # OpenSpaceTTD recovery checkpoint — 2026-09-15
 
-## Current checkpoint — 16 September, portal routing and PR
+## Current checkpoint — 16 September, WP-11 structural slice
+
+The remaining WP-11 structural economic slice is implemented locally on
+`fix/wp11-content-economic-slice` (base `3081af218d`). Both binaries are rebuilt;
+**377/377 CTests pass**, the unused-string check is clean, and pinned NML reproduces
+both packs and their manifest. Full active-content runs at years 1800 and 2300
+validate loaded catalog/refits, research/phase purchase checks, mined ore → steel,
+physical cargo and cash ledgers, fresh-process reload, blocked-route recovery,
+three complete steel deliveries, and a connected depot consuming 10 steel +
+5 ballast exactly once. Linux CI now runs this proof; GitHub has not run it yet.
+
+Start the human check with a copy of `demo/wp11-v1-operational.sav`.
+[Short UAT steps](demo/WP11-UAT.md) · [evidence and hashes](docs/audit/2026-09-16/wp11/README.md).
+Graphical UAT-13/14 and save/reload remain pending. Other production pipelines,
+federation and art remain outside this slice. No existing save was retrofitted.
+This implementation is uncommitted; no new push or PR was made in this turn.
+
+## Earlier checkpoint — 16 September, portal routing and PR
 
 All recovery work is committed on `fix/recovery-wp01-wp09`, based on current main
 `345e258867`. The subsequent user-reported YAPF assertion is fixed in `174e571780`:

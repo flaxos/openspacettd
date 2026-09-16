@@ -61,6 +61,7 @@ static void SetupBlueprintTestEnv(uint32_t map_w = 256, uint32_t map_h = 256)
 	FabricationManager::Reset();
 	StockpileManager::Reset();
 	TechTreeManager::Reset();
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
 	ResetRailTypes();
 	StationClass::Reset();
 	_vehicle_pool.CleanPool();
@@ -852,4 +853,32 @@ TEST_CASE("Blueprint infrastructure money and materials survive save reload", "[
 	CHECK(overlap.GetCost() == 0);
 	std::filesystem::remove(path);
 	std::filesystem::remove(dir);
+}
+
+TEST_CASE("WP11 Blueprint fabrication rejects locked research without mutation", "[wp11][blueprint]")
+{
+	SetupBlueprintTestEnv();
+	TechTreeManager::Reset();
+	Blueprint bp;
+	bp.width = bp.height = 1;
+	BlueprintTile depot;
+	depot.type = BlueprintTileType::Depot;
+	depot.railtype = RAILTYPE_BEGIN;
+	depot.dir = DiagDirection::NE;
+	bp.tiles.push_back(depot);
+	CompanyID company = _current_company;
+	TileIndex tile = TileXY(30, 30);
+	FabricationManager::SetFabricateFromStockpile(company, true);
+	CargoType steel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	StockpileManager::AddCargo(WorldID{0}, company, steel, 10);
+	StockpileManager::AddCargo(WorldID{0}, company, ballast, 5);
+	Money cash = Company::Get(company)->money;
+	for (DoCommandFlags flags : {DoCommandFlags{}, DoCommandFlags{DoCommandFlag::Execute}}) {
+		CHECK(CmdPlaceBlueprint(flags, tile, bp.ToJson(), RAILTYPE_BEGIN, false).GetErrorMessage() == STR_ERROR_COMMONWEALTH_RESEARCH);
+		CHECK(IsTileType(tile, TileType::Clear));
+		CHECK(Company::Get(company)->money == cash);
+		CHECK(StockpileManager::GetStock(WorldID{0}, company, steel) == 10);
+		CHECK(StockpileManager::GetStock(WorldID{0}, company, ballast) == 5);
+	}
 }
