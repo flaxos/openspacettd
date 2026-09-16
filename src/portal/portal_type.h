@@ -42,6 +42,18 @@ struct PortalExitPosition {
 	Track track = Track::Begin;
 };
 
+/** Distinct operational classes for one-tile OpenSpace portal-like heads. */
+enum class PortalGateKind : uint8_t {
+	None = 0,              ///< Not managed by OpenSpace portal sidecar state.
+	LocalLinked,           ///< A local wormhole pair with both physical endpoints.
+	LocalUnlinked,         ///< A constructed local gate head that has not been linked.
+	LocalStale,            ///< A local pair whose registry or physical opposite is missing.
+	ExternalLinked,        ///< A valid federation departure gate with a remote world and gate id.
+	ExternalUnlinked,      ///< An external gate record without a usable remote binding.
+	ExternalStale,         ///< An external gate whose local physical endpoint is gone or invalid.
+	EdgeConduit,           ///< A one-ended extraction conduit, not a train portal.
+};
+
 /** Endpoint of a portal wormhole gate. */
 struct PortalEndpoint {
 	TileIndex tile = INVALID_TILE;                    ///< Physical tile location of the portal head.
@@ -51,6 +63,34 @@ struct PortalEndpoint {
 	constexpr bool IsValid() const
 	{
 		return tile != INVALID_TILE;
+	}
+};
+
+/** Classification result for a portal, federation gate, conduit or stale endpoint. */
+struct PortalGateClassification {
+	PortalGateKind kind = PortalGateKind::None;
+	PortalID id = INVALID_PORTAL;
+	PortalEndpoint local_endpoint{};
+	PortalEndpoint opposite_endpoint{};
+	WorldID remote_world = INVALID_WORLD;
+	uint32_t remote_gate_id = 0;
+	uint32_t virtual_length = 1;
+
+	constexpr bool IsLocalWormhole() const
+	{
+		return kind == PortalGateKind::LocalLinked;
+	}
+
+	constexpr bool IsExternalDeparture() const
+	{
+		return kind == PortalGateKind::ExternalLinked;
+	}
+
+	constexpr bool IsClosedHead() const
+	{
+		return kind == PortalGateKind::LocalUnlinked || kind == PortalGateKind::LocalStale ||
+				kind == PortalGateKind::ExternalUnlinked || kind == PortalGateKind::ExternalStale ||
+				kind == PortalGateKind::EdgeConduit;
 	}
 };
 

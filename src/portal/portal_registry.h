@@ -112,6 +112,23 @@ public:
 	static bool IsPortalTile(TileIndex tile);
 
 	/**
+	 * Classify an OpenSpace-managed tunnel head, external gate or edge conduit.
+	 * @param tile The tile to classify.
+	 * @return Explicit gate classification; kind is None for unmanaged tiles.
+	 */
+	static PortalGateClassification ClassifyGate(TileIndex tile);
+
+	/**
+	 * Check whether a train may enter the gate from the supplied direction.
+	 * Local linked portals and valid external federation gates are enterable;
+	 * unlinked, stale and conduit heads are closed.
+	 * @param tile Portal-like tunnel head.
+	 * @param vehicle_dir Direction of vehicle movement into the head.
+	 * @return True when native entry is safe for this gate class and direction.
+	 */
+	static bool CanEnterGate(TileIndex tile, DiagDirection vehicle_dir);
+
+	/**
 	 * Resolve the opposite portal endpoint tile.
 	 * @param tile The source portal tile.
 	 * @return The destination portal tile, or INVALID_TILE if not a registered portal.
