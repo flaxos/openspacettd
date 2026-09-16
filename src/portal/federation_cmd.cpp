@@ -85,98 +85,97 @@ bool FederationTransferManager::InitiateConsistDeparture(Train *consist, TileInd
 		link->local_endpoint.world_id.base(), link->id.base(),
 		cid.sequence, TimerGameTick::counter);
 
-	ConsistDespawnResult despawn_res = ConsistMaterializer::DespawnForTransfer(front, owner_token,
-		[&](const ConsistSnapshot &snapshot, const ConsistSnapshotBytes &snapshot_bytes) {
-			/* 1. Record Prepared checkpoint in TransferJournal */
-			TransferCheckpoint cp;
-			cp.request_id = request_id;
-			cp.namespace_high = cid.name_space.high;
-			cp.namespace_low = cid.name_space.low;
-			cp.consist_sequence = cid.sequence;
-			cp.source_world = link->local_endpoint.world_id.base();
-			cp.destination_world = link->remote_world.base();
-			cp.snapshot = snapshot_bytes.bytes;
-			cp.state = TransferCheckpointState::Prepared;
-			TransferJournal::Prepare(cp);
+	ConsistDespawnResult capture_res = ConsistMaterializer::CaptureForTransfer(front, owner_token);
+	if (!capture_res.success) return false;
 
-			if (HasExternalAuthority()) {
-				/* Build cargo breakdown JSON */
-				uint32_t total_cargo = 0;
-				nlohmann::json breakdown = nlohmann::json::object();
-				for (const auto &unit : snapshot.units) {
-					total_cargo += unit.cargo_count;
-					if (unit.cargo_count > 0) {
-						std::string c_key = fmt::format("{}", unit.cargo_type);
-						breakdown[c_key] = breakdown.value(c_key, 0) + unit.cargo_count;
-					}
-				}
+	const ConsistSnapshot &snapshot = capture_res.snapshot;
+	const ConsistSnapshotBytes &snapshot_bytes = capture_res.snapshot_bytes;
 
-				/* Build orders JSON */
-				nlohmann::json orders_json = nlohmann::json::array();
-				for (const auto &dest : snapshot.orders) {
-					orders_json.push_back({
-						{"type", static_cast<uint8_t>(dest.type)},
-						{"dest_seq", dest.destination_sequence},
-						{"target_world", dest.target_world.base()},
-					});
-				}
+	/* 1. Record Prepared checkpoint while the physical consist still exists. */
+	TransferCheckpoint cp;
+	cp.request_id = request_id;
+	cp.namespace_high = cid.name_space.high;
+	cp.namespace_low = cid.name_space.low;
+	cp.consist_sequence = cid.sequence;
+	cp.source_world = link->local_endpoint.world_id.base();
+	cp.destination_world = link->remote_world.base();
+	cp.snapshot = snapshot_bytes.bytes;
+	cp.state = TransferCheckpointState::Prepared;
+	if (!TransferJournal::Prepare(cp)) return false;
 
-				nlohmann::json payload = {
-					{"request_id", request_id},
-					{"source_world", link->local_endpoint.world_id.base()},
-					{"dest_world", link->remote_world.base()},
-					{"source_gate", link->id.base()},
-					{"dest_gate", link->remote_gate_id},
-					{"snapshot_base64", Base64Encode(snapshot_bytes.bytes)},
-					{"total_cargo", total_cargo},
-					{"cargo_breakdown", breakdown},
-					{"orders", orders_json},
-					{"current_order_index", snapshot.current_order_index},
-					{"consist_id", fmt::format("{:x}:{:x}:{}", cid.name_space.high, cid.name_space.low, cid.sequence)},
-					{"transit_delay_sec", static_cast<double>(link->virtual_length) * 0.2 + 0.5},
-					{"priority", "STANDARD"}
-				};
-
-				AuthorityRequest init_req(GetAuthorityUrl(), AuthorityOperation::Initiate, payload, link->local_endpoint.world_id.base());
-				if (!init_req.ExecuteSync()) {
-					return false;
-				}
-				const auto &resp = init_req.GetResponse();
-				if (!resp.contains("transfer_id")) return false;
-				std::string tx_id = resp["transfer_id"].get<std::string>();
-
-				TransferJournal::BindTransfer(link->local_endpoint.world_id.base(), request_id, tx_id);
-
-				AuthorityRequest dep_req(GetAuthorityUrl(), AuthorityOperation::Depart, {{"transfer_id", tx_id}}, link->local_endpoint.world_id.base());
-				if (!dep_req.ExecuteSync()) {
-					return false;
-				}
-
-				TransferJournal::MarkDeparted(link->local_endpoint.world_id.base(), request_id);
-				Debug(net, 1, "[Federation] Consist departed: transfer_id={}, request_id={}, source_world={}, dest_world={}",
-					tx_id, request_id, link->local_endpoint.world_id.base(), link->remote_world.base());
-				return true;
-			} else {
-				/* In-memory service fallback */
-				std::string tx_id = UniverseAuthorityService::Instance().InitiateTransfer(
-					link->local_endpoint.world_id,
-					link->remote_world,
-					link->id.base(),
-					link->remote_gate_id,
-					snapshot_bytes,
-					transit_ticks
-				);
-
-				if (tx_id.empty()) return false;
-				TransferJournal::BindTransfer(link->local_endpoint.world_id.base(), request_id, tx_id);
-
-				if (!UniverseAuthorityService::Instance().DepartTransfer(tx_id, TimerGameTick::counter)) return false;
-				TransferJournal::MarkDeparted(link->local_endpoint.world_id.base(), request_id);
-				return true;
+	std::string tx_id;
+	if (HasExternalAuthority()) {
+		/* Build cargo breakdown JSON */
+		uint32_t total_cargo = 0;
+		nlohmann::json breakdown = nlohmann::json::object();
+		for (const auto &unit : snapshot.units) {
+			total_cargo += unit.cargo_count;
+			if (unit.cargo_count > 0) {
+				std::string c_key = fmt::format("{}", unit.cargo_type);
+				breakdown[c_key] = breakdown.value(c_key, 0) + unit.cargo_count;
 			}
-		});
+		}
 
-	return despawn_res.success;
+		/* Build orders JSON */
+		nlohmann::json orders_json = nlohmann::json::array();
+		for (const auto &dest : snapshot.orders) {
+			orders_json.push_back({
+				{"type", static_cast<uint8_t>(dest.type)},
+				{"dest_seq", dest.destination_sequence},
+				{"target_world", dest.target_world.base()},
+			});
+		}
+
+		nlohmann::json payload = {
+			{"request_id", request_id},
+			{"source_world", link->local_endpoint.world_id.base()},
+			{"dest_world", link->remote_world.base()},
+			{"source_gate", link->id.base()},
+			{"dest_gate", link->remote_gate_id},
+			{"snapshot_base64", Base64Encode(snapshot_bytes.bytes)},
+			{"total_cargo", total_cargo},
+			{"cargo_breakdown", breakdown},
+			{"orders", orders_json},
+			{"current_order_index", snapshot.current_order_index},
+			{"consist_id", fmt::format("{:x}:{:x}:{}", cid.name_space.high, cid.name_space.low, cid.sequence)},
+			{"transit_delay_sec", static_cast<double>(link->virtual_length) * 0.2 + 0.5},
+			{"priority", "STANDARD"}
+		};
+
+		AuthorityRequest init_req(GetAuthorityUrl(), AuthorityOperation::Initiate, payload, link->local_endpoint.world_id.base());
+		if (!init_req.ExecuteSync()) return false;
+		const auto &resp = init_req.GetResponse();
+		if (!resp.contains("transfer_id")) return false;
+		tx_id = resp["transfer_id"].get<std::string>();
+
+		if (!TransferJournal::BindTransfer(link->local_endpoint.world_id.base(), request_id, tx_id)) return false;
+
+		AuthorityRequest dep_req(GetAuthorityUrl(), AuthorityOperation::Depart, {{"transfer_id", tx_id}}, link->local_endpoint.world_id.base());
+		if (!dep_req.ExecuteSync()) return false;
+	} else {
+		/* In-memory service fallback */
+		tx_id = UniverseAuthorityService::Instance().InitiateTransfer(
+			link->local_endpoint.world_id,
+			link->remote_world,
+			link->id.base(),
+			link->remote_gate_id,
+			snapshot_bytes,
+			transit_ticks,
+			FreightPriority::Standard,
+			request_id
+		);
+
+		if (tx_id.empty()) return false;
+		if (!TransferJournal::BindTransfer(link->local_endpoint.world_id.base(), request_id, tx_id)) return false;
+
+		if (!UniverseAuthorityService::Instance().DepartTransfer(tx_id, TimerGameTick::counter)) return false;
+	}
+
+	if (!ConsistMaterializer::ReleaseCapturedConsist(front)) return false;
+	if (!TransferJournal::MarkDeparted(link->local_endpoint.world_id.base(), request_id)) return false;
+	Debug(net, 1, "[Federation] Consist departed: transfer_id={}, request_id={}, source_world={}, dest_world={}",
+		tx_id, request_id, link->local_endpoint.world_id.base(), link->remote_world.base());
+	return true;
 }
 
 size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, uint64_t current_tick)

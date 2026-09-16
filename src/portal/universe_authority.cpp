@@ -28,6 +28,7 @@ void UniverseAuthorityService::Reset()
 	this->_worlds.clear();
 	this->_routes.clear();
 	this->_transfers.clear();
+	this->_request_index.clear();
 	this->_trade_balances.clear();
 	this->_detailed_initiated.clear();
 	this->_detailed_completed.clear();
@@ -282,10 +283,31 @@ std::string UniverseAuthorityService::InitiateTransfer(
 	uint32_t dest_gate_id,
 	const ConsistSnapshotBytes &snapshot_bytes,
 	uint32_t transit_duration_ticks,
-	FreightPriority priority)
+	FreightPriority priority,
+	const std::string &request_id)
 {
 	if (source_world == INVALID_WORLD || dest_world == INVALID_WORLD || !snapshot_bytes.Succeeded() || snapshot_bytes.bytes.empty()) {
 		return "";
+	}
+
+	if (!request_id.empty()) {
+		auto req_it = this->_request_index.find({source_world, request_id});
+		if (req_it != this->_request_index.end()) {
+			auto tx_it = this->_transfers.find(req_it->second);
+			if (tx_it == this->_transfers.end()) {
+				this->_request_index.erase(req_it);
+			} else {
+				const UniverseTransferRecord &existing = tx_it->second;
+				const bool same_request =
+					existing.source_world == source_world &&
+					existing.dest_world == dest_world &&
+					existing.source_gate_id == source_gate_id &&
+					existing.dest_gate_id == dest_gate_id &&
+					existing.priority == priority &&
+					existing.snapshot_bytes.bytes == snapshot_bytes.bytes;
+				return same_request ? existing.transfer_id : "";
+			}
+		}
 	}
 
 	std::ostringstream ss;
@@ -294,6 +316,7 @@ std::string UniverseAuthorityService::InitiateTransfer(
 
 	UniverseTransferRecord rec;
 	rec.transfer_id = tx_id;
+	rec.request_id = request_id;
 	rec.source_world = source_world;
 	rec.dest_world = dest_world;
 	rec.source_gate_id = source_gate_id;
@@ -390,6 +413,9 @@ std::string UniverseAuthorityService::InitiateTransfer(
 	}
 
 	this->_transfers[tx_id] = std::move(rec);
+	if (!request_id.empty()) {
+		this->_request_index[{source_world, request_id}] = tx_id;
+	}
 	return tx_id;
 }
 
@@ -397,6 +423,8 @@ bool UniverseAuthorityService::DepartTransfer(const std::string &transfer_id, ui
 {
 	auto it = this->_transfers.find(transfer_id);
 	if (it == this->_transfers.end()) return false;
+
+	if (it->second.state == TransferState::InTransit) return true;
 
 	if (it->second.state != TransferState::Locked && it->second.state != TransferState::Preparing) {
 		return false;

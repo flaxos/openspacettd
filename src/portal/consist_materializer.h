@@ -40,6 +40,23 @@ struct ConsistMaterializeResult {
 class ConsistMaterializer {
 public:
 	/**
+	 * Capture a train consist snapshot without changing the physical train.
+	 *
+	 * The returned snapshot is suitable for authority admission and journal
+	 * prepare/bind work. Call ReleaseCapturedConsist() only after custody has
+	 * moved to the authority.
+	 */
+	static ConsistDespawnResult CaptureForTransfer(Train *consist, const GlobalOwnerToken &owner_token);
+
+	/**
+	 * Release a previously captured consist from the local simulation.
+	 *
+	 * This clears portal transit tracking, frees reservations, releases the
+	 * local identity anchor, and deletes the vehicle chain.
+	 */
+	static bool ReleaseCapturedConsist(Train *consist);
+
+	/**
 	 * Cleanly capture and despawn a train consist from the local simulation.
 	 *
 	 * - Captures snapshot via ConsistSnapshotCodec using current content manifest.

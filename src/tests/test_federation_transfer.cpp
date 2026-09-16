@@ -262,6 +262,45 @@ TEST_CASE("Federation Transfer - Universe Authority Lifecycle and State Machine"
 	authority.Reset();
 }
 
+TEST_CASE("Federation Transfer - Authority admission is idempotent by request id")
+{
+	UniverseAuthorityService &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+
+	ConsistSnapshot snapshot = CreateSampleSnapshot(40);
+	ConsistSnapshotBytes encoded = ConsistSnapshotCodec::Encode(snapshot);
+	REQUIRE(encoded.Succeeded());
+
+	const std::string request_id = "REQ-W1-G10-C777-T100";
+	std::string tx1 = authority.InitiateTransfer(
+		WorldID{1}, WorldID{2}, 10, 20, encoded, 200, FreightPriority::Standard, request_id);
+	REQUIRE(!tx1.empty());
+
+	std::string tx2 = authority.InitiateTransfer(
+		WorldID{1}, WorldID{2}, 10, 20, encoded, 200, FreightPriority::Standard, request_id);
+	CHECK(tx2 == tx1);
+	CHECK(authority.GetAllTransfers().size() == 1);
+	CHECK(authority.GetTransfer(tx1)->request_id == request_id);
+	CHECK(authority.GetCommodityAudit().total_transfers_initiated == 1);
+	CHECK(authority.GetCommodityAudit().total_cargo_initiated == 40);
+
+	ConsistSnapshot conflicting_snapshot = CreateSampleSnapshot(41);
+	ConsistSnapshotBytes conflicting_encoded = ConsistSnapshotCodec::Encode(conflicting_snapshot);
+	REQUIRE(conflicting_encoded.Succeeded());
+
+	std::string conflicting = authority.InitiateTransfer(
+		WorldID{1}, WorldID{2}, 10, 20, conflicting_encoded, 200, FreightPriority::Standard, request_id);
+	CHECK(conflicting.empty());
+	CHECK(authority.GetAllTransfers().size() == 1);
+
+	REQUIRE(authority.DepartTransfer(tx1, 1000));
+	CHECK(authority.GetTransfer(tx1)->state == TransferState::InTransit);
+	CHECK(authority.DepartTransfer(tx1, 1000));
+	CHECK(authority.GetTransfer(tx1)->state == TransferState::InTransit);
+
+	authority.Reset();
+}
+
 TEST_CASE("Federation Transfer - Commodity Conservation Invariant Audit")
 {
 	UniverseAuthorityService &authority = UniverseAuthorityService::Instance();
@@ -380,6 +419,13 @@ TEST_CASE("Federation Transfer - Consist Despawn for Transfer")
 	VehicleID engine_id = engine->index;
 	VehicleID wagon_id = wagon->index;
 
+	ConsistDespawnResult capture_res = ConsistMaterializer::CaptureForTransfer(engine, owner_token);
+	REQUIRE(capture_res.success);
+	CHECK(capture_res.snapshot.units.size() == 2);
+	CHECK(Train::GetIfValid(engine_id) == engine);
+	CHECK(Train::GetIfValid(wagon_id) != nullptr);
+	CHECK(HasTunnelBridgeReservation(gate_tile));
+
 	/* Despawn consist */
 	bool admission_called = false;
 	auto rejected = ConsistMaterializer::DespawnForTransfer(engine, owner_token,
@@ -414,6 +460,74 @@ TEST_CASE("Federation Transfer - Consist Despawn for Transfer")
 	CHECK(dec_res.snapshot->speed == 70);
 
 	PortalRegistry::Reset();
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+}
+
+TEST_CASE("Federation Transfer - Source departure records custody before releasing consist")
+{
+	Map::Allocate(64, 64);
+	FederationTransferManager::Reset();
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+
+	(void)MockEnvironment::Instance();
+	InitTestEngines();
+
+	REQUIRE(Company::CanAllocateItem());
+	Company *c = Company::Create();
+	REQUIRE(c != nullptr);
+
+	TileIndex gate_tile = TileXY(16, 16);
+	MakeRailTunnel(gate_tile, Owner(0), DiagDirection::NE, RAILTYPE_BEGIN);
+	PortalID pid = PortalRegistry::RegisterInterServerPortal(
+		gate_tile, DiagDirection::NE, WorldID{1}, WorldID{2}, 42, 100
+	);
+	REQUIRE(pid != INVALID_PORTAL);
+	SetTunnelBridgeReservation(gate_tile, true);
+
+	REQUIRE(Vehicle::CanAllocateItem(2));
+	Train *engine = Vehicle::Create<Train>();
+	engine->SetFrontEngine();
+	engine->SetEngine();
+	engine->owner = Owner(0);
+	engine->engine_type = EngineID{0};
+	engine->cargo_type = CargoType{0};
+	engine->tile = gate_tile;
+	engine->track = Track::Wormhole;
+	engine->direction = Direction::NE;
+
+	Train *wagon = Vehicle::Create<Train>();
+	wagon->ClearFrontEngine();
+	wagon->SetWagon();
+	wagon->owner = Owner(0);
+	wagon->engine_type = EngineID{1};
+	wagon->cargo_type = CargoType{0};
+	wagon->tile = gate_tile;
+	wagon->track = Track::Wormhole;
+	wagon->direction = Direction::NE;
+	engine->SetNext(wagon);
+
+	VehicleID engine_id = engine->index;
+	REQUIRE(FederationTransferManager::InitiateConsistDeparture(engine, gate_tile));
+
+	CHECK(Train::GetIfValid(engine_id) == nullptr);
+	CHECK_FALSE(HasTunnelBridgeReservation(gate_tile));
+	std::vector<UniverseTransferRecord> transfers = UniverseAuthorityService::Instance().GetAllTransfers();
+	REQUIRE(transfers.size() == 1);
+	const UniverseTransferRecord &transfer = transfers.front();
+	CHECK(!transfer.request_id.empty());
+	CHECK(transfer.state == TransferState::InTransit);
+	const TransferCheckpoint *checkpoint = TransferJournal::Find(1, transfer.request_id);
+	REQUIRE(checkpoint != nullptr);
+	CHECK(checkpoint->transfer_id == transfer.transfer_id);
+	CHECK(checkpoint->state == TransferCheckpointState::Departed);
+
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	FederationTransferManager::Reset();
 	_vehicle_pool.CleanPool();
 	_company_pool.CleanPool();
 }
