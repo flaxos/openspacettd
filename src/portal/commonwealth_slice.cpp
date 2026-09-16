@@ -38,9 +38,17 @@
 #include "../strings_func.h"
 #include "../safeguards.h"
 
+/** Active audit collector for the bounded WP11 slice run. */
 CommonwealthSliceAudit *_commonwealth_slice_audit = nullptr;
+/** Marker name used to identify the disposable WP11 fixture company. */
 static constexpr std::string_view SLICE_NAME = "WP11 Steel Slice v1";
 
+/**
+ * Report a failed command as a WP11 console failure.
+ * @param cost Command result to inspect.
+ * @param action Human-readable action name for the console message.
+ * @return True when the command succeeded.
+ */
 static bool SliceResult(const CommandCost &cost, std::string_view action)
 {
 	if (cost.Succeeded()) return true;
@@ -48,7 +56,10 @@ static bool SliceResult(const CommandCost &cost, std::string_view action)
 	return false;
 }
 
-/** Inspect physical cargo once: station totals include reservations, so vehicles contribute stored cargo only. */
+/**
+ * Inspect physical cargo once: station totals include reservations, so vehicles contribute stored cargo only.
+ * @return JSON snapshot of trains, stations, stockpiles, facilities, cash and fixture state.
+ */
 static nlohmann::json SliceSnapshot()
 {
 	nlohmann::json result;
@@ -95,6 +106,10 @@ static nlohmann::json SliceSnapshot()
 	return result;
 }
 
+/**
+ * Create the disposable three-world WP11 fixture in a fresh empty game.
+ * @return True when the fixture was prepared.
+ */
 static bool PrepareSlice()
 {
 	if (Map::SizeX() != 512 || Map::SizeY() != 128 || Company::GetNumItems() != 0 ||
@@ -145,6 +160,10 @@ static bool PrepareSlice()
 	return true;
 }
 
+/**
+ * Build the ore and steel routes, portals, stations, trains, furnace and hub.
+ * @return True when the route was built and both trains were started.
+ */
 static bool BuildSliceRoute()
 {
 	AutoRestoreBackup owner(_current_company, CompanyID{0});
@@ -193,6 +212,7 @@ static bool BuildSliceRoute()
 	return train(TileXY(135, 45), 0x33, ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel), furnace, hub);
 }
 
+/** Console-command entry point for the offline WP11 slice harness. */
 bool ConCommonwealthSlice(std::span<std::string_view> argv)
 {
 	if (argv.size() != 2) {
