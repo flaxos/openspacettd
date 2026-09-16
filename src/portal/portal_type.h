@@ -68,24 +68,36 @@ struct PortalEndpoint {
 
 /** Classification result for a portal, federation gate, conduit or stale endpoint. */
 struct PortalGateClassification {
-	PortalGateKind kind = PortalGateKind::None;
-	PortalID id = INVALID_PORTAL;
-	PortalEndpoint local_endpoint{};
-	PortalEndpoint opposite_endpoint{};
-	WorldID remote_world = INVALID_WORLD;
-	uint32_t remote_gate_id = 0;
-	uint32_t virtual_length = 1;
+	PortalGateKind kind = PortalGateKind::None;       ///< Operational class resolved for the queried tile.
+	PortalID id = INVALID_PORTAL;                     ///< Local portal or federation gate identifier, if present.
+	PortalEndpoint local_endpoint{};                  ///< Local physical head represented by this classification.
+	PortalEndpoint opposite_endpoint{};               ///< Opposite local endpoint for local wormhole pairs.
+	WorldID remote_world = INVALID_WORLD;             ///< Remote federation world for external gate records.
+	uint32_t remote_gate_id = 0;                       ///< Remote federation gate identifier, or 0 when unbound.
+	uint32_t virtual_length = 1;                       ///< Virtual routing length associated with the gate.
 
+	/**
+	 * Check whether this classification represents a traversable local wormhole pair.
+	 * @return True for a valid local linked portal.
+	 */
 	constexpr bool IsLocalWormhole() const
 	{
 		return kind == PortalGateKind::LocalLinked;
 	}
 
+	/**
+	 * Check whether this classification represents a valid external departure gate.
+	 * @return True for a valid linked inter-server gate.
+	 */
 	constexpr bool IsExternalDeparture() const
 	{
 		return kind == PortalGateKind::ExternalLinked;
 	}
 
+	/**
+	 * Check whether native rail entry must stop at this head.
+	 * @return True for unlinked, stale or conduit heads that are not safe train portals.
+	 */
 	constexpr bool IsClosedHead() const
 	{
 		return kind == PortalGateKind::LocalUnlinked || kind == PortalGateKind::LocalStale ||
