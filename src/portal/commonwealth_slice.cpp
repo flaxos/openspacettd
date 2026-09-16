@@ -212,11 +212,7 @@ static bool BuildSliceRoute()
 	return train(TileXY(135, 45), 0x33, ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel), furnace, hub);
 }
 
-/**
- * Execute the offline WP11 slice console command.
- * @param argv Console command arguments.
- * @return Always true because command errors are reported through console output.
- */
+/** Console-command entry point for the offline WP11 slice harness. */
 bool ConCommonwealthSlice(std::span<std::string_view> argv)
 {
 	if (argv.size() != 2) {
