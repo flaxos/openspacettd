@@ -95,6 +95,7 @@ struct InterServerRoute {
 /** Transactional record for a train consist transfer across server boundaries. */
 struct UniverseTransferRecord {
 	std::string transfer_id;
+	std::string request_id;
 	WorldID source_world = INVALID_WORLD;
 	WorldID dest_world = INVALID_WORLD;
 	uint32_t source_gate_id = 0;
@@ -213,7 +214,8 @@ public:
 		uint32_t dest_gate_id,
 		const ConsistSnapshotBytes &snapshot_bytes,
 		uint32_t transit_duration_ticks = 100,
-		FreightPriority priority = FreightPriority::Standard
+		FreightPriority priority = FreightPriority::Standard,
+		const std::string &request_id = {}
 	);
 
 	bool DepartTransfer(const std::string &transfer_id, uint64_t current_tick);
@@ -253,6 +255,7 @@ private:
 	std::map<WorldID, RegisteredWorld> _worlds;
 	std::map<uint32_t, InterServerRoute> _routes;
 	std::map<std::string, UniverseTransferRecord> _transfers;
+	std::map<std::pair<WorldID, std::string>, std::string> _request_index;
 	std::map<WorldID, TradeBalanceSummary> _trade_balances;
 	std::map<uint8_t, uint64_t> _detailed_initiated;
 	std::map<uint8_t, uint64_t> _detailed_completed;

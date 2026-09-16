@@ -39,8 +39,7 @@ ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, con
 		});
 }
 
-ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token,
-	const std::function<bool(const ConsistSnapshot &, const ConsistSnapshotBytes &)> &admit)
+ConsistDespawnResult ConsistMaterializer::CaptureForTransfer(Train *consist, const GlobalOwnerToken &owner_token)
 {
 	ConsistDespawnResult result;
 	if (consist == nullptr) {
@@ -74,11 +73,16 @@ ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, con
 		result.total_cargo += unit.cargo_count;
 	}
 
-	/* Admission must succeed before relinquishing the physical consist. */
-	if (admit && !admit(result.snapshot, result.snapshot_bytes)) {
-		result.error_message = "Consist transfer admission rejected";
-		return result;
-	}
+	result.success = true;
+	return result;
+}
+
+bool ConsistMaterializer::ReleaseCapturedConsist(Train *consist)
+{
+	if (consist == nullptr) return false;
+
+	Train *front = consist->First();
+	if (front == nullptr) return false;
 
 	/* 4. Release vehicle transit progress in portal registry */
 	PortalRegistry::ClearPortalTransit(front->index);
@@ -102,6 +106,28 @@ ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, con
 
 	/* 7. Cleanly delete vehicle chain */
 	delete front;
+
+	return true;
+}
+
+ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, const GlobalOwnerToken &owner_token,
+	const std::function<bool(const ConsistSnapshot &, const ConsistSnapshotBytes &)> &admit)
+{
+	ConsistDespawnResult result = CaptureForTransfer(consist, owner_token);
+	if (!result.success) return result;
+
+	/* Admission must succeed before relinquishing the physical consist. */
+	if (admit && !admit(result.snapshot, result.snapshot_bytes)) {
+		result.success = false;
+		result.error_message = "Consist transfer admission rejected";
+		return result;
+	}
+
+	if (!ReleaseCapturedConsist(consist)) {
+		result.success = false;
+		result.error_message = "Failed to release captured consist";
+		return result;
+	}
 
 	result.success = true;
 	return result;
