@@ -67,7 +67,7 @@ struct CargoDeliveryLoop {
 
 /**
  * Central manager for Commonwealth in-tree content packages, vehicle gating,
- * content admission, and 12-cargo closed delivery loops.
+ * content admission, and 13-cargo closed delivery loops.
  */
 class CommonwealthPackManager {
 public:
@@ -91,7 +91,7 @@ public:
 	/** Query physical Bill of Materials for fabricating this CST vehicle. */
 	static BillOfMaterials GetVehicleBOM(EngineID eid);
 
-	/** Retrieve all closed delivery loops for the 12-cargo Commonwealth suite. */
+	/** Retrieve all closed delivery loops for the 13-cargo Commonwealth suite. */
 	static const std::vector<CargoDeliveryLoop> &GetCargoDeliveryLoops();
 
 	/** Retrieve delivery loop for a specific cargo. */

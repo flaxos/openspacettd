@@ -1,0 +1,26 @@
+set(COMMONWEALTH_NEWGRF_SOURCE_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_industry.grf
+	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_rail.grf
+)
+
+foreach(COMMONWEALTH_NEWGRF_SOURCE_FILE IN LISTS COMMONWEALTH_NEWGRF_SOURCE_FILES)
+    get_filename_component(COMMONWEALTH_NEWGRF_NAME ${COMMONWEALTH_NEWGRF_SOURCE_FILE} NAME)
+    set(COMMONWEALTH_NEWGRF_BINARY_FILE ${CMAKE_BINARY_DIR}/newgrf/${COMMONWEALTH_NEWGRF_NAME})
+
+    add_custom_command(OUTPUT ${COMMONWEALTH_NEWGRF_BINARY_FILE}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/newgrf
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    ${COMMONWEALTH_NEWGRF_SOURCE_FILE}
+                    ${COMMONWEALTH_NEWGRF_BINARY_FILE}
+            MAIN_DEPENDENCY ${COMMONWEALTH_NEWGRF_SOURCE_FILE}
+            COMMENT "Copying Commonwealth NewGRF ${COMMONWEALTH_NEWGRF_NAME}"
+    )
+
+    list(APPEND COMMONWEALTH_NEWGRF_BINARY_FILES ${COMMONWEALTH_NEWGRF_BINARY_FILE})
+endforeach()
+
+add_custom_target(commonwealth_newgrf_files
+        DEPENDS ${COMMONWEALTH_NEWGRF_BINARY_FILES}
+)
+
+add_dependencies(openttd commonwealth_newgrf_files)

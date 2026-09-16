@@ -122,7 +122,7 @@ void CommonwealthPackManager::Initialize()
 		_cst_specs.push_back(mark4);
 	}
 
-	/* 2. Register Closed Delivery Loops for the 12-Cargo Suite (+ Consumer Crystals) */
+	/* 2. Register Closed Delivery Loops for the 13-Cargo Suite */
 	_cargo_loops = {
 		{
 			CommonwealthCargoID::StoneSlag,

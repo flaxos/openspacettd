@@ -5,11 +5,11 @@
  */
 
 grf {
-	grfid: "OST\x01";
+	grfid: "OST\01";
 	name: string(STR_GRF_NAME);
 	desc: string(STR_GRF_DESC);
-	version: 1;
-	min_compatible_version: 1;
+	version: 2;
+	min_compatible_version: 2;
 }
 
 cargotable {
@@ -40,11 +40,11 @@ item(FEAT_CARGOS, cargo_silc, 0x01) {
 		unit_name: string(STR_CARGO_UNIT_SILC);
 		type_abbreviation: string(STR_CARGO_ABBR_SILC);
 		sprite: 0x1AC0;
-		weight: 16;
-		payment_multiplier: 120;
-		transit_days_1: 15;
-		transit_days_2: 60;
-		cargo_classes: bitmask(CC_BULK, CC_NON_POOTABLE);
+		weight: 1 ton;
+		price_factor: 120;
+		penalty_lowerbound: 15;
+		single_penalty_length: 60;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
 }
@@ -56,11 +56,11 @@ item(FEAT_CARGOS, cargo_iron, 0x02) {
 		unit_name: string(STR_CARGO_UNIT_IRON);
 		type_abbreviation: string(STR_CARGO_ABBR_IRON);
 		sprite: 0x1AC1;
-		weight: 16;
-		payment_multiplier: 135;
-		transit_days_1: 12;
-		transit_days_2: 55;
-		cargo_classes: bitmask(CC_BULK, CC_NON_POOTABLE);
+		weight: 1 ton;
+		price_factor: 135;
+		penalty_lowerbound: 12;
+		single_penalty_length: 55;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
 }
@@ -72,10 +72,10 @@ item(FEAT_CARGOS, cargo_stel, 0x03) {
 		unit_name: string(STR_CARGO_UNIT_STEL);
 		type_abbreviation: string(STR_CARGO_ABBR_STEL);
 		sprite: 0x1AC2;
-		weight: 16;
-		payment_multiplier: 180;
-		transit_days_1: 10;
-		transit_days_2: 50;
+		weight: 1 ton;
+		price_factor: 180;
+		penalty_lowerbound: 10;
+		single_penalty_length: 50;
 		cargo_classes: bitmask(CC_PIECE_GOODS);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
@@ -88,10 +88,10 @@ item(FEAT_CARGOS, cargo_rare, 0x04) {
 		unit_name: string(STR_CARGO_UNIT_RARE);
 		type_abbreviation: string(STR_CARGO_ABBR_RARE);
 		sprite: 0x1AC3;
-		weight: 16;
-		payment_multiplier: 240;
-		transit_days_1: 8;
-		transit_days_2: 40;
+		weight: 1 ton;
+		price_factor: 240;
+		penalty_lowerbound: 8;
+		single_penalty_length: 40;
 		cargo_classes: bitmask(CC_BULK, CC_SPECIAL);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
@@ -104,10 +104,10 @@ item(FEAT_CARGOS, cargo_allo, 0x05) {
 		unit_name: string(STR_CARGO_UNIT_ALLO);
 		type_abbreviation: string(STR_CARGO_ABBR_ALLO);
 		sprite: 0x1AC4;
-		weight: 14;
-		payment_multiplier: 260;
-		transit_days_1: 6;
-		transit_days_2: 35;
+		weight: 1 ton;
+		price_factor: 260;
+		penalty_lowerbound: 6;
+		single_penalty_length: 35;
 		cargo_classes: bitmask(CC_PIECE_GOODS, CC_SPECIAL);
 		town_growth_effect: TOWNGROWTH_GOODS;
 	}
@@ -121,11 +121,11 @@ item(FEAT_CARGOS, cargo_copr, 0x06) {
 		unit_name: string(STR_CARGO_UNIT_COPR);
 		type_abbreviation: string(STR_CARGO_ABBR_COPR);
 		sprite: 0x1AC5;
-		weight: 16;
-		payment_multiplier: 130;
-		transit_days_1: 14;
-		transit_days_2: 55;
-		cargo_classes: bitmask(CC_BULK, CC_NON_POOTABLE);
+		weight: 1 ton;
+		price_factor: 130;
+		penalty_lowerbound: 14;
+		single_penalty_length: 55;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
 }
@@ -137,10 +137,10 @@ item(FEAT_CARGOS, cargo_wire, 0x07) {
 		unit_name: string(STR_CARGO_UNIT_WIRE);
 		type_abbreviation: string(STR_CARGO_ABBR_WIRE);
 		sprite: 0x1AC6;
-		weight: 12;
-		payment_multiplier: 175;
-		transit_days_1: 9;
-		transit_days_2: 45;
+		weight: 1 ton;
+		price_factor: 175;
+		penalty_lowerbound: 9;
+		single_penalty_length: 45;
 		cargo_classes: bitmask(CC_PIECE_GOODS);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
@@ -153,10 +153,10 @@ item(FEAT_CARGOS, cargo_sand, 0x08) {
 		unit_name: string(STR_CARGO_UNIT_SAND);
 		type_abbreviation: string(STR_CARGO_ABBR_SAND);
 		sprite: 0x1AC7;
-		weight: 16;
-		payment_multiplier: 110;
-		transit_days_1: 18;
-		transit_days_2: 65;
+		weight: 1 ton;
+		price_factor: 110;
+		penalty_lowerbound: 18;
+		single_penalty_length: 65;
 		cargo_classes: bitmask(CC_BULK);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
@@ -169,10 +169,10 @@ item(FEAT_CARGOS, cargo_chip, 0x09) {
 		unit_name: string(STR_CARGO_UNIT_CHIP);
 		type_abbreviation: string(STR_CARGO_ABBR_CHIP);
 		sprite: 0x1AC8;
-		weight: 6;
-		payment_multiplier: 275;
-		transit_days_1: 5;
-		transit_days_2: 30;
+		weight: 1 ton;
+		price_factor: 275;
+		penalty_lowerbound: 5;
+		single_penalty_length: 30;
 		cargo_classes: bitmask(CC_EXPRESS, CC_PIECE_GOODS);
 		town_growth_effect: TOWNGROWTH_GOODS;
 	}
@@ -186,10 +186,10 @@ item(FEAT_CARGOS, cargo_poly, 0x0A) {
 		unit_name: string(STR_CARGO_UNIT_POLY);
 		type_abbreviation: string(STR_CARGO_ABBR_POLY);
 		sprite: 0x1AC9;
-		weight: 10;
-		payment_multiplier: 195;
-		transit_days_1: 8;
-		transit_days_2: 40;
+		weight: 1 ton;
+		price_factor: 195;
+		penalty_lowerbound: 8;
+		single_penalty_length: 40;
 		cargo_classes: bitmask(CC_PIECE_GOODS, CC_LIQUID);
 		town_growth_effect: TOWNGROWTH_GOODS;
 	}
@@ -203,10 +203,10 @@ item(FEAT_CARGOS, cargo_bcry, 0x0B) {
 		unit_name: string(STR_CARGO_UNIT_BCRY);
 		type_abbreviation: string(STR_CARGO_ABBR_BCRY);
 		sprite: 0x1ACA;
-		weight: 4;
-		payment_multiplier: 220;
-		transit_days_1: 6;
-		transit_days_2: 35;
+		weight: 1 ton;
+		price_factor: 220;
+		penalty_lowerbound: 6;
+		single_penalty_length: 35;
 		cargo_classes: bitmask(CC_EXPRESS, CC_ARMOURED);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
@@ -219,10 +219,10 @@ item(FEAT_CARGOS, cargo_qcry, 0x0C) {
 		unit_name: string(STR_CARGO_UNIT_QCRY);
 		type_abbreviation: string(STR_CARGO_ABBR_QCRY);
 		sprite: 0x1ACB;
-		weight: 2;
-		payment_multiplier: 350;
-		transit_days_1: 4;
-		transit_days_2: 25;
+		weight: 1 ton;
+		price_factor: 350;
+		penalty_lowerbound: 4;
+		single_penalty_length: 25;
 		cargo_classes: bitmask(CC_EXPRESS, CC_ARMOURED, CC_SPECIAL);
 		town_growth_effect: TOWNGROWTH_NONE;
 	}
@@ -235,10 +235,10 @@ item(FEAT_CARGOS, cargo_ccry, 0x0D) {
 		unit_name: string(STR_CARGO_UNIT_CCRY);
 		type_abbreviation: string(STR_CARGO_ABBR_CCRY);
 		sprite: 0x1ACC;
-		weight: 3;
-		payment_multiplier: 300;
-		transit_days_1: 3;
-		transit_days_2: 20;
+		weight: 1 ton;
+		price_factor: 300;
+		penalty_lowerbound: 3;
+		single_penalty_length: 20;
 		cargo_classes: bitmask(CC_MAIL, CC_EXPRESS);
 		town_growth_effect: TOWNGROWTH_MAIL;
 	}
@@ -253,9 +253,8 @@ item(FEAT_INDUSTRIES, ind_quarry, 0x10) {
 	property {
 		substitute: 0x00;
 		name: string(STR_IND_NAME_QUARRY);
-		life_type: IND_LIFE_EXTRACTIVE;
-		prod_cargo_types: [SILC];
-		prod_multiplier: [18];
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("SILC", 18)];
 	}
 }
 
@@ -263,10 +262,8 @@ item(FEAT_INDUSTRIES, ind_crusher, 0x11) {
 	property {
 		substitute: 0x02;
 		name: string(STR_IND_NAME_CRUSHER);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [SILC];
-		prod_cargo_types: [SILC];
-		prod_multiplier: [16];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SILC"), produce_cargo("SILC", 16)];
 	}
 }
 
@@ -274,9 +271,8 @@ item(FEAT_INDUSTRIES, ind_iron_mine, 0x12) {
 	property {
 		substitute: 0x04;
 		name: string(STR_IND_NAME_IRON_MINE);
-		life_type: IND_LIFE_EXTRACTIVE;
-		prod_cargo_types: [IRON];
-		prod_multiplier: [20];
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("IRON", 20)];
 	}
 }
 
@@ -284,10 +280,8 @@ item(FEAT_INDUSTRIES, ind_steel_mill, 0x13) {
 	property {
 		substitute: 0x05;
 		name: string(STR_IND_NAME_STEEL_MILL);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [IRON];
-		prod_cargo_types: [STEL];
-		prod_multiplier: [15];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("IRON"), produce_cargo("STEL", 15)];
 	}
 }
 
@@ -295,9 +289,8 @@ item(FEAT_INDUSTRIES, ind_rare_mine, 0x14) {
 	property {
 		substitute: 0x07;
 		name: string(STR_IND_NAME_RARE_MINE);
-		life_type: IND_LIFE_EXTRACTIVE;
-		prod_cargo_types: [RARE];
-		prod_multiplier: [12];
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("RARE", 12)];
 	}
 }
 
@@ -305,10 +298,8 @@ item(FEAT_INDUSTRIES, ind_superalloy_foundry, 0x15) {
 	property {
 		substitute: 0x09;
 		name: string(STR_IND_NAME_SUPERALLOY_FOUNDRY);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [STEL, RARE];
-		prod_cargo_types: [ALLO];
-		prod_multiplier: [14];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("STEL"), accept_cargo("RARE"), produce_cargo("ALLO", 14)];
 	}
 }
 
@@ -317,9 +308,8 @@ item(FEAT_INDUSTRIES, ind_copper_mine, 0x16) {
 	property {
 		substitute: 0x0B;
 		name: string(STR_IND_NAME_COPPER_MINE);
-		life_type: IND_LIFE_EXTRACTIVE;
-		prod_cargo_types: [COPR];
-		prod_multiplier: [18];
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("COPR", 18)];
 	}
 }
 
@@ -327,10 +317,8 @@ item(FEAT_INDUSTRIES, ind_copper_smelter, 0x17) {
 	property {
 		substitute: 0x0C;
 		name: string(STR_IND_NAME_COPPER_SMELTER);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [COPR];
-		prod_cargo_types: [WIRE];
-		prod_multiplier: [16];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("COPR"), produce_cargo("WIRE", 16)];
 	}
 }
 
@@ -338,9 +326,8 @@ item(FEAT_INDUSTRIES, ind_silica_dunes, 0x18) {
 	property {
 		substitute: 0x0E;
 		name: string(STR_IND_NAME_SILICA_DUNES);
-		life_type: IND_LIFE_EXTRACTIVE;
-		prod_cargo_types: [SAND];
-		prod_multiplier: [22];
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("SAND", 22)];
 	}
 }
 
@@ -348,10 +335,8 @@ item(FEAT_INDUSTRIES, ind_silicon_arcology, 0x19) {
 	property {
 		substitute: 0x10;
 		name: string(STR_IND_NAME_SILICON_ARCOLOGY);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [SAND, WIRE];
-		prod_cargo_types: [CHIP];
-		prod_multiplier: [12];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SAND"), accept_cargo("WIRE"), produce_cargo("CHIP", 12)];
 	}
 }
 
@@ -360,10 +345,8 @@ item(FEAT_INDUSTRIES, ind_polymer_complex, 0x1A) {
 	property {
 		substitute: 0x12;
 		name: string(STR_IND_NAME_POLYMER_COMPLEX);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [SILC];
-		prod_cargo_types: [POLY];
-		prod_multiplier: [15];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SILC"), produce_cargo("POLY", 15)];
 	}
 }
 
@@ -372,10 +355,8 @@ item(FEAT_INDUSTRIES, ind_monocrystal_fab, 0x1B) {
 	property {
 		substitute: 0x14;
 		name: string(STR_IND_NAME_MONOCRYSTAL_FAB);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [SAND, RARE];
-		prod_cargo_types: [BCRY];
-		prod_multiplier: [14];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SAND"), accept_cargo("RARE"), produce_cargo("BCRY", 14)];
 	}
 }
 
@@ -383,10 +364,8 @@ item(FEAT_INDUSTRIES, ind_quantum_observatory, 0x1C) {
 	property {
 		substitute: 0x16;
 		name: string(STR_IND_NAME_QUANTUM_OBSERVATORY);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [BCRY];
-		prod_cargo_types: [QCRY];
-		prod_multiplier: [10];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("BCRY"), produce_cargo("QCRY", 10)];
 	}
 }
 
@@ -394,9 +373,7 @@ item(FEAT_INDUSTRIES, ind_megacity_formatting, 0x1D) {
 	property {
 		substitute: 0x18;
 		name: string(STR_IND_NAME_MEGACITY_FORMATTING);
-		life_type: IND_LIFE_PROCESSING;
-		accept_cargo_types: [BCRY];
-		prod_cargo_types: [CCRY];
-		prod_multiplier: [16];
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("BCRY"), produce_cargo("CCRY", 16)];
 	}
 }

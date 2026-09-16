@@ -92,7 +92,7 @@ TEST_CASE("Sprint 37: In-Tree NML Package Source Integrity", "[sprint37]")
 
 	std::ifstream ind_file(ind_nml);
 	std::string ind_content((std::istreambuf_iterator<char>(ind_file)), std::istreambuf_iterator<char>());
-	CHECK(ind_content.find("OST\\x01") != std::string::npos);
+	CHECK(ind_content.find("OST\\01") != std::string::npos);
 	CHECK(ind_content.find("FEAT_CARGOS") != std::string::npos);
 	CHECK(ind_content.find("FEAT_INDUSTRIES") != std::string::npos);
 	CHECK(ind_content.find("SILC") != std::string::npos);
@@ -111,7 +111,7 @@ TEST_CASE("Sprint 37: In-Tree NML Package Source Integrity", "[sprint37]")
 
 	std::ifstream rail_file(rail_nml);
 	std::string rail_content((std::istreambuf_iterator<char>(rail_file)), std::istreambuf_iterator<char>());
-	CHECK(rail_content.find("OST\\x02") != std::string::npos);
+	CHECK(rail_content.find("OST\\02") != std::string::npos);
 	CHECK(rail_content.find("FEAT_TRAINS") != std::string::npos);
 	CHECK(rail_content.find("cst_vulcan_steam") != std::string::npos);
 	CHECK(rail_content.find("cst_titan_diesel") != std::string::npos);
@@ -119,65 +119,27 @@ TEST_CASE("Sprint 37: In-Tree NML Package Source Integrity", "[sprint37]")
 	CHECK(rail_content.find("cst_mark4_maglev") != std::string::npos);
 }
 
-TEST_CASE("Sprint 37: Reproducible Binary GRF Container Synthesis", "[sprint37]")
+TEST_CASE("Sprint 37: Reproducible NML-Compiled GRF Containers", "[sprint37]")
 {
-	fs::path ind_grf_path = ResolvePath("pkg/commonwealth_industry/openspacettd_industry.grf");
-	fs::path rail_grf_path = ResolvePath("pkg/commonwealth_rail/openspacettd_rail.grf");
+	fs::path ind_grf_path = ResolvePath("bin/newgrf/openspacettd_industry.grf");
+	fs::path rail_grf_path = ResolvePath("bin/newgrf/openspacettd_rail.grf");
 
 	REQUIRE(fs::exists(ind_grf_path));
 	REQUIRE(fs::exists(rail_grf_path));
 
-	/* Verify Industry GRF Header & Action 8 */
-	{
-		std::ifstream f(ind_grf_path, std::ios::binary);
-		REQUIRE(f.is_open());
+	auto verify_grf = [](const fs::path &path, const std::array<uint8_t, 4> &grfid) {
+		std::ifstream file(path, std::ios::binary);
+		REQUIRE(file.is_open());
+		std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		static constexpr std::array<uint8_t, 10> container_v2 = {0x00, 0x00, 'G', 'R', 'F', 0x82, 0x0D, 0x0A, 0x1A, 0x0A};
+		REQUIRE(bytes.size() > 1000);
+		REQUIRE(bytes.size() >= container_v2.size());
+		CHECK(std::equal(container_v2.begin(), container_v2.end(), bytes.begin()));
+		CHECK(std::search(bytes.begin(), bytes.end(), grfid.begin(), grfid.end()) != bytes.end());
+	};
 
-		uint16_t sprite0_len = 0;
-		f.read(reinterpret_cast<char*>(&sprite0_len), sizeof(sprite0_len));
-		CHECK(sprite0_len > 0); // Container Version 1 signature
-
-		uint8_t sprite_type = 0;
-		f.read(reinterpret_cast<char*>(&sprite_type), sizeof(sprite_type));
-		CHECK(sprite_type == 0xFF); // Pseudo-sprite
-
-		uint8_t action = 0;
-		f.read(reinterpret_cast<char*>(&action), sizeof(action));
-		CHECK(action == 0x08); // Action 8
-
-		uint8_t grf_ver = 0;
-		f.read(reinterpret_cast<char*>(&grf_ver), sizeof(grf_ver));
-		CHECK(grf_ver == 8);
-
-		std::array<uint8_t, 4> grfid{};
-		f.read(reinterpret_cast<char*>(grfid.data()), 4);
-		CHECK(grfid == COMMONWEALTH_INDUSTRY_GRFID_BYTES);
-	}
-
-	/* Verify Rail GRF Header & Action 8 */
-	{
-		std::ifstream f(rail_grf_path, std::ios::binary);
-		REQUIRE(f.is_open());
-
-		uint16_t sprite0_len = 0;
-		f.read(reinterpret_cast<char*>(&sprite0_len), sizeof(sprite0_len));
-		CHECK(sprite0_len > 0); // Container Version 1 signature
-
-		uint8_t sprite_type = 0;
-		f.read(reinterpret_cast<char*>(&sprite_type), sizeof(sprite_type));
-		CHECK(sprite_type == 0xFF); // Pseudo-sprite
-
-		uint8_t action = 0;
-		f.read(reinterpret_cast<char*>(&action), sizeof(action));
-		CHECK(action == 0x08); // Action 8
-
-		uint8_t grf_ver = 0;
-		f.read(reinterpret_cast<char*>(&grf_ver), sizeof(grf_ver));
-		CHECK(grf_ver == 8);
-
-		std::array<uint8_t, 4> grfid{};
-		f.read(reinterpret_cast<char*>(grfid.data()), 4);
-		CHECK(grfid == COMMONWEALTH_RAIL_GRFID_BYTES);
-	}
+	verify_grf(ind_grf_path, COMMONWEALTH_INDUSTRY_GRFID_BYTES);
+	verify_grf(rail_grf_path, COMMONWEALTH_RAIL_GRFID_BYTES);
 }
 
 TEST_CASE("Sprint 37: Content Admission Boundary and Manifest Integration", "[sprint37]")
@@ -341,7 +303,7 @@ TEST_CASE("Sprint 37: CST Vehicle In-Kind Fabrication BOM Linkage", "[sprint37]"
 	CHECK(mark4_bom.GetRequirement(StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics)) == 15);
 }
 
-TEST_CASE("Sprint 37: Complete 12-Cargo Economy Closed Delivery Loops", "[sprint37]")
+TEST_CASE("Sprint 37: Complete 13-Cargo Economy Closed Delivery Loops", "[sprint37]")
 {
 	SetupSprint37TestWorlds();
 
