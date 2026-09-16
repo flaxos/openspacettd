@@ -28,6 +28,8 @@ struct TransferCheckpoint {
 	uint64_t consist_sequence = 0;
 	uint32_t source_world = 0;
 	uint32_t destination_world = 0;
+	uint32_t source_gate_id = 0;
+	uint32_t destination_gate_id = 0;
 	TransferCheckpointState state = TransferCheckpointState::Prepared;
 	std::vector<uint8_t> snapshot;
 

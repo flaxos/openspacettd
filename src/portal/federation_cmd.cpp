@@ -99,6 +99,8 @@ bool FederationTransferManager::InitiateConsistDeparture(Train *consist, TileInd
 	cp.consist_sequence = cid.sequence;
 	cp.source_world = link->local_endpoint.world_id.base();
 	cp.destination_world = link->remote_world.base();
+	cp.source_gate_id = link->id.base();
+	cp.destination_gate_id = link->remote_gate_id;
 	cp.snapshot = snapshot_bytes.bytes;
 	cp.state = TransferCheckpointState::Prepared;
 	if (!TransferJournal::Prepare(cp)) return false;
@@ -269,6 +271,8 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 				rcpt.consist_sequence = dec_res.snapshot->consist_id.sequence;
 				rcpt.source_world = claim_data.value("source_world", 0);
 				rcpt.destination_world = local_world.base();
+				rcpt.source_gate_id = claim_data.value("source_gate", claim_data.value("source_gate_id", 0));
+				rcpt.destination_gate_id = dest_gate;
 				rcpt.state = TransferCheckpointState::Materialized;
 				rcpt.snapshot = snap_bytes;
 				TransferJournal::RecordArrival(rcpt);
@@ -298,10 +302,11 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 		}
 	} else {
 		/* In-memory service logic */
-		std::vector<std::string> pending = UniverseAuthorityService::Instance().QueryPendingTransfers(local_world, current_tick);
+		auto &authority = UniverseAuthorityService::Instance();
+		authority.ReconcileFromJournal(current_tick);
+		std::vector<std::string> pending = authority.QueryPendingTransfers(local_world, current_tick);
 
 		for (const std::string &tx_id : pending) {
-			auto &authority = UniverseAuthorityService::Instance();
 			const auto *existing_cp = TransferJournal::FindByTransferId(tx_id);
 			if (existing_cp != nullptr && (existing_cp->state == TransferCheckpointState::Materialized ||
 					existing_cp->state == TransferCheckpointState::Confirmed)) {
@@ -355,6 +360,8 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 				rcpt.consist_sequence = rec.snapshot.consist_id.sequence;
 				rcpt.source_world = rec.source_world.base();
 				rcpt.destination_world = local_world.base();
+				rcpt.source_gate_id = rec.source_gate_id;
+				rcpt.destination_gate_id = rec.dest_gate_id;
 				rcpt.state = TransferCheckpointState::Materialized;
 				rcpt.snapshot = rec.snapshot_bytes.bytes;
 				if (!TransferJournal::RecordArrival(rcpt)) continue;

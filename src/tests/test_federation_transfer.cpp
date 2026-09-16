@@ -130,8 +130,33 @@ static TransferCheckpoint MakeJournalCheckpoint(std::string request_id, Transfer
 	cp.consist_sequence = 777;
 	cp.source_world = 1;
 	cp.destination_world = 2;
+	cp.source_gate_id = 10;
+	cp.destination_gate_id = 20;
 	cp.state = state;
 	cp.snapshot = {1, 2, 3, 4, static_cast<uint8_t>(to_underlying(state))};
+	return cp;
+}
+
+static TransferCheckpoint MakeAuthorityCheckpoint(std::string request_id, TransferCheckpointState state, uint32_t cargo_count = 40)
+{
+	ConsistSnapshot snapshot = CreateSampleSnapshot(cargo_count);
+	ConsistSnapshotBytes encoded = ConsistSnapshotCodec::Encode(snapshot);
+	REQUIRE(encoded.Succeeded());
+
+	TransferCheckpoint cp;
+	cp.request_id = std::move(request_id);
+	cp.transfer_id = state == TransferCheckpointState::Prepared ? "" : "TRANSFER-X000000777";
+	cp.arrival_receipt = (state == TransferCheckpointState::Materialized || state == TransferCheckpointState::Confirmed)
+		? "RCPT-W2-TRANSFER-X000000777" : "";
+	cp.namespace_high = snapshot.consist_id.name_space.high;
+	cp.namespace_low = snapshot.consist_id.name_space.low;
+	cp.consist_sequence = snapshot.consist_id.sequence;
+	cp.source_world = 1;
+	cp.destination_world = 2;
+	cp.source_gate_id = 10;
+	cp.destination_gate_id = 20;
+	cp.state = state;
+	cp.snapshot = encoded.bytes;
 	return cp;
 }
 
@@ -792,6 +817,8 @@ TEST_CASE("Federation Transfer - Journaled arrival confirmation retry does not d
 	cp.consist_sequence = snapshot.consist_id.sequence;
 	cp.source_world = 1;
 	cp.destination_world = 2;
+	cp.source_gate_id = 10;
+	cp.destination_gate_id = pid.base();
 	cp.state = TransferCheckpointState::Materialized;
 	cp.snapshot = encoded.bytes;
 	REQUIRE(TransferJournal::RecordArrival(cp));
@@ -999,6 +1026,119 @@ TEST_CASE("Federation Transfer - Journal Deduplication and Authority URL Config"
 	CHECK_FALSE(TransferJournal::HasArrival("TX-1001"));
 }
 
+
+TEST_CASE("Federation Transfer - Authority reconciliation rehydrates departed journal custody")
+{
+	TransferJournal::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+
+	TransferCheckpoint departed = MakeAuthorityCheckpoint("REQ-RESTART-DEPARTED", TransferCheckpointState::Departed, 40);
+	REQUIRE(TransferJournal::Restore(departed));
+	CHECK(authority.GetAllTransfers().empty());
+
+	CHECK(authority.ReconcileFromJournal(1000) == 1);
+	const UniverseTransferRecord *record = authority.GetTransfer(departed.transfer_id);
+	REQUIRE(record != nullptr);
+	CHECK(record->state == TransferState::InTransit);
+	CHECK(record->request_id == departed.request_id);
+	CHECK(record->source_gate_id == departed.source_gate_id);
+	CHECK(record->dest_gate_id == departed.destination_gate_id);
+	CHECK(record->total_cargo_units == 40);
+	CHECK(authority.QueryPendingTransfers(WorldID{2}, 1000).size() == 1);
+
+	CommodityAuditResult audit = authority.GetCommodityAudit();
+	CHECK(audit.total_transfers_initiated == 1);
+	CHECK(audit.total_cargo_initiated == 40);
+	CHECK(audit.total_cargo_completed == 0);
+	CHECK(audit.total_cargo_in_transit == 40);
+	CHECK(audit.IsConserved());
+	CHECK(authority.GetDetailedCommodityAudit().IsConserved());
+
+	TransferJournal::Reset();
+	authority.Reset();
+}
+
+TEST_CASE("Federation Transfer - Authority reconciliation confirms materialized checkpoint without duplication")
+{
+	TransferJournal::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+	_vehicle_pool.CleanPool();
+
+	TransferCheckpoint materialized = MakeAuthorityCheckpoint("ARR-W2-TRANSFER-X000000777", TransferCheckpointState::Materialized, 40);
+	REQUIRE(TransferJournal::RecordArrival(materialized));
+	CHECK(authority.GetAllTransfers().empty());
+
+	CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 500) == 0);
+	const UniverseTransferRecord *record = authority.GetTransfer(materialized.transfer_id);
+	REQUIRE(record != nullptr);
+	CHECK(record->state == TransferState::Completed);
+	const TransferCheckpoint *confirmed = TransferJournal::FindByTransferId(materialized.transfer_id);
+	REQUIRE(confirmed != nullptr);
+	CHECK(confirmed->state == TransferCheckpointState::Confirmed);
+	CHECK(Train::Iterate().begin() == Train::Iterate().end());
+
+	CommodityAuditResult audit = authority.GetCommodityAudit();
+	CHECK(audit.total_cargo_initiated == 40);
+	CHECK(audit.total_cargo_completed == 40);
+	CHECK(audit.total_cargo_in_transit == 0);
+	CHECK(audit.IsConserved());
+	CHECK(authority.GetDetailedCommodityAudit().IsConserved());
+
+	TransferJournal::Reset();
+	authority.Reset();
+}
+
+TEST_CASE("Federation Transfer - Authority reconciliation skips prepared and restores confirmed terminal custody")
+{
+	TransferJournal::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+
+	TransferCheckpoint prepared = MakeAuthorityCheckpoint("REQ-RESTART-PREPARED", TransferCheckpointState::Prepared, 40);
+	REQUIRE(TransferJournal::Prepare(prepared));
+	CHECK(authority.ReconcileFromJournal(42) == 0);
+	CHECK(authority.GetAllTransfers().empty());
+
+	TransferJournal::Reset();
+	TransferCheckpoint confirmed = MakeAuthorityCheckpoint("ARR-W2-TRANSFER-X000000777", TransferCheckpointState::Confirmed, 40);
+	REQUIRE(TransferJournal::Restore(confirmed));
+	CHECK(authority.ReconcileFromJournal(42) == 1);
+	const UniverseTransferRecord *record = authority.GetTransfer(confirmed.transfer_id);
+	REQUIRE(record != nullptr);
+	CHECK(record->state == TransferState::Completed);
+	CHECK(authority.QueryPendingTransfers(WorldID{2}, 42).empty());
+
+	CommodityAuditResult audit = authority.GetCommodityAudit();
+	CHECK(audit.total_cargo_initiated == 40);
+	CHECK(audit.total_cargo_completed == 40);
+	CHECK(audit.total_cargo_in_transit == 0);
+	CHECK(audit.IsConserved());
+	CHECK(authority.GetDetailedCommodityAudit().IsConserved());
+
+	TransferJournal::Reset();
+	authority.Reset();
+}
+
+TEST_CASE("Federation Transfer - Authority reconciliation rejects departed checkpoint without gate identity")
+{
+	TransferJournal::Reset();
+	auto &authority = UniverseAuthorityService::Instance();
+	authority.Reset();
+
+	TransferCheckpoint departed = MakeAuthorityCheckpoint("REQ-RESTART-NOGATE", TransferCheckpointState::Departed, 40);
+	departed.source_gate_id = 0;
+	departed.destination_gate_id = 0;
+	REQUIRE(TransferJournal::Restore(departed));
+	CHECK(authority.ReconcileFromJournal(42) == 0);
+	CHECK(authority.GetAllTransfers().empty());
+	CHECK(authority.GetCommodityAudit().IsConserved());
+
+	TransferJournal::Reset();
+	authority.Reset();
+}
+
 TEST_CASE("Federation Transfer - Journal checkpoints survive save reload")
 {
 	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_fjrn_roundtrip.sav").string();
@@ -1042,6 +1182,8 @@ TEST_CASE("Federation Transfer - Journal checkpoints survive save reload")
 	REQUIRE(loaded_departed != nullptr);
 	CHECK(loaded_departed->state == TransferCheckpointState::Departed);
 	CHECK(loaded_departed->transfer_id == "TX-DEPARTED");
+	CHECK(loaded_departed->source_gate_id == departed.source_gate_id);
+	CHECK(loaded_departed->destination_gate_id == departed.destination_gate_id);
 
 	const TransferCheckpoint *loaded_materialized = TransferJournal::FindByTransferId(materialized.transfer_id);
 	REQUIRE(loaded_materialized != nullptr);
@@ -1108,6 +1250,8 @@ TEST_CASE("Federation Transfer - Journaled materialization confirms after save r
 	cp.consist_sequence = snapshot.consist_id.sequence;
 	cp.source_world = 1;
 	cp.destination_world = 2;
+	cp.source_gate_id = 10;
+	cp.destination_gate_id = 20;
 	cp.state = TransferCheckpointState::Materialized;
 	cp.snapshot = encoded.bytes;
 	REQUIRE(TransferJournal::RecordArrival(cp));

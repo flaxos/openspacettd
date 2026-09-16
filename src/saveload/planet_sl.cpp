@@ -928,6 +928,8 @@ struct SlTransferCheckpoint {
 	uint64_t consist_sequence = 0;
 	uint32_t source_world = 0;
 	uint32_t destination_world = 0;
+	uint32_t source_gate_id = 0;
+	uint32_t destination_gate_id = 0;
 	uint8_t state = 0;
 	std::string snapshot_base64;
 };
@@ -941,6 +943,8 @@ static const SaveLoad _transfer_checkpoint_desc[] = {
 	SLE_VAR(SlTransferCheckpoint, consist_sequence, VarTypes::U64),
 	SLE_VAR(SlTransferCheckpoint, source_world,     VarTypes::U32),
 	SLE_VAR(SlTransferCheckpoint, destination_world, VarTypes::U32),
+	SLE_VAR(SlTransferCheckpoint, source_gate_id,   VarTypes::U32),
+	SLE_VAR(SlTransferCheckpoint, destination_gate_id, VarTypes::U32),
 	SLE_VAR(SlTransferCheckpoint, state,            VarTypes::U8),
 	SLE_SSTR(SlTransferCheckpoint, snapshot_base64, VarTypes::STR),
 };
@@ -963,6 +967,8 @@ struct FJRNChunkHandler : ChunkHandler {
 				.consist_sequence = record.consist_sequence,
 				.source_world = record.source_world,
 				.destination_world = record.destination_world,
+				.source_gate_id = record.source_gate_id,
+				.destination_gate_id = record.destination_gate_id,
 				.state = to_underlying(record.state),
 				.snapshot_base64 = Base64Encode(record.snapshot),
 			};
@@ -985,6 +991,8 @@ struct FJRNChunkHandler : ChunkHandler {
 			record.consist_sequence = row.consist_sequence;
 			record.source_world = row.source_world;
 			record.destination_world = row.destination_world;
+			record.source_gate_id = row.source_gate_id;
+			record.destination_gate_id = row.destination_gate_id;
 			record.state = static_cast<TransferCheckpointState>(row.state);
 			record.snapshot = Base64Decode(row.snapshot_base64);
 			TransferJournal::Restore(record);
