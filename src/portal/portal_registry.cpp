@@ -244,6 +244,12 @@ bool PortalRegistry::IsPortalTile(TileIndex tile)
 	       interserver_portals.find(tile) != interserver_portals.end();
 }
 
+/**
+ * Check whether a registry entry still matches a real rail tunnel head.
+ * @param tile Physical tile expected to hold the gate head.
+ * @param dir Expected entry direction, or Invalid when any tunnel direction is acceptable.
+ * @return True when the map still contains a rail tunnel head with the expected direction.
+ */
 static bool IsPhysicalRailGateHead(TileIndex tile, DiagDirection dir)
 {
 	if (tile == INVALID_TILE || !IsValidTile(tile) || !IsTunnelTile(tile)) return false;
