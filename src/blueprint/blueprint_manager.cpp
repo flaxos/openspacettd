@@ -39,10 +39,13 @@ static unsigned long _temporary_counter = 0;
 
 #if defined(_WIN32)
 using ssize_t = std::ptrdiff_t;
+/** Status of an open Blueprint backing file. */
 using StorageStat = struct _stat64;
 static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return _wopen(path.c_str(), flags | _O_BINARY, mode); }
 static int StorageClose(int fd) { return _close(fd); }
+/** Query the status of an already-open Blueprint file. */
 static int StorageFstat(int fd, StorageStat *st) { return _fstat64(fd, st); }
+/** Check that the opened Blueprint file is still regular. */
 static bool StorageIsRegular(const StorageStat &st) { return (st.st_mode & _S_IFMT) == _S_IFREG; }
 static ssize_t StorageRead(int fd, void *buf, size_t size) { return _read(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
 static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return _write(fd, buf, static_cast<unsigned>(std::min(size, static_cast<size_t>(INT_MAX)))); }
@@ -51,10 +54,13 @@ static bool StoragePublish(const std::filesystem::path &tmp, const std::filesyst
 static std::string StoragePublishFailure() { return std::error_code(static_cast<int>(GetLastError()), std::system_category()).message(); }
 static unsigned long StorageProcessId() { return GetCurrentProcessId(); }
 #else
+/** Status of an open Blueprint backing file. */
 using StorageStat = struct stat;
 static int StorageOpen(const std::filesystem::path &path, int flags, int mode = 0) { return open(path.c_str(), flags | O_NOFOLLOW, mode); }
 static int StorageClose(int fd) { return close(fd); }
+/** Query the status of an already-open Blueprint file. */
 static int StorageFstat(int fd, StorageStat *st) { return fstat(fd, st); }
+/** Check that the opened Blueprint file is still regular. */
 static bool StorageIsRegular(const StorageStat &st) { return S_ISREG(st.st_mode); }
 static ssize_t StorageRead(int fd, void *buf, size_t size) { return read(fd, buf, size); }
 static ssize_t StorageWrite(int fd, const void *buf, size_t size) { return write(fd, buf, size); }
