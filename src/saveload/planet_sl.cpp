@@ -1000,6 +1000,35 @@ struct FJRNChunkHandler : ChunkHandler {
 	}
 };
 
+/** Legacy chunk handler for federation transfer journal checkpoints (FTJR). */
+struct FTJRChunkHandler : ChunkHandler {
+	FTJRChunkHandler() : ChunkHandler("FTJR", ChunkType::ReadOnly) {}
+	void Load() const override
+	{
+		const auto table = SlTableHeader(_transfer_checkpoint_desc);
+		while (SlIterateArray() != -1) {
+			SlTransferCheckpoint row{};
+			SlObject(&row, table);
+			TransferCheckpoint record;
+			record.request_id = row.request_id;
+			record.transfer_id = row.transfer_id;
+			record.arrival_receipt = row.arrival_receipt;
+			record.namespace_high = row.namespace_high;
+			record.namespace_low = row.namespace_low;
+			record.consist_sequence = row.consist_sequence;
+			record.source_world = row.source_world;
+			record.destination_world = row.destination_world;
+			record.source_gate_id = row.source_gate_id;
+			record.destination_gate_id = row.destination_gate_id;
+			record.state = static_cast<TransferCheckpointState>(row.state);
+			if (!row.snapshot_base64.empty()) {
+				record.snapshot = Base64Decode(row.snapshot_base64);
+			}
+			TransferJournal::Restore(record);
+		}
+	}
+};
+
 /** Temporary storage for InterServerPortalLink serialization. */
 struct SlInterServerPortal {
 	uint32_t id;
@@ -1302,6 +1331,7 @@ struct PRODChunkHandler : ChunkHandler {
 };
 
 static const FJRNChunkHandler FJRN;
+static const FTJRChunkHandler FTJR;
 static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
@@ -1331,6 +1361,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	CHQS,
 	FABR,
 	FJRN,
+	FTJR,
 	TECH,
 	PROD,
 };
