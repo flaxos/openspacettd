@@ -23,6 +23,7 @@
 #include "tech_tree.h"
 #include "production_chain.h"
 #include "commonwealth_pack.h"
+#include "corporate_alliance.h"
 #include "../station_func.h"
 #include "../window_func.h"
 #include "../cargotype.h"
@@ -875,6 +876,86 @@ CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station)
 		ProductionChainManager::RemoveForStation(station);
 		UpdateStationAcceptance(st, false);
 		SetWindowDirty(WindowClass::StationView, station);
+		SetWindowDirty(WindowClass::EmpireFacilities, 0);
 	}
 	return CommandCost(ExpensesType::Construction);
 }
+
+CommandCost CmdUpgradeProcessingFacility(DoCommandFlags flags, StationID station, uint32_t capacity_increase)
+{
+	Station *st = Station::GetIfValid(station);
+	const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(station);
+	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || facility == nullptr || facility->owner != _current_company) return CMD_ERROR;
+	if (capacity_increase == 0 || facility->monthly_capacity >= 1000) return CommandCost(STR_ERROR_FACILITY_MAX_CAPACITY);
+	uint32_t new_capacity = std::min<uint32_t>(facility->monthly_capacity + capacity_increase, 1000);
+	uint32_t actual_increase = new_capacity - facility->monthly_capacity;
+	if (actual_increase == 0) return CommandCost(STR_ERROR_FACILITY_MAX_CAPACITY);
+
+	Money cost = static_cast<Money>(actual_increase) * 1000;
+	if (flags.Test(DoCommandFlag::Execute)) {
+		ProductionChainManager::UpgradeFacilityForStation(station, actual_increase);
+		SetWindowDirty(WindowClass::StationView, station);
+		SetWindowDirty(WindowClass::EmpireFacilities, 0);
+	}
+	return CommandCost(ExpensesType::Construction, cost);
+}
+
+CommandCost CmdSetFacilityPlatformCapacity(DoCommandFlags flags, StationID station, uint32_t platform_capacity)
+{
+	Station *st = Station::GetIfValid(station);
+	const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(station);
+	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || facility == nullptr || facility->owner != _current_company) return CMD_ERROR;
+	if (platform_capacity > 5000) return CMD_ERROR;
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		ProductionChainManager::SetPlatformCapacityForStation(station, platform_capacity);
+		SetWindowDirty(WindowClass::StationView, station);
+		SetWindowDirty(WindowClass::EmpireFacilities, 0);
+	}
+	return CommandCost();
+}
+
+CommandCost CmdConfigurePortalStagingSiding(DoCommandFlags flags, TileIndex portal_tile, TileIndex siding_tile)
+{
+	if (!IsValidTile(portal_tile) || !PortalRegistry::IsInterServerPortal(portal_tile)) return CMD_ERROR;
+	const InterServerPortalLink *link = PortalRegistry::GetInterServerPortal(portal_tile);
+	if (link == nullptr) return CMD_ERROR;
+
+	Owner portal_owner = GetTileOwner(link->local_endpoint.tile);
+	if (Company::IsValidID(_current_company) && _current_company != OWNER_DEITY) {
+		if (portal_owner != _current_company && portal_owner != OWNER_NONE) return CMD_ERROR;
+	}
+
+	if (siding_tile != INVALID_TILE) {
+		if (!IsValidTile(siding_tile)) return CMD_ERROR;
+		if (PlanetManager::GetTileWorld(portal_tile) != PlanetManager::GetTileWorld(siding_tile)) return CMD_ERROR;
+	}
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		PortalRegistry::ConfigureStagingSiding(portal_tile, siding_tile);
+		SetWindowDirty(WindowClass::UniverseDirectory, 0);
+	}
+	return CommandCost();
+}
+
+CommandCost CmdSetCorporateAlliance(DoCommandFlags flags, CompanyID target_company, CorporateRelation relation)
+{
+	if (!Company::IsValidID(_current_company) || _current_company == OWNER_DEITY) return CMD_ERROR;
+	if (!Company::IsValidID(target_company) || target_company == _current_company) {
+		return CommandCost(STR_ERROR_INVALID_ALLIANCE_TARGET);
+	}
+	if (Company::GetIfValid(target_company) == nullptr) {
+		return CommandCost(STR_ERROR_INVALID_ALLIANCE_TARGET);
+	}
+	if (to_underlying(relation) > to_underlying(CorporateRelation::Allied)) {
+		return CMD_ERROR;
+	}
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		CorporateAllianceManager::SetRelation(_current_company, target_company, relation);
+		SetWindowDirty(WindowClass::CorporateHQ, 0);
+	}
+	return CommandCost();
+}
+
+

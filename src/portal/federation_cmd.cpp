@@ -14,6 +14,7 @@
 #include "portal_registry.h"
 #include "transfer_journal.h"
 #include "universe_authority.h"
+#include "federation_staging.h"
 
 #include "../company_base.h"
 #include "../company_func.h"
@@ -382,8 +383,10 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 
 void FederationTransferManager::OnGameTick(uint64_t current_tick)
 {
-	/* Poll incoming transfers every 10 ticks (~330ms) */
+	/* Poll incoming transfers and release held trains every 10 ticks (~330ms) */
 	if ((current_tick % 10) != 0) return;
+
+	FederationStagingManager::OnGameTick(current_tick);
 
 	std::set<WorldID> local_worlds;
 	for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
@@ -417,6 +420,9 @@ CommandCost CmdDispatchInterServerTransfer(DoCommandFlags flags, VehicleID vehic
 	}
 
 	if (flags.Test(DoCommandFlag::Execute)) {
+		if (FederationStagingManager::CheckAndDivertToStaging(v, portal_tile)) {
+			return CommandCost();
+		}
 		if (!FederationTransferManager::InitiateConsistDeparture(v, portal_tile)) {
 			return CommandCost(STR_ERROR_SITE_UNSUITABLE_FOR_TUNNEL);
 		}

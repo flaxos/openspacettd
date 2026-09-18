@@ -251,6 +251,26 @@ public:
 	static const std::unordered_map<TileIndex, InterServerPortalLink> &GetAllInterServerPortals();
 
 	/**
+	 * Configure the staging siding / holding loop tile for an inter-server portal.
+	 */
+	static bool ConfigureStagingSiding(TileIndex portal_tile, TileIndex siding_tile);
+
+	/**
+	 * Get the designated staging siding tile for an inter-server portal.
+	 */
+	static TileIndex GetStagingSiding(TileIndex portal_tile);
+
+	/**
+	 * Set the active holding state for an inter-server portal link.
+	 */
+	static bool SetHoldingActive(TileIndex portal_tile, bool active);
+
+	/**
+	 * Check whether holding is currently active for an inter-server portal link.
+	 */
+	static bool IsHoldingActive(TileIndex portal_tile);
+
+	/**
 	 * Repair generated neutral gateway heads from early multi-world saves where
 	 * the stored entry direction pointed away from the world-side lead track.
 	 * This operation is deterministic and idempotent.

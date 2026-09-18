@@ -17,6 +17,7 @@
 #include "../tunnelbridge.h"
 #include "../tunnelbridge_map.h"
 #include "../portal/edge_conduit.h"
+#include "../portal/corporate_alliance.h"
 #include "../depot_map.h"
 #include "pathfinder_func.h"
 
@@ -388,12 +389,11 @@ protected:
 			}
 		}
 
-		/* Neutral railway is shared infrastructure. This is used by generated
-		 * interplanetary gateways and their approach tracks, which exist before
-		 * a player company is created. Competitor-owned railway remains private. */
+		/* Neutral railway (OWNER_NONE / CST) and allied railway are shared infrastructure.
+		 * Competitor-owned railway without an established alliance remains private or hostile. */
 		Owner tile_owner = GetTileOwner(this->new_tile);
-		if (IsRailTT() && tile_owner != this->veh_owner && tile_owner != OWNER_NONE) {
-			/* different owner */
+		if (IsRailTT() && !CorporateAllianceManager::CanTraverseTrack(this->veh_owner, tile_owner)) {
+			/* unauthorized track owner */
 			this->err = ErrorCode::NoWay;
 			return false;
 		}

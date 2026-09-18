@@ -27,6 +27,7 @@
 #include "order_cmd.h"
 #include "train_cmd.h"
 #include "train.h"
+#include "portal/corporate_alliance.h"
 
 #include "table/strings.h"
 
@@ -637,7 +638,7 @@ CommandCost CmdInsertOrder(DoCommandFlags flags, VehicleID veh, VehicleOrderID s
 			const Station *st = Station::GetIfValid(new_order.GetDestination().ToStationID());
 			if (st == nullptr) return CMD_ERROR;
 
-			if (st->owner != OWNER_NONE) {
+			if (st->owner != OWNER_NONE && !CorporateAllianceManager::CanUseStation(v->owner, st->owner)) {
 				ret = CheckOwnership(st->owner);
 				if (ret.Failed()) return ret;
 			}
@@ -764,8 +765,10 @@ CommandCost CmdInsertOrder(DoCommandFlags flags, VehicleID veh, VehicleOrderID s
 				case VehicleType::Train: {
 					if (!wp->facilities.Test(StationFacility::Train)) return CommandCost(STR_ERROR_CAN_T_ADD_ORDER, STR_ERROR_NO_RAIL_WAYPOINT);
 
-					ret = CheckOwnership(wp->owner);
-					if (ret.Failed()) return ret;
+					if (!CorporateAllianceManager::CanUseWaypoint(v->owner, wp->owner)) {
+						ret = CheckOwnership(wp->owner);
+						if (ret.Failed()) return ret;
+					}
 					break;
 				}
 

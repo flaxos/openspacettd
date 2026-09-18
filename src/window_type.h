@@ -767,6 +767,9 @@ enum class WindowClass : uint16_t {
 	/** Corporate Headquarters campus and planetary stockpile overview. */
 	CorporateHQ,
 
+	/** Empire-wide industrial processing facilities and supply chain dashboard. */
+	EmpireFacilities,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

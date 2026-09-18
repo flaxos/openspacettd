@@ -24,6 +24,7 @@
 #include "../portal/fabrication_manager.h"
 #include "../portal/tech_tree.h"
 #include "../portal/production_chain.h"
+#include "../portal/corporate_alliance.h"
 
 #include "../safeguards.h"
 
@@ -916,6 +917,56 @@ struct FABRChunkHandler : ChunkHandler {
 	}
 };
 
+struct SlCorporateAllianceRecord {
+	uint8_t company_a;
+	uint8_t company_b;
+	uint8_t relation;
+};
+
+static const SaveLoad _corporate_alliance_desc[] = {
+	SLE_VAR(SlCorporateAllianceRecord, company_a, VarTypes::U8),
+	SLE_VAR(SlCorporateAllianceRecord, company_b, VarTypes::U8),
+	SLE_VAR(SlCorporateAllianceRecord, relation,  VarTypes::U8),
+};
+
+/** Chunk handler for Corporate Alliances & Treaties (ALLI). */
+struct ALLIChunkHandler : ChunkHandler {
+	ALLIChunkHandler() : ChunkHandler("ALLI", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_corporate_alliance_desc);
+
+		int i = 0;
+		for (const auto &rec : CorporateAllianceManager::GetAllRelations()) {
+			SlCorporateAllianceRecord r{
+				.company_a = rec.company_a.base(),
+				.company_b = rec.company_b.base(),
+				.relation  = to_underlying(rec.relation),
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&r, _corporate_alliance_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		CorporateAllianceManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_corporate_alliance_desc);
+
+		SlCorporateAllianceRecord r{};
+		while (SlIterateArray() != -1) {
+			r = {};
+			SlObject(&r, slt);
+			CorporateAllianceManager::RestoreRelation(
+				CompanyID{r.company_a},
+				CompanyID{r.company_b},
+				static_cast<CorporateRelation>(r.relation)
+			);
+		}
+	}
+};
+
 /** Save/load row for federation transfer journal checkpoints. Snapshot bytes are
  * stored as base64 text to keep the named table shape simple and portable.
  */
@@ -995,6 +1046,35 @@ struct FJRNChunkHandler : ChunkHandler {
 			record.destination_gate_id = row.destination_gate_id;
 			record.state = static_cast<TransferCheckpointState>(row.state);
 			record.snapshot = Base64Decode(row.snapshot_base64);
+			TransferJournal::Restore(record);
+		}
+	}
+};
+
+/** Legacy chunk handler for federation transfer journal checkpoints (FTJR). */
+struct FTJRChunkHandler : ChunkHandler {
+	FTJRChunkHandler() : ChunkHandler("FTJR", ChunkType::ReadOnly) {}
+	void Load() const override
+	{
+		const auto table = SlTableHeader(_transfer_checkpoint_desc);
+		while (SlIterateArray() != -1) {
+			SlTransferCheckpoint row{};
+			SlObject(&row, table);
+			TransferCheckpoint record;
+			record.request_id = row.request_id;
+			record.transfer_id = row.transfer_id;
+			record.arrival_receipt = row.arrival_receipt;
+			record.namespace_high = row.namespace_high;
+			record.namespace_low = row.namespace_low;
+			record.consist_sequence = row.consist_sequence;
+			record.source_world = row.source_world;
+			record.destination_world = row.destination_world;
+			record.source_gate_id = row.source_gate_id;
+			record.destination_gate_id = row.destination_gate_id;
+			record.state = static_cast<TransferCheckpointState>(row.state);
+			if (!row.snapshot_base64.empty()) {
+				record.snapshot = Base64Decode(row.snapshot_base64);
+			}
 			TransferJournal::Restore(record);
 		}
 	}
@@ -1302,6 +1382,7 @@ struct PRODChunkHandler : ChunkHandler {
 };
 
 static const FJRNChunkHandler FJRN;
+static const FTJRChunkHandler FTJR;
 static const ISPRChunkHandler ISPR;
 static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
@@ -1314,6 +1395,7 @@ static const STCKChunkHandler STCK;
 static const LHUBChunkHandler LHUB;
 static const CHQSChunkHandler CHQS;
 static const FABRChunkHandler FABR;
+static const ALLIChunkHandler ALLI;
 static const TECHChunkHandler TECH;
 static const PRODChunkHandler PROD;
 
@@ -1330,7 +1412,9 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	LHUB,
 	CHQS,
 	FABR,
+	ALLI,
 	FJRN,
+	FTJR,
 	TECH,
 	PROD,
 };

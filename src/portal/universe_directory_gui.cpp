@@ -10,6 +10,7 @@
 #include "universe_authority.h"
 #include "planet_manager.h"
 #include "portal_cmd.h"
+#include "portal_registry.h"
 #include "megacity_gui.h"
 #include "megacity_manager.h"
 #include "../command_func.h"
@@ -47,7 +48,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_universe_directory_w
 		NWidget(WWT_PANEL, Colours::Blue, WID_UD_WORLD_LIST), SetMinimalSize(508, 200), SetFill(1, 1), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VSCROLLBAR, Colours::Blue, WID_UD_SCROLLBAR),
 	EndContainer(),
-	NWidget(WWT_PANEL, Colours::Blue, WID_UD_DETAILS_PANEL), SetMinimalSize(520, 68), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, Colours::Blue, WID_UD_DETAILS_PANEL), SetMinimalSize(520, 84), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
 		NWidget(WWT_RESIZEBOX, Colours::Blue),
@@ -55,7 +56,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_universe_directory_w
 };
 
 static WindowDesc _universe_directory_desc(
-	WindowPosition::Automatic, "view_universe_directory", 520, 350,
+	WindowPosition::Automatic, "view_universe_directory", 520, 370,
 	WindowClass::UniverseDirectory, WindowClass::None,
 	{},
 	_nested_universe_directory_widgets
@@ -117,16 +118,18 @@ struct UniverseDirectoryWindow : Window {
 			case WID_UD_HEADER_PANEL: {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
 				size_t online_count = 0;
+				int64_t total_cleared = 0;
 				for (const auto &w : worlds) {
 					if (w.status == WorldOnlineStatus::Online) online_count++;
+					total_cleared += w.total_cleared_revenue;
 				}
 
-				std::string line1 = fmt::format("Registered Worlds: {}  |  Online Servers: {} / {}",
-					worlds.size(), online_count, worlds.size());
+				std::string line1 = fmt::format("Registered Worlds: {}  |  Online Servers: {} / {}  |  Federation Cleared Rev: Cr {:L}",
+					worlds.size(), online_count, worlds.size(), total_cleared);
 				DrawString(tr, line1, TextColour::White);
 				tr.top += GetCharacterHeight(FontSize::Normal);
 
-				DrawString(tr, "Central Universe Authority Node: Active  |  Transport Protocol: F4 Lockstep", TextColour::Silver);
+				DrawString(tr, "Central Universe Authority Node: Active  |  Transport Protocol: F4 Lockstep  |  Holding Loops: Automated", TextColour::Silver);
 				break;
 			}
 
@@ -155,10 +158,16 @@ struct UniverseDirectoryWindow : Window {
 
 						Rect text_rect = item_rect.Shrink(WidgetDimensions::scaled.framerect);
 
-						/* Line 1: World ID, Name, Biome, and Status Badge */
-						StringID status_str = STR_UNIVERSE_DIRECTORY_ONLINE;
-						if (world.status == WorldOnlineStatus::Maintenance) status_str = STR_UNIVERSE_DIRECTORY_MAINTENANCE;
-						else if (world.status == WorldOnlineStatus::Unreachable) status_str = STR_UNIVERSE_DIRECTORY_UNREACHABLE;
+						/* Line 1: World ID, Name, Biome, Status Badge, Ping Badge, and Holding Indicator */
+						const char *status_text = "ONLINE";
+						TextColour status_col = TextColour::Green;
+						if (world.status == WorldOnlineStatus::Maintenance) {
+							status_text = "MAINTENANCE";
+							status_col = TextColour::Yellow;
+						} else if (world.status == WorldOnlineStatus::Unreachable) {
+							status_text = "UNREACHABLE";
+							status_col = TextColour::Red;
+						}
 
 						std::string world_header = fmt::format("World #{}: {} [{} | {}]",
 							world.world_id.base(), world.name,
@@ -168,14 +177,46 @@ struct UniverseDirectoryWindow : Window {
 
 						int header_w = GetStringBoundingBox(world_header).width;
 						Rect status_rect = text_rect.Indent(header_w + ScaleGUITrad(8), _current_text_dir != TD_RTL);
-						DrawString(status_rect, status_str);
+						DrawString(status_rect, status_text, status_col);
+
+						int status_w = GetStringBoundingBox(status_text).width;
+						Rect ping_rect = status_rect.Indent(status_w + ScaleGUITrad(6), _current_text_dir != TD_RTL);
+						std::string ping_str;
+						TextColour ping_col = TextColour::Green;
+						if (world.status == WorldOnlineStatus::Online) {
+							if (world.ping_ms < 50) ping_col = TextColour::Green;
+							else if (world.ping_ms <= 150) ping_col = TextColour::Yellow;
+							else ping_col = TextColour::Red;
+							ping_str = fmt::format("[{}ms]", world.ping_ms);
+						} else {
+							ping_col = TextColour::Silver;
+							ping_str = "[-]";
+						}
+						DrawString(ping_rect, ping_str, ping_col);
+
+						bool has_holding = false;
+						for (const auto &[ptile, plink] : PortalRegistry::GetAllInterServerPortals()) {
+							if (plink.remote_world == world.world_id && plink.is_holding_active) {
+								has_holding = true;
+								break;
+							}
+						}
+						if (has_holding) {
+							int ping_w = GetStringBoundingBox(ping_str).width;
+							Rect hold_rect = ping_rect.Indent(ping_w + ScaleGUITrad(6), _current_text_dir != TD_RTL);
+							DrawString(hold_rect, "[HOLDING]", TextColour::Red);
+						}
+
 						text_rect.top += GetCharacterHeight(FontSize::Normal);
 
-						/* Line 2: Address, Clients, Active Trains, Population, Megacity status */
+						/* Line 2: Address, Clients, Traffic Load, Trains, Clearing, Population, Megacity status */
 						uint32_t pop = world.population > 0 ? world.population : PlanetManager::GetWorldPopulation(world.world_id);
-						std::string metrics = fmt::format("Addr: {}  |  Clients: {}/{}  |  Active Trains: {}",
+						std::string metrics = fmt::format("Addr: {}  |  Clients: {}/{}  |  Load: {:.0f}%  |  Trains: {}",
 							world.address.empty() ? "Local / In-Process" : world.address,
-							world.active_clients, world.max_clients, world.active_trains);
+							world.active_clients, world.max_clients, world.traffic_load_pct, world.active_trains);
+						if (world.financial_clearing_balance != 0 || world.total_cleared_revenue != 0) {
+							metrics += fmt::format("  |  Clearing: Cr {:+L}", world.financial_clearing_balance);
+						}
 						if (pop > 0) {
 							metrics += fmt::format("  |  Pop: {:L}", pop);
 						}
@@ -230,6 +271,31 @@ struct UniverseDirectoryWindow : Window {
 					token_str, selected->last_heartbeat_tick);
 				DrawString(tr, line2, TextColour::Gold);
 				tr.top += GetCharacterHeight(FontSize::Normal);
+
+				std::string line_telemetry = fmt::format("Telemetry: Ping {}ms ({})  |  Corridor Traffic Load: {:.1f}%  |  Clearing Balance: Cr {:+L}  (Revenue: Cr {:L})",
+					selected->ping_ms,
+					selected->ping_ms < 50 ? "Optimal" : (selected->ping_ms <= 150 ? "Fair" : "High Latency"),
+					selected->traffic_load_pct,
+					selected->financial_clearing_balance,
+					selected->total_cleared_revenue);
+				DrawString(tr, line_telemetry, selected->ping_ms > 150 ? TextColour::Yellow : TextColour::LightBlue);
+				tr.top += GetCharacterHeight(FontSize::Normal);
+
+				bool has_siding = false;
+				bool holding_active = false;
+				for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
+					if (link.remote_world == selected->world_id) {
+						if (link.staging_siding_tile != INVALID_TILE) has_siding = true;
+						if (link.is_holding_active) holding_active = true;
+					}
+				}
+				if (has_siding || holding_active) {
+					std::string line_siding = fmt::format("Holding Loop / Staging Siding: {}  |  Status: {}",
+						has_siding ? "Configured" : "Unset",
+						holding_active ? "Holding Active (Diverting Traffic to Siding)" : "Normal (Route Clear)");
+					DrawString(tr, line_siding, holding_active ? TextColour::Red : TextColour::Green);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+				}
 
 				const PlanetRegion *local_reg = (this->selected_world != INVALID_WORLD) ? PlanetManager::GetRegion(this->selected_world) : nullptr;
 				uint32_t dev_score = local_reg != nullptr ? local_reg->development_score : 0;

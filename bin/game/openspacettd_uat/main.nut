@@ -560,8 +560,9 @@ function OpenSpaceUATDemo::Start()
 		 * CHAPTER 1: Overview & Planetary Navigation
 		 * ------------------------------------------------------------- */
 		local overview_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "1. Overview & Planetary Navigation");
-		this.AddText(overview_page, "Welcome to the OpenSpaceTTD All-Feature Guided Solo UAT environment. This deterministic vertical slice connects up to six distinct planetary worlds across the void: World 1 (Phase 1 Core, Temperate), World 2 (Phase 2 Developed, Arid Desert), World 3 (Phase 3 Frontier, Sub-Arctic), World 4 (Phase 4 Expansion, Volcanic), World 5 (Phase 4 Expansion, Sub-Tropic), and World 6 (Phase 4 Expansion, Oceanic).");
-		this.AddText(overview_page, "Use Ctrl+Alt+1 through Ctrl+Alt+6 or the Map dropdown menu to jump viewports instantly between worlds.");
+		this.AddText(overview_page, "Welcome to the OpenSpaceTTD End-to-End Tutorial & Guided UAT environment. This deterministic vertical slice connects up to six distinct planetary worlds across the void: World 1 (Phase 1 Core, Temperate), World 2 (Phase 2 Developed, Arid Desert), World 3 (Phase 3 Frontier, Sub-Arctic), World 4 (Phase 4 Expansion, Volcanic), World 5 (Phase 4 Expansion, Sub-Tropic), and World 6 (Phase 4 Expansion, Oceanic).");
+		this.AddText(overview_page, "TUTORIAL INSTRUCTIONS: Follow each chapter in sequence. Use Ctrl+Alt+1 through Ctrl+Alt+6 or the Map dropdown menu to jump viewports instantly between worlds. Click the location links below to jump directly to each planetary anchor town.");
+		this.AddText(overview_page, "FRAGILE & UNTESTED FOCUS: Test rapid viewport switching across world boundaries while trains are actively traversing portal wormholes. Use Land Area Information ('?') along the perimeter void boundaries (TileType::Void) to confirm construction is strictly forbidden across the void.");
 		for (local r = 0; r < regions.len(); r++) {
 			this.AddLocation(overview_page, regions[r].anchor, regions[r].world + " Anchor: " + regions[r].town + " (" + regions[r].phase + " - " + regions[r].biome + ")");
 		}
@@ -573,6 +574,8 @@ function OpenSpaceUATDemo::Start()
 		local portal_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "2. Monumental Portal Gates");
 		this.AddText(portal_page, "Monumental Portal Gates interlink planetary railway networks across the void. Pre-linked gateway pairs (Alpha 1<->2, Beta 2<->3, Gamma 3<->4, Delta 4<->5, Epsilon 5<->6) demonstrate arbitrary non-aligned spatial transitions with automatic 18-tile high-capacity terminals (holding lanes and path signals).");
 		this.AddText(portal_page, "The 'UAT Wormhole Demonstrator' locomotive continuously cycles between perpendicular track axes on World 1 and World 2.");
+		this.AddText(portal_page, "TUTORIAL INSTRUCTIONS: 1. Click the Gateway Alpha location links below and follow the demonstrator train as it transits between perpendicular track axes. 2. Select the Portal Gate tool on the Rail Construction toolbar and click a clear boundary tile facing the void to construct an unlinked gate. 3. Jump to World 2, build a matching gate, and link them using the Link Portal tool.");
+		this.AddText(portal_page, "FRAGILE & UNTESTED FOCUS: 1. Signal Modification: Change or remove a path signal on an active portal terminal while a train is approaching to test YAPF reservation recovery. 2. Consist Lengths: Run consists with 5, 7, and 10 wagons to verify no consist length desync across perpendicular track axes. 3. Reversing: Test reversing a train inside the depot turnback after portal exit.");
 		for (local g = 0; g < gateway_sides.len(); g++) {
 			local glabel = (g < gateway_names.len()) ? gateway_names[g] : ("Gateway " + (g + 1));
 			this.AddLocation(portal_page, gateway_sides[g].first, glabel + " - World " + (g + 1) + " head (" + gateway_sides[g].first_axis + ")");
@@ -587,6 +590,8 @@ function OpenSpaceUATDemo::Start()
 		local bp_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "3. Player Blueprints & CST Prefabs");
 		this.AddText(bp_page, "Open the Blueprint Library by pressing 'B' or clicking the Blueprint icon on the Railway Construction toolbar. Test the 8 canonical CST Prefab Rail Blocks (using 'R' to rotate 90 degrees and 'F' to mirror/flip horizontally with RHD/LHD traffic invariance).");
 		this.AddText(bp_page, "Capture custom player blueprints from the map using 'Capture From Map', save them with custom names and tags, and place replicas deterministically.");
+		this.AddText(bp_page, "TUTORIAL INSTRUCTIONS: 1. Press 'B' to open the Rail Blueprint Library. 2. Select a canonical CST prefab (e.g. CST Dual-Track Passing Siding or Mainline Double Straight). 3. Press 'R' to rotate 90 degrees and 'F' to mirror/flip. Click the CST Staging Area on World 2 to stamp it. 4. Click 'Capture' in the library window, drag across the sample track layout on World 2, type a custom name, save, and stamp a replica.");
+		this.AddText(bp_page, "FRAGILE & UNTESTED FOCUS: 1. Obstacle Overlap: Try stamping a prefab overlapping water, steep terrain, or void boundaries to verify atomic rollback (no partial track remnants). 2. Signal Variants: Verify that one-way path signals retain their exact direction and electric variant after rotation and mirroring. 3. Export/Import: Use Export to save a custom blueprint to disk, then Import to reload it.");
 		this.AddLocation(bp_page, cst_pad_tile != GSMap.TILE_INVALID ? cst_pad_tile : regions[1].center, "CST Prefab Staging Area (World 2: Merredin Industrial)");
 		this.AddLocation(bp_page, bp_pad_tile != GSMap.TILE_INVALID ? bp_pad_tile : regions[1].center, "Custom Blueprint Capture Track Layout (World 2: Merredin Industrial)");
 		this.AddGoal(bp_page, cst_pad_tile != GSMap.TILE_INVALID ? cst_pad_tile : regions[1].center, "4. Open Blueprint Library ('B'), select a canonical CST Prefab (e.g. CST Dual-Track Passing Siding or Mainline Double Straight), rotate/flip, and stamp it on the staging area.");
@@ -597,6 +602,8 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local ops_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "4. Planetary Operations: Spaceports & Conduits");
 		this.AddText(ops_page, "Spaceport operations and void Edge Conduits expand planetary extraction and off-world logistics. Spaceport controls appear in owned airport station windows. Edge Conduits are built using the void-tunnel tool on the Railway Construction toolbar.");
+		this.AddText(ops_page, "TUTORIAL INSTRUCTIONS: 1. Jump to the Phase 1 Spaceport candidate airport on World 1. Open the station window, click 'Designate Spaceport', and upgrade to Tier 2 and Tier 3. Observe life-support supplies and projected trade cargo. 2. Jump to World 3, select the Edge Conduit tool on the rail toolbar, and click the signed void boundary tile.");
+		this.AddText(ops_page, "FRAGILE & UNTESTED FOCUS: 1. Boundary Invariants: Attempt to build an Edge Conduit on an interior map tile (non-boundary) or non-flat slope to verify clean rejection without crash. 2. Verify Land Area Information on the conduit tile reports the +100% Frontier extraction bonus (100 units/mo mineral cargo).");
 		this.AddLocation(ops_page, spaceport_tile != GSMap.TILE_INVALID ? spaceport_tile : regions[0].center, "Phase 1 Spaceport candidate airport (World 1)");
 		this.AddGoal(ops_page, spaceport_tile != GSMap.TILE_INVALID ? spaceport_tile : regions[0].center, "6. Open station window for the Phase 1 Spaceport candidate and designate Spaceport. Upgrade through Tier 2 and Tier 3, observing supply status and projected off-world trade cargo.");
 		this.AddLocation(ops_page, conduit_tile != GSMap.TILE_INVALID ? conduit_tile : regions[2].center, "Phase 3 signed Edge Conduit construction tile (World 3)");
@@ -608,6 +615,8 @@ function OpenSpaceUATDemo::Start()
 		local mega_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "5. Megacity Demands & Freight Corridors");
 		this.AddText(mega_page, "Metropolitan core worlds demand multi-tier commodity logistics: Tier 1 Sustenance (Food/Water), Tier 2 Expansion (Goods/Alloys), and Tier 3 Prosperity (Data Crystals/Valuables). Monthly cycles evaluate supply satisfaction and transition growth states: Starvation (0.0x), Subsistence (1.0x), Metropolitan Boom (1.5x), and HyperGrowth (2.0x).");
 		this.AddText(mega_page, "The Freight Corridor Monitor tracks inter-world transport lanes, active transit volume, capacity utilization, and bottleneck escalation alerts.");
+		this.AddText(mega_page, "TUTORIAL INSTRUCTIONS: 1. Open Town window for Oaktree Core > click 'Megacity' (or Map menu > 'Megacity Overview'). Inspect Tier 1-3 demands and observe growth state transitions under monthly evaluation. 2. Open Map dropdown > 'Freight Corridor Monitor' to inspect corridor volume and capacity utilization.");
+		this.AddText(mega_page, "FRAGILE & UNTESTED FOCUS: 1. Partial Demand: Deliver only Tier 1 Food/Water while withholding Tier 2/3 goods. Confirm town stabilizes at Subsistence without falling into Starvation. 2. Congestion: Run multiple trains simultaneously through Gateway Alpha to verify corridor monitor escalates from GREEN to YELLOW and RED bottleneck alerts.");
 		this.AddLocation(mega_page, regions[0].anchor, "Oaktree Core (Metropolitan Megacity)");
 		this.AddLocation(mega_page, gateway_sides[0].first, "Gateway Alpha Freight Corridor (Phase 1)");
 		this.AddGoal(mega_page, regions[0].anchor, "8. Open Town window > 'Megacity' or Town menu > 'Megacity Overview'. Inspect Tier 1-3 demands and observe growth state transitions under monthly evaluation.");
@@ -619,6 +628,8 @@ function OpenSpaceUATDemo::Start()
 		local fed_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "6. Supply Chain Matrix & Federation Governance");
 		this.AddText(fed_page, "Sprint 27 completed native player and operator UI surfaces. The Supply Chain Matrix & Trade Ledger window monitors Commonwealth macro phase flows, spaceport launch volume, conduit extraction, and bilateral commodity conservation audits.");
 		this.AddText(fed_page, "The Federation Authentication & Charters window handles player session identity, corporate chartering, owner delegation, and world presence expansion.");
+		this.AddText(fed_page, "TUTORIAL INSTRUCTIONS: 1. Open Map dropdown > 'Supply Chain & Trade Ledger'. Inspect macro phase flows, spaceport/conduit infrastructure volume, and verify the CONSERVED commodity trade balance audit. 2. Open Map dropdown > 'Federation Authentication & Charters'. Authenticate player identity, charter a corporate entity, and expand world presence to World 1.");
+		this.AddText(fed_page, "FRAGILE & UNTESTED FOCUS: Inspect the ledger before and after an inter-world freight delivery across Gateway Alpha. Confirm exports on World 2 exactly match imports on World 1 with zero cargo duplication or leakage.");
 		this.AddLocation(fed_page, regions[0].anchor, "Federation Administrative Core (Oaktree Core)");
 		this.AddGoal(fed_page, regions[0].anchor, "10. Open Map dropdown > Supply Chain & Trade Ledger. Inspect macro phase flows, spaceport/conduit infrastructure volume, and verify the CONSERVED commodity trade balance audit.");
 		this.AddGoal(fed_page, regions[0].anchor, "11. Open Map dropdown > Federation Authentication & Charters. Authenticate player identity, charter a corporate entity, and expand world presence to World 1.");
@@ -628,6 +639,8 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local cargo_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "7. Commonwealth Data Crystals Rebranding");
 		this.AddText(cargo_page, "All user-facing references to the legacy mail cargo must display Data Crystals across economic, administrative, station, and vehicle surfaces.");
+		this.AddText(cargo_page, "TUTORIAL INSTRUCTIONS: Verify that postal mail has been completely rebranded to Data Crystals across: 1. Graphs > Cargo Payment Rates. 2. Game Settings distribution mode. 3. Station acceptance. 4. Train depot Data Van wagon. 5. Road depot MPS Data Courier.");
+		this.AddText(cargo_page, "FRAGILE & UNTESTED FOCUS: 1. Inspect depot purchase lists to confirm Data Van and MPS Data Courier display correct sprites and cargo capacities. 2. Test cargo refit of generic boxcars/vans to Data Crystals.");
 		this.AddLocation(cargo_page, regions[0].anchor, "Oaktree Core Station & Depot Area");
 		this.AddGoal(cargo_page, regions[0].anchor, "12. Graphs > Cargo Payment Rates lists Data Crystals.");
 		this.AddGoal(cargo_page, regions[0].anchor, "13. Game Settings search shows Distribution mode for data crystals.");
@@ -640,6 +653,8 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local col_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "8. Phase 4 Colonisation & Frontier Outposts");
 		this.AddText(col_page, "Uncolonised Expansion Worlds (Worlds 4, 5, 6) represent pristine planetary wildernesses featuring distinct alien biomes: Volcanic (World 4), Sub-Tropic (World 5), and Oceanic (World 6). Initially, town founding and processing facilities are restricted. Found colonial outposts using the Colonize Outpost tool or 'colonize_world <world_id>' console command to elevate the world to Phase 3 Frontier status, unlocking primary resource extraction, depots, and frontier towns.");
+		this.AddText(col_page, "TUTORIAL INSTRUCTIONS: Jump to World 4 (Ignis Caldera). Verify environmental styling and pre-colonisation placement restrictions. Found a colonial outpost to elevate it to Phase 3 Frontier status, unlocking primary extraction and settlement expansion.");
+		this.AddText(col_page, "FRAGILE & UNTESTED FOCUS: 1. Native Settlement Creation: Verify outpost founding creates real houses, roads, and population BEFORE phase promotion. 2. Persistence: Save and reload immediately after colonizing to verify persistent Frontier status.");
 		if (regions.len() >= 6) {
 			this.AddLocation(col_page, regions[3].anchor, "World 4 Anchor: Ignis Caldera (Volcanic Wilderness)");
 			this.AddLocation(col_page, regions[4].anchor, "World 5 Anchor: Verdant Canopy (Sub-Tropic Wilderness)");
@@ -653,6 +668,8 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local dev_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "9. Planetary Development Scoring & Phase Promotion");
 		this.AddText(dev_page, "Planetary worlds advance through 4 Commonwealth development phase tiers driven by logistics throughput and cargo delivery volume. Deliver cargo to stations across worlds to earn development score points (with interplanetary shipments earning significant premiums). When score thresholds are met (Phase 4->3: 100 pts, Phase 3->2: 5000 pts, Phase 2->1: 20000 pts), the world can be promoted via 'promote_world <world_id>' or the Planetary Operations window.");
+		this.AddText(dev_page, "TUTORIAL INSTRUCTIONS: Deliver inter-world cargo across gateway pairs to accumulate planetary development score points. Promote a Frontier or Developed world to its next development tier when the score threshold is satisfied, unlocking higher technology tiers.");
+		this.AddText(dev_page, "FRAGILE & UNTESTED FOCUS: 1. Premature Promotion: Attempt to promote a world before reaching the score threshold to verify graceful rejection. 2. World Reclassification: Confirm that promoting World 2 to Phase 1 allows Megacity designation.");
 		this.AddLocation(dev_page, regions[1].anchor, "World 2 Anchor: Merredin Industrial");
 		this.AddGoal(dev_page, regions[1].anchor, "19. Deliver inter-world cargo across gateway pairs to accumulate planetary development score points.");
 		this.AddGoal(dev_page, regions[1].anchor, "20. Promote a Frontier or Developed world to its next development tier when the score threshold is satisfied, unlocking higher technology tiers.");
@@ -662,6 +679,8 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local hq_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "10. Corporate Headquarters Campus");
 		this.AddText(hq_page, "Player corporations that establish networks spanning at least 3 distinct world phases and possess 5,000,000 Cr in capital can establish a monumental Corporate Headquarters campus on a Phase 1 Core World. Open Map menu > 'Corporate Headquarters & Stockpiles' to manage the campus, inspect branch tiers (Regional Branch -> Planetary HQ -> Commonwealth HQ), and track macro holdings.");
+		this.AddText(hq_page, "TUTORIAL INSTRUCTIONS: Open Map menu > 'Corporate Headquarters & Stockpiles' to inspect the established Commonwealth Central HQ campus on World 1. Advance headquarters tier through Planetary HQ and Commonwealth HQ to unlock corporate-wide bonuses.");
+		this.AddText(hq_page, "FRAGILE & UNTESTED FOCUS: 1. Verify tier upgrades apply corporate-wide bonuses. 2. Test relocation safeguards and confirmation prompts.");
 		local hq_site = GSMap.GetTileIndex((regions[0].min_x + regions[0].max_x) / 2 + 10, (regions[0].min_y + regions[0].max_y) / 2 + 10);
 		this.AddLocation(hq_page, hq_site, "Commonwealth Central HQ Campus (World 1: Oaktree Core)");
 		this.AddGoal(hq_page, hq_site, "21. Open Map menu > 'Corporate Headquarters & Stockpiles' to inspect the established Commonwealth Central HQ campus on World 1.");
@@ -672,6 +691,9 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local stock_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "11. Planetary Stockpiles & Logistics Hubs");
 		this.AddText(stock_page, "Each planetary world maintains a dedicated company physical stockpile of core fabrication commodities: Ballast, Structural Metal, Wiring, Electronics, Superalloy, and Composites. Company Logistics Hubs built adjacent to freight stations buffer and ingest train deliveries directly into local planetary stockpiles. Configure minimum reserve floors at logistics hubs to prevent trains from depleting reserves below operational minimums.");
+		this.AddText(tutorial_hub_text <- "TUTORIAL INSTRUCTIONS: Open Corporate Headquarters > 'Planetary Stockpiles' tab and verify multi-world inventory levels across all 6 fabrication roles. Inspect the Merredin Planetary Logistics Hub on World 2, configure minimum reserve floors, and verify train stockpile ingestion.");
+		this.AddText(stock_page, tutorial_hub_text);
+		this.AddText(stock_page, "FRAGILE & UNTESTED FOCUS: 1. Reserve Floor Enforcement: Set a reserve floor higher than current stock, then order a train to load. Confirm the train never extracts cargo below the reserve floor. 2. Cargo Conservation: Confirm that failed pickup or full inventory pools strictly conserve cargo on every tick.");
 		local hub_site = (regions.len() > 1) ? GSMap.GetTileIndex((regions[1].min_x + regions[1].max_x) / 2 - 10, (regions[1].min_y + regions[1].max_y) / 2 - 10) : regions[0].anchor;
 		this.AddLocation(stock_page, hub_site, "Merredin Planetary Logistics Hub (World 2)");
 		this.AddGoal(stock_page, hub_site, "23. Open Corporate Headquarters > 'Planetary Stockpiles' tab and verify multi-world inventory levels across all 6 fabrication roles.");
@@ -682,6 +704,8 @@ function OpenSpaceUATDemo::Start()
 		 * ------------------------------------------------------------- */
 		local fab_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "12. In-Kind Fabrication & BOM Construction");
 		this.AddText(fab_page, "Companies can toggle between standard commercial cash purchases and In-Kind Fabrication mode. When active, infrastructure construction (rail track, signals, depots) and vehicle manufacturing consume physical goods from the local planetary stockpile, applying a massive 80% cash discount.");
+		this.AddText(fab_page, "TUTORIAL INSTRUCTIONS: Toggle In-Kind Fabrication mode in the Corporate HQ window, construct rail infrastructure using local stockpile materials, and verify the 80% cash discount.");
+		this.AddText(fab_page, "FRAGILE & UNTESTED FOCUS: 1. Zero-Stockpile Fallback: Attempt construction in fabrication mode when local stockpiles have zero materials; verify clear error messaging explaining missing BOM requirements. 2. Vehicle Fabrication: Build a locomotive or wagon in a depot while in fabrication mode and verify material deduction.");
 		local fab_site = (regions.len() > 1) ? GSMap.GetTileIndex((regions[1].min_x + regions[1].max_x) / 2 - 8, (regions[1].min_y + regions[1].max_y) / 2 - 10) : regions[0].anchor;
 		this.AddLocation(fab_page, fab_site, "In-Kind Fabrication Track Staging (World 2)");
 		this.AddGoal(fab_page, fab_site, "25. Toggle In-Kind Fabrication mode in the Corporate HQ window, construct rail infrastructure using local stockpile materials, and verify the 80% cash discount.");
@@ -712,15 +736,18 @@ function OpenSpaceUATDemo::Start()
 		}
 		local owner_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "13. START HERE: Player Ownership & UAT Results");
 		this.AddText(owner_page, "UAT v1.1 covers Sprints 1-42. Play as the first human company (internal Company 0). Use Land Area Information on both gate heads and their complete approach tracks: every demo rail must show YOUR company. Extend the outer approach, change a path signal, connect a depot, and send your train through Gateway Alpha. Never modify a tile occupied or reserved by a train. Save a working copy and reload to verify ownership persists.");
+		this.AddText(owner_page, "TUTORIAL STEPS: 1. Click Land Area Information ('?') and click on Gateway Alpha gate heads and approach tracks on both World 1 and World 2. Confirm owner is Company 0. 2. Build a depot connected to the approach. 3. Buy an engine and freight car. 4. Order it to transit Gateway Alpha to World 2 and return.");
 		this.AddGoal(owner_page, null, "UAT-01: Verify player ownership; extend gate track, change signal, connect depot and run a train. Record Pass/Fail in demo/UAT-RESULTS.md.");
 		this.AddText(owner_page, "Earlier chapters are legacy orientation, not proof of acceptance. The current exact checklist is demo/ALL-FEATURES-UAT.md. All human results start Not run. Record screenshots and observed errors. Reload a fresh demo copy before independent tests. World 1 in the guide is internal world ID 0.");
 		local research_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "14. Commonwealth Research & Content Checks");
 		this.AddText(research_page, "UAT-12 / Sprint 41: Open Map > Corporate Headquarters, then Tech Tree. Select an eligible project, set a cash budget and observe progress over a game month. Compare cash, local feedstock and prerequisites. Verify completed research survives save/reload. Test Materials tier 3 discount only after genuinely unlocking it, not by assuming the demo has it.");
+		this.AddText(research_page, "FRAGILE & UNTESTED FOCUS: 1. Prerequisite Denial: Click a locked tier-2/3 project without prerequisites; confirm rejection explains missing prerequisites. 2. Monthly Budgeting: Advance simulation by one month and confirm cash is deducted and research points increment. 3. Persistence: Save and reload; confirm research points survive.");
 		this.AddGoal(research_page, null, "UAT-12: Research advances, locked prerequisites explain rejection, and completion persists.");
 		this.AddText(research_page, "UAT-13 / Sprint 37: Inspect active NewGRFs, cargo payment names and depot purchase lists before claiming the 12-cargo/CST pack is playable. This migrated save does not activate new content. Missing stock or cargos are Blocked, not a pass and not a reason to enable incompatible GRFs in an existing save.");
 		local gaps_page = GSStoryPage.New(GSCompany.COMPANY_INVALID, "15. Unproven Concepts & Separate Federation UAT");
 		this.AddText(gaps_page, "UAT-14 / Sprint 42: Production recipes have domain tests, but facility registration currently has no gameplay caller. Player-built closed production loops are BLOCKED pending integration. UAT-15 / Sprint 38: Bespoke alien/CST art is pending; inspect existing biomes without claiming original assets are complete.");
 		this.AddText(gaps_page, "UAT-16: External federation needs two servers and an authority, not this solo save. Follow demo/FEDERATION-UAT.md. Manual federation_dispatch proves an operator path only; natural gate-entry departure, visible return orders, mismatched content and restart recovery each need separate evidence. Do not mark these passed from a conserved ledger alone.");
+		this.AddText(gaps_page, "DIAGNOSTIC CONSOLE COMMANDS: Open console ('~') to run: 'setup_uat_fixtures verify' (checks ownership, stations, vehicles, hubs), 'stockpile' (prints planetary stockpiles), 'tech_tree' (prints research progress), 'federation_trains' (prints cross-process transfer consists).");
 		this.coverage42_added = true;
 		GSLog.Info("UAT v1.1 coverage ready: ownership onboarding and Sprints 37/41/42 plus explicit blockers.");
 		GSStoryPage.Show(owner_page);

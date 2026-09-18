@@ -6313,5 +6313,35 @@ STR_ERROR_PRODUCTION_BUILD                   :Cannot build production facility
 STR_ERROR_PRODUCTION_REMOVE                  :Cannot remove production facility
 
 STR_ERROR_COMMONWEALTH_CONTENT               :Commonwealth content is incomplete or incompatible; both exact v2 packs and all 13 cargoes are required
-STR_ERROR_COMMONWEALTH_RESEARCH              :Required Commonwealth research has not been completed
+STR_ERROR_COMMONWEALTH_RESEARCH              :Required Commonwealth research ('Materials Tier 1') has not been completed (toggle In-Kind Fabrication off in Corporate HQ to purchase with cash)
 STR_ERROR_COMMONWEALTH_PHASE                 :This vehicle or facility is not available in this world's phase
+
+# OpenSpaceTTD Sprint 43: Empire Facility Operations & Closed Production Loops
+STR_EMPIRE_FACILITIES_CAPTION                                :Industrial Facilities & Supply Chain
+STR_EMPIRE_FACILITIES_TAB_ALL                                :All Pipelines
+STR_EMPIRE_FACILITIES_TAB_PIPE_A                             :A: Structural
+STR_EMPIRE_FACILITIES_TAB_PIPE_B                             :B: Electronics
+STR_EMPIRE_FACILITIES_TAB_PIPE_C                             :C: Propulsion
+STR_EMPIRE_FACILITIES_TAB_PIPE_D                             :D: Data Crystals
+STR_EMPIRE_FACILITIES_REFRESH                                :Refresh
+STR_EMPIRE_FACILITIES_REFRESH_TOOLTIP                        :Refresh industrial metrics and buffer levels
+STR_EMPIRE_FACILITIES_UPGRADE_ALL                            :Upgrade All Facilities (+50 t/mo)
+STR_EMPIRE_FACILITIES_UPGRADE_ALL_TOOLTIP                    :Upgrade monthly processing capacity for all matching industrial facilities
+STR_MAP_MENU_INDUSTRIAL_FACILITIES                           :Industrial Facilities & Supply Chain
+STR_ERROR_CAN_T_UPGRADE_FACILITY                             :Can't upgrade processing facility capacity
+STR_ERROR_FACILITY_MAX_CAPACITY                              :Facility has already reached maximum capacity
+STR_ERROR_CAN_T_SET_PLATFORM_CAP                             :Can't set station platform holding target
+
+# OpenSpaceTTD Sprint 47: Neutral CST Infrastructure & Corporate Alliances
+STR_ERROR_FABRICATION_RESEARCH_OR_CASH                          :In-Kind Fabrication requires 'Materials Tier 1' research (disable in Corporate HQ to purchase with cash)
+STR_CORPORATE_HQ_TAB_ALLIANCES                                  :Alliances
+STR_CORPORATE_RELATION_ALLIED                                   :Allied (Shared Trackage Rights)
+STR_CORPORATE_RELATION_NEUTRAL                                  :Neutral (Private Track / Public CST Only)
+STR_CORPORATE_RELATION_HOSTILE                                  :Hostile (Track Access Interdicted)
+STR_CORPORATE_ALLIANCE_BTN_ALLIED                               :Alliance
+STR_CORPORATE_ALLIANCE_BTN_NEUTRAL                              :Neutral
+STR_CORPORATE_ALLIANCE_BTN_HOSTILE                              :Hostile
+STR_ERROR_CAN_T_SET_ALLIANCE                                    :Can't modify corporate alliance treaty
+STR_ERROR_INVALID_ALLIANCE_TARGET                               :Invalid corporation target
+
+

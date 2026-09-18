@@ -26,12 +26,16 @@
 static std::map<RecipeID, ProductionRecipe> _recipes;
 static std::map<FacilityID, ProcessingFacility> _facilities;
 static FacilityID _next_facility_id = 1;
+static uint64_t _total_hub_overflow = 0;
+static uint32_t _last_month_hub_overflow = 0;
 
 void ProductionChainManager::Reset()
 {
 	_recipes.clear();
 	_facilities.clear();
 	_next_facility_id = 1;
+	_total_hub_overflow = 0;
+	_last_month_hub_overflow = 0;
 	InitDefaultRecipes();
 }
 
@@ -278,7 +282,7 @@ bool ProductionChainManager::CanConstructFacility(WorldID world, RecipeID recipe
 	return true;
 }
 
-FacilityID ProductionChainManager::RegisterFacility(TileIndex tile, WorldID world, RecipeID recipe, CompanyID owner, uint32_t capacity, StationID station)
+FacilityID ProductionChainManager::RegisterFacility(TileIndex tile, WorldID world, RecipeID recipe, CompanyID owner, uint32_t capacity, StationID station, uint32_t platform_cap)
 {
 	std::string err;
 	if (!CanConstructFacility(world, recipe, err)) {
@@ -294,8 +298,10 @@ FacilityID ProductionChainManager::RegisterFacility(TileIndex tile, WorldID worl
 		.owner = owner,
 		.linked_station = station,
 		.monthly_capacity = capacity,
+		.platform_capacity = platform_cap,
 		.last_month_production = 0,
 		.total_produced = 0,
+		.last_month_hub_overflow = 0,
 		.input_buffers = {},
 		.output_buffers = {},
 	};
@@ -380,16 +386,52 @@ void ProductionChainManager::PublishStationOutput(ProcessingFacility &f)
 {
 	Station *st = Station::GetIfValid(f.linked_station);
 	if (st == nullptr || st->owner != f.owner || !st->facilities.Test(StationFacility::Train)) return;
-	for (auto &[cargo, amount] : f.output_buffers) {
-		if (cargo >= NUM_CARGO) continue;
-		while (amount > 0) {
-			uint16_t count = static_cast<uint16_t>(std::min<uint32_t>(amount, CargoPacket::MAX_COUNT));
+	bool has_hub = (f.owner != CompanyID::Invalid() && LogisticsHubManager::HasLogisticsHub(f.world_id, f.owner));
+
+	for (auto it = f.output_buffers.begin(); it != f.output_buffers.end();) {
+		CargoType cargo = it->first;
+		uint32_t &amount = it->second;
+		if (cargo >= NUM_CARGO) {
+			++it;
+			continue;
+		}
+
+		/* 1. Station Platform First: publish to platform up to platform_capacity.
+		 * If platform_capacity == 0 and no hub is present, publish all to platform. */
+		uint current_waiting = st->goods[cargo].AvailableCount();
+		uint platform_target = f.platform_capacity;
+		if (platform_target == 0 && !has_hub) {
+			platform_target = UINT32_MAX;
+		}
+
+		uint platform_space = (current_waiting < platform_target) ? (platform_target - current_waiting) : 0;
+		uint to_platform = std::min<uint32_t>(amount, platform_space);
+
+		while (to_platform > 0) {
+			uint16_t count = static_cast<uint16_t>(std::min<uint>(to_platform, CargoPacket::MAX_COUNT));
 			uint moved = AddProducedCargoToStation(st, cargo, count);
 			if (moved == 0) break;
+			to_platform -= moved;
 			amount -= moved;
+		}
+
+		/* 2. Hub Overflow: any output exceeding platform capacity diverts to planetary Logistics Hub */
+		if (amount > 0 && has_hub) {
+			StockpileManager::AddCargo(f.world_id, f.owner, cargo, amount);
+			f.last_month_hub_overflow += amount;
+			_total_hub_overflow += amount;
+			_last_month_hub_overflow += amount;
+			amount = 0;
+		}
+
+		if (amount == 0) {
+			it = f.output_buffers.erase(it);
+		} else {
+			++it;
 		}
 	}
 	SetWindowDirty(WindowClass::StationView, st->index);
+	SetWindowDirty(WindowClass::EmpireFacilities, 0);
 }
 
 std::vector<ProcessingFacility> ProductionChainManager::GetAllFacilities()
@@ -400,6 +442,56 @@ std::vector<ProcessingFacility> ProductionChainManager::GetAllFacilities()
 		res.push_back(f);
 	}
 	return res;
+}
+
+bool ProductionChainManager::UpgradeFacility(FacilityID id, uint32_t additional_capacity)
+{
+	ProcessingFacility *f = GetFacility(id);
+	if (f == nullptr || additional_capacity == 0) return false;
+	f->monthly_capacity = std::min<uint32_t>(f->monthly_capacity + additional_capacity, 1000);
+	SetWindowDirty(WindowClass::StationView, f->linked_station.base());
+	SetWindowDirty(WindowClass::EmpireFacilities, 0);
+	return true;
+}
+
+bool ProductionChainManager::UpgradeFacilityForStation(StationID station, uint32_t additional_capacity)
+{
+	ProcessingFacility *f = GetFacilityForStation(station);
+	if (f == nullptr) return false;
+	return UpgradeFacility(f->id, additional_capacity);
+}
+
+bool ProductionChainManager::SetPlatformCapacity(FacilityID id, uint32_t capacity)
+{
+	ProcessingFacility *f = GetFacility(id);
+	if (f == nullptr) return false;
+	f->platform_capacity = capacity;
+	SetWindowDirty(WindowClass::StationView, f->linked_station.base());
+	SetWindowDirty(WindowClass::EmpireFacilities, 0);
+	return true;
+}
+
+bool ProductionChainManager::SetPlatformCapacityForStation(StationID station, uint32_t capacity)
+{
+	ProcessingFacility *f = GetFacilityForStation(station);
+	if (f == nullptr) return false;
+	return SetPlatformCapacity(f->id, capacity);
+}
+
+uint64_t ProductionChainManager::GetTotalHubOverflow()
+{
+	return _total_hub_overflow;
+}
+
+uint32_t ProductionChainManager::GetLastMonthHubOverflow()
+{
+	return _last_month_hub_overflow;
+}
+
+void ProductionChainManager::ResetOverflowMetrics()
+{
+	_total_hub_overflow = 0;
+	_last_month_hub_overflow = 0;
 }
 
 void ProductionChainManager::DeliverCargo(FacilityID id, CargoType cargo, uint32_t amount)
@@ -429,7 +521,9 @@ uint32_t ProductionChainManager::WithdrawOutput(FacilityID id, CargoType cargo, 
 
 void ProductionChainManager::ProcessMonthlyProduction()
 {
+	_last_month_hub_overflow = 0;
 	for (auto &[id, f] : _facilities) {
+		f.last_month_hub_overflow = 0;
 		const ProductionRecipe *rec = GetRecipe(f.recipe_id);
 		if (rec == nullptr || CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid) continue;
 
@@ -460,13 +554,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 
 		for (const auto &[out_cargo, out_base] : rec->outputs) {
 			uint32_t produced_units = (max_batches * out_base * yield_mult_percent) / 100;
-
-			/* Check if output can automatically buffer into company's planetary Logistics Hub */
-			if (f.owner != CompanyID::Invalid() && LogisticsHubManager::HasLogisticsHub(f.world_id, f.owner)) {
-				StockpileManager::AddCargo(f.world_id, f.owner, out_cargo, produced_units);
-			} else {
-				f.output_buffers[out_cargo] += produced_units;
-			}
+			f.output_buffers[out_cargo] += produced_units;
 		}
 
 		f.last_month_production = max_batches;

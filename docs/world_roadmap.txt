@@ -1,0 +1,849 @@
+COMMONWEALTH SAGA — WORLD AND CONNECTION SCHEMA
+Version: research reconstruction 1.0
+Scope: Pandora's Star / Judas Unchained
+Purpose: source-informed OpenSpaceTTD universe planning
+
+======================================================================
+0. HOW TO READ THIS FILE
+======================================================================
+
+This is a reconstruction, not an official exhaustive route map.
+
+World existence and connection certainty are separate:
+- A world may be named in a source while its transport connections are not.
+- Do not promote an assumed connection to canon because its endpoints exist.
+
+CONNECTION EVIDENCE
+
+E = EXPLICIT
+    A retrieved novel passage describes the connection.
+
+R = REFERENCE-SUPPORTED
+    A secondary reference identifies the connection, or the connection follows
+    the novel's stated Earth-to-Phase-One structure combined with documented
+    Phase One membership.
+    An individually described journey has not necessarily been verified.
+
+I = INFERRED
+    There is a specific geographical, sector, journey or historical reason
+    to propose this connection, but a direct permanent link is not established.
+
+A = ASSUMED FOR GAME COMPLETION
+    The direct connection is not documented in the retrieved sources.
+    This is an editable game-design allocation, not a canonical discovery.
+
+U = UNKNOWN / NOT ASSIGNED
+    No direct connection is supplied.
+
+PHASES
+
+P1 = Phase One.
+P2 = Phase Two.
+P3 = Phase Three.
+?  = Not established here.
+NA = Phase classification not applicable.
+
+These are the setting's expansion-phase labels.
+Do not automatically equate them with a rigid game technology tier.
+A frontier-like world can still belong to Phase Two.
+
+TIME
+
+The ordinary network below is a PRE-INVASION / PEACETIME reconstruction.
+
+Historical demonstrations, emergency evacuation links, private retargetings,
+and later-era locations are listed separately.
+
+Do not activate all historical connections simultaneously.
+
+TRANSPORT MODES
+
+RAIL          = railway wormhole connection.
+GATE          = wormhole connection; through-running rail not established here.
+SCHEDULED     = wormhole with restricted operating periods.
+PRIVATE       = private/restricted wormhole access.
+EXPLORATION   = exploratory wormhole; not an ordinary public freight service.
+DATA          = communications connection, not train or bulk-cargo access.
+SILFEN_ROUTE  = access through the Silfen path network; intermediate paths unknown.
+ORBITAL       = wormhole to orbital infrastructure.
+SHUTTLE       = local spacecraft transfer.
+AIRCRAFT      = local atmospheric flight.
+NONE          = no active transport edge assigned.
+
+NETWORK CONVENTION
+
+Each catalogue row supplies ONE connection to its named CONNECTS_TO endpoint.
+
+Treat ordinary links as bidirectional unless a special record says otherwise.
+Connections listed under child worlds also belong to their parent world.
+
+Example:
+  Merredin -> Mito
+  Clonclurry -> Merredin
+  Valvida -> Merredin
+
+Therefore Merredin's neighbours are:
+  Mito, Clonclurry, Valvida.
+
+"CONNECTS_TO" is not necessarily the world's only connection.
+
+Never infer a direct gate merely from:
+- two worlds being near each other;
+- shared corporate ownership;
+- a train ticket mentioning both destinations;
+- a shared phase;
+- a radio message being received;
+- an evacuation itinerary without its intermediate stops.
+
+======================================================================
+1. SOURCE REGISTER
+======================================================================
+
+S01 — Named-world catalogue and additional locations.
+      Secondary reference; not a definitive concordance.
+      https://peterfhamilton.fandom.com/wiki/Locations_%28CS%29
+
+S02 — Big15 membership.
+      Secondary reference.
+      https://peterfhamilton.fandom.com/wiki/Big15
+
+S03 — Pandora's Star: Gralmond -> Verona -> Tanyata journey.
+      Novel text; online pagination is not printed-book pagination.
+      https://www.rulit.me/books/pandora-s-star-read-72600-6.html
+
+S04 — Commonwealth Saga excerpt: Earth/Phase-One junction structure,
+      Verona's sector and Saville's intended exploration role.
+      Novel excerpt.
+      https://www.everand.com/book/769303392/The-Commonwealth-Saga-2-Book-Bundle-Pandora-s-Star-and-Judas-Unchained
+
+S05 — Merredin's connections to Mito, Clonclurry and Valvida.
+      Secondary reference.
+      https://peterfhamilton.fandom.com/wiki/Merredin
+
+S06 — Judas Unchained: Wessex–Boongate wormhole.
+      Novel text; wartime passage establishes the connection's existence.
+      https://www.rulit.me/books/judas-unchained-read-72599-177.html
+
+S07 — Judas Unchained reading notes:
+      Boongate / Half Way / Far Away itinerary;
+      EdenBurg / Solidade connection.
+      Secondary notes, not the novel itself.
+      https://reboil.com/mediawiki/Judas_Unchained
+
+S08 — Pandora's Star reading notes:
+      Anshun's outward wormholes;
+      Merredin / Chelva exploration;
+      Silvergalde, Jaruva, Mars and Silfen-path access.
+      Secondary notes; transcription errors are possible.
+      https://reboil.com/mediawiki/Pandora%27s_Star
+
+S09 — Judas Unchained: Kerensk-linked orbital ports near High Angel.
+      Novel text.
+      https://www.rulit.me/books/judas-unchained-read-72599-98.html
+
+S10 — Pandora's Star: Ozzie's asteroid wormhole retargeted to Augusta;
+      New Iberia identified as a Phase One world.
+      Novel text.
+      https://www.rulit.me/books/pandora-s-star-read-72600-253.html
+
+S11 — Judas Unchained: Augusta collection point for travel to Cressat.
+      Supports an itinerary, not conclusively a direct permanent wormhole.
+      https://www.rulit.me/books/judas-unchained-read-72599-214.html
+
+S12 — Pandora's Star: Wessex-supported evacuation from Elan.
+      Novel text; emergency context.
+      https://www.rulit.me/books/pandora-s-star-read-72600-240.html
+
+S13 — Judas Unchained: Hanko evacuation to Anagaska;
+      Anagaska's proximity to Balkash.
+      Novel text; do not automatically treat the itinerary as one direct edge.
+      https://www.rulit.me/books/judas-unchained-read-72599-227.html
+
+S14 — Supplementary world catalogue and phase descriptions.
+      Secondary reference; some entries conflict with other references.
+      https://fr.wikipedia.org/wiki/La_Saga_du_Commonwealth
+
+S15 — Publisher synopsis: era, Commonwealth scale and Dyson expedition.
+      https://www.penguinrandomhouse.com/books/242997/the-commonwealth-saga-2-book-bundle-by-peter-f-hamilton/
+
+S16 — Judas Unchained excerpt describing the stormrider power cycle.
+      Quotation collection.
+      https://www.goodreads.com/work/quotes/44507-judas-unchained
+
+S17 — Judas Unchained opening: Arevalo identified with Phase One space.
+      Novel text.
+      https://www.rulit.me/books/judas-unchained-read-72599-1.html
+
+S18 — Pandora's Star: emergency rescue through Ozzie's private habitat.
+      Novel text.
+      https://www.rulit.me/books/pandora-s-star-read-72600-246.html
+
+======================================================================
+2. INFERENCE AND ASSUMPTION REGISTER
+======================================================================
+
+R0 — EARTH / PHASE ONE
+     S04 describes Earth as the junction for Phase One worlds.
+     S01, S02, S10, S14 and S17 identify relevant Phase One members.
+     Their Earth links are recorded R rather than pretending that every
+     individual gateway was independently described in a retrieved passage.
+
+I1 — VERONA / SAVILLE
+     Saville is discussed as an outward-exploration junction in the same
+     sector as Gralmond and Tanyata.
+     Verona is the established sector hub.
+     Proposed direct link: Verona <-> Saville.
+     Direct permanent connection remains unverified.
+
+I2 — WESSEX / ELAN
+     Wessex infrastructure serves Elan during evacuation.
+     A normal pre-war Wessex <-> Elan connection is plausible.
+     The emergency evidence does not independently prove peacetime service.
+
+I3 — BALKASH / ANAGASKA
+     Anagaska is a Phase Three world eight light-years from Balkash.
+     Proposed local expansion branch: Balkash <-> Anagaska.
+     Proximity alone does not establish a canonical gate.
+
+I4 — AUGUSTA / CRESSAT
+     Travel to Cressat is arranged through an Augusta collection point.
+     Proposed private direct link: Augusta <-> Cressat.
+     An intermediate transport leg remains possible.
+
+I5 — WESSEX / HANKO
+     Hanko's evacuation is discussed alongside Wessex-based wormholes.
+     Proposed normal sector attachment: Wessex <-> Hanko.
+     The precise pre-war direct connection is not established here.
+
+A0 — UNDOCUMENTED ORDINARY CONNECTION
+     Attach the otherwise unplaced world to a named Phase One hub.
+     Preserve a sparse branching network instead of inventing a mesh.
+     The particular hub allocation is an original game-design choice.
+     It is not an inference from undisclosed astronomical coordinates.
+
+A1 — SILVERGALDE ENTRY
+     A CST railway gateway at Silvergalde is reference-supported.
+     Its Commonwealth-side endpoint has not been reliably verified here.
+     Bayovar is supplied ONLY as a provisional game endpoint.
+     Do not cite Bayovar <-> Silvergalde as established canon.
+
+A2 — FRONTIER / WARTIME-SECTOR GROUPING
+     Group selected affected worlds around the Wessex/Anshun branch for
+     a coherent game scenario.
+     This does not establish that every affected world shared those hubs.
+     Exact parent assignments remain assumptions.
+
+A3 — EXPLORATION / RESTRICTED ACCESS
+     Attach a research or restricted world to a suitable operational hub.
+     Access controls and the chosen parent are game assumptions unless sourced.
+
+======================================================================
+3. BIG15 MEMBERSHIP
+======================================================================
+
+Source: S02.
+
+Augusta
+Bayovar
+Buta
+Democratic Republic of New Germany
+EdenBurg
+Granada
+Kerensk
+Los Vada
+Mito
+Orleans
+Piura
+Shayoni
+StLincoln
+Verona
+Wessex
+
+All receive Earth connections under R0.
+
+Other Phase One worlds are not automatically Big15 members.
+In particular, do not add Oaktier, Kyushu or Velaines to this list merely
+because another summary describes them as Phase One or labels them inconsistently.
+
+======================================================================
+4. COMPLETE MAIN REFERENCE CATALOGUE — 108 ENTRIES
+======================================================================
+
+Default source for a world's NAME: S01.
+Phase annotations use S01/S02, with supplementary S14 where required.
+Arevalo's P1 classification is supported by S17.
+
+The SOURCE/RULE column below primarily explains the CONNECTION.
+It does not imply that S01 documents an A or I connection.
+
+WORLD | PHASE | CONNECTS_TO | EVIDENCE | MODE | SOURCE/RULE
+
+Abadan | ? | Augusta | A | RAIL | A0
+Akreos | ? | UNASSIGNED | U | NONE | Abandoned-world reference: S14
+Anacona | P2 | Bayovar | A | RAIL | A0
+Anagaska | P3 | Balkash | I | RAIL | I3
+Anshun | P2 | Wessex | A | RAIL | A2
+Arevalo | P1 | Earth | R | RAIL | R0; S17
+Augusta | P1 | Earth | R | RAIL | R0; S02
+Austin | ? | Buta | A | RAIL | A0
+Balkash | ? | Anshun | A | RAIL | A2
+Balya | ? | Anshun | A | RAIL | A2
+Bayovar | P1 | Earth | R | RAIL | R0; S02
+Belembe | ? | Anshun | A | RAIL | A2
+Berkak | ? | Granada | A | RAIL | A0
+Bidar | ? | Kerensk | A | RAIL | A0
+Bilma | P2 | Buta | A | RAIL | A0
+Boongate | P2 | Wessex | E | RAIL | S06
+Buta | P1 | Earth | R | RAIL | R0; S02
+Buwangwa | ? | Orleans | A | RAIL | A0
+Cagayn | ? | Piura | A | RAIL | A0
+Clonclurry | P3 | Merredin | R | RAIL | S05
+Cressat | ? | Augusta | I | PRIVATE | I4
+Damaran | ? | Shayoni | A | RAIL | A0
+Dampier | ? | StLincoln | A | RAIL | A0
+Democratic Republic of New Germany | P1 | Earth | R | RAIL | R0; S02
+Dublin | ? | Augusta | A | RAIL | A0
+Dunedin | ? | Bayovar | A | RAIL | A0
+Earth | NA | ROOT | - | NONE | Sol homeworld; S01
+EdenBurg | P1 | Earth | R | RAIL | R0; S02
+Elan | P3 | Wessex | I | RAIL | I2; P3 from S14
+Far Away | P3 | Half Way | R | SCHEDULED | S07; see terminal-level route
+Far Jerusalem | ? | Buta | A | RAIL | A0
+Felicity | ? | Democratic Republic of New Germany | A | RAIL | A0
+Ferarra | ? | EdenBurg | A | RAIL | A0; spelling note below
+Ganthia | ? | UNASSIGNED | U | NONE | Era not verified; exclude baseline
+Gralmond | P2 | Verona | E | RAIL | S03
+Granada | P1 | Earth | R | RAIL | R0; S02
+Half Way | ? | Boongate | R | GATE | S07; see terminal-level route
+Halifax | ? | Granada | A | RAIL | A0
+Hanko | P2 | Wessex | I | RAIL | I5; P2 from S14
+Huxley's Haven | ? | Los Vada | A | RAIL | A0
+Ilichio | ? | Wessex | A | RAIL | A2; spelling note below
+Illuminatus | ? | Piura | A | RAIL | A0
+Jandk | ? | UNASSIGNED | U | NONE | Silfen world; no verified direct route
+Jura | ? | Shayoni | A | RAIL | A0
+Kabul | ? | StLincoln | A | RAIL | A0
+Kerensk | P1 | Earth | R | RAIL | R0; S02; orbital links listed separately
+Kharkov | ? | Augusta | A | RAIL | A0
+Kilburn | ? | Bayovar | A | RAIL | A0
+Kolhapur | ? | Buta | A | RAIL | A0
+Kozani | ? | Anshun | A | RAIL | A2
+Kyushu | P1 | Earth | R | RAIL | R0; S01
+Lerma | ? | EdenBurg | A | RAIL | A0
+Los Vada | P1 | Earth | R | RAIL | R0; S02
+Lothian | P1 | Earth | R | RAIL | R0; S14
+Louisiade | ? | Anshun | R | RAIL | S08; wartime retargeting applies
+Lowick | ? | Wessex | A | RAIL | A2
+Lyonna | ? | Kerensk | A | RAIL | A0
+Malaita | ? | Anshun | R | RAIL | S08; wartime retargeting applies
+Marindra | ? | Los Vada | A | RAIL | A0
+Martaban | ? | Anshun | A | RAIL | A2
+Mecheria | ? | Piura | A | RAIL | A0
+Merredin | P2 | Mito | R | RAIL | S05
+Minilya | ? | Shayoni | A | RAIL | A0
+Mito | P1 | Earth | R | RAIL | R0; S02
+Molina | ? | Anshun | A | RAIL | A2
+Molise | ? | Augusta | A | RAIL | A0
+Muang | ? | Bayovar | A | RAIL | A0
+Nattavaara | ? | Anshun | A | RAIL | A2
+New Iberia | P1 | Earth | R | RAIL | R0; S10
+New Rio | ? | Earth | A | RAIL | A0; administrative-access game choice
+Niska | ? | EdenBurg | A | RAIL | A0
+Nzega | ? | Granada | A | RAIL | A0
+Oaktier | P1 | Earth | R | RAIL | R0; S01
+Olivenza | ? | Anshun | A | RAIL | A2
+Omoloy | ? | Wessex | A | RAIL | A2
+Orleans | P1 | Earth | R | RAIL | R0; S02
+Pelcan | ? | Orleans | A | RAIL | A0
+Piura | P1 | Earth | R | RAIL | R0; S02
+Pomona | ? | Anshun | A | RAIL | A2
+Puimro | ? | Shayoni | A | RAIL | A0
+Samar | ? | Anshun | A | RAIL | A2
+Saville | P2 | Verona | I | RAIL | I1
+Shayoni | P1 | Earth | R | RAIL | R0; S02
+Silvergalde | ? | Bayovar | A | RAIL | A1; restricted Silfen access
+Sligo | ? | Anshun | A | RAIL | A2
+Solidade | ? | EdenBurg | R | PRIVATE | S07
+Sterling | ? | Bayovar | A | RAIL | A0
+StLincoln | P1 | Earth | R | RAIL | R0; S02
+Tampico | ? | Buta | A | RAIL | A0
+Tanyata | P2 | Verona | E | RAIL | S03
+Teleba | ? | Democratic Republic of New Germany | A | RAIL | A0
+Tolaka | ? | EdenBurg | A | RAIL | A0
+Toulanna | ? | Granada | A | RAIL | A0
+Trusbal | ? | Kerensk | A | RAIL | A0
+Tubuai | ? | Anshun | R | RAIL | S08; wartime retargeting applies
+Valdivia | ? | Los Vada | A | RAIL | A0
+Valvida | P3 | Merredin | R | RAIL | S05
+Velaines | P1 | Earth | R | RAIL | R0; S01
+Verona | P1 | Earth | R | RAIL | R0; S02
+Vinmar | ? | Augusta | R | DATA | S14; NOT a freight connection
+Vyborg | ? | Wessex | A | RAIL | A2
+Wessex | P1 | Earth | R | RAIL | R0; S02
+Westwould | ? | Piura | A | RAIL | A0
+Whalton | ? | Anshun | A | RAIL | A2
+Wuyam | ? | StLincoln | A | RAIL | A0
+York5 | P1 | Earth | R | RAIL | R0; S01; privately owned world
+Zarin | ? | Augusta | A | RAIL | A0
+Ztan | ? | Bayovar | A | RAIL | A0
+
+======================================================================
+5. ADDITIONAL WORLDS / PLANETARY BODIES
+======================================================================
+
+These supplement the main 108-entry catalogue.
+
+WORLD | PHASE | CONNECTS_TO | EVIDENCE | MODE | SOURCE/RULE
+
+Chelva | ? | Merredin | R | EXPLORATION | S01/S08
+Gaczyna | ? | Merredin | A | EXPLORATION | Name/restricted world: S14; route: A3
+Hardrock | ? | Kerensk | A | PRIVATE | Penal world: S01; route: A3
+Icalanise | NA | NO SURFACE CONNECTION | U | NONE | Gas giant; S01/S09
+Jaruva | ? | Silfen path network | R | SILFEN_ROUTE | S01/S08
+Mars | NA | Earth | R | GATE | Historical demonstration: S08
+Merioneth | ? | Earth | A | GATE | Independent world: S01; route: A3
+Tandil | ? | Merredin | A | EXPLORATION | Explored world: S01; route: A3
+
+SPECIAL CONDITIONS
+
+CHELVA
+  Exploration access is reference-supported.
+  Do not treat it as an established inhabited freight colony.
+  Its unsuitable environment is separate from whether a gate can reach it.
+
+HARDROCK
+  Its penal-world role does not identify its normal departure hub.
+  Kerensk is a supplied game assumption, not a sourced route.
+
+ICALANISE
+  This is the gas giant associated with High Angel.
+  The usable connection is to orbital infrastructure, not surface railway tiles.
+
+JARUVA
+  Its former CST connection was closed.
+  Do not give it an active public rail gate in the baseline.
+  Silfen-path access does not mean a direct Silvergalde–Jaruva path is known.
+
+MARS
+  Earth–Mars wormhole demonstration is historical.
+  This record does not establish a permanent 2380 commercial railway service.
+  Keep disabled in the ordinary freight graph unless deliberately adapting it.
+
+MERIONETH
+  Independent status does not imply complete physical isolation.
+  The proposed Earth connection remains an assumption.
+
+======================================================================
+6. NON-PLANET AND DESCRIPTIVELY NAMED NODES
+======================================================================
+
+These are not additional ordinary Commonwealth colony planets.
+
+NODE: OZZIE_ASTEROID
+  display_name: Ozzie's private asteroid
+  type: private asteroid habitat
+  system: Alpha Leonis
+  named_transport_connection: Augusta
+  connection_mode: PRIVATE
+  evidence: E, S10
+  condition: retargetable; the cited connection occurs during the story
+  public_rail_access: false
+
+NODE: HIGH_ANGEL
+  display_name: High Angel
+  type: alien starship / inhabited habitat
+  physical_location: orbit associated with Icalanise
+  public_planet_classification: false
+  access: Kerensk-linked orbital gateways, followed by local shuttle
+  evidence: E/R, S09/S01
+
+NODE: HIGH_ANGEL_ORBITAL_GATEWAYS
+  display_name: High Angel orbital gateway ports
+  type: aggregate of orbital transfer facilities
+  name_status: descriptive schema label, not a canonical proper name
+  wormhole_origin: Kerensk
+  evidence: E, S09
+  onward_access: local shuttles
+  note: do not create a direct surface railway on Icalanise
+
+NODE: ICE_CITADEL_WORLD
+  display_name: Unnamed ice world containing the Ice Citadel
+  type: planet with a named Silfen lodge
+  planet_name: unknown
+  access: Silfen path network
+  evidence: R, S01/S08
+  note: Ice Citadel names the lodge, not necessarily the planet
+
+NODE: PRIME_HOMEWORLD
+  display_name: Prime homeworld
+  type: alien planet
+  name_status: descriptive; "Prime" appears as a reference label
+  system: Dyson Alpha
+  evidence: R, S14
+  public_CST_connection: none
+  note: enemy wormhole operations require a separate story-era network
+
+NODE: DYSON_ALPHA
+  type: star/system
+  classification: not a planet
+  ordinary_CST_rail_connection: none in the opening-era network
+
+NODE: DYSON_BETA
+  type: star/system
+  classification: not a planet
+  ordinary_CST_rail_connection: none in the opening-era network
+
+NODE: SOL
+  type: star system
+  known_bodies_in_this_schema: Earth, Mars
+  note: common system membership does not itself create a transport link
+
+NODE: ALPHA_LEONIS
+  type: star system
+  known_locations_in_this_schema: Augusta, Ozzie's private asteroid
+  source: S01
+  note: common system membership does not itself create a transport link
+
+======================================================================
+7. TERMINAL-LEVEL CONNECTIONS — DO NOT FLATTEN THESE
+======================================================================
+
+7A. FAR AWAY ACCESS
+
+WORLD-LEVEL OVERVIEW
+
+  Wessex
+    <-> Boongate
+    <-> Half Way
+    <-> Far Away
+
+TERMINAL-LEVEL ROUTE
+
+  Wessex / CST gateway
+    <== RAIL WORMHOLE; E; S06 ==>
+  Boongate / CST interchange
+
+  Boongate / Half Way gateway
+    <== WORMHOLE; R; S07 ==>
+  Half Way / Shackleton
+
+  Half Way / Shackleton
+    <== LOCAL AIRCRAFT; R; S07 ==>
+  Half Way / Port Evergreen
+
+  Half Way / Port Evergreen
+    <== SCHEDULED WORMHOLE; R; S07 ==>
+  Far Away / Armstrong City / First Footfall Plaza
+
+RULES
+
+- Shackleton and Port Evergreen are on the SAME world.
+- Their connection is an aircraft journey, not another interstellar gate.
+- Do not assume a train can pass through the complete route unchanged.
+- The Far Away gateway's availability depends on its power cycle.
+- S16 describes a five-hour powered interval and a fifteen-hour return cycle.
+- Treat those timings as a source-specific operating detail, not proof of
+  uninterrupted service throughout every event in the novels.
+
+
+7B. HIGH ANGEL ACCESS
+
+  Earth
+    <== EARTH / PHASE ONE LINK; R0 ==>
+  Kerensk
+
+  Kerensk
+    <== ORBITAL WORMHOLE; E; S09 ==>
+  High Angel orbital gateway ports
+
+  Orbital gateway ports
+    <== LOCAL SHUTTLE; E; S09 ==>
+  High Angel / associated inhabited orbital facilities
+
+RULES
+
+- High Angel is not a normal colony planet.
+- Icalanise is not a rail destination on a solid planetary surface.
+- Orbital shipbuilding facilities can be represented as additional restricted
+  terminals, not invented new planets.
+
+
+7C. SILFEN ACCESS
+
+REFERENCE-SUPPORTED NETWORK MEMBERSHIP / ACCESS
+
+  Silvergalde: Silfen world with a human CST gateway.
+  Jaruva: accessible through Silfen paths despite CST disconnection.
+  Ice Citadel world: reached through the Silfen path network.
+
+INFERRED EXTENSION
+
+  Jandk: possible Silfen-path destination because it is a Silfen world.
+  Evidence for this network attachment: I, not an explicitly mapped route.
+
+DO NOT GENERATE THESE AS VERIFIED DIRECT EDGES
+
+  Silvergalde <-> Jaruva
+  Silvergalde <-> Jandk
+  Jandk <-> Ice Citadel world
+
+Instead represent:
+
+  origin
+    -> Silfen path network / unspecified intermediates
+    -> destination
+
+No train access is implied.
+
+
+7D. VINMAR COMMUNICATIONS
+
+  Augusta
+    <== DATA-SCALE WORMHOLE; R; S14 ==>
+  Vinmar
+
+RULES
+
+- This is not a railway freight lane.
+- Do not allow trains, passengers or bulk resources merely because a
+  communications connection exists.
+- Any material-access route needs separate evidence or an explicit adaptation.
+
+======================================================================
+8. HISTORICAL AND WARTIME ROUTES
+======================================================================
+
+These records do not belong in the default peacetime freight graph.
+
+EVENT: ELAN_EVACUATION
+  worlds: Elan, Wessex
+  mode: emergency wormhole access
+  evidence: E, S12
+  permanent_prewar_link: inferred only
+  game_baseline_enabled: false
+
+EVENT: HANKO_TO_ANAGASKA_EVACUATION
+  origin: Hanko
+  destination: Anagaska
+  evidence: E for the evacuation itinerary, S13
+  direct_single_edge: NOT established here
+  Wessex_infrastructure_involvement: described in the passage
+  game_baseline_enabled: false
+
+  Important:
+  "People travelled from Hanko to Anagaska" does not prove a permanent
+  Hanko <-> Anagaska railway wormhole.
+
+EVENT: ANSHUN_GENERATOR_RETARGETING
+  original_reference_connections:
+    Anshun <-> Louisiade
+    Anshun <-> Malaita
+    Anshun <-> Tubuai
+  evidence: R, S08
+  event: generators repurposed during the invasion
+  rule: ordinary links must not be assumed continuously available afterwards
+
+EVENT: OZZIE_PRIVATE_GATE_RESCUE
+  source_world: Elan
+  intermediate: Ozzie's private asteroid habitat
+  later_destination: Augusta
+  evidence: E, S18/S10
+  mechanism: private wormhole retargeting
+  simultaneous_three_way_junction: false
+  game_baseline_enabled: false
+
+EVENT: EARTH_MARS_DEMONSTRATION
+  worlds: Earth, Mars
+  mode: early wormhole demonstration
+  evidence: R, S08
+  proof_of_2380_regular_rail_service: false
+  game_baseline_enabled: false
+
+======================================================================
+9. LATER-ERA / UNVERIFIED-ERA HOLDING AREA
+======================================================================
+
+GANTHIA
+  Named in S01 as a "Higher" planet.
+  Its inclusion in the Pandora's Star / Judas Unchained era was not
+  independently established in this reconstruction.
+  Retain the catalogue entry but exclude it from the baseline graph.
+
+TRÜB
+  Named in S01's additional locations and associated with the Bienvenido system.
+  Keep in a separate later-era dataset.
+  Do not attach it to the 2380 CST railway network by assumption.
+
+The broader Commonwealth universe contains additional later-era worlds.
+This file is not a combined Void Trilogy / Fallers / duology gazetteer.
+
+======================================================================
+10. SPELLING, ALIASES AND CATALOGUE CONFLICTS
+======================================================================
+
+DRNG
+  Normalised display name: Democratic Republic of New Germany.
+
+Huxley's Haven
+  Reference alias: The Hive.
+  Do not create two worlds.
+
+EdenBurg / Edenburg
+  Treat as a capitalisation variation.
+
+StLincoln / St Lincoln
+  Treat as a spacing variation.
+
+York5 / York 5
+  Treat as a spacing variation.
+
+Ferarra / Ferrara
+  Conflicting reference spellings.
+  Retain one provisional identity and flag spelling for novel verification.
+
+Ilichio / Illchio
+  Conflicting reference spellings.
+  Do not silently import every attribute from one spelling into the other.
+
+Valdivia / Valvida
+  Both appear separately in S01.
+  Retain separate provisional entries until checked.
+  The Merredin connection is to Valvida.
+
+Oaktier
+  Canonical-reference world name used here.
+  Do not silently replace it with the project's "Oaktree" name.
+
+L.A. Galactic
+  An Earth transport location, not another colony planet.
+  Do not add it as a separate world because a secondary list categorises
+  it inconsistently.
+
+Damaran / Far Away
+  Receiving a radio signal is not a wormhole connection.
+  No Damaran <-> Far Away freight edge is established by that fact.
+
+Dublin / Silvergalde
+  A quoted physical distance is not proof of a direct gate.
+  No direct edge is supplied on that basis.
+
+======================================================================
+11. COMPACT VIEW OF THE MOST USEFUL BRANCHES
+======================================================================
+
+EARTH
+|
++--[R] VERONA
+|       +--[E] GRALMOND
+|       +--[E] TANYATA
+|       +--[I] SAVILLE
+|
++--[R] MITO
+|       +--[R] MERREDIN
+|               +--[R] CLONCLURRY
+|               +--[R] VALVIDA
+|               +--[R] CHELVA       [exploration only]
+|               +--[A] TANDIL       [proposed exploration link]
+|               +--[A] GACZYNA      [proposed restricted link]
+|
++--[R] WESSEX
+|       +--[E] BOONGATE
+|       |       +--[R] HALF WAY
+|       |               +--[R] FAR AWAY
+|       |                       [local air transfer required on Half Way]
+|       |
+|       +--[I] ELAN
+|       +--[I] HANKO
+|       +--[A] ANSHUN
+|               +--[R] LOUISIADE
+|               +--[R] MALAITA
+|               +--[R] TUBUAI
+|               +--[A] BALKASH
+|                       +--[I] ANAGASKA
+|
++--[R] AUGUSTA
+|       +--[I] CRESSAT              [private]
+|       +--[E] OZZIE'S ASTEROID     [private; event-specific retargeting]
+|       +--[R] VINMAR               [data only]
+|
++--[R] EDENBURG
+|       +--[R] SOLIDADE             [private]
+|
++--[R] KERENSK
+|       +--[E] HIGH ANGEL ORBITAL GATEWAYS
+|               +--[E] HIGH ANGEL / HABITATS [local shuttle]
+|
++--[R] BAYOVAR
+|       +--[A] SILVERGALDE          [parent hub explicitly unverified]
+|
++--[R] OTHER PHASE ONE WORLDS
+        +--[A] additional allocated branches from the catalogue
+
+This drawing is only a subset.
+The full assumed network is generated from Section 4.
+
+======================================================================
+12. IMPLEMENTATION RULES FOR OPENSPACETTD
+======================================================================
+
+Keep the source reconstruction separate from game topology.
+
+For every world:
+  world_id
+  canonical_reference_name
+  display_name
+  phase
+  phase_evidence
+  location_type
+  era
+  source_ids
+
+For every connection:
+  connection_id
+  endpoint_a
+  endpoint_b
+  connection_type
+  evidence_class
+  source_ids
+  inference_or_assumption_id
+  availability
+  access_policy
+  valid_era
+  permits_through_running_train
+  enabled_in_game
+
+Suggested graph modes:
+
+SOURCE_ONLY
+  Include E and R links.
+  Preserve disconnected worlds where no route is known.
+  Apply historical/private/modal restrictions.
+
+RECONSTRUCTED
+  Include E, R and I links.
+  Keep inferred connections visibly tagged.
+
+PLAYABLE_COMPLETION
+  Include selected A links as well.
+  These are game-design additions, never new canon.
+
+Do not automatically convert:
+  PRIVATE -> public railway
+  DATA -> cargo railway
+  SILFEN_ROUTE -> wormhole railway
+  ORBITAL + SHUTTLE -> uninterrupted train route
+  evacuation itinerary -> permanent direct gate
+
+For a larger universe:
+  Generate additional unnamed/procedural colonies as ORIGINAL GAME CONTENT.
+  Do not invent hundreds of names and attribute them to Hamilton.
+
+Core structural rule:
+  Earth / Phase One junctions
+    -> outward sector worlds
+    -> further expansion branches
+
+Known branches override generated topology.
+Unknown branches remain editable assumptions.
+
+END OF SCHEMA

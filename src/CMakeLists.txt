@@ -380,6 +380,8 @@ add_files(
     portal/corporate_hq.h
     portal/corporate_hq_gui.cpp
     portal/corporate_hq_gui.h
+    portal/corporate_alliance.cpp
+    portal/corporate_alliance.h
     portal/logistics_hub.cpp
     portal/logistics_hub.h
     portal/fabrication_manager.cpp
@@ -388,6 +390,8 @@ add_files(
     portal/tech_tree.h
     portal/production_chain.cpp
     portal/production_chain.h
+    portal/empire_facilities_gui.cpp
+    portal/empire_facilities_gui.h
     portal/commonwealth_slice.cpp
     portal/commonwealth_slice.h
     portal/commonwealth_pack.cpp
@@ -408,6 +412,8 @@ add_files(
     portal/federation_identity.h
     portal/federation_player.cpp
     portal/federation_player.h
+    portal/federation_staging.cpp
+    portal/federation_staging.h
     portal/freight_corridor_gui.cpp
     portal/freight_corridor_gui.h
     portal/megacity_gui.cpp
