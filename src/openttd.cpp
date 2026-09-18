@@ -59,6 +59,7 @@
 #include "rail_gui.h"
 #include "road_gui.h"
 #include "portal/federation_cmd.h"
+#include "portal/prompt_scenario_generator.h"
 #include "core/backup_type.hpp"
 #include "hotkeys.h"
 #include "newgrf.h"
@@ -475,7 +476,7 @@ static std::vector<OptionData> CreateOptions()
 {
 	std::vector<OptionData> options;
 	/* Options that require a parameter. */
-	for (char c : "GIMSbcmnpqrstv") options.push_back({ .type = ODF_HAS_VALUE, .id = c, .shortname = c });
+	for (char c : "GIMSbcmnpqrstvY") options.push_back({ .type = ODF_HAS_VALUE, .id = c, .shortname = c });
 
 	/* Options with an optional parameter. */
 	for (char c : "Ddg") options.push_back({ .type = ODF_OPTIONAL_VALUE, .id = c, .shortname = c });
@@ -506,6 +507,7 @@ int openttd_main(std::span<std::string_view> arguments)
 	std::string graphics_set;
 	std::string sounds_set;
 	std::string music_set;
+	std::string prompt_scenario_text;
 	Dimension resolution = {0, 0};
 	std::unique_ptr<AfterNewGRFScan> scanner = std::make_unique<AfterNewGRFScan>();
 	bool dedicated = false;
@@ -523,6 +525,7 @@ int openttd_main(std::span<std::string_view> arguments)
 	int i;
 	while ((i = mgo.GetOpt()) != -1) {
 		switch (i) {
+		case 'Y': prompt_scenario_text = mgo.opt; break;
 		case 'I': graphics_set = mgo.opt; break;
 		case 'S': sounds_set = mgo.opt; break;
 		case 'M': music_set = mgo.opt; break;
@@ -801,6 +804,26 @@ int openttd_main(std::span<std::string_view> arguments)
 
 	GenerateWorld(GWM_EMPTY, 64, 64); // Make the viewport initialization happy
 	LoadIntroGame(false);
+
+	if (!prompt_scenario_text.empty()) {
+		std::string out_save = !_file_to_saveload.name.empty() ? _file_to_saveload.name : "demo/prompt_scenario.sav";
+		fmt::print("Prompt-to-Savegame Generator: synthesizing from \"{}\" -> {}\n", prompt_scenario_text, out_save);
+		auto res = PromptScenarioGenerator::GenerateFromPrompt(prompt_scenario_text, out_save);
+		if (res.success) {
+			fmt::print("Scenario synthesis complete! Worlds: {}, Corridors: {}, Fleets: {}\n",
+				res.worlds_created, res.corridors_built, res.trains_spawned);
+			if (dedicated) {
+				PostMainLoop();
+				return 0;
+			}
+		} else {
+			fmt::print(stderr, "Scenario synthesis failed: {}\n", res.error_message);
+			if (dedicated) {
+				PostMainLoop();
+				return 1;
+			}
+		}
+	}
 
 	/* ScanNewGRFFiles now has control over the scanner. */
 	RequestNewGRFScan(scanner.release());

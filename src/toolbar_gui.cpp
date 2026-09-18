@@ -76,6 +76,7 @@
 #include "portal/federation_auth_gui.h"
 #include "portal/corporate_hq_gui.h"
 #include "portal/empire_facilities_gui.h"
+#include "portal/prompt_scenario_gui.h"
 #include "3rdparty/fmt/format.h"
 
 #include "network/network.h"
@@ -452,6 +453,7 @@ enum class MapMenuEntries : uint8_t {
 	ShowFederationAuth, ///< Open federation player authentication and corporate charters.
 	ShowCorporateHQ, ///< Open corporate headquarters campus and planetary stockpiles.
 	ShowIndustrialFacilities, ///< Open empire-wide industrial processing facilities dashboard.
+	ShowPromptScenarioGenerator, ///< Open narrative prompt scenario generator.
 };
 
 static CallBackFunction ToolbarMapClick(Window *w)
@@ -467,6 +469,7 @@ static CallBackFunction ToolbarMapClick(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FEDERATION_AUTH, MapMenuEntries::ShowFederationAuth));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_CORPORATE_HQ, MapMenuEntries::ShowCorporateHQ));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_INDUSTRIAL_FACILITIES, MapMenuEntries::ShowIndustrialFacilities));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_PROMPT_GENERATOR, MapMenuEntries::ShowPromptScenarioGenerator));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -493,6 +496,7 @@ static CallBackFunction ToolbarScenMapTownDir(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FEDERATION_AUTH, MapMenuEntries::ShowFederationAuth));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_CORPORATE_HQ, MapMenuEntries::ShowCorporateHQ));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_INDUSTRIAL_FACILITIES, MapMenuEntries::ShowIndustrialFacilities));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_PROMPT_GENERATOR, MapMenuEntries::ShowPromptScenarioGenerator));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -532,6 +536,7 @@ static CallBackFunction MenuClickMap(int index)
 		case MapMenuEntries::ShowFederationAuth: ShowFederationAuth(); break;
 		case MapMenuEntries::ShowCorporateHQ: ShowCorporateHQ(); break;
 		case MapMenuEntries::ShowIndustrialFacilities: ShowEmpireFacilitiesWindow(); break;
+		case MapMenuEntries::ShowPromptScenarioGenerator: ShowPromptScenarioWindow(); break;
 	}
 	return CallBackFunction::None;
 }

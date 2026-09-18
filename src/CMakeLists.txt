@@ -392,6 +392,10 @@ add_files(
     portal/production_chain.h
     portal/empire_facilities_gui.cpp
     portal/empire_facilities_gui.h
+    portal/prompt_scenario_generator.cpp
+    portal/prompt_scenario_generator.h
+    portal/prompt_scenario_gui.cpp
+    portal/prompt_scenario_gui.h
     portal/commonwealth_slice.cpp
     portal/commonwealth_slice.h
     portal/commonwealth_pack.cpp

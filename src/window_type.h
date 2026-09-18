@@ -770,6 +770,9 @@ enum class WindowClass : uint16_t {
 	/** Empire-wide industrial processing facilities and supply chain dashboard. */
 	EmpireFacilities,
 
+	/** Narrative Prompt-to-Savegame procedural scenario generator window. */
+	PromptScenarioGenerator,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 

@@ -6344,4 +6344,12 @@ STR_CORPORATE_ALLIANCE_BTN_HOSTILE                              :Hostile
 STR_ERROR_CAN_T_SET_ALLIANCE                                    :Can't modify corporate alliance treaty
 STR_ERROR_INVALID_ALLIANCE_TARGET                               :Invalid corporation target
 
+# OpenSpaceTTD Sprint 48: Prompt-to-Savegame Generator
+STR_MAP_MENU_PROMPT_GENERATOR                                  :Prompt-to-Savegame Generator
+STR_PROMPT_SCENARIO_CAPTION                                    :Prompt-to-Savegame Generator (Sprint 48)
+STR_PROMPT_SCENARIO_PRESET_1                                   :Preset: Arid Mining Strike
+STR_PROMPT_SCENARIO_PRESET_2                                   :Preset: Glacial Quantum
+STR_PROMPT_SCENARIO_PRESET_3                                   :Preset: Volcanic Maglev
+STR_PROMPT_SCENARIO_GENERATE_BTN                               :Synthesize & Generate Scenario
+
 
