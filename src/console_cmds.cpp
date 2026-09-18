@@ -58,6 +58,7 @@
 #include "portal/logistics_hub.h"
 #include "portal/fabrication_manager.h"
 #include "portal/tech_tree.h"
+#include "portal/prompt_scenario_generator.h"
 #include "portal/corporate_alliance.h"
 #include "portal/commonwealth_pack.h"
 #include "portal/commonwealth_slice.h"
@@ -3617,6 +3618,29 @@ static bool ConSetupUATFixtures(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Convert a narrative prompt into a synthesized scenario .sav file. @copydoc IConsoleCmdProc */
+static bool ConPromptToSave(std::span<std::string_view> argv)
+{
+	if (argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Usage: prompt_to_save \"<narrative prompt>\" [output_filename.sav]");
+		return true;
+	}
+
+	std::string prompt(argv[1]);
+	std::string output = (argv.size() >= 3) ? std::string(argv[2]) : "demo/prompt_scenario.sav";
+
+	IConsolePrint(CC_DEFAULT, "Synthesizing scenario from narrative prompt: \"{}\"...", prompt);
+	auto res = PromptScenarioGenerator::GenerateFromPrompt(prompt, output);
+	if (res.success) {
+		IConsolePrint(CC_DEFAULT, "Scenario synthesis complete! Built {} worlds, {} corridors, {} active fleets.",
+			res.worlds_created, res.corridors_built, res.trains_spawned);
+		IConsolePrint(CC_DEFAULT, "Saved to: {}", output);
+	} else {
+		IConsolePrint(CC_ERROR, "Scenario synthesis failed: {}", res.error_message);
+	}
+	return true;
+}
+
 /** Show the current framerate statistics. @copydoc IConsoleCmdProc */
 static bool ConFramerate(std::span<std::string_view> argv)
 {
@@ -3901,6 +3925,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);
 	IConsole::CmdRegister("commonwealth_status",     ConCommonwealthStatus);
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);
+	IConsole::CmdRegister("prompt_to_save",          ConPromptToSave);
+	IConsole::AliasRegister("generate_prompt_scenario", "prompt_to_save %+");
 
 	/* networking functions */
 

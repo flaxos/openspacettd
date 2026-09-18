@@ -52,6 +52,7 @@
 #include "../subsidy_func.h"
 #include "../newgrf.h"
 #include "../newgrf_station.h"
+#include "../engine_base.h"
 #include "../engine_func.h"
 #include "../rail_gui.h"
 #include "../core/backup_type.hpp"
@@ -809,6 +810,8 @@ bool AfterLoadGame()
 	if (VideoDriver::GetInstance() != nullptr) {
 		GfxLoadSprites();
 		LoadStringWidthTable();
+	} else if (std::size(_engine_mngr.mappings[VehicleType::Train]) >= GetOriginalEngineCount(VehicleType::Train)) {
+		SetupEngines();
 	}
 
 	/* Copy temporary data to Engine pool */
