@@ -14,6 +14,7 @@
 #include "portal_cmd.h"
 #include "planet_manager.h"
 #include "tech_tree.h"
+#include "corporate_alliance.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../command_func.h"
@@ -43,6 +44,7 @@ enum class CorporateHQTab : uint8_t {
 	LogisticsHubs = 2,
 	Fabrication = 3,
 	TechTree = 4,
+	Alliances = 5,
 };
 
 enum class CorporatePlacement : uint8_t { None, HQ, Hub };
@@ -57,11 +59,13 @@ static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_OVERVIEW), SetMinimalSize(70, 20), SetStringTip(STR_CORPORATE_HQ_TAB_OVERVIEW, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_STOCKPILES), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_HQ_TAB_STOCKPILES, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_LOGISTICS_HUBS), SetMinimalSize(85, 20), SetStringTip(STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION), SetMinimalSize(85, 20), SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_TECH_TREE), SetMinimalSize(110, 20), SetStringTip(STR_CORPORATE_HQ_TAB_TECH_TREE, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_STOCKPILES), SetMinimalSize(80, 20), SetStringTip(STR_CORPORATE_HQ_TAB_STOCKPILES, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_LOGISTICS_HUBS), SetMinimalSize(80, 20), SetStringTip(STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_TECH_TREE), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_TECH_TREE, STR_EMPTY),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_ALLIANCES), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_ALLIANCES, STR_EMPTY),
 		NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
+		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_ALLIANCE_TOGGLE_BTN), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_ALLIANCE_BTN_NEUTRAL, STR_EMPTY),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_RESEARCH_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_START_RESEARCH, STR_TECH_TREE_BTN_START_RESEARCH_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_BUDGET_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_SET_BUDGET, STR_TECH_TREE_BTN_SET_BUDGET_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE), SetMinimalSize(65, 20), SetStringTip(STR_FABRICATION_BTN_TOGGLE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
@@ -75,19 +79,19 @@ static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SELECT_CARGO), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_SELECT_CARGO, STR_CORPORATE_HQ_BTN_SELECT_CARGO_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SET_RESERVE), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_SET_RESERVE, STR_CORPORATE_HQ_BTN_SET_RESERVE_TOOLTIP),
 	EndContainer(),
-	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_HEADER_PANEL), SetMinimalSize(740, 60), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_HEADER_PANEL), SetMinimalSize(880, 60), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_MAIN_PANEL), SetMinimalSize(728, 280), SetFill(1, 1), SetResize(1, 1), EndContainer(),
+		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_MAIN_PANEL), SetMinimalSize(868, 280), SetFill(1, 1), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VSCROLLBAR, Colours::DarkGreen, WID_CHQ_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(728, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(868, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, Colours::DarkGreen),
 	EndContainer(),
 };
 
 static WindowDesc _corporate_hq_desc(
-	WindowPosition::Automatic, "view_corporate_hq", 740, 400,
+	WindowPosition::Automatic, "view_corporate_hq", 880, 420,
 	WindowClass::CorporateHQ, WindowClass::None,
 	{},
 	_nested_corporate_hq_widgets
@@ -97,6 +101,7 @@ struct CorporateHQWindow : Window {
 	CompanyID company = CompanyID::Invalid();
 	CorporateHQTab active_tab = CorporateHQTab::Overview;
 	TechID selected_tech = TECH_TRACTION_1;
+	CompanyID selected_alliance_company = CompanyID::Invalid();
 	Scrollbar *vscroll = nullptr;
 	CorporatePlacement placement = CorporatePlacement::None;
 	uint32_t selected_hub_id = 0;
@@ -131,6 +136,18 @@ struct CorporateHQWindow : Window {
 			if (b == 0) return "Budget: 0 Cr";
 			return fmt::format("Budget: {:L} Cr", b);
 		}
+		if (widget == WID_CHQ_ALLIANCE_TOGGLE_BTN) {
+			if (this->selected_alliance_company == CompanyID::Invalid() || !Company::IsValidID(this->selected_alliance_company)) {
+				return "Select Rival";
+			}
+			CorporateRelation rel = CorporateAllianceManager::GetRelation(this->company, this->selected_alliance_company);
+			switch (rel) {
+				case CorporateRelation::Neutral: return "Treaty: Neutral";
+				case CorporateRelation::Allied:  return "Treaty: Allied";
+				case CorporateRelation::Hostile: return "Treaty: Hostile";
+				default: return "Cycle Treaty";
+			}
+		}
 		if (widget == WID_CHQ_SELECT_HUB && this->selected_hub_id != 0) return fmt::format("Hub #{}", this->selected_hub_id);
 		if (widget == WID_CHQ_SELECT_CARGO && IsValidCargoType(this->selected_cargo)) {
 			return fmt::format("Cargo: {}", GetString(CargoSpec::Get(this->selected_cargo)->name));
@@ -151,11 +168,22 @@ struct CorporateHQWindow : Window {
 		bool has_owned_hub = false;
 		for (const auto &hub : LogisticsHubManager::GetAllHubs()) if (hub.company_id == this->company) { has_owned_hub = true; break; }
 
+		if (this->selected_alliance_company == CompanyID::Invalid() || !Company::IsValidID(this->selected_alliance_company) || this->selected_alliance_company == this->company) {
+			this->selected_alliance_company = CompanyID::Invalid();
+			for (const Company *c : Company::Iterate()) {
+				if (c->index != this->company) {
+					this->selected_alliance_company = c->index;
+					break;
+				}
+			}
+		}
+
 		this->SetWidgetDisabledState(WID_CHQ_LOCATE, !has_hq || profile == nullptr || profile->tile == INVALID_TILE);
 		this->SetWidgetDisabledState(WID_CHQ_UPGRADE, !own_company || !has_hq || (profile != nullptr && profile->tier >= CorporateHQTier::CST_Arcology));
 		this->SetWidgetDisabledState(WID_CHQ_TECH_RESEARCH_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
 		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
 		this->SetWidgetDisabledState(WID_CHQ_FABRICATION_TOGGLE, !own_company);
+		this->SetWidgetDisabledState(WID_CHQ_ALLIANCE_TOGGLE_BTN, !own_company || this->active_tab != CorporateHQTab::Alliances || this->selected_alliance_company == CompanyID::Invalid());
 		this->SetWidgetDisabledState(WID_CHQ_BUILD_HQ, !own_company || has_hq);
 		this->SetWidgetDisabledState(WID_CHQ_BUILD_HUB, !own_company);
 		this->SetWidgetDisabledState(WID_CHQ_SELECT_HUB, !own_company || !has_owned_hub);
@@ -178,6 +206,12 @@ struct CorporateHQWindow : Window {
 			this->vscroll->SetCount(comp_count);
 		} else if (this->active_tab == CorporateHQTab::TechTree) {
 			this->vscroll->SetCount(TechTreeManager::GetAllNodes().size());
+		} else if (this->active_tab == CorporateHQTab::Alliances) {
+			size_t rival_count = 0;
+			for (const Company *c : Company::Iterate()) {
+				if (c->index != this->company) rival_count++;
+			}
+			this->vscroll->SetCount(rival_count);
 		} else {
 			this->vscroll->SetCount(0);
 		}
@@ -403,6 +437,71 @@ struct CorporateHQWindow : Window {
 					render_branch(TechBranch::Traction, "Traction & Propulsion");
 					render_branch(TechBranch::PortalPhysics, "Wormhole & Portal Physics");
 					render_branch(TechBranch::Materials, "Materials & Fabrication");
+				} else if (this->active_tab == CorporateHQTab::Alliances) {
+					DrawString(tr, "Corporate Treaties, Reciprocal Trackage Rights & Neutral CST Infrastructure", TextColour::Gold);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 4;
+
+					DrawString(tr, "1. Public CST Neutral Infrastructure (Phase 1 Core & Phase 2 Developed Worlds):", TextColour::White);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+					DrawString(tr, "   - Commonwealth Space Transit maintains open neutral rail lines, junctions, and waypoints (Owner: None).", TextColour::Silver);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+					DrawString(tr, "   - Player and AI trains freely traverse neutral track and schedule waypoint orders to complete multi-world freight loops.", TextColour::Green);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
+
+					DrawString(tr, "2. Corporate Alliances & Trackage Rights (Bilateral Treaties):", TextColour::White);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+					DrawString(tr, "   - Allied: Mutual track sharing! Trains can route across partner rail, signals, and use partner stations/waypoints.", TextColour::Silver);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+					DrawString(tr, "   - Neutral: Competitor track is private. Only public CST neutral tracks may be shared.", TextColour::Silver);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+					DrawString(tr, "   - Hostile: Interdicted territory! Pathfinder treats hostile tracks as unreachable and signals deny reservations.", TextColour::Silver);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
+
+					DrawString(tr, "Registered Competitors in Universe (click list or 'Treaty' button to cycle):", TextColour::Gold);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 4;
+					DrawString(tr, "Company ID | Corporate Name                 | Treaty Standing                  | Shared Trackage Status", TextColour::Gold);
+					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+
+					size_t rival_count = 0;
+					for (const Company *c : Company::Iterate()) {
+						if (c->index == this->company) continue;
+
+						CorporateRelation rel = CorporateAllianceManager::GetRelation(this->company, c->index);
+						std::string rel_str;
+						std::string track_str;
+						TextColour text_col;
+
+						switch (rel) {
+							case CorporateRelation::Allied:
+								rel_str = "ALLIED (Reciprocal)";
+								track_str = "Open (Full Reciprocal Access)";
+								text_col = TextColour::Green;
+								break;
+							case CorporateRelation::Hostile:
+								rel_str = "HOSTILE (Interdicted)";
+								track_str = "Blocked (Interdicted / No Route)";
+								text_col = TextColour::Red;
+								break;
+							case CorporateRelation::Neutral:
+							default:
+								rel_str = "NEUTRAL (Private)";
+								track_str = "Restricted (Own + CST Public)";
+								text_col = TextColour::White;
+								break;
+						}
+
+						std::string sel_marker = (this->selected_alliance_company == c->index) ? "► " : "  ";
+						std::string row_str = fmt::format("{}{:<9} | {:<30} | {:<32} | {}",
+							sel_marker, fmt::format("#{}", c->index.base()), c->name, rel_str, track_str);
+
+						DrawString(tr, row_str, text_col);
+						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+						rival_count++;
+					}
+
+					if (rival_count == 0) {
+						DrawString(tr, "No rival corporations active in this universe. All CST public neutral infrastructure is fully operable.", TextColour::Silver);
+					}
 				}
 				break;
 			}
@@ -418,7 +517,7 @@ struct CorporateHQWindow : Window {
 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
 	{
 		if ((widget == WID_CHQ_UPGRADE || widget == WID_CHQ_TECH_RESEARCH_BTN || widget == WID_CHQ_TECH_BUDGET_BTN || widget == WID_CHQ_FABRICATION_TOGGLE ||
-			widget == WID_CHQ_BUILD_HQ || widget == WID_CHQ_BUILD_HUB || widget == WID_CHQ_SELECT_HUB || widget == WID_CHQ_SELECT_CARGO || widget == WID_CHQ_SET_RESERVE) &&
+			widget == WID_CHQ_ALLIANCE_TOGGLE_BTN || widget == WID_CHQ_BUILD_HQ || widget == WID_CHQ_BUILD_HUB || widget == WID_CHQ_SELECT_HUB || widget == WID_CHQ_SELECT_CARGO || widget == WID_CHQ_SET_RESERVE) &&
 			(!Company::IsValidID(_local_company) || this->company != _local_company)) return;
 		switch (widget) {
 			case WID_CHQ_BUILD_HQ:
@@ -484,6 +583,11 @@ struct CorporateHQWindow : Window {
 				this->SetDirty();
 				break;
 
+			case WID_CHQ_TAB_ALLIANCES:
+				this->active_tab = CorporateHQTab::Alliances;
+				this->SetDirty();
+				break;
+
 			case WID_CHQ_MAIN_PANEL:
 				if (this->active_tab == CorporateHQTab::TechTree) {
 					const auto &nodes = TechTreeManager::GetAllNodes();
@@ -498,8 +602,39 @@ struct CorporateHQWindow : Window {
 						this->selected_tech = nodes[(cur + 1) % nodes.size()].id;
 						this->SetDirty();
 					}
+				} else if (this->active_tab == CorporateHQTab::Alliances) {
+					std::vector<CompanyID> rivals;
+					for (const Company *c : Company::Iterate()) {
+						if (c->index != this->company) rivals.push_back(c->index);
+					}
+					if (!rivals.empty()) {
+						auto it = std::find(rivals.begin(), rivals.end(), this->selected_alliance_company);
+						if (it == rivals.end() || ++it == rivals.end()) {
+							this->selected_alliance_company = rivals.front();
+						} else {
+							this->selected_alliance_company = *it;
+						}
+						this->SetDirty();
+					}
 				}
 				break;
+
+			case WID_CHQ_ALLIANCE_TOGGLE_BTN: {
+				if (this->selected_alliance_company != CompanyID::Invalid() && Company::IsValidID(this->selected_alliance_company)) {
+					CorporateRelation cur = CorporateAllianceManager::GetRelation(this->company, this->selected_alliance_company);
+					CorporateRelation next_rel;
+					switch (cur) {
+						case CorporateRelation::Neutral: next_rel = CorporateRelation::Allied; break;
+						case CorporateRelation::Allied:  next_rel = CorporateRelation::Hostile; break;
+						case CorporateRelation::Hostile: next_rel = CorporateRelation::Neutral; break;
+						default: next_rel = CorporateRelation::Neutral; break;
+					}
+					Command<Commands::SetCorporateAlliance>::Post(STR_ERROR_CAN_T_SET_ALLIANCE, this->selected_alliance_company, next_rel);
+					this->status_message = fmt::format("Treaty update requested with company #{}.", this->selected_alliance_company.base());
+					this->SetDirty();
+				}
+				break;
+			}
 
 			case WID_CHQ_TECH_RESEARCH_BTN:
 				if (this->selected_tech != TECH_NONE) {

@@ -141,6 +141,8 @@ struct InterServerPortalLink {
 	WorldID remote_world = INVALID_WORLD; ///< Destination world ID on remote server.
 	uint32_t remote_gate_id = 0;       ///< Remote gateway identifier.
 	uint32_t virtual_length = 1;       ///< Virtual route length for YAPF.
+	TileIndex staging_siding_tile = INVALID_TILE; ///< Designated local staging siding / holding loop tile.
+	bool is_holding_active = false;    ///< True when inbound trains are currently diverted into staging siding.
 
 	constexpr bool IsValid() const
 	{

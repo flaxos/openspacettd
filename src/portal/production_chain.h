@@ -98,8 +98,10 @@ struct ProcessingFacility {
 	StationID linked_station = StationID::Invalid();
 
 	uint32_t monthly_capacity = 100;
+	uint32_t platform_capacity = 0; ///< Max waiting units to maintain on station platform before overflowing to hub.
 	uint32_t last_month_production = 0;
 	uint32_t total_produced = 0;
+	uint32_t last_month_hub_overflow = 0;
 
 	std::map<CargoType, uint32_t> input_buffers;
 	std::map<CargoType, uint32_t> output_buffers;
@@ -118,7 +120,7 @@ public:
 	static std::vector<ProductionRecipe> GetRecipesByPipeline(PipelineType pipeline);
 
 	/* Facility lifecycle */
-	static FacilityID RegisterFacility(TileIndex tile, WorldID world, RecipeID recipe, CompanyID owner, uint32_t capacity = 100, StationID station = StationID::Invalid());
+	static FacilityID RegisterFacility(TileIndex tile, WorldID world, RecipeID recipe, CompanyID owner, uint32_t capacity = 100, StationID station = StationID::Invalid(), uint32_t platform_cap = 0);
 	static bool UnregisterFacility(FacilityID id);
 	static ProcessingFacility *GetFacility(FacilityID id);
 	static ProcessingFacility *GetFacilityAtTile(TileIndex tile);
@@ -131,6 +133,14 @@ public:
 	/** Publish buffered output as ordinary waiting station cargo, retaining it if the packet pool is full. */
 	static void PublishStationOutput(ProcessingFacility &facility);
 	static std::vector<ProcessingFacility> GetAllFacilities();
+
+	static bool UpgradeFacility(FacilityID id, uint32_t additional_capacity);
+	static bool UpgradeFacilityForStation(StationID station, uint32_t additional_capacity);
+	static bool SetPlatformCapacity(FacilityID id, uint32_t capacity);
+	static bool SetPlatformCapacityForStation(StationID station, uint32_t capacity);
+	static uint64_t GetTotalHubOverflow();
+	static uint32_t GetLastMonthHubOverflow();
+	static void ResetOverflowMetrics();
 
 	/* Cargo delivery & buffering */
 	static void DeliverCargo(FacilityID id, CargoType cargo, uint32_t amount);

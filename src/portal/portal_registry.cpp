@@ -237,6 +237,34 @@ const std::unordered_map<TileIndex, InterServerPortalLink> &PortalRegistry::GetA
 	return interserver_portals;
 }
 
+bool PortalRegistry::ConfigureStagingSiding(TileIndex portal_tile, TileIndex siding_tile)
+{
+	auto it = interserver_portals.find(portal_tile);
+	if (it == interserver_portals.end()) return false;
+	it->second.staging_siding_tile = siding_tile;
+	return true;
+}
+
+TileIndex PortalRegistry::GetStagingSiding(TileIndex portal_tile)
+{
+	auto it = interserver_portals.find(portal_tile);
+	return it != interserver_portals.end() ? it->second.staging_siding_tile : INVALID_TILE;
+}
+
+bool PortalRegistry::SetHoldingActive(TileIndex portal_tile, bool active)
+{
+	auto it = interserver_portals.find(portal_tile);
+	if (it == interserver_portals.end()) return false;
+	it->second.is_holding_active = active;
+	return true;
+}
+
+bool PortalRegistry::IsHoldingActive(TileIndex portal_tile)
+{
+	auto it = interserver_portals.find(portal_tile);
+	return it != interserver_portals.end() ? it->second.is_holding_active : false;
+}
+
 bool PortalRegistry::IsPortalTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;

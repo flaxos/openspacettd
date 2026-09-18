@@ -241,6 +241,48 @@ bool UniverseAuthorityService::UpdateMegacityStatus(
 	return true;
 }
 
+bool UniverseAuthorityService::UpdateServerTelemetry(WorldID world_id, uint32_t ping_ms, float traffic_load_pct)
+{
+	if (world_id == INVALID_WORLD) return false;
+	auto it = this->_worlds.find(world_id);
+	if (it == this->_worlds.end()) {
+		RegisteredWorld w;
+		w.world_id = world_id;
+		w.name = fmt::format("World #{}", world_id.base());
+		it = this->_worlds.emplace(world_id, std::move(w)).first;
+	}
+	it->second.ping_ms = ping_ms;
+	it->second.traffic_load_pct = std::clamp(traffic_load_pct, 0.0f, 100.0f);
+	return true;
+}
+
+bool UniverseAuthorityService::RecordFinancialClearing(WorldID source_world, WorldID dest_world, [[maybe_unused]] CompanyID company, int64_t amount)
+{
+	if (amount <= 0) return true;
+	if (source_world != INVALID_WORLD) {
+		auto src_it = this->_worlds.find(source_world);
+		if (src_it == this->_worlds.end()) {
+			RegisteredWorld w;
+			w.world_id = source_world;
+			w.name = fmt::format("World #{}", source_world.base());
+			src_it = this->_worlds.emplace(source_world, std::move(w)).first;
+		}
+		src_it->second.financial_clearing_balance += amount;
+		src_it->second.total_cleared_revenue += static_cast<uint64_t>(amount);
+	}
+	if (dest_world != INVALID_WORLD) {
+		auto dst_it = this->_worlds.find(dest_world);
+		if (dst_it == this->_worlds.end()) {
+			RegisteredWorld w;
+			w.world_id = dest_world;
+			w.name = fmt::format("World #{}", dest_world.base());
+			dst_it = this->_worlds.emplace(dest_world, std::move(w)).first;
+		}
+		dst_it->second.financial_clearing_balance -= amount;
+	}
+	return true;
+}
+
 bool UniverseAuthorityService::RegisterRoute(const InterServerRoute &route)
 {
 	if (route.route_id == 0 || route.source_world == INVALID_WORLD || route.dest_world == INVALID_WORLD) {
@@ -680,6 +722,21 @@ bool UniverseAuthorityService::ConfirmTransferArrival(
 			int64_t trade_val = static_cast<int64_t>(count) * 10;
 			this->_trade_balances[it->second.source_world].net_trade_balance_credits += trade_val;
 			this->_trade_balances[dest_world].net_trade_balance_credits -= trade_val;
+		}
+
+		/* Settle cross-server financial clearing house accounting */
+		int64_t total_cleared = 0;
+		for (const auto &[cargo_type, count] : it->second.cargo_by_type) {
+			total_cleared += static_cast<int64_t>(count) * 10;
+		}
+		if (total_cleared == 0 && it->second.total_cargo_units > 0) {
+			total_cleared = static_cast<int64_t>(it->second.total_cargo_units) * 10;
+		}
+		if (total_cleared > 0) {
+			CompanyID company = it->second.snapshot.company_id.IsValid() ?
+				CompanyID{static_cast<uint8_t>(it->second.snapshot.company_id.sequence)} :
+				CompanyID::Invalid();
+			this->RecordFinancialClearing(it->second.source_world, dest_world, company, total_cleared);
 		}
 
 		/* Relieve corridor congestion */

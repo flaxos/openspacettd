@@ -402,8 +402,12 @@ enum class Commands : uint8_t {
 
 	BuildProcessingFacility, ///< attach a production recipe to a company rail station
 	RemoveProcessingFacility, ///< retire a station production facility
+	UpgradeProcessingFacility, ///< upgrade monthly processing capacity of a station facility
+	SetFacilityPlatformCapacity, ///< adjust platform holding capacity before hub overflow
 	UpgradeCorporateHQ, ///< advance an owned corporate headquarters by exactly one tier
 	SetLogisticsHubReserve, ///< set a cargo reserve floor for an owned logistics hub
+	ConfigurePortalStagingSiding, ///< designate or clear a local staging siding for an inter-server portal
+	SetCorporateAlliance, ///< establish or modify a diplomatic treaty/alliance with another corporation
 
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };

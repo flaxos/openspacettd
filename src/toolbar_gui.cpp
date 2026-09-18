@@ -75,6 +75,7 @@
 #include "portal/trade_ledger_gui.h"
 #include "portal/federation_auth_gui.h"
 #include "portal/corporate_hq_gui.h"
+#include "portal/empire_facilities_gui.h"
 #include "3rdparty/fmt/format.h"
 
 #include "network/network.h"
@@ -450,6 +451,7 @@ enum class MapMenuEntries : uint8_t {
 	ShowTradeLedger, ///< Open empire supply chain matrix and trade ledger.
 	ShowFederationAuth, ///< Open federation player authentication and corporate charters.
 	ShowCorporateHQ, ///< Open corporate headquarters campus and planetary stockpiles.
+	ShowIndustrialFacilities, ///< Open empire-wide industrial processing facilities dashboard.
 };
 
 static CallBackFunction ToolbarMapClick(Window *w)
@@ -464,6 +466,7 @@ static CallBackFunction ToolbarMapClick(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_TRADE_LEDGER, MapMenuEntries::ShowTradeLedger));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FEDERATION_AUTH, MapMenuEntries::ShowFederationAuth));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_CORPORATE_HQ, MapMenuEntries::ShowCorporateHQ));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_INDUSTRIAL_FACILITIES, MapMenuEntries::ShowIndustrialFacilities));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -489,6 +492,7 @@ static CallBackFunction ToolbarScenMapTownDir(Window *w)
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_TRADE_LEDGER, MapMenuEntries::ShowTradeLedger));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_FEDERATION_AUTH, MapMenuEntries::ShowFederationAuth));
 	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_CORPORATE_HQ, MapMenuEntries::ShowCorporateHQ));
+	list.push_back(MakeDropDownListStringItem(STR_MAP_MENU_INDUSTRIAL_FACILITIES, MapMenuEntries::ShowIndustrialFacilities));
 
 	if (PlanetManager::Count() > 0) {
 		for (const auto &r : PlanetManager::GetAllRegions()) {
@@ -527,6 +531,7 @@ static CallBackFunction MenuClickMap(int index)
 		case MapMenuEntries::ShowTradeLedger: ShowTradeLedger(); break;
 		case MapMenuEntries::ShowFederationAuth: ShowFederationAuth(); break;
 		case MapMenuEntries::ShowCorporateHQ: ShowCorporateHQ(); break;
+		case MapMenuEntries::ShowIndustrialFacilities: ShowEmpireFacilitiesWindow(); break;
 	}
 	return CallBackFunction::None;
 }
@@ -2146,6 +2151,7 @@ struct MainToolbarWindow : Window {
 			case MTHK_CLIENT_LIST: if (_networking) ShowClientList(); break;
 			case MTHK_SIGN_LIST: ShowSignList(); break;
 			case MTHK_LANDINFO: cbf = PlaceLandBlockInfo(); break;
+			case MTHK_INDUSTRIAL_FACILITIES: ShowEmpireFacilitiesWindow(); break;
 			default: return EventState::NotHandled;
 		}
 		if (cbf != CallBackFunction::None) _last_started_action = cbf;
@@ -2237,6 +2243,7 @@ struct MainToolbarWindow : Window {
 		Hotkey(0, "client_list", MTHK_CLIENT_LIST),
 		Hotkey(0, "sign_list", MTHK_SIGN_LIST),
 		Hotkey(0, "land_info", MTHK_LANDINFO),
+		Hotkey(WKC_CTRL | 'I', "industrial_facilities", MTHK_INDUSTRIAL_FACILITIES),
 	}};
 };
 

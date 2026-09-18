@@ -48,6 +48,8 @@
 #include "portal/federation_identity.h"
 #include "portal/planet_manager.h"
 #include "portal/federation_cmd.h"
+#include "portal/federation_staging.h"
+#include "portal/corporate_alliance.h"
 
 #include "safeguards.h"
 
@@ -3147,7 +3149,7 @@ static void TrainEnterStation(Train *consist, StationID station)
 static inline bool CheckCompatibleRail(const Train *v, TileIndex tile, bool check_railtype)
 {
 	Owner tile_owner = GetTileOwner(tile);
-	return (tile_owner == v->owner || tile_owner == OWNER_NONE) &&
+	return CorporateAllianceManager::CanTraverseTrack(v->owner, tile_owner) &&
 			(!check_railtype || !v->IsFrontEngine() || v->compatible_railtypes.Test(GetRailType(tile)));
 }
 
@@ -3611,6 +3613,9 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 			if (PortalRegistry::IsPortalTile(v->tile)) {
 				if (PortalRegistry::IsInterServerPortal(v->tile)) {
 					if (v->IsMovingFront()) {
+						if (FederationStagingManager::CheckAndDivertToStaging(first, v->tile)) {
+							return false;
+						}
 						FederationTransferManager::InitiateConsistDeparture(first, v->tile);
 						return false;
 					}

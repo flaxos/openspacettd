@@ -19,6 +19,7 @@
 #include "tech_tree.h"
 #include "production_chain.h"
 #include "corporate_hq.h"
+#include "corporate_alliance.h"
 
 /**
  * Build a single unlinked portal gate head on a tile.
@@ -217,7 +218,15 @@ DEF_CMD_TRAIT(Commands::SetResearchBudget,         CmdSetResearchBudget,        
 /** Attach a recipe to an owned rail station; query mode performs validation only. */
 CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, RecipeID recipe);
 CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station);
+CommandCost CmdUpgradeProcessingFacility(DoCommandFlags flags, StationID station, uint32_t capacity_increase);
+CommandCost CmdSetFacilityPlatformCapacity(DoCommandFlags flags, StationID station, uint32_t platform_capacity);
+CommandCost CmdConfigurePortalStagingSiding(DoCommandFlags flags, TileIndex portal_tile, TileIndex siding_tile);
+CommandCost CmdSetCorporateAlliance(DoCommandFlags flags, CompanyID target_company, CorporateRelation relation);
 DEF_CMD_TRAIT(Commands::BuildProcessingFacility, CmdBuildProcessingFacility, {}, CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::RemoveProcessingFacility, CmdRemoveProcessingFacility, {}, CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::UpgradeProcessingFacility, CmdUpgradeProcessingFacility, {}, CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::SetFacilityPlatformCapacity, CmdSetFacilityPlatformCapacity, {}, CommandType::CompanySetting)
+DEF_CMD_TRAIT(Commands::ConfigurePortalStagingSiding, CmdConfigurePortalStagingSiding, {}, CommandType::CompanySetting)
+DEF_CMD_TRAIT(Commands::SetCorporateAlliance, CmdSetCorporateAlliance, {}, CommandType::CompanySetting)
 
 #endif /* PORTAL_CMD_H */

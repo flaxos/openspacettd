@@ -57,6 +57,9 @@ add_test_files(
     test_sprint40_fabrication_engine.cpp
     test_sprint41_tech_tree.cpp
     test_sprint42_production_chains.cpp
+    test_sprint43_empire_facilities.cpp
+    test_sprint46_live_federation.cpp
+    test_sprint47_alliances_and_neutral_tracks.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

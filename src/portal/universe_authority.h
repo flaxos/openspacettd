@@ -57,6 +57,10 @@ struct RegisteredWorld {
 	bool is_megacity = false;
 	std::string megacity_growth_state = "Subsistence";
 	float satisfaction_pct = 100.0f;
+	uint32_t ping_ms = 15;
+	float traffic_load_pct = 0.0f;
+	int64_t financial_clearing_balance = 0;
+	uint64_t total_cleared_revenue = 0;
 };
 
 /** Freight corridor congestion level determined by active transit utilization. */
@@ -199,6 +203,8 @@ public:
 		float satisfaction_pct = 100.0f,
 		uint32_t population = 0
 	);
+	bool UpdateServerTelemetry(WorldID world_id, uint32_t ping_ms, float traffic_load_pct);
+	bool RecordFinancialClearing(WorldID source_world, WorldID dest_world, CompanyID company, int64_t amount);
 
 	/* Inter-Server Route & Freight Corridor Management */
 	bool RegisterRoute(const InterServerRoute &route);

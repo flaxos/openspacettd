@@ -57,12 +57,17 @@
 #include "portal/company_stockpile.h"
 #include "portal/logistics_hub.h"
 #include "portal/fabrication_manager.h"
+#include "portal/tech_tree.h"
+#include "portal/corporate_alliance.h"
 #include "portal/commonwealth_pack.h"
 #include "portal/commonwealth_slice.h"
 #include "industrytype.h"
 #include "tunnelbridge_map.h"
 #include "train.h"
 #include "station_base.h"
+#include "waypoint_base.h"
+#include "station_map.h"
+#include "rail_map.h"
 #include "town.h"
 #include "clear_map.h"
 
@@ -3576,8 +3581,10 @@ static bool ConSetupUATFixtures(std::span<std::string_view> argv)
 		IConsolePrint(CC_DEFAULT, "  -> Logistics Hub registered on World 1 (attached station: {})", nearest_st.base());
 	}
 
-	/* 5. Enable In-Kind Fabrication mode */
+	/* 5. Enable In-Kind Fabrication mode and unlock foundational Commonwealth research */
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_TRACTION_1, TECH_PORTAL_1});
 	FabricationManager::SetFabricateFromStockpile(CompanyID{0}, true);
+	IConsolePrint(CC_DEFAULT, "  -> Foundational research unlocked (Materials 1, Traction 1, Portal 1)");
 	IConsolePrint(CC_DEFAULT, "  -> In-Kind Fabrication enabled for Company 0 (80% discount active)");
 
 	/* 6. Populate development scores */
@@ -3586,6 +3593,25 @@ static bool ConSetupUATFixtures(std::span<std::string_view> argv)
 	PlanetManager::AddDevelopmentScore(WorldID{2}, 2500);
 	PlanetManager::AddDevelopmentScore(WorldID{3}, 1000);
 	IConsolePrint(CC_DEFAULT, "  -> Development scores initialized (W0: 25k, W1: 8k, W2: 2.5k, W3: 1k)");
+
+	/* 7. Seed CST Neutral Mainline & Waypoint on World 1 */
+	if (r1 != nullptr) {
+		TileIndex wp_tile = TileXY((r1->min_x + r1->max_x) / 2 - 8, (r1->min_y + r1->max_y) / 2 - 10);
+		if (IsValidTile(wp_tile)) {
+			MakeClear(wp_tile, ClearGround::Grass, 3);
+			MakeRailNormal(wp_tile, OWNER_NONE, TrackBits{Track::X}, RAILTYPE_BEGIN);
+			if (Waypoint::CanAllocateItem()) {
+				Waypoint *wp = Waypoint::Create(wp_tile);
+				if (wp != nullptr) {
+					wp->owner = OWNER_NONE;
+					wp->facilities.Set(StationFacility::Train);
+					wp->name = "CST Central Waypoint Beta";
+					MakeRailWaypoint(wp_tile, OWNER_NONE, wp->index, Axis::X, 0, RAILTYPE_BEGIN);
+					IConsolePrint(CC_DEFAULT, "  -> CST Neutral Rail Waypoint placed at tile ({}, {})", TileX(wp_tile), TileY(wp_tile));
+				}
+			}
+		}
+	}
 
 	IConsolePrint(CC_DEFAULT, "UAT fixtures setup complete!");
 	return true;

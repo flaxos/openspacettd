@@ -53,7 +53,8 @@ enum MainToolbarHotkeys : int32_t {
 	MTHK_TERRAFORM,
 	MTHK_EXTRA_VIEWPORT,
 	MTHK_CLIENT_LIST,
-	MTHK_SIGN_LIST
+	MTHK_SIGN_LIST,
+	MTHK_INDUSTRIAL_FACILITIES,
 };
 
 void AllocateToolbar();
