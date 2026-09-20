@@ -396,6 +396,8 @@ add_files(
     portal/prompt_scenario_generator.h
     portal/prompt_scenario_gui.cpp
     portal/prompt_scenario_gui.h
+    portal/balancing_critic.cpp
+    portal/balancing_critic.h
     portal/commonwealth_slice.cpp
     portal/commonwealth_slice.h
     portal/commonwealth_pack.cpp

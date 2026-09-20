@@ -48,10 +48,9 @@ static void GetTileDesc_Void([[maybe_unused]] TileIndex tile, TileDesc &td)
 }
 
 /** @copydoc TileLoopProc */
-static void TileLoop_Void(TileIndex tile)
+static void TileLoop_Void([[maybe_unused]] TileIndex tile)
 {
-	/* Floods adjacent edge tile to prevent maps without water. */
-	TileLoop_Water(tile);
+	/* OpenSpaceTTD uses void tiles for space vacuum between planetary worlds; do not flood. */
 }
 
 /** TileTypeProcs definitions for TileType::Void tiles. */

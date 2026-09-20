@@ -275,8 +275,17 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 				cur_x += step_x;
 			}
 
+			/* Place track behind the station for consist tail buffer / siding */
+			for (int b = 1; b <= 3; ++b) {
+				TileIndex bt = TileXY(sx - step_x * b, sy);
+				if (IsValidTile(bt) && !IsTileType(bt, TileType::Void) && !IsTileType(bt, TileType::Station) && !IsTileType(bt, TileType::TunnelBridge)) {
+					MakeClear(bt, ClearGround::Grass, 0);
+					MakeRailNormal(bt, human_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
+				}
+			}
+
 			/* Place a waypoint along the approach */
-			TileIndex wp_tile = TileXY(sx + step_x * 2, sy);
+			TileIndex wp_tile = TileXY(sx + step_x * 4, sy);
 			if (IsValidTile(wp_tile) && Waypoint::CanAllocateItem()) {
 				Waypoint *wp = Waypoint::Create(wp_tile);
 				if (wp != nullptr) {
@@ -340,10 +349,30 @@ bool PromptScenarioGenerator::SpawnActiveFleets(const PromptScenarioSpec &spec, 
 	if (wagon == EngineID::Invalid()) wagon = locomotive;
 
 	/* 1. Spawn heavy mining freight train in the mining world */
-	TileIndex spawn_tile = TileXY(TileX(st_mining->xy) + 2, TileY(st_mining->xy));
-	if (!IsValidTile(spawn_tile) || !IsTileType(spawn_tile, TileType::Railway)) {
-		spawn_tile = st_mining->xy;
+	TileIndex gate_tile = INVALID_TILE;
+	for (const auto &[pid, link] : PortalRegistry::GetAllPortals()) {
+		if (link.end_a.world_id == mining_id) {
+			gate_tile = link.end_a.tile;
+			break;
+		} else if (link.end_b.world_id == mining_id) {
+			gate_tile = link.end_b.tile;
+			break;
+		}
 	}
+
+	int step_x = (gate_tile != INVALID_TILE && TileX(gate_tile) >= TileX(st_mining->xy)) ? 1 : -1;
+	DiagDirection exit_dir = (step_x > 0) ? DiagDirection::SW : DiagDirection::NE;
+	Direction dir = DiagDirToDir(exit_dir);
+	Track track = Track::X;
+
+	TileIndex spawn_tile = st_mining->xy;
+
+	int x_fract = (step_x > 0) ? 4 : 10;
+	int y_fract = 8;
+	int eng_x = TileX(spawn_tile) * TILE_SIZE + x_fract;
+	int eng_y = TileY(spawn_tile) * TILE_SIZE + y_fract;
+	int eng_z = GetSlopePixelZ(eng_x, eng_y, true);
+	int trail_dx = (step_x > 0) ? -8 : 8;
 
 	if (Vehicle::CanAllocateItem(3)) {
 		Train *engine = Vehicle::Create<Train>();
@@ -374,48 +403,46 @@ bool PromptScenarioGenerator::SpawnActiveFleets(const PromptScenarioSpec &spec, 
 			w1->cur_speed = 0;
 			w2->cur_speed = 0;
 
-			engine->direction = Direction::NE;
-			w1->direction = Direction::NE;
-			w2->direction = Direction::NE;
+			engine->direction = dir;
+			engine->track = track;
+			engine->x_pos = eng_x;
+			engine->y_pos = eng_y;
+			engine->z_pos = eng_z;
+			engine->tile = spawn_tile;
 
-			engine->track = Track::X;
-			w1->track = Track::X;
-			w2->track = Track::X;
-
-			engine->x_pos = TileX(spawn_tile) * TILE_SIZE + 8;
-			engine->y_pos = TileY(spawn_tile) * TILE_SIZE + 8;
-			engine->z_pos = GetSlopePixelZ(engine->x_pos, engine->y_pos, true);
-			engine->tile = TileVirtXY(engine->x_pos, engine->y_pos);
-
-			w1->x_pos = engine->x_pos + 8;
-			w1->y_pos = engine->y_pos;
+			w1->direction = dir;
+			w1->track = track;
+			w1->x_pos = eng_x + trail_dx;
+			w1->y_pos = eng_y;
 			w1->z_pos = GetSlopePixelZ(w1->x_pos, w1->y_pos, true);
 			w1->tile = TileVirtXY(w1->x_pos, w1->y_pos);
 
-			w2->x_pos = engine->x_pos + 16;
-			w2->y_pos = engine->y_pos;
+			w2->direction = dir;
+			w2->track = track;
+			w2->x_pos = eng_x + 2 * trail_dx;
+			w2->y_pos = eng_y;
 			w2->z_pos = GetSlopePixelZ(w2->x_pos, w2->y_pos, true);
 			w2->tile = TileVirtXY(w2->x_pos, w2->y_pos);
 
-			engine->gcache.cached_veh_length = 8;
-			w1->gcache.cached_veh_length = 8;
-			w2->gcache.cached_veh_length = 8;
-
-			engine->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
-			w1->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
-			w2->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
-
-			engine->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
-			w1->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
-			w2->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
-
-			engine->railtypes = RailTypes{RAILTYPE_BEGIN};
-			w1->railtypes = RailTypes{RAILTYPE_BEGIN};
-			w2->railtypes = RailTypes{RAILTYPE_BEGIN};
+			for (Train *u : {engine, w1, w2}) {
+				u->gcache.cached_veh_length = 8;
+				u->sprite_cache.sprite_seq.Set(SPR_IMG_QUERY);
+				u->compatible_railtypes = RailTypes{RAILTYPE_BEGIN};
+				u->railtypes = RailTypes{RAILTYPE_BEGIN};
+			}
 
 			engine->SetNext(w1);
 			w1->SetNext(w2);
-			engine->ConsistChanged(CCF_SAVELOAD);
+			engine->ConsistChanged(CCF_ARRANGE);
+
+			for (Train *u = engine; u != nullptr; u = u->Next()) {
+				u->UpdatePositionAndViewport();
+				if (IsRailStationTile(u->tile)) {
+					SetRailStationReservation(u->tile, true);
+				} else if (IsPlainRailTile(u->tile) && HasTrack(u->tile, track)) {
+					TryReserveTrack(u->tile, track);
+				}
+			}
 
 			CargoType ore = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
 			w1->cargo_type = ore;
