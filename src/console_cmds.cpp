@@ -50,6 +50,7 @@
 #include "portal/universe_authority.h"
 #include "portal/federation_cmd.h"
 #include "portal/federation_player.h"
+#include "portal/federation_staging.h"
 #include "portal/megacity_manager.h"
 #include "portal/planet_manager.h"
 #include "portal/portal_registry.h"
@@ -2846,7 +2847,7 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 {
 	if (argv.size() < 4) {
 		IConsolePrint(CC_HELP, "Link a local portal gate head to a remote world server gate.");
-		IConsolePrint(CC_HELP, "Usage: 'federation_link_gate <tile> <remote_world> <remote_gate_id> [local_gate_id] [virtual_length]'");
+		IConsolePrint(CC_HELP, "Usage: 'federation_link_gate <tile> <remote_world> <remote_gate_id> [local_gate_id] [virtual_length] [local_world]'");
 		return true;
 	}
 
@@ -2860,6 +2861,7 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 
 	uint32_t local_gate_id = 0;
 	uint32_t virt_len = 10;
+	std::optional<uint32_t> custom_lworld;
 	if (argv.size() >= 5) {
 		auto p_lgate = ParseInteger(argv[4]);
 		if (p_lgate.has_value() && *p_lgate > 0) local_gate_id = static_cast<uint32_t>(*p_lgate);
@@ -2867,6 +2869,10 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 	if (argv.size() >= 6) {
 		auto p_vlen = ParseInteger(argv[5]);
 		if (p_vlen.has_value() && *p_vlen > 0) virt_len = static_cast<uint32_t>(*p_vlen);
+	}
+	if (argv.size() >= 7) {
+		auto p_lw = ParseInteger(argv[6]);
+		if (p_lw.has_value() && *p_lw > 0) custom_lworld = static_cast<uint32_t>(*p_lw);
 	}
 
 	TileIndex tile{static_cast<uint32_t>(*p_tile)};
@@ -2876,14 +2882,14 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 	}
 
 	DiagDirection dir = DiagDirection::Invalid;
-	WorldID local_world = PlanetManager::GetTileWorld(tile);
+	WorldID local_world = custom_lworld.has_value() ? WorldID{*custom_lworld} : PlanetManager::GetTileWorld(tile);
 
 	/* Check unlinked gates */
 	const auto &unlinked = PortalRegistry::GetUnlinkedGates();
 	auto it_un = unlinked.find(tile);
 	if (it_un != unlinked.end()) {
 		dir = it_un->second.enter_dir;
-		local_world = it_un->second.world_id;
+		if (!custom_lworld.has_value()) local_world = it_un->second.world_id;
 	} else if (IsTunnelTile(tile)) {
 		dir = GetTunnelBridgeDirection(tile);
 	}
@@ -2893,7 +2899,7 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 		return false;
 	}
 
-	if (local_world == INVALID_WORLD) local_world = WorldID{1};
+	if (local_world == INVALID_WORLD || local_world == WorldID{0}) local_world = WorldID{1};
 
 	PortalRegistry::UnregisterPortalByTile(tile);
 
@@ -2909,6 +2915,91 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 
 	IConsolePrint(CC_DEFAULT, "Registered inter-server portal link (ID {}): Tile {} (World {}) -> Remote World {}, Gate {}",
 		pid.base(), tile.base(), local_world.base(), static_cast<uint32_t>(*p_rworld), static_cast<uint32_t>(*p_rgate));
+	return true;
+}
+
+/** Designate a staging siding / holding loop for an inter-server portal gate. @copydoc IConsoleCmdProc */
+static bool ConFederationLinkStaging(std::span<std::string_view> argv)
+{
+	if (argv.size() < 3) {
+		IConsolePrint(CC_HELP, "Designate a staging siding / holding loop tile for an inter-server portal gate.");
+		IConsolePrint(CC_HELP, "Usage: 'federation_link_staging <portal_tile> <siding_tile>'");
+		return true;
+	}
+
+	auto p_ptile = ParseInteger(argv[1]);
+	auto p_stile = ParseInteger(argv[2]);
+	if (!p_ptile.has_value() || !p_stile.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid arguments. portal_tile and siding_tile must be integers.");
+		return false;
+	}
+
+	TileIndex portal_tile{static_cast<uint32_t>(*p_ptile)};
+	TileIndex siding_tile{static_cast<uint32_t>(*p_stile)};
+
+	if (!PortalRegistry::IsInterServerPortal(portal_tile)) {
+		IConsolePrint(CC_ERROR, "Tile {} is not a registered inter-server portal gate.", portal_tile.base());
+		return false;
+	}
+
+	if (!IsValidTile(siding_tile)) {
+		IConsolePrint(CC_ERROR, "Tile {} is invalid.", siding_tile.base());
+		return false;
+	}
+
+	if (!PortalRegistry::ConfigureStagingSiding(portal_tile, siding_tile)) {
+		IConsolePrint(CC_ERROR, "Failed to configure staging siding for portal at tile {}.", portal_tile.base());
+		return false;
+	}
+
+	IConsolePrint(CC_DEFAULT, "Configured staging siding: Portal at tile {} -> Siding at tile {}.", portal_tile.base(), siding_tile.base());
+	return true;
+}
+
+/** Set or simulate status and latency for a registered world. @copydoc IConsoleCmdProc */
+static bool ConFederationSetWorld(std::span<std::string_view> argv)
+{
+	if (argv.size() < 3) {
+		IConsolePrint(CC_HELP, "Set world status and latency for federation testing.");
+		IConsolePrint(CC_HELP, "Usage: 'federation_set_world <world_id> <online|maintenance|unreachable> [ping_ms]'");
+		return true;
+	}
+
+	auto p_wid = ParseInteger(argv[1]);
+	if (!p_wid.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid world_id.");
+		return false;
+	}
+
+	WorldID wid{static_cast<uint32_t>(*p_wid)};
+	std::string_view status_str = argv[2];
+	WorldOnlineStatus status = WorldOnlineStatus::Online;
+	if (status_str == "maintenance") status = WorldOnlineStatus::Maintenance;
+	else if (status_str == "unreachable") status = WorldOnlineStatus::Unreachable;
+	else if (status_str != "online") {
+		IConsolePrint(CC_ERROR, "Invalid status '{}'. Must be online, maintenance, or unreachable.", status_str);
+		return false;
+	}
+
+	uint32_t ping_ms = 20;
+	if (argv.size() >= 4) {
+		auto p_ping = ParseInteger(argv[3]);
+		if (p_ping.has_value()) ping_ms = static_cast<uint32_t>(*p_ping);
+	}
+
+	RegisteredWorld rw;
+	const RegisteredWorld *existing = UniverseAuthorityService::Instance().GetWorld(wid);
+	if (existing != nullptr) {
+		rw = *existing;
+	} else {
+		rw.world_id = wid;
+		rw.name = fmt::format("World {}", wid.base());
+	}
+	rw.status = status;
+	rw.ping_ms = ping_ms;
+	UniverseAuthorityService::Instance().RegisterWorld(rw);
+
+	IConsolePrint(CC_DEFAULT, "Updated World {}: status={}, ping={}ms", wid.base(), status_str, ping_ms);
 	return true;
 }
 
@@ -2983,6 +3074,11 @@ static bool ConFederationDispatch(std::span<std::string_view> argv)
 	if (!PortalRegistry::IsPortalTile(tile) || !PortalRegistry::IsInterServerPortal(tile)) {
 		IConsolePrint(CC_ERROR, "Tile {} is not an inter-server portal gate.", tile.base());
 		return false;
+	}
+
+	if (FederationStagingManager::CheckAndDivertToStaging(v, tile)) {
+		IConsolePrint(CC_DEFAULT, "Train {} diverted to staging siding for portal at tile {}.", *p_vid, tile.base());
+		return true;
 	}
 
 	if (!FederationTransferManager::InitiateConsistDeparture(v, tile)) {
@@ -3949,6 +4045,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("federation_status",       ConFederationStatus);
 	IConsole::CmdRegister("federation_authority",    ConFederationAuthority);
 	IConsole::CmdRegister("federation_link_gate",    ConFederationLinkGate);
+	IConsole::CmdRegister("federation_link_staging", ConFederationLinkStaging);
+	IConsole::CmdRegister("federation_set_world",    ConFederationSetWorld);
 	IConsole::CmdRegister("federation_list_gates",   ConFederationListGates);
 	IConsole::CmdRegister("federation_trains",       ConFederationTrains);
 	IConsole::CmdRegister("federation_dispatch",     ConFederationDispatch);

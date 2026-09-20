@@ -7,5 +7,6 @@ docs/source/*
 /out
 /vcpkg_installed
 /logs/
+/fixtures/
 __pycache__/
 *.pyc

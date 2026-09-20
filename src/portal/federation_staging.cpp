@@ -9,6 +9,7 @@
 
 #include "../stdafx.h"
 #include "federation_staging.h"
+#include "federation_cmd.h"
 #include "portal_registry.h"
 #include "universe_authority.h"
 #include "../train.h"
@@ -33,8 +34,8 @@ bool FederationStagingManager::IsServerHoldingCondition(WorldID remote_world)
 
 	const RegisteredWorld *world = UniverseAuthorityService::Instance().GetWorld(remote_world);
 	if (world == nullptr) {
-		/* Unregistered or absent remote server */
-		return true;
+		/* In-memory mode requires explicit registration; under external authority, default to clear unless holding configured */
+		return !FederationTransferManager::HasExternalAuthority();
 	}
 
 	if (world->status == WorldOnlineStatus::Maintenance || world->status == WorldOnlineStatus::Unreachable) {
@@ -60,7 +61,9 @@ std::string FederationStagingManager::GetHoldingReason(WorldID remote_world)
 	if (remote_world == INVALID_WORLD) return "Invalid Destination";
 
 	const RegisteredWorld *world = UniverseAuthorityService::Instance().GetWorld(remote_world);
-	if (world == nullptr) return "Destination Server Offline";
+	if (world == nullptr) {
+		return FederationTransferManager::HasExternalAuthority() ? "Mainline Clear" : "Destination Server Offline";
+	}
 
 	if (world->status == WorldOnlineStatus::Maintenance) {
 		return "Server Maintenance / Scheduled Restart";
@@ -172,6 +175,9 @@ size_t FederationStagingManager::ReleaseHeldTrains(TileIndex portal_tile)
 
 	PortalRegistry::SetHoldingActive(portal_tile, false);
 	SetWindowDirty(WindowClass::UniverseDirectory, 0);
+	if (released_count > 0) {
+		Debug(net, 1, "[Federation Staging] Released {} held trains for portal {}", released_count, portal_tile.base());
+	}
 	return released_count;
 }
 
