@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "description": "Autonomous Balancing Critic Tuning Patch",
+  "simulation_years": 20,
+  "is_sustainable": true,
+  "recipe_modifications": {},
+  "megacity_quota_modifications": {
+    "MegacityTier2Quota": {
+      "recommended_value": "200 units/mo",
+      "rationale": "Megacity quota targets exceed current freight corridor throughput; recalibrate baseline quota."
+    }
+  },
+  "tariff_rate_modifications": {},
+  "metadata": {
+    "diagnoses": [
+      "Megacity Supply Deficit: Average commodity demand satisfaction is only 0.0%."
+    ],
+    "recommendation_count": 1
+  }
+}

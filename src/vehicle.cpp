@@ -674,7 +674,7 @@ static void UpdateVehicleViewportHash(Vehicle *v, int x, int y, int old_x, int o
 	if (old_hash == new_hash) return;
 
 	/* remove from hash table? */
-	if (old_hash != nullptr) {
+	if (old_hash != nullptr && v->hash_viewport_prev != nullptr) {
 		if (v->hash_viewport_next != nullptr) v->hash_viewport_next->hash_viewport_prev = v->hash_viewport_prev;
 		*v->hash_viewport_prev = v->hash_viewport_next;
 	}

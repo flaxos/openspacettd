@@ -60,6 +60,8 @@
 #include "road_gui.h"
 #include "portal/federation_cmd.h"
 #include "portal/prompt_scenario_generator.h"
+#include "portal/balancing_critic.h"
+#include <charconv>
 #include "core/backup_type.hpp"
 #include "hotkeys.h"
 #include "newgrf.h"
@@ -476,7 +478,7 @@ static std::vector<OptionData> CreateOptions()
 {
 	std::vector<OptionData> options;
 	/* Options that require a parameter. */
-	for (char c : "GIMSbcmnpqrstvY") options.push_back({ .type = ODF_HAS_VALUE, .id = c, .shortname = c });
+	for (char c : "GIMSbcmnpqrstvYZ") options.push_back({ .type = ODF_HAS_VALUE, .id = c, .shortname = c });
 
 	/* Options with an optional parameter. */
 	for (char c : "Ddg") options.push_back({ .type = ODF_OPTIONAL_VALUE, .id = c, .shortname = c });
@@ -508,6 +510,8 @@ int openttd_main(std::span<std::string_view> arguments)
 	std::string sounds_set;
 	std::string music_set;
 	std::string prompt_scenario_text;
+	uint32_t critic_sim_years = 0;
+	std::string critic_report_path;
 	Dimension resolution = {0, 0};
 	std::unique_ptr<AfterNewGRFScan> scanner = std::make_unique<AfterNewGRFScan>();
 	bool dedicated = false;
@@ -526,6 +530,16 @@ int openttd_main(std::span<std::string_view> arguments)
 	while ((i = mgo.GetOpt()) != -1) {
 		switch (i) {
 		case 'Y': prompt_scenario_text = mgo.opt; break;
+		case 'Z': {
+			std::string_view opt = mgo.opt;
+			size_t comma = opt.find(',');
+			std::string_view yr_str = (comma != std::string_view::npos) ? opt.substr(0, comma) : opt;
+			std::from_chars(yr_str.data(), yr_str.data() + yr_str.size(), critic_sim_years);
+			if (comma != std::string_view::npos) {
+				critic_report_path = std::string(opt.substr(comma + 1));
+			}
+			break;
+		}
 		case 'I': graphics_set = mgo.opt; break;
 		case 'S': sounds_set = mgo.opt; break;
 		case 'M': music_set = mgo.opt; break;
@@ -822,6 +836,20 @@ int openttd_main(std::span<std::string_view> arguments)
 				PostMainLoop();
 				return 1;
 			}
+		}
+	}
+
+	if (critic_sim_years > 0) {
+		if (_switch_mode != SwitchMode::None) {
+			fmt::print("Balancing Critic: loading scenario savegame \"{}\"...\n", _file_to_saveload.name);
+			SwitchToMode(_switch_mode);
+			_switch_mode = SwitchMode::None;
+		}
+		std::string out_report = !critic_report_path.empty() ? critic_report_path : "demo/critic_report.json";
+		bool ok = BalancingCritic::RunHeadlessCritic(critic_sim_years, out_report);
+		if (dedicated || videodriver == "null") {
+			PostMainLoop();
+			return ok ? 0 : 1;
 		}
 	}
 

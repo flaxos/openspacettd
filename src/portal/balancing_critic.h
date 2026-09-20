@@ -1,0 +1,165 @@
+/*
+ * This file is part of OpenSpaceTTD.
+ * OpenSpaceTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ */
+
+/** @file balancing_critic.h Autonomous Headless Balancing Critic and Multi-Decade Simulator. */
+
+#ifndef BALANCING_CRITIC_H
+#define BALANCING_CRITIC_H
+
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <map>
+
+/** Macroeconomic financial snapshot for a company. */
+struct BalancingCompanyStats {
+	uint8_t company_id;          ///< Owning company identifier.
+	int64_t money;               ///< Current company treasury bank balance.
+	int64_t current_loan;        ///< Current borrowed loan liability.
+	int64_t annual_revenue;      ///< Revenue earned over the last 12 calendar months.
+	int64_t annual_expenses;     ///< Operating and maintenance expenses over the last 12 calendar months.
+	double profit_margin;        ///< Net profit margin ratio (net income / revenue).
+};
+
+/** Planetary stockpile inventory levels and starvation tracker. */
+struct BalancingStockpileStats {
+	uint32_t world_id;                     ///< Logical world ID.
+	uint8_t company_id;                    ///< Owning company identifier.
+	std::map<uint8_t, uint32_t> inventory; ///< CargoType -> units in stockpile.
+	uint32_t total_units;                  ///< Aggregated inventory count across all cargo types.
+	uint32_t zero_stock_cargos;            ///< Count of registered commodities with zero inventory.
+};
+
+/** Dedicated logistics hub operations and reserve floor health. */
+struct BalancingHubStats {
+	uint32_t hub_id;                 ///< Hub station / warehouse ID.
+	uint32_t world_id;               ///< Logical world ID.
+	uint8_t company_id;              ///< Owning company identifier.
+	uint32_t reserve_floor_deficits; ///< Count of commodities whose inventory falls below minimum reserve floor.
+};
+
+/** Interplanetary portal gateway transit, congestion, and queue telemetry. */
+struct BalancingPortalStats {
+	uint32_t total_portals;              ///< Total operational portal gates across all worlds.
+	uint32_t total_vehicles_in_transit;  ///< Consists currently transiting wormhole corridors.
+	uint32_t peak_wait_ticks;            ///< Maximum signal hold duration recorded on approach tracks.
+	uint32_t stuck_train_count;          ///< Consists waiting at signals exceeding deadlocked threshold.
+	uint32_t trains_waiting_signal;      ///< Consists queued at approach signals.
+};
+
+/** Processing facility production output and feedstock buffer health. */
+struct BalancingFacilityStats {
+	uint32_t total_facilities;          ///< Total station-attached processing facilities.
+	uint32_t monthly_produced_batches;  ///< Output batches fabricated during sampling window.
+	uint32_t input_starved_facilities;  ///< Facilities unable to produce due to missing input feedstocks.
+	uint32_t output_blocked_facilities; ///< Facilities halted because station platform / hub buffers are full.
+};
+
+/** Megacity monthly commodity delivery quota progress. */
+struct BalancingMegacityStats {
+	uint32_t town_id;         ///< Megacity town index.
+	uint32_t world_id;        ///< Logical world ID.
+	uint32_t population;      ///< Megacity population count.
+	uint32_t quota_demanded;  ///< Monthly commodity units demanded across all quotas.
+	uint32_t quota_delivered; ///< Monthly commodity units successfully delivered to city stations.
+	double satisfaction_pct;  ///< Delivery quota satisfaction ratio (delivered / demanded).
+};
+
+/** Instantaneous multi-system macroeconomic and logistics snapshot. */
+struct BalancingSnapshot {
+	uint32_t calendar_year;                ///< Game calendar year at time of snapshot.
+	uint32_t calendar_month;               ///< Game calendar month at time of snapshot.
+	uint32_t calendar_day;                 ///< Game calendar day at time of snapshot.
+	uint64_t tick_counter;                 ///< Exact simulation tick count.
+
+	/* Macroeconomics & Inflation */
+	uint64_t inflation_prices;             ///< Current price inflation index.
+	uint64_t inflation_payment;            ///< Current payment/revenue inflation index.
+	double inflation_drift_ratio;          ///< Ratio between price and payment inflation indices.
+
+	std::vector<BalancingCompanyStats> companies;    ///< Financial status of all active companies.
+	BalancingPortalStats portals;                   ///< Gateway throughput and congestion metrics.
+	std::vector<BalancingStockpileStats> stockpiles; ///< Planetary stockpile inventory levels.
+	std::vector<BalancingHubStats> hubs;            ///< Dedicated logistics hub buffer metrics.
+	BalancingFacilityStats facilities;              ///< Processing facility conversion statistics.
+	std::vector<BalancingMegacityStats> megacities;  ///< Megacity quota satisfaction metrics.
+	uint64_t total_interplanetary_tariffs;          ///< Inter-world transit tariffs collected to date.
+};
+
+/** Actionable tuning recommendation generated by the balancing critic rule engine. */
+struct TuningRecommendation {
+	std::string category;          ///< Functional category ("BOM", "Tariff", "Megacity", "Portal").
+	std::string rule_triggered;    ///< Diagnostic rule identifier triggering this recommendation.
+	std::string severity;          ///< Severity classification ("INFO", "WARNING", "CRITICAL").
+	std::string message;           ///< Human-readable explanation and impact assessment.
+	std::string parameter_name;    ///< Name of the tuneable game parameter.
+	std::string current_value;     ///< Current value of the parameter.
+	std::string recommended_value; ///< Recommended adjusted value.
+};
+
+/** Comprehensive simulation report and sustainability critique. */
+struct BalancingCriticReport {
+	uint32_t simulation_years = 0;              ///< Total game years simulated during run.
+	uint64_t total_ticks_simulated = 0;         ///< Total simulation ticks elapsed.
+	std::vector<BalancingSnapshot> timeseries;   ///< Chronological sequence of periodic snapshots.
+
+	/* Summary Diagnostics */
+	double avg_profit_margin = 0.0;             ///< Average operating margin across all active companies.
+	double compound_annual_inflation = 0.0;     ///< Compound annual growth rate of inflation.
+	double price_payment_divergence = 0.0;      ///< Macroeconomic divergence between costs and revenue.
+	double portal_choke_point_index = 0.0;      ///< Percentage of snapshots exhibiting gateway congestion.
+	double stockpile_starvation_rate = 0.0;     ///< Percentage of stockpile checks experiencing zero inventory.
+	double megacity_avg_satisfaction = 0.0;     ///< Average monthly delivery satisfaction across megacities.
+
+	std::vector<std::string> diagnoses;          ///< Diagnostic observations and warning notes.
+	std::vector<TuningRecommendation> recommendations; ///< Actionable tuning adjustments.
+
+	bool is_sustainable = true;                 ///< Verdict on overall economic and logistical viability.
+};
+
+/**
+ * Autonomous Headless Balancing Critic and Multi-Decade Simulator.
+ */
+class BalancingCritic {
+public:
+	/**
+	 * Take a single instantaneous telemetry snapshot of the current simulation state.
+	 * @return Instantaneous snapshot containing macroeconomic and logistics metrics.
+	 */
+	static BalancingSnapshot TakeSnapshot();
+
+	/**
+	 * Run a fast-forward headless simulation for the specified number of game years.
+	 * @param years Number of game years to simulate.
+	 * @param snapshots_per_year Number of snapshots to sample per year (default: 1 annual snapshot).
+	 * @return Completed report with timeseries and critic analysis.
+	 */
+	static BalancingCriticReport SimulateYears(uint32_t years, uint32_t snapshots_per_year = 1);
+
+	/**
+	 * Perform diagnostic analysis on a recorded timeseries and generate tuning recommendations.
+	 * @param timeseries Series of snapshots over time.
+	 * @return Analysis report with diagnoses and tuning recommendations.
+	 */
+	static BalancingCriticReport AnalyzeAndCritique(const std::vector<BalancingSnapshot> &timeseries);
+
+	/**
+	 * Export the critic report to a JSON file.
+	 * @param report The generated balancing report to serialize.
+	 * @param filepath Destination filesystem path for the output JSON.
+	 * @return True if the report was successfully exported.
+	 */
+	static bool ExportReportJson(const BalancingCriticReport &report, const std::string &filepath);
+
+	/**
+	 * Run headless critic execution: simulates years, outputs diagnostics to console, and saves JSON.
+	 * @param years Number of game years to simulate.
+	 * @param output_json_path Target file for exported JSON report.
+	 * @return True if the scenario was determined to be economically sustainable.
+	 */
+	static bool RunHeadlessCritic(uint32_t years, const std::string &output_json_path);
+};
+
+#endif /* BALANCING_CRITIC_H */

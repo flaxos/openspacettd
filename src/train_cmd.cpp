@@ -4258,7 +4258,6 @@ bool Train::Tick()
 		this->current_order_time++;
 
 		if (!TrainLocoHandler(this, false)) return false;
-
 		return TrainLocoHandler(this, true);
 	} else if (this->IsFreeWagon() && this->vehstatus.Test(VehState::Crashed)) {
 		/* Delete flooded standalone wagon chain */

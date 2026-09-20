@@ -61,6 +61,7 @@ add_test_files(
     test_sprint46_live_federation.cpp
     test_sprint47_alliances_and_neutral_tracks.cpp
     test_sprint48_prompt_to_savegame.cpp
+    test_sprint48_balancing_critic.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

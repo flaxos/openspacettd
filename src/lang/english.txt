@@ -6333,7 +6333,6 @@ STR_ERROR_FACILITY_MAX_CAPACITY                              :Facility has alrea
 STR_ERROR_CAN_T_SET_PLATFORM_CAP                             :Can't set station platform holding target
 
 # OpenSpaceTTD Sprint 47: Neutral CST Infrastructure & Corporate Alliances
-STR_ERROR_FABRICATION_RESEARCH_OR_CASH                          :In-Kind Fabrication requires 'Materials Tier 1' research (disable in Corporate HQ to purchase with cash)
 STR_CORPORATE_HQ_TAB_ALLIANCES                                  :Alliances
 STR_CORPORATE_RELATION_ALLIED                                   :Allied (Shared Trackage Rights)
 STR_CORPORATE_RELATION_NEUTRAL                                  :Neutral (Private Track / Public CST Only)
