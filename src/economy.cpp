@@ -57,6 +57,7 @@
 #include "portal/company_stockpile.h"
 #include "portal/tech_tree.h"
 #include "portal/production_chain.h"
+#include "portal/lore_competitor.h"
 #include "story_base.h"
 #include "linkgraph/refresh.h"
 #include "company_cmd.h"
@@ -2071,6 +2072,7 @@ static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthl
 	MegacityManager::EvaluateMonthlySupply();
 	ProductionChainManager::ProcessMonthlyProduction();
 	TechTreeManager::ProcessMonthlyResearch();
+	LoreCompetitorManager::OnMonthlyTick();
 });
 
 static void DoAcquireCompany(Company *c, bool hostile_takeover)

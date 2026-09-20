@@ -398,6 +398,8 @@ add_files(
     portal/prompt_scenario_gui.h
     portal/balancing_critic.cpp
     portal/balancing_critic.h
+    portal/lore_competitor.cpp
+    portal/lore_competitor.h
     portal/commonwealth_slice.cpp
     portal/commonwealth_slice.h
     portal/commonwealth_pack.cpp
