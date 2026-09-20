@@ -56,7 +56,18 @@ private:
 	bool cancelled = false;
 };
 
+/**
+ * Encode a binary buffer into a base64-encoded ASCII string.
+ * @param data Byte span to encode.
+ * @return Base64-encoded string.
+ */
 std::string Base64Encode(std::span<const uint8_t> data);
+
+/**
+ * Decode a base64-encoded ASCII string into raw bytes.
+ * @param encoded Base64-encoded string view.
+ * @return Decoded byte vector.
+ */
 std::vector<uint8_t> Base64Decode(std::string_view encoded);
 
 #endif /* AUTHORITY_TRANSPORT_H */

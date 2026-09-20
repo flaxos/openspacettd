@@ -302,13 +302,15 @@ TEST_CASE_METHOD(Sprint48CriticFixture, "Sprint 48 Part 2 - Multi-Year Simulatio
 		CHECK(std::filesystem::file_size(test_report) > 100);
 
 		/* Verify JSON structure contains core keys */
-		std::ifstream ifs(test_report);
-		std::string content((std::istreambuf_iterator<char>(ifs)),
-		                    std::istreambuf_iterator<char>());
-		CHECK(content.find("\"simulation_years\": 1") != std::string::npos);
-		CHECK(content.find("\"timeseries\":") != std::string::npos);
-		CHECK(content.find("\"recommendations\":") != std::string::npos);
-		CHECK(content.find("\"is_sustainable\":") != std::string::npos);
+		{
+			std::ifstream ifs(test_report);
+			std::string content((std::istreambuf_iterator<char>(ifs)),
+			                    std::istreambuf_iterator<char>());
+			CHECK(content.find("\"simulation_years\": 1") != std::string::npos);
+			CHECK(content.find("\"timeseries\":") != std::string::npos);
+			CHECK(content.find("\"recommendations\":") != std::string::npos);
+			CHECK(content.find("\"is_sustainable\":") != std::string::npos);
+		}
 
 		/* Clean up */
 		std::filesystem::remove(test_report);

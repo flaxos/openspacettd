@@ -5,7 +5,7 @@
 - **Goal:** Railway-heavy industrial and logistics simulation game.
 - **Inspiration:** OpenTTD + Factorio-scale production chains + Peter F. Hamilton-style Commonwealth saga (planetary rail networks interlinked via fixed wormholes).
 - **Core Future Feature:** Multiple logical worlds connected by railway portal/wormhole gates.
-- **Current Status:** Source includes implementation through the recorded Sprint 42 scope, with WP-01–09 Blueprint, cargo-conservation, hub lifecycle, GUI-authority, capture/routing, native settlement and HQ/hub/reserve repairs implemented locally. Content, federation and human acceptance work are tracked in the recovery plan. Read `docs/RECOVERY_PLAN_2026-09-15.md` for the single recovery plan, `docs/PROJECT_STATUS_AND_ROADMAP.md` for historical sprint status, and `DEVBOX_HANDOFF.md` for the audit checkpoint. Passing domain tests are not human acceptance.
+- **Current Status:** Source includes implementation through Sprints 43, 46, 47, 48, Horizon A live cluster testbed, and recovery WP-01–09 repairs. Content, federation and human acceptance work are tracked in the recovery plan. Read `docs/RECOVERY_PLAN_2026-09-15.md` for the single recovery plan, `docs/POST_RECOVERY_ROADMAP_SPRINTS_43_48.md` for the strategic roadmap, `docs/PROJECT_STATUS_AND_ROADMAP.md` for historical sprint status, and `DEVBOX_HANDOFF.md` for the audit checkpoint. Passing domain tests are not human acceptance.
 
 ---
 
@@ -55,3 +55,19 @@
 
 6. **Player Rail Blueprints:**
    Player blueprints and CST prefabs must use the portable JSON schema and server-authoritative placement command (`Commands::PlaceBlueprint`) to ensure lockstep simulation and multiplayer determinism.
+
+---
+
+## Autonomous Agent Delivery & Completion Protocol
+
+After every successful implementation and verification pass, the agent MUST automatically:
+1. **Verify Clean Linters & Tests**:
+   - Run unit tests and CTest suite (`./build/openttd_test`, `ctest --test-dir build --output-on-failure`).
+   - Run repo linters: `python3 .github/file-descriptions.py`, `python3 .github/unused-strings.py`, `git diff --check`.
+2. **Commit and Open Pull Request**:
+   - Create a clean git commit on a descriptive feature branch with a conventional commit message.
+   - Push the branch to `openspace` remote and create a GitHub Pull Request using `gh pr create` with summary, verification evidence, and issue references.
+3. **Report Next Steps, Options, and Roadmap**:
+   - Inspect roadmap and recovery plan registers (`docs/POST_RECOVERY_ROADMAP_SPRINTS_43_48.md`, `docs/RECOVERY_PLAN_2026-09-15.md`).
+   - Present a quick roadmap summary indicating current progress.
+   - Present 2–4 prioritized next-step options with the recommended choice highlighted, so the user can immediately choose how to proceed.

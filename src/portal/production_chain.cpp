@@ -338,6 +338,32 @@ ProcessingFacility *ProductionChainManager::GetFacilityForStation(StationID stat
 	return nullptr;
 }
 
+FacilityStatus ProductionChainManager::GetFacilityStatus(const ProcessingFacility *f)
+{
+	if (f == nullptr) return FacilityStatus::None;
+	const ProductionRecipe *rec = GetRecipe(f->recipe_id);
+	if (rec == nullptr) return FacilityStatus::Idle;
+
+	if (f->last_month_hub_overflow > 0) return FacilityStatus::Overflow;
+	if (f->last_month_production > 0) return FacilityStatus::Active;
+
+	bool starved = false;
+	for (const auto &[in_c, in_amt] : rec->inputs) {
+		auto it = f->input_buffers.find(in_c);
+		if (it == f->input_buffers.end() || it->second < in_amt) {
+			starved = true;
+			break;
+		}
+	}
+	if (starved) return FacilityStatus::Starved;
+	return FacilityStatus::Idle;
+}
+
+FacilityStatus ProductionChainManager::GetFacilityStatusForStation(StationID station)
+{
+	return GetFacilityStatus(GetFacilityForStation(station));
+}
+
 void ProductionChainManager::RemoveForStation(StationID station)
 {
 	ProcessingFacility *f = GetFacilityForStation(station);
@@ -379,6 +405,9 @@ uint32_t ProductionChainManager::DeliverToStation(StationID station, CargoType c
 	ProcessingFacility *f = GetFacilityForStation(station);
 	uint32_t accepted = std::min(amount, UINT32_MAX - f->input_buffers[cargo]);
 	DeliverCargo(f->id, cargo, accepted);
+	if (accepted > 0) {
+		if (Station *st = Station::GetIfValid(station); st != nullptr) st->UpdateVirtCoord();
+	}
 	return accepted;
 }
 
@@ -538,6 +567,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 		if (max_batches == 0) {
 			f.last_month_production = 0;
 			PublishStationOutput(f);
+			if (Station *st = Station::GetIfValid(f.linked_station); st != nullptr) st->UpdateVirtCoord();
 			continue;
 		}
 
@@ -560,6 +590,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 		f.last_month_production = max_batches;
 		f.total_produced += max_batches;
 		PublishStationOutput(f);
+		if (Station *st = Station::GetIfValid(f.linked_station); st != nullptr) st->UpdateVirtCoord();
 	}
 }
 

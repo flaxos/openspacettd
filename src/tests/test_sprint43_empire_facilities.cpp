@@ -493,3 +493,69 @@ TEST_CASE("Sprint 43 - Empire Facility Dashboard WindowDesc, Tree & Filtering", 
 	}
 	CHECK(count_data == 1);
 }
+
+TEST_CASE("Sprint 43 - In-Game Viewport Overlays and Dashboard Retire Lifecycle", "[sprint43][viewport][gui]")
+{
+	Station *station = SetupSprint43Environment();
+
+	/* Initially no facility attached */
+	CHECK(ProductionChainManager::GetFacilityStatusForStation(station->index) == FacilityStatus::None);
+
+	/* 1. Build steel smelting facility */
+	auto build_res = Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING);
+	REQUIRE(build_res.Succeeded());
+
+	/* Facility is built with empty input buffers, so it must report Starved */
+	CHECK(ProductionChainManager::GetFacilityStatusForStation(station->index) == FacilityStatus::Starved);
+
+	/* Verify string formatting contains [Starved] */
+	std::string starved_str = GetString(STR_VIEWPORT_FACILITY_STARVED, station->index, station->facilities);
+	CHECK(starved_str.find("[Starved]") != std::string::npos);
+
+	/* 2. Deliver required inputs (Iron Ore) */
+	CargoType c_iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	REQUIRE(ProductionChainManager::DeliverToStation(station->index, c_iron, 60) == 60);
+
+	/* Buffers are now satisfied; before first monthly run, it's not starved */
+	CHECK(ProductionChainManager::GetFacilityStatusForStation(station->index) == FacilityStatus::Idle);
+
+	/* 3. Execute monthly production process */
+	ProductionChainManager::ProcessMonthlyProduction();
+	CHECK(ProductionChainManager::GetFacilityStatusForStation(station->index) == FacilityStatus::Active);
+
+	/* Verify string formatting contains [Active] */
+	std::string active_str = GetString(STR_VIEWPORT_FACILITY_ACTIVE, station->index, station->facilities);
+	CHECK(active_str.find("[Active]") != std::string::npos);
+
+	/* 4. Test overflow status: register hub and set platform capacity to 0 */
+	uint32_t hub_id = LogisticsHubManager::RegisterHub(station->xy, WorldID{0}, station->owner, station->index, "Earth Main Hub");
+	REQUIRE(hub_id != 0);
+	REQUIRE(ProductionChainManager::SetPlatformCapacityForStation(station->index, 0));
+
+	/* Deliver more inputs and process again */
+	REQUIRE(ProductionChainManager::DeliverToStation(station->index, c_iron, 60) == 60);
+	ProductionChainManager::ProcessMonthlyProduction();
+
+	ProcessingFacility *fac = ProductionChainManager::GetFacilityForStation(station->index);
+	REQUIRE(fac != nullptr);
+	CHECK(fac->last_month_hub_overflow > 0);
+	CHECK(ProductionChainManager::GetFacilityStatusForStation(station->index) == FacilityStatus::Overflow);
+
+	/* Verify string formatting contains [Overflow] */
+	std::string overflow_str = GetString(STR_VIEWPORT_FACILITY_OVERFLOW, station->index, station->facilities);
+	CHECK(overflow_str.find("[Overflow]") != std::string::npos);
+
+	/* 5. Authoritative Decommission / Retire via Command */
+	auto remove_res = Command<Commands::RemoveProcessingFacility>::Do(DoCommandFlag::Execute, station->index);
+	REQUIRE(remove_res.Succeeded());
+
+	/* Facility is removed; status returns to None */
+	CHECK(ProductionChainManager::GetFacilityForStation(station->index) == nullptr);
+	CHECK(ProductionChainManager::GetFacilityStatusForStation(station->index) == FacilityStatus::None);
+
+	/* Station sign returns to normal station name */
+	std::string normal_str = GetString(STR_VIEWPORT_STATION, station->index, station->facilities);
+	CHECK(normal_str.find("[Starved]") == std::string::npos);
+	CHECK(normal_str.find("[Active]") == std::string::npos);
+	CHECK(normal_str.find("[Overflow]") == std::string::npos);
+}

@@ -6331,6 +6331,24 @@ STR_MAP_MENU_INDUSTRIAL_FACILITIES                           :Industrial Facilit
 STR_ERROR_CAN_T_UPGRADE_FACILITY                             :Can't upgrade processing facility capacity
 STR_ERROR_FACILITY_MAX_CAPACITY                              :Facility has already reached maximum capacity
 STR_ERROR_CAN_T_SET_PLATFORM_CAP                             :Can't set station platform holding target
+STR_EMPIRE_FACILITIES_RETIRE_BTN                                :Retire
+STR_ERROR_CAN_T_REMOVE_FACILITY                                 :Can't decommission processing facility
+STR_VIEWPORT_FACILITY_ACTIVE                                    :{GREEN}[Active]{BLACK} {STATION} {STATION_FEATURES}
+STR_VIEWPORT_FACILITY_STARVED                                   :{RED}[Starved]{BLACK} {STATION} {STATION_FEATURES}
+STR_VIEWPORT_FACILITY_OVERFLOW                                  :{GOLD}[Overflow]{BLACK} {STATION} {STATION_FEATURES}
+STR_VIEWPORT_FACILITY_IDLE                                      :{SILVER}[Idle]{BLACK} {STATION} {STATION_FEATURES}
+STR_STATION_FACILITY_ACTIVE                                     :{GREEN}[Active]{BLACK} {STATION}
+STR_STATION_FACILITY_STARVED                                    :{RED}[Starved]{BLACK} {STATION}
+STR_STATION_FACILITY_OVERFLOW                                   :{GOLD}[Overflow]{BLACK} {STATION}
+STR_STATION_FACILITY_IDLE                                       :{SILVER}[Idle]{BLACK} {STATION}
+STR_VIEWPORT_SPACEPORT_FACILITY_ACTIVE                          :{GREEN}[Active]{BLACK} SPACEPORT T{NUM}: {STATION} {STATION_FEATURES}
+STR_VIEWPORT_SPACEPORT_FACILITY_STARVED                         :{RED}[Starved]{BLACK} SPACEPORT T{NUM}: {STATION} {STATION_FEATURES}
+STR_VIEWPORT_SPACEPORT_FACILITY_OVERFLOW                        :{GOLD}[Overflow]{BLACK} SPACEPORT T{NUM}: {STATION} {STATION_FEATURES}
+STR_VIEWPORT_SPACEPORT_FACILITY_IDLE                            :{SILVER}[Idle]{BLACK} SPACEPORT T{NUM}: {STATION} {STATION_FEATURES}
+STR_SPACEPORT_FACILITY_ACTIVE                                   :{GREEN}[Active]{BLACK} SPACEPORT T{NUM}: {STATION}
+STR_SPACEPORT_FACILITY_STARVED                                  :{RED}[Starved]{BLACK} SPACEPORT T{NUM}: {STATION}
+STR_SPACEPORT_FACILITY_OVERFLOW                                 :{GOLD}[Overflow]{BLACK} SPACEPORT T{NUM}: {STATION}
+STR_SPACEPORT_FACILITY_IDLE                                     :{SILVER}[Idle]{BLACK} SPACEPORT T{NUM}: {STATION}
 
 # OpenSpaceTTD Sprint 47: Neutral CST Infrastructure & Corporate Alliances
 STR_CORPORATE_HQ_TAB_ALLIANCES                                  :Alliances

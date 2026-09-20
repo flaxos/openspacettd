@@ -175,41 +175,35 @@ struct EmpireFacilitiesWindow : Window {
 					DrawString(line1_r, line1, TextColour::Yellow);
 
 					/* Status Badge on right */
-					bool starved = false;
-					if (rec != nullptr) {
-						for (const auto &[in_c, in_amt] : rec->inputs) {
-							auto it = f.input_buffers.find(in_c);
-							if (it == f.input_buffers.end() || it->second < in_amt) {
-								starved = true;
-								break;
-							}
-						}
-					}
-
+					FacilityStatus status = ProductionChainManager::GetFacilityStatus(&f);
 					std::string status_badge;
 					TextColour status_col = TextColour::Green;
-					if (starved) {
-						status_badge = "[Starved: Need Inputs]";
-						status_col = TextColour::Red;
-					} else if (f.last_month_production > 0) {
-						status_badge = fmt::format("[Active: {}/{} t/mo]", f.last_month_production, f.monthly_capacity);
-						status_col = TextColour::White;
-					} else {
-						status_badge = fmt::format("[Idle (Cap: {} t/mo)]", f.monthly_capacity);
-						status_col = TextColour::Grey;
+					switch (status) {
+						case FacilityStatus::Overflow:
+							status_badge = fmt::format("[Overflow: {} t to Hub]", f.last_month_hub_overflow);
+							status_col = TextColour::Gold;
+							break;
+						case FacilityStatus::Active:
+							status_badge = fmt::format("[Active: {}/{} t/mo]", f.last_month_production, f.monthly_capacity);
+							status_col = TextColour::White;
+							break;
+						case FacilityStatus::Starved:
+							status_badge = "[Starved: Need Inputs]";
+							status_col = TextColour::Red;
+							break;
+						case FacilityStatus::Idle:
+						default:
+							status_badge = fmt::format("[Idle (Cap: {} t/mo)]", f.monthly_capacity);
+							status_col = TextColour::Grey;
+							break;
 					}
 
-					if (f.last_month_hub_overflow > 0) {
-						status_badge += fmt::format(" ({} t to Hub)", f.last_month_hub_overflow);
-						status_col = TextColour::Gold;
-					}
-
-					Rect badge_r = Rect{row_rect.right - 280, y + 2, row_rect.right - 145, y + 16};
+					Rect badge_r = Rect{row_rect.right - 290, y + 2, row_rect.right - 155, y + 16};
 					DrawString(badge_r, status_badge, status_col);
 
 					/* Line 2: Recipe Name & Inputs/Outputs */
 					std::string line2 = (rec != nullptr) ? fmt::format("Recipe: {} (Cap: {} t/mo)", rec->name, f.monthly_capacity) : "Recipe: None";
-					Rect line2_r = Rect{row_rect.left + 2, y + 16, row_rect.right - 145, y + 30};
+					Rect line2_r = Rect{row_rect.left + 2, y + 16, row_rect.right - 155, y + 30};
 					DrawString(line2_r, line2, TextColour::White);
 
 					/* Line 3: Input/Output Buffers */
@@ -224,15 +218,19 @@ struct EmpireFacilitiesWindow : Window {
 
 					std::string out_desc = fmt::format("Plat Target: {} t", f.platform_capacity);
 					std::string line3 = fmt::format("{} | {}", in_desc, out_desc);
-					Rect line3_r = Rect{row_rect.left + 2, y + 30, row_rect.right - 145, y + 46};
+					Rect line3_r = Rect{row_rect.left + 2, y + 30, row_rect.right - 155, y + 46};
 					DrawString(line3_r, line3, TextColour::Silver);
 
 					/* Interactive Buttons on right */
-					Rect btn_upgrade = Rect{row_rect.right - 140, y + 4, row_rect.right - 4, y + 22};
+					Rect btn_upgrade = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
 					GfxFillRect(btn_upgrade, GetColourGradient(Colours::Grey, Shade::Normal));
 					DrawString(btn_upgrade, "Upgrade (+50)", TextColour::Yellow, AlignmentH::Centre);
 
-					Rect btn_target = Rect{row_rect.right - 140, y + 26, row_rect.right - 4, y + 44};
+					Rect btn_retire = Rect{row_rect.right - 54, y + 4, row_rect.right - 4, y + 22};
+					GfxFillRect(btn_retire, GetColourGradient(Colours::Red, Shade::Normal));
+					DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), TextColour::White, AlignmentH::Centre);
+
+					Rect btn_target = Rect{row_rect.right - 150, y + 26, row_rect.right - 4, y + 44};
 					GfxFillRect(btn_target, GetColourGradient(Colours::Grey, Shade::Normal));
 					std::string target_label = (f.platform_capacity == 0) ? "Platform: 0 (Hub)" : fmt::format("Platform: {} t", f.platform_capacity);
 					DrawString(btn_target, target_label, TextColour::White, AlignmentH::Centre);
@@ -252,19 +250,9 @@ struct EmpireFacilitiesWindow : Window {
 				for (const auto &f : all_facs) {
 					if (this->target_company != CompanyID::Invalid() && f.owner != this->target_company) continue;
 					total_monthly_prod += f.last_month_production;
-					const ProductionRecipe *rec = ProductionChainManager::GetRecipe(f.recipe_id);
-					bool starved = false;
-					if (rec != nullptr) {
-						for (const auto &[in_c, in_amt] : rec->inputs) {
-							auto it = f.input_buffers.find(in_c);
-							if (it == f.input_buffers.end() || it->second < in_amt) {
-								starved = true;
-								break;
-							}
-						}
-					}
-					if (starved) total_starved++;
-					else total_active++;
+					FacilityStatus status = ProductionChainManager::GetFacilityStatus(&f);
+					if (status == FacilityStatus::Starved) total_starved++;
+					else if (status == FacilityStatus::Active || status == FacilityStatus::Overflow) total_active++;
 				}
 
 				uint64_t total_overflow = ProductionChainManager::GetTotalHubOverflow();
@@ -332,13 +320,21 @@ struct EmpireFacilitiesWindow : Window {
 				int rel_y = (pt.y - r.top) % ROW_HEIGHT;
 
 				/* Check button clicks on right side */
-				if (pt.x >= r.right - 140 && pt.x <= r.right - 4) {
+				if (pt.x >= r.right - 150 && pt.x <= r.right - 4) {
 					if (rel_y >= 4 && rel_y <= 22) {
-						/* Upgrade button */
-						if (f.linked_station != StationID::Invalid()) {
-							Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
+						if (pt.x <= r.right - 58) {
+							/* Upgrade button */
+							if (f.linked_station != StationID::Invalid()) {
+								Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
+							}
+							return;
+						} else {
+							/* Retire button */
+							if (f.linked_station != StationID::Invalid()) {
+								Command<Commands::RemoveProcessingFacility>::Post(STR_ERROR_CAN_T_REMOVE_FACILITY, f.linked_station);
+							}
+							return;
 						}
-						return;
 					} else if (rel_y >= 26 && rel_y <= 44) {
 						/* Platform target cycle: 0 -> 50 -> 100 -> 200 -> 0 */
 						uint32_t next_target = (f.platform_capacity == 0) ? 50 : (f.platform_capacity == 50) ? 100 : (f.platform_capacity == 100) ? 200 : 0;
