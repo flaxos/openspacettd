@@ -25,6 +25,7 @@
 #include "../portal/tech_tree.h"
 #include "../portal/production_chain.h"
 #include "../portal/corporate_alliance.h"
+#include "../portal/lore_competitor.h"
 
 #include "../safeguards.h"
 
@@ -1381,6 +1382,92 @@ struct PRODChunkHandler : ChunkHandler {
 	}
 };
 
+/** Save/load record for autonomous lore-driven AI competitors (LORE). */
+struct SlLoreCompetitorRecord {
+	uint8_t type;
+	uint8_t company_id;
+	std::string name;
+	std::string president_name;
+	uint8_t colour;
+	uint32_t home_world;
+	uint32_t milestone_tier;
+	uint32_t prefabs_placed;
+	uint32_t active_trains;
+	uint64_t total_cargo_delivered;
+	uint64_t total_revenue_earned;
+	uint8_t active;
+};
+
+static const SaveLoad _lore_competitor_desc[] = {
+	SLE_VAR(SlLoreCompetitorRecord, type,                  VarTypes::U8),
+	SLE_VAR(SlLoreCompetitorRecord, company_id,            VarTypes::U8),
+	SLE_SSTR(SlLoreCompetitorRecord, name,                 VarTypes::STR),
+	SLE_SSTR(SlLoreCompetitorRecord, president_name,       VarTypes::STR),
+	SLE_VAR(SlLoreCompetitorRecord, colour,                VarTypes::U8),
+	SLE_VAR(SlLoreCompetitorRecord, home_world,            VarTypes::U32),
+	SLE_VAR(SlLoreCompetitorRecord, milestone_tier,        VarTypes::U32),
+	SLE_VAR(SlLoreCompetitorRecord, prefabs_placed,        VarTypes::U32),
+	SLE_VAR(SlLoreCompetitorRecord, active_trains,         VarTypes::U32),
+	SLE_VAR(SlLoreCompetitorRecord, total_cargo_delivered, VarTypes::U64),
+	SLE_VAR(SlLoreCompetitorRecord, total_revenue_earned,  VarTypes::U64),
+	SLE_VAR(SlLoreCompetitorRecord, active,                VarTypes::U8),
+};
+
+struct LOREChunkHandler : ChunkHandler {
+	LOREChunkHandler() : ChunkHandler("LORE", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_lore_competitor_desc);
+
+		int i = 0;
+		for (const auto &p : LoreCompetitorManager::GetAllCompetitors()) {
+			SlLoreCompetitorRecord r{
+				.type = to_underlying(p.type),
+				.company_id = p.company_id.base(),
+				.name = p.name,
+				.president_name = p.president_name,
+				.colour = to_underlying(p.colour),
+				.home_world = p.home_world.base(),
+				.milestone_tier = p.milestone_tier,
+				.prefabs_placed = p.prefabs_placed,
+				.active_trains = p.active_trains,
+				.total_cargo_delivered = p.total_cargo_delivered,
+				.total_revenue_earned = p.total_revenue_earned,
+				.active = static_cast<uint8_t>(p.active ? 1 : 0),
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&r, _lore_competitor_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		LoreCompetitorManager::Reset();
+		const std::vector<SaveLoad> slt = SlTableHeader(_lore_competitor_desc);
+
+		SlLoreCompetitorRecord r{};
+		while (SlIterateArray() != -1) {
+			r = {};
+			SlObject(&r, slt);
+			LoreCompetitorProfile p;
+			p.type = static_cast<CompetitorType>(r.type);
+			p.company_id = CompanyID{r.company_id};
+			p.name = r.name;
+			p.president_name = r.president_name;
+			p.colour = static_cast<Colours>(r.colour);
+			p.home_world = WorldID{r.home_world};
+			p.milestone_tier = r.milestone_tier;
+			p.prefabs_placed = r.prefabs_placed;
+			p.active_trains = r.active_trains;
+			p.total_cargo_delivered = r.total_cargo_delivered;
+			p.total_revenue_earned = r.total_revenue_earned;
+			p.active = (r.active != 0);
+			LoreCompetitorManager::RestoreCompetitor(p);
+		}
+	}
+};
+
 static const FJRNChunkHandler FJRN;
 static const FTJRChunkHandler FTJR;
 static const ISPRChunkHandler ISPR;
@@ -1398,6 +1485,7 @@ static const FABRChunkHandler FABR;
 static const ALLIChunkHandler ALLI;
 static const TECHChunkHandler TECH;
 static const PRODChunkHandler PROD;
+static const LOREChunkHandler LORE;
 
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
@@ -1417,6 +1505,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	FTJR,
 	TECH,
 	PROD,
+	LORE,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

@@ -58,6 +58,7 @@ add_test_files(
     test_sprint41_tech_tree.cpp
     test_sprint42_production_chains.cpp
     test_sprint43_empire_facilities.cpp
+    test_sprint44_lore_ai_competitors.cpp
     test_sprint46_live_federation.cpp
     test_sprint47_alliances_and_neutral_tracks.cpp
     test_sprint48_prompt_to_savegame.cpp
