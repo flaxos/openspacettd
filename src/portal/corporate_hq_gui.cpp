@@ -184,6 +184,17 @@ struct CorporateHQWindow : Window {
 		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
 		this->SetWidgetDisabledState(WID_CHQ_FABRICATION_TOGGLE, !own_company);
 		this->SetWidgetDisabledState(WID_CHQ_ALLIANCE_TOGGLE_BTN, !own_company || this->active_tab != CorporateHQTab::Alliances || this->selected_alliance_company == CompanyID::Invalid());
+		if (this->selected_alliance_company != CompanyID::Invalid() && Company::IsValidID(this->selected_alliance_company)) {
+			CorporateRelation rel = CorporateAllianceManager::GetRelation(this->company, this->selected_alliance_company);
+			StringID btn_str = STR_CORPORATE_ALLIANCE_BTN_NEUTRAL;
+			switch (rel) {
+				case CorporateRelation::Neutral: btn_str = STR_CORPORATE_ALLIANCE_BTN_ALLIED; break;
+				case CorporateRelation::Allied:  btn_str = STR_CORPORATE_ALLIANCE_BTN_HOSTILE; break;
+				case CorporateRelation::Hostile: btn_str = STR_CORPORATE_ALLIANCE_BTN_NEUTRAL; break;
+				default: break;
+			}
+			this->GetWidget<NWidgetCore>(WID_CHQ_ALLIANCE_TOGGLE_BTN)->SetString(btn_str);
+		}
 		this->SetWidgetDisabledState(WID_CHQ_BUILD_HQ, !own_company || has_hq);
 		this->SetWidgetDisabledState(WID_CHQ_BUILD_HUB, !own_company);
 		this->SetWidgetDisabledState(WID_CHQ_SELECT_HUB, !own_company || !has_owned_hub);
@@ -471,24 +482,26 @@ struct CorporateHQWindow : Window {
 						std::string track_str;
 						TextColour text_col;
 
+						StringID rel_sid = STR_CORPORATE_RELATION_NEUTRAL;
 						switch (rel) {
 							case CorporateRelation::Allied:
-								rel_str = "ALLIED (Reciprocal)";
+								rel_sid = STR_CORPORATE_RELATION_ALLIED;
 								track_str = "Open (Full Reciprocal Access)";
 								text_col = TextColour::Green;
 								break;
 							case CorporateRelation::Hostile:
-								rel_str = "HOSTILE (Interdicted)";
+								rel_sid = STR_CORPORATE_RELATION_HOSTILE;
 								track_str = "Blocked (Interdicted / No Route)";
 								text_col = TextColour::Red;
 								break;
 							case CorporateRelation::Neutral:
 							default:
-								rel_str = "NEUTRAL (Private)";
+								rel_sid = STR_CORPORATE_RELATION_NEUTRAL;
 								track_str = "Restricted (Own + CST Public)";
 								text_col = TextColour::White;
 								break;
 						}
+						rel_str = GetString(rel_sid);
 
 						std::string sel_marker = (this->selected_alliance_company == c->index) ? "► " : "  ";
 						std::string row_str = fmt::format("{}{:<9} | {:<30} | {:<32} | {}",

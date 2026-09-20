@@ -318,15 +318,15 @@ BalancingCriticReport BalancingCritic::AnalyzeAndCritique(const std::vector<Bala
 	}
 
 	/* 4. Planetary Stockpile Starvation */
-	uint32_t total_stock_checks = 0;
-	uint32_t zero_stock_checks = 0;
+	size_t total_stock_checks = 0;
+	size_t zero_stock_checks = 0;
 	for (const auto &snap : timeseries) {
 		for (const auto &s : snap.stockpiles) {
 			total_stock_checks += s.inventory.size();
 			zero_stock_checks  += s.zero_stock_cargos;
 		}
 	}
-	report.stockpile_starvation_rate = (total_stock_checks > 0) ? (static_cast<double>(zero_stock_checks) / total_stock_checks) : 0.0;
+	report.stockpile_starvation_rate = (total_stock_checks > 0) ? (static_cast<double>(zero_stock_checks) / static_cast<double>(total_stock_checks)) : 0.0;
 
 	if (report.stockpile_starvation_rate > 0.25) {
 		report.diagnoses.push_back(fmt::format(

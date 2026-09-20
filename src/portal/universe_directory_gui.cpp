@@ -159,13 +159,13 @@ struct UniverseDirectoryWindow : Window {
 						Rect text_rect = item_rect.Shrink(WidgetDimensions::scaled.framerect);
 
 						/* Line 1: World ID, Name, Biome, Status Badge, Ping Badge, and Holding Indicator */
-						const char *status_text = "ONLINE";
+						StringID status_str = STR_UNIVERSE_DIRECTORY_ONLINE;
 						TextColour status_col = TextColour::Green;
 						if (world.status == WorldOnlineStatus::Maintenance) {
-							status_text = "MAINTENANCE";
+							status_str = STR_UNIVERSE_DIRECTORY_MAINTENANCE;
 							status_col = TextColour::Yellow;
 						} else if (world.status == WorldOnlineStatus::Unreachable) {
-							status_text = "UNREACHABLE";
+							status_str = STR_UNIVERSE_DIRECTORY_UNREACHABLE;
 							status_col = TextColour::Red;
 						}
 
@@ -177,9 +177,9 @@ struct UniverseDirectoryWindow : Window {
 
 						int header_w = GetStringBoundingBox(world_header).width;
 						Rect status_rect = text_rect.Indent(header_w + ScaleGUITrad(8), _current_text_dir != TD_RTL);
-						DrawString(status_rect, status_text, status_col);
+						DrawString(status_rect, status_str, status_col);
 
-						int status_w = GetStringBoundingBox(status_text).width;
+						int status_w = GetStringBoundingBox(status_str).width;
 						Rect ping_rect = status_rect.Indent(status_w + ScaleGUITrad(6), _current_text_dir != TD_RTL);
 						std::string ping_str;
 						TextColour ping_col = TextColour::Green;
