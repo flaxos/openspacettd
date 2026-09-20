@@ -887,7 +887,8 @@ class UniverseAuthority:
         total_cargo_initiated = sum(r["total_cargo"] for r in self.transfers.values())
         total_completed = sum(1 for r in self.transfers.values() if r["state"] == "COMPLETED")
         total_cargo_completed = sum(r["total_cargo"] for r in self.transfers.values() if r["state"] == "COMPLETED")
-        total_in_transit = sum(1 for r in self.transfers.values() if r["state"] in ("IN_TRANSIT", "ARRIVAL_PENDING", "LOCKED", "PREPARING", "RECOVERY_REQUIRED"))
+        total_in_transit = sum(1 for r in self.transfers.values() if r["state"] in ("IN_TRANSIT", "ARRIVAL_PENDING", "LOCKED", "PREPARING"))
+        total_quarantined = sum(1 for r in self.transfers.values() if r["state"] == "RECOVERY_REQUIRED")
         total_cargo_in_transit = sum(r["total_cargo"] for r in self.transfers.values() if r["state"] in ("IN_TRANSIT", "ARRIVAL_PENDING", "LOCKED", "PREPARING", "RECOVERY_REQUIRED"))
 
         is_conserved = total_cargo_initiated == (total_cargo_completed + total_cargo_in_transit)
@@ -895,6 +896,7 @@ class UniverseAuthority:
             "total_transfers_initiated": total_initiated,
             "total_transfers_completed": total_completed,
             "total_transfers_in_transit": total_in_transit,
+            "total_transfers_quarantined": total_quarantined,
             "total_cargo_initiated": total_cargo_initiated,
             "total_cargo_completed": total_cargo_completed,
             "total_cargo_in_transit": total_cargo_in_transit,
@@ -902,6 +904,7 @@ class UniverseAuthority:
         }
 
     def get_detailed_audit(self):
+        audit = self.get_audit()
         # Per cargo type conservation audit
         all_types = set(self.commodity_initiated.keys()) | set(self.commodity_in_transit.keys()) | set(self.commodity_completed.keys())
         commodity_reports = []
@@ -922,11 +925,16 @@ class UniverseAuthority:
                 "conserved": conserved
             })
 
-        return {
-            "all_conserved": all_conserved,
+        audit.update({
+            "all_conserved": all_conserved and audit["is_conserved"],
+            "conserved": all_conserved and audit["is_conserved"],
             "commodity_reports": commodity_reports,
-            "total_commodities_tracked": len(all_types)
-        }
+            "total_commodities_tracked": len(all_types),
+            "cargo_initiated": dict(self.commodity_initiated),
+            "cargo_completed": dict(self.commodity_completed),
+            "cargo_in_transit": dict(self.commodity_in_transit),
+        })
+        return audit
 
     def get_trade_balances(self):
         # Summarize exports/imports per world

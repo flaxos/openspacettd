@@ -1,6 +1,7 @@
 /* This file is part of OpenSpaceTTD, licensed under GNU GPL version 2. */
 
-/** @file transfer_journal.h Savegame checkpoint records for federation recovery.
+/**
+ * @file transfer_journal.h Savegame checkpoint records for federation recovery.
  * These records alone are not a write-ahead log: an external handoff must not be
  * acknowledged until its checkpoint and physical consist are durably committed.
  */

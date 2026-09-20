@@ -3612,7 +3612,8 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 		} else {
 			if (PortalRegistry::IsPortalTile(v->tile)) {
 				if (PortalRegistry::IsInterServerPortal(v->tile)) {
-					if (v->IsMovingFront()) {
+					if (v->IsMovingFront() && v->track == Track::Wormhole &&
+							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {
 						if (FederationStagingManager::CheckAndDivertToStaging(first, v->tile)) {
 							return false;
 						}

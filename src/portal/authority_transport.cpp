@@ -1,3 +1,5 @@
+/** @file authority_transport.cpp HTTP transport relay for Universe Authority coordination. */
+
 #include "../stdafx.h"
 #include "authority_transport.h"
 #include <thread>
