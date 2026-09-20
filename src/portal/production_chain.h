@@ -88,6 +88,15 @@ struct ProductionRecipe {
 using FacilityID = uint32_t;
 static constexpr FacilityID INVALID_FACILITY = 0;
 
+/** Operational status of an industrial processing facility. */
+enum class FacilityStatus : uint8_t {
+	None = 0,
+	Starved,
+	Active,
+	Overflow,
+	Idle,
+};
+
 /** Runtime state of a registered industrial processing facility. */
 struct ProcessingFacility {
 	FacilityID id = INVALID_FACILITY;
@@ -125,6 +134,8 @@ public:
 	static ProcessingFacility *GetFacility(FacilityID id);
 	static ProcessingFacility *GetFacilityAtTile(TileIndex tile);
 	static ProcessingFacility *GetFacilityForStation(StationID station);
+	static FacilityStatus GetFacilityStatus(const ProcessingFacility *facility);
+	static FacilityStatus GetFacilityStatusForStation(StationID station);
 	/** Retire a station attachment and salvage buffered material to its owner's stockpile. */
 	static void RemoveForStation(StationID station);
 	static void ChangeCompanyOwner(CompanyID old_owner, CompanyID new_owner);

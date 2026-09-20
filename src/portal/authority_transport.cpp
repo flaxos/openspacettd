@@ -151,11 +151,14 @@ bool AuthorityRequest::ExecuteSync(std::chrono::milliseconds timeout_limit)
 	return this->Succeeded();
 }
 
+namespace {
 static const char base64_chars[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"abcdefghijklmnopqrstuvwxyz"
 	"0123456789+/";
+} // namespace
 
+/** Encode bytes to base64. */
 std::string Base64Encode(std::span<const uint8_t> data)
 {
 	std::string ret;
@@ -194,6 +197,7 @@ std::string Base64Encode(std::span<const uint8_t> data)
 	return ret;
 }
 
+/** Decode base64 to bytes. */
 std::vector<uint8_t> Base64Decode(std::string_view encoded)
 {
 	std::vector<uint8_t> ret;

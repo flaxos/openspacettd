@@ -461,12 +461,57 @@ void Station::UpdateVirtCoord()
 	if (this->sign.kdtree_valid) _viewport_sign_kdtree.Remove(ViewportSignKdtreeItem::MakeStation(this->index));
 
 	const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(this->index);
-	std::string normal = spaceport == nullptr
-		? GetString(STR_VIEWPORT_STATION, this->index, this->facilities)
-		: GetString(STR_VIEWPORT_SPACEPORT, spaceport->offworld_trade_tier, this->index, this->facilities);
-	std::string small = spaceport == nullptr
-		? GetString(STR_STATION_NAME, this->index, this->facilities)
-		: GetString(STR_SPACEPORT_NAME, spaceport->offworld_trade_tier, this->index);
+	const FacilityStatus fac_status = ProductionChainManager::GetFacilityStatusForStation(this->index);
+	std::string normal;
+	std::string small;
+
+	if (spaceport != nullptr) {
+		switch (fac_status) {
+			case FacilityStatus::Active:
+				normal = GetString(STR_VIEWPORT_SPACEPORT_FACILITY_ACTIVE, spaceport->offworld_trade_tier, this->index, this->facilities);
+				small  = GetString(STR_SPACEPORT_FACILITY_ACTIVE, spaceport->offworld_trade_tier, this->index);
+				break;
+			case FacilityStatus::Starved:
+				normal = GetString(STR_VIEWPORT_SPACEPORT_FACILITY_STARVED, spaceport->offworld_trade_tier, this->index, this->facilities);
+				small  = GetString(STR_SPACEPORT_FACILITY_STARVED, spaceport->offworld_trade_tier, this->index);
+				break;
+			case FacilityStatus::Overflow:
+				normal = GetString(STR_VIEWPORT_SPACEPORT_FACILITY_OVERFLOW, spaceport->offworld_trade_tier, this->index, this->facilities);
+				small  = GetString(STR_SPACEPORT_FACILITY_OVERFLOW, spaceport->offworld_trade_tier, this->index);
+				break;
+			case FacilityStatus::Idle:
+				normal = GetString(STR_VIEWPORT_SPACEPORT_FACILITY_IDLE, spaceport->offworld_trade_tier, this->index, this->facilities);
+				small  = GetString(STR_SPACEPORT_FACILITY_IDLE, spaceport->offworld_trade_tier, this->index);
+				break;
+			default:
+				normal = GetString(STR_VIEWPORT_SPACEPORT, spaceport->offworld_trade_tier, this->index, this->facilities);
+				small  = GetString(STR_SPACEPORT_NAME, spaceport->offworld_trade_tier, this->index);
+				break;
+		}
+	} else {
+		switch (fac_status) {
+			case FacilityStatus::Active:
+				normal = GetString(STR_VIEWPORT_FACILITY_ACTIVE, this->index, this->facilities);
+				small  = GetString(STR_STATION_FACILITY_ACTIVE, this->index);
+				break;
+			case FacilityStatus::Starved:
+				normal = GetString(STR_VIEWPORT_FACILITY_STARVED, this->index, this->facilities);
+				small  = GetString(STR_STATION_FACILITY_STARVED, this->index);
+				break;
+			case FacilityStatus::Overflow:
+				normal = GetString(STR_VIEWPORT_FACILITY_OVERFLOW, this->index, this->facilities);
+				small  = GetString(STR_STATION_FACILITY_OVERFLOW, this->index);
+				break;
+			case FacilityStatus::Idle:
+				normal = GetString(STR_VIEWPORT_FACILITY_IDLE, this->index, this->facilities);
+				small  = GetString(STR_STATION_FACILITY_IDLE, this->index);
+				break;
+			default:
+				normal = GetString(STR_VIEWPORT_STATION, this->index, this->facilities);
+				small  = GetString(STR_STATION_NAME, this->index, this->facilities);
+				break;
+		}
+	}
 	this->sign.UpdatePosition(pt.x, pt.y, normal, small);
 
 	_viewport_sign_kdtree.Insert(ViewportSignKdtreeItem::MakeStation(this->index));

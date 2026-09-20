@@ -862,6 +862,7 @@ CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, 
 	if (flags.Test(DoCommandFlag::Execute)) {
 		ProductionChainManager::RegisterFacility(tile, world, recipe, _current_company, 100, station);
 		UpdateStationAcceptance(st, false);
+		st->UpdateVirtCoord();
 		SetWindowDirty(WindowClass::StationView, station);
 	}
 	return CommandCost(ExpensesType::Construction, 100000);
@@ -875,6 +876,7 @@ CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station)
 	if (flags.Test(DoCommandFlag::Execute)) {
 		ProductionChainManager::RemoveForStation(station);
 		UpdateStationAcceptance(st, false);
+		st->UpdateVirtCoord();
 		SetWindowDirty(WindowClass::StationView, station);
 		SetWindowDirty(WindowClass::EmpireFacilities, 0);
 	}
@@ -894,6 +896,7 @@ CommandCost CmdUpgradeProcessingFacility(DoCommandFlags flags, StationID station
 	Money cost = static_cast<Money>(actual_increase) * 1000;
 	if (flags.Test(DoCommandFlag::Execute)) {
 		ProductionChainManager::UpgradeFacilityForStation(station, actual_increase);
+		st->UpdateVirtCoord();
 		SetWindowDirty(WindowClass::StationView, station);
 		SetWindowDirty(WindowClass::EmpireFacilities, 0);
 	}
@@ -909,6 +912,7 @@ CommandCost CmdSetFacilityPlatformCapacity(DoCommandFlags flags, StationID stati
 
 	if (flags.Test(DoCommandFlag::Execute)) {
 		ProductionChainManager::SetPlatformCapacityForStation(station, platform_capacity);
+		st->UpdateVirtCoord();
 		SetWindowDirty(WindowClass::StationView, station);
 		SetWindowDirty(WindowClass::EmpireFacilities, 0);
 	}

@@ -66,6 +66,7 @@
 #include "viewport_func.h"
 #include "station_base.h"
 #include "portal/spaceport_manager.h"
+#include "portal/production_chain.h"
 #include "waypoint_base.h"
 #include "town.h"
 #include "signs_base.h"
@@ -1440,12 +1441,63 @@ static void ViewportAddStationStrings(DrawPixelInfo *dpi, const std::vector<cons
 
 		if (Station::IsExpected(st)) { /* Station */
 			const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(static_cast<StationID>(st->index));
+			const FacilityStatus fac_status = ProductionChainManager::GetFacilityStatusForStation(static_cast<StationID>(st->index));
 			if (spaceport != nullptr) {
-				*str = small
-					? GetString(STR_SPACEPORT_NAME, spaceport->offworld_trade_tier, st->index)
-					: GetString(STR_VIEWPORT_SPACEPORT, spaceport->offworld_trade_tier, st->index, st->facilities);
+				switch (fac_status) {
+					case FacilityStatus::Active:
+						*str = small
+							? GetString(STR_SPACEPORT_FACILITY_ACTIVE, spaceport->offworld_trade_tier, st->index)
+							: GetString(STR_VIEWPORT_SPACEPORT_FACILITY_ACTIVE, spaceport->offworld_trade_tier, st->index, st->facilities);
+						break;
+					case FacilityStatus::Starved:
+						*str = small
+							? GetString(STR_SPACEPORT_FACILITY_STARVED, spaceport->offworld_trade_tier, st->index)
+							: GetString(STR_VIEWPORT_SPACEPORT_FACILITY_STARVED, spaceport->offworld_trade_tier, st->index, st->facilities);
+						break;
+					case FacilityStatus::Overflow:
+						*str = small
+							? GetString(STR_SPACEPORT_FACILITY_OVERFLOW, spaceport->offworld_trade_tier, st->index)
+							: GetString(STR_VIEWPORT_SPACEPORT_FACILITY_OVERFLOW, spaceport->offworld_trade_tier, st->index, st->facilities);
+						break;
+					case FacilityStatus::Idle:
+						*str = small
+							? GetString(STR_SPACEPORT_FACILITY_IDLE, spaceport->offworld_trade_tier, st->index)
+							: GetString(STR_VIEWPORT_SPACEPORT_FACILITY_IDLE, spaceport->offworld_trade_tier, st->index, st->facilities);
+						break;
+					default:
+						*str = small
+							? GetString(STR_SPACEPORT_NAME, spaceport->offworld_trade_tier, st->index)
+							: GetString(STR_VIEWPORT_SPACEPORT, spaceport->offworld_trade_tier, st->index, st->facilities);
+						break;
+				}
 			} else {
-				*str = GetString(small ? STR_STATION_NAME : STR_VIEWPORT_STATION, st->index, st->facilities);
+				switch (fac_status) {
+					case FacilityStatus::Active:
+						*str = small
+							? GetString(STR_STATION_FACILITY_ACTIVE, st->index)
+							: GetString(STR_VIEWPORT_FACILITY_ACTIVE, st->index, st->facilities);
+						break;
+					case FacilityStatus::Starved:
+						*str = small
+							? GetString(STR_STATION_FACILITY_STARVED, st->index)
+							: GetString(STR_VIEWPORT_FACILITY_STARVED, st->index, st->facilities);
+						break;
+					case FacilityStatus::Overflow:
+						*str = small
+							? GetString(STR_STATION_FACILITY_OVERFLOW, st->index)
+							: GetString(STR_VIEWPORT_FACILITY_OVERFLOW, st->index, st->facilities);
+						break;
+					case FacilityStatus::Idle:
+						*str = small
+							? GetString(STR_STATION_FACILITY_IDLE, st->index)
+							: GetString(STR_VIEWPORT_FACILITY_IDLE, st->index, st->facilities);
+						break;
+					default:
+						*str = small
+							? GetString(STR_STATION_NAME, st->index, st->facilities)
+							: GetString(STR_VIEWPORT_STATION, st->index, st->facilities);
+						break;
+				}
 			}
 		} else { /* Waypoint */
 			*str = GetString(STR_WAYPOINT_NAME, st->index);
