@@ -679,8 +679,10 @@ CommandCost CmdRemoveSingleRail(DoCommandFlags flags, TileIndex tile, Track trac
 				}
 
 				owner = GetTileOwner(tile);
-				Company::Get(owner)->infrastructure.rail[GetRailType(tile)] -= LEVELCROSSING_TRACKBIT_FACTOR;
-				DirtyCompanyInfrastructureWindows(owner);
+				if (Company::IsValidID(owner)) {
+					Company::Get(owner)->infrastructure.rail[GetRailType(tile)] -= LEVELCROSSING_TRACKBIT_FACTOR;
+					DirtyCompanyInfrastructureWindows(owner);
+				}
 				MakeRoadNormal(tile, GetCrossingRoadBits(tile), GetRoadTypeRoad(tile), GetRoadTypeTram(tile), GetTownIndex(tile), GetRoadOwner(tile, RoadTramType::Road), GetRoadOwner(tile, RoadTramType::Tram));
 				DeleteNewGRFInspectWindow(GrfSpecFeature::RailTypes, tile.base());
 			}
@@ -719,16 +721,20 @@ CommandCost CmdRemoveSingleRail(DoCommandFlags flags, TileIndex tile, Track trac
 
 				owner = GetTileOwner(tile);
 
-				/* Subtract old infrastructure count. */
-				uint pieces = present.Count();
-				if (TracksOverlap(present)) pieces *= pieces;
-				Company::Get(owner)->infrastructure.rail[GetRailType(tile)] -= pieces;
-				/* Add new infrastructure count. */
-				present.Flip(track);
-				pieces = present.Count();
-				if (TracksOverlap(present)) pieces *= pieces;
-				Company::Get(owner)->infrastructure.rail[GetRailType(tile)] += pieces;
-				DirtyCompanyInfrastructureWindows(owner);
+				if (Company::IsValidID(owner)) {
+					/* Subtract old infrastructure count. */
+					uint pieces = present.Count();
+					if (TracksOverlap(present)) pieces *= pieces;
+					Company::Get(owner)->infrastructure.rail[GetRailType(tile)] -= pieces;
+					/* Add new infrastructure count. */
+					present.Flip(track);
+					pieces = present.Count();
+					if (TracksOverlap(present)) pieces *= pieces;
+					Company::Get(owner)->infrastructure.rail[GetRailType(tile)] += pieces;
+					DirtyCompanyInfrastructureWindows(owner);
+				} else {
+					present.Flip(track);
+				}
 
 				if (present.None()) {
 					Slope tileh = GetTileSlope(tile);
@@ -754,7 +760,7 @@ CommandCost CmdRemoveSingleRail(DoCommandFlags flags, TileIndex tile, Track trac
 
 	if (flags.Test(DoCommandFlag::Execute)) {
 		/* if we got that far, 'owner' variable is set correctly */
-		assert(Company::IsValidID(owner));
+		assert(Company::IsValidID(owner) || owner == OWNER_NONE || owner == OWNER_WATER);
 
 		MarkTileDirtyByTile(tile);
 		if (crossing) {

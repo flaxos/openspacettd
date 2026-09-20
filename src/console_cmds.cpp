@@ -8,6 +8,7 @@
 /** @file console_cmds.cpp Implementation of the console hooks. */
 
 #include "stdafx.h"
+#include <charconv>
 #include "core/string_consumer.hpp"
 #include "console_internal.h"
 #include "debug.h"
@@ -59,6 +60,7 @@
 #include "portal/fabrication_manager.h"
 #include "portal/tech_tree.h"
 #include "portal/prompt_scenario_generator.h"
+#include "portal/balancing_critic.h"
 #include "portal/corporate_alliance.h"
 #include "portal/commonwealth_pack.h"
 #include "portal/commonwealth_slice.h"
@@ -3641,6 +3643,43 @@ static bool ConPromptToSave(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Run balancing critic simulation or snapshot. @copydoc IConsoleCmdProc */
+static bool ConBalancingCritic(std::span<std::string_view> argv)
+{
+	uint32_t years = 10;
+	std::string output = "demo/critic_report.json";
+
+	if (argv.size() >= 2) {
+		uint32_t val = 0;
+		if (auto [ptr, ec] = std::from_chars(argv[1].data(), argv[1].data() + argv[1].size(), val); ec == std::errc()) {
+			years = std::max(1u, val);
+		}
+	}
+	if (argv.size() >= 3) {
+		output = std::string(argv[2]);
+	}
+
+	IConsolePrint(CC_DEFAULT, "Initiating Balancing Critic fast-forward for {} years...", years);
+	bool ok = BalancingCritic::RunHeadlessCritic(years, output);
+	IConsolePrint(ok ? CC_DEFAULT : CC_WARNING, "Balancing Critic complete. Sustainability verdict: {}",
+		ok ? "SUSTAINABLE" : "UNSUSTAINABLE (Imbalances detected)");
+	return true;
+}
+
+/** Take instantaneous balancing telemetry snapshot. @copydoc IConsoleCmdProc */
+static bool ConBalancingSnapshot(std::span<std::string_view> argv)
+{
+	std::string output = (argv.size() >= 2) ? std::string(argv[1]) : "demo/snapshot.json";
+	auto snap = BalancingCritic::TakeSnapshot();
+	BalancingCriticReport report;
+	report.simulation_years = 0;
+	report.timeseries.push_back(snap);
+	report = BalancingCritic::AnalyzeAndCritique(report.timeseries);
+	BalancingCritic::ExportReportJson(report, output);
+	IConsolePrint(CC_DEFAULT, "Balancing telemetry snapshot exported to {}", output);
+	return true;
+}
+
 /** Show the current framerate statistics. @copydoc IConsoleCmdProc */
 static bool ConFramerate(std::span<std::string_view> argv)
 {
@@ -3927,6 +3966,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);
 	IConsole::CmdRegister("prompt_to_save",          ConPromptToSave);
 	IConsole::AliasRegister("generate_prompt_scenario", "prompt_to_save %+");
+	IConsole::CmdRegister("balancing_critic",        ConBalancingCritic);
+	IConsole::CmdRegister("balancing_snapshot",      ConBalancingSnapshot);
 
 	/* networking functions */
 

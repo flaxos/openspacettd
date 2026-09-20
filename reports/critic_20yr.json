@@ -1,0 +1,2229 @@
+{
+  "diagnoses": [
+    "Megacity Supply Deficit: Average commodity demand satisfaction is only 0.0%."
+  ],
+  "recommendations": [
+    {
+      "category": "Megacity",
+      "current_value": "300 units/mo",
+      "message": "Megacity quota targets exceed current freight corridor throughput; recalibrate baseline quota.",
+      "parameter_name": "MegacityTier2Quota",
+      "recommended_value": "200 units/mo",
+      "rule_triggered": "MEGACITY_DEFICIT_GROWTH_PENALTY",
+      "severity": "INFO"
+    }
+  ],
+  "simulation_years": 20,
+  "summary": {
+    "avg_profit_margin": 0.0,
+    "compound_annual_inflation": 0.0,
+    "is_sustainable": true,
+    "megacity_avg_satisfaction": 0.0,
+    "portal_choke_point_index": 0.0,
+    "price_payment_divergence": 0.0,
+    "stockpile_starvation_rate": 0.0
+  },
+  "timeseries": [
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": 0,
+          "loan": 0,
+          "money": 50000000,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": 0,
+          "loan": 0,
+          "money": 0,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 5,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 62675,
+      "total_tariffs": 0,
+      "year": 2051
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -9,
+          "loan": 0,
+          "money": 49999261,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": 0,
+          "loan": 0,
+          "money": -201,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 80435,
+      "total_tariffs": 0,
+      "year": 2052
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -63,
+          "loan": 0,
+          "money": 49998085,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -1,
+          "loan": 0,
+          "money": -514,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 109295,
+      "total_tariffs": 0,
+      "year": 2053
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -51,
+          "loan": 0,
+          "money": 49996977,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -2,
+          "loan": 0,
+          "money": -842,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 135935,
+      "total_tariffs": 0,
+      "year": 2054
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -41,
+          "loan": 0,
+          "money": 49995868,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -3,
+          "loan": 0,
+          "money": -1182,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 162575,
+      "total_tariffs": 0,
+      "year": 2055
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -29,
+          "loan": 0,
+          "money": 49994760,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -5,
+          "loan": 0,
+          "money": -1535,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 189215,
+      "total_tariffs": 0,
+      "year": 2056
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -16,
+          "loan": 0,
+          "money": 49993651,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -6,
+          "loan": 0,
+          "money": -1906,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 215855,
+      "total_tariffs": 0,
+      "year": 2057
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -5,
+          "loan": 0,
+          "money": 49992542,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -7,
+          "loan": 0,
+          "money": -2289,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 242495,
+      "total_tariffs": 0,
+      "year": 2058
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -61,
+          "loan": 0,
+          "money": 49991366,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -8,
+          "loan": 0,
+          "money": -2690,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 271370,
+      "total_tariffs": 0,
+      "year": 2059
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -49,
+          "loan": 0,
+          "money": 49990258,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -10,
+          "loan": 0,
+          "money": -3103,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 298010,
+      "total_tariffs": 0,
+      "year": 2060
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -36,
+          "loan": 0,
+          "money": 49989149,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -11,
+          "loan": 0,
+          "money": -3535,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 324650,
+      "total_tariffs": 0,
+      "year": 2061
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -24,
+          "loan": 0,
+          "money": 49988041,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -13,
+          "loan": 0,
+          "money": -3985,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 351290,
+      "total_tariffs": 0,
+      "year": 2062
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -13,
+          "loan": 0,
+          "money": 49986932,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -14,
+          "loan": 0,
+          "money": -4453,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 377930,
+      "total_tariffs": 0,
+      "year": 2063
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -3,
+          "loan": 0,
+          "money": 49985823,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -16,
+          "loan": 0,
+          "money": -4939,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 404570,
+      "total_tariffs": 0,
+      "year": 2064
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -57,
+          "loan": 0,
+          "money": 49984647,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -18,
+          "loan": 0,
+          "money": -5445,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 433430,
+      "total_tariffs": 0,
+      "year": 2065
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -45,
+          "loan": 0,
+          "money": 49983539,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -19,
+          "loan": 0,
+          "money": -5969,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 460070,
+      "total_tariffs": 0,
+      "year": 2066
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -34,
+          "loan": 0,
+          "money": 49982430,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -21,
+          "loan": 0,
+          "money": -6517,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 486710,
+      "total_tariffs": 0,
+      "year": 2067
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -22,
+          "loan": 0,
+          "money": 49981322,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -23,
+          "loan": 0,
+          "money": -7088,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 513350,
+      "total_tariffs": 0,
+      "year": 2068
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -9,
+          "loan": 0,
+          "money": 49980213,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -25,
+          "loan": 0,
+          "money": -7681,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 539990,
+      "total_tariffs": 0,
+      "year": 2069
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -65,
+          "loan": 0,
+          "money": 49979037,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -27,
+          "loan": 0,
+          "money": -8298,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 568850,
+      "total_tariffs": 0,
+      "year": 2070
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -54,
+          "loan": 0,
+          "money": 49977928,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -29,
+          "loan": 0,
+          "money": -8942,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 595490,
+      "total_tariffs": 0,
+      "year": 2071
+    },
+    {
+      "companies": [
+        {
+          "company_id": 0,
+          "expenses": -54,
+          "loan": 0,
+          "money": 49977928,
+          "profit_margin": 0.0,
+          "revenue": 0
+        },
+        {
+          "company_id": 1,
+          "expenses": -29,
+          "loan": 0,
+          "money": -8942,
+          "profit_margin": 0.0,
+          "revenue": 0
+        }
+      ],
+      "facilities": {
+        "input_starved": 0,
+        "output_blocked": 0,
+        "produced_batches": 0,
+        "total_facilities": 1
+      },
+      "inflation_drift_ratio": 1.0,
+      "inflation_payment": 65536,
+      "inflation_prices": 65536,
+      "megacities": [
+        {
+          "delivered": 0,
+          "demanded": 450,
+          "population": 25000,
+          "satisfaction_pct": 0.0,
+          "town_id": 0,
+          "world_id": 0
+        }
+      ],
+      "month": 1,
+      "portals": {
+        "in_transit": 0,
+        "peak_wait_ticks": 0,
+        "stuck_trains": 0,
+        "total_portals": 2,
+        "waiting_signal": 0
+      },
+      "stockpiles": [
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 0,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 1,
+          "zero_stock_cargos": 0
+        },
+        {
+          "company_id": 0,
+          "inventory": [
+            [
+              1,
+              500
+            ],
+            [
+              9,
+              350
+            ]
+          ],
+          "total_units": 850,
+          "world_id": 2,
+          "zero_stock_cargos": 0
+        }
+      ],
+      "tick": 595490,
+      "total_tariffs": 0,
+      "year": 2071
+    }
+  ],
+  "total_ticks_simulated": 541680
+}

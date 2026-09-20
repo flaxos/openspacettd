@@ -1199,7 +1199,7 @@ FloodingBehaviour GetFloodingBehaviour(TileIndex tile)
 			return GetTreeGround(tile) == TreeGround::Shore ? FloodingBehaviour::DryOut : FloodingBehaviour::None;
 
 		case TileType::Void:
-			return _settings_game.construction.freeform_edges ? FloodingBehaviour::None : FloodingBehaviour::Active;
+			return FloodingBehaviour::None;
 
 		default:
 			return FloodingBehaviour::None;
