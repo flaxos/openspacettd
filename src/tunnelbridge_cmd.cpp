@@ -46,6 +46,7 @@
 
 #include "portal/portal_registry.h"
 #include "portal/edge_conduit.h"
+#include "portal/visual_overhaul.h"
 
 #include "safeguards.h"
 
@@ -1360,8 +1361,16 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		if (is_portal_gate) {
 			/* Commonwealth CST monumental portal gate:
 			 * Active linked gates display cyan-blue conduit excitation (PALETTE_TO_STRUCT_BLUE);
-			 * Unlinked gates in standby display amber/yellow excitation (PALETTE_TO_STRUCT_YELLOW). */
-			portal_pal = PortalRegistry::IsPortalTile(ti->tile) ? PALETTE_TO_STRUCT_BLUE : PALETTE_TO_STRUCT_YELLOW;
+			 * Unlinked gates in standby display amber/yellow excitation (PALETTE_TO_STRUCT_YELLOW);
+			 * Transit ripples display white-hot excitation (PALETTE_TO_STRUCT_WHITE);
+			 * Holding/quarantine displays pulsing red (PALETTE_TO_STRUCT_RED). */
+			switch (VisualOverhaulManager::GetEventHorizonVisualState(ti->tile)) {
+				case WormholeVisualState::ActiveCyanPulse:  portal_pal = PALETTE_TO_STRUCT_BLUE;   break;
+				case WormholeVisualState::StandbyAmber:     portal_pal = PALETTE_TO_STRUCT_YELLOW; break;
+				case WormholeVisualState::TransitRipple:    portal_pal = PALETTE_TO_STRUCT_WHITE;  break;
+				case WormholeVisualState::QuarantineRed:    portal_pal = PALETTE_TO_STRUCT_RED;    break;
+				default:                                    portal_pal = PALETTE_TO_STRUCT_BLUE;   break;
+			}
 		}
 
 		if (HasTunnelBridgeSnowOrDesert(ti->tile)) image += railtype_overlay != 0 ? 8 : 32;

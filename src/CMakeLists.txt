@@ -400,6 +400,8 @@ add_files(
     portal/balancing_critic.h
     portal/lore_competitor.cpp
     portal/lore_competitor.h
+    portal/visual_overhaul.cpp
+    portal/visual_overhaul.h
     portal/commonwealth_slice.cpp
     portal/commonwealth_slice.h
     portal/commonwealth_pack.cpp
