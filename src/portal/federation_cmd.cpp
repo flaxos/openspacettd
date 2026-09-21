@@ -383,10 +383,17 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 
 void FederationTransferManager::OnGameTick(uint64_t current_tick)
 {
-	/* Poll incoming transfers and release held trains every 10 ticks (~330ms) */
-	if ((current_tick % 10) != 0) return;
+	/* Staging manager runs on the faster cadence (every 10 ticks / ~330ms). */
+	if ((current_tick % 10) == 0) {
+		FederationStagingManager::OnGameTick(current_tick);
+	}
 
-	FederationStagingManager::OnGameTick(current_tick);
+	/* Authority HTTP polling runs on a slower cadence (every 150 ticks / ~5s)
+	 * to avoid hammering the external authority with rapid synchronous requests.
+	 * Each ExecuteSync call blocks the game loop until the HTTP roundtrip completes,
+	 * so high frequency polling degrades simulation throughput and can cause
+	 * concurrent HTTP state corruption in the curl thread. */
+	if ((current_tick % 150) != 0) return;
 
 	std::set<WorldID> local_worlds;
 	for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
@@ -404,7 +411,13 @@ void FederationTransferManager::OnGameTick(uint64_t current_tick)
 	}
 
 	for (WorldID wid : local_worlds) {
-		ProcessIncomingTransfers(wid, current_tick);
+		try {
+			ProcessIncomingTransfers(wid, current_tick);
+		} catch (const std::exception &e) {
+			Debug(net, 0, "[Federation] Exception in ProcessIncomingTransfers for world {}: {}", wid.base(), e.what());
+		} catch (...) {
+			Debug(net, 0, "[Federation] Unknown exception in ProcessIncomingTransfers for world {}", wid.base());
+		}
 	}
 }
 

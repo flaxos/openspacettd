@@ -156,17 +156,11 @@ In the *Commonwealth Saga*, wormholes are not all identical standard-gauge railw
 | **GATE**          | Boongate <-> Half Way       | Terminal break-of-gauge. Consists terminate at  |
 |                   |                             | a transfer terminal; cargo is cross-docked.     |
 +-------------------+-----------------------------+-------------------------------------------------+
-| **SCHEDULED**     | Half Way <-> Far Away       | Stormrider cyclic power windows (e.g. 5 days    |
-|                   | (Stormrider power cycle)    | open, 15 days recharging). Staging sidings.     |
-+-------------------+-----------------------------+-------------------------------------------------+
 | **PRIVATE**       | Cressat, Solidade,          | Locked behind company reputation, tech tree     |
 |                   | Ozzie's Asteroid, Hardrock  | research ("Consortium Charter"), or gate tolls. |
 +-------------------+-----------------------------+-------------------------------------------------+
 | **EXPLORATION**   | Chelva, Tandil, Gaczyna     | Uninhabited / hazardous. Requires Expeditionary |
 |                   |                             | Survey Consists to scan and anchor gate heads.  |
-+-------------------+-----------------------------+-------------------------------------------------+
-| **DATA**          | Augusta <-> Vinmar          | Data-only wormhole. Physical trains blocked.    |
-|                   | (Subspace communications)   | Substation converts gate into continuous RP.    |
 +-------------------+-----------------------------+-------------------------------------------------+
 | **SILFEN_ROUTE**  | Silvergalde, Jaruva,        | Alien mystical paths. Trains cannot transit.    |
 |                   | Ice Citadel World, Jandk    | Requires Intermodal Depots & container pods.    |
@@ -176,19 +170,14 @@ In the *Commonwealth Saga*, wormholes are not all identical standard-gauge railw
 +-------------------+-----------------------------+-------------------------------------------------+
 ```
 
-### 4.1 Scheduled Cyclic Gateways (The Far Away Power Cycle)
-- **Lore Context:** The gateway between Half Way (Port Evergreen) and Far Away (Armstrong City) operates on a pulsed power cycle linked to planetary atmospheric stormriders—5 hours powered, 15 hours recharging.
+### 4.1 Staging Loops & Congestion Sidings
+- **Freight Operation Context:** High-traffic inter-world corridors (such as the route to Far Away or Augusta) require automated staging loops and overflow sidings to manage peak throughput without mainline gridlock.
 - **Gameplay Implementation:**
-  - The gate has a dynamic state: `GateState::Active` vs `GateState::Recharging`.
-  - During the recharging interval, gateway signals show red, and incoming trains automatically divert into designated **staging loops** or holding sidings.
-  - Players must balance throughput by sizing staging yards properly to prevent mainline gridlock.
+  - Automated staging loop integration with YAPF pathfinding.
+  - Trains divert into designated holding sidings when downstream portals or terminals are occupied.
 
-### 4.2 Subspace Data Relays (Vinmar)
-- **Lore Context:** Vinmar connects to Augusta via a low-energy, data-scale wormhole capable of transmitting sensor feeds and communications, but incapable of passing trains or bulk matter.
-- **Gameplay Implementation:**
-  - Trains attempting to enter a Data Gate receive a routing error (`STR_ERROR_DATA_GATE_NO_TRAINS`).
-  - Constructing a **Subspace Telemetry Station** over the gate tile establishes a permanent data link.
-  - The station generates a steady stream of **Research Points (RP)** directly into the Sprint 41 Commonwealth Tech Tree, accelerating scientific breakthroughs.
+### 4.2 Universal Rail Freight Connectivity
+- All standard Commonwealth trade nodes (including frontier and remote worlds) support physical rail freight and trade gateway interchange, ensuring robust logistics operations without artificial gate power shutdowns or non-train data gimmicks.
 
 ### 4.3 Silfen Path Intermodal Depots (Silvergalde & Jaruva)
 - **Lore Context:** The Silfen paths are mystical, extra-dimensional trails through alien forests that connect distant worlds without human technology. Standard trains cannot run along them.
