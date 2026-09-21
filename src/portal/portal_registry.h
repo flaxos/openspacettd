@@ -271,6 +271,26 @@ public:
 	static bool IsHoldingActive(TileIndex portal_tile);
 
 	/**
+	 * Configure an auxiliary parallel throat tile for multi-track gateway operations.
+	 */
+	static bool ConfigureParallelThroat(TileIndex portal_tile, TileIndex secondary_throat_tile);
+
+	/**
+	 * Get the auxiliary parallel throat tile for a portal, or INVALID_TILE if not configured.
+	 */
+	static TileIndex GetParallelThroat(TileIndex portal_tile);
+
+	/**
+	 * Check if a portal has an auxiliary parallel throat configured.
+	 */
+	static bool HasParallelThroat(TileIndex portal_tile);
+
+	/**
+	 * Get all active throat tiles (primary and parallel) for a portal gate.
+	 */
+	static std::vector<TileIndex> GetThroatTiles(TileIndex portal_tile);
+
+	/**
 	 * Repair generated neutral gateway heads from early multi-world saves where
 	 * the stored entry direction pointed away from the world-side lead track.
 	 * This operation is deterministic and idempotent.

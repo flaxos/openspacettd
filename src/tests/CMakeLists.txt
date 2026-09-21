@@ -66,6 +66,8 @@ add_test_files(
     test_sprint48_balancing_critic.cpp
     test_universe_graph.cpp
     test_prebuilt_trade.cpp
+    test_sprint50_throat_and_staging.cpp
+    test_sprint50_universal_and_charters.cpp
     test_prefab_world_uat.cpp
     test_script_admin.cpp
     test_window_desc.cpp

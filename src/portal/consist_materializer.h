@@ -86,6 +86,16 @@ public:
 	static bool CheckThroatClearance(TileIndex exit_tile, DiagDirection enter_dir);
 
 	/**
+	 * Resolve a clear throat tile for consist emergence, checking the primary portal head
+	 * and any configured parallel throat track (multi-track throat approaches).
+	 *
+	 * @param primary_exit_tile Primary exit portal gate head tile.
+	 * @param enter_dir Direction of travel into the portal head.
+	 * @return Clear throat tile (primary or parallel), or INVALID_TILE if all throats are obstructed.
+	 */
+	static TileIndex ResolveClearThroat(TileIndex primary_exit_tile, DiagDirection enter_dir);
+
+	/**
 	 * Materialize an incoming train consist from a validated snapshot at a portal gate throat.
 	 *
 	 * - Validates content manifest against local content.

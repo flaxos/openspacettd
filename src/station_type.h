@@ -48,12 +48,13 @@ enum class RoadStopType : uint8_t {
 
 /** The facilities a station might be having */
 enum class StationFacility : uint8_t {
-	Train     = 0, ///< Station with train station
-	TruckStop = 1, ///< Station with truck stops
-	BusStop   = 2, ///< Station with bus stops
-	Airport   = 3, ///< Station with an airport
-	Dock      = 4, ///< Station with a dock
-	Waypoint  = 7, ///< Station is a waypoint
+	Train         = 0, ///< Station with train station
+	TruckStop     = 1, ///< Station with truck stops
+	BusStop       = 2, ///< Station with bus stops
+	Airport       = 3, ///< Station with an airport
+	Dock          = 4, ///< Station with a dock
+	HoldingSiding = 5, ///< Station is designated holding loop / congestion staging siding
+	Waypoint      = 7, ///< Station is a waypoint
 };
 
 /** Bitset of \c StationFacility elements. */

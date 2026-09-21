@@ -113,6 +113,8 @@ struct PortalLink {
 	PortalEndpoint end_b;              ///< Secondary endpoint (e.g. World B)
 	uint32_t virtual_length = 1;       ///< Virtual route length in tiles for YAPF; physical transit time is fixed.
 	bool bidirectional = true;         ///< Whether vehicles can traverse in both directions.
+	TileIndex parallel_throat_tile_a = INVALID_TILE; ///< Auxiliary parallel throat tile for End A.
+	TileIndex parallel_throat_tile_b = INVALID_TILE; ///< Auxiliary parallel throat tile for End B.
 
 	constexpr bool IsValid() const
 	{
@@ -143,6 +145,7 @@ struct InterServerPortalLink {
 	uint32_t virtual_length = 1;       ///< Virtual route length for YAPF.
 	TileIndex staging_siding_tile = INVALID_TILE; ///< Designated local staging siding / holding loop tile.
 	bool is_holding_active = false;    ///< True when inbound trains are currently diverted into staging siding.
+	TileIndex parallel_throat_tile = INVALID_TILE; ///< Auxiliary parallel throat tile for multi-track gateway entry/exit.
 
 	constexpr bool IsValid() const
 	{

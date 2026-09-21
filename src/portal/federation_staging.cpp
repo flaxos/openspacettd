@@ -12,6 +12,11 @@
 #include "federation_cmd.h"
 #include "portal_registry.h"
 #include "universe_authority.h"
+#include "planet_manager.h"
+#include "../station_base.h"
+#include "../map_func.h"
+#include "../tunnelbridge_map.h"
+#include "../vehicle_func.h"
 #include "../train.h"
 #include "../timer/timer_game_tick.h"
 #include "../track_func.h"
@@ -84,6 +89,55 @@ std::string FederationStagingManager::GetHoldingReason(WorldID remote_world)
 	return "Mainline Clear";
 }
 
+bool FederationStagingManager::IsPortalApproachCongested(TileIndex portal_tile)
+{
+	if (portal_tile == INVALID_TILE || !IsValidTile(portal_tile)) return false;
+
+	/* If portal has a train currently on it, it's occupied */
+	for (const Vehicle *v : VehiclesOnTile(portal_tile)) {
+		if (v->type == VehicleType::Train) return true;
+	}
+
+	/* Conflicting tunnel reservation if tile is a rail tunnel/bridge */
+	if (IsTileType(portal_tile, TileType::TunnelBridge) &&
+	    GetTunnelBridgeTransportType(portal_tile) == TransportType::Rail &&
+	    HasTunnelBridgeReservation(portal_tile)) {
+		return true;
+	}
+
+	return false;
+}
+
+TileIndex FederationStagingManager::FindStagingSidingForPortal(TileIndex portal_tile)
+{
+	if (portal_tile == INVALID_TILE) return INVALID_TILE;
+
+	/* 1. Check if portal link has an explicitly configured siding */
+	const InterServerPortalLink *link = PortalRegistry::GetInterServerPortal(portal_tile);
+	if (link != nullptr && link->staging_siding_tile != INVALID_TILE && IsValidTile(link->staging_siding_tile)) {
+		return link->staging_siding_tile;
+	}
+
+	/* 2. Scan for designated StationFacility::HoldingSiding stations in the vicinity */
+	WorldID world = PlanetManager::GetTileWorld(portal_tile);
+	TileIndex best_siding = INVALID_TILE;
+	uint best_dist = UINT_MAX;
+
+	for (const Station *st : Station::Iterate()) {
+		if (st->facilities.Test(StationFacility::HoldingSiding)) {
+			if (st->xy < Map::Size() && (world == INVALID_WORLD || PlanetManager::GetTileWorld(st->xy) == world)) {
+				uint d = DistanceManhattan(portal_tile, st->xy);
+				if (d < best_dist) {
+					best_dist = d;
+					best_siding = st->xy;
+				}
+			}
+		}
+	}
+
+	return best_siding;
+}
+
 bool FederationStagingManager::CheckAndDivertToStaging(Train *consist, TileIndex portal_tile)
 {
 	if (consist == nullptr || portal_tile == INVALID_TILE) return false;
@@ -99,8 +153,10 @@ bool FederationStagingManager::CheckAndDivertToStaging(Train *consist, TileIndex
 		return true;
 	}
 
-	/* Evaluate whether holding conditions apply to remote server */
-	if (!IsServerHoldingCondition(link->remote_world)) {
+	/* Evaluate whether holding conditions apply: remote server condition OR portal approach congestion */
+	bool is_congested = IsPortalApproachCongested(portal_tile);
+	bool server_holding = IsServerHoldingCondition(link->remote_world);
+	if (!server_holding && !is_congested) {
 		PortalRegistry::SetHoldingActive(portal_tile, false);
 		return false;
 	}
@@ -108,13 +164,14 @@ bool FederationStagingManager::CheckAndDivertToStaging(Train *consist, TileIndex
 	/* Holding condition active: divert train into staging siding or hold before portal */
 	PortalRegistry::SetHoldingActive(portal_tile, true);
 
-	TileIndex siding = link->staging_siding_tile;
-	std::string reason = GetHoldingReason(link->remote_world);
+	TileIndex siding = FindStagingSidingForPortal(portal_tile);
+	std::string reason = server_holding ? GetHoldingReason(link->remote_world) : "Portal Throat Congested / Occupied";
 
 	/* Safely stop consist and free mainline reservations if valid */
-	if (front->track != Track::Wormhole) {
+	Track first_track = FindFirstTrack(front->track);
+	if (front->IsFrontEngine() && front->track != Track::Wormhole && IsValidTrack(first_track)) {
 		Trackdir td = front->GetVehicleTrackdir();
-		if (IsValidTrackdir(td) && IsValidTrack(TrackdirToTrack(td))) {
+		if (IsValidTrackdir(td)) {
 			FreeTrainTrackReservation(front);
 		}
 	}
@@ -185,7 +242,7 @@ size_t FederationStagingManager::ReleaseHeldTrains()
 {
 	size_t released = 0;
 	for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) {
-		if (link.is_holding_active && !IsServerHoldingCondition(link.remote_world)) {
+		if (link.is_holding_active && !IsServerHoldingCondition(link.remote_world) && !IsPortalApproachCongested(tile)) {
 			released += ReleaseHeldTrains(tile);
 		}
 	}

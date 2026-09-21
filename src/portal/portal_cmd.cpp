@@ -942,6 +942,27 @@ CommandCost CmdConfigurePortalStagingSiding(DoCommandFlags flags, TileIndex port
 	return CommandCost();
 }
 
+CommandCost CmdDesignateHoldingSiding(DoCommandFlags flags, StationID station_id, bool enable)
+{
+	Station *st = Station::GetIfValid(station_id);
+	if (st == nullptr) return CMD_ERROR;
+
+	if (Company::IsValidID(_current_company) && _current_company != OWNER_DEITY) {
+		if (st->owner != _current_company && st->owner != OWNER_NONE) return CMD_ERROR;
+	}
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		if (enable) {
+			st->facilities.Set(StationFacility::HoldingSiding);
+		} else {
+			st->facilities.Reset(StationFacility::HoldingSiding);
+		}
+		SetWindowDirty(WindowClass::StationView, station_id.base());
+		SetWindowClassesDirty(WindowClass::VehicleOrders);
+	}
+	return CommandCost();
+}
+
 CommandCost CmdSetCorporateAlliance(DoCommandFlags flags, CompanyID target_company, CorporateRelation relation)
 {
 	if (!Company::IsValidID(_current_company) || _current_company == OWNER_DEITY) return CMD_ERROR;

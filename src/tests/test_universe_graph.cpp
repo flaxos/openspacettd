@@ -95,22 +95,28 @@ TEST_CASE("Sprint 49: UniverseGraphManager loads and parses canonical 108-world 
 		CHECK(playable_reachable.size() >= 100);
 	}
 
-	SECTION("Modal transport restrictions are strictly maintained")
+	SECTION("Modal transport restrictions and universal rail freight (WP-50.3)")
 	{
-		// Vinmar is DATA only - trains must not be permitted
+		// Vinmar is universal RAIL (WP-50.3)
 		const UniverseNode *vinmar = mgr.FindNode("world_vinmar");
 		REQUIRE(vinmar != nullptr);
-		CHECK(vinmar->connection_mode == ConnectionMode::Data);
-		CHECK(UniverseGraphManager::IsModePermittingTrains(vinmar->connection_mode) == false);
+		CHECK(vinmar->connection_mode == ConnectionMode::Rail);
+		CHECK(UniverseGraphManager::IsModePermittingTrains(vinmar->connection_mode) == true);
 
 		const UniverseEdge *vinmar_edge = mgr.FindEdge("world_vinmar", "world_augusta", GraphFilterMode::SOURCE_ONLY);
 		REQUIRE(vinmar_edge != nullptr);
-		CHECK(vinmar_edge->permits_through_running_train == false);
+		CHECK(vinmar_edge->permits_through_running_train == true);
 
-		// Far Away is SCHEDULED
+		// Far Away is universal RAIL (WP-50.3)
 		const UniverseNode *far_away = mgr.FindNode("world_far_away");
 		REQUIRE(far_away != nullptr);
-		CHECK(far_away->connection_mode == ConnectionMode::Scheduled);
+		CHECK(far_away->connection_mode == ConnectionMode::Rail);
+		CHECK(UniverseGraphManager::IsModePermittingTrains(far_away->connection_mode) == true);
+
+		// Cressat is PRIVATE (WP-50.4)
+		const UniverseNode *cressat = mgr.FindNode("world_cressat");
+		REQUIRE(cressat != nullptr);
+		CHECK(cressat->connection_mode == ConnectionMode::Private);
 
 		// Merredin is RAIL
 		const UniverseNode *merredin = mgr.FindNode("world_merredin");
@@ -201,7 +207,7 @@ TEST_CASE("Sprint 49: UniverseGraphManager loads and parses canonical 108-world 
 		REQUIRE(far_away != nullptr);
 		CHECK(far_away->canonical_name == "Far Away");
 		CHECK(far_away->phase == WorldPhase::Phase3_Frontier);
-		CHECK(far_away->connection_mode == ConnectionMode::Scheduled);
+		CHECK(far_away->connection_mode == ConnectionMode::Rail);
 		CHECK(far_away->connects_to == "world_half_way");
 		CHECK(far_away->economic_profile.role == "primary_resource_extraction");
 		CHECK_FALSE(far_away->economic_profile.primary_imports.empty());

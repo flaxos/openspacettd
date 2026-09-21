@@ -11,6 +11,7 @@
 #include "content_manifest.h"
 #include "federation_identity.h"
 #include "portal_registry.h"
+#include "prebuilt_trade.h"
 
 #include "../company_base.h"
 #include "../company_func.h"
@@ -133,15 +134,16 @@ ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, con
 	return result;
 }
 
-bool ConsistMaterializer::CheckThroatClearance(TileIndex exit_tile, DiagDirection enter_dir)
+bool ConsistMaterializer::CheckThroatClearance(TileIndex exit_tile, DiagDirection /*enter_dir*/)
 {
-	(void)enter_dir;
-	if (!IsValidTile(exit_tile) || !IsTunnelTile(exit_tile)) {
+	if (!IsValidTile(exit_tile)) {
 		return false;
 	}
 
-	/* Check for conflicting reservations */
-	if (HasTunnelBridgeReservation(exit_tile)) {
+	/* Check for conflicting reservations if tile is a rail tunnel/bridge */
+	if (IsTileType(exit_tile, TileType::TunnelBridge) &&
+	    GetTunnelBridgeTransportType(exit_tile) == TransportType::Rail &&
+	    HasTunnelBridgeReservation(exit_tile)) {
 		return false;
 	}
 
@@ -153,6 +155,26 @@ bool ConsistMaterializer::CheckThroatClearance(TileIndex exit_tile, DiagDirectio
 	}
 
 	return true;
+}
+
+TileIndex ConsistMaterializer::ResolveClearThroat(TileIndex primary_exit_tile, DiagDirection enter_dir)
+{
+	if (CheckThroatClearance(primary_exit_tile, enter_dir)) {
+		return primary_exit_tile;
+	}
+
+	/* Check for configured parallel throat track on inter-server, local, or trade portal */
+	TileIndex parallel = PortalRegistry::GetParallelThroat(primary_exit_tile);
+	if (parallel == INVALID_TILE) {
+		const auto *gw = PrebuiltTradeManager::Instance().GetTradeGateway(primary_exit_tile);
+		if (gw != nullptr) parallel = gw->parallel_throat_tile;
+	}
+
+	if (parallel != INVALID_TILE && CheckThroatClearance(parallel, enter_dir)) {
+		return parallel;
+	}
+
+	return INVALID_TILE;
 }
 
 ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
@@ -176,11 +198,13 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		}
 	}
 
-	/* 2. Check exit throat clearance */
-	if (!CheckThroatClearance(exit_tile, enter_dir)) {
+	/* 2. Check exit throat clearance (supporting parallel throat fallback) */
+	TileIndex active_exit = ResolveClearThroat(exit_tile, enter_dir);
+	if (active_exit == INVALID_TILE) {
 		result.error_message = "Portal throat is obstructed";
 		return result;
 	}
+	exit_tile = active_exit;
 
 	/* 3. Check pool allocations and engine types */
 	if (!Vehicle::CanAllocateItem(snapshot.units.size())) {

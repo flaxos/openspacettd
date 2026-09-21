@@ -238,9 +238,11 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 				continue;
 			}
 
-			if (!ConsistMaterializer::CheckThroatClearance(dest_tile, enter_dir)) {
+			TileIndex clear_dest = ConsistMaterializer::ResolveClearThroat(dest_tile, enter_dir);
+			if (clear_dest == INVALID_TILE) {
 				continue;
 			}
+			dest_tile = clear_dest;
 
 			std::string snap_b64 = claim_data.value("snapshot_base64", "");
 			auto snap_bytes = Base64Decode(snap_b64);
@@ -341,9 +343,11 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 				continue;
 			}
 
-			if (!ConsistMaterializer::CheckThroatClearance(dest_tile, enter_dir)) {
+			TileIndex clear_dest = ConsistMaterializer::ResolveClearThroat(dest_tile, enter_dir);
+			if (clear_dest == INVALID_TILE) {
 				continue;
 			}
+			dest_tile = clear_dest;
 
 			ConsistMaterializeResult mat_res = ConsistMaterializer::MaterializeFromTransfer(
 				rec.snapshot, dest_tile, enter_dir

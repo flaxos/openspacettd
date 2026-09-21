@@ -47,6 +47,18 @@ public:
 	static bool IsServerHoldingCondition(WorldID remote_world);
 
 	/**
+	 * Check whether a portal gate approach or throat is currently congested:
+	 * vehicle on portal tile, tunnel reservation active, or downstream signal obstruction.
+	 */
+	static bool IsPortalApproachCongested(TileIndex portal_tile);
+
+	/**
+	 * Find the most suitable staging siding tile for a portal, either the explicitly
+	 * configured siding or the closest designated StationFacility::HoldingSiding facility.
+	 */
+	static TileIndex FindStagingSidingForPortal(TileIndex portal_tile);
+
+	/**
 	 * Get a human-readable diagnostic description of why holding is active.
 	 */
 	static std::string GetHoldingReason(WorldID remote_world);

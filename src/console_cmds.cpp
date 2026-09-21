@@ -66,6 +66,8 @@
 #include "portal/commonwealth_pack.h"
 #include "portal/commonwealth_slice.h"
 #include "portal/prebuilt_trade.h"
+#include "portal/corporate_charter.h"
+#include "portal/portal_cmd.h"
 #include "industrytype.h"
 #include "tunnelbridge_map.h"
 #include "train.h"
@@ -3779,6 +3781,137 @@ static bool ConVerifyUATWorld(std::span<std::string_view> argv)
 	}
 }
 
+/** Set or inspect gate access policy on a portal tile. @copydoc IConsoleCmdProc */
+static bool ConGateAccess(std::span<std::string_view> argv)
+{
+	if (argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Usage: gate_access <tile> [public|reputation|charter|toll] [toll_amount]");
+		return true;
+	}
+	auto tile_opt = ParseType<TileIndex>(argv[1]);
+	if (!tile_opt.has_value() || *tile_opt >= Map::Size()) {
+		IConsolePrint(CC_ERROR, "Invalid tile index.");
+		return false;
+	}
+	TileIndex tile = *tile_opt;
+
+	if (argv.size() >= 3) {
+		std::string pol_str(argv[2]);
+		GateAccessPolicy policy = GateAccessPolicy::Public;
+		if (pol_str == "reputation") policy = GateAccessPolicy::ReputationRestricted;
+		else if (pol_str == "charter") policy = GateAccessPolicy::CharterRequired;
+		else if (pol_str == "toll") policy = GateAccessPolicy::TollRequired;
+
+		Money toll = 0;
+		if (argv.size() >= 4) {
+			auto toll_opt = ParseInteger(argv[3]);
+			if (toll_opt.has_value()) toll = static_cast<Money>(*toll_opt);
+		}
+		CorporateCharterManager::Instance().SetGatePolicy(tile, policy, toll);
+		IConsolePrint(CC_DEFAULT, "Configured portal {} policy to '{}' (toll: {} Cr).", tile.base(), pol_str, toll);
+		return true;
+	}
+
+	GateAccessPolicy pol = CorporateCharterManager::Instance().GetGatePolicy(tile);
+	Money toll = CorporateCharterManager::Instance().GetGateToll(tile);
+	std::string desc = "public";
+	if (pol == GateAccessPolicy::ReputationRestricted) desc = "reputation (>= 80%)";
+	else if (pol == GateAccessPolicy::CharterRequired) desc = "charter required";
+	else if (pol == GateAccessPolicy::TollRequired) desc = fmt::format("toll required ({} Cr)", toll);
+	IConsolePrint(CC_DEFAULT, "Portal {} policy: {}", tile.base(), desc);
+	return true;
+}
+
+/** Purchase a corporate diplomatic charter for the current company. @copydoc IConsoleCmdProc */
+static bool ConPurchaseCharter(std::span<std::string_view> argv)
+{
+	if (argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Usage: purchase_charter <world_id>");
+		return true;
+	}
+	std::string world_id(argv[1]);
+	CompanyID comp = _current_company;
+	if (!Company::IsValidID(comp)) comp = CompanyID{0};
+
+	CommandCost res = CmdPurchaseDiplomaticCharter(DoCommandFlag::Execute, comp, world_id);
+	if (res.Succeeded()) {
+		IConsolePrint(CC_DEFAULT, "Purchased diplomatic charter to {} for company {} (Cost: {} Cr).",
+			world_id, comp.base(), res.GetCost());
+		return true;
+	} else {
+		IConsolePrint(CC_ERROR, "Failed to purchase charter for {}.", world_id);
+		return false;
+	}
+}
+
+/** List active diplomatic charters for the current company. @copydoc IConsoleCmdProc */
+static bool ConListCharters(std::span<std::string_view> argv)
+{
+	(void)argv;
+	CompanyID comp = _current_company;
+	if (!Company::IsValidID(comp)) comp = CompanyID{0};
+
+	auto charters = CorporateCharterManager::Instance().GetCompanyCharters(comp);
+	IConsolePrint(CC_DEFAULT, "Diplomatic charters for company {}: {} active.", comp.base(), charters.size());
+	for (const auto &w : charters) {
+		IConsolePrint(CC_DEFAULT, "  -> Target World: {}", w);
+	}
+	return true;
+}
+
+/** Designate or remove a station facility as a holding siding / staging loop. @copydoc IConsoleCmdProc */
+static bool ConDesignateSiding(std::span<std::string_view> argv)
+{
+	if (argv.size() < 2) {
+		IConsolePrint(CC_HELP, "Usage: designate_siding <station_id> [1|0]");
+		return true;
+	}
+	auto st_id_opt = ParseType<StationID>(argv[1]);
+	if (!st_id_opt.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid station ID.");
+		return false;
+	}
+	bool enable = true;
+	if (argv.size() >= 3) {
+		enable = (argv[2] == "1" || argv[2] == "true" || argv[2] == "on");
+	}
+	CommandCost res = CmdDesignateHoldingSiding(DoCommandFlag::Execute, *st_id_opt, enable);
+	if (res.Succeeded()) {
+		IConsolePrint(CC_DEFAULT, "Station {} holding siding status set to {}.", st_id_opt->base(), enable ? "ACTIVE" : "INACTIVE");
+		return true;
+	} else {
+		IConsolePrint(CC_ERROR, "Failed to update holding siding status for station {}.", st_id_opt->base());
+		return false;
+	}
+}
+
+/** Configure an auxiliary parallel throat for a portal gate. @copydoc IConsoleCmdProc */
+static bool ConConfigureParallelThroat(std::span<std::string_view> argv)
+{
+	if (argv.size() < 3) {
+		IConsolePrint(CC_HELP, "Usage: configure_parallel_throat <primary_tile> <parallel_tile>");
+		return true;
+	}
+	auto pri_opt = ParseType<TileIndex>(argv[1]);
+	auto par_opt = ParseType<TileIndex>(argv[2]);
+	if (!pri_opt.has_value() || !par_opt.has_value()) {
+		IConsolePrint(CC_ERROR, "Invalid tile parameters.");
+		return false;
+	}
+	bool res = PortalRegistry::ConfigureParallelThroat(*pri_opt, *par_opt);
+	if (PrebuiltTradeManager::Instance().IsTradeGateway(*pri_opt)) {
+		PrebuiltTradeManager::Instance().ConfigureGatewayParallelThroat(*pri_opt, *par_opt);
+		res = true;
+	}
+	if (res) {
+		IConsolePrint(CC_DEFAULT, "Configured parallel throat for portal {} -> {}.", pri_opt->base(), par_opt->base());
+		return true;
+	} else {
+		IConsolePrint(CC_ERROR, "Portal {} not found.", pri_opt->base());
+		return false;
+	}
+}
+
 /** Run balancing critic simulation or snapshot. @copydoc IConsoleCmdProc */
 static bool ConBalancingCritic(std::span<std::string_view> argv)
 {
@@ -4108,6 +4241,11 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("verify_uat_world",        ConVerifyUATWorld);
 	IConsole::CmdRegister("balancing_critic",        ConBalancingCritic);
 	IConsole::CmdRegister("balancing_snapshot",      ConBalancingSnapshot);
+	IConsole::CmdRegister("gate_access",             ConGateAccess);
+	IConsole::CmdRegister("purchase_charter",        ConPurchaseCharter);
+	IConsole::CmdRegister("list_charters",           ConListCharters);
+	IConsole::CmdRegister("designate_siding",        ConDesignateSiding);
+	IConsole::CmdRegister("configure_parallel_throat", ConConfigureParallelThroat);
 
 	/* networking functions */
 

@@ -265,6 +265,69 @@ bool PortalRegistry::IsHoldingActive(TileIndex portal_tile)
 	return it != interserver_portals.end() ? it->second.is_holding_active : false;
 }
 
+bool PortalRegistry::ConfigureParallelThroat(TileIndex portal_tile, TileIndex secondary_throat_tile)
+{
+	auto it_is = interserver_portals.find(portal_tile);
+	if (it_is != interserver_portals.end()) {
+		it_is->second.parallel_throat_tile = secondary_throat_tile;
+		return true;
+	}
+	auto it_p = tile_to_portal.find(portal_tile);
+	if (it_p != tile_to_portal.end()) {
+		auto it_link = portal_links.find(it_p->second.base());
+		if (it_link != portal_links.end()) {
+			if (it_link->second.end_a.tile == portal_tile) {
+				it_link->second.parallel_throat_tile_a = secondary_throat_tile;
+				return true;
+			}
+			if (it_link->second.end_b.tile == portal_tile) {
+				it_link->second.parallel_throat_tile_b = secondary_throat_tile;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+TileIndex PortalRegistry::GetParallelThroat(TileIndex portal_tile)
+{
+	auto it_is = interserver_portals.find(portal_tile);
+	if (it_is != interserver_portals.end()) {
+		return it_is->second.parallel_throat_tile;
+	}
+	auto it_p = tile_to_portal.find(portal_tile);
+	if (it_p != tile_to_portal.end()) {
+		auto it_link = portal_links.find(it_p->second.base());
+		if (it_link != portal_links.end()) {
+			if (it_link->second.end_a.tile == portal_tile) {
+				return it_link->second.parallel_throat_tile_a;
+			}
+			if (it_link->second.end_b.tile == portal_tile) {
+				return it_link->second.parallel_throat_tile_b;
+			}
+		}
+	}
+	return INVALID_TILE;
+}
+
+bool PortalRegistry::HasParallelThroat(TileIndex portal_tile)
+{
+	return GetParallelThroat(portal_tile) != INVALID_TILE;
+}
+
+std::vector<TileIndex> PortalRegistry::GetThroatTiles(TileIndex portal_tile)
+{
+	std::vector<TileIndex> res;
+	if (portal_tile != INVALID_TILE) {
+		res.push_back(portal_tile);
+		TileIndex parallel = GetParallelThroat(portal_tile);
+		if (parallel != INVALID_TILE) {
+			res.push_back(parallel);
+		}
+	}
+	return res;
+}
+
 bool PortalRegistry::IsPortalTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;
