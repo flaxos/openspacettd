@@ -20,8 +20,10 @@
 #include "fabrication_manager.h"
 #include "spaceport_manager.h"
 #include "edge_conduit.h"
+#include "prebuilt_trade.h"
 
 #include "../core/pool_type.hpp"
+#include "../linkgraph/linkgraphschedule.h"
 #include "../viewport_kdtree.h"
 #include "../map_func.h"
 #include "../clear_map.h"
@@ -39,6 +41,7 @@
 #include "../order_base.h"
 #include "../waypoint_base.h"
 #include "../saveload/saveload.h"
+#include "../animated_tile_func.h"
 #include "../signal_func.h"
 #include "../direction_func.h"
 #include "../fileio_func.h"
@@ -483,6 +486,10 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 0);
 		else MakeVoid(tile);
 	}
+	InitializeAnimatedTiles();
+	extern TileIndex _cur_tileloop_tile;
+	_cur_tileloop_tile = TileIndex{1};
+	LinkGraphSchedule::Clear();
 	PoolBase::Clean(PoolType::Normal);
 
 	ProductionChainManager::Reset();
@@ -641,6 +648,7 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		if (p.has_parent_path()) {
 			std::filesystem::create_directories(p.parent_path(), ec);
 		}
+		LinkGraphSchedule::Clear();
 		SaveLoadResult save_res = SaveOrLoad(output_path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
 		if (save_res != SaveLoadResult::Ok) {
 			result.error_message = "SaveOrLoad failed to write .sav file";
@@ -656,4 +664,146 @@ ScenarioSynthesisResult PromptScenarioGenerator::GenerateFromPrompt(const std::s
 {
 	PromptScenarioSpec spec = ParsePrompt(prompt_text);
 	return SynthesizeAndSave(spec, output_path);
+}
+
+ScenarioSynthesisResult PromptScenarioGenerator::GenerateCommonwealthPrefabWorld(const std::string &output_path, uint32_t world_count)
+{
+	PromptScenarioSpec spec;
+	spec.title = "Commonwealth Interplanetary UAT Matrix";
+	spec.narrative_summary = "Verified multi-world logistics network connecting Sol Earth Core to Augusta Hub, Merredin Outpost, and Prometheus Caldera.";
+	spec.world_count = std::clamp<uint32_t>(world_count, 3, 6);
+	spec.rival_relation = CorporateRelation::Neutral;
+	spec.rival_corporation = "Consortium Heavy Industries";
+	spec.create_active_fleets = true;
+	spec.create_prebuilt_corridors = true;
+
+	spec.worlds.resize(spec.world_count);
+
+	/* World 0: Core Earth */
+	spec.worlds[0].id = WorldID{0};
+	spec.worlds[0].name = "Sol Earth Core";
+	spec.worlds[0].phase = WorldPhase::Phase1_Core;
+	spec.worlds[0].biome = WorldBiome::Temperate;
+	spec.worlds[0].role_description = "High-density metropolitan administrative nexus.";
+	spec.worlds[0].population = 25000;
+	spec.worlds[0].has_megacity = true;
+	spec.worlds[0].has_corporate_hq = true;
+	spec.worlds[0].demanded_cargos.push_back(CommonwealthCargoID::Superalloys);
+	spec.worlds[0].demanded_cargos.push_back(CommonwealthCargoID::SiliconChips);
+	spec.worlds[0].supplied_cargos.push_back(CommonwealthCargoID::StructuralSteel);
+
+	/* World 1: Developed Augusta */
+	spec.worlds[1].id = WorldID{1};
+	spec.worlds[1].name = "Augusta CST Hub";
+	spec.worlds[1].phase = WorldPhase::Phase2_Developed;
+	spec.worlds[1].biome = WorldBiome::SubTropic;
+	spec.worlds[1].role_description = "Primary industrial fabrication and assembly nexus.";
+	spec.worlds[1].population = 10000;
+	spec.worlds[1].has_industrial_facility = true;
+	spec.worlds[1].industrial_recipe = RECIPE_STEEL_SMELTING;
+	spec.worlds[1].demanded_cargos.push_back(CommonwealthCargoID::IronOre);
+	spec.worlds[1].demanded_cargos.push_back(CommonwealthCargoID::RareEarthMinerals);
+	spec.worlds[1].supplied_cargos.push_back(CommonwealthCargoID::Superalloys);
+
+	/* World 2: Frontier Merredin */
+	spec.worlds[2].id = WorldID{2};
+	spec.worlds[2].name = "Merredin Mining Colony";
+	spec.worlds[2].phase = WorldPhase::Phase3_Frontier;
+	spec.worlds[2].biome = WorldBiome::AridDesert;
+	spec.worlds[2].role_description = "Deep-vein mineral extraction and rare earths mining.";
+	spec.worlds[2].population = 3500;
+	spec.worlds[2].is_striking = true;
+	spec.worlds[2].strike_cause = "Life-Support and Water Scarcity";
+	spec.worlds[2].supplied_cargos.push_back(CommonwealthCargoID::IronOre);
+	spec.worlds[2].supplied_cargos.push_back(CommonwealthCargoID::RareEarthMinerals);
+
+	if (spec.world_count >= 4) {
+		/* World 3: Expansion Prometheus */
+		spec.worlds[3].id = WorldID{3};
+		spec.worlds[3].name = "Prometheus Caldera Outpost";
+		spec.worlds[3].phase = WorldPhase::Phase4_Expansion;
+		spec.worlds[3].biome = WorldBiome::Volcanic;
+		spec.worlds[3].role_description = "High-energy plasma cracking and quantum crystal synthesis.";
+		spec.worlds[3].population = 1200;
+		spec.worlds[3].has_industrial_facility = true;
+		spec.worlds[3].industrial_recipe = RECIPE_QUANTUM_ENRICHMENT;
+		spec.worlds[3].supplied_cargos.push_back(CommonwealthCargoID::EnrichedQuantumCrystals);
+	}
+
+	for (size_t i = 4; i < spec.world_count; ++i) {
+		spec.worlds[i].id = WorldID{static_cast<uint32_t>(i)};
+		spec.worlds[i].name = fmt::format("Outer Territory Alpha-{}", i);
+		spec.worlds[i].phase = WorldPhase::Phase3_Frontier;
+		spec.worlds[i].biome = WorldBiome::SubArctic;
+		spec.worlds[i].population = 2000;
+	}
+
+	auto result = SynthesizeAndSave(spec, output_path);
+	if (!result.success) return result;
+
+	/* Bind trade gateway on Sol Earth Core to off-world Augusta node */
+	for (const auto &[pid, link] : PortalRegistry::GetAllPortals()) {
+		if (link.end_a.world_id == WorldID{0}) {
+			PrebuiltTradeManager::Instance().RegisterTradeGateway(link.end_a.tile, "world_augusta", WorldID{0}, 32);
+			break;
+		}
+	}
+
+	/* Re-save to persist newly registered trade gateways into TRAD chunk */
+	if (!output_path.empty()) {
+		LinkGraphSchedule::Clear();
+		SaveOrLoad(output_path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
+	}
+
+	return result;
+}
+
+bool PromptScenarioGenerator::VerifyCommonwealthUAT(std::string *error_msg)
+{
+	auto fail = [error_msg](std::string msg) {
+		if (error_msg != nullptr) *error_msg = std::move(msg);
+		return false;
+	};
+
+	if (PlanetManager::Count() < 3) {
+		return fail(fmt::format("Expected >= 3 worlds, found {}", PlanetManager::Count()));
+	}
+
+	if (PortalRegistry::Count() < 2) {
+		return fail(fmt::format("Expected >= 2 portal links, found {}", PortalRegistry::Count()));
+	}
+
+	const Company *c0 = Company::GetIfValid(CompanyID{0});
+	if (c0 == nullptr) {
+		return fail("Company 0 does not exist");
+	}
+
+	const auto *hq = CorporateHQManager::GetHQ(CompanyID{0});
+	if (hq == nullptr) {
+		return fail("Corporate HQ not registered for Company 0");
+	}
+
+	if (MegacityManager::GetAllMegacities().empty()) {
+		return fail("No Megacity registered");
+	}
+
+	if (PrebuiltTradeManager::Instance().GetAllTradeGateways().empty()) {
+		return fail("No Prebuilt Trade Gateways registered");
+	}
+
+	size_t train_count = 0;
+	for (const Train *t : Train::Iterate()) {
+		if (t->IsFrontEngine()) {
+			train_count++;
+			if (t->vehstatus.Test(VehState::Crashed)) {
+				return fail(fmt::format("Train {} is crashed", t->index.base()));
+			}
+		}
+	}
+
+	if (train_count == 0) {
+		return fail("No active train consists found");
+	}
+
+	return true;
 }

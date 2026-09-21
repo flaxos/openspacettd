@@ -64,6 +64,9 @@ add_test_files(
     test_sprint47_alliances_and_neutral_tracks.cpp
     test_sprint48_prompt_to_savegame.cpp
     test_sprint48_balancing_critic.cpp
+    test_universe_graph.cpp
+    test_prebuilt_trade.cpp
+    test_prefab_world_uat.cpp
     test_script_admin.cpp
     test_window_desc.cpp
     tilearea.cpp

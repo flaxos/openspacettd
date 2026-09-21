@@ -50,6 +50,8 @@
 #include "portal/federation_cmd.h"
 #include "portal/federation_staging.h"
 #include "portal/corporate_alliance.h"
+#include "portal/prebuilt_trade.h"
+#include "portal/consist_materializer.h"
 
 #include "safeguards.h"
 
@@ -3611,6 +3613,19 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 			}
 		} else {
 			if (PortalRegistry::IsPortalTile(v->tile)) {
+				if (PrebuiltTradeManager::Instance().IsTradeGateway(v->tile)) {
+					if (v->IsMovingFront() && v->track == Track::Wormhole &&
+							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {
+						auto global_comp = FederationIdentityRegistry::FindCompany(first->owner);
+						GlobalOwnerToken owner_token = global_comp.has_value() ? global_comp->ToOwnerToken() : GlobalOwnerToken{};
+						ConsistDespawnResult capture_res = ConsistMaterializer::CaptureForTransfer(first, owner_token);
+						if (capture_res.success) {
+							PrebuiltTradeManager::Instance().DispatchOutboundConsist(v->tile, capture_res.snapshot, TimerGameTick::counter, first->owner);
+							ConsistMaterializer::ReleaseCapturedConsist(first);
+						}
+						return false;
+					}
+				}
 				if (PortalRegistry::IsInterServerPortal(v->tile)) {
 					if (v->IsMovingFront() && v->track == Track::Wormhole &&
 							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {

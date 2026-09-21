@@ -436,6 +436,10 @@ add_files(
     portal/universe_authority.h
     portal/universe_directory_gui.cpp
     portal/universe_directory_gui.h
+    portal/universe_graph.cpp
+    portal/universe_graph.h
+    portal/prebuilt_trade.cpp
+    portal/prebuilt_trade.h
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h

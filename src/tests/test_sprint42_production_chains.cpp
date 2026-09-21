@@ -29,6 +29,7 @@
 #include "../station_kdtree.h"
 #include "../town.h"
 #include "../town_kdtree.h"
+#include "../viewport_kdtree.h"
 #include "../train.h"
 #include "../vehicle_func.h"
 #include "../clear_map.h"
@@ -486,6 +487,7 @@ static Station *SetupProductionGameplay()
 	MakeRailStation(tile, company->index, station->index, Axis::X, 0, RAILTYPE_RAIL);
 	RebuildStationKdtree();
 	RebuildTownKdtree();
+	RebuildViewportKdtree();
 	station->RecomputeCatchment();
 	if (_valid_searchpaths.empty()) _valid_searchpaths.push_back(Searchpath::WorkingDir);
 	return station;

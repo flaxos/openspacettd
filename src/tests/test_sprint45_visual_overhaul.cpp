@@ -26,6 +26,9 @@
 #include "../depot_base.h"
 #include "../vehicle_base.h"
 #include "../town.h"
+#include "../town_kdtree.h"
+#include "../core/pool_type.hpp"
+#include "../linkgraph/linkgraphschedule.h"
 #include "../map_func.h"
 #include "../saveload/saveload.h"
 #include "../saveload/saveload_func.h"
@@ -54,11 +57,15 @@ static void SetupTestEnvironment(uint32_t map_w = 256, uint32_t map_h = 256)
 
 	ResetRailTypes();
 	StationClass::Reset();
-	_vehicle_pool.CleanPool();
-	_depot_pool.CleanPool();
-	_station_pool.CleanPool();
-	_town_pool.CleanPool();
-	_company_pool.CleanPool();
+	LinkGraphSchedule::Clear();
+	PoolBase::Clean(PoolType::Normal);
+
+	if (Town::CanAllocateItem()) {
+		Town *t = Town::Create(TileXY(10, 10));
+		t->name = "Visual Overhaul Town";
+		t->townnametype = SPECSTR_TOWNNAME_START;
+		RebuildTownKdtree();
+	}
 
 	if (_current_language == nullptr) {
 		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
@@ -341,6 +348,7 @@ TEST_CASE("Sprint 45 - Visual Overhaul Save/Load Round-Trip Serialization (VISU 
 
 	CHECK(VisualOverhaulManager::GetAllArcologyTiers().size() == 3);
 
+	LinkGraphSchedule::Clear();
 	/* Save game */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(save_res == SaveLoadResult::Ok);

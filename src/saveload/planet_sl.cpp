@@ -27,6 +27,8 @@
 #include "../portal/corporate_alliance.h"
 #include "../portal/lore_competitor.h"
 #include "../portal/visual_overhaul.h"
+#include "../portal/prebuilt_trade.h"
+#include "../portal/universe_graph.h"
 
 #include "../safeguards.h"
 
@@ -1532,6 +1534,94 @@ struct VISUChunkHandler : ChunkHandler {
 
 static const VISUChunkHandler VISU;
 
+/** Save/load record for prebuilt trade gateways (TRAD). */
+struct SlPrebuiltTradeRecord {
+	uint32_t portal_tile;
+	uint32_t local_world;
+	std::string target_world_id;
+	std::string target_world_name;
+	uint32_t virtual_length;
+	uint32_t total_trains_exported;
+	uint32_t total_cargo_exported;
+	uint32_t total_trains_imported;
+	uint32_t total_cargo_imported;
+	uint64_t total_tariffs_earned;
+	uint8_t active;
+};
+
+static const SaveLoad _prebuilt_trade_desc[] = {
+	    SLE_VAR(SlPrebuiltTradeRecord, portal_tile,           VarTypes::U32),
+	    SLE_VAR(SlPrebuiltTradeRecord, local_world,            VarTypes::U32),
+	   SLE_SSTR(SlPrebuiltTradeRecord, target_world_id,       VarTypes::STR),
+	   SLE_SSTR(SlPrebuiltTradeRecord, target_world_name,     VarTypes::STR),
+	    SLE_VAR(SlPrebuiltTradeRecord, virtual_length,        VarTypes::U32),
+	    SLE_VAR(SlPrebuiltTradeRecord, total_trains_exported, VarTypes::U32),
+	    SLE_VAR(SlPrebuiltTradeRecord, total_cargo_exported,  VarTypes::U32),
+	    SLE_VAR(SlPrebuiltTradeRecord, total_trains_imported, VarTypes::U32),
+	    SLE_VAR(SlPrebuiltTradeRecord, total_cargo_imported,  VarTypes::U32),
+	    SLE_VAR(SlPrebuiltTradeRecord, total_tariffs_earned,  VarTypes::U64),
+	    SLE_VAR(SlPrebuiltTradeRecord, active,                VarTypes::U8),
+};
+
+struct TRADChunkHandler : ChunkHandler {
+	TRADChunkHandler() : ChunkHandler("TRAD", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_prebuilt_trade_desc);
+
+		int i = 0;
+		for (const auto &gw : PrebuiltTradeManager::Instance().GetAllTradeGateways()) {
+			SlPrebuiltTradeRecord r{
+				.portal_tile = gw.portal_tile.base(),
+				.local_world = gw.local_world.base(),
+				.target_world_id = gw.target_world_id,
+				.target_world_name = gw.target_world_name,
+				.virtual_length = gw.virtual_length_tiles,
+				.total_trains_exported = static_cast<uint32_t>(gw.total_trains_exported),
+				.total_cargo_exported = static_cast<uint32_t>(gw.total_cargo_exported),
+				.total_trains_imported = static_cast<uint32_t>(gw.total_trains_imported),
+				.total_cargo_imported = static_cast<uint32_t>(gw.total_cargo_imported),
+				.total_tariffs_earned = static_cast<uint64_t>(std::max<int64_t>(0, gw.total_tariffs_earned)),
+				.active = static_cast<uint8_t>(gw.active ? 1 : 0),
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&r, _prebuilt_trade_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		const std::vector<SaveLoad> slt = SlTableHeader(_prebuilt_trade_desc);
+
+		SlPrebuiltTradeRecord r{};
+		while (SlIterateArray() != -1) {
+			r = {};
+			SlObject(&r, slt);
+			PrebuiltTradeGateway gw;
+			gw.portal_tile = TileIndex{r.portal_tile};
+			gw.local_world = WorldID{r.local_world};
+			gw.target_world_id = r.target_world_id;
+			gw.target_world_name = r.target_world_name;
+			gw.virtual_length_tiles = r.virtual_length;
+			gw.total_trains_exported = r.total_trains_exported;
+			gw.total_cargo_exported = r.total_cargo_exported;
+			gw.total_trains_imported = r.total_trains_imported;
+			gw.total_cargo_imported = r.total_cargo_imported;
+			gw.total_tariffs_earned = static_cast<int64_t>(r.total_tariffs_earned);
+			gw.active = (r.active != 0);
+
+			const UniverseNode *node = UniverseGraphManager::Instance().FindNode(gw.target_world_id);
+			if (node != nullptr) {
+				gw.tariff_multiplier = node->economic_profile.tariff_multiplier;
+			}
+			PrebuiltTradeManager::Instance().RestoreGateway(gw);
+		}
+	}
+};
+
+static const TRADChunkHandler TRAD;
+
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
 	PORT,
@@ -1552,6 +1642,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PROD,
 	LORE,
 	VISU,
+	TRAD,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

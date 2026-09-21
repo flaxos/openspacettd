@@ -20,6 +20,8 @@
 #include "../station_map.h"
 #include "../town.h"
 #include "../cargopacket.h"
+#include "../industry.h"
+#include "../depot_base.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../command_func.h"
@@ -37,6 +39,8 @@
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
 #include "../table/strings.h"
+#include "../language.h"
+#include "../strings_func.h"
 #include "../gfx_func.h"
 #include "../table/sprites.h"
 #include "mock_environment.h"
@@ -54,14 +58,35 @@ static void SetupSprint9Environment(uint32_t map_w = 256, uint32_t map_h = 256)
 	SpaceportManager::Reset();
 	EdgeConduitManager::Reset();
 
+	_industry_pool.CleanPool();
+	_depot_pool.CleanPool();
 	_station_pool.CleanPool();
 	_town_pool.CleanPool();
 	_vehicle_pool.CleanPool();
 	_company_pool.CleanPool();
+	_cargopacket_pool.CleanPool();
+
+	if (Town::CanAllocateItem()) {
+		Town *t = Town::Create(TileXY(10, 10));
+		t->name = "Terra Town";
+		t->townnametype = SPECSTR_TOWNNAME_START;
+		RebuildTownKdtree();
+	}
 
 	MockEnvironment &mock = MockEnvironment::Instance();
 	(void)mock;
 	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
+
+	if (_current_language == nullptr) {
+		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+		auto saved_paths = _valid_searchpaths;
+		auto saved_binary = _searchpaths[Searchpath::BinaryDir];
+		_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
+		_valid_searchpaths = {Searchpath::BinaryDir};
+		InitializeLanguagePacks();
+		_valid_searchpaths = std::move(saved_paths);
+		_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
+	}
 
 	if (_valid_searchpaths.empty()) {
 		_valid_searchpaths.push_back(Searchpath::WorkingDir);
@@ -159,11 +184,14 @@ static void SetupMapEdgeWorld(WorldPhase phase = WorldPhase::Phase3_Frontier)
 static Station *CreateConduitTestStation(TileIndex tile, Town *town = nullptr, uint8_t rating = 255)
 {
 	if (town == nullptr) {
-		REQUIRE(Town::CanAllocateItem());
-		town = Town::Create(TileXY(10, 10));
-		town->name = "Conduit Test Town";
-		town->townnametype = SPECSTR_TOWNNAME_START;
-		RebuildTownKdtree();
+		town = Town::GetIfValid(TownID{0});
+		if (town == nullptr) {
+			REQUIRE(Town::CanAllocateItem());
+			town = Town::Create(TileXY(10, 10));
+			town->name = "Conduit Test Town";
+			town->townnametype = SPECSTR_TOWNNAME_START;
+			RebuildTownKdtree();
+		}
 	}
 
 	REQUIRE(Station::CanAllocateItem());
@@ -244,7 +272,9 @@ TEST_CASE("Spaceport Manager - Lifecycle and Trade Calculation")
 	CHECK(SpaceportManager::CalculateTradeCargoProduction(*info) == 75);
 
 	/* Deliver supplies */
-	SpaceportManager::RecordSupplyDelivery(sid, CargoType{0}, 100);
+	CargoType ct = GetCargoTypeByLabel(CT_GOODS);
+	if (!IsValidCargoType(ct)) ct = CargoType{0};
+	SpaceportManager::RecordSupplyDelivery(sid, ct, 100);
 	info = SpaceportManager::GetSpaceport(sid);
 	REQUIRE(info != nullptr);
 	CHECK(info->supplies_received == 100);

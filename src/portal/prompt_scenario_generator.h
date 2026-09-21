@@ -112,6 +112,21 @@ public:
 	 * @return True on success.
 	 */
 	static bool SpawnActiveFleets(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result);
+
+	/**
+	 * Synthesize a canonical multi-world Commonwealth Prefab World for automated UAT.
+	 * @param output_path Destination savegame path (.sav).
+	 * @param world_count Number of worlds to partition (default 4).
+	 * @return ScenarioSynthesisResult containing generated stats.
+	 */
+	static ScenarioSynthesisResult GenerateCommonwealthPrefabWorld(const std::string &output_path, uint32_t world_count = 4);
+
+	/**
+	 * Verify that the currently loaded game world is a healthy, playable Commonwealth UAT scenario.
+	 * @param error_msg Optional pointer to string receiving detailed diagnostics.
+	 * @return True if all UAT invariants pass.
+	 */
+	static bool VerifyCommonwealthUAT(std::string *error_msg = nullptr);
 };
 
 #endif /* PROMPT_SCENARIO_GENERATOR_H */
