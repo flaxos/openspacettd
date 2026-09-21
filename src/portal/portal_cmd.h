@@ -221,6 +221,7 @@ CommandCost CmdRemoveProcessingFacility(DoCommandFlags flags, StationID station)
 CommandCost CmdUpgradeProcessingFacility(DoCommandFlags flags, StationID station, uint32_t capacity_increase);
 CommandCost CmdSetFacilityPlatformCapacity(DoCommandFlags flags, StationID station, uint32_t platform_capacity);
 CommandCost CmdConfigurePortalStagingSiding(DoCommandFlags flags, TileIndex portal_tile, TileIndex siding_tile);
+CommandCost CmdDesignateHoldingSiding(DoCommandFlags flags, StationID station_id, bool enable);
 CommandCost CmdSetCorporateAlliance(DoCommandFlags flags, CompanyID target_company, CorporateRelation relation);
 DEF_CMD_TRAIT(Commands::BuildProcessingFacility, CmdBuildProcessingFacility, {}, CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::RemoveProcessingFacility, CmdRemoveProcessingFacility, {}, CommandType::LandscapeConstruction)

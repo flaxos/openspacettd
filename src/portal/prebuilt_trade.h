@@ -61,6 +61,7 @@ struct PrebuiltTradeGateway {
 	uint64_t total_cargo_exported = 0;
 	uint64_t total_cargo_imported = 0;
 	int64_t total_tariffs_earned = 0;
+	TileIndex parallel_throat_tile = INVALID_TILE; ///< Auxiliary parallel throat tile for multi-track gateway returns.
 	bool active = true;
 };
 
@@ -91,6 +92,16 @@ public:
 		WorldID local_world,
 		uint32_t virtual_length = 32
 	);
+
+	/**
+	 * Configure an auxiliary parallel throat tile for multi-track trade gateway operations.
+	 */
+	bool ConfigureGatewayParallelThroat(TileIndex portal_tile, TileIndex secondary_throat_tile);
+
+	/**
+	 * Get the auxiliary parallel throat tile for a trade gateway, or INVALID_TILE if none configured.
+	 */
+	TileIndex GetGatewayParallelThroat(TileIndex portal_tile) const;
 
 	/**
 	 * Unregister a trade gateway by tile.

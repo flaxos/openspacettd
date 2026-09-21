@@ -114,19 +114,28 @@ def test_modal_rules(data):
     node_map = {n["world_id"]: n for n in data["nodes"]}
     vinmar = node_map.get("world_vinmar")
     assert vinmar is not None
-    assert vinmar["connection_mode"] == "DATA"
+    assert vinmar["connection_mode"] == "RAIL"
 
-    conn_map = {c["connection_id"]: c for c in data["connections"]}
     vinmar_conn = next(c for c in data["connections"] if "vinmar" in c["connection_id"])
-    assert vinmar_conn["permits_through_running_train"] is False
-    assert vinmar_conn["connection_type"] == "DATA"
+    assert vinmar_conn["permits_through_running_train"] is True
+    assert vinmar_conn["connection_type"] == "RAIL"
 
-    # Far Away scheduled route
+    # Far Away universal rail freight route (WP-50.3)
+    far_away = node_map.get("world_far_away")
+    assert far_away is not None
+    assert far_away["connection_mode"] == "RAIL"
+
     far_away_conn = next(c for c in data["connections"] if "far_away" in c["connection_id"])
-    assert far_away_conn["connection_type"] == "SCHEDULED"
-    assert far_away_conn["availability"] == "SCHEDULED"
+    assert far_away_conn["connection_type"] == "RAIL"
+    assert far_away_conn["availability"] == "PERMANENT"
+    assert far_away_conn["permits_through_running_train"] is True
 
-    print(f"PASS: Modal rules verified (Vinmar DATA blocks trains, Far Away is SCHEDULED)")
+    # Private world verification (WP-50.4)
+    cressat = node_map.get("world_cressat")
+    assert cressat is not None
+    assert cressat["connection_mode"] == "PRIVATE"
+
+    print(f"PASS: Modal rules verified (Vinmar & Far Away are universal RAIL, Cressat is PRIVATE)")
 
 def main():
     repo_root = Path(__file__).resolve().parent.parent

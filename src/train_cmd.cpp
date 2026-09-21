@@ -52,6 +52,7 @@
 #include "portal/corporate_alliance.h"
 #include "portal/prebuilt_trade.h"
 #include "portal/consist_materializer.h"
+#include "portal/corporate_charter.h"
 
 #include "safeguards.h"
 
@@ -3616,6 +3617,18 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 				if (PrebuiltTradeManager::Instance().IsTradeGateway(v->tile)) {
 					if (v->IsMovingFront() && v->track == Track::Wormhole &&
 							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {
+						const auto *gw = PrebuiltTradeManager::Instance().GetTradeGateway(v->tile);
+						std::string target_world = (gw != nullptr) ? gw->target_world_id : "";
+						auto access = CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
+						if (!access.allowed) {
+							/* Access denied: lack of charter or insufficient reputation */
+							first->cur_speed = 0;
+							first->vehstatus.Set(VehState::Stopped);
+							SetWindowDirty(WindowClass::VehicleView, first->index);
+							Debug(net, 1, "[Charter] Access denied for company {} to world {} at tile {}: {}",
+								first->owner, target_world, v->tile.base(), access.reason);
+							return false;
+						}
 						auto global_comp = FederationIdentityRegistry::FindCompany(first->owner);
 						GlobalOwnerToken owner_token = global_comp.has_value() ? global_comp->ToOwnerToken() : GlobalOwnerToken{};
 						ConsistDespawnResult capture_res = ConsistMaterializer::CaptureForTransfer(first, owner_token);
@@ -3629,6 +3642,17 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 				if (PortalRegistry::IsInterServerPortal(v->tile)) {
 					if (v->IsMovingFront() && v->track == Track::Wormhole &&
 							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {
+						const auto *link = PortalRegistry::GetInterServerPortal(v->tile);
+						std::string target_world = (link != nullptr) ? fmt::format("world_{}", link->remote_world.base()) : "";
+						auto access = CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
+						if (!access.allowed) {
+							first->cur_speed = 0;
+							first->vehstatus.Set(VehState::Stopped);
+							SetWindowDirty(WindowClass::VehicleView, first->index);
+							Debug(net, 1, "[Charter] Access denied for company {} to world {} at tile {}: {}",
+								first->owner, target_world, v->tile.base(), access.reason);
+							return false;
+						}
 						if (FederationStagingManager::CheckAndDivertToStaging(first, v->tile)) {
 							return false;
 						}

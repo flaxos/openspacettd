@@ -440,6 +440,8 @@ add_files(
     portal/universe_graph.h
     portal/prebuilt_trade.cpp
     portal/prebuilt_trade.h
+    portal/corporate_charter.cpp
+    portal/corporate_charter.h
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h

@@ -1083,8 +1083,8 @@
       "era": "pre_invasion",
       "connects_to": "world_half_way",
       "connection_evidence": "R",
-      "connection_mode": "SCHEDULED",
-      "source_rule": "S07; see terminal-level route",
+      "connection_mode": "RAIL",
+      "source_rule": "S07; universal rail freight connection",
       "source_ids": [
         "S07"
       ],
@@ -3640,8 +3640,8 @@
       "era": "pre_invasion",
       "connects_to": "world_augusta",
       "connection_evidence": "R",
-      "connection_mode": "DATA",
-      "source_rule": "S14; NOT a freight connection",
+      "connection_mode": "RAIL",
+      "source_rule": "S14; universal rail freight connection",
       "source_ids": [
         "S14"
       ],
@@ -4946,15 +4946,15 @@
       "connection_id": "conn_world_far_away_world_half_way",
       "endpoint_a": "world_far_away",
       "endpoint_b": "world_half_way",
-      "connection_type": "SCHEDULED",
+      "connection_type": "RAIL",
       "evidence_class": "R",
       "source_ids": [
         "S07"
       ],
       "inference_or_assumption_id": "NONE",
-      "availability": "SCHEDULED",
+      "availability": "PERMANENT",
       "access_policy": "PUBLIC",
-      "permits_through_running_train": false,
+      "permits_through_running_train": true,
       "virtual_length_tiles": 32,
       "enabled_in_game": true
     },
@@ -6034,7 +6034,7 @@
       "connection_id": "conn_world_vinmar_world_augusta",
       "endpoint_a": "world_vinmar",
       "endpoint_b": "world_augusta",
-      "connection_type": "DATA",
+      "connection_type": "RAIL",
       "evidence_class": "R",
       "source_ids": [
         "S14"
@@ -6042,9 +6042,9 @@
       "inference_or_assumption_id": "NONE",
       "availability": "PERMANENT",
       "access_policy": "PUBLIC",
-      "permits_through_running_train": false,
+      "permits_through_running_train": true,
       "virtual_length_tiles": 32,
-      "enabled_in_game": false
+      "enabled_in_game": true
     },
     {
       "connection_id": "conn_world_vyborg_world_wessex",

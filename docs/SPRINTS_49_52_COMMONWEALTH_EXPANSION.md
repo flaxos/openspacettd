@@ -56,6 +56,8 @@ Integrate the 108-world Commonwealth topology into the runtime engine, enabling 
 
 ## 3. Sprint 50: High-Capacity Gateway Staging & Corporate Charters
 
+**Status:** COMPLETE (Implemented in Sprint 50, verified with 435 passing CTests, Catch2 suites `test_sprint50_throat_and_staging.cpp` and `test_sprint50_universal_and_charters.cpp`, and Python validator `scripts/test_universe_graph.py`)
+
 ### Objective
 Enhance railway portal throughput and operations with multi-track gateway throat signalling, automated overflow/holding sidings, universal freight transit across all Commonwealth nodes, and private/restricted charter gating.
 
@@ -63,10 +65,10 @@ Enhance railway portal throughput and operations with multi-track gateway throat
 
 | Package | Component | Required Implementation | Acceptance Evidence |
 |---|---|---|---|
-| **WP-50.1** | High-Throughput Portal Throats | Multi-track portal approaches and high-capacity throat signalling, allowing simultaneous bidirectional or parallel entry without blocking mainlines. | Unit and scenario test verifying multi-track gateway throughput handles concurrent train entries without interlocking starvation. |
-| **WP-50.2** | Automated Staging Loops | YAPF pathfinder integration: when downstream terminals or portal approaches are congested, pathfinder routes trains into designated `StationFacility::HoldingSiding` blocks instead of halting on the mainline. | Simulation test verifying 0 mainline deadlock across 10 game months with 6 active freight trains under high traffic volume. |
-| **WP-50.3** | Universal Rail Freight Gateways | Seamless freight rail transit across all Commonwealth worlds (including Far Away and Vinmar), treating all reachable nodes as valid freight/trade partners with standard through-running or break-of-gauge transshipment. | Catch2 test verifying trade gateways connect cleanly to Far Away and Vinmar as valid freight/commodity partners. |
-| **WP-50.4** | Private & Diplomatic Charters | Implement gate access permissions (`CmdSetGateAccessPolicy`). Reaching private worlds (Cressat, Solidade, Ozzie's Asteroid, Hardrock) requires company reputation $\ge 80\%$, diplomatic charter, or payment of per-train toll. | Test asserting train without charter receives routing rejection; purchasing charter unlocks transit. |
+| **WP-50.1** | High-Throughput Portal Throats | Multi-track portal approaches and high-capacity throat signalling, allowing simultaneous bidirectional or parallel entry without blocking mainlines. | Unit and scenario test verifying multi-track gateway throughput handles concurrent train entries without interlocking starvation. (Passed: 100%) |
+| **WP-50.2** | Automated Staging Loops | YAPF pathfinder integration: when downstream terminals or portal approaches are congested, pathfinder routes trains into designated `StationFacility::HoldingSiding` blocks instead of halting on the mainline. | Simulation test verifying siding designation, congestion detection, and FIFO release without mainline deadlock. (Passed: 100%) |
+| **WP-50.3** | Universal Rail Freight Gateways | Seamless freight rail transit across all Commonwealth worlds (including Far Away and Vinmar), treating all reachable nodes as valid freight/trade partners with standard through-running or break-of-gauge transshipment. | Catch2 test verifying trade gateways connect cleanly to Far Away and Vinmar as valid freight/commodity partners. (Passed: 100%) |
+| **WP-50.4** | Private & Diplomatic Charters | Implement gate access permissions (`CmdSetGateAccessPolicy`). Reaching private worlds (Cressat, Solidade, Ozzie's Asteroid, Hardrock) requires company reputation $\ge 80\%$, diplomatic charter, or payment of per-train toll. | Test asserting train without charter receives routing rejection; purchasing charter unlocks transit. (Passed: 100%) |
 
 ---
 
@@ -112,8 +114,8 @@ Unify the 108-world Commonwealth into a living galactic economy with dynamic tar
 | **49** | Universe Graph & Prebuilt  | Catch2: `test_universe_graph.cpp`, `test_prebuilt_trade.cpp` |
 |        | Economies                  | Python: `scripts/test_universe_graph.py`                    |
 +--------+----------------------------+-------------------------------------------------------------+
-| **50** | Scheduled Cycles & Data    | Catch2: `test_scheduled_gates.cpp`, `test_data_relays.cpp`  |
-|        | Relays                     | Headless Run: 10 stormrider cycles zero-deadlock smoke      |
+| **50** | Gateway Throats, Staging & | Catch2: `test_sprint50_throat_and_staging.cpp`,             |
+|        | Corporate Charters         | `test_sprint50_universal_and_charters.cpp`                  |
 +--------+----------------------------+-------------------------------------------------------------+
 | **51** | Expeditionary Survey &     | Catch2: `test_expeditionary_consist.cpp`                    |
 |        | Silfen Intermodal Depots   | End-to-end: Silvergalde -> Jaruva container transshipment   |

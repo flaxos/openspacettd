@@ -63,6 +63,20 @@ bool PrebuiltTradeManager::RegisterTradeGateway(
 	return true;
 }
 
+bool PrebuiltTradeManager::ConfigureGatewayParallelThroat(TileIndex portal_tile, TileIndex secondary_throat_tile)
+{
+	auto it = this->_gateways.find(portal_tile);
+	if (it == this->_gateways.end()) return false;
+	it->second.parallel_throat_tile = secondary_throat_tile;
+	return true;
+}
+
+TileIndex PrebuiltTradeManager::GetGatewayParallelThroat(TileIndex portal_tile) const
+{
+	auto it = this->_gateways.find(portal_tile);
+	return it != this->_gateways.end() ? it->second.parallel_throat_tile : INVALID_TILE;
+}
+
 bool PrebuiltTradeManager::UnregisterTradeGateway(TileIndex portal_tile)
 {
 	return this->_gateways.erase(portal_tile) > 0;
@@ -217,11 +231,12 @@ size_t PrebuiltTradeManager::ProcessScheduledReturns(uint64_t current_tick)
 			/* Materialize train onto return portal track if map is initialized, tile is tunnel, and throat is clear */
 			if (ret.portal_tile != INVALID_TILE && Map::Size() > 0 && ret.portal_tile < Map::Size() && IsTunnelTile(ret.portal_tile)) {
 				DiagDirection enter_dir = ReverseDiagDir(GetTunnelBridgeDirection(ret.portal_tile));
-				if (!ConsistMaterializer::CheckThroatClearance(ret.portal_tile, enter_dir)) {
-					/* Throat is temporarily occupied; retry on next tick */
+				TileIndex active_throat = ConsistMaterializer::ResolveClearThroat(ret.portal_tile, enter_dir);
+				if (active_throat == INVALID_TILE) {
+					/* All candidate throats temporarily occupied; retry on next tick */
 					continue;
 				}
-				ConsistMaterializer::MaterializeFromTransfer(ret.return_snapshot, ret.portal_tile, enter_dir);
+				ConsistMaterializer::MaterializeFromTransfer(ret.return_snapshot, active_throat, enter_dir);
 			}
 
 			ret.status = TradeTransactionStatus::Arrived;

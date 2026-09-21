@@ -12,6 +12,7 @@
 
 
 #include "../../pbs.h"
+#include "../../station_base.h"
 #include "../follow_track.hpp"
 #include "../pathfinder_type.h"
 #include "yapf_type.hpp"
@@ -467,9 +468,13 @@ no_entry_cost: // jump here at the beginning if the node has no parent (it is th
 			} else if (follower->is_station) {
 				/* Station penalties. */
 				uint platform_length = follower->tiles_skipped + 1;
-				/* We don't know yet if the station is our target or not. Act like
-				 * if it is pass-through station (not our destination). */
-				segment_cost += Yapf().PfGetSettings().rail_station_penalty * platform_length;
+				const Station *st = Station::GetIfValid(GetStationIndex(cur.tile));
+				bool is_holding_siding = (st != nullptr && st->facilities.Test(StationFacility::HoldingSiding));
+				/* Holding sidings do not incur standard pass-through station penalties,
+				 * permitting trains to divert naturally into staging loops when the mainline is congested. */
+				if (!is_holding_siding) {
+					segment_cost += Yapf().PfGetSettings().rail_station_penalty * platform_length;
+				}
 				/* We will end in this pass (station is possible target) */
 				end_segment_reason.Set(EndSegmentReason::Station);
 
