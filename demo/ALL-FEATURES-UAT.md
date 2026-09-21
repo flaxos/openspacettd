@@ -203,7 +203,7 @@ not instructions for a player to crash or damage their library.
 airport and World3 **Frontier Edge Minerals** actual rail station, located from
 Sign list. Verify ownership/existence/catchment; if absent, build owned airport/
 rail station with native toolbar or mark Blocked. Cash mode; no custom research.
-**Status:** Not run; OST-EC-001 counter defect known from code.
+**Status:** Automated tests pass ([wp10]); OST-EC-001 resolved; human visual UAT pending.
 
 1. Click actual airport station→**Designate Spaceport**. Record tier, supplies,
    **Next monthly off-world trade** and cash. Deliver actual requested supply cargo

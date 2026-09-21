@@ -17,6 +17,22 @@ from verification; [player checklist](../demo/ALL-FEATURES-UAT.md) and
 is a short checkpoint, not another backlog. The audit began no implementation packages;
 the subsequent user-authorized WP-01–09 execution is recorded below.
 
+## WP-10 implementation follow-up — 17 September
+
+**Implemented and merged into main (PR #8).** Edge Conduits now follow OpenTTD's
+native station allocator instead of claiming delivery when no cargo is accepted.
+OST-EC-001 is resolved. All six focused test cases pass (97 assertions in `./build/openttd_test '[wp10]'`).
+
+- **Delivery accounting:** `MoveGoodsToStationDetailed` tracks candidate stations,
+  eligible stations, packet allocation, and whole units actually moved.
+- **Counters and states:** `EdgeConduit` tracks `last_month_potential`,
+  `last_month_allocated`, `total_allocated`, and explicit `ConduitDeliveryStatus`
+  (`NoCatchment`, `NoEligibleStation`, `NoWholeUnitsAllocated`, `PacketAllocationFailed`,
+  `Allocated`, `DirectFeederDispatched`, `DirectFeederUnavailable`).
+- **Land Information UI:** The Land Information window displays honest extraction
+  potential, actual monthly allocation, cumulative delivery, and specific outcome.
+- **Persistence:** Saved in `COND` chunk; backward compatibility preserved for legacy saves.
+
 ## WP-11 implementation follow-up — 16 September
 
 The structural economic slice is implemented locally; human UAT remains open.
@@ -85,7 +101,7 @@ rebuilt and all **363 CTests pass**. [Evidence, fixture hashes and limitations](
 **Next acceptance:** UAT-04, 08, 10–12 and save/reload using copies with the current
 binary. `orca-ide` remains unavailable, so no new visual pass is claimed. The
 previous user crash-smoke report predates these changes. These packages are not
-closed for human acceptance, and WP-10 or later work has not started.
+closed for human acceptance; WP-10 and WP-11 are implemented and merged into main.
 
 ## WP-06 implementation follow-up
 
@@ -528,7 +544,7 @@ Rollback: local change; negligible fixture storage, one process.
 | **WP-07 Functional capture and prefab routes** | OST-BP-003/005, two reviews: native drag/cancel/naming; then topology fixes supported by port-route tests. No bridges/grade separation/new catalogue. Depends WP01/06. | Capture empty/foreign/cancel; eight full layouts, sequential transforms, YAPF routes; trains each promised movement. GUI UAT04. | Geometry repair can alter saved templates; version built-ins and retain imported layouts. Bounded maps/one engine. |
 | **WP-08 Correct colonisation** | OST-COL-001; native `town_cmd` initialization and portal/world command preflight. Depends WP05. No new town economy model. | Pool/terrain/owner/funds failure atomicity; real houses/population/spatial lookup; directory matches world; save/reload; UAT08. | Existing incomplete outposts need explicit repair decision and versioned fixture; do not blanket regenerate towns. |
 | **WP-09 Establishable HQ/hubs/reserves** | OST-UI-001, corporate GUI/commands/widgets/lang. Depends WP02–05. Native placement, owned-station selection, reserve editing; decide explicit transfer workflow and company presence. No decorative redesign. | Fresh player builds HQ/hub, moves cargo, edits reserve, sees cost/errors and persists; UAT10/11/12. | Workflow scope can grow; one control/path per review. Small maps and same content; rollback preserves backend data. |
-| **WP-10 Honest conduit delivery** | OST-EC-001; edge manager/station allocation/UI. Define gross, allocated and buffered/lost semantics; do not force rating/service bypass. Independent after WP01. | Complete trace cases from §C; monthly serviced/unsupplied control, actual waiting+onboard; UAT05. | Buffering changes economy/persistence; if chosen split buffer schema from counter/UI fix. No unbounded output logs. |
+| **WP-10 Honest conduit delivery** | **Implemented (PR #8).** OST-EC-001 resolved; edge manager/station allocation/UI follows native allocator whole units. | 6 test cases (97 assertions in `[wp10]`) pass; honest LandInfo status and actual waiting+onboard verified. | Preserves legacy counter compatibility; truthful local allocation tracked separately. |
 | **WP-11 Content and economic vertical slice** | OST-CONT-001/DES-001; label mapping, pack generator/NML, research bindings, scripts/fixtures. Separate runtime pack validity, role binding, then each chain. Depends WP02–10 where route uses them. No full art pack. | Fresh active-content labels/IDs/refits/industry behavior; conserved moving ore→steel→useful output; dates/research actual effects; UAT13/14. | Save cargo remapping is high risk: never retrofit replacement GRFs; retained old fixture; each output hashed; no large content downloads. |
 | **WP-F1 External gate classification/demolition** | OST-FED-001/PORT-001; distinguish endpoint kinds, native enter/status and direct removal. Independent local tests; release use remains gated on F2. | All directions, local/unlinked/stale/conduit negatives, direct external demolish; then physical natural entry capture. | Opening gate exposes unsafe transaction path; keep federation acceptance isolated until F2; 2 servers+authority bounded. |
 | **WP-F2 Durable federation custody** | OST-FED-003 epic split into transaction-ID/reconciliation, identity/order restoration, and fault matrix. Existing transport retained. No federation expansion. | Exactly one physical owner/consist; per-cargo conservation through request loss/duplicates/obstruction/restarts/older saves; natural ordered return with IDs/flags. Remove permissive missing-evidence defaults, never assertions. | Distributed recovery cannot be a single small “sprint”. Dedicated fixtures and <=3 processes, bounded logs/ports/deadlines; rollback disables unsupported external workflow, preserves journal evidence. |

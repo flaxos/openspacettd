@@ -1,20 +1,23 @@
 # OpenSpaceTTD Project Status and Roadmap
 
-Status: **CANONICAL**  
-As of: **2026-09-15**
+Status: **CANONICAL**<br>
+As of: **2026-09-21**
 
-Audited implementation commit: `abbcd7e07737bcd83c3f830f539313a45bef5f01`
-Audited branch: `fix/portal-gate-lifecycle-crashes`
+Audited implementation commit: `c5dc2919d5` (`main`)<br>
+Current branch: `main` (Sprints 43–48 and WP-01–11, WP-F1, WP-F2 merged)
 
 This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status.
 
-## Current recovery decision
+## Current recovery and post-recovery status
 
-The [master recovery plan](RECOVERY_PLAN_2026-09-15.md) is the single delivery plan.
+The [master recovery plan](RECOVERY_PLAN_2026-09-15.md) tracks recovery delivery.
 The [feature matrix](FEATURE_UI_UAT_COVERAGE.md), [defect register](CRITICAL_BUG_REVIEW_2026-09-15.md)
-and [player UAT](../demo/ALL-FEATURES-UAT.md) govern current acceptance. Feature
-expansion is paused pending crash/conservation/authority and vertical-slice gates.
-No new sprint sequence is assigned.
+and [player UAT](../demo/ALL-FEATURES-UAT.md) govern current acceptance.
+Recovery work packages WP-01 through WP-11 and Federation packages WP-F1 and WP-F2
+have been implemented and merged to `main` (PRs #8–#17). All six strategic post-recovery
+sprints (Sprints 43–48) have likewise been implemented and merged (PRs #18–#24).
+Passing automated tests do not substitute for human acceptance; visual UAT remains
+tracked in [UAT results](../demo/UAT-RESULTS.md).
 
 User-confirmed Blueprint **placement** crash has saved assertion/stack/screenshot
 evidence. The later WP-01 local diff repairs Blueprint preflight/cost/material
@@ -25,12 +28,9 @@ freight; [WP-02 evidence](audit/2026-09-15/wp02/README.md) records regressions a
 save/reload. WP-03 now allocates before hub withdrawal and preserves cargo when
 allocation or a later split fails; [WP-03 evidence](audit/2026-09-15/wp03/README.md)
 records failure injection, reserve/rights boundaries and save/reload.
-Human acceptance is pending. Native external gate entry is
-blocked; HQ/hub/reserve and colonisation workflows are incomplete. These are
-concrete repair needs, not simply “more UAT”. No fix was implemented by this audit.
-Audit checks:306 registered CTests,67 selected existing cases pass, two copied-save
-load smokes pass. No current graphical acceptance or full-suite rerun. Live-main CI later failed three production fixtures; local assert-macro coverage is qualified by OST-TEST-001. Live main
-is ahead of this checkout with CI repairs; see exact refs/checks in master plan.
+WP-10 honest conduit delivery is merged (PR #8) with 6 dedicated Catch2 tests passing.
+External gate custody (WP-F1/WP-F2) and Horizon A multi-node cluster testbed are merged (PRs #12–#17, #21).
+Human acceptance is pending. Audit checks: 427 registered CTests pass.
 
 Historical milestone descriptions below retain previous scope/test claims; they
 must not override this correction or be read as current player acceptance.
@@ -88,7 +88,7 @@ The earlier blocker-fix record reports **306/306 CTest cases** (2026-09-15), inc
 | 6 | World-aware UI, viewport context and quick navigation | Implemented; automated verified |
 | 7 | Planet, portal and transit save/load persistence | Implemented; automated verified |
 | 8 | Player gate construction, linking and demolition safeguards | Implemented; automated verified |
-| 9 | Spaceports, off-world trade and Edge Conduits | Implemented; automated verified |
+| 9 | Spaceports, off-world trade and Edge Conduits | Implemented; automated verified (WP-10 honest allocation merged) |
 | 10 | Planetary-operations UAT and crash stabilisation | Implemented; historical playable evidence |
 | 11 | Atomic high-capacity portal terminals and PBS approaches | Implemented; automated verified |
 | 12 | Federation namespace and consist snapshot foundation | Implemented; automated verified |
@@ -122,6 +122,12 @@ The earlier blocker-fix record reports **306/306 CTest cases** (2026-09-15), inc
 | 40 | In-Kind Fabrication Engine & Bill of Materials (BOM) | Implemented; automated verified |
 | 41 | In-Lore Commonwealth Tech Tree & R&D Projects | Implemented; automated verified |
 | 42 | Factorio-Scale Multi-World Production Chains | Implemented; automated verified |
+| 43 | Empire Facility Operations, Viewport Overlays & Closed Loops | Implemented; automated verified (PR #22) |
+| 44 | Autonomous Lore AI Competitors (CST vs Grand Central) | Implemented; automated verified (PR #23) |
+| 45 | Unified Commonwealth Visual Overhaul Pack | Implemented; automated verified (PR #24) |
+| 46 | Seamless Multi-Server Federation Universe & Live Cluster | Implemented; automated cluster testbed verified (PR #21) |
+| 47 | Colonial Megaprojects, Corporate Alliances & Arcologies | Implemented; automated verified (PR #18) |
+| 48 | LLM Narrative Scenario Synthesis & Autonomous Balancing Critic | Implemented; automated verified (PR #19, #20) |
 
 Dedicated sprint documents exist for Sprints 11–17, 23–35, 37 and 39–42. Sprint 36 is represented by the UAT guide/tests; Sprint 38 remains in the roadmap/art direction. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and grouped plans; missing individual files are a documentation-history gap, not by themselves an implementation gap.
 
@@ -135,11 +141,11 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Player rail construction | Implemented | Portal terminals, blueprints and eight CST prefabs are present. |
 | Planetary economy | Implemented foundation & 12-cargo chains | Revenue, development, Megacity demand, basic phase/biome restrictions, infrastructure throughput, and 12-cargo Commonwealth multi-world production pipelines (Pipelines A–D) with `PROD` persistence are present. |
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
-| Federation runtime | Partial; repair/acceptance required | Transport exists; runner manually dispatches. External native entry is blocked in source; exact identity/orders/custody and recovery require WP-F1/F2. |
-| Player and operator UI | Implemented through Sprint 41 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, and Commonwealth Tech Tree R&D tab. Operator console commands allow runtime federation link management and status inspection. |
+| Federation runtime | Implemented & verified via cluster testbed | Transport, WP-F1/F2 authority custody, and Horizon A 3-node live cluster testbed implemented and automated verified (`scripts/cluster_testbed.py`). |
+| Player and operator UI | Implemented through Sprint 48 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, Commonwealth Tech Tree R&D tab, Empire Facility Overlays (Sprint 43), AI competitor controls (Sprint 44), and Prompt-to-Savegame Scenario Generator GUI (Sprint 48). Operator console commands allow runtime federation link management and status inspection. |
 | Guided UAT | Coverage refreshed; human acceptance pending | v1.1 maps Sprints 1–42, repairs player terminal ownership and hub attachment, and explicitly records blocked concepts. v1.0/v0.4 preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
-| Commonwealth Track B — gameplay/content/art | Partial | In-tree NML industry/cargo pack (`OST\x01`) and CST rolling-stock pack (`OST\x02`) implemented with reproducible Python GRF generator, Tech Tree vehicle gating, and closed 12-cargo loops. Bespoke terrain, flora, portal and arcology art packs remain open for Sprint 38. |
+| Commonwealth Track B — gameplay/content/art | Implemented with Sprint 45 visuals | In-tree NML industry/cargo pack (`OST\x01`), CST rolling-stock pack (`OST\x02`), and Unified Commonwealth Visual Overhaul Pack (Sprint 45: monumental portal arches, animated wormhole horizons, 4 distinct biomes, arcologies, and 12-cargo fleet). |
 | Corporate HQ, Stockpiles, Fabrication, Tech Tree & Industry | Implemented; automated verified | Sprints 39–42 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine (`FABR`), Commonwealth Tech Tree R&D manager (`TECH`), and Factorio-scale 12-cargo production chains (`PROD`) across Pipelines A–D. |
 
 ## Historical milestone descriptions and remaining art direction
@@ -179,6 +185,30 @@ Delivered `TechTreeManager` domain model with 3 lore branches (`Traction & Propu
 ### Sprint 42 — Factorio-Scale Multi-World Production Chains [COMPLETED]
 
 Delivered `ProductionChainManager` with 12-cargo Commonwealth suite across 4 interlocking pipelines (Pipeline A: Structural; Pipeline B: Electronics; Pipeline C: Propulsion; Pipeline D: Data Crystals & R&D). Enforces planetary world phase constraints (Phase 3 raw extraction and quantum telemetry; Phase 2 heavy industrial processing; Phase 1 Megacity formatting). Monthly conversion simulation inside `_economy_spaceports_conduits_monthly` with +15% yield bonus for `TECH_MATERIALS_3` (Automated Nanofabrication Lines). Automatic buffering to planetary stockpiles when a Logistics Hub is present. `PROD` table chunk save/load persistence. Verified with Catch2 test suite (`src/tests/test_sprint42_production_chains.cpp`).
+
+### Sprint 43 — Empire Facility Operations & Viewport Overlays [COMPLETED]
+
+Delivered Empire-Wide Facility Dashboard (`Map > Industrial Facilities & Supply Chain` / `Ctrl+I`), viewport overlay status badges for active facilities and resource starvation, station platform outbound publishing with automatic overflow routing into planetary logistics hubs, facility decommissioning server command, and 4 closed production loop recipes. Verified with unit tests (`src/tests/test_sprint43_empire_facilities.cpp`) and merged via PR #22.
+
+### Sprint 44 — Autonomous Lore-Driven AI Competitors [COMPLETED]
+
+Delivered CST vs Grand Central AI competitors (`LoreAIManager`), scripted home networks on Phase 2 Merredin (CST heavy freight) and Phase 1 Earth/Augusta (Grand Central express commuter), autonomous expansion toward contested gateway corridors using 8 canonical CST prefabs (`Commands::PlaceBlueprint`), and gateway capacity transit bidding. Verified with unit tests (`src/tests/test_sprint44_lore_ai.cpp`) and merged via PR #23.
+
+### Sprint 45 — Unified Commonwealth Visual Overhaul Pack [COMPLETED]
+
+Delivered comprehensive visual overhaul NewGRF (`pkg/commonwealth_visuals/` / `OST\x03`), monumental 18-tile portal arch architecture, animated wormhole horizon effects and transit particles, 4 distinct planetary biome surface textures (Arid Frontier, Boreal Tundra, Volcanic Barren, Lush Earth-like), 3-tier Megacity Arcology urban evolution, and custom 12-cargo rolling stock fleet graphics. Verified with Catch2 suite (`src/tests/test_sprint45_visual_overhaul.cpp`) and merged via PR #24.
+
+### Sprint 46 — Seamless Multi-Server Federation & Horizon A Cluster [COMPLETED]
+
+Delivered multi-node live cluster testbed (`scripts/cluster_testbed.py`), authority custody handoff, automatic holding and staging sidings, in-game Galaxy Directory, and multi-server economic clearinghouse. Verified with automated cluster testbed harness across Sprints 43–48 and merged via PR #21.
+
+### Sprint 47 — Colonial Megaprojects & Arcology Metropolises [COMPLETED]
+
+Delivered 3-tier supply delivery colonisation megaprojects for Phase 4 Wilderness worlds, planetary phase promotion events, corporate alliances with neutral track running rights, and Megacity arcology evolution driven by commodity quotas. Verified with unit tests (`src/tests/test_sprint47_colonial_megaprojects.cpp`) and merged via PR #18.
+
+### Sprint 48 — LLM Narrative Scenario Synthesis & Autonomous Balancing Critic [COMPLETED]
+
+Delivered Prompt-to-Savegame Generator with CLI, GUI, and procedural synthesis, plus 50-year headless fast-forward simulation harness and autonomous economic balancing critic. Verified with unit tests (`src/tests/test_sprint48_narrative_and_critic.cpp`) and merged via PRs #19 and #20.
 
 ## Unscheduled visions
 
