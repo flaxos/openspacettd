@@ -1,40 +1,40 @@
 # OpenSpaceTTD: Post-Recovery Strategic Roadmap (Sprints 43–48)
 
-**Status:** CANONICAL FUTURE ROADMAP  
-**Date:** 2026-09-18  
-**Governing Architecture:** Peter F. Hamilton *Commonwealth Saga* + Factorio-Scale Production + OpenTTD Determinism  
-**Prerequisite:** Full Human UAT completion across Sprints 1–42 (`demo/UAT-RESULTS.md`)
+**Status:** ALL STRATEGIC SPRINTS 43–48 IMPLEMENTED & MERGED INTO MAIN
+**Date:** 2026-09-21
+**Governing Architecture:** Peter F. Hamilton *Commonwealth Saga* + Factorio-Scale Production + OpenTTD Determinism
+**Next Horizon:** Commonwealth Expansion (Sprints 49–52) & Human UAT Acceptance
 
 ---
 
 ## 1. Executive Summary & Design Alignment
 
-Through the `/grill-me` architectural interview, the long-term vision for OpenSpaceTTD has been solidified into an actionable, multi-phase roadmap following the completion of current UAT and recovery milestones:
+Through the `/grill-me` architectural interview, the long-term vision for OpenSpaceTTD was codified into an actionable, multi-phase roadmap spanning Sprints 43–48. As of September 2026, **all six strategic sprints (43–48) have been fully implemented, verified, and merged into `main`** alongside the Horizon A multi-node cluster testbed:
 
 ```text
-+---------------------------------------------------------------------------------------------------+
-|                                  SIX-SPRINT ROADMAP MATRIX                                        |
-+--------+------------------------------------+-----------------------------------------------------+
-| Sprint | Name                               | Key Deliverables & Gameplay Mechanics               |
-+--------+------------------------------------+-----------------------------------------------------+
-| **43** | **Empire Facility Operations &**   | Empire-Wide Industrial Dashboard; Station Platform  |
-|        | **Closed Production Loops**        | output with Hub overflow; 4-pipeline factory loop.  |
-+--------+------------------------------------+-----------------------------------------------------+
-| **44** | **Lore AI Competitors:**           | Scripted home networks (CST on Merredin, Grand      |
-|        | **CST vs Grand Central**           | Central on Augusta); dynamic gateway corridor races.|
-+--------+------------------------------------+-----------------------------------------------------+
-| **45** | **Unified Commonwealth**           | Synchronized NewGRF: Monumental portals, animated   |
-|        | **Visual Overhaul Pack**           | wormholes, 4 biomes, Arcologies, 12-cargo fleet.    |
-+--------+------------------------------------+-----------------------------------------------------+
-| **46** | **Seamless Multi-Server**          | Live trans-server train transit; authority custody; |
-|        | **Federation Universe**            | automatic holding loops; in-game Galaxy directory.  |
-+--------+------------------------------------+-----------------------------------------------------+
-| **47** | **Colonial Megaprojects &**        | 3-tier supply delivery colonisation; Arcology       |
-|        | **Arcology Metropolises**          | urban evolution; planetary phase promotion events.  |
-+--------+------------------------------------+-----------------------------------------------------+
-| **48** | **LLM Narrative Synthesis &**      | Prompt-to-savegame generator; 50-year headless fast-|
-|        | **Autonomous Balancing Critic**    | forward economic balancing; automated BOM tuning.   |
-+--------+------------------------------------+-----------------------------------------------------+
++---------------------------------------------------------------------------------------------------------------+
+|                                      SIX-SPRINT ROADMAP MATRIX                                                |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| Sprint | Name                               | Key Deliverables & Gameplay Mechanics               | Status    |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| **43** | **Empire Facility Operations &**   | Empire-Wide Industrial Dashboard; Station Platform  | **MERGED**|
+|        | **Closed Production Loops**        | output with Hub overflow; 4-pipeline factory loop.  | (PR #22)  |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| **44** | **Lore AI Competitors:**           | Scripted home networks (CST on Merredin, Grand      | **MERGED**|
+|        | **CST vs Grand Central**           | Central on Augusta); dynamic gateway corridor races.| (PR #23)  |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| **45** | **Unified Commonwealth**           | Synchronized NewGRF: Monumental portals, animated   | **MERGED**|
+|        | **Visual Overhaul Pack**           | wormholes, 4 biomes, Arcologies, 12-cargo fleet.    | (PR #24)  |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| **46** | **Seamless Multi-Server**          | Live trans-server train transit; authority custody; | **MERGED**|
+|        | **Federation Universe**            | automatic holding loops; in-game Galaxy directory.  | (PR #21)  |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| **47** | **Colonial Megaprojects &**        | 3-tier supply delivery colonisation; Arcology       | **MERGED**|
+|        | **Arcology Metropolises**          | urban evolution; planetary phase promotion events.  | (PR #18)  |
++--------+------------------------------------+-----------------------------------------------------+-----------+
+| **48** | **LLM Narrative Synthesis &**      | Prompt-to-savegame generator; 50-year headless fast-| **MERGED**|
+|        | **Autonomous Balancing Critic**    | forward economic balancing; automated BOM tuning.   | (PR 19/20)|
++--------+------------------------------------+-----------------------------------------------------+-----------+
 ```
 
 ---

@@ -58,6 +58,13 @@ All 363 CTests pass. Older empty outposts are preserved; automatic repair is
 unsupported. UAT-04, 08, 10–12 and reload still need visual acceptance on the newer
 build. [Evidence](../docs/audit/2026-09-16/wp07-09/README.md).
 
+**WP-10 automated update (17 September):** honest conduit delivery and LandInfo allocation
+telemetry are implemented and merged via PR #8. All 6 dedicated Catch2 unit/regression
+tests pass (97 assertions in `src/tests/test_spaceports_and_conduits.cpp` under `[wp10]`),
+verifying unserved extraction produces 0 allocated waiting cargo, served stations receive
+honest allocation, multiple stations share extraction proportionally, and LandInfo UI
+accurately reflects extraction status (`OST-EC-001` resolved). Visual human acceptance remains pending.
+
 ## Subsequent user gameplay report
 
 The user reports: “OpenTTD no longer crashes. UAT seems to pass.” This follows the
@@ -85,7 +92,7 @@ a fresh clear pad has not been prepared. [Attempt evidence](../docs/audit/2026-0
 | 02 World navigation/biomes | Not run | |
 | 03 Gate construction/linking/safeguards | Not run | |
 | 04 Eight prefabs and player blueprints | Historical crash; current smoke reported passing | User confirmed Mainline Double Straight placement crash; OST-BP-001. Separate04a–g below; capture/export/routes now repaired locally, visual retest pending |
-| 05 Spaceports/conduits | Not run | |
+| 05 Spaceports/conduits | Automated pass ([wp10]); visual pending | WP-10 honest conduit delivery implemented (PR #8); 6 unit tests pass (97 assertions); LandInfo honest allocation UI operational; visual human UAT pending |
 | 06 Megacities/corridor traffic | Not run | |
 | 07 Ledger/governance UI | Not run | |
 | 08 Colonisation/promotion/restrictions | Not run | |
