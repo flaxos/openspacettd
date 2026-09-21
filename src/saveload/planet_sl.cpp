@@ -26,6 +26,7 @@
 #include "../portal/production_chain.h"
 #include "../portal/corporate_alliance.h"
 #include "../portal/lore_competitor.h"
+#include "../portal/visual_overhaul.h"
 
 #include "../safeguards.h"
 
@@ -1487,6 +1488,50 @@ static const TECHChunkHandler TECH;
 static const PRODChunkHandler PROD;
 static const LOREChunkHandler LORE;
 
+/** Save/load record for visual overhaul arcology progression (VISU). */
+struct SlVisualArcologyRecord {
+	uint32_t town_id;
+	uint8_t arcology_tier;
+};
+
+static const SaveLoad _visual_arcology_desc[] = {
+	SLE_VAR(SlVisualArcologyRecord, town_id,       VarTypes::U32),
+	SLE_VAR(SlVisualArcologyRecord, arcology_tier, VarTypes::U8),
+};
+
+struct VISUChunkHandler : ChunkHandler {
+	VISUChunkHandler() : ChunkHandler("VISU", ChunkType::Table) {}
+
+	void Save() const override
+	{
+		SlTableHeader(_visual_arcology_desc);
+
+		int i = 0;
+		for (const auto &[town_id, tier] : VisualOverhaulManager::GetAllArcologyTiers()) {
+			SlVisualArcologyRecord r{
+				.town_id = town_id,
+				.arcology_tier = to_underlying(tier),
+			};
+			SlSetArrayIndex(i++);
+			SlObject(&r, _visual_arcology_desc);
+		}
+	}
+
+	void Load() const override
+	{
+		const std::vector<SaveLoad> slt = SlTableHeader(_visual_arcology_desc);
+
+		SlVisualArcologyRecord r{};
+		while (SlIterateArray() != -1) {
+			r = {};
+			SlObject(&r, slt);
+			VisualOverhaulManager::SetArcologyTier(TownID{static_cast<uint16_t>(r.town_id)}, static_cast<ArcologyTier>(r.arcology_tier));
+		}
+	}
+};
+
+static const VISUChunkHandler VISU;
+
 static const ChunkHandlerRef planet_chunk_handlers[] = {
 	PLNT,
 	PORT,
@@ -1506,6 +1551,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	TECH,
 	PROD,
 	LORE,
+	VISU,
 };
 
 extern const ChunkHandlerTable _planet_chunk_handlers(planet_chunk_handlers);

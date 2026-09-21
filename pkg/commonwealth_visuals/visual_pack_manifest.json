@@ -1,0 +1,129 @@
+{
+  "name": "Unified Commonwealth Visual Overhaul Pack",
+  "sprint": 45,
+  "schema_version": 1,
+  "pillars": {
+    "monumental_portal_architecture": {
+      "footprint_tiles": 18,
+      "dimensions": "6x3 (dual-track span)",
+      "components": [
+        "West Reinforced Composite Pylon",
+        "East Reinforced Composite Pylon",
+        "Upper Monumental Arch Crown Beam",
+        "Event Horizon Core Singularity Emitter",
+        "High-Clearance Approach Catenary Gantry",
+        "Integrated Optical Corridor Signaling Gantry",
+        "Magnetic Confinement Substation",
+        "Reinforced Heavy Ballast Track Bed"
+      ],
+      "event_horizon_states": [
+        "StandbyAmber (unlinked standby)",
+        "ActiveCyanPulse (linked active quantum conduit)",
+        "TransitRipple (intense white-hot transit excitation)",
+        "QuarantineRed (holding pattern / quarantined corridor)"
+      ],
+      "particle_effects": "QuantumRipple expanding wave pulses on entry/exit",
+      "concept_asset": "portal_arch_1789949705243.jpg"
+    },
+    "distinct_world_biomes": {
+      "biomes": [
+        {
+          "biome": "Arid Rust Frontier",
+          "features": ["Oxidized red sand dunes", "Cracked salt flats", "Industrial dust haze"],
+          "palette": "PALETTE_TO_STRUCT_YELLOW",
+          "ambient_particle": "IndustrialHaze"
+        },
+        {
+          "biome": "Boreal Glacial Tundra",
+          "features": ["Crystalline ice sheets", "Permafrost crevasses", "Steaming geothermal vents"],
+          "palette": "PALETTE_TO_STRUCT_BLUE",
+          "ambient_particle": "GeothermalSteam"
+        },
+        {
+          "biome": "Volcanic Barren",
+          "features": ["Dark basalt flows", "Obsidian ridges", "Degassing sulfur plumes"],
+          "palette": "PALETTE_CRASH",
+          "ambient_particle": "SulfurPlume"
+        },
+        {
+          "biome": "Core Temperate",
+          "features": ["Lush agricultural terraces", "Emerald valleys", "Manicured civic biospheres"],
+          "palette": "PAL_NONE",
+          "ambient_particle": "ArcologyBeacon"
+        }
+      ],
+      "concept_asset": "biome_surfaces_1789949726128.jpg"
+    },
+    "megacity_arcology_evolution": {
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Modular High-Tech Spire Foundations",
+          "threshold": "50% Tier 1 Sustenance met, Population >= 500",
+          "features": ["Deep structural foundation pylons", "Heavy construction cranes", "Ground-level transit hubs"]
+        },
+        {
+          "tier": 2,
+          "name": "Towering Multi-Level Interconnected Arcology Blocks",
+          "threshold": "100% Tier 1 & 2 met, Population >= 1000",
+          "features": ["Twin arcology towers", "Elevated glass skybridges", "Mid-level rail crossings"]
+        },
+        {
+          "tier": 3,
+          "name": "Colossal Gleaming Commonwealth Arcology Citadel",
+          "threshold": "100% Tier 1, 2, 3 met (HyperGrowth), Population >= 1500",
+          "features": ["Grand Commonwealth Citadel", "Elevated transit tubes", "Integrated central multi-line railway terminal", "High-intensity navigation beacon"]
+        }
+      ],
+      "concept_asset": "megacity_arcologies_1789949752813.jpg"
+    },
+    "custom_rolling_stock_fleet": {
+      "locomotives": [
+        {
+          "id": "CST Titan D-100",
+          "class": "10,000-hp Heavy Diesel Hauler",
+          "livery": "CST Emerald Green with Imperial Gold trim",
+          "power_hp": 10000,
+          "max_speed_kmh": 160
+        },
+        {
+          "id": "CST E-40 Inter-World",
+          "class": "High-Power Catenary Electric Freight",
+          "livery": "Grand Central Deep Navy with Polished Silver trim",
+          "power_hp": 8500,
+          "max_speed_kmh": 220
+        },
+        {
+          "id": "CST Mark IV 'Chimaera'",
+          "class": "400 km/h Vacuum Hyper-Maglev",
+          "livery": "Streamlined Carbon Fiber & Cyan Accent",
+          "power_hp": 15000,
+          "max_speed_kmh": 400
+        }
+      ],
+      "specialized_wagons": [
+        {
+          "type": "Armored Quantum Containment Van",
+          "cargoes": ["Blank Crystals", "Quantum Crystals", "Consumer Crystals"]
+        },
+        {
+          "type": "Cryogenic Pressurized Tanker",
+          "cargoes": ["Synthetic Composites", "Hydrocarbons"]
+        },
+        {
+          "type": "Reinforced Triple-Axle Mineral Hopper",
+          "cargoes": ["Iron Ore", "Copper Ore", "Stone/Slag", "Silica Sand", "Rare Earths"]
+        },
+        {
+          "type": "Heavy Industrial Flatbed",
+          "cargoes": ["Structural Steel", "Copper Wiring", "Superalloys"]
+        },
+        {
+          "type": "High-Security Sealed Cargo Van",
+          "cargoes": ["Silicon Chips"]
+        }
+      ],
+      "concept_asset": "cst_rolling_stock_1789949785281.jpg"
+    }
+  }
+}

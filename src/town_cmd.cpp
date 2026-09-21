@@ -65,6 +65,7 @@
 #include "timer/timer_game_tick.h"
 #include "portal/planet_manager.h"
 #include "portal/megacity_manager.h"
+#include "portal/visual_overhaul.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -281,7 +282,13 @@ static void DrawTile_Town(TileInfo *ti)
 	/* Add a house on top of the ground? */
 	SpriteID image = dcts->building.sprite;
 	if (image != 0) {
-		AddSortableSpriteToDraw(image, dcts->building.pal, *ti, *dcts, IsTransparencySet(TransparencyOption::Houses));
+		PaletteID building_pal = dcts->building.pal;
+		const Town *t = Town::GetByTile(ti->tile);
+		if (t != nullptr) {
+			PaletteID arc_pal = VisualOverhaulManager::GetArcologyBuildingPalette(t->index, house_id);
+			if (arc_pal != PAL_NONE) building_pal = arc_pal;
+		}
+		AddSortableSpriteToDraw(image, building_pal, *ti, *dcts, IsTransparencySet(TransparencyOption::Houses));
 
 		if (IsTransparencySet(TransparencyOption::Houses)) return;
 	}
