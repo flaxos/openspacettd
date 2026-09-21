@@ -24,12 +24,11 @@ Sprints 49 through 52 represent the **late-game apex** of OpenSpaceTTD. Once pla
 | **49** | **Commonwealth Graph Engine &**    | C++ UniverseGraphManager; JSON schema parser;       |
 |        | **Prebuilt Lore Economies**        | Universe Directory Galaxy Map; off-map trade ports. |
 +--------+------------------------------------+-----------------------------------------------------+
-| **50** | **Multi-Modal Gateway Operations &**| Cyclic scheduled gates (Far Away power cycle);      |
-|        | **Dynamic Gate Cycles**            | Vinmar Data Relays (RP beam); holding loop staging. |
+| **50** | **High-Capacity Gateway Staging &**  | High-throughput portal throat signalling; holding   |
+|        | **Corporate Charters**              | loops & congestion sidings; private access charters.|
 +--------+------------------------------------+-----------------------------------------------------+
 | **51** | **Expeditionary Survey Logistics &**| Expeditionary Survey Trains; Silfen Path Intermodal |
 |        | **Silfen Intermodal Paths**        | Depots; High Angel / Kerensk orbital shuttle docks. |
-+--------+------------------------------------+-----------------------------------------------------+
 | **52** | **Galactic Commonwealth Hegemony &**| 108-world economic clearinghouse; tariff arbitrage; |
 |        | **Narrative Lore Scenarios**       | historical event scenarios (Dyson Alpha, Elan evac).|
 +--------+------------------------------------+-----------------------------------------------------+
@@ -55,18 +54,18 @@ Integrate the 108-world Commonwealth topology into the runtime engine, enabling 
 
 ---
 
-## 3. Sprint 50: Multi-Modal Gateway Operations & Dynamic Gate Cycles
+## 3. Sprint 50: High-Capacity Gateway Staging & Corporate Charters
 
 ### Objective
-Implement non-standard gateway operating physics, specifically cyclic scheduled gates (the Far Away stormrider power cycle), subspace data-only relays (Vinmar), and private/restricted charter gating.
+Enhance railway portal throughput and operations with multi-track gateway throat signalling, automated overflow/holding sidings, universal freight transit across all Commonwealth nodes, and private/restricted charter gating.
 
 ### Work Packages
 
 | Package | Component | Required Implementation | Acceptance Evidence |
 |---|---|---|---|
-| **WP-50.1** | Cyclic Scheduled Gateways | Add `GateOperatingCycle` to `PortalLink` and `PortalEndpoint`. Gateway cycles between `Active` (e.g. 5 game days) and `Recharging` (e.g. 15 game days). When recharging, gate throat signals automatically display red. | Test script verifies signals turn red upon gate deactivation; trains path into holding loops; signals turn green and trains resume on cycle activation. |
-| **WP-50.2** | Automated Staging Loops | YAPF pathfinder integration: when a scheduled gate is in recharge, pathfinder routes trains into designated `StationFacility::HoldingSiding` blocks instead of halting on the mainline. | Simulation test verifying 0 mainline deadlock across 10 complete 20-day stormrider cycles with 6 active freight trains. |
-| **WP-50.3** | Subspace Data Relays (Vinmar) | Enforce that `DATA` gates reject rolling stock (`STR_ERROR_DATA_GATE_NO_TRAINS`). A `SubspaceRelayStation` built on the gate tile generates continuous Tech Tree Research Points (RP) proportional to company network rating. | Catch2 test verifying trains cannot enter data gates; RP ledger increments monthly in `TechTreeManager`. |
+| **WP-50.1** | High-Throughput Portal Throats | Multi-track portal approaches and high-capacity throat signalling, allowing simultaneous bidirectional or parallel entry without blocking mainlines. | Unit and scenario test verifying multi-track gateway throughput handles concurrent train entries without interlocking starvation. |
+| **WP-50.2** | Automated Staging Loops | YAPF pathfinder integration: when downstream terminals or portal approaches are congested, pathfinder routes trains into designated `StationFacility::HoldingSiding` blocks instead of halting on the mainline. | Simulation test verifying 0 mainline deadlock across 10 game months with 6 active freight trains under high traffic volume. |
+| **WP-50.3** | Universal Rail Freight Gateways | Seamless freight rail transit across all Commonwealth worlds (including Far Away and Vinmar), treating all reachable nodes as valid freight/trade partners with standard through-running or break-of-gauge transshipment. | Catch2 test verifying trade gateways connect cleanly to Far Away and Vinmar as valid freight/commodity partners. |
 | **WP-50.4** | Private & Diplomatic Charters | Implement gate access permissions (`CmdSetGateAccessPolicy`). Reaching private worlds (Cressat, Solidade, Ozzie's Asteroid, Hardrock) requires company reputation $\ge 80\%$, diplomatic charter, or payment of per-train toll. | Test asserting train without charter receives routing rejection; purchasing charter unlocks transit. |
 
 ---

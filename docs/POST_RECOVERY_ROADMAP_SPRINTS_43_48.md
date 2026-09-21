@@ -142,9 +142,9 @@ Through the `/grill-me` architectural interview, the long-term vision for OpenSp
 
 ## 3. Beyond Sprint 48: The Commonwealth Expansion Era (Sprints 49–52)
 
-Following the completion of Sprints 43–48, the late-game expansion roadmap expands into full galactic integration based on [`docs/world_roadmap.txt`](world_roadmap.txt). See the complete specification in [`docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md`](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md):
+Following the completion of Sprints 43–48, the late-game expansion roadmap expands into full galactic integration based on [`docs/world_roadmap.txt`](world_roadmap.txt). See the complete specification in [`docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md`](docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md):
 
-* **Sprint 49: Commonwealth Graph Engine & Prebuilt Lore Economies:** Ingests the 108-world JSON schema, creates the interactive Universe Directory Galaxy Map, and unlocks prebuilt simulated trading partners across the Big15 Core Hubs.
-* **Sprint 50: Multi-Modal Gateway Operations & Dynamic Gate Cycles:** Cyclic scheduled stormrider gates (Far Away 5h on / 15h off), automated staging loops, Vinmar Subspace Data Relays, and private corporate gate charters.
-* **Sprint 51: Expeditionary Survey Logistics & Silfen Intermodal Paths:** Specialized survey consists for uncharted worlds (Chelva, Tandil), Silfen path container transshipment, and Kerensk $\rightarrow$ High Angel orbital shuttle docks.
+* **Sprint 49: Commonwealth Graph Engine & Prebuilt Lore Economies:** 108-world Commonwealth topology parsing (`assets/data/commonwealth_universe.json`), visual Galaxy Map tree browser with phase coloring and evidence badges, and prebuilt trade gateways (`PrebuiltTradeManager`) enabling local portals to trade off-world.
+* **Sprint 50: High-Capacity Gateway Staging & Private Corporate Charters:** Multi-track portal throat signalling, automated staging loops & overflow sidings, universal rail freight across Commonwealth worlds, and private corporate gate charters.
+* **Sprint 51: Expeditionary Survey Logistics & Silfen Intermodal Paths:** Hazardous frontier world surveying, non-rail Silfen paths with intermodal container pods, and High Angel / Kerensk orbital lighter docks, High Angel orbital shuttle docks.
 * **Sprint 52: Galactic Commonwealth Hegemony & Narrative Lore Scenarios:** Dynamic galactic commodity clearinghouse, corridor congestion surcharges, and historical narrative crisis scenarios (*The Dyson Alpha Crisis*, *Anshun Generator Retargeting*).
