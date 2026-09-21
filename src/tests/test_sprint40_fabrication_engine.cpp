@@ -28,6 +28,7 @@
 #include "../economy_func.h"
 #include "../engine_base.h"
 #include "../engine_func.h"
+#include "../signal_func.h"
 #include "../clear_map.h"
 #include "../table/strings.h"
 #include "mock_environment.h"
@@ -141,6 +142,7 @@ TEST_CASE("Sprint 40 Fabrication - Mode Toggling and Company Isolation")
 
 TEST_CASE("Sprint 40 Fabrication - Track Building Interception")
 {
+	UpdateSignalsInBuffer();
 	ResetRailTypes();
 	PlanetManager::Reset();
 	StockpileManager::Reset();
@@ -224,10 +226,12 @@ TEST_CASE("Sprint 40 Fabrication - Track Building Interception")
 	CHECK(res_fab2.Succeeded());
 	CHECK(StockpileManager::GetStock(w0, CompanyID{0}, ballast) == 6);
 	CHECK(StockpileManager::GetStock(w0, CompanyID{0}, steel) == 3);
+	UpdateSignalsInBuffer();
 }
 
 TEST_CASE("Sprint 40 Fabrication - Signal and Depot Interception")
 {
+	UpdateSignalsInBuffer();
 	ResetRailTypes();
 	PlanetManager::Reset();
 	StockpileManager::Reset();
@@ -313,6 +317,7 @@ TEST_CASE("Sprint 40 Fabrication - Signal and Depot Interception")
 	/* Stockpile consumed */
 	CHECK(StockpileManager::GetStock(w0, CompanyID{0}, ballast) == 0);
 	CHECK(StockpileManager::GetStock(w0, CompanyID{0}, steel) == 4); // was 14, now 4
+	UpdateSignalsInBuffer();
 }
 
 TEST_CASE("Sprint 40 Fabrication - Save/Load Serialization")

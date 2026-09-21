@@ -6211,6 +6211,22 @@ STR_UNIVERSE_DIRECTORY_PROMOTE                                   :Promote World
 STR_UNIVERSE_DIRECTORY_PROMOTE_TOOLTIP                           :Promote this world to its next development tier when development threshold is met
 STR_UNIVERSE_DIRECTORY_MEGACITY                                  :View Megacity
 STR_UNIVERSE_DIRECTORY_MEGACITY_TOOLTIP                          :Open the Megacity Overview for this Core World's primary metropolis
+STR_UNIVERSE_DIRECTORY_TAB_SERVERS                              :Servers
+STR_UNIVERSE_DIRECTORY_TAB_SERVERS_TOOLTIP                      :Browse registered live multiplayer world servers
+STR_UNIVERSE_DIRECTORY_TAB_GALAXY_MAP                           :Galaxy Map
+STR_UNIVERSE_DIRECTORY_TAB_GALAXY_MAP_TOOLTIP                   :Explore the 108-world Commonwealth topological tree and lore economies
+STR_UNIVERSE_DIRECTORY_FILTER_ALL                               :All
+STR_UNIVERSE_DIRECTORY_FILTER_ALL_TOOLTIP                       :Show all Commonwealth worlds
+STR_UNIVERSE_DIRECTORY_FILTER_P1                                :P1: Core
+STR_UNIVERSE_DIRECTORY_FILTER_P1_TOOLTIP                        :Show Phase 1 Core Worlds
+STR_UNIVERSE_DIRECTORY_FILTER_P2                                :P2: Developed
+STR_UNIVERSE_DIRECTORY_FILTER_P2_TOOLTIP                        :Show Phase 2 Developed Industrial Worlds
+STR_UNIVERSE_DIRECTORY_FILTER_P3                                :P3: Frontier
+STR_UNIVERSE_DIRECTORY_FILTER_P3_TOOLTIP                        :Show Phase 3 Frontier Agricultural Worlds
+STR_UNIVERSE_DIRECTORY_FILTER_P4                                :P4: Wilderness
+STR_UNIVERSE_DIRECTORY_FILTER_P4_TOOLTIP                        :Show Phase 4 Wilderness and Expansion Worlds
+STR_UNIVERSE_DIRECTORY_TRADE_GATE                               :Trade Gateway
+STR_UNIVERSE_DIRECTORY_TRADE_GATE_TOOLTIP                       :Configure selected Commonwealth node as a simulated trade partner
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
 
 # OpenSpaceTTD Sprint 25: Player Rail Blueprints

@@ -1,0 +1,6358 @@
+{
+  "metadata": {
+    "schema_version": "1.0",
+    "title": "Commonwealth Saga 108-World Universe Topology",
+    "source": "docs/world_roadmap.txt",
+    "governing_lore": "Peter F. Hamilton Commonwealth Saga (Pandora's Star / Judas Unchained)",
+    "node_count": 108,
+    "special_body_count": 16,
+    "total_location_count": 124,
+    "connection_count": 115,
+    "root_node_id": "world_earth"
+  },
+  "nodes": [
+    {
+      "world_id": "world_abadan",
+      "canonical_name": "Abadan",
+      "display_name": "Abadan",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Abadan",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_akreos",
+      "canonical_name": "Akreos",
+      "display_name": "Akreos",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "U",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Akreos",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "U",
+      "connection_mode": "NONE",
+      "source_rule": "Abandoned-world reference: S14",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_anacona",
+      "canonical_name": "Anacona",
+      "display_name": "Anacona",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Anacona",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_anagaska",
+      "canonical_name": "Anagaska",
+      "display_name": "Anagaska",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "P3",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Anagaska",
+      "era": "pre_invasion",
+      "connects_to": "world_balkash",
+      "connection_evidence": "I",
+      "connection_mode": "RAIL",
+      "source_rule": "I3",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_anshun",
+      "canonical_name": "Anshun",
+      "display_name": "Anshun",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Anshun",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_arevalo",
+      "canonical_name": "Arevalo",
+      "display_name": "Arevalo",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Arevalo",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S17",
+      "source_ids": [
+        "S17"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_augusta",
+      "canonical_name": "Augusta",
+      "display_name": "Augusta",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Augusta",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_austin",
+      "canonical_name": "Austin",
+      "display_name": "Austin",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Austin",
+      "era": "pre_invasion",
+      "connects_to": "world_buta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_balkash",
+      "canonical_name": "Balkash",
+      "display_name": "Balkash",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Balkash",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_balya",
+      "canonical_name": "Balya",
+      "display_name": "Balya",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Balya",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_bayovar",
+      "canonical_name": "Bayovar",
+      "display_name": "Bayovar",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Bayovar",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_belembe",
+      "canonical_name": "Belembe",
+      "display_name": "Belembe",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Belembe",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_berkak",
+      "canonical_name": "Berkak",
+      "display_name": "Berkak",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Berkak",
+      "era": "pre_invasion",
+      "connects_to": "world_granada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_bidar",
+      "canonical_name": "Bidar",
+      "display_name": "Bidar",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Bidar",
+      "era": "pre_invasion",
+      "connects_to": "world_kerensk",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_bilma",
+      "canonical_name": "Bilma",
+      "display_name": "Bilma",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Bilma",
+      "era": "pre_invasion",
+      "connects_to": "world_buta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_boongate",
+      "canonical_name": "Boongate",
+      "display_name": "Boongate",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Boongate",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "E",
+      "connection_mode": "RAIL",
+      "source_rule": "S06",
+      "source_ids": [
+        "S06"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_buta",
+      "canonical_name": "Buta",
+      "display_name": "Buta",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Buta",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_buwangwa",
+      "canonical_name": "Buwangwa",
+      "display_name": "Buwangwa",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Buwangwa",
+      "era": "pre_invasion",
+      "connects_to": "world_orleans",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_cagayn",
+      "canonical_name": "Cagayn",
+      "display_name": "Cagayn",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Cagayn",
+      "era": "pre_invasion",
+      "connects_to": "world_piura",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_clonclurry",
+      "canonical_name": "Clonclurry",
+      "display_name": "Clonclurry",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "P3",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Clonclurry",
+      "era": "pre_invasion",
+      "connects_to": "world_merredin",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "S05",
+      "source_ids": [
+        "S05"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_cressat",
+      "canonical_name": "Cressat",
+      "display_name": "Cressat",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "I",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Cressat",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "I",
+      "connection_mode": "PRIVATE",
+      "source_rule": "I4",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_damaran",
+      "canonical_name": "Damaran",
+      "display_name": "Damaran",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Damaran",
+      "era": "pre_invasion",
+      "connects_to": "world_shayoni",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_dampier",
+      "canonical_name": "Dampier",
+      "display_name": "Dampier",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Dampier",
+      "era": "pre_invasion",
+      "connects_to": "world_stlincoln",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_democratic_republic_of_new_germany",
+      "canonical_name": "Democratic Republic of New Germany",
+      "display_name": "Democratic Republic of New Germany",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Democratic Republic of New Germany",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_dublin",
+      "canonical_name": "Dublin",
+      "display_name": "Dublin",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Dublin",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_dunedin",
+      "canonical_name": "Dunedin",
+      "display_name": "Dunedin",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Dunedin",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_earth",
+      "canonical_name": "Earth",
+      "display_name": "Earth",
+      "phase": "NotApplicable",
+      "phase_evidence": "-",
+      "biome": "Temperate",
+      "location_type": "homeworld",
+      "system": "Sol",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "-",
+      "connection_mode": "NONE",
+      "source_rule": "Sol homeworld; S01",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "sol_homeworld_capital",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "HIGH_TECH_ELECTRONICS",
+          "QUANTUM_CRYSTALS",
+          "CONSUMER_CRYSTALS",
+          "LUXURY_GOODS"
+        ],
+        "primary_exports": [
+          "FABRICATION_PARTS",
+          "MACHINE_MODULES",
+          "PASSENGERS",
+          "INVESTMENT_CAPITAL"
+        ],
+        "base_population": 8500000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.5
+      }
+    },
+    {
+      "world_id": "world_edenburg",
+      "canonical_name": "EdenBurg",
+      "display_name": "EdenBurg",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "EdenBurg",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_elan",
+      "canonical_name": "Elan",
+      "display_name": "Elan",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "P3",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Elan",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "I",
+      "connection_mode": "RAIL",
+      "source_rule": "I2; P3 from S14",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_far_away",
+      "canonical_name": "Far Away",
+      "display_name": "Far Away",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "P3",
+      "biome": "BorealSnow",
+      "location_type": "colony_world",
+      "system": "Far Away",
+      "era": "pre_invasion",
+      "connects_to": "world_half_way",
+      "connection_evidence": "R",
+      "connection_mode": "SCHEDULED",
+      "source_rule": "S07; see terminal-level route",
+      "source_ids": [
+        "S07"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_far_jerusalem",
+      "canonical_name": "Far Jerusalem",
+      "display_name": "Far Jerusalem",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Far Jerusalem",
+      "era": "pre_invasion",
+      "connects_to": "world_buta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_felicity",
+      "canonical_name": "Felicity",
+      "display_name": "Felicity",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Felicity",
+      "era": "pre_invasion",
+      "connects_to": "world_democratic_republic_of_new_germany",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_ferarra",
+      "canonical_name": "Ferarra",
+      "display_name": "Ferarra",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Ferarra",
+      "era": "pre_invasion",
+      "connects_to": "world_edenburg",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0; spelling note below",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_ganthia",
+      "canonical_name": "Ganthia",
+      "display_name": "Ganthia",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "U",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Ganthia",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "U",
+      "connection_mode": "NONE",
+      "source_rule": "Era not verified; exclude baseline",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_gralmond",
+      "canonical_name": "Gralmond",
+      "display_name": "Gralmond",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Gralmond",
+      "era": "pre_invasion",
+      "connects_to": "world_verona",
+      "connection_evidence": "E",
+      "connection_mode": "RAIL",
+      "source_rule": "S03",
+      "source_ids": [
+        "S03"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_granada",
+      "canonical_name": "Granada",
+      "display_name": "Granada",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Granada",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_half_way",
+      "canonical_name": "Half Way",
+      "display_name": "Half Way",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Half Way",
+      "era": "pre_invasion",
+      "connects_to": "world_boongate",
+      "connection_evidence": "R",
+      "connection_mode": "GATE",
+      "source_rule": "S07; see terminal-level route",
+      "source_ids": [
+        "S07"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_halifax",
+      "canonical_name": "Halifax",
+      "display_name": "Halifax",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "BorealSnow",
+      "location_type": "colony_world",
+      "system": "Halifax",
+      "era": "pre_invasion",
+      "connects_to": "world_granada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_hanko",
+      "canonical_name": "Hanko",
+      "display_name": "Hanko",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "BorealSnow",
+      "location_type": "colony_world",
+      "system": "Hanko",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "I",
+      "connection_mode": "RAIL",
+      "source_rule": "I5; P2 from S14",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_huxley_s_haven",
+      "canonical_name": "Huxley's Haven",
+      "display_name": "Huxley's Haven",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Huxley's Haven",
+      "era": "pre_invasion",
+      "connects_to": "world_los_vada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_ilichio",
+      "canonical_name": "Ilichio",
+      "display_name": "Ilichio",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Ilichio",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2; spelling note below",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_illuminatus",
+      "canonical_name": "Illuminatus",
+      "display_name": "Illuminatus",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Illuminatus",
+      "era": "pre_invasion",
+      "connects_to": "world_piura",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_jandk",
+      "canonical_name": "Jandk",
+      "display_name": "Jandk",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "U",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Jandk",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "U",
+      "connection_mode": "NONE",
+      "source_rule": "Silfen world; no verified direct route",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_jura",
+      "canonical_name": "Jura",
+      "display_name": "Jura",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Jura",
+      "era": "pre_invasion",
+      "connects_to": "world_shayoni",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_kabul",
+      "canonical_name": "Kabul",
+      "display_name": "Kabul",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Kabul",
+      "era": "pre_invasion",
+      "connects_to": "world_stlincoln",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_kerensk",
+      "canonical_name": "Kerensk",
+      "display_name": "Kerensk",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Kerensk",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02; orbital links listed separately",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_kharkov",
+      "canonical_name": "Kharkov",
+      "display_name": "Kharkov",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Kharkov",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_kilburn",
+      "canonical_name": "Kilburn",
+      "display_name": "Kilburn",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Kilburn",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_kolhapur",
+      "canonical_name": "Kolhapur",
+      "display_name": "Kolhapur",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Kolhapur",
+      "era": "pre_invasion",
+      "connects_to": "world_buta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_kozani",
+      "canonical_name": "Kozani",
+      "display_name": "Kozani",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Kozani",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_kyushu",
+      "canonical_name": "Kyushu",
+      "display_name": "Kyushu",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Kyushu",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S01",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_lerma",
+      "canonical_name": "Lerma",
+      "display_name": "Lerma",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Lerma",
+      "era": "pre_invasion",
+      "connects_to": "world_edenburg",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_los_vada",
+      "canonical_name": "Los Vada",
+      "display_name": "Los Vada",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Los Vada",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_lothian",
+      "canonical_name": "Lothian",
+      "display_name": "Lothian",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Lothian",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S14",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_louisiade",
+      "canonical_name": "Louisiade",
+      "display_name": "Louisiade",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Louisiade",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "S08; wartime retargeting applies",
+      "source_ids": [
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_lowick",
+      "canonical_name": "Lowick",
+      "display_name": "Lowick",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Lowick",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_lyonna",
+      "canonical_name": "Lyonna",
+      "display_name": "Lyonna",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Lyonna",
+      "era": "pre_invasion",
+      "connects_to": "world_kerensk",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_malaita",
+      "canonical_name": "Malaita",
+      "display_name": "Malaita",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Malaita",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "S08; wartime retargeting applies",
+      "source_ids": [
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_marindra",
+      "canonical_name": "Marindra",
+      "display_name": "Marindra",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Marindra",
+      "era": "pre_invasion",
+      "connects_to": "world_los_vada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_martaban",
+      "canonical_name": "Martaban",
+      "display_name": "Martaban",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "VolcanicBasalt",
+      "location_type": "colony_world",
+      "system": "Martaban",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_mecheria",
+      "canonical_name": "Mecheria",
+      "display_name": "Mecheria",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Mecheria",
+      "era": "pre_invasion",
+      "connects_to": "world_piura",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_merredin",
+      "canonical_name": "Merredin",
+      "display_name": "Merredin",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Merredin",
+      "era": "pre_invasion",
+      "connects_to": "world_mito",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "S05",
+      "source_ids": [
+        "S05"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_minilya",
+      "canonical_name": "Minilya",
+      "display_name": "Minilya",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Minilya",
+      "era": "pre_invasion",
+      "connects_to": "world_shayoni",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_mito",
+      "canonical_name": "Mito",
+      "display_name": "Mito",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Mito",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_molina",
+      "canonical_name": "Molina",
+      "display_name": "Molina",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Molina",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_molise",
+      "canonical_name": "Molise",
+      "display_name": "Molise",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Molise",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_muang",
+      "canonical_name": "Muang",
+      "display_name": "Muang",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Muang",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_nattavaara",
+      "canonical_name": "Nattavaara",
+      "display_name": "Nattavaara",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "BorealSnow",
+      "location_type": "colony_world",
+      "system": "Nattavaara",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_new_iberia",
+      "canonical_name": "New Iberia",
+      "display_name": "New Iberia",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "New Iberia",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S10",
+      "source_ids": [
+        "S10"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_new_rio",
+      "canonical_name": "New Rio",
+      "display_name": "New Rio",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "New Rio",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0; administrative-access game choice",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_niska",
+      "canonical_name": "Niska",
+      "display_name": "Niska",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Niska",
+      "era": "pre_invasion",
+      "connects_to": "world_edenburg",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_nzega",
+      "canonical_name": "Nzega",
+      "display_name": "Nzega",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Nzega",
+      "era": "pre_invasion",
+      "connects_to": "world_granada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_oaktier",
+      "canonical_name": "Oaktier",
+      "display_name": "Oaktier",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Oaktier",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S01",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_olivenza",
+      "canonical_name": "Olivenza",
+      "display_name": "Olivenza",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Olivenza",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_omoloy",
+      "canonical_name": "Omoloy",
+      "display_name": "Omoloy",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Omoloy",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_orleans",
+      "canonical_name": "Orleans",
+      "display_name": "Orleans",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Orleans",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_pelcan",
+      "canonical_name": "Pelcan",
+      "display_name": "Pelcan",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Pelcan",
+      "era": "pre_invasion",
+      "connects_to": "world_orleans",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_piura",
+      "canonical_name": "Piura",
+      "display_name": "Piura",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Piura",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_pomona",
+      "canonical_name": "Pomona",
+      "display_name": "Pomona",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Pomona",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_puimro",
+      "canonical_name": "Puimro",
+      "display_name": "Puimro",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Puimro",
+      "era": "pre_invasion",
+      "connects_to": "world_shayoni",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_samar",
+      "canonical_name": "Samar",
+      "display_name": "Samar",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Samar",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_saville",
+      "canonical_name": "Saville",
+      "display_name": "Saville",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Saville",
+      "era": "pre_invasion",
+      "connects_to": "world_verona",
+      "connection_evidence": "I",
+      "connection_mode": "RAIL",
+      "source_rule": "I1",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_shayoni",
+      "canonical_name": "Shayoni",
+      "display_name": "Shayoni",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Shayoni",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_silvergalde",
+      "canonical_name": "Silvergalde",
+      "display_name": "Silvergalde",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Silvergalde",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A1; restricted Silfen access",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_sligo",
+      "canonical_name": "Sligo",
+      "display_name": "Sligo",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "VolcanicBasalt",
+      "location_type": "colony_world",
+      "system": "Sligo",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_solidade",
+      "canonical_name": "Solidade",
+      "display_name": "Solidade",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Solidade",
+      "era": "pre_invasion",
+      "connects_to": "world_edenburg",
+      "connection_evidence": "R",
+      "connection_mode": "PRIVATE",
+      "source_rule": "S07",
+      "source_ids": [
+        "S07"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_sterling",
+      "canonical_name": "Sterling",
+      "display_name": "Sterling",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Sterling",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_stlincoln",
+      "canonical_name": "StLincoln",
+      "display_name": "StLincoln",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "StLincoln",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_tampico",
+      "canonical_name": "Tampico",
+      "display_name": "Tampico",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Tampico",
+      "era": "pre_invasion",
+      "connects_to": "world_buta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_tanyata",
+      "canonical_name": "Tanyata",
+      "display_name": "Tanyata",
+      "phase": "Phase2_Developed",
+      "phase_evidence": "P2",
+      "biome": "AridDesert",
+      "location_type": "colony_world",
+      "system": "Tanyata",
+      "era": "pre_invasion",
+      "connects_to": "world_verona",
+      "connection_evidence": "E",
+      "connection_mode": "RAIL",
+      "source_rule": "S03",
+      "source_ids": [
+        "S03"
+      ],
+      "economic_profile": {
+        "role": "heavy_refining_and_fabrication",
+        "primary_imports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "SILICA_SAND",
+          "HYDROCARBONS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "STRUCTURAL_STEEL",
+          "SUPERALLOYS",
+          "SIGNALLING_LOGIC",
+          "MACHINE_MODULES"
+        ],
+        "base_population": 4500000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 1.0
+      }
+    },
+    {
+      "world_id": "world_teleba",
+      "canonical_name": "Teleba",
+      "display_name": "Teleba",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Teleba",
+      "era": "pre_invasion",
+      "connects_to": "world_democratic_republic_of_new_germany",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_tolaka",
+      "canonical_name": "Tolaka",
+      "display_name": "Tolaka",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Tolaka",
+      "era": "pre_invasion",
+      "connects_to": "world_edenburg",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_toulanna",
+      "canonical_name": "Toulanna",
+      "display_name": "Toulanna",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Toulanna",
+      "era": "pre_invasion",
+      "connects_to": "world_granada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_trusbal",
+      "canonical_name": "Trusbal",
+      "display_name": "Trusbal",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Trusbal",
+      "era": "pre_invasion",
+      "connects_to": "world_kerensk",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_tubuai",
+      "canonical_name": "Tubuai",
+      "display_name": "Tubuai",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Tubuai",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "S08; wartime retargeting applies",
+      "source_ids": [
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_valdivia",
+      "canonical_name": "Valdivia",
+      "display_name": "Valdivia",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Valdivia",
+      "era": "pre_invasion",
+      "connects_to": "world_los_vada",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_valvida",
+      "canonical_name": "Valvida",
+      "display_name": "Valvida",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "P3",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Valvida",
+      "era": "pre_invasion",
+      "connects_to": "world_merredin",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "S05",
+      "source_ids": [
+        "S05"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_velaines",
+      "canonical_name": "Velaines",
+      "display_name": "Velaines",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Velaines",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S01",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_verona",
+      "canonical_name": "Verona",
+      "display_name": "Verona",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Verona",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_vinmar",
+      "canonical_name": "Vinmar",
+      "display_name": "Vinmar",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Vinmar",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "R",
+      "connection_mode": "DATA",
+      "source_rule": "S14; NOT a freight connection",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_vyborg",
+      "canonical_name": "Vyborg",
+      "display_name": "Vyborg",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "BorealSnow",
+      "location_type": "colony_world",
+      "system": "Vyborg",
+      "era": "pre_invasion",
+      "connects_to": "world_wessex",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_wessex",
+      "canonical_name": "Wessex",
+      "display_name": "Wessex",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "Wessex",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S02",
+      "source_ids": [
+        "S02"
+      ],
+      "economic_profile": {
+        "role": "core_metropolitan_hub",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "HIGH_TECH_ELECTRONICS",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "QUANTUM_CRYSTALS",
+          "MACHINE_MODULES",
+          "LUXURY_GOODS"
+        ],
+        "base_population": 85000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.25
+      }
+    },
+    {
+      "world_id": "world_westwould",
+      "canonical_name": "Westwould",
+      "display_name": "Westwould",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Westwould",
+      "era": "pre_invasion",
+      "connects_to": "world_piura",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_whalton",
+      "canonical_name": "Whalton",
+      "display_name": "Whalton",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "VolcanicBasalt",
+      "location_type": "colony_world",
+      "system": "Whalton",
+      "era": "pre_invasion",
+      "connects_to": "world_anshun",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A2",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_wuyam",
+      "canonical_name": "Wuyam",
+      "display_name": "Wuyam",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Wuyam",
+      "era": "pre_invasion",
+      "connects_to": "world_stlincoln",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_york5",
+      "canonical_name": "York5",
+      "display_name": "York5",
+      "phase": "Phase1_Core",
+      "phase_evidence": "P1",
+      "biome": "Temperate",
+      "location_type": "core_world",
+      "system": "York5",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "RAIL",
+      "source_rule": "R0; S01; privately owned world",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "metropolitan_center",
+        "primary_imports": [
+          "SUPERALLOYS",
+          "WIRING",
+          "CONSUMER_CRYSTALS",
+          "FOOD"
+        ],
+        "primary_exports": [
+          "HIGH_TECH_ELECTRONICS",
+          "DATA_CRYSTALS"
+        ],
+        "base_population": 25000000,
+        "megacity_eligible": true,
+        "tariff_multiplier": 1.15
+      }
+    },
+    {
+      "world_id": "world_zarin",
+      "canonical_name": "Zarin",
+      "display_name": "Zarin",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Zarin",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_ztan",
+      "canonical_name": "Ztan",
+      "display_name": "Ztan",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "colony_world",
+      "system": "Ztan",
+      "era": "pre_invasion",
+      "connects_to": "world_bayovar",
+      "connection_evidence": "A",
+      "connection_mode": "RAIL",
+      "source_rule": "A0",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    }
+  ],
+  "special_bodies": [
+    {
+      "world_id": "world_chelva",
+      "canonical_name": "Chelva",
+      "display_name": "Chelva",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "VolcanicBasalt",
+      "location_type": "special_body",
+      "system": "Chelva",
+      "era": "pre_invasion",
+      "connects_to": "world_merredin",
+      "connection_evidence": "R",
+      "connection_mode": "EXPLORATION",
+      "source_rule": "S01/S08",
+      "source_ids": [
+        "S01",
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_gaczyna",
+      "canonical_name": "Gaczyna",
+      "display_name": "Gaczyna",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "BorealSnow",
+      "location_type": "special_body",
+      "system": "Gaczyna",
+      "era": "pre_invasion",
+      "connects_to": "world_merredin",
+      "connection_evidence": "A",
+      "connection_mode": "EXPLORATION",
+      "source_rule": "Name/restricted world: S14; route: A3",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_hardrock",
+      "canonical_name": "Hardrock",
+      "display_name": "Hardrock",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "VolcanicBasalt",
+      "location_type": "special_body",
+      "system": "Hardrock",
+      "era": "pre_invasion",
+      "connects_to": "world_kerensk",
+      "connection_evidence": "A",
+      "connection_mode": "PRIVATE",
+      "source_rule": "Penal world: S01; route: A3",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_icalanise",
+      "canonical_name": "Icalanise",
+      "display_name": "Icalanise",
+      "phase": "NotApplicable",
+      "phase_evidence": "U",
+      "biome": "Temperate",
+      "location_type": "special_body",
+      "system": "Icalanise",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "U",
+      "connection_mode": "NONE",
+      "source_rule": "Gas giant; S01/S09",
+      "source_ids": [
+        "S01",
+        "S09"
+      ],
+      "economic_profile": {
+        "role": "wilderness_and_outpost",
+        "primary_imports": [
+          "BUILDING_MATERIALS",
+          "LIFE_SUPPORT",
+          "FABRICATION_PARTS"
+        ],
+        "primary_exports": [
+          "UNREFINED_ORE",
+          "EXOTIC_SPECIMENS"
+        ],
+        "base_population": 1500,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.7
+      }
+    },
+    {
+      "world_id": "world_jaruva",
+      "canonical_name": "Jaruva",
+      "display_name": "Jaruva",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "special_body",
+      "system": "Jaruva",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "R",
+      "connection_mode": "SILFEN_ROUTE",
+      "source_rule": "S01/S08",
+      "source_ids": [
+        "S01",
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_mars",
+      "canonical_name": "Mars",
+      "display_name": "Mars",
+      "phase": "NotApplicable",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "special_body",
+      "system": "Sol",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "R",
+      "connection_mode": "GATE",
+      "source_rule": "Historical demonstration: S08",
+      "source_ids": [
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "wilderness_and_outpost",
+        "primary_imports": [
+          "BUILDING_MATERIALS",
+          "LIFE_SUPPORT",
+          "FABRICATION_PARTS"
+        ],
+        "primary_exports": [
+          "UNREFINED_ORE",
+          "EXOTIC_SPECIMENS"
+        ],
+        "base_population": 1500,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.7
+      }
+    },
+    {
+      "world_id": "world_merioneth",
+      "canonical_name": "Merioneth",
+      "display_name": "Merioneth",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "Temperate",
+      "location_type": "special_body",
+      "system": "Merioneth",
+      "era": "pre_invasion",
+      "connects_to": "world_earth",
+      "connection_evidence": "A",
+      "connection_mode": "GATE",
+      "source_rule": "Independent world: S01; route: A3",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "world_tandil",
+      "canonical_name": "Tandil",
+      "display_name": "Tandil",
+      "phase": "Phase3_Frontier",
+      "phase_evidence": "A",
+      "biome": "BorealSnow",
+      "location_type": "special_body",
+      "system": "Tandil",
+      "era": "pre_invasion",
+      "connects_to": "world_merredin",
+      "connection_evidence": "A",
+      "connection_mode": "EXPLORATION",
+      "source_rule": "Explored world: S01; route: A3",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "primary_resource_extraction",
+        "primary_imports": [
+          "STRUCTURAL_STEEL",
+          "MACHINE_MODULES",
+          "FOOD",
+          "CONSUMER_GOODS"
+        ],
+        "primary_exports": [
+          "IRON_ORE",
+          "COPPER_ORE",
+          "RARE_EARTHS",
+          "BLANK_CRYSTALS",
+          "BIOMASS"
+        ],
+        "base_population": 250000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 0.85
+      }
+    },
+    {
+      "world_id": "node_ozzie_asteroid",
+      "canonical_name": "Ozzie's Private Asteroid",
+      "display_name": "Ozzie's Asteroid",
+      "phase": "NotApplicable",
+      "phase_evidence": "E",
+      "biome": "Temperate",
+      "location_type": "private_asteroid_habitat",
+      "system": "Alpha Leonis",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "E",
+      "connection_mode": "PRIVATE",
+      "source_rule": "S10, S18",
+      "source_ids": [
+        "S10",
+        "S18"
+      ],
+      "economic_profile": {
+        "role": "private_asteroid_habitat",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 100000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "node_high_angel",
+      "canonical_name": "High Angel",
+      "display_name": "High Angel (Starship Habitat)",
+      "phase": "NotApplicable",
+      "phase_evidence": "E",
+      "biome": "Temperate",
+      "location_type": "alien_starship_habitat",
+      "system": "Icalanise",
+      "era": "pre_invasion",
+      "connects_to": "node_high_angel_orbital_gateways",
+      "connection_evidence": "E",
+      "connection_mode": "SHUTTLE",
+      "source_rule": "S01, S09",
+      "source_ids": [
+        "S01",
+        "S09"
+      ],
+      "economic_profile": {
+        "role": "alien_starship_habitat",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 100000,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "node_high_angel_orbital_gateways",
+      "canonical_name": "High Angel Orbital Gateways",
+      "display_name": "High Angel Orbital Gateways",
+      "phase": "NotApplicable",
+      "phase_evidence": "E",
+      "biome": "Temperate",
+      "location_type": "orbital_gateway_port",
+      "system": "Icalanise",
+      "era": "pre_invasion",
+      "connects_to": "world_kerensk",
+      "connection_evidence": "E",
+      "connection_mode": "ORBITAL",
+      "source_rule": "S09",
+      "source_ids": [
+        "S09"
+      ],
+      "economic_profile": {
+        "role": "orbital_gateway_port",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 0,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "node_ice_citadel_world",
+      "canonical_name": "Ice Citadel World",
+      "display_name": "Unnamed Ice World (Ice Citadel)",
+      "phase": "NotApplicable",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "silfen_lodge_world",
+      "system": "Unknown",
+      "era": "pre_invasion",
+      "connects_to": "world_silvergalde",
+      "connection_evidence": "R",
+      "connection_mode": "SILFEN_ROUTE",
+      "source_rule": "S01, S08",
+      "source_ids": [
+        "S01",
+        "S08"
+      ],
+      "economic_profile": {
+        "role": "silfen_lodge_world",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 0,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "node_prime_homeworld",
+      "canonical_name": "Prime Homeworld",
+      "display_name": "Prime Homeworld (MorningLightMountain)",
+      "phase": "NotApplicable",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "hostile_alien_world",
+      "system": "Dyson Alpha",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "R",
+      "connection_mode": "NONE",
+      "source_rule": "S14",
+      "source_ids": [
+        "S14"
+      ],
+      "economic_profile": {
+        "role": "hostile_alien_world",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 0,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "node_dyson_alpha",
+      "canonical_name": "Dyson Alpha",
+      "display_name": "Dyson Alpha System",
+      "phase": "NotApplicable",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "enclosed_star_system",
+      "system": "Dyson Alpha",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "R",
+      "connection_mode": "NONE",
+      "source_rule": "S15",
+      "source_ids": [
+        "S15"
+      ],
+      "economic_profile": {
+        "role": "enclosed_star_system",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 0,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "node_dyson_beta",
+      "canonical_name": "Dyson Beta",
+      "display_name": "Dyson Beta System",
+      "phase": "NotApplicable",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "enclosed_star_system",
+      "system": "Dyson Beta",
+      "era": "pre_invasion",
+      "connects_to": "",
+      "connection_evidence": "R",
+      "connection_mode": "NONE",
+      "source_rule": "S15",
+      "source_ids": [
+        "S15"
+      ],
+      "economic_profile": {
+        "role": "enclosed_star_system",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 0,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    },
+    {
+      "world_id": "sys_alpha_leonis",
+      "canonical_name": "Alpha Leonis",
+      "display_name": "Alpha Leonis System",
+      "phase": "NotApplicable",
+      "phase_evidence": "R",
+      "biome": "Temperate",
+      "location_type": "binary_star_system",
+      "system": "Alpha Leonis",
+      "era": "pre_invasion",
+      "connects_to": "world_augusta",
+      "connection_evidence": "R",
+      "connection_mode": "NONE",
+      "source_rule": "S01",
+      "source_ids": [
+        "S01"
+      ],
+      "economic_profile": {
+        "role": "binary_star_system",
+        "primary_imports": [
+          "EXOTIC_TECHNOLOGY",
+          "QUANTUM_CRYSTALS"
+        ],
+        "primary_exports": [
+          "EXOTIC_BLUEPRINTS",
+          "ALIEN_ARTIFACTS"
+        ],
+        "base_population": 0,
+        "megacity_eligible": false,
+        "tariff_multiplier": 2.0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "conn_world_abadan_world_augusta",
+      "endpoint_a": "world_abadan",
+      "endpoint_b": "world_augusta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_anacona_world_bayovar",
+      "endpoint_a": "world_anacona",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_anagaska_world_balkash",
+      "endpoint_a": "world_anagaska",
+      "endpoint_b": "world_balkash",
+      "connection_type": "RAIL",
+      "evidence_class": "I",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "I3",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_anshun_world_wessex",
+      "endpoint_a": "world_anshun",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_arevalo_world_earth",
+      "endpoint_a": "world_arevalo",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S17"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_augusta_world_earth",
+      "endpoint_a": "world_augusta",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_austin_world_buta",
+      "endpoint_a": "world_austin",
+      "endpoint_b": "world_buta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_balkash_world_anshun",
+      "endpoint_a": "world_balkash",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_balya_world_anshun",
+      "endpoint_a": "world_balya",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_bayovar_world_earth",
+      "endpoint_a": "world_bayovar",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_belembe_world_anshun",
+      "endpoint_a": "world_belembe",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_berkak_world_granada",
+      "endpoint_a": "world_berkak",
+      "endpoint_b": "world_granada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_bidar_world_kerensk",
+      "endpoint_a": "world_bidar",
+      "endpoint_b": "world_kerensk",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_bilma_world_buta",
+      "endpoint_a": "world_bilma",
+      "endpoint_b": "world_buta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_boongate_world_wessex",
+      "endpoint_a": "world_boongate",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "E",
+      "source_ids": [
+        "S06"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_buta_world_earth",
+      "endpoint_a": "world_buta",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_buwangwa_world_orleans",
+      "endpoint_a": "world_buwangwa",
+      "endpoint_b": "world_orleans",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_cagayn_world_piura",
+      "endpoint_a": "world_cagayn",
+      "endpoint_b": "world_piura",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_clonclurry_world_merredin",
+      "endpoint_a": "world_clonclurry",
+      "endpoint_b": "world_merredin",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S05"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_cressat_world_augusta",
+      "endpoint_a": "world_cressat",
+      "endpoint_b": "world_augusta",
+      "connection_type": "PRIVATE",
+      "evidence_class": "I",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "I4",
+      "availability": "PRIVATE",
+      "access_policy": "PRIVATE",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_damaran_world_shayoni",
+      "endpoint_a": "world_damaran",
+      "endpoint_b": "world_shayoni",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_dampier_world_stlincoln",
+      "endpoint_a": "world_dampier",
+      "endpoint_b": "world_stlincoln",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_democratic_republic_of_new_germany_world_earth",
+      "endpoint_a": "world_democratic_republic_of_new_germany",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_dublin_world_augusta",
+      "endpoint_a": "world_dublin",
+      "endpoint_b": "world_augusta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_dunedin_world_bayovar",
+      "endpoint_a": "world_dunedin",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_edenburg_world_earth",
+      "endpoint_a": "world_edenburg",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_elan_world_wessex",
+      "endpoint_a": "world_elan",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "I",
+      "source_ids": [
+        "S14"
+      ],
+      "inference_or_assumption_id": "I2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_far_away_world_half_way",
+      "endpoint_a": "world_far_away",
+      "endpoint_b": "world_half_way",
+      "connection_type": "SCHEDULED",
+      "evidence_class": "R",
+      "source_ids": [
+        "S07"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "SCHEDULED",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_far_jerusalem_world_buta",
+      "endpoint_a": "world_far_jerusalem",
+      "endpoint_b": "world_buta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_felicity_world_democratic_republic_of_new_germany",
+      "endpoint_a": "world_felicity",
+      "endpoint_b": "world_democratic_republic_of_new_germany",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_ferarra_world_edenburg",
+      "endpoint_a": "world_ferarra",
+      "endpoint_b": "world_edenburg",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_gralmond_world_verona",
+      "endpoint_a": "world_gralmond",
+      "endpoint_b": "world_verona",
+      "connection_type": "RAIL",
+      "evidence_class": "E",
+      "source_ids": [
+        "S03"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_granada_world_earth",
+      "endpoint_a": "world_granada",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_half_way_world_boongate",
+      "endpoint_a": "world_half_way",
+      "endpoint_b": "world_boongate",
+      "connection_type": "GATE",
+      "evidence_class": "R",
+      "source_ids": [
+        "S07"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_halifax_world_granada",
+      "endpoint_a": "world_halifax",
+      "endpoint_b": "world_granada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_hanko_world_wessex",
+      "endpoint_a": "world_hanko",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "I",
+      "source_ids": [
+        "S14"
+      ],
+      "inference_or_assumption_id": "I5",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_huxley_s_haven_world_los_vada",
+      "endpoint_a": "world_huxley_s_haven",
+      "endpoint_b": "world_los_vada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_ilichio_world_wessex",
+      "endpoint_a": "world_ilichio",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_illuminatus_world_piura",
+      "endpoint_a": "world_illuminatus",
+      "endpoint_b": "world_piura",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_jura_world_shayoni",
+      "endpoint_a": "world_jura",
+      "endpoint_b": "world_shayoni",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kabul_world_stlincoln",
+      "endpoint_a": "world_kabul",
+      "endpoint_b": "world_stlincoln",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kerensk_world_earth",
+      "endpoint_a": "world_kerensk",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kharkov_world_augusta",
+      "endpoint_a": "world_kharkov",
+      "endpoint_b": "world_augusta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kilburn_world_bayovar",
+      "endpoint_a": "world_kilburn",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kolhapur_world_buta",
+      "endpoint_a": "world_kolhapur",
+      "endpoint_b": "world_buta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kozani_world_anshun",
+      "endpoint_a": "world_kozani",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_kyushu_world_earth",
+      "endpoint_a": "world_kyushu",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_lerma_world_edenburg",
+      "endpoint_a": "world_lerma",
+      "endpoint_b": "world_edenburg",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_los_vada_world_earth",
+      "endpoint_a": "world_los_vada",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_lothian_world_earth",
+      "endpoint_a": "world_lothian",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S14"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_louisiade_world_anshun",
+      "endpoint_a": "world_louisiade",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S08"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_lowick_world_wessex",
+      "endpoint_a": "world_lowick",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_lyonna_world_kerensk",
+      "endpoint_a": "world_lyonna",
+      "endpoint_b": "world_kerensk",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_malaita_world_anshun",
+      "endpoint_a": "world_malaita",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S08"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_marindra_world_los_vada",
+      "endpoint_a": "world_marindra",
+      "endpoint_b": "world_los_vada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_martaban_world_anshun",
+      "endpoint_a": "world_martaban",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_mecheria_world_piura",
+      "endpoint_a": "world_mecheria",
+      "endpoint_b": "world_piura",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_merredin_world_mito",
+      "endpoint_a": "world_merredin",
+      "endpoint_b": "world_mito",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S05"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_minilya_world_shayoni",
+      "endpoint_a": "world_minilya",
+      "endpoint_b": "world_shayoni",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_mito_world_earth",
+      "endpoint_a": "world_mito",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_molina_world_anshun",
+      "endpoint_a": "world_molina",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_molise_world_augusta",
+      "endpoint_a": "world_molise",
+      "endpoint_b": "world_augusta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_muang_world_bayovar",
+      "endpoint_a": "world_muang",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_nattavaara_world_anshun",
+      "endpoint_a": "world_nattavaara",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_new_iberia_world_earth",
+      "endpoint_a": "world_new_iberia",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S10"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_new_rio_world_earth",
+      "endpoint_a": "world_new_rio",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_niska_world_edenburg",
+      "endpoint_a": "world_niska",
+      "endpoint_b": "world_edenburg",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_nzega_world_granada",
+      "endpoint_a": "world_nzega",
+      "endpoint_b": "world_granada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_oaktier_world_earth",
+      "endpoint_a": "world_oaktier",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_olivenza_world_anshun",
+      "endpoint_a": "world_olivenza",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_omoloy_world_wessex",
+      "endpoint_a": "world_omoloy",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_orleans_world_earth",
+      "endpoint_a": "world_orleans",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_pelcan_world_orleans",
+      "endpoint_a": "world_pelcan",
+      "endpoint_b": "world_orleans",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_piura_world_earth",
+      "endpoint_a": "world_piura",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_pomona_world_anshun",
+      "endpoint_a": "world_pomona",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_puimro_world_shayoni",
+      "endpoint_a": "world_puimro",
+      "endpoint_b": "world_shayoni",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_samar_world_anshun",
+      "endpoint_a": "world_samar",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_saville_world_verona",
+      "endpoint_a": "world_saville",
+      "endpoint_b": "world_verona",
+      "connection_type": "RAIL",
+      "evidence_class": "I",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "I1",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_shayoni_world_earth",
+      "endpoint_a": "world_shayoni",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_silvergalde_world_bayovar",
+      "endpoint_a": "world_silvergalde",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A1",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_sligo_world_anshun",
+      "endpoint_a": "world_sligo",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_solidade_world_edenburg",
+      "endpoint_a": "world_solidade",
+      "endpoint_b": "world_edenburg",
+      "connection_type": "PRIVATE",
+      "evidence_class": "R",
+      "source_ids": [
+        "S07"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PRIVATE",
+      "access_policy": "PRIVATE",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_sterling_world_bayovar",
+      "endpoint_a": "world_sterling",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_stlincoln_world_earth",
+      "endpoint_a": "world_stlincoln",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_tampico_world_buta",
+      "endpoint_a": "world_tampico",
+      "endpoint_b": "world_buta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_tanyata_world_verona",
+      "endpoint_a": "world_tanyata",
+      "endpoint_b": "world_verona",
+      "connection_type": "RAIL",
+      "evidence_class": "E",
+      "source_ids": [
+        "S03"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_teleba_world_democratic_republic_of_new_germany",
+      "endpoint_a": "world_teleba",
+      "endpoint_b": "world_democratic_republic_of_new_germany",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_tolaka_world_edenburg",
+      "endpoint_a": "world_tolaka",
+      "endpoint_b": "world_edenburg",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_toulanna_world_granada",
+      "endpoint_a": "world_toulanna",
+      "endpoint_b": "world_granada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_trusbal_world_kerensk",
+      "endpoint_a": "world_trusbal",
+      "endpoint_b": "world_kerensk",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_tubuai_world_anshun",
+      "endpoint_a": "world_tubuai",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S08"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_valdivia_world_los_vada",
+      "endpoint_a": "world_valdivia",
+      "endpoint_b": "world_los_vada",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_valvida_world_merredin",
+      "endpoint_a": "world_valvida",
+      "endpoint_b": "world_merredin",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S05"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_velaines_world_earth",
+      "endpoint_a": "world_velaines",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_verona_world_earth",
+      "endpoint_a": "world_verona",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_vinmar_world_augusta",
+      "endpoint_a": "world_vinmar",
+      "endpoint_b": "world_augusta",
+      "connection_type": "DATA",
+      "evidence_class": "R",
+      "source_ids": [
+        "S14"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": false
+    },
+    {
+      "connection_id": "conn_world_vyborg_world_wessex",
+      "endpoint_a": "world_vyborg",
+      "endpoint_b": "world_wessex",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_wessex_world_earth",
+      "endpoint_a": "world_wessex",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S02"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_westwould_world_piura",
+      "endpoint_a": "world_westwould",
+      "endpoint_b": "world_piura",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_whalton_world_anshun",
+      "endpoint_a": "world_whalton",
+      "endpoint_b": "world_anshun",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A2",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_wuyam_world_stlincoln",
+      "endpoint_a": "world_wuyam",
+      "endpoint_b": "world_stlincoln",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_york5_world_earth",
+      "endpoint_a": "world_york5",
+      "endpoint_b": "world_earth",
+      "connection_type": "RAIL",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "R0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_zarin_world_augusta",
+      "endpoint_a": "world_zarin",
+      "endpoint_b": "world_augusta",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_ztan_world_bayovar",
+      "endpoint_a": "world_ztan",
+      "endpoint_b": "world_bayovar",
+      "connection_type": "RAIL",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A0",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": true,
+      "virtual_length_tiles": 32,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_chelva_world_merredin",
+      "endpoint_a": "world_chelva",
+      "endpoint_b": "world_merredin",
+      "connection_type": "EXPLORATION",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01",
+        "S08"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 48,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_gaczyna_world_merredin",
+      "endpoint_a": "world_gaczyna",
+      "endpoint_b": "world_merredin",
+      "connection_type": "EXPLORATION",
+      "evidence_class": "A",
+      "source_ids": [
+        "S14"
+      ],
+      "inference_or_assumption_id": "A3",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 48,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_hardrock_world_kerensk",
+      "endpoint_a": "world_hardrock",
+      "endpoint_b": "world_kerensk",
+      "connection_type": "PRIVATE",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A3",
+      "availability": "PERMANENT",
+      "access_policy": "PRIVATE",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 48,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_mars_world_earth",
+      "endpoint_a": "world_mars",
+      "endpoint_b": "world_earth",
+      "connection_type": "GATE",
+      "evidence_class": "R",
+      "source_ids": [
+        "S08"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 48,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_merioneth_world_earth",
+      "endpoint_a": "world_merioneth",
+      "endpoint_b": "world_earth",
+      "connection_type": "GATE",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A3",
+      "availability": "PERMANENT",
+      "access_policy": "PUBLIC",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 48,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_world_tandil_world_merredin",
+      "endpoint_a": "world_tandil",
+      "endpoint_b": "world_merredin",
+      "connection_type": "EXPLORATION",
+      "evidence_class": "A",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "A3",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 48,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_node_ozzie_asteroid_world_augusta",
+      "endpoint_a": "node_ozzie_asteroid",
+      "endpoint_b": "world_augusta",
+      "connection_type": "PRIVATE",
+      "evidence_class": "E",
+      "source_ids": [
+        "S10",
+        "S18"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PRIVATE",
+      "access_policy": "PRIVATE",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 64,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_node_high_angel_node_high_angel_orbital_gateways",
+      "endpoint_a": "node_high_angel",
+      "endpoint_b": "node_high_angel_orbital_gateways",
+      "connection_type": "SHUTTLE",
+      "evidence_class": "E",
+      "source_ids": [
+        "S01",
+        "S09"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 64,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_node_high_angel_orbital_gateways_world_kerensk",
+      "endpoint_a": "node_high_angel_orbital_gateways",
+      "endpoint_b": "world_kerensk",
+      "connection_type": "ORBITAL",
+      "evidence_class": "E",
+      "source_ids": [
+        "S09"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 64,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_node_ice_citadel_world_world_silvergalde",
+      "endpoint_a": "node_ice_citadel_world",
+      "endpoint_b": "world_silvergalde",
+      "connection_type": "SILFEN_ROUTE",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01",
+        "S08"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 64,
+      "enabled_in_game": true
+    },
+    {
+      "connection_id": "conn_sys_alpha_leonis_world_augusta",
+      "endpoint_a": "sys_alpha_leonis",
+      "endpoint_b": "world_augusta",
+      "connection_type": "NONE",
+      "evidence_class": "R",
+      "source_ids": [
+        "S01"
+      ],
+      "inference_or_assumption_id": "NONE",
+      "availability": "PERMANENT",
+      "access_policy": "RESTRICTED",
+      "permits_through_running_train": false,
+      "virtual_length_tiles": 64,
+      "enabled_in_game": false
+    }
+  ]
+}

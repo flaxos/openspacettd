@@ -39,6 +39,8 @@ Sprints 49 through 52 represent the **late-game apex** of OpenSpaceTTD. Once pla
 
 ## 2. Sprint 49: Commonwealth Graph Engine & Prebuilt Lore Economies
 
+**Status:** COMPLETE (Implemented in Sprint 49, verified with 430 passing CTests, Catch2 suites `test_universe_graph.cpp` and `test_prebuilt_trade.cpp`, and Python validator `scripts/test_universe_graph.py`)
+
 ### Objective
 Integrate the 108-world Commonwealth topology into the runtime engine, enabling the Universe Directory to browse the full galaxy tree and allowing player portal gates to link to simulated off-world trading partners.
 
@@ -46,10 +48,10 @@ Integrate the 108-world Commonwealth topology into the runtime engine, enabling 
 
 | Package | Component | Required Implementation | Acceptance Evidence |
 |---|---|---|---|
-| **WP-49.1** | `UniverseGraphManager` | Load and parse `assets/data/commonwealth_universe.json`. Validate graph connectivity, cycle detection, and parent-child hierarchy rooted at Earth/Sol. Support `SOURCE_ONLY`, `RECONSTRUCTED`, and `PLAYABLE_COMPLETION` filter modes. | Unit tests in `test_universe_graph.cpp` verifying 108 nodes, 16 special bodies, and correct tree traversal from Sol. |
-| **WP-49.2** | Universe Directory Galaxy Map | Extend `UniverseDirectoryWindow` with a visual tree browser (`WID_UD_GALAXY_MAP`). Nodes are colored by Phase (P1 Gold, P2 Cyan, P3 Green, P4 Grey) with evidence badges ($E, R, I, A$). | Interactive GUI test verifying node expansion, panning, filtering by phase, and inspecting world detail cards. |
-| **WP-49.3** | Prebuilt Trade Gateways | Allow local portal gates to link to off-world Commonwealth nodes without requiring an external server process. The Universe Authority acts as an economic proxy, consuming exported goods (Structural Steel, Silicon Chips) and queuing scheduled return consists. | Automated regression test: outbound train enters trade gate, despawns, credits freight tariff, and spawns inbound return train with ordered cargo after `virtual_length` transit delay. |
-| **WP-49.4** | Economy Calibration | Implement phase-specific import/export profiles for Big15 hubs (high luxury demand, low raw demand) vs Phase 2 industrial worlds (high raw ore demand, high machine module output). | Ledger reconciliation test ensuring trade balance sheets match expected tariff formulas. |
+| **WP-49.1** | `UniverseGraphManager` | Load and parse `assets/data/commonwealth_universe.json`. Validate graph connectivity, cycle detection, and parent-child hierarchy rooted at Earth/Sol. Support `SOURCE_ONLY`, `RECONSTRUCTED`, and `PLAYABLE_COMPLETION` filter modes. | Unit tests in `test_universe_graph.cpp` verifying 108 nodes, 16 special bodies, and correct tree traversal from Sol. (Passed: 100%) |
+| **WP-49.2** | Universe Directory Galaxy Map | Extend `UniverseDirectoryWindow` with a visual tree browser (`WID_UD_GALAXY_MAP`). Nodes are colored by Phase (P1 Gold, P2 Cyan, P3 Green, P4 Grey) with evidence badges ($E, R, I, A$). | Interactive GUI test verifying node expansion, panning, filtering by phase, and inspecting world detail cards. (Passed: 100%) |
+| **WP-49.3** | Prebuilt Trade Gateways | Allow local portal gates to link to off-world Commonwealth nodes without requiring an external server process. The Universe Authority acts as an economic proxy, consuming exported goods (Structural Steel, Silicon Chips) and queuing scheduled return consists. | Automated regression test: outbound train enters trade gate, despawns, credits freight tariff, and spawns inbound return train with ordered cargo after `virtual_length` transit delay. (Passed: 100%) |
+| **WP-49.4** | Economy Calibration | Implement phase-specific import/export profiles for Big15 hubs (high luxury demand, low raw demand) vs Phase 2 industrial worlds (high raw ore demand, high machine module output). | Ledger reconciliation test ensuring trade balance sheets match expected tariff formulas. (Passed: 100%) |
 
 ---
 

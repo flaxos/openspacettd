@@ -65,6 +65,7 @@
 #include "portal/corporate_alliance.h"
 #include "portal/commonwealth_pack.h"
 #include "portal/commonwealth_slice.h"
+#include "portal/prebuilt_trade.h"
 #include "industrytype.h"
 #include "tunnelbridge_map.h"
 #include "train.h"
@@ -3739,6 +3740,45 @@ static bool ConPromptToSave(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Synthesize and save a verified Commonwealth Prefab World for automated UAT. @copydoc IConsoleCmdProc */
+static bool ConGenerateUATWorld(std::span<std::string_view> argv)
+{
+	std::string output = (argv.size() >= 2) ? std::string(argv[1]) : "demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav";
+	uint32_t count = 4;
+	if (argv.size() >= 3) {
+		auto parsed = ParseInteger(argv[2]);
+		if (parsed.has_value()) count = static_cast<uint32_t>(*parsed);
+	}
+
+	IConsolePrint(CC_DEFAULT, "Generating Commonwealth Prefab UAT World ({} worlds) -> {}...", count, output);
+	auto res = PromptScenarioGenerator::GenerateCommonwealthPrefabWorld(output, count);
+	if (res.success) {
+		IConsolePrint(CC_DEFAULT, "[UAT Generation: SUCCESS] Saved prefab world to '{}' ({} worlds, {} corridors, {} fleets).",
+			output, res.worlds_created, res.corridors_built, res.trains_spawned);
+		return true;
+	} else {
+		IConsolePrint(CC_ERROR, "[UAT Generation: FAILED] {}", res.error_message);
+		return false;
+	}
+}
+
+/** Verify that the currently loaded game world satisfies Commonwealth UAT invariants. @copydoc IConsoleCmdProc */
+static bool ConVerifyUATWorld(std::span<std::string_view> argv)
+{
+	(void)argv;
+	std::string err;
+	if (PromptScenarioGenerator::VerifyCommonwealthUAT(&err)) {
+		IConsolePrint(CC_DEFAULT, "[UAT Verification: PASS] Worlds: {}, Portals: {}, Gateways: {}, Trains: {}.",
+			PlanetManager::Count(), PortalRegistry::Count(),
+			PrebuiltTradeManager::Instance().GetAllTradeGateways().size(),
+			Train::GetNumItems());
+		return true;
+	} else {
+		IConsolePrint(CC_ERROR, "[UAT Verification: FAIL] Invariant violation: {}", err);
+		return false;
+	}
+}
+
 /** Run balancing critic simulation or snapshot. @copydoc IConsoleCmdProc */
 static bool ConBalancingCritic(std::span<std::string_view> argv)
 {
@@ -4064,6 +4104,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);
 	IConsole::CmdRegister("prompt_to_save",          ConPromptToSave);
 	IConsole::AliasRegister("generate_prompt_scenario", "prompt_to_save %+");
+	IConsole::CmdRegister("generate_uat_world",      ConGenerateUATWorld);
+	IConsole::CmdRegister("verify_uat_world",        ConVerifyUATWorld);
 	IConsole::CmdRegister("balancing_critic",        ConBalancingCritic);
 	IConsole::CmdRegister("balancing_snapshot",      ConBalancingSnapshot);
 

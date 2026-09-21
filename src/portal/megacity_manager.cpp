@@ -7,6 +7,8 @@
 
 #include "../stdafx.h"
 #include "megacity_manager.h"
+#include "visual_overhaul.h"
+#include "../town.h"
 #include <algorithm>
 
 #include "../safeguards.h"
@@ -190,5 +192,10 @@ void MegacityManager::EvaluateMonthlySupply()
 			profile.growth_multiplier = 1.0f;
 			profile.passenger_multiplier = 1.0f;
 		}
+
+		/* Update visual overhaul Arcology evolution */
+		const Town *t = Town::GetIfValid(profile.town_id);
+		uint32_t pop = t != nullptr ? t->cache.population : profile.population;
+		VisualOverhaulManager::UpdateArcologyEvolution(profile.town_id, profile.overall_supply_index, pop);
 	}
 }

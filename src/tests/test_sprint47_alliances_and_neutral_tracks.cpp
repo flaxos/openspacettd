@@ -22,11 +22,17 @@
 #include "../company_func.h"
 #include "../command_func.h"
 #include "../station_base.h"
+#include "../town.h"
+#include "../town_kdtree.h"
+#include "../core/pool_type.hpp"
+#include "../linkgraph/linkgraphschedule.h"
 #include "../waypoint_base.h"
 #include "../rail.h"
 #include "../rail_type.h"
 #include "mock_environment.h"
 #include "../table/strings.h"
+#include "../language.h"
+#include "../strings_func.h"
 #include "../saveload/saveload.h"
 #include "../saveload/saveload_func.h"
 #include "../fileio_func.h"
@@ -309,11 +315,29 @@ TEST_CASE("Sprint 47 - Corporate Alliance Save/Load Round-Trip Serialization")
 	Map::Allocate(64, 64);
 	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
 
+	if (_current_language == nullptr) {
+		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+		auto saved_paths = _valid_searchpaths;
+		auto saved_binary = _searchpaths[Searchpath::BinaryDir];
+		_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
+		_valid_searchpaths = {Searchpath::BinaryDir};
+		InitializeLanguagePacks();
+		_valid_searchpaths = std::move(saved_paths);
+		_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
+	}
+
 	if (_valid_searchpaths.empty()) {
 		_valid_searchpaths.push_back(Searchpath::WorkingDir);
 	}
 
-	_company_pool.CleanPool();
+	LinkGraphSchedule::Clear();
+	PoolBase::Clean(PoolType::Normal);
+	if (Town::CanAllocateItem()) {
+		Town *t = Town::Create(TileXY(10, 10));
+		t->name = "Alliance Test Town";
+		t->townnametype = SPECSTR_TOWNNAME_START;
+		RebuildTownKdtree();
+	}
 	Company::CreateAtIndex(CompanyID{0});
 	Company::CreateAtIndex(CompanyID{1});
 	Company::CreateAtIndex(CompanyID{2});
@@ -329,6 +353,7 @@ TEST_CASE("Sprint 47 - Corporate Alliance Save/Load Round-Trip Serialization")
 	CHECK(CorporateAllianceManager::GetRelation(CompanyID{0}, CompanyID{2}) == CorporateRelation::Hostile);
 	CHECK(CorporateAllianceManager::GetRelation(CompanyID{1}, CompanyID{2}) == CorporateRelation::Neutral);
 
+	LinkGraphSchedule::Clear();
 	/* Save to file */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
 	REQUIRE(save_res == SaveLoadResult::Ok);

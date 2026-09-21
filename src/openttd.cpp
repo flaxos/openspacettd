@@ -59,6 +59,8 @@
 #include "rail_gui.h"
 #include "road_gui.h"
 #include "portal/federation_cmd.h"
+#include "portal/prebuilt_trade.h"
+#include "portal/visual_overhaul.h"
 #include "portal/prompt_scenario_generator.h"
 #include "portal/balancing_critic.h"
 #include <charconv>
@@ -1316,6 +1318,8 @@ void StateGameLoop()
 		CallVehicleTicks();
 		CallLandscapeTick();
 		FederationTransferManager::OnGameTick(TimerGameTick::counter);
+		PrebuiltTradeManager::Instance().ProcessScheduledReturns(TimerGameTick::counter);
+		VisualOverhaulManager::OnGameTick(TimerGameTick::counter);
 		BasePersistentStorageArray::SwitchMode(PSM_LEAVE_GAMELOOP);
 
 #ifndef DEBUG_DUMP_COMMANDS
