@@ -1100,8 +1100,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
 	return accepted;
 }
 
-/**
- * Delivers goods to industries/towns and calculates the payment
+/** Delivers goods to industries/towns and calculates the payment
  * @param num_pieces amount of cargo delivered
  * @param cargo_type the type of cargo that is delivered
  * @param dest Station the cargo has been unloaded
@@ -1109,6 +1108,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
  * @param periods_in_transit Travel time in cargo aging periods
  * @param company The company delivering the cargo
  * @param src Source of cargo
+ * @param src_tile Original production tile, or INVALID_TILE if unavailable.
  * @param delivery_vehicle Front vehicle used for optional delivery audit counters.
  * @return Revenue for delivering cargo
  * @note The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery

@@ -1,8 +1,8 @@
 {
   "passed": true,
   "save": "OpenSpaceTTD-Connected-Economy-UAT-v2.0.sav",
-  "save_sha256": "70e4ba32b574cdddd2cdc45a9662b6c16c086058ddad48ac1fc179a43fc536ca",
-  "binary_sha256": "34bc7af52d7cd46605cfcc6c839cb06cca11fe88bee138e62df6424252cc9e2a",
+  "save_sha256": "6bda0cb913d2dfab35357470ef6fd85543eb016ef6952ad7e1d5ac5452bdca36",
+  "binary_sha256": "0e48e481d891697dfdee69f1773c70cfead0b92f1b6bb7092bfdeba9d5a3bdb0",
   "content_manifest": {
     "cargo_labels": [
       "SILC",
