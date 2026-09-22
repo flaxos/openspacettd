@@ -5,7 +5,7 @@
 - **Goal:** Railway-heavy industrial and logistics simulation game.
 - **Inspiration:** OpenTTD + Factorio-scale production chains + Peter F. Hamilton-style Commonwealth saga (planetary rail networks interlinked via fixed wormholes).
 - **Core Future Feature:** Multiple logical worlds connected by railway portal/wormhole gates.
-- **Current Status:** Source includes implementation through all strategic Sprints (43–48: Empire Facilities, Lore AI Competitors, Visual Overhaul, Multi-Server Federation, Colonial Megaprojects, Narrative Generator & Headless Critic), Horizon A live cluster testbed, and recovery WP-01–11 repairs. Content, federation, and human acceptance work are tracked in the recovery plan. Read `docs/RECOVERY_PLAN_2026-09-15.md` for the single recovery plan, `docs/POST_RECOVERY_ROADMAP_SPRINTS_43_48.md` for the strategic roadmap, `docs/PROJECT_STATUS_AND_ROADMAP.md` for historical sprint status, and `DEVBOX_HANDOFF.md` for the audit checkpoint. Passing domain tests are not human acceptance.
+- **Current Status:** Main branch (`e4baa35623`) includes Sprints 1–48, WP-01–11 recovery repairs, WP-F1/F2 federation custody, and Horizon A cluster testbed (PRs #4–#25). Sprints 49–50 are on feature branches not yet merged to main. Sprints 51–52 are planned. Automated tests pass (435+ CTests); human UAT for Sprints 43–50 remains outstanding. Read `docs/PROJECT_STATUS_AND_ROADMAP.md` for canonical status, `docs/CURRENT_ARCHITECTURE.md` for source-verified architecture, `docs/KNOWN_LIMITATIONS.md` for gaps and unproven claims, and `docs/RECOVERY_PLAN_2026-09-15.md` for the recovery plan. Passing domain tests are not human acceptance.
 
 ---
 

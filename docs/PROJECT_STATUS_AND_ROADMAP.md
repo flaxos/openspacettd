@@ -1,12 +1,12 @@
 # OpenSpaceTTD Project Status and Roadmap
 
 Status: **CANONICAL**<br>
-As of: **2026-09-21**
+As of: **2026-09-22**
 
-Audited implementation commit: `c5dc2919d5` (`main`)<br>
-Current branch: `main` (Sprints 43–48 and WP-01–11, WP-F1, WP-F2 merged)
+Audited main branch HEAD: `e4baa35623` (Sprints 1–48 and WP-01–11 merged via PRs #4–#25)<br>
+Current working HEAD: `a6cf83e6a6` (branch `feature/sprint-50-gateway-staging-and-charters`; Sprints 49–50 **not yet merged to main**)
 
-This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status.
+This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status. For source-level architecture details, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For known gaps and unproven claims, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
 
 ## Current recovery and post-recovery status
 
@@ -128,8 +128,12 @@ The earlier blocker-fix record reports **306/306 CTest cases** (2026-09-15), inc
 | 46 | Seamless Multi-Server Federation Universe & Live Cluster | Implemented; automated cluster testbed verified (PR #21) |
 | 47 | Colonial Megaprojects, Corporate Alliances & Arcologies | Implemented; automated verified (PR #18) |
 | 48 | LLM Narrative Scenario Synthesis & Autonomous Balancing Critic | Implemented; automated verified (PR #19, #20) |
+| 49 | Commonwealth Graph Engine & Prebuilt Lore Economies | Implemented; automated verified (feature branch; **not yet on main**) |
+| 50 | High-Capacity Gateway Staging & Corporate Charters | Implemented; automated verified (feature branch; **not yet on main**) |
+| 51 | Expeditionary Survey Logistics & Silfen Intermodal Paths | **Planned** |
+| 52 | Galactic Commonwealth Hegemony & Narrative Lore Scenarios | **Planned** |
 
-Dedicated sprint documents exist for Sprints 11–17, 23–35, 37 and 39–42. Sprint 36 is represented by the UAT guide/tests; Sprint 38 remains in the roadmap/art direction. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and grouped plans; missing individual files are a documentation-history gap, not by themselves an implementation gap.
+Dedicated sprint documents exist for Sprints 11–17, 23–35, 37 and 39–42; Sprint 49–52 are described in `docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md`. Sprint 36 is represented by the UAT guide/tests; Sprint 38 remains in the roadmap/art direction. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and grouped plans; missing individual files are a documentation-history gap, not by themselves an implementation gap.
 
 Evidence is grouped in the [documentation index](README.md). The principal milestone records are the [Sprint 10 stabilisation report](STABILISATION_UAT_2026-09-11.md), [Sprint 17 federation economy report](SPRINT17_MEGACITY_ECONOMY_2026-09-13.md), [Sprint 24 procedural worlds report](SPRINT24_PLAYABLE_ALIEN_WORLDS_2026-09-13.md), [Sprint 29 protocol acceptance report](SPRINT29_FEDERATION_ACCEPTANCE_KIT_2026-09-13.md), [Sprint 33 planetary economy report](SPRINT33_MEGACITY_AND_COLONIAL_INDUSTRY_2026-09-14.md), [Sprint 37 Commonwealth pack report](SPRINT37_COMMONWEALTH_ECONOMY_AND_ROLLING_STOCK_2026-09-15.md), [Sprint 39 corporate HQ report](SPRINT39_CORPORATE_HQ_AND_LOGISTICS_HUBS_2026-09-14.md), [Sprint 40 in-kind fabrication report](SPRINT40_IN_KIND_FABRICATION_ENGINE_2026-09-14.md), [Sprint 41 tech tree report](SPRINT41_COMMONWEALTH_TECH_TREE_2026-09-15.md), [Sprint 42 production chains report](SPRINT42_FACTORIO_SCALE_PRODUCTION_CHAINS_2026-09-15.md), [solo UAT guide](../demo/ALL-FEATURES-UAT.md), [legacy solo UAT guide](../demo/SPRINT28-UAT.md) and [federation protocol guide](../demo/FEDERATION-UAT.md).
 
