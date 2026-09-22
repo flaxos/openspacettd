@@ -1,6 +1,11 @@
 # Recovery defect register — 2026-09-15
 
-Current source: `abbcd7e07737bcd83c3f830f539313a45bef5f01`. This register feeds the
+> [!NOTE]
+> **HISTORICAL DEFECT REGISTER — RECOVERY RESOLUTIONS RECORDED**
+> This register preserves the defect baseline identified during the 15 September 2026 audit. Defects listed (OST-BP-001, OST-EC-001, etc.) have been repaired under recovery work packages WP-01 through WP-11 and merged into `main`.
+> For current project status, see [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). For current known gaps, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
+
+Audit baseline source: `abbcd7e07737bcd83c3f830f539313a45bef5f01`. This register feeds the
 [master recovery plan](RECOVERY_PLAN_2026-09-15.md). **No fixes were implemented in
 this audit.** The later WP-01 implementation is recorded separately below. P1 means crash, conservation/authority risk or blocked core loop;
 P2 means a workflow/design/content gap. “Source-confirmed” means a concrete code

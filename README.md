@@ -1,6 +1,6 @@
 # OpenTTD
 
-> This repository is the **OpenSpaceTTD** fork. Start with the [project status and roadmap](docs/PROJECT_STATUS_AND_ROADMAP.md) for canonical completion status. See [current architecture](docs/CURRENT_ARCHITECTURE.md) for source-verified system details and [known limitations](docs/KNOWN_LIMITATIONS.md) for documented gaps. The [recovery plan](docs/RECOVERY_PLAN_2026-09-15.md) tracks recovery delivery. The remainder of this README retains the upstream OpenTTD overview and build information.
+> This repository is the **OpenSpaceTTD** fork. Start with the [project status and roadmap](docs/PROJECT_STATUS_AND_ROADMAP.md) for canonical completion status and the [sprint ledger](docs/SPRINT_LEDGER.md) for sprint history. See [current architecture](docs/CURRENT_ARCHITECTURE.md) for source-verified system details and [known limitations](docs/KNOWN_LIMITATIONS.md) for documented gaps. The [recovery plan](docs/RECOVERY_PLAN_2026-09-15.md) tracks recovery delivery. The remainder of this README retains the upstream OpenTTD overview and build information.
 
 ## Table of contents
 

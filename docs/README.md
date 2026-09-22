@@ -15,6 +15,7 @@ Start with [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). It is
 ## Canonical current documents
 
 - [Project status and roadmap](PROJECT_STATUS_AND_ROADMAP.md) — completed spikes and sprints, incomplete goals and planned Sprints 51–52.
+- [Sprint ledger and index](SPRINT_LEDGER.md) — comprehensive 52-sprint index with exact commits, test evidence, UAT status, and strict status classifications.
 - [Current architecture](CURRENT_ARCHITECTURE.md) — source-verified system-level architecture snapshot at HEAD.
 - [Known limitations](KNOWN_LIMITATIONS.md) — documented gaps, architectural constraints and unproven claims.
 - [Source-code architecture map](ARCHITECTURE_NOTES.md) — OpenTTD subsystem mapping for developers.

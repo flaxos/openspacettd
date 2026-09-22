@@ -8,11 +8,26 @@ Current working HEAD: `a6cf83e6a6` (branch `feature/sprint-50-gateway-staging-an
 
 This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status. For source-level architecture details, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For known gaps and unproven claims, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
 
+## Project Vision
+
+OpenSpaceTTD is a railway-heavy interstellar logistics and economic simulation built on OpenTTD, inspired by Factorio-scale production chains and Peter F. Hamilton's Commonwealth saga. Players construct and operate high-capacity planetary rail networks across multiple distinct worlds connected via fixed wormhole portal gates. Worlds have defined development phases (Core, Industrial, Emerging, Wilderness) and specialized economic profiles, creating systemic interdependence where mature core worlds consume advanced commodities and off-world food, while frontier colonies extract raw resources and require industrial fabrication support—all simulated deterministically on OpenTTD's high-throughput transport engine.
+
+## Current Architecture Reality
+
+OpenSpaceTTD operates on a **single global OpenTTD map** (up to 4096×4096 tiles) partitioned into discrete logical world regions separated by unbuildable void space. It does **not** employ a multi-map engine. World identity is resolved via an $O(1)$ spatial hash grid (`PlanetManager`). Inter-world railway transit adapts OpenTTD's tunnel/bridge wormhole subsystem (`Track::Wormhole`), allowing consists to traverse distant coordinates without intermediate physical track tiles. Custom state is persisted across 20 dedicated save/load chunks in `src/saveload/planet_sl.cpp`. All custom gameplay logic is isolated in `src/portal/` and `src/blueprint/`. At current working HEAD `a6cf83e6a6`, 435+ registered CTests pass cleanly. For complete subsystem details, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For gaps and unproven claims, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md). For the complete 52-sprint ledger, see [SPRINT_LEDGER.md](SPRINT_LEDGER.md).
+
+## Current Project Milestone
+
+- **Main Branch Milestone (`e4baa35623`):** Sprints 1–48, WP-01–11 recovery fixes, WP-F1/F2 federation custody, and Horizon A cluster testbed are fully merged (PRs #4–#25).
+- **Working HEAD Milestone (`a6cf83e6a6`):** Sprints 49 and 50 are implemented on feature branches (`feature/sprint-49-commonwealth-graph-engine`, `feature/sprint-50-gateway-staging-and-charters`) with passing unit tests, but are **not yet merged to `main`**.
+- **Active Acceptance Gap:** Sprints 43–50 have zero recorded human visual UAT evidence. The v1.1 guided solo UAT save (`demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav`) has not been played through by a human tester.
+- **Immediate Milestone Goal:** Merge Sprints 49–50 to `main`, execute human UAT for Sprints 43–50, and commence Sprint 51 (Expeditionary Survey Logistics).
+
 ## Current recovery and post-recovery status
 
-The [master recovery plan](RECOVERY_PLAN_2026-09-15.md) tracks recovery delivery.
-The [feature matrix](FEATURE_UI_UAT_COVERAGE.md), [defect register](CRITICAL_BUG_REVIEW_2026-09-15.md)
-and [player UAT](../demo/ALL-FEATURES-UAT.md) govern current acceptance.
+The [master recovery plan](RECOVERY_PLAN_2026-09-15.md) tracks historical recovery delivery.
+The [feature matrix](FEATURE_UI_UAT_COVERAGE.md), [defect register](CRITICAL_BUG_REVIEW_2026-09-15.md),
+[sprint ledger](SPRINT_LEDGER.md), and [player UAT](../demo/ALL-FEATURES-UAT.md) govern current acceptance.
 Recovery work packages WP-01 through WP-11 and Federation packages WP-F1 and WP-F2
 have been implemented and merged to `main` (PRs #8–#17). All six strategic post-recovery
 sprints (Sprints 43–48) have likewise been implemented and merged (PRs #18–#24).
@@ -30,7 +45,7 @@ allocation or a later split fails; [WP-03 evidence](audit/2026-09-15/wp03/README
 records failure injection, reserve/rights boundaries and save/reload.
 WP-10 honest conduit delivery is merged (PR #8) with 6 dedicated Catch2 tests passing.
 External gate custody (WP-F1/WP-F2) and Horizon A multi-node cluster testbed are merged (PRs #12–#17, #21).
-Human acceptance is pending. Audit checks: 427 registered CTests pass.
+Human acceptance is pending. Audit checks: 435+ registered CTests pass.
 
 Historical milestone descriptions below retain previous scope/test claims; they
 must not override this correction or be read as current player acceptance.
@@ -214,34 +229,73 @@ Delivered 3-tier supply delivery colonisation megaprojects for Phase 4 Wildernes
 
 Delivered Prompt-to-Savegame Generator with CLI, GUI, and procedural synthesis, plus 50-year headless fast-forward simulation harness and autonomous economic balancing critic. Verified with unit tests (`src/tests/test_sprint48_narrative_and_critic.cpp`) and merged via PRs #19 and #20.
 
-## Unscheduled visions
+## Dependency-Ordered Strategic Roadmap
 
-These remain ideas rather than incomplete commitments: space combat or planetary defence, off-rail spacecraft, a detailed electrical-grid simulation, procedural alien languages, and dynamic climate change or terraforming.
+Future development work must follow this dependency order to prevent building advanced gameplay on fragile foundations:
 
-## Current evidence gaps
+### Phase 1: Foundation & Correctness (Current Priority)
+1. **Authoritative Documentation & Baseline Alignment (Sprint 50/Audit):** Source-of-truth documentation tied to exact HEAD (`a6cf83e6a6`), resolving contradictions and establishing strict status definitions.
+2. **Central Validation of References:** Post-load and post-destruction reference validation across custom world, portal, and entity indices in `afterload.cpp`.
+3. **Complete Portal State Persistence:** Operational state, transit queue, and signal reservation persistence across save/load cycles.
+4. **Safe Local & External Gate Classification:** Deterministic separation of intra-system wormholes vs external federation gates.
+5. **End-to-End Natural Traversal Verification:** Black-box automated and human verification of train movement through portals without manual operator intervention.
+6. **Save/Load Mid-Transit Recovery:** Proven deterministic recovery of consists saved while inside `Track::Wormhole`.
 
-- Human v1.1 UAT and visual acceptance remain outstanding; automated results do not establish player acceptance.
-- The independent-process federation runner uses manual dispatch. Natural gate entry and the full recovery matrix still require acceptance evidence.
-- Sprint 37 pack sources and compiled GRFs exist, but the migrated v1.1 save does not activate them.
-- Sprint 42 station production upgrades have a gameplay path; human cross-world chain acceptance remains outstanding, including distinct active-pack cargos.
-- Bespoke Sprint 38 art and required biome comparison captures remain outstanding.
+### Phase 2: Network Architecture
+1. **Decoupled Topology Model:** Complete separation of universe/world graph routing concepts (`UniverseGraphManager`) from physical tile and gate metadata (`PortalRegistry`).
+2. **Multi-Hop & Branching Routing:** Proven YAPF routing across A→B→C world topologies with dynamic path invalidation upon portal disruption.
+3. **Capacity, Congestion & Staging:** Gate throat signalling, automated holding sidings, and schedule recovery under portal bottleneck conditions.
+4. **WorldContext Boundary:** World-qualified references and explicit world boundaries maintained while preserving the single-map engine.
 
-See [the critical bug review](CRITICAL_BUG_REVIEW_2026-09-15.md) for the Sprint 37 engine-identity fix and prioritised follow-up.
+### Phase 3: Game Systems & Coherent Economy
+1. **Unified Inter-World Economy:** Consolidate overlapping overlays (standard industries, Commonwealth 12-cargo pipelines, Megacity quotas, Prebuilt trade) into a unified simulation model.
+2. **Phase & Tier System Integration:** Strict planetary phase restrictions governing resource extraction, manufacturing, tech access, and vehicle tiers.
+3. **Core / Frontier Interdependence:** Economic modeling requiring mature core worlds to import bulk foodstuffs and raw ores, making inter-world logistics indispensable.
+4. **Logistics-Driven Population Growth:** Town and colony growth driven by sustained multi-world supply chains rather than local passenger loops.
+5. **Content & Visual Progression:** NewGRF packs (`OST\x01`, `OST\x02`, `OST\x03`) and bespoke Commonwealth art layered cleanly onto the verified simulation.
 
+---
 
-## Recovery supersedes unqualified milestone completion
+## Explicit Deferrals
 
-Finish WP-01 graphical acceptance and WP-02/03 hub delivery/pickup acceptance with
-the rebuilt local executable; the user has reported no further Blueprint crash.
-WP-04 hub binding, station lifecycle and persistence are now repaired locally
-([evidence](audit/2026-09-15/wp04/README.md)); human hub acceptance remains open.
-WP-05 HQ/Directory command authority and outpost-location persistence are also
-repaired locally:95 selected CTests and a native-command TCP server/two-client
-replay pass ([evidence](audit/2026-09-15/wp05/README.md)). Graphical UAT-08/10 and
-full multiplayer join acceptance remain separate. WP-06 Blueprint parser/storage
-safety is now implemented:35 selected CTests and six real I/O fault injections pass
-([evidence](audit/2026-09-15/wp06/README.md)); UAT-04f/g graphical acceptance is pending.
-WP-07 capture and prefab routes is next. Independent provenance work may proceed.
-Do not start Sprint38 art or new features to bypass these gates. The current
-13-cargo content, actual player establishment, durable federation and graphical
-acceptance gaps are detailed in the master plan; preserve original product intent.
+To maintain project focus on core rail logistics and avoid premature scope expansion, the following areas are **explicitly deferred**:
+
+1. **True Multi-Map Engine Refactoring:** Independent maps, world dynamic loading/unloading, background LOD simulation, and asynchronous world tick rates are deferred unless an architectural decision proves single-map limits are permanently exceeded.
+2. **Premature Performance Micro-Optimisations:** Optimising tile arrays or spatial lookups before profiling demonstrates measurable frame bottlenecks.
+3. **Broad Cosmetic Art Expansion:** Producing dozens of bespoke sprite sets before underlying vehicle physics, BOM fabrication, and delivery loops are accepted.
+4. **Off-Rail Mechanics:** Space combat, orbital dogfighting, planetary defence lasers, terraforming dynamics, and procedural alien linguistics remain unscheduled visions outside the project's transport core.
+
+---
+
+## Unresolved Architecture Decisions Requiring Owner Input
+
+The following decisions represent fundamental forks in engine design and require explicit owner direction:
+
+1. **Multi-Map Migration Threshold:**
+   *Current state:* Single 4096×4096 map supporting ~6–8 simultaneous worlds.
+   *Question:* What specific gameplay requirement (e.g. 20+ playable worlds, memory constraints, independent tick rates) triggers a migration to a true multi-map engine architecture, and who approves the prerequisite rewrite?
+2. **Economic Engine Authority:**
+   *Current state:* Five loosely-coupled economic overlays (OpenTTD standard, `ProductionChainManager`, `MegacityManager`, `PrebuiltTradeManager`, `EdgeConduit`).
+   *Question:* Which subsystem should become the single source of truth for cargo supply, demand, and pricing, and how should legacy OpenTTD industry loops be reconciled with Commonwealth 12-cargo pipelines?
+3. **Federation Gameplay Role:**
+   *Current state:* Working protocol and cluster testbed, but transport requires manual console dispatch.
+   *Question:* Is federation intended as a seamless player-facing MMO-style cluster, or primarily as an offline/asynchronous scenario and savegame exchange protocol?
+4. **NewGRF Content vs Native Engine Integration:**
+   *Current state:* Dual-representation with in-tree compiled NML NewGRFs (`OST\x01`–`OST\x03`) alongside C++ hardcoded `CommonwealthCargoID` structures.
+   *Question:* Should Commonwealth content be fully standardized as standalone NewGRF packages loaded at game creation, or integrated natively into the core C++ engine tables?
+
+---
+
+## Historical Recovery Retrospective
+
+The recovery phase initiated on 2026-09-15 addressed critical blockers in the experimental codebase:
+- **WP-01:** Fixed Blueprint placement crash, preflight costing, and material reservation.
+- **WP-02 / WP-03:** Enforced exclusive company stockpile allocation and prevented cargo duplication during hub transfers.
+- **WP-04:** Restored Logistics Hub station binding and savegame lifecycle integrity.
+- **WP-05:** Decoupled GUI action handlers from local state to ensure server-authoritative network command replication.
+- **WP-06:** Hardened Blueprint JSON parser and storage against malformed files.
+- **WP-10:** Replaced speculative Edge Conduit cargo credit with honest OpenTTD station acceptance verification (PR #8).
+- **WP-11:** Delivered active economic vertical slice with in-kind steel and ballast production (PR #9).
+- **WP-F1 / WP-F2:** Hardened external portal gate classification and cross-server transfer custody journal checkpoints (PRs #12–#20).
+
+All recovery repairs are committed and merged into `main`. For detailed historical audit logs, see [RECOVERY_PLAN_2026-09-15.md](RECOVERY_PLAN_2026-09-15.md) and [CRITICAL_BUG_REVIEW_2026-09-15.md](CRITICAL_BUG_REVIEW_2026-09-15.md).

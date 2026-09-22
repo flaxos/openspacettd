@@ -1,5 +1,10 @@
 # OpenSpaceTTD recovery checkpoint — 2026-09-15
 
+> [!WARNING]
+> **HISTORICAL DOCUMENT — DO NOT USE FOR CURRENT REPO STATUS**
+> This file records a point-in-time audit checkpoint from 15–16 September 2026. All work packages described herein as uncommitted (WP-01 through WP-11) have subsequently been committed, verified, and merged into `main` (PRs #4–#25).
+> For authoritative project status, see [docs/PROJECT_STATUS_AND_ROADMAP.md](docs/PROJECT_STATUS_AND_ROADMAP.md). For source-verified architecture, see [docs/CURRENT_ARCHITECTURE.md](docs/CURRENT_ARCHITECTURE.md). For the full sprint ledger, see [docs/SPRINT_LEDGER.md](docs/SPRINT_LEDGER.md).
+
 ## Current checkpoint — 16 September, WP-11 structural slice
 
 The remaining WP-11 structural economic slice is implemented locally on

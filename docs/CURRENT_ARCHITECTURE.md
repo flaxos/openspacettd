@@ -186,7 +186,29 @@ constraints. It does **not** mean 108 simultaneously loaded map regions.
 
 ---
 
-## 8. Visual / Content Systems
+---
+
+## 8. World Progression: Placement Restrictions vs Simulation Progression
+
+A central architectural question is: **What in world progression is static metadata/placement restriction versus true simulation-driven progression?**
+
+### Static Metadata & Placement Restrictions
+- **WorldPhase Classification:** Each `PlanetRegion` has a `WorldPhase` (Phase 1 Core, Phase 2 Industrial, Phase 3 Extraction/Frontier, Phase 4 Wilderness). This classification is assigned at world generation time.
+- **Construction Restrictions:** `PlanetManager::CheckConstructionPlacement` enforces:
+  * No building in void space between worlds (`STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE`).
+  * Corporate HQ can *only* be founded on Phase 1 Core worlds.
+  * Heavy industrial processing is prohibited on Phase 4 Wilderness worlds.
+  * Raw extraction facilities are locked to Phase 3/4 worlds.
+- **Technology Gating:** `TechTreeManager` gates rolling stock and fabrication recipes behind research nodes (e.g. `TECH_TRACTION_1..4`), but this is a capability gate rather than an automatic map-morphing simulation.
+
+### True Simulation-Driven Progression
+- **Megacity Consumption & Growth:** `MegacityManager` runs a monthly simulation tick checking cargo delivery against population demand quotas. If quotas are met, population score increases and arcologies can advance tiers.
+- **Phase Promotion Events:** In Sprint 47, Phase 4 Wilderness worlds can be promoted to Phase 3 Emerging worlds upon completion of 3-tier megaproject supply delivery quotas (life-support, structural steel, power conduits).
+- **Town Growth Interception:** Town growth in `megacity_manager.cpp` is throttled if off-world commodity supply loops fall below minimum thresholds.
+
+---
+
+## 9. Visual / Content Systems
 
 | Component | File | Chunk |
 |---|---|---|
@@ -199,35 +221,34 @@ Three in-tree NML packs exist (`OST\x01` industry, `OST\x02` rolling stock,
 
 ---
 
-## 9. Complete Save/Load Chunk Registry
+## 10. Complete Save/Load Chunk Registry & Persistence Validation
 
-All custom chunks are defined in `src/saveload/planet_sl.cpp`:
+All custom chunks are registered in `src/saveload/planet_sl.cpp` and processed in order:
 
-| Chunk | Type | System |
-|---|---|---|
-| `PLNT` | Table | Planet regions |
-| `PORT` | Table | Portal links |
-| `PRTX` | Table | Portal terminal extensions |
-| `FIDS` | Table | Federation identities |
-| `SPRT` | Table | Spaceport records |
-| `COND` | Table | Edge conduit entries |
-| `MEGA` | Table | Megacity state |
-| `STCK` | Table | Company stockpiles |
-| `LHUB` | Table | Logistics hub state |
-| `CHQS` | Table | Corporate HQ profiles |
-| `FABR` | Table | Fabrication mode settings |
-| `ALLI` | Table | Corporate alliance relations |
-| `FJRN` | Table | Federation transfer journal |
-| `FTJR` | ReadOnly | Legacy transfer journal (migration) |
-| `ISPR` | Table | Industry spaceport bindings |
-| `TECH` | Table | Tech tree state |
-| `PROD` | Table | Production chain facilities |
-| `LORE` | Table | Lore competitor state |
-| `VISU` | Table | Visual overhaul arcology data |
-| `TRAD` | Table | Prebuilt trade gateways |
+| Chunk | Type | System / Manager | Save/Load Handlers | Round-Trip Test Coverage |
+|---|---|---|---|---|
+| `PLNT` | Table | `PlanetManager` (worlds & regions) | `Save_PLNT` / `Load_PLNT` | ✅ Covered in `test_saveload_planet.cpp` |
+| `PORT` | Table | `PortalRegistry` (portal pairs & links) | `Save_PORT` / `Load_PORT` | ✅ Covered in `test_saveload_planet.cpp`, `test_portal_construction.cpp` |
+| `PRTX` | Table | `PortalTerminal` (extended terminal geometry) | `Save_PRTX` / `Load_PRTX` | ✅ Covered in `test_portal_construction.cpp` |
+| `FIDS` | Table | `FederationIdentity` (global company/consist IDs) | `Save_FIDS` / `Load_FIDS` | ✅ Covered in `test_federation.cpp` |
+| `SPRT` | Table | `SpaceportManager` (orbital spaceport hubs) | `Save_SPRT` / `Load_SPRT` | ✅ Covered in `test_spaceports_and_conduits.cpp` |
+| `COND` | Table | `EdgeConduit` (virtual off-world conduits) | `Save_COND` / `Load_COND` | ✅ Covered in `test_spaceports_and_conduits.cpp` |
+| `MEGA` | Table | `MegacityManager` (megacity population & quotas) | `Save_MEGA` / `Load_MEGA` | ✅ Covered in `test_federation_megacity_economy.cpp` |
+| `STCK` | Table | `CompanyStockpile` (per-world commodity balances) | `Save_STCK` / `Load_STCK` | ✅ Covered in `test_sprint39_corporate_hq_and_stockpile.cpp` |
+| `LHUB` | Table | `LogisticsHub` (bi-directional buffering & floors) | `Save_LHUB` / `Load_LHUB` | ✅ Covered in `test_sprint39_corporate_hq_and_stockpile.cpp` |
+| `CHQS` | Table | `CorporateHQManager` (campus tier & location) | `Save_CHQS` / `Load_CHQS` | ✅ Covered in `test_sprint39_corporate_hq_and_stockpile.cpp` |
+| `FABR` | Table | `FabricationManager` (company dual-mode setting) | `Save_FABR` / `Load_FABR` | ✅ Covered in `test_sprint40_fabrication_engine.cpp` |
+| `ALLI` | Table | `CorporateAllianceManager` (diplomatic relations) | `Save_ALLI` / `Load_ALLI` | ✅ Covered in `test_sprint47_alliances_and_neutral_tracks.cpp` |
+| `FJRN` | Table | `TransferJournal` (cross-server transfer records) | `Save_FJRN` / `Load_FJRN` | ✅ Covered in `test_sprint46_live_federation.cpp` |
+| `FTJR` | ReadOnly | Legacy transfer journal (migration chunk) | `Load_FTJR` only | ✅ Covered in legacy migration test |
+| `ISPR` | Table | Industry spaceport bindings | `Save_ISPR` / `Load_ISPR` | ✅ Covered in `test_spaceports_and_conduits.cpp` |
+| `TECH` | Table | `TechTreeManager` (research DAG progression) | `Save_TECH` / `Load_TECH` | ✅ Covered in `test_sprint41_tech_tree.cpp` |
+| `PROD` | Table | `ProductionChainManager` (facility states) | `Save_PROD` / `Load_PROD` | ✅ Covered in `test_sprint42_production_chains.cpp` |
+| `LORE` | Table | `LoreAIManager` (competitor scripts & expansion) | `Save_LORE` / `Load_LORE` | ✅ Covered in `test_sprint44_lore_ai.cpp` |
+| `VISU` | Table | `VisualOverhaul` (arcology visual stages) | `Save_VISU` / `Load_VISU` | ✅ Covered in `test_sprint45_visual_overhaul.cpp` |
+| `TRAD` | Table | `PrebuiltTradeManager` (gateway tariffs & returns) | `Save_TRAD` / `Load_TRAD` | ✅ Covered in `test_prebuilt_trade.cpp` |
 
-**20 custom chunks** total. All have save handlers. Round-trip test coverage
-varies — see sprint ledger for per-system evidence.
+**Post-load reference validation:** Chunks reconstruct pointers to `Station`, `Industry`, and `TileIndex` entities. Post-load verification is hooked into `afterload.cpp` to discard orphaned portal endpoints or invalid company references after map resize or savegame migration.
 
 ---
 

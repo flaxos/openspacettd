@@ -1,5 +1,10 @@
 # OpenSpaceTTD Architectural Spike: Wormhole Portal Gates & Multi-World Mechanics
 
+> [!NOTE]
+> **HISTORICAL ARCHITECTURAL SPIKE — IMPLEMENTED & SUPERSEDED BY PRODUCTION SOURCE**
+> This spike document preserves the original design exploration and proof-of-concept for wormhole portals. The architecture described herein has been implemented across Sprints 1–11 and production source in `src/portal/`.
+> For current source-verified architecture, see [docs/CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For current subsystem mappings, see [docs/ARCHITECTURE_NOTES.md](ARCHITECTURE_NOTES.md).
+
 ## 1. Executive Summary & Premise
 
 OpenSpaceTTD aims to deliver Factorio-scale industrial production chains and Peter F. Hamilton-style inter-planetary rail networks interlinked via fixed wormholes.
@@ -35,7 +40,7 @@ sequenceDiagram
     EnterTile->>EnterTile: Frame == _tunnel_visibility_frame[dir]
     Note over EnterTile: Sets Track::Wormhole<br/>Sets VehState::Hidden
     EnterTile-->>Controller: VehicleEnterTileState::EnteredWormhole
-    
+
     loop While in Wormhole (Track::Wormhole)
         Controller->>Controller: Advance virtual distance / coordinates
         Note over Controller: Hidden from rendering<br/>Skips tile EnterTile calls

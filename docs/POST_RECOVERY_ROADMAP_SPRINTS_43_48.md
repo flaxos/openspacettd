@@ -1,7 +1,12 @@
 # OpenSpaceTTD: Post-Recovery Strategic Roadmap (Sprints 43–48)
 
-**Status:** ALL STRATEGIC SPRINTS 43–48 IMPLEMENTED & MERGED INTO MAIN
-**Date:** 2026-09-21
+> [!NOTE]
+> **MILESTONE COMPLETED ON MAIN · HUMAN UAT OUTSTANDING**
+> All six strategic sprints (43–48) have been implemented and merged to `main` (PRs #18–#24). Automated Catch2 tests pass cleanly; human visual UAT remains outstanding.
+> For canonical repository status and the active roadmap (Sprints 49–52), see [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). For the comprehensive sprint index, see [SPRINT_LEDGER.md](SPRINT_LEDGER.md).
+
+**Status:** ALL STRATEGIC SPRINTS 43–48 IMPLEMENTED & MERGED INTO MAIN (HUMAN UAT PENDING)
+**Date:** 2026-09-22
 **Governing Architecture:** Peter F. Hamilton *Commonwealth Saga* + Factorio-Scale Production + OpenTTD Determinism
 **Next Horizon:** Commonwealth Expansion (Sprints 49–52) & Human UAT Acceptance
 
