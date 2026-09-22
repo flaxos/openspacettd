@@ -299,3 +299,21 @@ The recovery phase initiated on 2026-09-15 addressed critical blockers in the ex
 - **WP-F1 / WP-F2:** Hardened external portal gate classification and cross-server transfer custody journal checkpoints (PRs #12–#20).
 
 All recovery repairs are committed and merged into `main`. For detailed historical audit logs, see [RECOVERY_PLAN_2026-09-15.md](RECOVERY_PLAN_2026-09-15.md) and [CRITICAL_BUG_REVIEW_2026-09-15.md](CRITICAL_BUG_REVIEW_2026-09-15.md).
+
+
+## 2026-09-22 — CST prefab purchase-mode UAT blocker
+
+Player-reported missing-material rejection exposed a purchase-mode discovery gap:
+the ordinary company HQ is separate from corporate management, whose controls
+also overflowed a single row. Blueprint Library now has a company purchase-mode
+switch; HQ tabs/actions are split into rows with a dedicated mode switch. Both
+use the existing authoritative command, without requiring an HQ or changing saved
+mode automatically. Cash mode needs no stockpile; fabrication still requires
+local-world materials. The library control supports the UAT's 640-pixel width;
+the detailed HQ dashboard still requires a wider screen.
+
+Automated verification: incremental build passed; 425 unit cases / 66,224
+assertions and 436/436 CTests passed, including the new 56-assertion GUI
+placement regression. File-description and unused-string linters and
+`git diff --check` passed. Human retest pending.
+See [UAT evidence and retest steps](../demo/UAT-RESULTS.md#2026-09-22--cst-prefab-purchase-mode-uat-blocker).

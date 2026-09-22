@@ -5,10 +5,19 @@
 #include "mock_environment.h"
 #include "../blueprint/blueprint_manager.h"
 #include "../blueprint/blueprint_gui.h"
+#include "../blueprint/blueprint_cmd.h"
+#include "../command_func.h"
+#include "../portal/planet_manager.h"
+#include "../portal/fabrication_manager.h"
+#include "../portal/corporate_hq.h"
+#include "../portal/corporate_hq_gui.h"
+#include "../widgets/corporate_hq_widget.h"
+#include "../portal/tech_tree.h"
 #include "../map_func.h"
 #include "../clear_map.h"
 #include "../void_map.h"
 #include "../rail_map.h"
+#include "../signal_func.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../economy_func.h"
@@ -279,4 +288,73 @@ TEST_CASE("Blueprint GUI default export remains separate from the library scan",
 	CHECK(Status(window).find("Library scan:") == 0);
 	CHECK(Status(window).find("broken.json") != std::string::npos);
 	CHECK(BlueprintManager::GetBlueprints().size() == before + 1);
+}
+
+TEST_CASE("Blueprint GUI unblocks CST placement with empty stockpiles and no HQ", "[.][blueprint-file-gui][fabrication]")
+{
+	BlueprintFileGUIFixture fixture;
+	Map::Allocate(64, 64);
+	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
+		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 0);
+		else MakeVoid(tile);
+	}
+	PlanetManager::Reset();
+	CorporateHQManager::Reset();
+	StockpileManager::Reset();
+	FabricationManager::Reset();
+	TechTreeManager::Reset();
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
+	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{0}, .name = "Prefab test",
+		.phase = WorldPhase::Phase1_Core, .biome = WorldBiome::Temperate,
+		.min_x = 1, .min_y = 1, .max_x = 62, .max_y = 62, .development_score = 10000}));
+	_company_pool.CleanPool();
+	Company *company = Company::CreateAtIndex(CompanyID{0});
+	_current_company = _local_company = company->index;
+	_game_mode = GameMode::Normal;
+	ResetRailTypes();
+	company->avail_railtypes.Set(RAILTYPE_RAIL);
+	company->money = 1000000;
+	company->clear_limit = 1000 << 16;
+	_price[Price::BuildRail] = 100;
+	_price[Price::BuildSignals] = 20;
+	FabricationManager::SetFabricateFromStockpile(company->index, true);
+	Window *window = LibraryWindow();
+	const Blueprint *prefab = BlueprintManager::FindBuiltin("CST Mainline Double Straight");
+	REQUIRE(prefab != nullptr);
+	const Blueprint bp = *prefab;
+	const TileIndex origin = TileXY(20, 20);
+	const auto query = Command<Commands::PlaceBlueprint>::Do({}, origin, bp.ToJson(), RAILTYPE_RAIL, false);
+	CHECK(query.GetErrorMessage() == STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+	window->OnClick({}, WID_BPL_PLACE, 1);
+	window->OnPlaceObject({}, origin);
+	CHECK(company->money == 1000000);
+	CHECK(IsTileType(origin, TileType::Clear));
+	CHECK_FALSE(CorporateHQManager::HasHQ(company->index));
+	window->OnClick({}, WID_BPL_FABRICATION_TOGGLE, 1);
+	CHECK_FALSE(FabricationManager::IsFabricateFromStockpileEnabled(company->index));
+	CHECK(window->GetWidgetString(WID_BPL_FABRICATION_TOGGLE, STR_NULL) == GetString(STR_FABRICATION_MODE_CASH));
+	window->OnPlaceObject({}, origin);
+	for (const BlueprintTile &cell : bp.tiles) {
+		const TileIndex tile = TileAddWrap(origin, cell.dx, cell.dy);
+		REQUIRE(IsPlainRailTile(tile));
+		CHECK(GetTrackBits(tile) == cell.trackbits);
+		for (const BlueprintSignal &signal : cell.signals) {
+			REQUIRE(HasSignalOnTrack(tile, signal.track));
+			CHECK(GetSignalType(tile, signal.track) == signal.sigtype);
+			CHECK((GetPresentSignals(tile) & SignalOnTrack(signal.track)) == signal.signals_copy);
+		}
+	}
+	CHECK(company->money == 1000000 - 16 * 100 - 2 * 20);
+	CHECK(StockpileManager::GetAllStockpiles().empty());
+	CHECK(window->width <= 640);
+	ShowCorporateHQ(company->index);
+	Window *hq = FindWindowById(WindowClass::CorporateHQ, company->index.base());
+	REQUIRE(hq != nullptr);
+	CHECK(hq->width <= 1024);
+	hq->OnClick({}, WID_CHQ_FABRICATION_TOGGLE, 1);
+	CHECK(FabricationManager::IsFabricateFromStockpileEnabled(company->index));
+	CHECK(window->GetWidgetString(WID_BPL_FABRICATION_TOGGLE, STR_NULL) == GetString(STR_FABRICATION_MODE_STOCKPILE));
+	_current_company = _local_company = COMPANY_SPECTATOR;
+	window->OnClick({}, WID_BPL_FABRICATION_TOGGLE, 1);
+	CHECK_FALSE(FabricationManager::IsFabricateFromStockpileEnabled(COMPANY_SPECTATOR));
 }

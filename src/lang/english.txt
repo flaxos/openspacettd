@@ -5217,7 +5217,7 @@ STR_ERROR_ALREADY_HAS_CORPORATE_HQ                           :company has alread
 STR_NEWS_CORPORATE_HQ_ESTABLISHED                            :{BIG_FONT}{BLACK}Corporate Headquarters Founded!{}{RAW_STRING} has established its interstellar corporate nexus!
 STR_ERROR_CAN_T_BUILD_LOGISTICS_HUB                          :Can't build Company Logistics Hub...
 STR_ERROR_CAN_T_PLACE_CORPORATE_HQ                           :Can't place Corporate Headquarters...
-STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS                   :insufficient materials in planetary stockpile for in-kind fabrication
+STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS                   :insufficient local stockpile materials. Select Cash purchase mode in the Blueprint Library or Map > Corporate Headquarters & Stockpiles.
 
 
 # Local authority errors
@@ -6303,8 +6303,9 @@ STR_MAP_MENU_CORPORATE_HQ                                           :Corporate H
 
 # OpenSpaceTTD Sprint 40: In-Kind Fabrication Engine & Bill of Materials
 STR_CORPORATE_HQ_TAB_FABRICATION                                   :In-Kind Fabrication
-STR_FABRICATION_BTN_TOGGLE                                         :Toggle Mode
-STR_FABRICATION_BTN_TOGGLE_TOOLTIP                                 :Toggle between standard cash purchase and in-kind fabrication from planetary stockpile
+STR_FABRICATION_MODE_CASH                                          :Purchase mode: Cash (click to change)
+STR_FABRICATION_MODE_STOCKPILE                                     :Purchase mode: In-kind stockpile (click to change)
+STR_FABRICATION_BTN_TOGGLE_TOOLTIP                                 :Change purchase mode for all company construction. Cash pays full price without materials; in-kind uses the local planetary stockpile. No HQ building is required.
 
 # OpenSpaceTTD Sprint 41: In-Lore Commonwealth Tech Tree & R&D Projects
 STR_CORPORATE_HQ_TAB_TECH_TREE                                      :Commonwealth Tech Tree

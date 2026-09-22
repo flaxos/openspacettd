@@ -23,6 +23,10 @@
 #include "../textbuf_gui.h"
 #include "../command_func.h"
 #include "../toolbar_gui.h"
+#include "../company_base.h"
+#include "../company_func.h"
+#include "../portal/fabrication_manager.h"
+#include "../portal/portal_cmd.h"
 
 #include <algorithm>
 
@@ -59,6 +63,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_blueprint_library_wi
 		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_BPL_EXPORT),  SetFill(1, 0), SetStringTip(STR_BLUEPRINT_BUTTON_EXPORT, STR_BLUEPRINT_BUTTON_EXPORT_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_BPL_IMPORT),  SetFill(1, 0), SetStringTip(STR_BLUEPRINT_BUTTON_IMPORT, STR_BLUEPRINT_BUTTON_IMPORT_TOOLTIP),
 	EndContainer(),
+	NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_BPL_FABRICATION_TOGGLE), SetFill(1, 0), SetStringTip(STR_FABRICATION_MODE_STOCKPILE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_STATUS_BAR), SetMinimalSize(508, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, Colours::Brown),
@@ -115,6 +120,7 @@ struct BlueprintLibraryWindow : Window {
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
+		if (widget == WID_BPL_FABRICATION_TOGGLE) return GetString(FabricationManager::IsFabricateFromStockpileEnabled(_local_company) ? STR_FABRICATION_MODE_STOCKPILE : STR_FABRICATION_MODE_CASH);
 		if (widget == WID_BPL_STATUS_BAR) return this->status_message;
 		if (widget == WID_BPL_CAPTION) {
 			return GetString(STR_BLUEPRINT_VIEW_CAPTION);
@@ -128,6 +134,7 @@ struct BlueprintLibraryWindow : Window {
 		bool has_sel = (this->selected_index < list.size());
 		bool is_builtin = has_sel && list[this->selected_index].is_builtin;
 
+		this->SetWidgetDisabledState(WID_BPL_FABRICATION_TOGGLE, !Company::IsValidID(_local_company));
 		this->SetWidgetDisabledState(WID_BPL_PLACE, !has_sel);
 		this->SetWidgetDisabledState(WID_BPL_ROTATE, !has_sel);
 		this->SetWidgetDisabledState(WID_BPL_FLIP, !has_sel);
@@ -223,6 +230,11 @@ struct BlueprintLibraryWindow : Window {
 		/* A new library action cancels any earlier path/name query before its target changes. */
 		CloseWindowByClass(WindowClass::QueryString);
 		switch (widget) {
+			case WID_BPL_FABRICATION_TOGGLE:
+				if (Company::IsValidID(_local_company)) {
+					Command<Commands::SetFabricationMode>::Post(!FabricationManager::IsFabricateFromStockpileEnabled(_local_company));
+				}
+				break;
 			case WID_BPL_LIST_PANEL: {
 				const NWidgetBase *list_wid = this->GetWidget<NWidgetBase>(WID_BPL_LIST_PANEL);
 				Rect r = list_wid->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
