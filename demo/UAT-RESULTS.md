@@ -210,3 +210,18 @@ library width <=640 and HQ width <=1024 at the test's default UI scale. It does
 not constitute a human screenshot or a full replay of the user's save. Save
 metadata inspection with the rebuilt executable reads the supplied v1.0 fixture
 as version 367 with no NewGRFs; the save itself was not modified.
+
+
+## 2026-09-22 — UAT text readability
+
+Blueprint details and status messages now wrap; related counts share a compact
+line, with more room for descriptions. Corporate HQ Overview and Fabrication
+use short, wrapped instructions and a compact materials list. Repeated discount
+claims and nonessential explanatory text were removed. HQ status messages wrap.
+This is a presentation-only change; construction and resource rules are unchanged.
+
+Verification: incremental build, 425 unit cases / 66,224 assertions, 436/436
+CTests, both repository linters and `git diff --check` passed. Human visual retest
+pending: reopen Blueprint Library and HQ Overview/Fabrication, check readability
+at the user's font/UI scale, and resize the windows. Very long imported text still
+requires sufficient panel height; the wider HQ dashboard is not redesigned here.

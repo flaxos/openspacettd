@@ -86,7 +86,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets
 		NWidget(NWID_VSCROLLBAR, Colours::DarkGreen, WID_CHQ_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(868, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(868, 42), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, Colours::DarkGreen),
 	EndContainer(),
 };
@@ -279,33 +279,19 @@ struct CorporateHQWindow : Window {
 			case WID_CHQ_MAIN_PANEL: {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
 
+				auto paragraph = [&tr](std::string_view text, TextColour colour = TextColour::Silver) {
+					tr.top = DrawStringMultiLine(tr, text, colour) + 6;
+				};
+
 				if (this->active_tab == CorporateHQTab::Overview) {
-					DrawString(tr, "Corporate Overview & Production Architecture", TextColour::Gold);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
-
-					DrawString(tr, "1. Dual Construction Accounting Mode (Factorio / Captain of Industry Style):", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - Standard builds draw cash from company treasury.", TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - If planetary stockpile holds required Bill of Materials (BOM), in-kind fabrication grants 70-85% cash discount!", TextColour::Green);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
-
-					DrawString(tr, "2. Bi-Directional Dedicated Logistics Hubs (Company Warehouses):", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - Attached to rail stations. Consists unloading deposit cargo into the planetary stockpile ledger.", TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - Outgoing export consists draw surplus inventory above the configurable reserve floor.", TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
-					DrawString(tr, "   - Use normal unload/load orders for stockpile exchange; Transfer and No Unload retain their native meaning.", TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
-
-					DrawString(tr, "3. Two-Tier Data Crystal Life Cycle:", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - Blank Monocrystalline Substrate is synthesized from high-purity silicon and rare silicates.", TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - Tier A (Consumer): Encrypted mail replacement delivering planetary prosperity to Metropolises.", TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal);
-					DrawString(tr, "   - Tier B (Research): Quantum-enriched crystals imprinted with advanced math proofs at frontier observatories.", TextColour::Gold);
+					paragraph("Construction", TextColour::Gold);
+					paragraph("Cash: pay the full price. No materials or HQ required.");
+					paragraph("In-kind: use materials from this world's stockpile for a cash discount. Change mode with the purchase-mode button above.");
+					paragraph("Logistics hubs", TextColour::Gold);
+					paragraph("Attach a hub to an owned rail station. Normal unload orders put cargo into the world's stockpile.");
+					paragraph("Loading trains collect stock above the hub's reserve. Transfer and No Unload orders keep their usual meaning.");
+					paragraph("Research", TextColour::Gold);
+					paragraph("Open Commonwealth Tech Tree to choose a project and monthly budget. Research also uses HQ-world electronics and enriched crystals.");
 				} else if (this->active_tab == CorporateHQTab::Stockpiles) {
 					DrawString(tr, "World              | Steel (Tons) | Ballast (Tons) | Goods/Wiring | Valuables/Chips | Crystals", TextColour::Gold);
 					tr.top += GetCharacterHeight(FontSize::Normal) + 4;
@@ -360,40 +346,13 @@ struct CorporateHQWindow : Window {
 					}
 				} else if (this->active_tab == CorporateHQTab::Fabrication) {
 					bool fab_active = FabricationManager::IsFabricateFromStockpileEnabled(this->company);
-					std::string mode_status = fab_active ?
-						"Status: ACTIVE — Construction automatically draws physical BOM from local world stockpile (80% cash discount)" :
-						"Status: INACTIVE — Standard commercial purchase (100% cash from corporate bank balance)";
-					DrawString(tr, mode_status, fab_active ? TextColour::Green : TextColour::Silver);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
-
-					DrawString(tr, "Standard Infrastructure & Rolling Stock Bill of Materials (BOM) Catalog:", TextColour::Gold);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 4;
-
-					DrawString(tr, "• Pioneer Standard Rail:     2 Ballast (Gravel/Stone) + 1 Structural Metal (Steel)  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• Catenary Electric Rail:    2 Ballast + 1 Structural Metal + 1 Wiring (Copper Wire)  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• High-Speed Monorail:       4 Ballast + 2 Structural Metal + 1 Wiring  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• CST Vacuum Maglev:         2 Superalloys + 2 Wiring + 1 Electronics (Microchips)  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• Track Signals:             1 Structural Metal + 1 Wiring  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• Train Maintenance Depots:  10 Structural Metal + 5 Ballast  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• Locomotives & Traction:    30–50 Metal/Superalloys + 10–25 Wiring/Electronics  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-
-					DrawString(tr, "• Freight & Passenger Cars:  10 Structural Metal + 2 Composites  [80% cash discount]", TextColour::White);
-					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
-
-					DrawString(tr, "Tip: Use Logistics Hubs at regional terminals to ingest freight into the world's company stockpile.", TextColour::Gold);
+					paragraph(fab_active ? "In-kind: local materials + discounted cash cost." : "Cash: full price, no materials required.", TextColour::White);
+					paragraph("Use the purchase-mode button above to switch. If materials run out, switch to Cash or deliver more to a local logistics hub.");
+					paragraph("Materials per item", TextColour::Gold);
+					paragraph("Standard rail: 2 ballast + 1 metal\nElectric rail: 2 ballast + 1 metal + 1 wiring\nMonorail: 4 ballast + 2 metal + 1 wiring\nMaglev: 2 superalloys + 2 wiring + 1 electronics", TextColour::White);
+					paragraph("Signal: 1 metal + 1 wiring\nDepot: 10 metal + 5 ballast", TextColour::White);
+					paragraph("Locomotive: materials vary by rail type.\nWagon: 10 metal + 2 composites.");
+					paragraph("Cargo names depend on the active content pack. Check Planetary Stockpiles for available materials.");
 				} else if (this->active_tab == CorporateHQTab::TechTree) {
 					TechID active = TechTreeManager::GetActiveProject(this->company);
 					const TechProjectNode *active_node = TechTreeManager::GetNode(active);
@@ -523,7 +482,7 @@ struct CorporateHQWindow : Window {
 
 			case WID_CHQ_STATUS_BAR: {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
-				DrawString(tr, this->status_message, TextColour::Silver, AlignmentH::Centre);
+				DrawStringMultiLine(tr, this->status_message, TextColour::Silver);
 				break;
 			}
 		}
