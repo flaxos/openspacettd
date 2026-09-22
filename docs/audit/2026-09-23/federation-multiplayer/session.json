@@ -1,0 +1,37 @@
+{
+  "binary": "/home/flax/games/openspacettd/build/openttd",
+  "binary_sha256": "66e14ebbff0fe6e52ea9b7320045a1d1289437ca7d65d272dda357ffc24fe120",
+  "authority": "http://127.0.0.1:44543",
+  "processes": [
+    {
+      "name": "authority",
+      "pid": 881921,
+      "port": null,
+      "console": "/tmp/federation-native-final/authority.console"
+    },
+    {
+      "name": "server1",
+      "pid": 881938,
+      "port": 54701,
+      "console": "/tmp/federation-native-final/server1.console"
+    },
+    {
+      "name": "server2",
+      "pid": 881973,
+      "port": 37965,
+      "console": "/tmp/federation-native-final/server2.console"
+    },
+    {
+      "name": "client1",
+      "pid": 882072,
+      "port": null,
+      "console": "/tmp/federation-native-final/client1.console"
+    },
+    {
+      "name": "client2",
+      "pid": 882230,
+      "port": null,
+      "console": "/tmp/federation-native-final/client2.console"
+    }
+  ]
+}

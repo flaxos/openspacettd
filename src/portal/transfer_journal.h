@@ -125,6 +125,30 @@ public:
 		return record.state == TransferCheckpointState::Materialized && Restore(record);
 	}
 
+	/** Assemble replayable arrival fragments in savegame state, including during a client join. */
+	static bool AppendArrivalFragment(uint32_t source_world, const std::string &request_id, size_t offset, const std::vector<uint8_t> &bytes)
+	{
+		auto it = records.find({source_world, request_id});
+		if (it == records.end() || it->second.state != TransferCheckpointState::Prepared) return false;
+		auto &snapshot = it->second.snapshot;
+		if (offset > snapshot.size() || bytes.size() > 1024 * 1024 || offset > 1024 * 1024 - bytes.size()) return false;
+		if (offset < snapshot.size()) {
+			return bytes.size() <= snapshot.size() - offset && std::equal(bytes.begin(), bytes.end(), snapshot.begin() + offset);
+		}
+		snapshot.insert(snapshot.end(), bytes.begin(), bytes.end());
+		return true;
+	}
+
+	/** Commit the physical arrival and receipt on every peer at the same command frame. */
+	static bool MarkMaterialized(uint32_t source_world, const std::string &request_id, const std::string &receipt)
+	{
+		auto it = records.find({source_world, request_id});
+		if (it == records.end() || it->second.state != TransferCheckpointState::Prepared || receipt.empty() || receipt.size() > 128) return false;
+		it->second.arrival_receipt = receipt;
+		it->second.state = TransferCheckpointState::Materialized;
+		return true;
+	}
+
 	static bool ConfirmArrival(uint32_t source_world, const std::string &request_id, const std::string &receipt)
 	{
 		auto it = records.find({source_world, request_id});

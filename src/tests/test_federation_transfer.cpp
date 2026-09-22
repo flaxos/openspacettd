@@ -24,9 +24,12 @@
 #include "../portal/universe_authority.h"
 #include "../rail_map.h"
 #include "../train.h"
+#include "../command_func.h"
+#include "../network/network.h"
 #include "../tunnel_map.h"
 #include "../tunnelbridge_map.h"
 #include "../vehicle_base.h"
+#include "../vehicle_func.h"
 #include "mock_environment.h"
 
 #include "../saveload/saveload_func.h"
@@ -545,6 +548,10 @@ TEST_CASE("Federation Transfer - Consist Despawn for Transfer")
 
 TEST_CASE("Federation Transfer - Source departure records custody before releasing consist")
 {
+	const bool multiplayer = GENERATE(false, true);
+	AutoRestoreBackup networking(_networking, multiplayer);
+	AutoRestoreBackup server(_network_server, multiplayer);
+
 	Map::Allocate(64, 64);
 	FederationTransferManager::Reset();
 	PortalRegistry::Reset();
@@ -590,6 +597,23 @@ TEST_CASE("Federation Transfer - Source departure records custody before releasi
 	engine->SetNext(wagon);
 
 	VehicleID engine_id = engine->index;
+	if (multiplayer) {
+		CHECK_FALSE(FederationTransferManager::InitiateConsistDeparture(engine, gate_tile));
+		CHECK(Train::GetIfValid(engine_id) == engine);
+		CHECK(HasTunnelBridgeReservation(gate_tile));
+		REQUIRE(TransferJournal::GetAll().size() == 1);
+		const auto cp = TransferJournal::GetAll().begin()->second;
+		CHECK(cp.state == TransferCheckpointState::Prepared);
+		CHECK(UniverseAuthorityService::Instance().GetAllTransfers().empty());
+		CHECK_FALSE(FederationTransferManager::InitiateConsistDeparture(engine, gate_tile));
+		CHECK(TransferJournal::GetAll().size() == 1);
+		CHECK(CmdCommitFederationDeparture({}, cp.source_world, cp.request_id, "test-admitted").Succeeded());
+		CHECK(Train::GetIfValid(engine_id) == engine);
+		CHECK(CmdCommitFederationDeparture(DoCommandFlag::Execute, cp.source_world, cp.request_id, "test-admitted").Succeeded());
+		CHECK(Train::GetIfValid(engine_id) == nullptr);
+		CHECK(CmdCommitFederationDeparture(DoCommandFlag::Execute, cp.source_world, cp.request_id, "test-admitted").Succeeded());
+		CHECK_FALSE(HasTunnelBridgeReservation(gate_tile));
+	} else {
 	REQUIRE(FederationTransferManager::InitiateConsistDeparture(engine, gate_tile));
 
 	CHECK(Train::GetIfValid(engine_id) == nullptr);
@@ -603,6 +627,8 @@ TEST_CASE("Federation Transfer - Source departure records custody before releasi
 	REQUIRE(checkpoint != nullptr);
 	CHECK(checkpoint->transfer_id == transfer.transfer_id);
 	CHECK(checkpoint->state == TransferCheckpointState::Departed);
+
+	}
 
 	PortalRegistry::Reset();
 	FederationIdentityRegistry::Reset();
@@ -1274,4 +1300,99 @@ TEST_CASE("Federation Transfer - Journaled materialization confirms after save r
 	PortalRegistry::Reset();
 	FederationIdentityRegistry::Reset();
 	FederationTransferManager::Reset();
+}
+
+TEST_CASE("Federation Transfer - Gate command preserves local counterpart and validates before mutation", "[federation-network]")
+{
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	const TileIndex a = TileXY(20, 20), b = TileXY(40, 40);
+	MakeRailTunnel(a, Owner{0}, DiagDirection::NE, RAILTYPE_BEGIN);
+	MakeRailTunnel(b, Owner{0}, DiagDirection::SW, RAILTYPE_BEGIN);
+	REQUIRE(PortalRegistry::RegisterPortalPair(a, DiagDirection::NE, WorldID{1}, b, DiagDirection::SW, WorldID{2}, 10) != INVALID_PORTAL);
+	CHECK(CmdConfigureFederationGate({}, a, 2, 20, 10, 5, 1).Succeeded());
+	CHECK(PortalRegistry::GetOtherPortalEnd(a) == b);
+	CHECK(CmdConfigureFederationGate(DoCommandFlag::Execute, a, 2, 0, 10, 5, 1).Failed());
+	CHECK(PortalRegistry::GetOtherPortalEnd(a) == b);
+	CHECK(CmdConfigureFederationGate(DoCommandFlag::Execute, a, 2, 20, 10, 5, 1).Succeeded());
+	CHECK(PortalRegistry::IsInterServerPortal(a));
+	CHECK(PortalRegistry::IsUnlinkedGate(b));
+	CHECK(PortalRegistry::GetAllPortals().empty());
+	CHECK(GetCommandFlags<Commands::ConfigureFederationGate>().Test(CommandFlag::Server));
+	PortalRegistry::Reset();
+}
+
+TEST_CASE("Federation Transfer - Replicated arrival fragments are bounded and retry-safe", "[federation-network]")
+{
+	TransferJournal::Reset();
+	const std::string metadata = R"({"tx":"network-arrival","sw":1,"dw":2,"sg":10,"dg":20,"nh":11,"nl":22,"seq":33})";
+	const std::vector<uint8_t> first{1, 2, 3}, second{4, 5, 6};
+	CHECK(CmdStageFederationArrival({}, metadata, 0, Base64Encode(first)).Succeeded());
+	CHECK(TransferJournal::GetAll().empty());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, 3, Base64Encode(second)).Failed());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, 0, Base64Encode(first)).Succeeded());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, 0, Base64Encode(first)).Succeeded());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, 0, Base64Encode(second)).Failed());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, 3, Base64Encode(second)).Succeeded());
+	const auto *cp = TransferJournal::FindByTransferId("network-arrival");
+	REQUIRE(cp != nullptr);
+	CHECK(cp->snapshot == std::vector<uint8_t>{1, 2, 3, 4, 5, 6});
+	CHECK(cp->state == TransferCheckpointState::Prepared);
+	CHECK(CmdMaterializeFederationArrival({}, "network-arrival").Failed());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, "{}", 0, "AAAA").Failed());
+	CHECK(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, 6, std::string(513, 'A')).Failed());
+	TransferJournal::Reset();
+}
+
+TEST_CASE("Federation Transfer - Staged arrival restores cargo and foreign identity exactly once", "[federation-network]")
+{
+	(void)MockEnvironment::Instance();
+	Map::Allocate(64, 64);
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	TransferJournal::Reset();
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	_company_pool.CleanPool();
+	InitTestEngines();
+	Company::CreateAtIndex(CompanyID{0});
+	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	FederationIdentityRegistry::RestoreState({99, 88}, 1);
+	const TileIndex gate = TileXY(20, 20);
+	MakeRailTunnel(gate, Owner{0}, DiagDirection::SW, RAILTYPE_BEGIN);
+	SetTunnelBridgeReservation(gate, false);
+	PortalRegistry::RegisterInterServerPortal(gate, DiagDirection::SW, WorldID{2}, WorldID{1}, 10, 5, 20);
+	const auto snapshot = CreateSampleSnapshot(50);
+	const auto encoded = ConsistSnapshotCodec::Encode(snapshot);
+	REQUIRE(encoded.Succeeded());
+	const std::string metadata = nlohmann::json{{"tx", "staged-test"}, {"sw", 1}, {"dw", 2}, {"sg", 10}, {"dg", 20},
+		{"nh", snapshot.consist_id.name_space.high}, {"nl", snapshot.consist_id.name_space.low}, {"seq", snapshot.consist_id.sequence}}.dump();
+	for (size_t offset = 0; offset < encoded.bytes.size(); offset += 384) {
+		const std::vector<uint8_t> fragment(encoded.bytes.begin() + offset, encoded.bytes.begin() + std::min(encoded.bytes.size(), offset + 384));
+		REQUIRE(CmdStageFederationArrival(DoCommandFlag::Execute, metadata, static_cast<uint32_t>(offset), Base64Encode(fragment)).Succeeded());
+		/* The serialized journal is sufficient to resume even a partial arrival. */
+		const auto records = TransferJournal::GetAll();
+		TransferJournal::Reset();
+		for (const auto &[key, cp] : records) REQUIRE(TransferJournal::Restore(cp));
+	}
+	CHECK(CmdMaterializeFederationArrival({}, "staged-test").Succeeded());
+	CHECK(Vehicle::GetNumItems() == 0);
+	REQUIRE(CmdMaterializeFederationArrival(DoCommandFlag::Execute, "staged-test").Succeeded());
+	CHECK(Vehicle::GetNumItems() == snapshot.units.size());
+	uint32_t cargo = 0;
+	for (const Train *train : Train::Iterate()) {
+		cargo += train->cargo.StoredCount();
+		if (train->IsFrontEngine()) CHECK(FederationIdentityRegistry::Find(train) == snapshot.consist_id);
+	}
+	CHECK(cargo == 50);
+	CHECK(CmdMaterializeFederationArrival(DoCommandFlag::Execute, "staged-test").Succeeded());
+	CHECK(Vehicle::GetNumItems() == snapshot.units.size());
+	CHECK(CmdConfirmFederationArrival(DoCommandFlag::Execute, "staged-test").Succeeded());
+	CHECK(TransferJournal::FindByTransferId("staged-test")->state == TransferCheckpointState::Confirmed);
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	_company_pool.CleanPool();
+	PortalRegistry::Reset();
+	FederationIdentityRegistry::Reset();
+	TransferJournal::Reset();
 }
