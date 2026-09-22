@@ -77,6 +77,30 @@ IndustryBuildData _industry_builder; ///< In-game manager of industries.
 
 static int WhoCanServiceIndustry(Industry *ind);
 
+static CargoLabel ResolveMixedCargoLabel(const std::variant<CargoLabel, MixedCargoType> &label)
+{
+	struct visitor {
+		CargoLabel operator()(const CargoLabel &l) { return l; }
+		CargoLabel operator()(const MixedCargoType &mixed)
+		{
+			switch (mixed) {
+				case MCT_LIVESTOCK_FRUIT:
+					return (GetCargoTypeByLabel(CT_LIVESTOCK) != INVALID_CARGO) ? CT_LIVESTOCK : CT_FRUIT;
+				case MCT_GRAIN_WHEAT_MAIZE:
+					if (GetCargoTypeByLabel(CT_GRAIN) != INVALID_CARGO) return CT_GRAIN;
+					if (GetCargoTypeByLabel(CT_WHEAT) != INVALID_CARGO) return CT_WHEAT;
+					return CT_MAIZE;
+				case MCT_VALUABLES_GOLD_DIAMONDS:
+					if (GetCargoTypeByLabel(CT_VALUABLES) != INVALID_CARGO) return CT_VALUABLES;
+					if (GetCargoTypeByLabel(CT_GOLD) != INVALID_CARGO) return CT_GOLD;
+					return CT_DIAMONDS;
+				default: return CT_INVALID;
+			}
+		}
+	};
+	return std::visit(visitor{}, label);
+}
+
 /**
  * This function initialize the spec arrays of both
  * industry and industry tiles.
@@ -96,9 +120,33 @@ void ResetIndustries()
 	auto industry_tile_insert = std::copy(std::begin(_origin_industry_tile_specs), std::end(_origin_industry_tile_specs), std::begin(_industry_tile_specs));
 	std::fill(industry_tile_insert, std::end(_industry_tile_specs), IndustryTileSpec{});
 
+	/* Apply default cargo translation map for unset cargo slots */
+	for (auto &indsp : _industry_specs) {
+		for (size_t i = 0; i < std::size(indsp.produced_cargo_label); ++i) {
+			if (!IsValidCargoType(indsp.produced_cargo[i])) {
+				indsp.produced_cargo[i] = GetCargoTypeByLabel(ResolveMixedCargoLabel(indsp.produced_cargo_label[i]));
+			}
+		}
+		for (size_t i = 0; i < std::size(indsp.accepts_cargo_label); ++i) {
+			if (!IsValidCargoType(indsp.accepts_cargo[i])) {
+				indsp.accepts_cargo[i] = GetCargoTypeByLabel(ResolveMixedCargoLabel(indsp.accepts_cargo_label[i]));
+			}
+		}
+	}
+
+	for (auto &indtsp : _industry_tile_specs) {
+		for (size_t i = 0; i < std::size(indtsp.accepts_cargo_label); ++i) {
+			if (!IsValidCargoType(indtsp.accepts_cargo[i])) {
+				indtsp.accepts_cargo[i] = GetCargoTypeByLabel(ResolveMixedCargoLabel(indtsp.accepts_cargo_label[i]));
+			}
+		}
+	}
+
 	/* Reset any overrides that have been set. */
 	_industile_mngr.ResetOverride();
 	_industry_mngr.ResetOverride();
+
+	InitializeIndustries();
 }
 
 /**

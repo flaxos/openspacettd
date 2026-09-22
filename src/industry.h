@@ -328,6 +328,7 @@ enum IndustryDirectoryInvalidateWindowData : uint8_t {
 	IDIWD_FORCE_RESORT,
 };
 
+void InitializeIndustries();
 void TrimIndustryAcceptedProduced(Industry *ind);
 
 #endif /* INDUSTRY_H */

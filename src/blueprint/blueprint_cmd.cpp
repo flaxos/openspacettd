@@ -22,6 +22,7 @@
 #include "../portal/portal_registry.h"
 #include "../portal/fabrication_manager.h"
 #include "../portal/company_stockpile.h"
+#include "../signal_func.h"
 #include "../table/strings.h"
 
 #include <map>
@@ -340,5 +341,6 @@ CommandCost CmdPlaceBlueprint(DoCommandFlags flags, TileIndex origin_tile, const
 			actual.AddCost(child.GetCost());
 		}
 	}
+	UpdateSignalsInBuffer();
 	return actual;
 }
