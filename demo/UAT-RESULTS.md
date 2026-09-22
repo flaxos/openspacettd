@@ -271,3 +271,9 @@ acceptance passed. Human graphical retest remains **pending**.
 
 [Recovery evidence](CONNECTED-UAT-RECOVERY.evidence.json) ·
 [Reproduction](../docs/CONNECTED_ECONOMY_UAT.md#terrain-and-cargo-text-recovery-2026-09-23).
+
+## 2026-09-23 — Savegame authoring workflow
+
+Documented the terrain, cargo-text, logistics and recovery lessons in
+[Savegame authoring](../docs/SAVEGAME_AUTHORING.md), with a required `AGENTS.md`
+checklist. This documentation change adds no human acceptance claim or new save.

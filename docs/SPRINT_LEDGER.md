@@ -188,3 +188,16 @@ acceptance passed. Human graphical retest remains **pending**.
 
 [Recovery evidence](../demo/CONNECTED-UAT-RECOVERY.evidence.json) ·
 [Reproduction](CONNECTED_ECONOMY_UAT.md#terrain-and-cargo-text-recovery-2026-09-23).
+
+## 2026-09-23 — Savegame authoring workflow
+
+[Savegame authoring](SAVEGAME_AUTHORING.md) now records the reproducible build,
+early terrain/text audits, logistics proof, checkpoint use, content compatibility
+and publication workflow. `AGENTS.md` requires future scenario work to use it.
+Documentation-only follow-up: no engine, content or save changes; human visual
+acceptance remains pending. The guide explicitly distinguishes fixture-specific
+assumptions from reusable practices.
+
+Documentation verification: guide links and referenced tools checked; 429 unit
+cases / 66,359 assertions, 440/440 CTests, both repository linters and
+`git diff --check` passed. No executable or save regeneration was needed.
