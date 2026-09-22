@@ -47,9 +47,9 @@ static constexpr std::initializer_list<NWidgetPart> _nested_blueprint_library_wi
 		NWidget(WWT_STICKYBOX, Colours::Brown),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_LIST_PANEL), SetMinimalSize(240, 200), SetFill(1, 1), SetResize(1, 1), EndContainer(),
+		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_LIST_PANEL), SetMinimalSize(240, 260), SetFill(1, 1), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VSCROLLBAR, Colours::Brown, WID_BPL_SCROLLBAR),
-		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_INFO_PANEL), SetMinimalSize(280, 200), SetFill(1, 1), SetResize(1, 1), EndContainer(),
+		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_INFO_PANEL), SetMinimalSize(280, 260), SetFill(1, 1), SetResize(1, 1), EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
 		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_BPL_CAPTURE), SetFill(1, 0), SetStringTip(STR_BLUEPRINT_BUTTON_CAPTURE, STR_BLUEPRINT_BUTTON_CAPTURE_TOOLTIP),
@@ -65,7 +65,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_blueprint_library_wi
 	EndContainer(),
 	NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_BPL_FABRICATION_TOGGLE), SetFill(1, 0), SetStringTip(STR_FABRICATION_MODE_STOCKPILE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_STATUS_BAR), SetMinimalSize(508, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PANEL, Colours::Brown, WID_BPL_STATUS_BAR), SetMinimalSize(508, 48), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, Colours::Brown),
 	EndContainer(),
 };
@@ -178,35 +178,15 @@ struct BlueprintLibraryWindow : Window {
 
 		if (this->has_working_bp) {
 			const auto &bp = this->working_bp;
-			DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Name: {}", bp.name), TextColour::White);
-			iy += line_height;
-
-			std::string type_str = bp.is_builtin ? "CST Prefab (Read-Only)" : "Player Blueprint";
-			DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Type: {}", type_str), bp.is_builtin ? TextColour::Gold : TextColour::Silver);
-			iy += line_height;
-
-			if (!bp.author.empty()) {
-				DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Author: {}", bp.author), TextColour::Silver);
-				iy += line_height;
-			}
-
-			DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Footprint: {} x {} tiles", bp.width, bp.height), TextColour::Green);
-			iy += line_height;
-
-			DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Track Pieces: {}", bp.GetTrackPieceCount()), TextColour::LightBlue);
-			iy += line_height;
-
-			DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Signals: {}", bp.GetSignalCount()), TextColour::Yellow);
-			iy += line_height;
-
-			if (bp.GetStationCount() > 0) {
-				DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Stations: {} tiles", bp.GetStationCount()), TextColour::Orange);
-				iy += line_height;
-			}
-
-			if (bp.GetDepotCount() > 0) {
-				DrawString(ir.left + 4, ir.right - 4, iy, fmt::format("Depots: {}", bp.GetDepotCount()), TextColour::Purple);
-				iy += line_height;
+			auto detail = [&ir, &iy](std::string_view text, TextColour colour) {
+				iy = DrawStringMultiLine(Rect{ir.left + 4, iy, ir.right - 4, ir.bottom}, text, colour) + 4;
+			};
+			detail(bp.name, TextColour::White);
+			detail(bp.is_builtin ? "CST prefab (read-only)" : "Player blueprint", TextColour::Gold);
+			if (!bp.is_builtin && !bp.author.empty()) detail(fmt::format("By {}", bp.author), TextColour::Silver);
+			detail(fmt::format("{} x {} tiles | {} tracks | {} signals", bp.width, bp.height, bp.GetTrackPieceCount(), bp.GetSignalCount()), TextColour::LightBlue);
+			if (bp.GetStationCount() > 0 || bp.GetDepotCount() > 0) {
+				detail(fmt::format("{} station tiles | {} depots", bp.GetStationCount(), bp.GetDepotCount()), TextColour::Orange);
 			}
 
 			if (!bp.description.empty()) {
@@ -222,7 +202,7 @@ struct BlueprintLibraryWindow : Window {
 		Rect sr = status_wid->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
 		TextColour status_tc = (this->mode == BlueprintWindowMode::Placing) ? TextColour::Yellow :
 		                       ((this->mode == BlueprintWindowMode::Capturing) ? TextColour::Orange : TextColour::Silver);
-		DrawString(sr.left + 4, sr.right - 4, sr.top + 4, this->GetWidgetString(WID_BPL_STATUS_BAR, STR_NULL), status_tc);
+		DrawStringMultiLine(Rect{sr.left + 4, sr.top + 4, sr.right - 4, sr.bottom - 4}, this->status_message, status_tc);
 	}
 
 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override

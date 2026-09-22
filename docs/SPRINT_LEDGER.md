@@ -137,3 +137,18 @@ assertions and 436/436 CTests passed, including the new 56-assertion GUI
 placement regression. File-description and unused-string linters and
 `git diff --check` passed. Human retest pending.
 See [UAT evidence and retest steps](../demo/UAT-RESULTS.md#2026-09-22--cst-prefab-purchase-mode-uat-blocker).
+
+
+## 2026-09-22 — UAT text readability
+
+Blueprint details and status messages now wrap; related counts share a compact
+line, with more room for descriptions. Corporate HQ Overview and Fabrication
+use short, wrapped instructions and a compact materials list. Repeated discount
+claims and nonessential explanatory text were removed. HQ status messages wrap.
+This is a presentation-only change; construction and resource rules are unchanged.
+
+Verification: incremental build, 425 unit cases / 66,224 assertions, 436/436
+CTests, both repository linters and `git diff --check` passed. Human visual retest
+pending: reopen Blueprint Library and HQ Overview/Fabrication, check readability
+at the user's font/UI scale, and resize the windows. Very long imported text still
+requires sufficient panel height; the wider HQ dashboard is not redesigned here.
