@@ -64,14 +64,15 @@ static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_TECH_TREE), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_TECH_TREE, STR_EMPTY),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_ALLIANCES), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_ALLIANCES, STR_EMPTY),
-		NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_ALLIANCE_TOGGLE_BTN), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_ALLIANCE_BTN_NEUTRAL, STR_EMPTY),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_RESEARCH_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_START_RESEARCH, STR_TECH_TREE_BTN_START_RESEARCH_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_BUDGET_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_SET_BUDGET, STR_TECH_TREE_BTN_SET_BUDGET_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE), SetMinimalSize(65, 20), SetStringTip(STR_FABRICATION_BTN_TOGGLE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_LOCATE), SetMinimalSize(55, 20), SetStringTip(STR_CORPORATE_HQ_BTN_LOCATE, STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_UPGRADE), SetMinimalSize(55, 20), SetStringTip(STR_CORPORATE_HQ_BTN_UPGRADE, STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP),
 	EndContainer(),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE), SetFill(1, 0), SetStringTip(STR_FABRICATION_MODE_STOCKPILE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_BUILD_HQ), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_BUILD_HQ, STR_CORPORATE_HQ_BTN_BUILD_HQ_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_BUILD_HUB), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_BUILD_HUB, STR_CORPORATE_HQ_BTN_BUILD_HUB_TOOLTIP),
@@ -125,6 +126,7 @@ struct CorporateHQWindow : Window {
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
+		if (widget == WID_CHQ_FABRICATION_TOGGLE) return GetString(FabricationManager::IsFabricateFromStockpileEnabled(this->company) ? STR_FABRICATION_MODE_STOCKPILE : STR_FABRICATION_MODE_CASH);
 		if (widget == WID_CHQ_STATUS_BAR) return this->status_message;
 		if (widget == WID_CHQ_CAPTION) {
 			const Company *c = Company::GetIfValid(this->company);

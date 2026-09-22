@@ -82,6 +82,7 @@ foreach(case IN ITEMS
     "Blueprint GUI exports the transformed selection and imports a real file"
     "Blueprint GUI reports invalid imports collisions and export failures truthfully"
     "Blueprint GUI default export remains separate from the library scan"
+    "Blueprint GUI unblocks CST placement with empty stockpiles and no HQ"
     "Corporate HQ GUI establishes an owned station hub and edits its reserve"
 )
     string(MAKE_C_IDENTIFIER "${case}" case_name)

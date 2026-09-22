@@ -27,8 +27,10 @@ Do not ask a player to run the broad suite while its crash smoke still fails.
    menu→Save Game using a new case-specific filename; never overwrite M1/BC.
 3. Pause using the toolbar pause button. Open Map→**Corporate Headquarters &
    Stockpiles**. Record Overview, **Planetary Stockpiles**, **Logistics Hubs**,
-   **In-Kind Fabrication**, **Commonwealth Tech Tree**. Where HQ exists, click
-   **Toggle Mode** until standard cash mode for construction cases. Record actual
+   **In-Kind Fabrication**, **Commonwealth Tech Tree**. For construction cases, click the purchase-mode button until it reads
+   **Purchase mode: Cash (click to change)**. The same button is available directly
+   in the Blueprint Library, and **no HQ building is required**. The ordinary
+   Company details → Build HQ window is separate from this management window. Record actual
    local cargo counts and current research; fixture seeding is not proof of them.
 4. Cash must exceed the quoted case costs plus operating reserve. Record actual
    amount before/after. If insufficient, use ordinary company finance borrowing
@@ -372,9 +374,9 @@ save/reload. **Reset:** common; no setup_uat_fixtures reseeding to fake deliveri
 HQ seeded inventory verified; record actual cargo counts (shared alias roles are
 one pool), enough cash. No research needed for baseline80%. **Status:** Not run.
 
-1. HQ→In-Kind Fabrication→Toggle Mode to cash. Build five identical rail pieces
+1. Blueprint Library→**Purchase mode: Cash (click to change)**. Build five identical rail pieces
    with Autorail; record cash/material delta. Reset.
-2. Same location/type→Toggle Mode to in-kind; repeat five pieces; inspect cash and
+2. Same location/type→switch purchase mode to **In-kind stockpile**; repeat five pieces; inspect cash and
    actual local stockpile after. Test depot, signal and locomotive separately,
    each with their displayed requirements and independent reset.
 3. Repeat with an operator-supplied low-material fixture after WP-Q; require clean

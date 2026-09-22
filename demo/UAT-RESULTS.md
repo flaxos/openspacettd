@@ -166,3 +166,47 @@ failure stays historical. Retest on copied BC/M1 fixtures and a fresh pad; retai
 screenshots and exact money/material changes. Stockpile-mode signal placement now
 consumes materials, so record and supply the entire stamp's materials. No graphical pass
 is inferred from the automated results.
+
+
+## 2026-09-22 — CST prefab purchase-mode UAT blocker
+
+The player identified `OpenSpaceTTD-All-Features-UAT-v1.0.sav` as the input.
+The player reported that CST placement rejected missing materials and that the
+suggested fabrication switch could not be found after building an HQ. Source
+inspection confirms the switch already posts `SetFabricationMode`, but belongs
+to Map → Corporate Headquarters & Stockpiles, separate from the ordinary company
+HQ. The corporate window also put six tabs and six actions in one oversized row.
+The UAT setup enables fabrication; a shortage in the placement world's stockpile
+then correctly rejects construction. This is a control-discovery/layout and UAT
+preflight defect, not a requirement to establish an HQ before cash construction.
+
+The Blueprint Library now exposes the company purchase mode directly. The HQ
+window separates tabs/actions and gives the same mode switch its own row. Both
+show the current mode and use the existing authoritative command; changing it
+redraws both windows. The shortage message gives the two exact control locations.
+No saved mode is silently changed and no materials are granted or bypassed.
+
+Automated verification: incremental build passed; 425 unit cases / 66,224
+assertions and 436/436 CTests passed, including the new 56-assertion GUI
+placement regression. File-description and unused-string linters and
+`git diff --check` passed. Human retest pending;
+the player-reported failure is recorded, not converted into a human pass.
+Retest on a working save copy: open Blueprint Library, set **Purchase mode: Cash**,
+place **CST Mainline Double Straight** on clear valid terrain, verify the whole
+layout and cash charge, then save/reload. No HQ establishment is needed. For
+fabrication UAT, enable in-kind mode and supply the **placement world's** stockpile.
+
+The existing v1.0 working save can use the new control without migration. For a
+fresh broad UAT run, use the documented All-Features v1.1 fixture, which repairs
+v1.0 terminal ownership. This resource-control fix does not migrate ownership or
+claim acceptance of the wider UAT suite.
+
+Verified executable: `build/openttd`, SHA256
+`61b340ba34fbef2290b13fad65cc0d3fc5a45c87a4ba54dc5c1a079c36ed2105`.
+The new isolated GUI regression uses the null video driver and tests real widget
+callbacks/commands, full track footprint, both one-way signals, exact cash charge,
+unchanged empty stockpiles, spectator protection, shared HQ/library mode labels,
+library width <=640 and HQ width <=1024 at the test's default UI scale. It does
+not constitute a human screenshot or a full replay of the user's save. Save
+metadata inspection with the rebuilt executable reads the supplied v1.0 fixture
+as version 367 with no NewGRFs; the save itself was not modified.

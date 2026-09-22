@@ -800,6 +800,7 @@ CommandCost CmdSetFabricationMode(DoCommandFlags flags, bool enabled)
 
 	if (flags.Test(DoCommandFlag::Execute)) {
 		FabricationManager::SetFabricateFromStockpile(company, enabled);
+		SetWindowClassesDirty(WindowClass::BlueprintLibrary);
 		SetWindowDirty(WindowClass::CorporateHQ, company.base());
 	}
 
