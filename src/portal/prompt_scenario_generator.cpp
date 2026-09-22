@@ -50,7 +50,22 @@
 #include "../timer/timer_game_calendar.h"
 #include "../engine_base.h"
 #include "../engine_func.h"
+#include "../blueprint/blueprint_manager.h"
+#include "../industry.h"
+#include "../industry_cmd.h"
+#include "../industrytype.h"
+#include "../core/backup_type.hpp"
+#include "../depot_base.h"
+#include "../rail_cmd.h"
+#include "../cargotype.h"
+#include "../settings_type.h"
 #include <filesystem>
+
+static constexpr IndustryType IT_COAL_MINE     = 0;
+static constexpr IndustryType IT_POWER_STATION = 1;
+static constexpr IndustryType IT_FACTORY       = 6;
+static constexpr IndustryType IT_STEEL_MILL    = 8;
+static constexpr IndustryType IT_IRON_MINE     = 18;
 
 #include <algorithm>
 #include <cctype>
@@ -205,6 +220,8 @@ PromptScenarioSpec PromptScenarioGenerator::ParsePrompt(const std::string &promp
 bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result)
 {
 	CompanyID human_company{0};
+	AutoRestoreBackup cur_company(_current_company, human_company);
+	AutoRestoreBackup old_game_mode(_game_mode, GameMode::Editor);
 
 	for (size_t i = 0; i < spec.worlds.size(); ++i) {
 		const PlanetRegion *region = PlanetManager::GetRegion(WorldID{static_cast<uint32_t>(i)});
@@ -239,6 +256,10 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 				MakeRailStation(station_tile, human_company, st->index, Axis::X, 0, RAILTYPE_BEGIN);
 				st->RecomputeCatchment();
 				result.stations_placed++;
+
+				/* Attach company logistics hub to station */
+				TileIndex hub_tile = TileXY(center_x - 4, center_y + 4);
+				LogisticsHubManager::RegisterHub(hub_tile, region->id, human_company, st->index, fmt::format("{} Logistics Hub", spec.worlds[i].name));
 			}
 		}
 
@@ -287,6 +308,26 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 				}
 			}
 
+			/* Place train depot at end of siding */
+			TileIndex depot_tile = TileXY(sx - step_x * 4, sy);
+			if (IsValidTile(depot_tile) && !IsTileType(depot_tile, TileType::Void) && Depot::CanAllocateItem()) {
+				MakeClear(depot_tile, ClearGround::Grass, 0);
+				DiagDirection depot_dir = (step_x > 0) ? DiagDirection::SW : DiagDirection::NE;
+				CommandCost depot_res = CmdBuildTrainDepot(DoCommandFlag::Execute, depot_tile, RAILTYPE_BEGIN, depot_dir);
+				if (depot_res.Succeeded()) {
+					result.depots_placed++;
+				} else {
+					Depot *d = Depot::Create(depot_tile);
+					if (d != nullptr) {
+						MakeRailDepot(depot_tile, human_company, d->index, depot_dir, RAILTYPE_BEGIN);
+						MakeDefaultName(d);
+						Company *c = Company::GetIfValid(human_company);
+						if (c != nullptr) c->infrastructure.rail[RAILTYPE_BEGIN]++;
+						result.depots_placed++;
+					}
+				}
+			}
+
 			/* Place a waypoint along the approach */
 			TileIndex wp_tile = TileXY(sx + step_x * 4, sy);
 			if (IsValidTile(wp_tile) && Waypoint::CanAllocateItem()) {
@@ -299,6 +340,23 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 				}
 			}
 
+			/* On Augusta Hub (World 1), create a designated Holding Siding station */
+			if (region->id == WorldID{1} && town != nullptr && Station::CanAllocateItem()) {
+				TileIndex staging_tile = TileXY(sx + step_x * 2, sy + 2);
+				MakeClear(staging_tile, ClearGround::Grass, 0);
+				Station *st_staging = Station::Create(staging_tile);
+				if (st_staging != nullptr) {
+					st_staging->name = "Augusta Gateway Holding Siding";
+					st_staging->owner = human_company;
+					st_staging->town = town;
+					st_staging->facilities.Set(StationFacility::Train);
+					st_staging->facilities.Set(StationFacility::HoldingSiding);
+					st_staging->train_station = TileArea(staging_tile, 1, 1);
+					st_staging->spread = st_staging->train_station;
+					MakeRailStation(staging_tile, human_company, st_staging->index, Axis::X, 0, RAILTYPE_BEGIN);
+				}
+			}
+
 			result.corridors_built++;
 		}
 	}
@@ -306,6 +364,79 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 	RebuildStationKdtree();
 	RebuildTownKdtree();
 	UpdateSignalsInBuffer();
+	return true;
+}
+
+bool PromptScenarioGenerator::PlaceCanonicalIndustries(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result)
+{
+	AutoRestoreBackup cur_company(_current_company, OWNER_DEITY);
+	AutoRestoreBackup old_game_mode(_game_mode, GameMode::Editor);
+
+	for (size_t i = 0; i < spec.worlds.size(); ++i) {
+		const auto &w_spec = spec.worlds[i];
+		const PlanetRegion *region = PlanetManager::GetRegion(WorldID{static_cast<uint32_t>(i)});
+		if (region == nullptr) continue;
+
+		uint32_t center_x = (region->min_x + region->max_x) / 2;
+		uint32_t center_y = (region->min_y + region->max_y) / 2;
+
+		IndustryType primary_type = IT_INVALID;
+		IndustryType secondary_type = IT_INVALID;
+
+		if (w_spec.phase == WorldPhase::Phase3_Frontier || w_spec.name.find("Mining") != std::string::npos) {
+			/* Mining Frontier: Iron Ore Mine + Coal Mine */
+			primary_type = IT_IRON_MINE;
+			secondary_type = IT_COAL_MINE;
+		} else if (w_spec.phase == WorldPhase::Phase2_Developed || w_spec.name.find("Augusta") != std::string::npos) {
+			/* Industrial Hub: Steel Mill */
+			primary_type = IT_STEEL_MILL;
+		} else if (w_spec.phase == WorldPhase::Phase1_Core || w_spec.name.find("Earth") != std::string::npos) {
+			/* Metropolitan Core: Factory */
+			primary_type = IT_FACTORY;
+		} else if (w_spec.phase == WorldPhase::Phase4_Expansion || w_spec.name.find("Prometheus") != std::string::npos) {
+			/* Energy / Outpost: Power Station */
+			primary_type = IT_POWER_STATION;
+		}
+
+		auto try_build_industry = [&](IndustryType it, int offset_x, int offset_y) -> bool {
+			if (it == IT_INVALID) return false;
+			const IndustrySpec *indspec = GetIndustrySpec(it);
+			if (!indspec->enabled || indspec->layouts.empty()) return false;
+
+			for (int try_dx : {offset_x, offset_x + 2, offset_x - 2, offset_x + 3, offset_x - 3}) {
+				for (int try_dy : {offset_y, -offset_y, offset_y + 1, -offset_y - 1}) {
+					TileIndex ind_tile = TileXY(center_x + try_dx, center_y + try_dy);
+					if (!IsValidTile(ind_tile) || IsTileType(ind_tile, TileType::Void)) continue;
+
+					/* Clear 6x6 footprint around candidate ind_tile */
+					for (int cy = -1; cy <= 4; ++cy) {
+						for (int cx = -1; cx <= 4; ++cx) {
+							TileIndex t = TileXY(center_x + try_dx + cx, center_y + try_dy + cy);
+							if (IsValidTile(t) && !IsTileType(t, TileType::Void) && !IsTileType(t, TileType::Station) && !IsTileType(t, TileType::TunnelBridge)) {
+								MakeClear(t, ClearGround::Grass, 0);
+							}
+						}
+					}
+
+					CommandCost res = CmdBuildIndustry(DoCommandFlag::Execute, ind_tile, it, 0, true, 42);
+					if (res.Succeeded()) {
+						result.industries_placed++;
+						return true;
+					}
+				}
+			}
+			return false;
+		};
+
+		if (primary_type != IT_INVALID) {
+			try_build_industry(primary_type, 0, 3);
+		}
+		if (secondary_type != IT_INVALID) {
+			try_build_industry(secondary_type, 3, -3);
+		}
+	}
+
+	Station::RecomputeCatchmentForAll();
 	return true;
 }
 
@@ -320,6 +451,16 @@ bool PromptScenarioGenerator::SpawnActiveFleets(const PromptScenarioSpec &spec, 
 
 	WorldID core_id = WorldID{0};
 	WorldID mining_id = WorldID{static_cast<uint32_t>(spec.worlds.size() - 1)};
+	for (const auto &w_spec : spec.worlds) {
+		bool provides_ore = false;
+		for (auto cargo : w_spec.supplied_cargos) {
+			if (cargo == CommonwealthCargoID::IronOre) provides_ore = true;
+		}
+		if (provides_ore) {
+			mining_id = w_spec.id;
+			break;
+		}
+	}
 
 	for (Station *st : Station::Iterate()) {
 		if (st->owner != human_company) continue;
@@ -453,6 +594,16 @@ bool PromptScenarioGenerator::SpawnActiveFleets(const PromptScenarioSpec &spec, 
 			w2->cargo_type = ore;
 			w2->cargo_cap = 50;
 
+			/* Pre-seed 100 tons of Iron Ore waiting at st_mining so trains can immediately load */
+			if (ore < NUM_CARGO) {
+				GoodsEntry &ge = st_mining->goods[ore];
+				StationID next = ge.GetVia(st_mining->index);
+				Source source = (st_mining->town != nullptr) ? Source{st_mining->town->index, SourceType::Town} : Source{Source::Invalid, SourceType::Town};
+				if (CargoPacket::CanAllocateItem()) {
+					ge.GetOrCreateData().cargo.Append(CargoPacket::Create(st_mining->index, 100, source), next);
+				}
+			}
+
 			/* Assign round trip orders between Mining and Core */
 			ConsistMaterializer::AssignRoundTripOrders(engine, st_mining->index, mining_id, st_core->index, core_id);
 
@@ -492,6 +643,7 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	LinkGraphSchedule::Clear();
 	PoolBase::Clean(PoolType::Normal);
 
+	UpdateSignalsInBuffer();
 	ProductionChainManager::Reset();
 	StockpileManager::Reset();
 	LogisticsHubManager::Reset();
@@ -512,6 +664,12 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	}
 	SetupEngines();
 	StartupEngines();
+
+	_settings_game.game_creation.landscape = LandscapeType::Temperate;
+	_settings_game.economy.multiple_industry_per_town = true;
+	SetupCargoForClimate(LandscapeType::Temperate);
+	ResetIndustries();
+	BlueprintManager::Initialize();
 
 	ProductionChainManager::InitDefaultRecipes();
 
@@ -548,9 +706,17 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		c0 = Company::CreateAtIndex(CompanyID{0});
 	}
 	if (c0 != nullptr) {
-		c0->money = 50000000; // 50M Cr
+		c0->money = 100000000; // 100M Cr starting capital
 		c0->name = "Commonwealth Interplanetary Transport";
-		TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_TRACTION_1, TECH_PORTAL_1});
+		c0->avail_railtypes.Set(RAILTYPE_BEGIN);
+		c0->avail_railtypes.Set(RAILTYPE_ELECTRIC);
+		c0->avail_railtypes.Set(RAILTYPE_MONO);
+		c0->avail_railtypes.Set(RAILTYPE_MAGLEV);
+		TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {
+			TECH_MATERIALS_1, TECH_MATERIALS_2, TECH_MATERIALS_3,
+			TECH_TRACTION_1, TECH_TRACTION_2, TECH_TRACTION_3,
+			TECH_PORTAL_1, TECH_PORTAL_2
+		});
 		FabricationManager::SetFabricateFromStockpile(CompanyID{0}, true);
 	}
 
@@ -560,6 +726,10 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	}
 	if (c1 != nullptr) {
 		c1->name = "Consortium Heavy Industries";
+		c1->avail_railtypes.Set(RAILTYPE_BEGIN);
+		c1->avail_railtypes.Set(RAILTYPE_ELECTRIC);
+		c1->avail_railtypes.Set(RAILTYPE_MONO);
+		c1->avail_railtypes.Set(RAILTYPE_MAGLEV);
 	}
 
 	/* 5. Diplomatic Stance */
@@ -609,14 +779,20 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 			result.facilities_placed++;
 		}
 
-		/* Planetary Stockpiles & Strike Mechanics */
+		/* Planetary Stockpiles & Strike Mechanics: seed all 6 fabrication roles in abundance */
 		CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
 		CargoType steel   = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+		CargoType wiring  = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+		CargoType chips   = StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics);
 		CargoType alloy   = StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy);
+		CargoType comp    = StockpileManager::RoleToDefaultCargo(FabricationRole::Composites);
 
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, ballast, 500);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, steel,   250);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, alloy,   100);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, ballast, 10000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, steel,   10000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, wiring,  10000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, chips,   5000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, alloy,   5000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, comp,    5000);
 
 		if (w_spec.is_striking) {
 			/* Empty sustenance stockpile and configure urgent relief floor */
@@ -636,7 +812,10 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		BuildCorridorsAndStations(spec, result);
 	}
 
-	/* 8. Spawn active fleets */
+	/* 8. Place canonical resource industries within station catchments */
+	PlaceCanonicalIndustries(spec, result);
+
+	/* 9. Spawn active fleets */
 	if (spec.create_active_fleets) {
 		SpawnActiveFleets(spec, result);
 	}
@@ -778,6 +957,10 @@ bool PromptScenarioGenerator::VerifyCommonwealthUAT(std::string *error_msg)
 		return fail("Company 0 does not exist");
 	}
 
+	if (c0->money < 10000000) {
+		return fail("Company 0 has insufficient capital for Commonwealth operations");
+	}
+
 	const auto *hq = CorporateHQManager::GetHQ(CompanyID{0});
 	if (hq == nullptr) {
 		return fail("Corporate HQ not registered for Company 0");
@@ -789,6 +972,70 @@ bool PromptScenarioGenerator::VerifyCommonwealthUAT(std::string *error_msg)
 
 	if (PrebuiltTradeManager::Instance().GetAllTradeGateways().empty()) {
 		return fail("No Prebuilt Trade Gateways registered");
+	}
+
+	/* Verify canonical resource industries exist */
+	bool has_iron_mine = false;
+	bool has_steel_mill = false;
+	for (const Industry *ind : Industry::Iterate()) {
+		if (ind->type == IT_IRON_MINE) has_iron_mine = true;
+		if (ind->type == IT_STEEL_MILL) has_steel_mill = true;
+	}
+	if (!has_iron_mine) {
+		return fail("Missing canonical Iron Ore Mine on extraction world");
+	}
+	if (!has_steel_mill) {
+		return fail("Missing canonical Steel Mill on industrial world");
+	}
+
+	/* Verify station catchment contains at least one nearby industry */
+	bool any_station_has_industry = false;
+	for (const Station *st : Station::Iterate()) {
+		if (st->owner == CompanyID{0} && !st->industries_near.empty()) {
+			any_station_has_industry = true;
+			break;
+		}
+	}
+	if (!any_station_has_industry) {
+		for (const Industry *ind : Industry::Iterate()) {
+			if (!ind->stations_near.empty()) {
+				any_station_has_industry = true;
+				break;
+			}
+		}
+	}
+	if (!any_station_has_industry) {
+		return fail("No station has resource industries within its catchment area");
+	}
+
+	/* Verify train depots exist for fleet maintenance and purchase */
+	if (Depot::GetNumItems() == 0) {
+		return fail("No train depots found on any colonized world");
+	}
+
+	/* Verify company planetary stockpiles have sufficient fabrication materials */
+	CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	CargoType steel   = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	CargoType wiring  = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+	CargoType chips   = StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics);
+	CargoType alloy   = StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy);
+
+	for (const PlanetRegion &reg : PlanetManager::GetAllRegions()) {
+		WorldID wid = reg.id;
+		if (StockpileManager::GetStock(wid, CompanyID{0}, ballast) < 500 ||
+				StockpileManager::GetStock(wid, CompanyID{0}, steel) < 500 ||
+				StockpileManager::GetStock(wid, CompanyID{0}, wiring) < 500 ||
+				StockpileManager::GetStock(wid, CompanyID{0}, chips) < 250 ||
+				StockpileManager::GetStock(wid, CompanyID{0}, alloy) < 250) {
+			return fail(fmt::format("World {} has insufficient stockpiles for prefab fabrication", wid.base()));
+		}
+	}
+
+	/* Verify essential Commonwealth research is unlocked */
+	if (!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_1) ||
+			!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_2) ||
+			!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_PORTAL_1)) {
+		return fail("Company 0 lacks foundational Commonwealth research (materials/portals)");
 	}
 
 	size_t train_count = 0;

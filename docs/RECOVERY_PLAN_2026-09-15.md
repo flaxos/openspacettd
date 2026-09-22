@@ -1,6 +1,11 @@
 # OpenSpaceTTD recovery plan
 
-**Canonical delivery plan · 15 September 2026 · audit baseline and WP-01–09 follow-ups**
+> [!NOTE]
+> **HISTORICAL DELIVERY RECORD — RECOVERY PHASE COMPLETED**
+> This document tracks the execution of recovery work packages WP-01 through WP-11 and Federation packages WP-F1/WP-F2 initiated on 15 September 2026. All recovery packages have been completed and merged into `main` (PRs #4–#20).
+> For current project status, see [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). For current architecture, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For the sprint ledger, see [SPRINT_LEDGER.md](SPRINT_LEDGER.md).
+
+**Historical recovery baseline · 15 September 2026 · audit baseline and WP-01–11 follow-ups**
 
 OpenSpaceTTD has substantial working engine code and useful automated coverage.
 It does **not yet have a demonstrated, dependable player vertical slice**. The

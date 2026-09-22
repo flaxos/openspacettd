@@ -66,6 +66,8 @@ struct ScenarioSynthesisResult {
 	uint32_t trains_spawned = 0;
 	uint32_t stations_placed = 0;
 	uint32_t facilities_placed = 0;
+	uint32_t industries_placed = 0;
+	uint32_t depots_placed = 0;
 };
 
 /**
@@ -98,12 +100,20 @@ public:
 	static ScenarioSynthesisResult GenerateFromPrompt(const std::string &prompt_text, const std::string &output_path);
 
 	/**
-	 * Build pre-built railway corridors, portal throats, stations, and waypoints between worlds.
+	 * Build pre-built railway corridors, portal throats, stations, depots, and waypoints between worlds.
 	 * @param spec Scenario specification.
 	 * @param result Result tracking structure to record corridor counts.
 	 * @return True on success.
 	 */
 	static bool BuildCorridorsAndStations(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result);
+
+	/**
+	 * Spawn canonical resource industries within station catchment to establish active supply chains.
+	 * @param spec Scenario specification.
+	 * @param result Result tracking structure to record industry counts.
+	 * @return True on success.
+	 */
+	static bool PlaceCanonicalIndustries(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result);
 
 	/**
 	 * Spawn and dispatch operational trains with assigned inter-world round-trip orders.

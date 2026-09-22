@@ -77,6 +77,8 @@
 #include "rail_map.h"
 #include "town.h"
 #include "clear_map.h"
+#include "blueprint/blueprint_manager.h"
+#include "blueprint/blueprint_cmd.h"
 
 #if defined(WITH_ZLIB)
 #include "network/network_content.h"
@@ -3781,6 +3783,49 @@ static bool ConVerifyUATWorld(std::span<std::string_view> argv)
 	}
 }
 
+/** Place a CST Prefab blueprint at the specified tile. @copydoc IConsoleCmdProc */
+static bool ConPlacePrefab(std::span<std::string_view> argv)
+{
+	if (argv.size() < 3) {
+		IConsolePrint(CC_HELP, "Usage: place_prefab <tile> <prefab_name>");
+		return true;
+	}
+
+	auto tile_opt = ParseType<TileIndex>(argv[1]);
+	if (!tile_opt.has_value() || *tile_opt >= Map::Size()) {
+		IConsolePrint(CC_ERROR, "Invalid tile index.");
+		return false;
+	}
+	TileIndex tile = *tile_opt;
+	std::string name;
+	for (size_t i = 2; i < argv.size(); ++i) {
+		if (i > 2) name += " ";
+		name += argv[i];
+	}
+
+	BlueprintManager::Initialize();
+	const Blueprint *bp = BlueprintManager::FindBuiltin(name);
+	if (bp == nullptr) {
+		IConsolePrint(CC_ERROR, "Built-in prefab '{}' not found.", name);
+		return false;
+	}
+
+	CompanyID comp = _current_company;
+	if (!Company::IsValidID(comp)) comp = _local_company;
+	if (!Company::IsValidID(comp)) comp = CompanyID{0};
+	AutoRestoreBackup cur_company(_current_company, comp);
+
+	CommandCost res = CmdPlaceBlueprint(DoCommandFlag::Execute, tile, bp->ToJson(), RAILTYPE_BEGIN, false);
+	if (res.Succeeded()) {
+		IConsolePrint(CC_DEFAULT, "Successfully placed prefab '{}' at tile {} (Cost: {} Cr).", name, tile.base(), res.GetCost());
+		return true;
+	} else {
+		fmt::print(stderr, "ConPlacePrefab FAILED: name='{}' tile={} err={} cost={}\n", name, tile.base(), res.GetErrorMessage(), res.GetCost());
+		IConsolePrint(CC_ERROR, "Failed to place prefab '{}': error {}.", name, res.GetErrorMessage());
+		return false;
+	}
+}
+
 /** Set or inspect gate access policy on a portal tile. @copydoc IConsoleCmdProc */
 static bool ConGateAccess(std::span<std::string_view> argv)
 {
@@ -4239,6 +4284,7 @@ void IConsoleStdLibRegister()
 	IConsole::AliasRegister("generate_prompt_scenario", "prompt_to_save %+");
 	IConsole::CmdRegister("generate_uat_world",      ConGenerateUATWorld);
 	IConsole::CmdRegister("verify_uat_world",        ConVerifyUATWorld);
+	IConsole::CmdRegister("place_prefab",            ConPlacePrefab);
 	IConsole::CmdRegister("balancing_critic",        ConBalancingCritic);
 	IConsole::CmdRegister("balancing_snapshot",      ConBalancingSnapshot);
 	IConsole::CmdRegister("gate_access",             ConGateAccess);
