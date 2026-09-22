@@ -1,6 +1,6 @@
 # OpenSpaceTTD: Sprints 49–52 Commonwealth Expansion Specification
 
-**Status:** CANONICAL FUTURE SPRINT SPECIFICATION  
+**Status:** HISTORICAL SPECIFICATION — Sprints 51–52 withdrawn on 23 September 2026
 **Date:** 2026-09-18  
 **Governing Architecture:** Peter F. Hamilton *Commonwealth Saga* + OpenTTD Engine Determinism  
 **Prerequisites:** Completion of Sprints 43–48 (`docs/POST_RECOVERY_ROADMAP_SPRINTS_43_48.md`)  
@@ -10,6 +10,14 @@
 - [`docs/world_roadmap.txt`](world_roadmap.txt)  
 
 ---
+
+## Current scope override — 23 September 2026
+
+The user removed Sprints 51–52 from the active roadmap and excluded narrative
+and story-driven scenarios. The specifications below are retained only as design
+history; do not implement the withdrawn scope. Sprints 49–50 remain candidates,
+subordinate to [live two-server/two-client federation acceptance](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+Human UAT and current graphics are accepted; further graphics work is optional.
 
 ## 1. Executive Roadmap Summary
 

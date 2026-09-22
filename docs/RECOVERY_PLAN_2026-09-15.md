@@ -1,5 +1,19 @@
 # OpenSpaceTTD recovery plan
 
+## Current user acceptance and direction — 23 September 2026
+
+The user confirms human UAT is OK and accepts the new graphics as good enough
+for now. Further graphics improvements are optional later work. This supersedes
+older blanket statements that human UAT and graphics acceptance are pending.
+This is a user-reported overall acceptance, without new per-subcase captures or
+a pinned build/save manifest; historical observations remain unchanged.
+
+The user separately asks whether federation has been tested with two multiplayer
+servers and two open clients. That workflow remains unverified; general gameplay
+acceptance does not close it. The next priority is the live federation acceptance
+pass described in [the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+
+
 **Canonical delivery plan · 15 September 2026 · audit baseline and WP-01–09 follow-ups**
 
 OpenSpaceTTD has substantial working engine code and useful automated coverage.

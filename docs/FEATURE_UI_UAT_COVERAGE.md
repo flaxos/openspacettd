@@ -1,5 +1,19 @@
 # Feature → implementation → player → verification evidence
 
+## Current user acceptance and direction — 23 September 2026
+
+The user confirms human UAT is OK and accepts the new graphics as good enough
+for now. Further graphics improvements are optional later work. This supersedes
+older blanket statements that human UAT and graphics acceptance are pending.
+This is a user-reported overall acceptance, without new per-subcase captures or
+a pinned build/save manifest; historical observations remain unchanged.
+
+The user separately asks whether federation has been tested with two multiplayer
+servers and two open clients. That workflow remains unverified; general gameplay
+acceptance does not close it. The next priority is the live federation acceptance
+pass described in [the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+
+
 Audited source `abbcd7e077` on 2026-09-15. The [master recovery plan](RECOVERY_PLAN_2026-09-15.md)
 sets dependencies; the [defect register](CRITICAL_BUG_REVIEW_2026-09-15.md) gives
 stable IDs. Human procedures/results remain [ALL-FEATURES-UAT](../demo/ALL-FEATURES-UAT.md)
