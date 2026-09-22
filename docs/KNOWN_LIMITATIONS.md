@@ -194,3 +194,20 @@ CTests, both repository linters and `git diff --check` passed. Human visual rete
 pending: reopen Blueprint Library and HQ Overview/Fabrication, check readability
 at the user's font/UI scale, and resize the windows. Very long imported text still
 requires sufficient panel height; the wider HQ dashboard is not redesigned here.
+
+## Connected economy UAT v2.0 — 2026-09-23
+
+The new [playable connected save](../demo/CONNECTED-ECONOMY-UAT.md) has automated
+proof of repeated logistics, a 24-month soak, real city growth, reload conservation,
+food starvation/recovery, CST prefab material use and research consumption.
+**Human visual UAT remains pending.** The computer-use CLI was unavailable
+(`orca-ide: command not found`), so no graphical acceptance is claimed.
+
+The fixture uses 100 million startup credits, three prerequisite technologies,
+dedicated service corridors, and disabled breakdowns/disasters. Cargo stocks warm
+from zero through normal production and transport. Stockpiles are pooled per company
+and logical world. This proves the bounded showcase, not competitive balance or
+indefinite growth. Monthly supply fluctuates; rebuilding can temporarily lower town
+population. All worlds remain regions of one map. The save requires the matching
+v3 NewGRFs and current engine; old v2 binaries and UAT saves remain available.
+See [detailed boundaries and evidence](CONNECTED_ECONOMY_UAT.md).

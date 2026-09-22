@@ -9,6 +9,9 @@
 #include "megacity_manager.h"
 #include "visual_overhaul.h"
 #include "../town.h"
+#include "../cargotype.h"
+#include "../station_base.h"
+#include "../town_map.h"
 #include <algorithm>
 
 #include "../safeguards.h"
@@ -135,26 +138,28 @@ void MegacityManager::RecordDeliveryByCargo(TownID town_id, uint8_t cargo_type, 
 
 MegacityDemandTier MegacityManager::ClassifyCargo(uint8_t cargo_type)
 {
-	switch (cargo_type) {
-		case 4:  // Livestock
-		case 6:  // Grain
-		case 11: // Food
-		case 12: // Water
-			return MegacityDemandTier::Tier1_Sustenance;
-
-		case 5:  // Goods
-		case 7:  // Wood
-		case 9:  // Steel
-		case 8:  // Iron Ore
-			return MegacityDemandTier::Tier2_Expansion;
-
-		case 10: // Valuables / Diamonds / Data Crystals
-		case 3:  // Oil / Chemicals
-			return MegacityDemandTier::Tier3_Prosperity;
-
-		default:
-			return static_cast<MegacityDemandTier>(cargo_type % 3);
+	if (cargo_type >= NUM_CARGO || !IsValidCargoType(CargoType{cargo_type})) return MegacityDemandTier::End;
+	const CargoLabel label = CargoSpec::Get(CargoType{cargo_type})->label;
+	for (auto name : {CargoLabel{"FOOD"}, CargoLabel{"WATR"}, CargoLabel{"GRAI"}, CargoLabel{"WHEA"}, CargoLabel{"MAIZ"}, CargoLabel{"LVST"}, CargoLabel{"FRUT"}}) {
+		if (label == name) return MegacityDemandTier::Tier1_Sustenance;
 	}
+	for (auto name : {CargoLabel{"GOOD"}, CargoLabel{"WOOD"}, CargoLabel{"STEL"}, CargoLabel{"ALLO"}, CargoLabel{"POLY"}, CargoLabel{"WIRE"}}) {
+		if (label == name) return MegacityDemandTier::Tier2_Expansion;
+	}
+	for (auto name : {CargoLabel{"VALU"}, CargoLabel{"GOLD"}, CargoLabel{"DIAM"}, CargoLabel{"CCRY"}, CargoLabel{"CHIP"}}) {
+		if (label == name) return MegacityDemandTier::Tier3_Prosperity;
+	}
+	return MegacityDemandTier::End;
+}
+
+bool MegacityManager::IsConsumerStation(const Station *station)
+{
+	if (station == nullptr || station->town == nullptr || !IsMegacity(station->town->index)) return false;
+	BitmapTileIterator it(station->catchment_tiles);
+	for (TileIndex tile = it; tile != INVALID_TILE; tile = ++it) {
+		if (IsTileType(tile, TileType::House) && GetTownIndex(tile) == station->town->index) return true;
+	}
+	return false;
 }
 
 void MegacityManager::EvaluateMonthlySupply()

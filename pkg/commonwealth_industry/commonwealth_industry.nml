@@ -8,8 +8,8 @@ grf {
 	grfid: "OST\01";
 	name: string(STR_GRF_NAME);
 	desc: string(STR_GRF_DESC);
-	version: 2;
-	min_compatible_version: 2;
+	version: 3;
+	min_compatible_version: 3;
 }
 
 cargotable {
@@ -33,8 +33,9 @@ cargotable {
  * ==================================================================== */
 
 /* Pipeline A: Structural & Track Infrastructure */
-item(FEAT_CARGOS, cargo_silc, 0x01) {
+item(FEAT_CARGOS, cargo_silc, 0x10) {
 	property {
+		is_freight: 1;
 		cargo_label: "SILC";
 		number: 16;
 		type_name: string(STR_CARGO_NAME_SILC);
@@ -50,8 +51,9 @@ item(FEAT_CARGOS, cargo_silc, 0x01) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_iron, 0x02) {
+item(FEAT_CARGOS, cargo_iron, 0x11) {
 	property {
+		is_freight: 1;
 		cargo_label: "IRON";
 		number: 17;
 		type_name: string(STR_CARGO_NAME_IRON);
@@ -67,8 +69,9 @@ item(FEAT_CARGOS, cargo_iron, 0x02) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_stel, 0x03) {
+item(FEAT_CARGOS, cargo_stel, 0x12) {
 	property {
+		is_freight: 1;
 		cargo_label: "STEL";
 		number: 18;
 		type_name: string(STR_CARGO_NAME_STEL);
@@ -84,8 +87,9 @@ item(FEAT_CARGOS, cargo_stel, 0x03) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_rare, 0x04) {
+item(FEAT_CARGOS, cargo_rare, 0x13) {
 	property {
+		is_freight: 1;
 		cargo_label: "RARE";
 		number: 19;
 		type_name: string(STR_CARGO_NAME_RARE);
@@ -101,8 +105,9 @@ item(FEAT_CARGOS, cargo_rare, 0x04) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_allo, 0x05) {
+item(FEAT_CARGOS, cargo_allo, 0x14) {
 	property {
+		is_freight: 1;
 		cargo_label: "ALLO";
 		number: 20;
 		type_name: string(STR_CARGO_NAME_ALLO);
@@ -119,8 +124,9 @@ item(FEAT_CARGOS, cargo_allo, 0x05) {
 }
 
 /* Pipeline B: Electronics, Signalling & Catenary */
-item(FEAT_CARGOS, cargo_copr, 0x06) {
+item(FEAT_CARGOS, cargo_copr, 0x15) {
 	property {
+		is_freight: 1;
 		cargo_label: "COPR";
 		number: 21;
 		type_name: string(STR_CARGO_NAME_COPR);
@@ -136,8 +142,9 @@ item(FEAT_CARGOS, cargo_copr, 0x06) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_wire, 0x07) {
+item(FEAT_CARGOS, cargo_wire, 0x16) {
 	property {
+		is_freight: 1;
 		cargo_label: "WIRE";
 		number: 22;
 		type_name: string(STR_CARGO_NAME_WIRE);
@@ -153,8 +160,9 @@ item(FEAT_CARGOS, cargo_wire, 0x07) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_sand, 0x08) {
+item(FEAT_CARGOS, cargo_sand, 0x17) {
 	property {
+		is_freight: 1;
 		cargo_label: "SAND";
 		number: 23;
 		type_name: string(STR_CARGO_NAME_SAND);
@@ -170,8 +178,9 @@ item(FEAT_CARGOS, cargo_sand, 0x08) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_chip, 0x09) {
+item(FEAT_CARGOS, cargo_chip, 0x18) {
 	property {
+		is_freight: 1;
 		cargo_label: "CHIP";
 		number: 24;
 		type_name: string(STR_CARGO_NAME_CHIP);
@@ -188,8 +197,9 @@ item(FEAT_CARGOS, cargo_chip, 0x09) {
 }
 
 /* Pipeline C: Advanced Train Propulsion */
-item(FEAT_CARGOS, cargo_poly, 0x0A) {
+item(FEAT_CARGOS, cargo_poly, 0x19) {
 	property {
+		is_freight: 1;
 		cargo_label: "POLY";
 		number: 25;
 		type_name: string(STR_CARGO_NAME_POLY);
@@ -206,8 +216,9 @@ item(FEAT_CARGOS, cargo_poly, 0x0A) {
 }
 
 /* Pipeline D: Data Crystals & Scientific R&D */
-item(FEAT_CARGOS, cargo_bcry, 0x0B) {
+item(FEAT_CARGOS, cargo_bcry, 0x1A) {
 	property {
+		is_freight: 1;
 		cargo_label: "BCRY";
 		number: 26;
 		type_name: string(STR_CARGO_NAME_BCRY);
@@ -223,8 +234,9 @@ item(FEAT_CARGOS, cargo_bcry, 0x0B) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_qcry, 0x0C) {
+item(FEAT_CARGOS, cargo_qcry, 0x1B) {
 	property {
+		is_freight: 1;
 		cargo_label: "QCRY";
 		number: 27;
 		type_name: string(STR_CARGO_NAME_QCRY);
@@ -240,8 +252,9 @@ item(FEAT_CARGOS, cargo_qcry, 0x0C) {
 	}
 }
 
-item(FEAT_CARGOS, cargo_ccry, 0x0D) {
+item(FEAT_CARGOS, cargo_ccry, 0x1C) {
 	property {
+		is_freight: 1;
 		cargo_label: "CCRY";
 		number: 28;
 		type_name: string(STR_CARGO_NAME_CCRY);

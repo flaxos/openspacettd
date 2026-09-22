@@ -225,3 +225,24 @@ CTests, both repository linters and `git diff --check` passed. Human visual rete
 pending: reopen Blueprint Library and HQ Overview/Fabrication, check readability
 at the user's font/UI scale, and resize the windows. Very long imported text still
 requires sufficient panel height; the wider HQ dashboard is not redesigned here.
+
+## Connected economy UAT v2.0 — 2026-09-23
+
+**Automated: PASS. Human visual acceptance: NOT RUN.**
+
+- Artifact: [OpenSpaceTTD-Connected-Economy-UAT-v2.0.sav](OpenSpaceTTD-Connected-Economy-UAT-v2.0.sav).
+- Start with the [short player checklist](CONNECTED-ECONOMY-UAT.md).
+- 37 trains carry all required cargoes repeatedly; all eleven factories operate.
+- Checkpoint: 32 houses / 872 people. After approximately 332 normal-speed seconds:
+  35 houses / 905 people. After the 24-month soak: 42 houses / 906 people.
+- Reload conserves observed state. Stopping food causes starvation and halts new
+  houses; restarting restores growth. The negative test uses a separate copy.
+- CST prefab: exactly 32 ballast, 18 steel and 2 wiring consumed. Research uses
+  delivered feedstock and completes the selected project.
+- 427 unit cases / 66,233 assertions; 438/438 CTests; both linters; content rebuild
+  verification; legacy v2 WP-11 regression; whitespace and script syntax checks pass.
+- [Machine evidence](OpenSpaceTTD-Connected-Economy-UAT-v2.0.evidence.json) and
+  [full compressed run](OpenSpaceTTD-Connected-Economy-UAT-v2.0.run.json.gz).
+
+The visual check could not run because `orca-ide` was unavailable. Earlier human
+UAT gaps remain open; these automated results do not mark them accepted.

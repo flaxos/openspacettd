@@ -6,6 +6,8 @@
 /** @file test_federation_megacity_economy.cpp Unit tests for Phase F4 Megacity & Empire Economy. */
 
 #include "../stdafx.h"
+#include "../cargotype.h"
+#include "../core/backup_type.hpp"
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../portal/megacity_manager.h"
@@ -66,6 +68,7 @@ static ConsistSnapshotBytes CreateTestCargoSnapshot(const std::map<uint8_t, uint
 
 TEST_CASE("Federation Megacity - Registration, Quotas, and Monthly Evaluation Lifecycle")
 {
+	SetupCargoForClimate(LandscapeType::Temperate);
 	MegacityManager::Reset();
 	REQUIRE(MegacityManager::GetAllMegacities().empty());
 
@@ -130,7 +133,7 @@ TEST_CASE("Federation Megacity - Registration, Quotas, and Monthly Evaluation Li
 	 * Deliver: Food (T1) = 80 (80%), Goods (T2) = 20 (40%), Diamonds (T3) = 20 (100%)
 	 * Using RecordDeliveryByCargo
 	 * ------------------------------------------------------------- */
-	MegacityManager::RecordDeliveryByCargo(tid1, 11, 80); // Cargo 11 = Food -> Tier 1
+	MegacityManager::RecordDeliveryByCargo(tid1, 6, 80); // Cargo 6 = Grain -> Tier 1
 	MegacityManager::RecordDeliveryByCargo(tid1, 5, 20);  // Cargo 5 = Goods -> Tier 2
 	MegacityManager::RecordDeliveryByCargo(tid1, 10, 20); // Cargo 10 = Valuables/Diamonds -> Tier 3
 
@@ -468,4 +471,18 @@ TEST_CASE("Federation Empire Supply Chain Matrix & Conservation Accounting")
 	REQUIRE(summary.total_cargo_completed == 280);
 	REQUIRE(summary.total_cargo_in_transit == 0);
 	REQUIRE(summary.IsConserved());
+}
+
+TEST_CASE("Megacity demand follows cargo labels and ignores unrelated cargo", "[megacity]")
+{
+	SetupCargoForClimate(LandscapeType::Temperate);
+	AutoRestoreBackup grain_label(CargoSpec::Get(CargoType{6})->label, CargoLabel{"STEL"});
+	AutoRestoreBackup steel_label(CargoSpec::Get(CargoType{9})->label, CargoLabel{"FOOD"});
+	AutoRestoreBackup valuable_label(CargoSpec::Get(CargoType{10})->label, CargoLabel{"QCRY"});
+	CHECK(MegacityManager::ClassifyCargo(6) == MegacityDemandTier::Tier2_Expansion);
+	CHECK(MegacityManager::ClassifyCargo(9) == MegacityDemandTier::Tier1_Sustenance);
+	CHECK(MegacityManager::ClassifyCargo(10) == MegacityDemandTier::End);
+	CHECK(MegacityManager::ClassifyCargo(0) == MegacityDemandTier::End);
+	CHECK(MegacityManager::ClassifyCargo(8) == MegacityDemandTier::End);
+	CHECK(MegacityManager::ClassifyCargo(255) == MegacityDemandTier::End);
 }

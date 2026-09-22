@@ -152,3 +152,14 @@ CTests, both repository linters and `git diff --check` passed. Human visual rete
 pending: reopen Blueprint Library and HQ Overview/Fabrication, check readability
 at the user's font/UI scale, and resize the windows. Very long imported text still
 requires sufficient panel height; the wider HQ dashboard is not redesigned here.
+
+## Acceptance follow-up — Connected economy UAT v2.0 (2026-09-23)
+
+| Scope | Implementation | Automated evidence | Human UAT | Status |
+|---|---|---|---|---|
+| Fully connected production and megacity showcase | Independent four-world save; 37 trains; 28 stations; eleven factories; food, research and construction supply. Label-based demand, residential acceptance and native-compatible v3 content repairs. | 427 unit cases / 66,233 assertions; 438/438 CTests; linters and content rebuild; repeated deliveries, 24-month soak, reload, starvation/recovery, exact prefab materials and research; legacy v2 regression. | Pending; graphical inspection unavailable in this session. | TESTED |
+
+[Player checklist](../demo/CONNECTED-ECONOMY-UAT.md) ·
+[Reproduction and limitations](CONNECTED_ECONOMY_UAT.md) ·
+[Machine evidence](../demo/OpenSpaceTTD-Connected-Economy-UAT-v2.0.evidence.json).
+This is an acceptance follow-up, not a new sprint or acceptance of Sprints 43–50.

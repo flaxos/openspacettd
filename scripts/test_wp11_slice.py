@@ -67,7 +67,7 @@ class Engine:
             self.log.write(line)
             self.log.flush()
             self.lines.append(line.strip())
-            if "WP11 FAIL" in line or "Assertion failed" in line or "Saving map failed" in line:
+            if "WP11 FAIL" in line or "CONNECTED FAIL" in line or "Assertion failed" in line or "Saving map failed" in line:
                 raise RuntimeError(line.strip())
             if marker in line:
                 return line.split(marker, 1)[1].strip()
@@ -115,7 +115,7 @@ def console_payload(line):
     return re.sub(r"^\[[^]]+\]\s*", "", line).strip()
 
 
-def catalog(engine):
+def catalog(engine, native_refits=False):
     start = len(engine.lines)
     engine.command("commonwealth_status", "Commonwealth catalog:")
     lines = [console_payload(line) for line in engine.lines[start:]]
@@ -131,10 +131,15 @@ def catalog(engine):
         if match:
             _, local, wagon, mask = match.groups()
             vehicles[int(local)] = (wagon == "true", int(mask))
-    require(set(vehicles) == set(range(32, 37)) | set(range(48, 55)), "Vehicle catalog differs")
+    require(set(vehicles) == set(range(32, 37)) | set(range(48, 56 if native_refits else 55)), "Vehicle catalog differs")
     refits = {49: [10, 11, 12], 50: [0, 1, 3, 5, 7], 51: [2, 4], 52: [6, 8], 53: [9], 54: list(range(13))}
     for local, indexes in refits.items():
-        require(vehicles[local] == (True, sum(1 << cargos[i] for i in indexes)), f"Wrong refits for wagon {local}")
+        expected = sum(1 << cargos[i] for i in indexes)
+        actual = vehicles[local][1]
+        if native_refits and local in (50, 52):
+            require(vehicles[local][0] and actual & ~0xffff == expected and actual & 0xffff, f"Missing native refits for wagon {local}")
+        else:
+            require(vehicles[local] == (True, expected), f"Wrong refits for wagon {local}")
     require(all(not vehicles[local][0] for local in range(32, 37)), "Locomotive classified as wagon")
     return {"cargo_slots": cargos, "industries": industries, "vehicles": vehicles}
 

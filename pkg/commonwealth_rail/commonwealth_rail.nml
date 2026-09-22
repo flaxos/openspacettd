@@ -8,12 +8,12 @@ grf {
 	grfid: "OST\02";
 	name: string(STR_GRF_NAME);
 	desc: string(STR_GRF_DESC);
-	version: 2;
-	min_compatible_version: 2;
+	version: 3;
+	min_compatible_version: 3;
 }
 
 cargotable {
-	PASS, VALU, IORE, STEL, GOOD, OIL_,
+	PASS, VALU, IORE, STEL, GOOD, OIL_, LVST, WHEA, GRAI, MAIZ, FOOD,
 	SILC, IRON, COPR, WIRE, SAND, CHIP, RARE, ALLO, POLY, BCRY, QCRY, CCRY
 }
 
@@ -216,7 +216,7 @@ item(FEAT_TRAINS, cst_hopper, 0x32) {
 		weight: 20 ton;
 		default_cargo_type: IRON;
 		refittable_cargo_classes: 0;
-		cargo_allow_refit: [SILC, IRON, COPR, SAND, RARE];
+		cargo_allow_refit: [SILC, IRON, COPR, SAND, RARE, WHEA, GRAI, MAIZ];
 		cargo_capacity: 45;
 		track_type: RAIL;
 	}
@@ -258,7 +258,7 @@ item(FEAT_TRAINS, cst_cryo_car, 0x34) {
 		weight: 24 ton;
 		default_cargo_type: CHIP;
 		refittable_cargo_classes: 0;
-		cargo_allow_refit: [CHIP, ALLO];
+		cargo_allow_refit: [CHIP, ALLO, FOOD];
 		cargo_capacity: 35;
 		track_type: RAIL;
 	}
@@ -303,5 +303,26 @@ item(FEAT_TRAINS, cst_maglev_pod, 0x36) {
 		cargo_allow_refit: [SILC, IRON, STEL, COPR, WIRE, SAND, CHIP, RARE, ALLO, POLY, BCRY, QCRY, CCRY];
 		cargo_capacity: 50;
 		track_type: MGLV;
+	}
+}
+
+/* Ventilated stockcar for the native farm-to-food chain. */
+item(FEAT_TRAINS, cst_livestock_car, 0x37) {
+	property {
+		power: 0 hp;
+		name: string(STR_NAME_LIVESTOCK_CAR);
+		climates_available: ALL_CLIMATES;
+		introduction_date: date(0, 1, 1);
+		model_life: 255;
+		vehicle_life: 40;
+		cost_factor: 10;
+		running_cost_factor: 6;
+		speed: 145 km/h;
+		weight: 18 ton;
+		default_cargo_type: LVST;
+		refittable_cargo_classes: 0;
+		cargo_allow_refit: [LVST];
+		cargo_capacity: 40;
+		track_type: RAIL;
 	}
 }

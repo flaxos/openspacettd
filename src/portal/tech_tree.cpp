@@ -11,6 +11,7 @@
 #include "tech_tree.h"
 #include "corporate_hq.h"
 #include "company_stockpile.h"
+#include "commonwealth_slice.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../core/format.hpp"
@@ -374,6 +375,10 @@ void TechTreeManager::ProcessMonthlyResearch()
 		uint32_t burn_cr = std::min(avail_cr, 5u);
 		if (burn_cr > 0) {
 			StockpileManager::WithdrawCargo(hq->world_id, cid, cr_cargo, burn_cr);
+			if (_commonwealth_slice_audit != nullptr) {
+				_commonwealth_slice_audit->consumed[cr_cargo] += burn_cr;
+				_commonwealth_slice_audit->research_consumed[cr_cargo] += burn_cr;
+			}
 			generated_rp += burn_cr * 10;
 		}
 
@@ -383,6 +388,10 @@ void TechTreeManager::ProcessMonthlyResearch()
 		uint32_t burn_el = std::min(avail_el, 10u);
 		if (burn_el > 0) {
 			StockpileManager::WithdrawCargo(hq->world_id, cid, el_cargo, burn_el);
+			if (_commonwealth_slice_audit != nullptr) {
+				_commonwealth_slice_audit->consumed[el_cargo] += burn_el;
+				_commonwealth_slice_audit->research_consumed[el_cargo] += burn_el;
+			}
 			generated_rp += burn_el * 5;
 		}
 

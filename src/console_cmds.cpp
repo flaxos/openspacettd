@@ -4277,6 +4277,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
 	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
 	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
+	IConsole::CmdRegister("connected_economy", ConConnectedEconomy);
 	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);
 	IConsole::CmdRegister("commonwealth_status",     ConCommonwealthStatus);
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);

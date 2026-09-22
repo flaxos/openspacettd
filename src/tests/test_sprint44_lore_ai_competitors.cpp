@@ -6,6 +6,7 @@
 /** @file test_sprint44_lore_ai_competitors.cpp Unit tests for Sprint 44 Autonomous Lore-Driven AI Competitors. */
 
 #include "../stdafx.h"
+#include "../cargotype.h"
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../portal/lore_competitor.h"
@@ -49,6 +50,7 @@
 
 static void SetupTestEnvironment(uint32_t map_w = 256, uint32_t map_h = 256)
 {
+	SetupCargoForClimate(LandscapeType::Temperate);
 	UpdateSignalsInBuffer();
 	Map::Allocate(map_w, map_h);
 	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
@@ -367,6 +369,7 @@ TEST_CASE("Sprint 44 - Gateway Transit Scheduling & Staging Siding Holding durin
 
 TEST_CASE("Sprint 44 - Megacity Multi-Commodity Supply Competition")
 {
+	SetupCargoForClimate(LandscapeType::Temperate);
 	MockEnvironment &mock = MockEnvironment::Instance();
 	(void)mock;
 
@@ -392,9 +395,9 @@ TEST_CASE("Sprint 44 - Megacity Multi-Commodity Supply Competition")
 	UniverseAuthorityService::Instance().RegisterWorld(w0);
 
 	/* Rivals fulfill multi-tier quotas */
-	CargoType minerals = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	CargoType minerals = GetCargoTypeByLabel(CargoLabel{"GRAI"});
 	CargoType steel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
-	CargoType crystals = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::EncryptedConsumerCrystals);
+	CargoType crystals = GetCargoTypeByLabel(CargoLabel{"VALU"});
 
 	/* InterWorld supplies Tier 1 Sustenance */
 	LoreCompetitorManager::ScheduleGatewayTransit(CompetitorType::InterWorld, WorldID{2}, WorldID{0}, minerals, 100);

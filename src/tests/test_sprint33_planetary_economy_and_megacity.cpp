@@ -8,6 +8,7 @@
 /** @file test_sprint33_planetary_economy_and_megacity.cpp Unit tests for Sprint 33 Planetary Town Growth, Megacity Supply Loops, and Biome-Specific Industry Lifecycle. */
 
 #include "../stdafx.h"
+#include "../cargotype.h"
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../map_func.h"
@@ -141,6 +142,7 @@ TEST_CASE("Sprint 33 - Biome-Specific Industry Placement Protection")
 
 TEST_CASE("Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation Integration")
 {
+	SetupCargoForClimate(LandscapeType::Temperate);
 	MegacityManager::Reset();
 	REQUIRE(MegacityManager::GetAllMegacities().empty());
 
@@ -159,8 +161,8 @@ TEST_CASE("Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation In
 	CHECK(prof->growth_state == MegacityGrowthState::Subsistence);
 
 	/* Simulate cargo deliveries via cargo type mapping */
-	/* Cargo 11 (Food) -> Tier 1 */
-	MegacityManager::RecordDeliveryByCargo(tid1, 11, 1200);
+	/* Cargo 6 (Grain) -> Tier 1 */
+	MegacityManager::RecordDeliveryByCargo(tid1, 6, 1200);
 	/* Cargo 5 (Goods) -> Tier 2 */
 	MegacityManager::RecordDeliveryByCargo(tid1, 5, 600);
 	/* Cargo 10 (Valuables/Diamonds) -> Tier 3 */
@@ -179,7 +181,7 @@ TEST_CASE("Sprint 33 - Megacity Supply Delivery Tracking & Monthly Evaluation In
 	CHECK(prof->passenger_multiplier == 1.5f);
 
 	/* Next month: starve tier 1 (< 50% delivered) */
-	MegacityManager::RecordDeliveryByCargo(tid1, 11, 300); // 300 / 1000 = 30% < 50%
+	MegacityManager::RecordDeliveryByCargo(tid1, 6, 300); // 300 / 1000 = 30% < 50%
 	MegacityManager::RecordDeliveryByCargo(tid1, 5, 500);
 	MegacityManager::RecordDeliveryByCargo(tid1, 10, 200);
 

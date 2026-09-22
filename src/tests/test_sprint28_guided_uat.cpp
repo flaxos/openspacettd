@@ -6,6 +6,7 @@
 /** @file test_sprint28_guided_uat.cpp Unit and regression tests for Sprint 28 Guided Solo UAT. */
 
 #include "../stdafx.h"
+#include "../cargotype.h"
 #include "../3rdparty/catch2/catch.hpp"
 #include "mock_environment.h"
 
@@ -156,6 +157,7 @@ TEST_CASE_METHOD(Sprint28UatFixture, "Sprint 28 UAT - CST Prefab Rail Blocks Cat
 
 TEST_CASE_METHOD(Sprint28UatFixture, "Sprint 28 UAT - Megacity Multi-Tier Demand & Growth States", "[sprint28],[megacity]")
 {
+	SetupCargoForClimate(LandscapeType::Temperate);
 	MegacityManager::Reset();
 	REQUIRE(MegacityManager::GetAllMegacities().empty());
 
@@ -170,7 +172,7 @@ TEST_CASE_METHOD(Sprint28UatFixture, "Sprint 28 UAT - Megacity Multi-Tier Demand
 	CHECK(profile->growth_state == MegacityGrowthState::Subsistence);
 
 	/* Cargo classification */
-	CHECK(MegacityManager::ClassifyCargo(11) == MegacityDemandTier::Tier1_Sustenance); // Food
+	CHECK(MegacityManager::ClassifyCargo(6) == MegacityDemandTier::Tier1_Sustenance); // Food
 	CHECK(MegacityManager::ClassifyCargo(5)  == MegacityDemandTier::Tier2_Expansion);  // Goods
 	CHECK(MegacityManager::ClassifyCargo(10) == MegacityDemandTier::Tier3_Prosperity); // Valuables/Diamonds
 
