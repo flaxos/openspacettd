@@ -16,14 +16,14 @@
   ],
   "commonwealth_packages": [
     {
-      "bytes": 2424,
+      "bytes": 2502,
       "grfid": "OST\\u0001",
       "grfid_hex": "0154534f",
-      "md5": "267af5326a5a06cf77178a1c2f7d94df",
-      "name": "openspacettd_industry_v3.grf",
-      "sha256": "02744d1689144a8618fe6a3aa8732b41aa724e77ef5c9648364eb8594b0dbf56",
+      "md5": "67fb7c456932167b80dab933ae0e875e",
+      "name": "openspacettd_industry_v4.grf",
+      "sha256": "7f709d575d4ae1507865bf94351a698c5106be3c4f8099a6753c12f35960823d",
       "source": "pkg/commonwealth_industry/commonwealth_industry.nml",
-      "version": 3
+      "version": 4
     },
     {
       "bytes": 1820,

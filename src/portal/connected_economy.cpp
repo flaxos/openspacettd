@@ -33,6 +33,7 @@
 #include "../town_cmd.h"
 #include "../town.h"
 #include "../clear_map.h"
+#include "../landscape.h"
 #include "../void_map.h"
 #include "../map_func.h"
 #include "../signal_func.h"
@@ -45,6 +46,7 @@
 #include "../network/network_base.h"
 #include "../core/backup_type.hpp"
 #include "../3rdparty/nlohmann/json.hpp"
+#include <queue>
 #include "../safeguards.h"
 
 extern Company *DoStartupNewCompany(bool, CompanyID);
@@ -262,6 +264,48 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 }
 
 /**
+ * Lower exposed terrain into a continuous height field, without touching infrastructure.
+ * A corner is shared by four tiles, so all four must be safe before any change is applied.
+ * @return Whether the entire repair can be applied safely (failure leaves the map unchanged).
+ */
+bool SmoothTerrain()
+{
+	std::vector<uint8_t> heights(Map::Size());
+	std::queue<TileIndex> pending;
+	for (const TileIndex tile : Map::Iterate()) {
+		heights[tile.base()] = TileHeight(tile);
+		pending.push(tile);
+	}
+	while (!pending.empty()) {
+		TileIndex tile = pending.front();
+		pending.pop();
+		uint x = TileX(tile), y = TileY(tile);
+		for (auto [dx, dy] : {std::pair{-1, 0}, {1, 0}, {0, -1}, {0, 1}}) {
+			int nx = static_cast<int>(x) + dx, ny = static_cast<int>(y) + dy;
+			if (nx < 0 || ny < 0 || nx >= static_cast<int>(Map::SizeX()) || ny >= static_cast<int>(Map::SizeY())) continue;
+			TileIndex next = TileXY(nx, ny);
+			if (heights[next.base()] <= heights[tile.base()] + 1) continue;
+			heights[next.base()] = heights[tile.base()] + 1;
+			pending.push(next);
+		}
+	}
+	for (const TileIndex tile : Map::Iterate()) {
+		if (heights[tile.base()] == TileHeight(tile)) continue;
+		for (int dy = -1; dy <= 0; ++dy) {
+			for (int dx = -1; dx <= 0; ++dx) {
+				int x = static_cast<int>(TileX(tile)) + dx, y = static_cast<int>(TileY(tile)) + dy;
+				if (x < 0 || y < 0) continue;
+				TileIndex affected = TileXY(x, y);
+				TileType type = GetTileType(affected);
+				if (type != TileType::Clear && type != TileType::Trees && type != TileType::Void) return false;
+			}
+		}
+	}
+	for (const TileIndex tile : Map::Iterate()) SetTileHeight(tile, heights[tile.base()]);
+	return true;
+}
+
+/**
  * Construct the isolated four-world fixture on a fresh map.
  * @return Whether all construction and configuration commands succeeded.
  */
@@ -303,6 +347,10 @@ bool Prepare()
 			SetTileHeight(tile, 1);
 			if (PlanetManager::GetTileWorld(tile) == INVALID_WORLD) MakeVoid(tile);
 		}
+	if (!SmoothTerrain()) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL unsafe terrain transition");
+		return false;
+	}
 	Company *company = DoStartupNewCompany(false, CompanyID{0});
 	if (company == nullptr) return false;
 	company->name = DEMO_NAME;
@@ -487,10 +535,18 @@ Json Snapshot()
 }
 } // namespace
 
+bool RepairConnectedEconomyTerrain()
+{
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (Map::SizeX() != 1024 || Map::SizeY() != 1024 || company == nullptr || company->name != DEMO_NAME ||
+		PlanetManager::Count() != 4) return true;
+	return SmoothTerrain();
+}
+
 bool ConConnectedEconomy(std::span<std::string_view> argv)
 {
 	if (argv.size() != 2) {
-		IConsolePrint(CC_HELP, "connected_economy prepare|status|advance|stop-food|start-food|fabricate|research: isolated demo only");
+		IConsolePrint(CC_HELP, "connected_economy prepare|status|audit|advance|stop-food|start-food|fabricate|research: isolated demo only");
 		return true;
 	}
 	if (_game_mode != GameMode::Normal || (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) ||
@@ -508,7 +564,47 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		return true;
 	}
 	AutoRestoreBackup owner(_current_company, CompanyID{0});
-	if (argv[1] == "status")
+	if (argv[1] == "audit") {
+		Json result = {{"invalid_slopes", Json::array()}, {"cargo", Json::array()}};
+		for (uint y = 0; y < Map::MaxY(); ++y) {
+			for (uint x = 0; x < Map::MaxX(); ++x) {
+				TileIndex tile = TileXY(x, y);
+				int n = TileHeight(tile), w = TileHeight(TileXY(x + 1, y));
+				int e = TileHeight(TileXY(x, y + 1)), s = TileHeight(TileXY(x + 1, y + 1));
+				if (abs(n - w) > 1 || abs(n - e) > 1 || abs(s - w) > 1 || abs(s - e) > 1) {
+					result["invalid_slopes"].push_back({x, y, n, w, e, s, static_cast<uint>(GetTileSlope(tile))});
+				}
+			}
+		}
+		for (CargoType c{0}; c < NUM_CARGO; ++c) {
+			const CargoSpec &cs = *CargoSpec::Get(c);
+			if (!cs.IsValid()) continue;
+			result["cargo"].push_back({{"id", cs.Index()}, {"name", GetString(cs.name)},
+				{"single", GetString(cs.name_single)}, {"units", GetString(cs.units_volume, 100)},
+				{"quantity", GetString(cs.quantifier, 100)}, {"zero_quantity", GetString(cs.quantifier, 0)},
+				{"large_quantity", GetString(cs.quantifier, 100000)}, {"abbreviation", GetString(cs.abbrev)}});
+		}
+		result["language"] = GetCurrentLanguageIsoCode();
+		result["pixel_queries"] = 0;
+		result["viewport_queries"] = 0;
+		if (result["invalid_slopes"].empty()) {
+			uint64_t pixels = 0, viewports = 0;
+			for (uint y = 0; y < Map::MaxY(); ++y) {
+				for (uint x = 0; x < Map::MaxX(); ++x) {
+					for (int offset : {0, 8, 15}) {
+						GetSlopePixelZ(x * TILE_SIZE + offset, y * TILE_SIZE + offset);
+						++pixels;
+					}
+					Point screen = RemapCoords2(x * TILE_SIZE + 8, y * TILE_SIZE + 8);
+					InverseRemapCoords2(screen.x, screen.y, true);
+					++viewports;
+				}
+			}
+			result["pixel_queries"] = pixels;
+			result["viewport_queries"] = viewports;
+		}
+		IConsolePrint(CC_DEFAULT, "CONNECTED audit {}", result.dump());
+	} else if (argv[1] == "status")
 		IConsolePrint(CC_DEFAULT, "CONNECTED state {}", Snapshot().dump());
 	else if (argv[1] == "advance") {
 		Json before = Snapshot();

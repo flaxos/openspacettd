@@ -1,0 +1,302 @@
+{
+  "passed": true,
+  "source_sha256": "1b51ed6f0cc89b9dcfaf7d9b83d52c543070418e938bf24ded46881625ff55e2",
+  "recovered_sha256": "c44c4d242854a6d5b61120a6a276a0f504037822728e50f61f8b8be6b262c3ea",
+  "city": [
+    {
+      "current": [
+        70,
+        35,
+        35
+      ],
+      "houses": 45,
+      "id": 1,
+      "last": [
+        70,
+        30,
+        35
+      ],
+      "population": 1107,
+      "quotas": [
+        55,
+        30,
+        11
+      ],
+      "state": 3
+    }
+  ],
+  "trains": 37,
+  "reported_crash": "NOT_REACHED landscape.cpp:298 / GetPartialPixelZ",
+  "invalid_tiles_before": 742,
+  "custom_cargos_missing_quantity_text_before": 13,
+  "binary_sha256": "ba111bd294f550425cf79f0aa77b5f29fa4f7c2fe7b95fd1b4b0fca1103bdcf1",
+  "human_graphical_retest": "pending",
+  "audits": {
+    "english_US.lng": {
+      "language": "en_US",
+      "pixel_queries": 3139587,
+      "viewport_queries": 1046529,
+      "invalid_slopes": []
+    },
+    "english.lng": {
+      "language": "en_GB",
+      "pixel_queries": 3139587,
+      "viewport_queries": 1046529,
+      "invalid_slopes": []
+    },
+    "reload": {
+      "language": "en_GB",
+      "pixel_queries": 3139587,
+      "viewport_queries": 1046529,
+      "invalid_slopes": []
+    },
+    "after_running": {
+      "language": "en_GB",
+      "pixel_queries": 3139587,
+      "viewport_queries": 1046529,
+      "invalid_slopes": []
+    }
+  },
+  "cargo": [
+    {
+      "abbreviation": "PS",
+      "id": 0,
+      "large_quantity": "100,000\u00a0passengers",
+      "name": "Passengers",
+      "quantity": "100\u00a0passengers",
+      "single": "Passenger",
+      "units": "100\u00a0passengers",
+      "zero_quantity": "0\u00a0passengers"
+    },
+    {
+      "abbreviation": "CL",
+      "id": 1,
+      "large_quantity": "100,000\u00a0tonnes of coal",
+      "name": "Coal",
+      "quantity": "100\u00a0tonnes of coal",
+      "single": "Coal",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of coal"
+    },
+    {
+      "abbreviation": "DC",
+      "id": 2,
+      "large_quantity": "100,000\u00a0data crystals",
+      "name": "Data Crystals",
+      "quantity": "100\u00a0data crystals",
+      "single": "Data Crystal",
+      "units": "100\u00a0data crystals",
+      "zero_quantity": "0\u00a0data crystals"
+    },
+    {
+      "abbreviation": "OL",
+      "id": 3,
+      "large_quantity": "100,000,000\u00a0litres of oil",
+      "name": "Oil",
+      "quantity": "100,000\u00a0litres of oil",
+      "single": "Oil",
+      "units": "100\u00a0liters",
+      "zero_quantity": "0\u00a0litres of oil"
+    },
+    {
+      "abbreviation": "LV",
+      "id": 4,
+      "large_quantity": "100,000\u00a0head of livestock",
+      "name": "Livestock",
+      "quantity": "100\u00a0head of livestock",
+      "single": "Livestock",
+      "units": "100\u00a0items",
+      "zero_quantity": "0\u00a0head of livestock"
+    },
+    {
+      "abbreviation": "GD",
+      "id": 5,
+      "large_quantity": "100,000\u00a0crates of goods",
+      "name": "Manufactured Goods & Colony Supplies",
+      "quantity": "100\u00a0crates of goods",
+      "single": "Manufactured Goods & Colony Supplies",
+      "units": "100\u00a0crates",
+      "zero_quantity": "0\u00a0crates of goods"
+    },
+    {
+      "abbreviation": "WH",
+      "id": 6,
+      "large_quantity": "100,000\u00a0tonnes of wheat",
+      "name": "Wheat",
+      "quantity": "100\u00a0tonnes of wheat",
+      "single": "Wheat",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of wheat"
+    },
+    {
+      "abbreviation": "WD",
+      "id": 7,
+      "large_quantity": "100,000\u00a0tonnes of wood",
+      "name": "Wood",
+      "quantity": "100\u00a0tonnes of wood",
+      "single": "Wood",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of wood"
+    },
+    {
+      "abbreviation": "PR",
+      "id": 9,
+      "large_quantity": "100,000\u00a0tonnes of paper",
+      "name": "Paper",
+      "quantity": "100\u00a0tonnes of paper",
+      "single": "Paper",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of paper"
+    },
+    {
+      "abbreviation": "GD",
+      "id": 10,
+      "large_quantity": "100,000\u00a0bags of gold",
+      "name": "Gold",
+      "quantity": "100\u00a0bags of gold",
+      "single": "Gold",
+      "units": "100\u00a0bags",
+      "zero_quantity": "0\u00a0bags of gold"
+    },
+    {
+      "abbreviation": "FD",
+      "id": 11,
+      "large_quantity": "100,000\u00a0tonnes of food",
+      "name": "Packaged Nutrients & Rations",
+      "quantity": "100\u00a0tonnes of food",
+      "single": "Packaged Nutrients & Rations",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of food"
+    },
+    {
+      "abbreviation": "SILC",
+      "id": 16,
+      "large_quantity": "100,000\u00a0tonnes of silicates",
+      "name": "Silicates & Ballast Slag",
+      "quantity": "100\u00a0tonnes of silicates",
+      "single": "Silicates & Ballast Slag",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of silicates"
+    },
+    {
+      "abbreviation": "IRON",
+      "id": 17,
+      "large_quantity": "100,000\u00a0tonnes of iron ore",
+      "name": "Iron Ore",
+      "quantity": "100\u00a0tonnes of iron ore",
+      "single": "Iron Ore",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of iron ore"
+    },
+    {
+      "abbreviation": "STEL",
+      "id": 18,
+      "large_quantity": "100,000\u00a0tonnes of structural steel",
+      "name": "Structural Steel",
+      "quantity": "100\u00a0tonnes of structural steel",
+      "single": "Structural Steel",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of structural steel"
+    },
+    {
+      "abbreviation": "RARE",
+      "id": 19,
+      "large_quantity": "100,000\u00a0tonnes of rare earth minerals",
+      "name": "Rare Earth Minerals",
+      "quantity": "100\u00a0tonnes of rare earth minerals",
+      "single": "Rare Earth Minerals",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of rare earth minerals"
+    },
+    {
+      "abbreviation": "ALLO",
+      "id": 20,
+      "large_quantity": "100,000\u00a0tonnes of superalloys",
+      "name": "Superalloys & Superconductors",
+      "quantity": "100\u00a0tonnes of superalloys",
+      "single": "Superalloys & Superconductors",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of superalloys"
+    },
+    {
+      "abbreviation": "COPR",
+      "id": 21,
+      "large_quantity": "100,000\u00a0tonnes of copper ore",
+      "name": "Copper Ore",
+      "quantity": "100\u00a0tonnes of copper ore",
+      "single": "Copper Ore",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of copper ore"
+    },
+    {
+      "abbreviation": "WIRE",
+      "id": 22,
+      "large_quantity": "100,000\u00a0tonnes of conductive wiring",
+      "name": "Conductive Wiring & Coils",
+      "quantity": "100\u00a0tonnes of conductive wiring",
+      "single": "Conductive Wiring & Coils",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of conductive wiring"
+    },
+    {
+      "abbreviation": "SAND",
+      "id": 23,
+      "large_quantity": "100,000\u00a0tonnes of silica sand",
+      "name": "Silica Sand & Quartz",
+      "quantity": "100\u00a0tonnes of silica sand",
+      "single": "Silica Sand & Quartz",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of silica sand"
+    },
+    {
+      "abbreviation": "CHIP",
+      "id": 24,
+      "large_quantity": "100,000\u00a0tonnes of silicon chips",
+      "name": "Silicon Wafers & Chips",
+      "quantity": "100\u00a0tonnes of silicon chips",
+      "single": "Silicon Wafers & Chips",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of silicon chips"
+    },
+    {
+      "abbreviation": "POLY",
+      "id": 25,
+      "large_quantity": "100,000\u00a0tonnes of synthetic polymers",
+      "name": "Synthetic Polymers & Composites",
+      "quantity": "100\u00a0tonnes of synthetic polymers",
+      "single": "Synthetic Polymers & Composites",
+      "units": "100\u00a0tonnes",
+      "zero_quantity": "0\u00a0tonnes of synthetic polymers"
+    },
+    {
+      "abbreviation": "BCRY",
+      "id": 26,
+      "large_quantity": "100,000\u00a0blank data crystals",
+      "name": "Blank Data Crystals",
+      "quantity": "100\u00a0blank data crystals",
+      "single": "Blank Data Crystals",
+      "units": "100\u00a0items",
+      "zero_quantity": "0\u00a0blank data crystals"
+    },
+    {
+      "abbreviation": "QCRY",
+      "id": 27,
+      "large_quantity": "100,000\u00a0quantum data crystals",
+      "name": "Enriched Quantum Crystals",
+      "quantity": "100\u00a0quantum data crystals",
+      "single": "Enriched Quantum Crystals",
+      "units": "100\u00a0items",
+      "zero_quantity": "0\u00a0quantum data crystals"
+    },
+    {
+      "abbreviation": "CCRY",
+      "id": 28,
+      "large_quantity": "100,000\u00a0consumer data crystals",
+      "name": "Encrypted Consumer Crystals",
+      "quantity": "100\u00a0consumer data crystals",
+      "single": "Encrypted Consumer Crystals",
+      "units": "100\u00a0items",
+      "zero_quantity": "0\u00a0consumer data crystals"
+    }
+  ]
+}

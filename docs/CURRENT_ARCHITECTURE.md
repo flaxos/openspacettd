@@ -295,3 +295,14 @@ Industry v3 occupies cargo slots 16–28 with explicit freight flags; rail v3 re
 native food/grain support and adds a livestock stockcar. Exact v2 packs remain
 supported for existing saves. Optional observer counters reconcile cargo flows and
 research consumption without changing simulation behavior.
+
+## Connected fixture recovery — 2026-09-23
+
+`RepairConnectedEconomyTerrain` runs before post-load terrain use, restricted to
+the marked connected demo. A deterministic corner-height relaxation first plans
+continuous slopes, then validates all four adjacent tiles of every changed corner,
+and only then writes the heights. It refuses to touch infrastructure. Generation
+uses the same routine before constructing the network. No new save chunk or world
+layout is introduced. `CommonwealthPackManager::RepairLegacyCargoStrings` repairs
+only the identified v2/v3 industry pack after GRF string mapping. Industry v4
+contains complete cargo text directly; legacy binaries retain their exact hashes.

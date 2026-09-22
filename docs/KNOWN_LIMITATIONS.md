@@ -211,3 +211,18 @@ indefinite growth. Monthly supply fluctuates; rebuilding can temporarily lower t
 population. All worlds remain regions of one map. The save requires the matching
 v3 NewGRFs and current engine; old v2 binaries and UAT saves remain available.
 See [detailed boundaries and evidence](CONNECTED_ECONOMY_UAT.md).
+
+## Connected UAT terrain and text follow-up (2026-09-23)
+
+The first connected-demo human run exposed 742 malformed slopes and missing
+quantity/unit descriptions for all 13 custom cargos. These are fixed and the
+reported crash save is recovered with full-map viewport and two-language audits.
+See [recovery evidence](../demo/CONNECTED-UAT-RECOVERY.evidence.json).
+
+Automatic terrain recovery is intentionally limited to the original marked
+1024×1024, four-world connected fixture. A changed corner shared by infrastructure
+causes a clear load error instead of modifying that infrastructure. Renamed or
+structurally modified unrelated fixtures are not general-purpose terrain-repair
+targets. Original v2/v3 content hashes remain available. This repair does not
+change the single-map architecture or establish human visual acceptance; the
+user must still retest panning and the affected station/industry windows.

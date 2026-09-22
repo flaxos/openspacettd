@@ -6387,3 +6387,18 @@ STR_PROMPT_SCENARIO_PRESET_3                                   :Preset: Volcanic
 STR_PROMPT_SCENARIO_GENERATE_BTN                               :Synthesize & Generate Scenario
 
 
+
+# Quantity text for legacy Commonwealth cargo packs
+STR_QUANTITY_COMMONWEALTH_SILC                                  :{WEIGHT_LONG} of silicates
+STR_QUANTITY_COMMONWEALTH_IRON                                  :{WEIGHT_LONG} of iron ore
+STR_QUANTITY_COMMONWEALTH_STEL                                  :{WEIGHT_LONG} of structural steel
+STR_QUANTITY_COMMONWEALTH_COPR                                  :{WEIGHT_LONG} of copper ore
+STR_QUANTITY_COMMONWEALTH_WIRE                                  :{WEIGHT_LONG} of conductive wiring
+STR_QUANTITY_COMMONWEALTH_SAND                                  :{WEIGHT_LONG} of silica sand
+STR_QUANTITY_COMMONWEALTH_CHIP                                  :{WEIGHT_LONG} of silicon chips
+STR_QUANTITY_COMMONWEALTH_RARE                                  :{WEIGHT_LONG} of rare earth minerals
+STR_QUANTITY_COMMONWEALTH_ALLO                                  :{WEIGHT_LONG} of superalloys
+STR_QUANTITY_COMMONWEALTH_POLY                                  :{WEIGHT_LONG} of synthetic polymers
+STR_QUANTITY_COMMONWEALTH_BCRY                                  :{COMMA}{NBSP}blank data crystals
+STR_QUANTITY_COMMONWEALTH_QCRY                                  :{COMMA}{NBSP}quantum data crystals
+STR_QUANTITY_COMMONWEALTH_CCRY                                  :{COMMA}{NBSP}consumer data crystals

@@ -2,6 +2,7 @@ set(COMMONWEALTH_NEWGRF_SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_industry.grf
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_rail.grf
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_industry_v3.grf
+	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_industry_v4.grf
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_rail_v3.grf
 )
 

@@ -23,11 +23,11 @@ PINNED_NML_VERSION = "0.9.0"
 
 PACKS = (
     {
-        "name": "openspacettd_industry_v3.grf",
+        "name": "openspacettd_industry_v4.grf",
         "source": INDUSTRY_DIR / "commonwealth_industry.nml",
         "grfid": "OST\\u0001",
         "grfid_hex": "0154534f",
-        "version": 3,
+        "version": 4,
     },
     {
         "name": "openspacettd_rail_v3.grf",
