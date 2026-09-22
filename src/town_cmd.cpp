@@ -8,6 +8,7 @@
 /** @file town_cmd.cpp Handling of town tiles. */
 
 #include "stdafx.h"
+#include "portal/commonwealth_slice.h"
 #include "misc/history_type.hpp"
 #include "misc/history_func.hpp"
 #include "road.h"
@@ -543,7 +544,12 @@ static void TownGenerateCargo(Town *t, CargoType cargo, uint amount, StationFind
 	/* Actually generate cargo and update town statistics. */
 	auto &supplied = t->GetOrCreateCargoSupplied(cargo);
 	supplied.history[THIS_MONTH].production += amount;
-	supplied.history[THIS_MONTH].transported += MoveGoodsToStation(cargo, amount, {t->index, SourceType::Town}, stations.GetStations());
+	uint transported = MoveGoodsToStation(cargo, amount, {t->index, SourceType::Town}, stations.GetStations());
+	supplied.history[THIS_MONTH].transported += transported;
+	if (_commonwealth_slice_audit != nullptr) {
+		_commonwealth_slice_audit->produced[cargo] += amount;
+		_commonwealth_slice_audit->unallocated[cargo] += amount - transported;
+	}
 }
 
 /**

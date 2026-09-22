@@ -332,3 +332,21 @@ CTests, both repository linters and `git diff --check` passed. Human visual rete
 pending: reopen Blueprint Library and HQ Overview/Fabrication, check readability
 at the user's font/UI scale, and resize the windows. Very long imported text still
 requires sufficient panel height; the wider HQ dashboard is not redesigned here.
+
+## Connected economy UAT v2.0 — 2026-09-23
+
+**TESTED; human visual acceptance pending.** The new
+[connected economy save and short guide](../demo/CONNECTED-ECONOMY-UAT.md) provide
+four logical worlds, 37 operating trains, 28 stations, all eleven production
+facilities, native food logistics, HQ materials/research, and real megacity growth.
+The existing v1.0/v1.1 saves are preserved. Cargo-label classification, residential
+consumer acceptance and monthly population-based quotas are repaired; exact v3
+packs preserve native farm/food slots while retaining legacy v2 support.
+
+The selected checkpoint grows from 32 houses / 872 people to 35 houses / 905 people
+in about 5½ normal-speed minutes. All services deliver repeatedly across a 24-month
+soak; reload, food stop/restart, CST in-kind prefab fabrication and delivered-feedstock
+research pass. Validation: 427 unit cases (66,233 assertions), 438/438 CTests,
+both repository linters, content rebuild verification and the legacy v2 WP-11 regression.
+See [reproduction, evidence and limits](CONNECTED_ECONOMY_UAT.md). The next acceptance
+gate is the short human play-through; Sprints 43–50 retain their separate UAT gaps.

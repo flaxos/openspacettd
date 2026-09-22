@@ -5,6 +5,7 @@
 
 #include "../cargo_type.h"
 #include <array>
+#include <map>
 #include <span>
 #include <string_view>
 
@@ -13,6 +14,10 @@ struct CommonwealthSliceAudit {
 	std::array<uint64_t, NUM_CARGO> produced{}; ///< Native production released by cargo.
 	std::array<uint64_t, NUM_CARGO> unallocated{}; ///< Produced cargo not allocated to a station.
 	std::array<uint64_t, NUM_CARGO> discarded{}; ///< Station cargo removed by truncation or rating loss.
+	std::array<uint64_t, NUM_CARGO> consumed{}; ///< Cargo accepted by native industries or town consumers.
+	std::map<uint32_t, std::array<uint64_t, NUM_CARGO>> vehicle_deliveries; ///< Accepted cargo by vehicle.
+	std::array<uint64_t, NUM_CARGO> research_consumed{}; ///< Actual research feedstock withdrawals.
+	std::map<uint32_t, std::array<uint64_t, NUM_CARGO>> deliveries; ///< Accepted cargo by destination station.
 	int64_t cash_debits = 0; ///< Actual company cash debits observed during the run.
 };
 /** Active WP11 audit observer, or nullptr outside the harness. */
@@ -23,5 +28,11 @@ extern CommonwealthSliceAudit *_commonwealth_slice_audit;
  * @return Always true because command errors are reported through console output.
  */
 bool ConCommonwealthSlice(std::span<std::string_view> argv);
+/**
+ * Build and inspect the isolated connected-economy demo.
+ * @param argv Console command arguments.
+ * @return Always true; errors are reported through console output.
+ */
+bool ConConnectedEconomy(std::span<std::string_view> argv);
 
 #endif

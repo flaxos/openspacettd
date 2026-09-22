@@ -23,18 +23,18 @@ PINNED_NML_VERSION = "0.9.0"
 
 PACKS = (
     {
-        "name": "openspacettd_industry.grf",
+        "name": "openspacettd_industry_v3.grf",
         "source": INDUSTRY_DIR / "commonwealth_industry.nml",
         "grfid": "OST\\u0001",
         "grfid_hex": "0154534f",
-        "version": 2,
+        "version": 3,
     },
     {
-        "name": "openspacettd_rail.grf",
+        "name": "openspacettd_rail_v3.grf",
         "source": RAIL_DIR / "commonwealth_rail.nml",
         "grfid": "OST\\u0002",
         "grfid_hex": "0254534f",
-        "version": 2,
+        "version": 3,
     },
 )
 
@@ -44,14 +44,15 @@ CARGO_LABELS = (
 )
 
 INDUSTRY_LOCAL_IDS = tuple(range(0x10, 0x1E))
-VEHICLE_LOCAL_IDS = tuple(range(0x20, 0x25)) + tuple(range(0x30, 0x37))
+VEHICLE_LOCAL_IDS = tuple(range(0x20, 0x25)) + tuple(range(0x30, 0x38))
 WAGON_REFITS = {
     "0x31": ["BCRY", "QCRY", "CCRY"],
-    "0x32": ["SILC", "IRON", "COPR", "SAND", "RARE"],
+    "0x32": ["SILC", "IRON", "COPR", "SAND", "RARE", "WHEA", "GRAI", "MAIZ"],
     "0x33": ["STEL", "WIRE"],
-    "0x34": ["CHIP", "ALLO"],
+    "0x34": ["CHIP", "ALLO", "FOOD"],
     "0x35": ["POLY"],
     "0x36": list(CARGO_LABELS),
+    "0x37": ["LVST"],
 }
 
 

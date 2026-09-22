@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+struct Station;
+
 /** Three-tier commodity demand classification for metropolitan core worlds. */
 enum class MegacityDemandTier : uint8_t {
 	Tier1_Sustenance  = 0, ///< Food, Water, and basic survival consumables.
@@ -79,6 +81,12 @@ public:
 
 	/* Cargo Classification */
 	static MegacityDemandTier ClassifyCargo(uint8_t cargo_type);
+	/**
+	 * Determine whether this station serves houses belonging to a registered megacity.
+	 * @param station Station to inspect, or nullptr.
+	 * @return Whether its catchment includes a house of its registered megacity.
+	 */
+	static bool IsConsumerStation(const Station *station);
 
 private:
 	static std::map<uint32_t, MegacityProfile> _megacities;

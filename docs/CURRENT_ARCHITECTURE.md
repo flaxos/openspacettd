@@ -279,3 +279,19 @@ and `src/blueprint/` (8 files). This is the correct isolation pattern.
 - **Registered CTest cases:** 435+ at HEAD (all passing)
 - **Regression tests:** Squirrel AI, GameScript, stationlist, blueprint, window validation
 - **CI:** Linux build with CTest + repo linters (`file-descriptions.py`, `unused-strings.py`)
+
+## Connected economy acceptance adapter — 2026-09-23
+
+`src/portal/connected_economy.cpp` adds an isolated offline scenario builder and
+read-only audit interface. It uses existing logical regions, normal construction,
+orders, timetables, production facilities, hubs and town growth. It introduces no
+new persistent chunk or independent map. [Details](CONNECTED_ECONOMY_UAT.md).
+
+Megacity demand now resolves loaded cargo labels. Stations serving a registered
+megacity's actual houses accept its demand cargoes; only town-consumed remainder
+counts toward monthly supply, excluding industry inputs and warehouse storage.
+The monthly economy hook synchronizes quota population from the native town.
+Industry v3 occupies cargo slots 16–28 with explicit freight flags; rail v3 retains
+native food/grain support and adds a livestock stockcar. Exact v2 packs remain
+supported for existing saves. Optional observer counters reconcile cargo flows and
+research consumption without changing simulation behavior.

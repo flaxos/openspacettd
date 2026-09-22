@@ -45,9 +45,9 @@ CommonwealthContentStatus CommonwealthPackManager::GetContentStatus()
 	}
 	if (industry == nullptr && rail == nullptr) return {};
 	for (const GRFConfig *config : {industry, rail}) {
-		if (config == nullptr || config->version != 2 || config->status != GRFStatus::Activated ||
+		if (config == nullptr || (config->version != 2 && config->version != 3) || config->status != GRFStatus::Activated ||
 				config->flags.Any({GRFConfigFlag::Invalid, GRFConfigFlag::Compatible})) {
-			return {CommonwealthContentMode::Invalid, "Both exact Commonwealth v2 packs must be active"};
+			return {CommonwealthContentMode::Invalid, "Exact Commonwealth industry and rail v2/v3 packs must be active"};
 		}
 	}
 	for (uint8_t i = 0; i < static_cast<uint8_t>(CommonwealthCargoID::Count); ++i) {

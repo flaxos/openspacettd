@@ -8,6 +8,7 @@
 /** @file station_cmd.cpp Handling of station tiles. */
 
 #include "stdafx.h"
+#include "portal/megacity_manager.h"
 #include "portal/commonwealth_slice.h"
 #include "portal/production_chain.h"
 #include "portal/logistics_hub.h"
@@ -691,6 +692,15 @@ void UpdateStationAcceptance(Station *st, bool show_msg)
 	CargoArray acceptance{};
 	if (!st->spread.IsEmpty()) {
 		std::tie(acceptance, st->always_accepted) = GetAcceptanceAroundStation(st);
+	}
+
+	/* A megacity consumes its declared demand cargo at stations serving its houses. */
+	if (MegacityManager::IsConsumerStation(st)) {
+		for (CargoType cargo : EnumRange(NUM_CARGO)) {
+			if (MegacityManager::ClassifyCargo(cargo) == MegacityDemandTier::End) continue;
+			acceptance[cargo] = std::max<uint>(8, acceptance[cargo]);
+			st->always_accepted.Set(cargo);
+		}
 	}
 
 	/* Adjust in case our station only accepts fewer kinds of goods */

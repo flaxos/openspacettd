@@ -449,6 +449,16 @@ TEST_CASE("Commonwealth content binds distinct loaded cargoes and rejects incomp
 	CHECK(FabricationManager::CheckMaterials(WorldID{0}, CompanyID{0}, FabricationManager::GetDepotBOM(RAILTYPE_RAIL)).GetErrorMessage() == STR_ERROR_COMMONWEALTH_CONTENT);
 }
 
+TEST_CASE("Commonwealth exact v3 packs retain label bindings", "[wp11][connected]")
+{
+	CommonwealthContentScope scope;
+	for (auto &config : _grfconfig) config->version = 3;
+	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Active);
+	CHECK(ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::SiliconChips) == CargoType{22});
+	_grfconfig.front()->version = 4;
+	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
+}
+
 TEST_CASE("Commonwealth fabrication requires research and consumes distinct materials once", "[wp11]")
 {
 	CommonwealthContentScope scope;

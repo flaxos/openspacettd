@@ -16,24 +16,24 @@
   ],
   "commonwealth_packages": [
     {
-      "bytes": 2398,
+      "bytes": 2424,
       "grfid": "OST\\u0001",
       "grfid_hex": "0154534f",
-      "md5": "f08c47d60ab8ed25d63fb15e6ec3e1f1",
-      "name": "openspacettd_industry.grf",
-      "sha256": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
+      "md5": "267af5326a5a06cf77178a1c2f7d94df",
+      "name": "openspacettd_industry_v3.grf",
+      "sha256": "02744d1689144a8618fe6a3aa8732b41aa724e77ef5c9648364eb8594b0dbf56",
       "source": "pkg/commonwealth_industry/commonwealth_industry.nml",
-      "version": 2
+      "version": 3
     },
     {
-      "bytes": 1695,
+      "bytes": 1820,
       "grfid": "OST\\u0002",
       "grfid_hex": "0254534f",
-      "md5": "ec75dc10aacc2a7767c0d2f31a789cf7",
-      "name": "openspacettd_rail.grf",
-      "sha256": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87",
+      "md5": "8249fd4e7c8b0ce7058fc4557a6c80ec",
+      "name": "openspacettd_rail_v3.grf",
+      "sha256": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
       "source": "pkg/commonwealth_rail/commonwealth_rail.nml",
-      "version": 2
+      "version": 3
     }
   ],
   "compiler": {
@@ -69,7 +69,8 @@
     "0x33",
     "0x34",
     "0x35",
-    "0x36"
+    "0x36",
+    "0x37"
   ],
   "wagon_refits": {
     "0x31": [
@@ -82,7 +83,10 @@
       "IRON",
       "COPR",
       "SAND",
-      "RARE"
+      "RARE",
+      "WHEA",
+      "GRAI",
+      "MAIZ"
     ],
     "0x33": [
       "STEL",
@@ -90,7 +94,8 @@
     ],
     "0x34": [
       "CHIP",
-      "ALLO"
+      "ALLO",
+      "FOOD"
     ],
     "0x35": [
       "POLY"
@@ -109,6 +114,9 @@
       "BCRY",
       "QCRY",
       "CCRY"
+    ],
+    "0x37": [
+      "LVST"
     ]
   }
 }

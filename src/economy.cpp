@@ -8,6 +8,7 @@
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
+#include "portal/commonwealth_slice.h"
 #include <ranges>
 #include "company_func.h"
 #include "command_func.h"
@@ -1099,8 +1100,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
 	return accepted;
 }
 
-/**
- * Delivers goods to industries/towns and calculates the payment
+/** Delivers goods to industries/towns and calculates the payment
  * @param num_pieces amount of cargo delivered
  * @param cargo_type the type of cargo that is delivered
  * @param dest Station the cargo has been unloaded
@@ -1108,10 +1108,12 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
  * @param periods_in_transit Travel time in cargo aging periods
  * @param company The company delivering the cargo
  * @param src Source of cargo
+ * @param src_tile Original production tile, or INVALID_TILE if unavailable.
+ * @param delivery_vehicle Front vehicle used for optional delivery audit counters.
  * @return Revenue for delivering cargo
  * @note The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery
  */
-static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, uint distance, uint16_t periods_in_transit, Company *company, Source src, TileIndex src_tile = INVALID_TILE)
+static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, uint distance, uint16_t periods_in_transit, Company *company, Source src, TileIndex src_tile, VehicleID delivery_vehicle)
 {
 	assert(num_pieces > 0);
 
@@ -1133,6 +1135,12 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 	/* If this cargo type is always accepted, the town accepts the remainder. */
 	uint accepted_total = hub == nullptr && st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
 
+	if (_commonwealth_slice_audit != nullptr) {
+		_commonwealth_slice_audit->consumed[cargo_type] += accepted_total - accepted_facility;
+		_commonwealth_slice_audit->deliveries[dest.base()][cargo_type] += accepted_total + stored;
+		_commonwealth_slice_audit->vehicle_deliveries[delivery_vehicle.base()][cargo_type] += accepted_total + stored;
+	}
+
 	/* Update station statistics */
 	if (accepted_total + stored > 0) {
 		st->goods[cargo_type].status.Set({GoodsEntry::State::EverAccepted, GoodsEntry::State::CurrentMonth, GoodsEntry::State::AcceptedBigtick});
@@ -1145,8 +1153,8 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
 	}
 	PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
-	if (st->town != nullptr && MegacityManager::IsMegacity(st->town->index)) {
-		MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility);
+	if (MegacityManager::IsConsumerStation(st)) {
+		MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility - accepted_ind);
 	}
 
 	/* Update company statistics */
@@ -1277,7 +1285,7 @@ CargoPayment::~CargoPayment()
 void CargoPayment::PayFinalDelivery(CargoType cargo, const CargoPacket *cp, uint count, TileIndex current_tile)
 {
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, cargo, this->current_station, cp->GetDistance(current_tile), cp->GetPeriodsInTransit(), Company::Get(this->front->owner), cp->GetSource(), cp->GetSourceXY());
+	Money profit = DeliverGoods(count, cargo, this->current_station, cp->GetDistance(current_tile), cp->GetPeriodsInTransit(), Company::Get(this->front->owner), cp->GetSource(), cp->GetSourceXY(), this->front->index);
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -2069,6 +2077,9 @@ static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthl
 {
 	SpaceportManager::ProcessOffWorldTrade();
 	EdgeConduitManager::ProduceAllConduits();
+	for (const auto &city : MegacityManager::GetAllMegacities()) {
+		if (const Town *town = Town::GetIfValid(city.town_id)) MegacityManager::UpdatePopulation(city.town_id, town->cache.population);
+	}
 	MegacityManager::EvaluateMonthlySupply();
 	ProductionChainManager::ProcessMonthlyProduction();
 	TechTreeManager::ProcessMonthlyResearch();
