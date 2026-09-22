@@ -226,3 +226,12 @@ structurally modified unrelated fixtures are not general-purpose terrain-repair
 targets. Original v2/v3 content hashes remain available. This repair does not
 change the single-map architecture or establish human visual acceptance; the
 user must still retest panning and the affected station/industry windows.
+
+## 2026-09-23 — Savegame authoring workflow
+
+[Savegame authoring](SAVEGAME_AUTHORING.md) now records the reproducible build,
+early terrain/text audits, logistics proof, checkpoint use, content compatibility
+and publication workflow. `AGENTS.md` requires future scenario work to use it.
+Documentation-only follow-up: no engine, content or save changes; human visual
+acceptance remains pending. The guide explicitly distinguishes fixture-specific
+assumptions from reusable practices.

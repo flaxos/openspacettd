@@ -2,6 +2,8 @@
 
 **2026-09-23 · Automated acceptance passed; human visual UAT pending.**
 
+General workflow and lessons: [Savegame authoring](SAVEGAME_AUTHORING.md).
+
 Player entry point: [short UAT guide](../demo/CONNECTED-ECONOMY-UAT.md).
 The v2.0 save is independent of the older all-features saves.
 
@@ -86,7 +88,9 @@ Save/load drops zero-valued buffer entries, which the comparison normalizes.
   the executed and quoted construction costs agree. Research consumes 45 delivered
   feedstock units and completes Dual-Track Throat Arrays.
 
-Validation: **427 unit cases / 66,233 assertions; 438/438 CTests**. Both repository
+Initial fixture validation: **427 unit cases / 66,233 assertions; 438/438 CTests**.
+The subsequent crash/text repair passed **429 unit cases / 66,359 assertions;
+440/440 CTests**; see [recovery evidence](../demo/CONNECTED-UAT-RECOVERY.evidence.json). Both repository
 linters, `git diff --check`, pinned NewGRF rebuild verification and the legacy v2
 WP-11 headless economy/reload/fabrication regression pass.
 
