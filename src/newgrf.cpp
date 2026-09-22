@@ -8,6 +8,7 @@
 /** @file newgrf.cpp Base of all NewGRF support. */
 
 #include "stdafx.h"
+#include "portal/commonwealth_pack.h"
 #include "portal/production_chain.h"
 #include "core/backup_type.hpp"
 #include "core/container_func.hpp"
@@ -1646,6 +1647,7 @@ static void AfterLoadGRFs()
 
 	/* Polish cargoes */
 	FinaliseCargoArray();
+	CommonwealthPackManager::RepairLegacyCargoStrings();
 
 	/* Pre-calculate all refit masks after loading GRF files. */
 	CalculateRefitMasks();

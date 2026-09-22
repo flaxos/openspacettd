@@ -20,6 +20,10 @@
 #include "../newgrf_config.h"
 #include "../newgrf.h"
 #include "../cargotype.h"
+#include "../portal/commonwealth_slice.h"
+#include "../company_base.h"
+#include "../clear_map.h"
+#include "../landscape.h"
 #include "../table/strings.h"
 
 #include <fstream>
@@ -456,6 +460,11 @@ TEST_CASE("Commonwealth exact v3 packs retain label bindings", "[wp11][connected
 	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Active);
 	CHECK(ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::SiliconChips) == CargoType{22});
 	_grfconfig.front()->version = 4;
+	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Active);
+	_grfconfig.back()->version = 4;
+	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
+	_grfconfig.back()->version = 3;
+	_grfconfig.front()->version = 5;
 	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
 }
 
@@ -521,5 +530,76 @@ TEST_CASE("WP11 active cargo conversion preserves buffers and applies Materials 
 		CHECK(facility->total_produced == 0);
 	}
 	ProductionChainManager::Reset();
+	PlanetManager::Reset();
+}
+
+TEST_CASE("Legacy Commonwealth quantities are complete without replacing content", "[connected][cargo]")
+{
+	CommonwealthContentScope scope;
+	for (uint32_t version : {2u, 3u}) {
+		_grfconfig.front()->version = version;
+		for (uint i = 0; i < 13; ++i) {
+			CargoSpec *spec = CargoSpec::Get(16 + i);
+			spec->name = STR_CARGO_PLURAL_GOODS;
+			spec->name_single = STR_NULL;
+			spec->units_volume = STR_NULL;
+			spec->quantifier = STR_NULL;
+		}
+		CommonwealthPackManager::RepairLegacyCargoStrings();
+		for (uint i = 0; i < 13; ++i) {
+			const CargoSpec *spec = CargoSpec::Get(16 + i);
+			CHECK(spec->name_single == spec->name);
+			CHECK(spec->units_volume == (i >= 10 ? STR_ITEMS : STR_TONS));
+			CHECK(spec->quantifier != STR_NULL);
+		}
+	}
+	_grfconfig.front()->version = 4;
+	CargoSpec::Get(16)->quantifier = STR_NULL;
+	CommonwealthPackManager::RepairLegacyCargoStrings();
+	CHECK(CargoSpec::Get(16)->quantifier == STR_NULL);
+	_grfconfig.front()->version = 3;
+	scope.industry.grfid = GrfID{"TEST"};
+	CommonwealthPackManager::RepairLegacyCargoStrings();
+	CHECK(CargoSpec::Get(16)->quantifier == STR_NULL);
+}
+
+TEST_CASE("Connected terrain recovery is continuous, scoped and atomic", "[connected][terrain]")
+{
+	Map::Allocate(1024, 1024);
+	for (auto tile : Map::Iterate()) {
+		MakeClear(tile, ClearGround::Grass, 3);
+		SetTileHeight(tile, 1);
+	}
+	_company_pool.CleanPool();
+	Company *company = Company::CreateAtIndex(CompanyID{0});
+	company->name = "Unrelated game";
+	PlanetManager::Reset();
+	for (uint i = 0; i < 4; ++i) {
+		REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{i}, .name = "Test",
+			.min_x = i * 256 + 1, .min_y = 1, .max_x = i * 256 + 240, .max_y = 1022}));
+	}
+	TileIndex peak = TileXY(120, 49);
+	SetTileHeight(peak, 3);
+	REQUIRE(RepairConnectedEconomyTerrain());
+	CHECK(TileHeight(peak) == 3); // Never modify an unrelated save.
+	company->name = "Connected Commonwealth UAT v2";
+	SECTION("Repair and repeat") {
+		REQUIRE(RepairConnectedEconomyTerrain());
+		CHECK(TileHeight(peak) == 2);
+		REQUIRE(RepairConnectedEconomyTerrain());
+		CHECK(TileHeight(peak) == 2);
+		for (uint y = 47; y <= 51; ++y) {
+			for (uint x = 118; x <= 122; ++x) {
+				CHECK(GetPartialPixelZ(8, 8, GetTileSlope(TileXY(x, y))) <= 2 * TILE_HEIGHT);
+			}
+		}
+	}
+	SECTION("Shared corner belongs to infrastructure") {
+		SetTileType(TileXY(119, 48), TileType::Railway);
+		CHECK_FALSE(RepairConnectedEconomyTerrain());
+		CHECK(TileHeight(peak) == 3);
+		CHECK(TileHeight(TileXY(119, 49)) == 1);
+	}
+	_company_pool.CleanPool();
 	PlanetManager::Reset();
 }

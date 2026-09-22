@@ -35,6 +35,28 @@ CargoLabel CommonwealthPackManager::GetCargoLabel(CommonwealthCargoID cargo)
 	return static_cast<size_t>(cargo) < labels.size() ? labels[static_cast<size_t>(cargo)] : CT_INVALID;
 }
 
+void CommonwealthPackManager::RepairLegacyCargoStrings()
+{
+	const GRFConfig *config = GetGRFConfig(COMMONWEALTH_INDUSTRY_GRFID);
+	if (config == nullptr || (config->version != 2 && config->version != 3)) return;
+	static constexpr std::array<StringID, 13> quantities = {
+		STR_QUANTITY_COMMONWEALTH_SILC, STR_QUANTITY_COMMONWEALTH_IRON, STR_QUANTITY_COMMONWEALTH_STEL,
+		STR_QUANTITY_COMMONWEALTH_COPR, STR_QUANTITY_COMMONWEALTH_WIRE, STR_QUANTITY_COMMONWEALTH_SAND,
+		STR_QUANTITY_COMMONWEALTH_CHIP, STR_QUANTITY_COMMONWEALTH_RARE, STR_QUANTITY_COMMONWEALTH_ALLO,
+		STR_QUANTITY_COMMONWEALTH_POLY, STR_QUANTITY_COMMONWEALTH_BCRY, STR_QUANTITY_COMMONWEALTH_QCRY,
+		STR_QUANTITY_COMMONWEALTH_CCRY,
+	};
+	for (size_t i = 0; i < quantities.size(); ++i) {
+		CargoType cargo = GetCargoTypeByLabel(GetCargoLabel(static_cast<CommonwealthCargoID>(i)));
+		if (!IsValidCargoType(cargo)) continue;
+		CargoSpec *spec = CargoSpec::Get(cargo);
+		if (spec->grffile == nullptr || spec->grffile->grfid != COMMONWEALTH_INDUSTRY_GRFID) continue;
+		spec->name_single = spec->name;
+		spec->units_volume = i >= 10 ? STR_ITEMS : STR_TONS;
+		spec->quantifier = quantities[i];
+	}
+}
+
 CommonwealthContentStatus CommonwealthPackManager::GetContentStatus()
 {
 	const GRFConfig *industry = nullptr;
@@ -45,9 +67,10 @@ CommonwealthContentStatus CommonwealthPackManager::GetContentStatus()
 	}
 	if (industry == nullptr && rail == nullptr) return {};
 	for (const GRFConfig *config : {industry, rail}) {
-		if (config == nullptr || (config->version != 2 && config->version != 3) || config->status != GRFStatus::Activated ||
+		if (config == nullptr || (config->version != 2 && config->version != 3 &&
+				(config->ident.grfid != COMMONWEALTH_INDUSTRY_GRFID || config->version != 4)) || config->status != GRFStatus::Activated ||
 				config->flags.Any({GRFConfigFlag::Invalid, GRFConfigFlag::Compatible})) {
-			return {CommonwealthContentMode::Invalid, "Exact Commonwealth industry and rail v2/v3 packs must be active"};
+			return {CommonwealthContentMode::Invalid, "Exact Commonwealth industry v2/v3/v4 and rail v2/v3 packs must be active"};
 		}
 	}
 	for (uint8_t i = 0; i < static_cast<uint8_t>(CommonwealthCargoID::Count); ++i) {
