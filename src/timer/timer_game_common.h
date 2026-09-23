@@ -180,10 +180,10 @@ public:
 	/** The absolute minimum year in OTTD */
 	static constexpr typename TimerGame<T>::Year MIN_YEAR{0};
 
-	/** The default starting year */
-	static constexpr typename TimerGame<T>::Year DEF_START_YEAR{1950};
+	/** The default starting year (Commonwealth wormhole expansion era) */
+	static constexpr typename TimerGame<T>::Year DEF_START_YEAR{2050};
 	/** The default scoring end year */
-	static constexpr typename TimerGame<T>::Year DEF_END_YEAR{ORIGINAL_END_YEAR - 1};
+	static constexpr typename TimerGame<T>::Year DEF_END_YEAR{2150};
 
 	/** The date of the first day of the original base year. */
 	static constexpr typename TimerGame<T>::Date DAYS_TILL_ORIGINAL_BASE_YEAR{TimerGame<T>::DateAtStartOfYear(ORIGINAL_BASE_YEAR)};

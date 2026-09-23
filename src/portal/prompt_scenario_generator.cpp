@@ -395,9 +395,9 @@ bool PromptScenarioGenerator::SpawnActiveFleets(const PromptScenarioSpec &spec, 
 			w1->engine_type = wagon;
 			w2->engine_type = wagon;
 
-			engine->build_year = TimerGameCalendar::Year{1950};
-			w1->build_year = TimerGameCalendar::Year{1950};
-			w2->build_year = TimerGameCalendar::Year{1950};
+			engine->build_year = TimerGameCalendar::year;
+			w1->build_year = TimerGameCalendar::year;
+			w2->build_year = TimerGameCalendar::year;
 
 			engine->cur_speed = 0;
 			w1->cur_speed = 0;

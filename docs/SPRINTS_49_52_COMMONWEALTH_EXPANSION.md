@@ -27,11 +27,11 @@ Sprints 49 through 52 represent the **late-game apex** of OpenSpaceTTD. Once pla
 | **50** | **Multi-Modal Gateway Operations &**| Cyclic scheduled gates (Far Away power cycle);      |
 |        | **Dynamic Gate Cycles**            | Vinmar Data Relays (RP beam); holding loop staging. |
 +--------+------------------------------------+-----------------------------------------------------+
-| **51** | **Expeditionary Survey Logistics &**| Expeditionary Survey Trains; Silfen Path Intermodal |
-|        | **Silfen Intermodal Paths**        | Depots; High Angel / Kerensk orbital shuttle docks. |
+| **51** | **CST Mainline Heavy Freight Corridors &**| Quad-track trunk management; gate throat flying   |
+|        | **Automated Marshalling Staging**  | junctions; automated hump/marshalling yards.        |
 +--------+------------------------------------+-----------------------------------------------------+
-| **52** | **Galactic Commonwealth Hegemony &**| 108-world economic clearinghouse; tariff arbitrage; |
-|        | **Narrative Lore Scenarios**       | historical event scenarios (Dyson Alpha, Elan evac).|
+| **52** | **Galactic Commonwealth Logistics &**| 108-world industrial clearinghouse; heavy axle-load |
+|        | **Industrial Hegemony**            | unit train tariffs; network mastery challenges.     |
 +--------+------------------------------------+-----------------------------------------------------+
 ```
 
@@ -69,34 +69,35 @@ Implement non-standard gateway operating physics, specifically cyclic scheduled 
 
 ---
 
-## 4. Sprint 51: Expeditionary Survey Logistics & Silfen Intermodal Paths
+## 4. Sprint 51: CST Mainline Heavy Freight Corridors & Automated Marshalling Staging
 
 ### Objective
-Implement exploration and intermodal transshipment mechanics for hazardous frontier worlds, Silfen alien paths, and orbital starship habitats.
+Implement authentic Commonwealth Star Transit (CST) heavy industrial railway mechanics: high-capacity quad-track mainline trunks, directional throat signaling, automated classification/marshalling yards, and heavy axle-load unit trains connecting factories to planetary portal gates.
 
 ### Work Packages
 
 | Package | Component | Required Implementation | Acceptance Evidence |
 |---|---|---|---|
-| **WP-51.1** | Expeditionary Survey Consists | New specialized rolling stock: *Mobile Survey Laboratory Car*, *Environmental Hazard Shield Wagon*, and *Tracklayer Caboose*. Unexplored worlds (Chelva, Tandil, Gaczyna) cannot receive standard commercial trains until surveyed. | Test asserting un-surveyed gate rejects standard freight; dispatching an Expeditionary Consist surveys world, discovers resource clusters, and unlocks commercial gate. |
-| **WP-51.2** | Silfen Path Intermodal Depots | Implement `StationFacility::SilfenIntermodalDepot` on Silfen worlds (Silvergalde, Jaruva, Ice Citadel). Rail consists terminate and unload; cargo is containerized into alien path pods and transported across the Silfen network without rails. | End-to-end cargo test: raw freight unloaded at Silvergalde depot; authority ledger tracks path transit; materializes at Jaruva depot. |
-| **WP-51.3** | High Angel Orbital Interface | Kerensk orbital wormhole terminal connects to `StationFacility::OrbitalLighterDock`. Rail freight converts to orbital cargo lighters feeding High Angel orbital facilities. Unlocks alien technology trade (Quantum Crystals $\rightarrow$ Exotic Arcology Blueprints). | Verification test for Kerensk-to-High Angel orbital transit and exotic blueprint purchase. |
+| **WP-51.1** | Quad-Track Trunk Management & Corridor Signaling | Extend YAPF pathfinder with directional speed-lane and cargo-tier track reservation. Inner high-speed tracks prioritize express inter-world freights; outer relief tracks handle local feeder consists. | Pathfinding regression test verifying express unit trains do not get trapped behind local shunting consists on 4-track trunk lines. |
+| **WP-51.2** | High-Density Gate Throat Interlocking | Optimized turnout interlocking and flying junction prefabs for 18-tile portal arches. Prevents conflicting train paths from deadlock at portal entrance throats. | Catch2 test verifying continuous throughput of 12 consists/minute across a single quad-track portal arch throat with zero deadlocks. |
+| **WP-51.3** | Automated Classification & Marshalling Yards | Dedicated classification sidings (`StationFacility::MarshallingYard`). Inbound mixed-manifest industrial trains are automatically sorted by destination world into homogeneous unit block trains. | Automated unit test: mixed cargo wagons decoupled at hump siding, reassembled into destination-specific unit trains, and dispatched through corresponding portal gates. |
+| **WP-51.4** | Heavy Axle-Load Unit Freight Operations | Support for ultra-heavy unit trains (CST Titan D-100 twin-unit diesels and Vulcan heavy haulers). Dynamic track wear and axle-load constraints requiring reinforced heavy rail. | Unit test verifying locomotive haulage ratings, dynamic tractive effort on steep grades, and heavy rail maintenance economics. |
 
 ---
 
-## 5. Sprint 52: Galactic Commonwealth Hegemony & Narrative Lore Scenarios
+## 5. Sprint 52: Galactic Commonwealth Logistics & Industrial Hegemony
 
 ### Objective
-Unify the 108-world Commonwealth into a living galactic economy with dynamic tariffs, supply-chain congestion surcharges, and playable historical lore scenarios.
+Unify the 108-world Commonwealth into an interconnected industrial powerhouse with commodity arbitrage, inter-world supply contracts, corridor backpressure tariffs, and network mastery challenges.
 
 ### Work Packages
 
 | Package | Component | Required Implementation | Acceptance Evidence |
 |---|---|---|---|
-| **WP-52.1** | Galactic Clearinghouse | Real-time commodity arbitrage ledger across all active and simulated worlds. Prices float dynamically based on local supply deficits (e.g. food shortages on mining worlds increase grain prices by 300%). | Headless simulation test verifying market price elasticity and automated tariff transfers across 12 game months. |
-| **WP-52.2** | Corridor Backpressure & Tariffs | Freight corridors exceeding 80% utilization incur congestion delays and transit surcharge taxes, incentivizing players to build bypass corridors or upgrade to vacuum-tube maglev. | Test verifying congestion delays and player revenue adjustments under heavy traffic loads. |
-| **WP-52.3** | Scenario: The Dyson Alpha Crisis | Standalone narrative scenario: astronomical observation detects the sudden disappearance of the Dyson Alpha stars. The player must rush heavy supplies to construct defensive orbital gates and evacuation sidings. | Savegame scenario test: scripted event triggers supply quotas and emergency passenger evacuation orders. |
-| **WP-52.4** | Scenario: The Evacuation of Elan | Wartime scenario modeling the emergency evacuation of Elan via Wessex infrastructure. Player must organize high-capacity evacuation EMUs under strict tick countdowns. | Timed scenario test verifying passenger survival metrics and evacuation clearing receipts. |
+| **WP-52.1** | Inter-World Industrial Clearinghouse | Dynamic multi-world commodity clearinghouse and price arbitrage ledger. Heavy manufacturing worlds demand raw minerals and energy; frontier worlds purchase machine modules and structural steel. | Headless simulation test verifying dynamic commodity pricing elasticity and tariff settlement across 12 simulated months. |
+| **WP-52.2** | Corridor Backpressure & Bottleneck Tariffs | High-volume portal corridors exceeding capacity incur network congestion charges, incentivizing players to construct bypass corridors, grade-separated junctions, or upgrade to vacuum-tube maglev corridors. | Test verifying congestion delays and player revenue adjustments under heavy traffic loads. |
+| **WP-52.3** | Commonwealth Logistics Master Contracts | Long-term multi-world supply contracts (e.g. delivering 10,000 tons of Heavy Machine Parts from Phase 2 Merredin to Phase 4 frontier worlds within 180 game days). | Savegame contract test verifying multi-consist milestone tracking and contract fulfillment payouts. |
+| **WP-52.4** | Network Mastery Scenarios | High-density industrial network operational scenarios: managing peak-hour corridor surges, scheduled maintenance closures, and emergency freight re-routing. | Scenario runner test verifying corridor throughput and routing recovery under forced bottleneck events. |
 
 ---
 
@@ -114,10 +115,10 @@ Unify the 108-world Commonwealth into a living galactic economy with dynamic tar
 | **50** | Scheduled Cycles & Data    | Catch2: `test_scheduled_gates.cpp`, `test_data_relays.cpp`  |
 |        | Relays                     | Headless Run: 10 stormrider cycles zero-deadlock smoke      |
 +--------+----------------------------+-------------------------------------------------------------+
-| **51** | Expeditionary Survey &     | Catch2: `test_expeditionary_consist.cpp`                    |
-|        | Silfen Intermodal Depots   | End-to-end: Silvergalde -> Jaruva container transshipment   |
+| **51** | CST Mainline & Automated   | Catch2: `test_cst_mainline.cpp`, `test_marshalling_yard.cpp`|
+|        | Marshalling Staging        | End-to-end: Quad-track portal throat throughput benchmark   |
 +--------+----------------------------+-------------------------------------------------------------+
-| **52** | Galactic Hegemony &        | Catch2: `test_galactic_clearinghouse.cpp`                   |
-|        | Historical Scenarios       | Scenario Runner: Dyson Alpha Crisis automated playthrough   |
+| **52** | Galactic Logistics &       | Catch2: `test_galactic_clearinghouse.cpp`                   |
+|        | Industrial Hegemony        | Scenario Runner: Commonwealth Master Contract verification  |
 +--------+----------------------------+-------------------------------------------------------------+
 ```

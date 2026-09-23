@@ -80,25 +80,44 @@
     "custom_rolling_stock_fleet": {
       "locomotives": [
         {
+          "id": "CST Pioneer 0-6-0 'Surveyor'",
+          "class": "Pioneer Pressurized Steam Locomotive",
+          "livery": "Weathered Steel & Brass with Black/Gold trim",
+          "power_hp": 600,
+          "max_speed_kmh": 72,
+          "tech_gate": "TECH_NONE (Baseline Colony)"
+        },
+        {
+          "id": "Vulcan 2-8-0 'Frontier Hauler'",
+          "class": "Armored Heavy Steam Locomotive",
+          "livery": "Heavy Cast Iron with Reinforced Cowcatcher",
+          "power_hp": 1800,
+          "max_speed_kmh": 96,
+          "tech_gate": "TECH_TRACTION_1 (Advanced Steam)"
+        },
+        {
           "id": "CST Titan D-100",
           "class": "10,000-hp Heavy Diesel Hauler",
           "livery": "CST Emerald Green with Imperial Gold trim",
           "power_hp": 10000,
-          "max_speed_kmh": 160
+          "max_speed_kmh": 160,
+          "tech_gate": "TECH_TRACTION_2 (Planetary Diesel)"
         },
         {
           "id": "CST E-40 Inter-World",
           "class": "High-Power Catenary Electric Freight",
           "livery": "Grand Central Deep Navy with Polished Silver trim",
           "power_hp": 8500,
-          "max_speed_kmh": 220
+          "max_speed_kmh": 220,
+          "tech_gate": "TECH_TRACTION_3 (Catenary Electric)"
         },
         {
           "id": "CST Mark IV 'Chimaera'",
           "class": "400 km/h Vacuum Hyper-Maglev",
           "livery": "Streamlined Carbon Fiber & Cyan Accent",
           "power_hp": 15000,
-          "max_speed_kmh": 400
+          "max_speed_kmh": 400,
+          "tech_gate": "TECH_TRACTION_4 (Superconducting Maglev)"
         }
       ],
       "specialized_wagons": [
@@ -123,7 +142,13 @@
           "cargoes": ["Silicon Chips"]
         }
       ],
-      "concept_asset": "cst_rolling_stock_1789949785281.jpg"
+      "concept_assets": {
+        "steam_pioneer": "cst_pioneer_steam.jpg",
+        "heavy_diesel": "cst_heavy_diesel.jpg",
+        "electric_and_maglev": "cst_electric_maglev.jpg",
+        "isometric_sprite_sheet": "cst_loco_spritesheet.jpg",
+        "legacy_overview": "cst_rolling_stock.jpg"
+      }
     }
   }
 }
