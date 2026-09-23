@@ -409,6 +409,11 @@ enum class Commands : uint8_t {
 	ConfigurePortalStagingSiding, ///< designate or clear a local staging siding for an inter-server portal
 	SetCorporateAlliance, ///< establish or modify a diplomatic treaty/alliance with another corporation
 
+	ConfigureFederationGate, ///< replicate an operator-configured inter-server gate
+	CommitFederationDeparture, ///< replicate authority-admitted source removal
+	StageFederationArrival, ///< replicate bounded arrival snapshot fragments
+	MaterializeFederationArrival, ///< replicate physical arrival from a staged snapshot
+	ConfirmFederationArrival, ///< replicate authority receipt confirmation
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

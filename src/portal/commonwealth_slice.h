@@ -24,4 +24,7 @@ extern CommonwealthSliceAudit *_commonwealth_slice_audit;
  */
 bool ConCommonwealthSlice(std::span<std::string_view> argv);
 
+/** Prepare a disposable empty-map federation test before any clients join. */
+bool ConFederationTestFixture(std::span<std::string_view> argv);
+
 #endif

@@ -302,8 +302,8 @@ struct FIDSChunkHandler : ChunkHandler {
 			SlFederationIdentity mapping{
 				.kind = 1,
 				.anchor_vehicle = anchor,
-				.namespace_high = 0,
-				.namespace_low = 0,
+				.namespace_high = FederationIdentityRegistry::GetAnchorNamespace(VehicleID{anchor}).high,
+				.namespace_low = FederationIdentityRegistry::GetAnchorNamespace(VehicleID{anchor}).low,
 				.sequence = sequence,
 				.next_sequence = 0,
 			};
@@ -373,7 +373,7 @@ struct FIDSChunkHandler : ChunkHandler {
 			if (record.kind == 0) {
 				FederationIdentityRegistry::RestoreState({record.namespace_high, record.namespace_low}, record.next_sequence);
 			} else if (record.kind == 1) {
-				FederationIdentityRegistry::RestoreMapping(VehicleID{record.anchor_vehicle}, record.sequence);
+				FederationIdentityRegistry::RestoreMapping(VehicleID{record.anchor_vehicle}, record.sequence, {record.namespace_high, record.namespace_low});
 			} else if (record.kind == 2) {
 				FederationIdentityRegistry::RestoreCompanyMapping(CompanyID{static_cast<uint8_t>(record.anchor_vehicle)}, record.sequence);
 			} else if (record.kind == 3) {

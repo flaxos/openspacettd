@@ -143,10 +143,10 @@ Through the `/grill-me` architectural interview, the long-term vision for OpenSp
 ## 3. Current next steps — 23 September 2026
 
 Human UAT and the current graphics are accepted by the user. Graphics refinement
-can follow later. First prove two dedicated servers, one joined graphical client
-per server, and a loaded train making a natural gate-entry round trip through
-federation with correct cargo, orders, ownership and synchronized client state.
-Then test blocking, restarts and reconnects. See the
+can follow later. The controlled two-server/two-client loaded natural-entry round
+trip now passes after the desync repair. Next prove scheduled loading/unloading,
+orders, ownership and money, then blocking, restarts and reconnects.
+[Live evidence](audit/2026-09-23/federation-multiplayer/README.md). See the
 [current acceptance target](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
 
 Sprints 49–50 remain candidates for graph/trading and gateway operations after

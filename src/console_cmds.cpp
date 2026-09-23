@@ -8,6 +8,11 @@
 /** @file console_cmds.cpp Implementation of the console hooks. */
 
 #include "stdafx.h"
+#include "train_cmd.h"
+#include "vehicle_cmd.h"
+#include "portal/portal_cmd.h"
+#include "portal/federation_identity.h"
+#include "3rdparty/nlohmann/json.hpp"
 #include <charconv>
 #include "core/string_consumer.hpp"
 #include "console_internal.h"
@@ -2901,21 +2906,9 @@ static bool ConFederationLinkGate(std::span<std::string_view> argv)
 
 	if (local_world == INVALID_WORLD || local_world == WorldID{0}) local_world = WorldID{1};
 
-	PortalRegistry::UnregisterPortalByTile(tile);
-
-	PortalID pid = PortalRegistry::RegisterInterServerPortal(
-		tile, dir, local_world, WorldID{static_cast<uint32_t>(*p_rworld)},
-		static_cast<uint32_t>(*p_rgate), virt_len, local_gate_id
-	);
-
-	if (pid == INVALID_PORTAL) {
-		IConsolePrint(CC_ERROR, "Failed to register inter-server portal at tile {}.", tile.base());
-		return false;
-	}
-
-	IConsolePrint(CC_DEFAULT, "Registered inter-server portal link (ID {}): Tile {} (World {}) -> Remote World {}, Gate {}",
-		pid.base(), tile.base(), local_world.base(), static_cast<uint32_t>(*p_rworld), static_cast<uint32_t>(*p_rgate));
-	return true;
+	return Command<Commands::ConfigureFederationGate>::Post(tile,
+		static_cast<uint32_t>(*p_rworld), static_cast<uint32_t>(*p_rgate),
+		local_gate_id, virt_len, local_world.base());
 }
 
 /** Designate a staging siding / holding loop for an inter-server portal gate. @copydoc IConsoleCmdProc */
@@ -2947,18 +2940,18 @@ static bool ConFederationLinkStaging(std::span<std::string_view> argv)
 		return false;
 	}
 
-	if (!PortalRegistry::ConfigureStagingSiding(portal_tile, siding_tile)) {
-		IConsolePrint(CC_ERROR, "Failed to configure staging siding for portal at tile {}.", portal_tile.base());
-		return false;
-	}
-
-	IConsolePrint(CC_DEFAULT, "Configured staging siding: Portal at tile {} -> Siding at tile {}.", portal_tile.base(), siding_tile.base());
-	return true;
+	AutoRestoreBackup owner(_current_company, GetTileOwner(portal_tile));
+	return Command<Commands::ConfigurePortalStagingSiding>::Post(portal_tile, siding_tile);
 }
 
 /** Set or simulate status and latency for a registered world. @copydoc IConsoleCmdProc */
 static bool ConFederationSetWorld(std::span<std::string_view> argv)
 {
+	if (_networking) {
+		IConsolePrint(CC_ERROR, "Local world-status injection is offline-only; it is not replicated multiplayer state.");
+		return true;
+	}
+
 	if (argv.size() < 3) {
 		IConsolePrint(CC_HELP, "Set world status and latency for federation testing.");
 		IConsolePrint(CC_HELP, "Usage: 'federation_set_world <world_id> <online|maintenance|unreachable> [ping_ms]'");
@@ -3042,15 +3035,49 @@ static bool ConFederationTrains(std::span<std::string_view> argv)
 			}
 			IConsolePrint(CC_DEFAULT, "  Train ID {}: Tile {}, Speed {} km/h, Cargo {}, Orders {}",
 				t->index.base(), t->tile.base(), t->cur_speed * 10 / 16, total_cargo, t->GetNumOrders());
+			nlohmann::json units = nlohmann::json::array();
+			for (const Train *unit = t; unit != nullptr; unit = unit->Next()) {
+				units.push_back({{"engine", unit->engine_type.base()}, {"owner", unit->owner.base()},
+					{"x", unit->x_pos}, {"y", unit->y_pos}, {"hidden", unit->vehstatus.Test(VehState::Hidden)},
+					{"cargo", unit->cargo.StoredCount()}});
+			}
+			const auto identity = FederationIdentityRegistry::Find(t);
+			IConsolePrint(CC_DEFAULT, "  Consist state {}", nlohmann::json{{"vehicle", t->index.base()}, {"units", units},
+				{"global_id", identity.has_value() ? fmt::format("{:x}:{:x}:{}", identity->name_space.high, identity->name_space.low, identity->sequence) : ""}}.dump());
 		}
 	}
 	IConsolePrint(CC_DEFAULT, "Total front engines: {}", count);
 	return true;
 }
 
+/** Operate a train through native replicated commands for federation acceptance. */
+static bool ConFederationTrainAction(std::span<std::string_view> argv)
+{
+	if (argv.size() != 3) {
+		IConsolePrint(CC_HELP, "federation_train_action <vehicle_id> reverse|start|stop");
+		return true;
+	}
+	auto parsed = ParseInteger(argv[1]);
+	if (!parsed.has_value()) return false;
+	Train *train = Train::GetIfValid(VehicleID{static_cast<uint32_t>(*parsed)});
+	if (train == nullptr || !train->IsFrontEngine()) return false;
+	AutoRestoreBackup owner(_current_company, train->owner);
+	if (argv[2] == "reverse") return Command<Commands::ReverseTrainDirection>::Post(train->tile, train->index, false);
+	if (argv[2] == "start" || argv[2] == "stop") {
+		if (train->vehstatus.Test(VehState::Stopped) == (argv[2] == "stop")) return true;
+		return Command<Commands::StartStopVehicle>::Post(train->tile, train->index, true);
+	}
+	return false;
+}
+
 /** Dispatch a consist through an inter-server portal gate. @copydoc IConsoleCmdProc */
 static bool ConFederationDispatch(std::span<std::string_view> argv)
 {
+	if (_networking) {
+		IConsolePrint(CC_ERROR, "Manual federation dispatch is offline-only; use normal train entry in multiplayer.");
+		return true;
+	}
+
 	if (argv.size() < 3) {
 		IConsolePrint(CC_HELP, "Dispatch a consist into an inter-server portal gate.");
 		IConsolePrint(CC_HELP, "Usage: 'federation_dispatch <vehicle_id> <portal_tile>'");
@@ -4043,11 +4070,12 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("companies",               ConCompanies);
 	IConsole::AliasRegister("players",               "companies");
 	IConsole::CmdRegister("federation_status",       ConFederationStatus);
-	IConsole::CmdRegister("federation_authority",    ConFederationAuthority);
-	IConsole::CmdRegister("federation_link_gate",    ConFederationLinkGate);
-	IConsole::CmdRegister("federation_link_staging", ConFederationLinkStaging);
+	IConsole::CmdRegister("federation_authority",    ConFederationAuthority, ConHookServerOrNoNetwork);
+	IConsole::CmdRegister("federation_link_gate",    ConFederationLinkGate, ConHookServerOrNoNetwork);
+	IConsole::CmdRegister("federation_link_staging", ConFederationLinkStaging, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_set_world",    ConFederationSetWorld);
 	IConsole::CmdRegister("federation_list_gates",   ConFederationListGates);
+	IConsole::CmdRegister("federation_train_action", ConFederationTrainAction, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_trains",       ConFederationTrains);
 	IConsole::CmdRegister("federation_dispatch",     ConFederationDispatch);
 	IConsole::CmdRegister("universe_auth",           ConUniverseAuth);
@@ -4059,6 +4087,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("universe_economy",        ConUniverseEconomy);
 	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
 	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
+	IConsole::CmdRegister("federation_test_fixture", ConFederationTestFixture);
 	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);
 	IConsole::CmdRegister("commonwealth_status",     ConCommonwealthStatus);
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);

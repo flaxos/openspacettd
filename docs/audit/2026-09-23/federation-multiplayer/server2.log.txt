@@ -1,0 +1,337 @@
+OpenTTD Game Console Revision 7 - 20260922-fix-live-federation-desync-m234921dc94
+------------------------------------
+use "help" for more information.
+
+[2026-09-23 08:51:31] dbg: [net:1] No "client_name" has been set, using "Unnamed Client" instead. Please set this now using the "name <new name>" command
+‎*** Game paused (number of players)
+Federation fixture ready: world=2, gate=20530, cargo=0
+Saving map...
+Map successfully saved to '/tmp/federation-native-final/server2-ready.sav'.
+‎*** Game still paused (manual, connecting clients, number of players)
+‎*** Native Observer 2 has joined the game (Client #2)
+‎*** Native Observer 2 has started a new company (#2)
+‎*** Game still paused (manual, number of players)
+‎*** Game still paused (manual)
+‎*** Native Observer 2 has joined Federation Native Test
+[2026-09-23 08:51:34] dbg: [net:1] Registered inter-server portal link (ID 20): Tile 20530 (World 2) -> Remote World 1, Gate 10
+‎*** Game unpaused (manual)
+[2026-09-23 08:51:35] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:35] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:35] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:40] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:40] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:40] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:40] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:41] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:41] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:41] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:42] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:42] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:42] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:42] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:43] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:43] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:43] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:43] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:44] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:44] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:44] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:44] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:45] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:45] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:45] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:46] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:46] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:46] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:46] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:47] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:47] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:47] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:47] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:48] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:48] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:48] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:49] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:49] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:49] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:49] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:50] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:50] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:50] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:50] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:51] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:51] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:51] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:51] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:52] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:52] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:52] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:53] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:53] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:53] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:53] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:54] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:54] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:54] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:54] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:55] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:55] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:55] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:56] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:56] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:56] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:56] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:57] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:57] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:57] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:57] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:58] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:58] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:58] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:59] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:59] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:59] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:51:59] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:00] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:00] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:00] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:00] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:01] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:01] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:01] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:01] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:02] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:02] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:02] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:03] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:03] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:03] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:03] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:04] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:04] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:04] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:04] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:05] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:05] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:05] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:06] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:06] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:06] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:06] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:07] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:07] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:07] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:07] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:08] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:08] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:08] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:09] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:09] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:09] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:09] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:10] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:10] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:10] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:10] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:11] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:11] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:11] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:11] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:12] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:12] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:12] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:12] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:12] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:12] dbg: [net:1] [Federation] Consist materialized: transfer_id=TRANSFER-X000000001, dest_world=2, gate=20, cargo=10
+Trains on this server:
+  Train ID 0: Tile 20530, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":803,"y":648},{"cargo":10,"engine":29,"hidden":true,"owner":0,"x":807,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:13] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:13] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:13] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:13] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20529, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":792,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":800,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:13] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:14] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20528, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":781,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":789,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:14] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:14] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20528, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":770,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":778,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:14] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:15] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20527, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":759,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":767,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:15] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:15] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20526, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":748,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":756,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:16] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:16] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:16] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20526, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":736,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":744,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:16] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:17] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20525, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":725,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":733,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:17] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:17] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20524, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":714,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":722,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:17] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:18] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20523, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":703,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":711,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:18] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:18] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:18] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20523, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":692,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":700,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:19] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:19] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20522, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":680,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":688,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:19] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:20] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20521, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":669,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":677,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:20] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:20] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20521, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":658,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":666,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:20] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:21] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:21] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+  Train ID 0: Tile 20520, Speed 40 km/h, Cargo 10, Orders 0
+  Consist state {"global_id":"3af1eab5a2c5c4c7:ae5adf4aa9286cae:1","units":[{"cargo":0,"engine":0,"hidden":false,"owner":0,"x":647,"y":648},{"cargo":10,"engine":29,"hidden":false,"owner":0,"x":655,"y":648}],"vehicle":0}
+Total front engines: 1
+[2026-09-23 08:52:21] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:21] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:22] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:22] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:22] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:23] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:23] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:23] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:23] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:24] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:24] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:24] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:24] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:25] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:25] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:25] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:26] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:26] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:26] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:26] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:27] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:27] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:27] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:27] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:28] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:28] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:28] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:28] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:29] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:29] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:29] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:30] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:30] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:30] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:30] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:31] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:31] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:31] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:31] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:32] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:32] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:32] dbg: [net:1] [Federation] Consist departed: transfer_id=TRANSFER-X000000002, source_world=2, dest_world=1
+[2026-09-23 08:52:32] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:32] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:32] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:33] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:33] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:33] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:33] dbg: [net:1] HTTP request succeeded
+Trains on this server:
+Total front engines: 0
+[2026-09-23 08:52:34] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:34] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:34] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:34] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:35] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:35] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:35] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:36] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:37] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:38] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:39] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:40] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:40] dbg: [net:1] HTTP request succeeded
+[2026-09-23 08:52:40] dbg: [net:1] HTTP request succeeded
+Client #1  name: 'Unnamed Client'  company: 255  IP: server
+Client #2  name: 'Native Observer 2'  company: 1  IP: 127.0.0.1
+[2026-09-23 08:52:40] dbg: [net:1] HTTP request succeeded
+‎*** Game paused (manual)
+Saving map...
+Map successfully saved to '/tmp/federation-native-final/server2-verified.sav'.
+Trains on this server:
+Total front engines: 0

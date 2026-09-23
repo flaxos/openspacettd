@@ -16,14 +16,19 @@ older blanket statements that human UAT and graphics acceptance are pending.
 This is a user-reported overall acceptance, without new per-subcase captures or
 a pinned build/save manifest; historical observations remain unchanged.
 
-The user separately asks whether federation has been tested with two multiplayer
-servers and two open clients. That workflow remains unverified; general gameplay
-acceptance does not close it. The next priority is the live federation acceptance
-pass described in [the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+The subsequent live test reproduced a local portal hop and client desync. The
+repair now passes a loaded, natural-entry round trip between two dedicated servers
+with one joined client each, including a run with two graphical clients. Ten cargo
+units and the global train identity return without a detected desync or duplicate.
+This is a controlled two-car fixture with no station orders; scheduled routes,
+restart recovery and human federation acceptance remain open. See
+[the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
 
 ## Next priority: live federation with two clients
 
-1. **Recommended: two-server, two-client natural-entry acceptance.** Run two
+1. **Recommended: scheduled-route federation acceptance.** The controlled
+   two-client natural-entry round trip now passes; extend it to station orders,
+   loading/unloading, company ownership and money. Run two
    independent dedicated servers and a persistent Universe Authority. Join one
    graphical multiplayer client to each server through the normal join/map-load
    handshake. Use ordinary train orders to drive a loaded consist into a linked
@@ -43,7 +48,22 @@ dynamic galactic markets, congestion tariffs and crisis scenarios) are removed
 from the active roadmap at the user's request. Existing Sprint 48 code is a
 historical implementation; this documentation change does not remove it.
 
-### Federation evidence reviewed on 23 September
+### Live federation repair — 23 September
+
+The user-reported local hop was not a cross-server transfer. Gate configuration
+changed only the server registry; departure and arrival also bypassed the native
+multiplayer command stream. The repair replicates gate changes, departure commits,
+arrival fragments and materialization through server-authored commands. Only the
+server contacts the authority. Imported wagons emerge with their proper spacing,
+and the full train identity retains its original namespace.
+
+`scripts/test_federation_multiplayer.py` now exercises normal map joins, gate
+conversion after both clients join, loaded natural entry, receiving-side movement,
+a native reversal and return. `federation_dispatch` is disabled in multiplayer;
+older manual-dispatch runners are historical developer tools and need migration.
+[Evidence, limitations and replay instructions](audit/2026-09-23/federation-multiplayer/README.md).
+
+### Earlier evidence review on 23 September (before the live repair)
 
 - `scripts/test_sprint35_cross_process.py` launches two dedicated servers and an
   authority, but triggers outbound and return transfers via `federation_dispatch`.

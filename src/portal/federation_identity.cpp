@@ -33,6 +33,7 @@ uint64_t _next_station_sequence = 1;
 uint64_t _next_source_sequence = 1;
 uint64_t _next_depot_sequence = 1;
 std::map<uint32_t, uint64_t> _consist_mappings;
+std::map<uint32_t, FederationNamespace> _consist_namespaces;
 std::map<uint8_t, uint64_t> _company_mappings;
 std::map<uint32_t, uint64_t> _station_mappings;
 std::map<uint32_t, uint64_t> _source_mappings;
@@ -135,11 +136,15 @@ std::optional<GlobalConsistID> FederationIdentityRegistry::Find(const Train *tra
 	if (front == nullptr) return std::nullopt;
 
 	std::optional<uint64_t> best_sequence;
+	VehicleID best_anchor = VehicleID::Invalid();
 	for (const auto &[anchor_id, sequence] : _consist_mappings) {
 		const Train *anchor = Train::GetIfValid(VehicleID{anchor_id});
-		if (AnchorBelongsTo(anchor, front) && (!best_sequence.has_value() || sequence < *best_sequence)) best_sequence = sequence;
+		if (AnchorBelongsTo(anchor, front) && (!best_sequence.has_value() || sequence < *best_sequence)) {
+			best_sequence = sequence;
+			best_anchor = VehicleID{anchor_id};
+		}
 	}
-	return best_sequence.has_value() ? std::optional<GlobalConsistID>{GlobalConsistID{GetNamespace(), *best_sequence}} : std::nullopt;
+	return best_sequence.has_value() ? std::optional<GlobalConsistID>{GlobalConsistID{GetAnchorNamespace(best_anchor), *best_sequence}} : std::nullopt;
 }
 
 std::optional<GlobalConsistID> FederationIdentityRegistry::GetOrCreate(const Train *train)
@@ -177,14 +182,17 @@ void FederationIdentityRegistry::ReconcileConsistChange(const Train *source, con
 		for (uint32_t anchor_id : anchors) {
 			uint64_t sequence = _consist_mappings.at(anchor_id);
 			if (preferred_destination.has_value() && sequence == preferred_destination->sequence &&
-					preferred_destination->name_space == GetNamespace()) {
+					preferred_destination->name_space == GetAnchorNamespace(VehicleID{anchor_id})) {
 				keep = anchor_id;
 				break;
 			}
 			if (sequence < _consist_mappings.at(keep)) keep = anchor_id;
 		}
 		for (uint32_t anchor_id : anchors) {
-			if (anchor_id != keep) _consist_mappings.erase(anchor_id);
+			if (anchor_id != keep) {
+				_consist_mappings.erase(anchor_id);
+				_consist_namespaces.erase(anchor_id);
+			}
 		}
 	}
 }
@@ -192,6 +200,7 @@ void FederationIdentityRegistry::ReconcileConsistChange(const Train *source, con
 void FederationIdentityRegistry::ReleaseVehicle(VehicleID vehicle)
 {
 	_consist_mappings.erase(vehicle.base());
+	_consist_namespaces.erase(vehicle.base());
 }
 
 const std::map<uint32_t, uint64_t> &FederationIdentityRegistry::GetMappings()
@@ -205,10 +214,21 @@ void FederationIdentityRegistry::RestoreState(FederationNamespace name_space, ui
 	_next_consist_sequence = next_sequence;
 }
 
-bool FederationIdentityRegistry::RestoreMapping(VehicleID anchor, uint64_t sequence)
+FederationNamespace FederationIdentityRegistry::GetAnchorNamespace(VehicleID anchor)
+{
+	auto it = _consist_namespaces.find(anchor.base());
+	return it == _consist_namespaces.end() ? GetNamespace() : it->second;
+}
+
+bool FederationIdentityRegistry::RestoreMapping(VehicleID anchor, uint64_t sequence, FederationNamespace name_space)
 {
 	if (anchor == VehicleID::Invalid() || sequence == 0) return false;
 	_consist_mappings[anchor.base()] = sequence;
+	_consist_namespaces.erase(anchor.base());
+	if (name_space.IsValid() && name_space != GetNamespace()) {
+		_consist_namespaces[anchor.base()] = name_space;
+		return true;
+	}
 	if (sequence == UINT64_MAX) {
 		_next_consist_sequence = 0;
 	} else if (_next_consist_sequence != 0) {
@@ -222,6 +242,7 @@ void FederationIdentityRegistry::PruneStaleMappings()
 	for (auto it = _consist_mappings.begin(); it != _consist_mappings.end();) {
 		const Train *anchor = Train::GetIfValid(VehicleID{it->first});
 		if (CanonicalFront(anchor) == nullptr) {
+			_consist_namespaces.erase(it->first);
 			it = _consist_mappings.erase(it);
 		} else {
 			++it;
@@ -243,9 +264,11 @@ void FederationIdentityRegistry::PruneStaleMappings()
 		uint32_t old_anchor = known->second;
 		if (it->second < _consist_mappings.at(old_anchor)) {
 			_consist_mappings.erase(old_anchor);
+			_consist_namespaces.erase(old_anchor);
 			known->second = it->first;
 			++it;
 		} else {
+			_consist_namespaces.erase(it->first);
 			it = _consist_mappings.erase(it);
 		}
 	}
@@ -658,6 +681,7 @@ void FederationIdentityRegistry::Reset()
 	_next_source_sequence = 1;
 	_next_depot_sequence = 1;
 	_consist_mappings.clear();
+	_consist_namespaces.clear();
 	_company_mappings.clear();
 	_station_mappings.clear();
 	_source_mappings.clear();
