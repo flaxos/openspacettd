@@ -170,7 +170,9 @@ public:
 
 	/** Save/load restoration API. */
 	static void RestoreState(FederationNamespace name_space, uint64_t next_sequence);
-	static bool RestoreMapping(VehicleID anchor, uint64_t sequence);
+	static bool RestoreMapping(VehicleID anchor, uint64_t sequence, FederationNamespace name_space = {});
+	/** Full namespace of a local or imported consist anchor. */
+	static FederationNamespace GetAnchorNamespace(VehicleID anchor);
 	static void PruneStaleMappings();
 
 	/* Company identity */

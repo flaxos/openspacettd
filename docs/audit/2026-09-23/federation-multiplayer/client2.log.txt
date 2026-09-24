@@ -1,0 +1,3 @@
+[2026-09-23 08:51:34] dbg: [net:1] Registered inter-server portal link (ID 20): Tile 20530 (World 2) -> Remote World 1, Gate 10
+[2026-09-23 08:52:12] dbg: [net:1] [Federation] Consist materialized: transfer_id=TRANSFER-X000000001, dest_world=2, gate=20, cargo=10
+[2026-09-23 08:52:32] dbg: [net:1] [Federation] Consist departed: transfer_id=TRANSFER-X000000002, source_world=2, dest_world=1

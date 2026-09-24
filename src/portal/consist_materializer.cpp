@@ -366,6 +366,23 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 	if (snapshot.driving_backwards) front->vehicle_flags.Set(VehicleFlag::DrivingBackwards);
 
 	front->ConsistChanged(CCF_ARRANGE);
+	/* Keep trailing cars inside the receiving wormhole until their actual
+	 * spacing behind the moving front has cleared the portal visibility frame. */
+	if (PortalRegistry::IsInterServerPortal(exit_tile)) {
+		int32_t distance = 0;
+		Train *previous = nullptr;
+		for (Train *unit = front->GetMovingFront(); unit != nullptr; unit = unit->GetMovingNext()) {
+			unit->SetMovingDirection(dir);
+			if (previous != nullptr) {
+				distance += (previous->gcache.cached_veh_length + unit->gcache.cached_veh_length) / 2;
+				unit->track = Track::Wormhole;
+				unit->vehstatus.Set(VehState::Hidden);
+				PortalRegistry::SetVehicleTransitProgress(unit->index, static_cast<uint32_t>(static_cast<int32_t>(PORTAL_TRANSIT_DISTANCE) - distance));
+			}
+			previous = unit;
+		}
+	}
+
 	for (Train *u = front; u != nullptr; u = u->Next()) {
 		u->UpdatePositionAndViewport();
 	}
@@ -379,7 +396,7 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 
 	/* 9. Restore persistent GlobalConsistID */
 	if (snapshot.consist_id.IsValid()) {
-		FederationIdentityRegistry::RestoreMapping(front->index, snapshot.consist_id.sequence);
+		FederationIdentityRegistry::RestoreMapping(front->index, snapshot.consist_id.sequence, snapshot.consist_id.name_space);
 	}
 
 	/* 10. Restore and resolve order schedule */
