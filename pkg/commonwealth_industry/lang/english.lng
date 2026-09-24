@@ -47,15 +47,15 @@ STR_CARGO_UNIT_POLY                                     :{WEIGHT} of synthetic p
 STR_CARGO_ABBR_POLY                                     :POLY
 
 STR_CARGO_NAME_BCRY                                     :Blank Data Crystals
-STR_CARGO_UNIT_BCRY                                     :{SIGNED_WORD} blank data crystals
+STR_CARGO_UNIT_BCRY                                     :{COMMA} blank data crystals
 STR_CARGO_ABBR_BCRY                                     :BCRY
 
 STR_CARGO_NAME_QCRY                                     :Enriched Quantum Crystals
-STR_CARGO_UNIT_QCRY                                     :{SIGNED_WORD} quantum data crystals
+STR_CARGO_UNIT_QCRY                                     :{COMMA} quantum data crystals
 STR_CARGO_ABBR_QCRY                                     :QCRY
 
 STR_CARGO_NAME_CCRY                                     :Encrypted Consumer Crystals
-STR_CARGO_UNIT_CCRY                                     :{SIGNED_WORD} consumer data crystals
+STR_CARGO_UNIT_CCRY                                     :{COMMA} consumer data crystals
 STR_CARGO_ABBR_CCRY                                     :CCRY
 
 # Industry Names

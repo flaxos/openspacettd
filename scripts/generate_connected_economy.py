@@ -163,7 +163,7 @@ def publish_evidence(report, save):
         'starvation_and_recovery': report['starvation_and_recovery'],
         'fabrication': report['fabrication'],
         'research_feedstock_consumed': sum(sum(s['research_consumed']) for s in report['research']),
-        'human_visual_uat': 'pending',
+        'human_visual_uat': 'pending', 'terrain_and_text': report['terrain_and_text'],
     }
     save.with_suffix('.evidence.json').write_text(json.dumps(summary, indent=2) + '\n')
     save.with_suffix('.run.json.gz').write_bytes(gzip.compress(json.dumps(report).encode(), mtime=0))
@@ -180,7 +180,7 @@ def run(args):
                      ('autosave_on_exit = true', 'autosave_on_exit = false')]:
         text = text.replace(old, new)
     for name in ('industry', 'rail'):
-        filename = 'openspacettd_industry_v3.grf' if name == 'industry' else 'openspacettd_rail_v3.grf'
+        filename = 'openspacettd_industry_v4.grf' if name == 'industry' else 'openspacettd_rail_v3.grf'
         text = text.replace(f'openspacettd_{name}.grf =', f'{ROOT}/bin/newgrf/{filename} =')
     config.write_text(text)
     engine = Engine(args.binary.resolve(), config, output, 'connected', args.resume, year=1950)
@@ -193,6 +193,10 @@ def run(args):
             engine.save(output / 'cold-start.sav')
         state = json.loads(engine.command('connected_economy status', 'CONNECTED state '))
         report['initial'] = state
+        report['terrain_and_text'] = json.loads(engine.command('connected_economy audit', 'CONNECTED audit '))
+        require(not report['terrain_and_text']['invalid_slopes'], 'Invalid terrain slopes')
+        for cargo in report['terrain_and_text']['cargo']:
+            require(all(value and '(undefined' not in value and '(invalid' not in value for key, value in cargo.items() if key != 'id'), f'Incomplete cargo text: {cargo}')
         if args.verify:
             acceptance(engine, config, output, args, report)
             return

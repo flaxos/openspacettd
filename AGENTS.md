@@ -77,6 +77,31 @@ Every coding or architecture agent working on OpenSpaceTTD MUST follow these rul
 
 ---
 
+## Building or Repairing UAT Savegames
+
+Before authoring a scenario, read [SAVEGAME_AUTHORING.md](docs/SAVEGAME_AUTHORING.md)
+and reuse the existing builder/harness rather than scripting a new construction path.
+
+- Confirm the actual binary, save and exact content dependencies; preserve user saves
+  and unrelated work. Keep worlds as immutable regions of the existing global map.
+- Build changed NewGRFs before the engine. Batch string changes, reuse the configured
+  build, and run a short generation/terrain/text audit before a long economic soak.
+- Validate the whole height field, including rectangle boundaries and void edges.
+  Tile corners are shared; direct height writes and `MakeVoid` can invalidate neighbors.
+- Resolve cargo by label, preserve native slots, and supply all five cargo text fields.
+  Audit all active cargo text in the player's language and English, not just names.
+- Build via normal commands and prove repeated delivery per train/cargo, genuine town
+  growth, conservation, fresh-process reload and interruption/recovery. Distinguish
+  warehouse storage and industry input from actual city consumption.
+- Use checkpoints for diagnosis, not as a substitute for cold-start generation evidence.
+  Freeze binary/content before final verification; publish matching save and hash evidence.
+- Preserve old GRF hashes and a public regression fixture for compatibility. Scope any
+  recovery narrowly and preflight shared corners before changing terrain under a save.
+- Keep player instructions short and wrapped. Headless tests do not establish graphical
+  acceptance; record the visual retest separately at the player's UI scale and language.
+
+---
+
 ## Autonomous Agent Delivery & Completion Protocol
 
 After every successful implementation and verification pass, the agent MUST automatically:
