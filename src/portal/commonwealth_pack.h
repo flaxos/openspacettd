@@ -85,6 +85,8 @@ struct CargoDeliveryLoop {
 class CommonwealthPackManager {
 public:
 	static void Initialize();
+	/** Restore missing quantity/unit text in the unchanged v2/v3 NewGRFs. */
+	static void RepairLegacyCargoStrings();
 	/**
 	 * Validate the currently configured Commonwealth industry and rail packs.
 	 * @return Runtime content status, including an error reason for invalid configured packs.

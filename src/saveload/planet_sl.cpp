@@ -16,6 +16,8 @@
 #include "../portal/edge_conduit.h"
 #include "../portal/authority_transport.h"
 #include "../portal/federation_identity.h"
+#include "../portal/federation_cargo.h"
+#include "../cargopacket.h"
 #include "../portal/transfer_journal.h"
 #include "../portal/megacity_manager.h"
 #include "../portal/company_stockpile.h"
@@ -304,8 +306,8 @@ struct FIDSChunkHandler : ChunkHandler {
 			SlFederationIdentity mapping{
 				.kind = 1,
 				.anchor_vehicle = anchor,
-				.namespace_high = 0,
-				.namespace_low = 0,
+				.namespace_high = FederationIdentityRegistry::GetAnchorNamespace(VehicleID{anchor}).high,
+				.namespace_low = FederationIdentityRegistry::GetAnchorNamespace(VehicleID{anchor}).low,
 				.sequence = sequence,
 				.next_sequence = 0,
 			};
@@ -314,11 +316,12 @@ struct FIDSChunkHandler : ChunkHandler {
 		}
 
 		for (const auto &[company, sequence] : FederationIdentityRegistry::GetCompanyMappings()) {
+			const auto identity = FederationIdentityRegistry::FindCompany(CompanyID{company});
 			SlFederationIdentity mapping{
 				.kind = 2,
 				.anchor_vehicle = company,
-				.namespace_high = 0,
-				.namespace_low = 0,
+				.namespace_high = identity->name_space.high,
+				.namespace_low = identity->name_space.low,
 				.sequence = sequence,
 				.next_sequence = 0,
 			};
@@ -327,13 +330,14 @@ struct FIDSChunkHandler : ChunkHandler {
 		}
 
 		for (const auto &[station, sequence] : FederationIdentityRegistry::GetStationMappings()) {
+			const auto identity = FederationIdentityRegistry::FindStation(StationID{static_cast<uint16_t>(station)});
 			SlFederationIdentity mapping{
 				.kind = 3,
 				.anchor_vehicle = station,
-				.namespace_high = 0,
-				.namespace_low = 0,
+				.namespace_high = identity->name_space.high,
+				.namespace_low = identity->name_space.low,
 				.sequence = sequence,
-				.next_sequence = 0,
+				.next_sequence = static_cast<uint64_t>(identity->world_id.base()) + 1,
 			};
 			SlSetArrayIndex(index++);
 			SlObject(&mapping, _federation_identity_desc);
@@ -375,11 +379,12 @@ struct FIDSChunkHandler : ChunkHandler {
 			if (record.kind == 0) {
 				FederationIdentityRegistry::RestoreState({record.namespace_high, record.namespace_low}, record.next_sequence);
 			} else if (record.kind == 1) {
-				FederationIdentityRegistry::RestoreMapping(VehicleID{record.anchor_vehicle}, record.sequence);
+				FederationIdentityRegistry::RestoreMapping(VehicleID{record.anchor_vehicle}, record.sequence, {record.namespace_high, record.namespace_low});
 			} else if (record.kind == 2) {
-				FederationIdentityRegistry::RestoreCompanyMapping(CompanyID{static_cast<uint8_t>(record.anchor_vehicle)}, record.sequence);
+				FederationIdentityRegistry::RestoreCompanyMapping(CompanyID{static_cast<uint8_t>(record.anchor_vehicle)}, record.sequence, {record.namespace_high, record.namespace_low});
 			} else if (record.kind == 3) {
-				FederationIdentityRegistry::RestoreStationMapping(StationID{static_cast<uint16_t>(record.anchor_vehicle)}, record.sequence);
+				FederationIdentityRegistry::RestoreStationMapping(StationID{static_cast<uint16_t>(record.anchor_vehicle)}, record.sequence,
+					{record.namespace_high, record.namespace_low}, record.next_sequence == 0 ? INVALID_WORLD : WorldID{static_cast<uint32_t>(record.next_sequence - 1)});
 			} else if (record.kind == 4) {
 				FederationIdentityRegistry::RestoreSourceMapping(record.anchor_vehicle, record.sequence);
 			} else if (record.kind == 5) {
@@ -390,6 +395,143 @@ struct FIDSChunkHandler : ChunkHandler {
 		FederationIdentityRegistry::PruneStaleCompanyMappings();
 		FederationIdentityRegistry::PruneStaleStationMappings();
 		FederationIdentityRegistry::PruneStaleSourceMappings();
+	}
+};
+
+/** Scalar save table for SlFederationSchedule. */
+struct SlFederationSchedule {
+	uint64_t consist_high = 0;
+	uint64_t consist_low = 0;
+	uint64_t consist_sequence = 0;
+	uint16_t order_index = 0;
+	uint8_t type = 0;
+	uint64_t namespace_high = 0;
+	uint64_t namespace_low = 0;
+	uint64_t station_high = 0;
+	uint64_t station_low = 0;
+	uint64_t station_sequence = 0;
+	uint32_t station_world = 0;
+	uint64_t destination_sequence = 0;
+	uint32_t target_world = 0;
+};
+
+static const SaveLoad _SlFederationSchedule_desc[] = {
+	SLE_VAR(SlFederationSchedule, consist_high, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, consist_low, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, consist_sequence, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, order_index, VarTypes::U16),
+	SLE_VAR(SlFederationSchedule, type, VarTypes::U8),
+	SLE_VAR(SlFederationSchedule, namespace_high, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, namespace_low, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, station_high, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, station_low, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, station_sequence, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, station_world, VarTypes::U32),
+	SLE_VAR(SlFederationSchedule, destination_sequence, VarTypes::U64),
+	SLE_VAR(SlFederationSchedule, target_world, VarTypes::U32),
+};
+
+/** Portable master schedules for live consists (FSCH). */
+struct FSCHChunkHandler : ChunkHandler {
+	FSCHChunkHandler() : ChunkHandler("FSCH", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_SlFederationSchedule_desc);
+		uint32_t index = 0;
+		for (const auto &[id, schedule] : FederationIdentityRegistry::GetConsistSchedules()) {
+			for (size_t i = 0; i < schedule.size(); ++i) {
+				const auto &order = schedule[i];
+				SlFederationSchedule row{id.name_space.high, id.name_space.low, id.sequence, static_cast<uint16_t>(i),
+					static_cast<uint8_t>(order.type), order.name_space.high, order.name_space.low,
+					order.station_id.name_space.high, order.station_id.name_space.low, order.station_id.sequence,
+					order.station_id.world_id.base(), order.destination_sequence, order.target_world.base()};
+				SlSetArrayIndex(index++);
+				SlObject(&row, _SlFederationSchedule_desc);
+			}
+		}
+	}
+	void Load() const override
+	{
+		const auto table = SlTableHeader(_SlFederationSchedule_desc);
+		std::map<GlobalConsistID, std::vector<GlobalOrderDestinationID>> schedules;
+		while (SlIterateArray() != -1) {
+			SlFederationSchedule row{};
+			SlObject(&row, table);
+			GlobalConsistID id{{row.consist_high, row.consist_low}, row.consist_sequence};
+			GlobalOrderDestinationID order{{row.namespace_high, row.namespace_low}, static_cast<OrderDestinationType>(row.type),
+				{{row.station_high, row.station_low}, row.station_sequence, WorldID{row.station_world}},
+				row.destination_sequence, WorldID{row.target_world}};
+			if (!id.IsValid() || !order.IsValid() || row.type > static_cast<uint8_t>(OrderDestinationType::PortalGate) ||
+					row.order_index >= 256 || row.order_index != schedules[id].size()) SlErrorCorrupt("Invalid federation schedule");
+			schedules[id].push_back(order);
+		}
+		for (auto &[id, schedule] : schedules) FederationIdentityRegistry::SetConsistSchedule(id, std::move(schedule));
+		FederationIdentityRegistry::PruneStaleSchedules();
+	}
+};
+
+/** Scalar save table for SlFederationCargo. */
+struct SlFederationCargo {
+	uint32_t packet = 0;
+	uint64_t source_high = 0;
+	uint64_t source_low = 0;
+	uint64_t station_high = 0;
+	uint64_t station_low = 0;
+	uint64_t station_sequence = 0;
+	uint32_t station_world = 0;
+	uint8_t source_type = 0;
+	uint64_t source_sequence = 0;
+	uint32_t source_world = 0;
+	uint32_t source_x = 0;
+	uint32_t source_y = 0;
+};
+
+static const SaveLoad _SlFederationCargo_desc[] = {
+	SLE_VAR(SlFederationCargo, packet, VarTypes::U32),
+	SLE_VAR(SlFederationCargo, source_high, VarTypes::U64),
+	SLE_VAR(SlFederationCargo, source_low, VarTypes::U64),
+	SLE_VAR(SlFederationCargo, station_high, VarTypes::U64),
+	SLE_VAR(SlFederationCargo, station_low, VarTypes::U64),
+	SLE_VAR(SlFederationCargo, station_sequence, VarTypes::U64),
+	SLE_VAR(SlFederationCargo, station_world, VarTypes::U32),
+	SLE_VAR(SlFederationCargo, source_type, VarTypes::U8),
+	SLE_VAR(SlFederationCargo, source_sequence, VarTypes::U64),
+	SLE_VAR(SlFederationCargo, source_world, VarTypes::U32),
+	SLE_VAR(SlFederationCargo, source_x, VarTypes::U32),
+	SLE_VAR(SlFederationCargo, source_y, VarTypes::U32),
+};
+
+/** Remote provenance of native cargo packets (FGCP); quantities stay in CAPA. */
+struct FGCPChunkHandler : ChunkHandler {
+	FGCPChunkHandler() : ChunkHandler("FGCP", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_SlFederationCargo_desc);
+		uint32_t index = 0;
+		for (const auto &[packet, source] : FederationCargoRegistry::GetAll()) {
+			if (!CargoPacket::IsValidID(CargoPacketID{packet})) continue;
+			SlFederationCargo row{packet, source.name_space.high, source.name_space.low,
+				source.origin_station.name_space.high, source.origin_station.name_space.low, source.origin_station.sequence,
+				source.origin_station.world_id.base(), static_cast<uint8_t>(source.source_type), source.source_sequence,
+				source.origin_world.base(), source.origin_tile_x, source.origin_tile_y};
+			SlSetArrayIndex(index++);
+			SlObject(&row, _SlFederationCargo_desc);
+		}
+	}
+	void Load() const override
+	{
+		FederationCargoRegistry::Reset();
+		const auto table = SlTableHeader(_SlFederationCargo_desc);
+		while (SlIterateArray() != -1) {
+			SlFederationCargo row{};
+			SlObject(&row, table);
+			GlobalCargoSourceID source{{row.source_high, row.source_low},
+				{{row.station_high, row.station_low}, row.station_sequence, WorldID{row.station_world}},
+				static_cast<SourceType>(row.source_type), row.source_sequence, WorldID{row.source_world}, row.source_x, row.source_y};
+			if (!source.IsValid() || row.source_type > static_cast<uint8_t>(SourceType::Headquarters) ||
+					!CargoPacket::IsValidID(CargoPacketID{row.packet})) SlErrorCorrupt("Invalid federation cargo reference");
+			FederationCargoRegistry::Set(row.packet, source);
+		}
 	}
 };
 
@@ -1478,6 +1620,8 @@ static const PLNTChunkHandler PLNT;
 static const PORTChunkHandler PORT;
 static const PRTXChunkHandler PRTX;
 static const FIDSChunkHandler FIDS;
+static const FSCHChunkHandler FSCH;
+static const FGCPChunkHandler FGCP;
 static const SPRTChunkHandler SPRT;
 static const CONDChunkHandler COND;
 static const MEGAChunkHandler MEGA;
@@ -1628,6 +1772,8 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	ISPR,
 	PRTX,
 	FIDS,
+	FSCH,
+	FGCP,
 	SPRT,
 	COND,
 	MEGA,

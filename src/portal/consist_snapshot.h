@@ -19,10 +19,23 @@
 
 struct Train;
 
-static constexpr uint16_t CONSIST_SNAPSHOT_VERSION = 2;
+static constexpr uint16_t CONSIST_SNAPSHOT_VERSION = 3;
 static constexpr size_t CONSIST_SNAPSHOT_MAX_UNITS = 256;
 static constexpr size_t CONSIST_SNAPSHOT_MAX_ORDERS = 256;
 static constexpr size_t CONSIST_SNAPSHOT_MAX_BYTES = 1024 * 1024;
+
+/** One native packet's quantity, age, payment vector and portable provenance. */
+struct ConsistSnapshotPacket {
+	uint16_t count = 0;
+	uint16_t periods_in_transit = 0;
+	int64_t feeder_share = 0;
+	int32_t travelled_x = 0;
+	int32_t travelled_y = 0;
+	uint32_t source_x = UINT32_MAX;
+	uint32_t source_y = UINT32_MAX;
+	GlobalCargoSourceID source{};
+	auto operator<=>(const ConsistSnapshotPacket &) const = default;
+};
 
 /** Portable, non-spatial state for one engine, wagon, or articulated part. */
 struct ConsistSnapshotUnit {
@@ -46,6 +59,7 @@ struct ConsistSnapshotUnit {
 	uint16_t random_bits = 0;
 	bool cargo_provenance_unresolved = false;
 	GlobalCargoSourceID cargo_source{}; ///< Resolved global cargo provenance.
+	std::vector<ConsistSnapshotPacket> packets{}; ///< V3 native packet boundaries and payment state.
 
 	auto operator<=>(const ConsistSnapshotUnit &) const = default;
 };
@@ -64,6 +78,7 @@ struct ConsistSnapshot {
 	bool driving_backwards = false;
 	std::vector<ConsistSnapshotUnit> units;
 	std::vector<GlobalOrderDestinationID> orders{}; ///< Captured portable order destinations.
+	std::vector<uint16_t> station_order_flags{};   ///< V3 loading/unloading, non-stop and platform position.
 	uint16_t current_order_index = 0;               ///< Active order index at time of transfer.
 
 	auto operator<=>(const ConsistSnapshot &) const = default;

@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "natural_entry": true,
+  "two_joined_clients": true,
+  "round_trip": true,
+  "global_consist_id": "3af1eab5a2c5c4c7:ae5adf4aa9286cae:1",
+  "physical_cargo_returned": 10,
+  "ledger": {
+    "total_transfers_initiated": 2,
+    "total_transfers_completed": 2,
+    "total_transfers_in_transit": 0,
+    "total_transfers_quarantined": 0,
+    "total_cargo_initiated": 20,
+    "total_cargo_completed": 20,
+    "total_cargo_in_transit": 0,
+    "is_conserved": true
+  }
+}

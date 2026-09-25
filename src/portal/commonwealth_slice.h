@@ -35,4 +35,17 @@ bool ConCommonwealthSlice(std::span<std::string_view> argv);
  */
 bool ConConnectedEconomy(std::span<std::string_view> argv);
 
+/**
+ * Repair legacy connected-demo terrain before rendering or simulation after load.
+ * Other saves are unchanged. Refuses to alter any corner shared by infrastructure.
+ * @return True on success or when the save is not the connected fixture.
+ */
+bool RepairConnectedEconomyTerrain();
+
+/** Smooth exposed terrain before building an isolated UAT fixture. */
+bool SmoothExposedUATTerrain();
+
+/** Prepare a disposable empty-map federation test before any clients join. */
+bool ConFederationTestFixture(std::span<std::string_view> argv);
+
 #endif

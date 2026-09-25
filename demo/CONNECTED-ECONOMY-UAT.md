@@ -43,3 +43,10 @@ injections or forced city growth are used.
 Automated acceptance passed; **human visual acceptance is still pending**.
 See the [evidence](OpenSpaceTTD-Connected-Economy-UAT-v2.0.evidence.json) and
 [reproduction details](../docs/CONNECTED_ECONOMY_UAT.md).
+
+## Crash-fix retest
+
+Use the rebuilt game. Existing connected saves repair their terrain automatically;
+the supplied fresh save is also corrected. Pan around the map, then open a mine
+and a station with waiting cargo. Quantities should have names instead of
+“undefined string”. Your original save and company progress are preserved.

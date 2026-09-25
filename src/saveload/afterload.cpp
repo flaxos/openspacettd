@@ -8,6 +8,7 @@
 /** @file afterload.cpp Code updating data after game load. */
 
 #include "../stdafx.h"
+#include "../portal/commonwealth_slice.h"
 #include "../portal/logistics_hub.h"
 #include "../void_map.h"
 #include "../signs_base.h"
@@ -707,6 +708,8 @@ bool AfterLoadGame()
 			}
 		}
 	}
+
+	if (!RepairConnectedEconomyTerrain()) SlErrorCorrupt("Connected demo terrain repair would alter infrastructure; load an earlier autosave");
 
 	/* convert road side to my format. */
 	if (to_underlying(_settings_game.vehicle.road_side) != 0) _settings_game.vehicle.road_side = RoadVehicleDrivingSide::Right;

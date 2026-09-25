@@ -70,10 +70,27 @@ public:
 	static const std::string &GetAuthorityUrl();
 	static bool HasExternalAuthority();
 
+	/** Server-local checkpoint barrier; shared mutations still use native commands. */
+	static void SetTransportQuiescing(bool quiescing);
+	static bool IsTransportQuiescing();
+	static size_t PendingAuthorityRequests();
+
 	/**
 	 * Periodic simulation tick handler for background federation polling.
 	 */
 	static void OnGameTick(uint64_t current_tick);
 };
+
+/** Server-authored commands replicated through the native lockstep command queue. */
+CommandCost CmdConfigureFederationGate(DoCommandFlags flags, TileIndex tile, uint32_t remote_world, uint32_t remote_gate, uint32_t local_gate, uint32_t length, uint32_t local_world);
+CommandCost CmdCommitFederationDeparture(DoCommandFlags flags, uint32_t source_world, const std::string &request_id, const std::string &transfer_id);
+CommandCost CmdStageFederationArrival(DoCommandFlags flags, const std::string &metadata, uint32_t offset, const std::string &fragment);
+CommandCost CmdMaterializeFederationArrival(DoCommandFlags flags, const std::string &transfer_id);
+CommandCost CmdConfirmFederationArrival(DoCommandFlags flags, const std::string &transfer_id);
+DEF_CMD_TRAIT(Commands::ConfigureFederationGate, CmdConfigureFederationGate, CommandFlag::Server, CommandType::ServerSetting)
+DEF_CMD_TRAIT(Commands::CommitFederationDeparture, CmdCommitFederationDeparture, CommandFlag::Server, CommandType::ServerSetting)
+DEF_CMD_TRAIT(Commands::StageFederationArrival, CmdStageFederationArrival, CommandFlag::Server, CommandType::ServerSetting)
+DEF_CMD_TRAIT(Commands::MaterializeFederationArrival, CmdMaterializeFederationArrival, CommandFlag::Server, CommandType::ServerSetting)
+DEF_CMD_TRAIT(Commands::ConfirmFederationArrival, CmdConfirmFederationArrival, CommandFlag::Server, CommandType::ServerSetting)
 
 #endif /* FEDERATION_CMD_H */

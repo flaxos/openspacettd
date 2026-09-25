@@ -163,3 +163,59 @@ requires sufficient panel height; the wider HQ dashboard is not redesigned here.
 [Reproduction and limitations](CONNECTED_ECONOMY_UAT.md) ·
 [Machine evidence](../demo/OpenSpaceTTD-Connected-Economy-UAT-v2.0.evidence.json).
 This is an acceptance follow-up, not a new sprint or acceptance of Sprints 43–50.
+
+## 2026-09-23 — Connected UAT crash and undefined cargo text
+
+Human UAT **failed** on the initial connected save: `GetPartialPixelZ` reached
+`NOT_REACHED` at landscape.cpp:298 while moving the viewport. The preserved
+crash save contained 742 tiles with adjacent corners differing by more than one
+height level. Direct flattening had left discontinuities at the construction
+band boundary. All 13 Commonwealth cargos also lacked their quantity/unit strings.
+
+The generator now smooths exposed terrain; a deterministic, preflighted load
+repair handles the marked legacy fixture without touching infrastructure or
+changing cargo, trains, cash or towns. Industry v4 supplies complete text; the
+unchanged v2/v3 binaries receive a pack-scoped text compatibility repair.
+
+Verification: 429 unit cases / 66,359 assertions; 440/440 CTests; repository
+linters, diff whitespace and reproducible GRF checks passed. The actual crash
+save passed 3,139,587 pixel-height queries and 1,046,529 inverse viewport queries,
+with zero invalid slopes, complete text for all 24 active cargos in English-US
+and English, exact state across reload and continued cargo-conserving simulation.
+The recovered copy retains 37 trains and the city with 1,107 people / 45 houses.
+The original crash save is unchanged. Fresh demo acceptance and legacy v2 WP-11
+acceptance passed. Human graphical retest remains **pending**.
+
+[Recovery evidence](../demo/CONNECTED-UAT-RECOVERY.evidence.json) ·
+[Reproduction](CONNECTED_ECONOMY_UAT.md#terrain-and-cargo-text-recovery-2026-09-23).
+
+## 2026-09-23 — Savegame authoring workflow
+
+[Savegame authoring](SAVEGAME_AUTHORING.md) now records the reproducible build,
+early terrain/text audits, logistics proof, checkpoint use, content compatibility
+and publication workflow. `AGENTS.md` requires future scenario work to use it.
+Documentation-only follow-up: no engine, content or save changes; human visual
+acceptance remains pending. The guide explicitly distinguishes fixture-specific
+assumptions from reusable practices.
+
+Documentation verification: guide links and referenced tools checked; 429 unit
+cases / 66,359 assertions, 440/440 CTests, both repository linters and
+`git diff --check` passed. No executable or save regeneration was needed.
+
+## 2026-09-25 — Federation scheduled freight (draft)
+
+Branch `fix/federation-scheduled-recovery` integrates main with PRs #36/#37
+and the existing UAT cargo/terrain recovery and authoring guide. New work adds
+nonblocking multiplayer authority requests, explicit company/station mappings,
+portable station schedules, packet provenance and coordinated-checkpoint tools.
+
+This is **in progress, not sprint completion**. Combined unit tests previously
+passed 438 cases / 66,610 assertions. The transport-only fixture passed a
+30-second authority outage and destination restart with joined clients. The
+scheduled native coal fixture completed three loaded deliveries and empty
+returns (180 coal accepted) before its 600-second timeout; the required five
+cycles and full recovery matrix have **not passed**. Conservation/payment checks
+after five cycles, nonempty custom-state reload, blocked arrival and checkpoint
+phase coverage remain unverified. Human federation UAT remains pending.
+
+See [the implementation record](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).

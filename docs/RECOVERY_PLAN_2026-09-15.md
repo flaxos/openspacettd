@@ -5,6 +5,23 @@
 > This document tracks the execution of recovery work packages WP-01 through WP-11 and Federation packages WP-F1/WP-F2 initiated on 15 September 2026. All recovery packages have been completed and merged into `main` (PRs #4–#20).
 > For current project status, see [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). For current architecture, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For the sprint ledger, see [SPRINT_LEDGER.md](SPRINT_LEDGER.md).
 
+## Current user acceptance and direction — 23 September 2026
+
+The user confirms human UAT is OK and accepts the new graphics as good enough
+for now. Further graphics improvements are optional later work. This supersedes
+older blanket statements that human UAT and graphics acceptance are pending.
+This is a user-reported overall acceptance, without new per-subcase captures or
+a pinned build/save manifest; historical observations remain unchanged.
+
+The subsequent live test reproduced a local portal hop and client desync. The
+repair now passes a loaded, natural-entry round trip between two dedicated servers
+with one joined client each, including a run with two graphical clients. Ten cargo
+units and the global train identity return without a detected desync or duplicate.
+This is a controlled two-car fixture with no station orders; scheduled routes,
+restart recovery and human federation acceptance remain open. See
+[the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+
+
 **Historical recovery baseline · 15 September 2026 · audit baseline and WP-01–11 follow-ups**
 
 OpenSpaceTTD has substantial working engine code and useful automated coverage.

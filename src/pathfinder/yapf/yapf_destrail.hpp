@@ -11,6 +11,7 @@
 #define YAPF_DESTRAIL_HPP
 
 #include "../../train.h"
+#include "../../portal/federation_orders.h"
 #include "../pathfinder_func.h"
 #include "../pathfinder_type.h"
 #include "yapf_rail_portal_heuristic.hpp"
@@ -129,7 +130,12 @@ public:
 	void SetDestination(const Train *v)
 	{
 		this->any_depot = false;
-		switch (v->current_order.GetType()) {
+		if (auto gate = GetFederationOrderGate(v, &v->current_order)) {
+			this->dest_tile = *gate == INVALID_TILE ? v->tile : *gate;
+			this->dest_station_id = StationID::Invalid();
+			this->dest_trackdirs = *gate == INVALID_TILE ? INVALID_TRACKDIR_BIT :
+				GetTileTrackStatus(*gate, TransportType::Rail, RoadTramType::Invalid).trackdirs;
+		} else switch (v->current_order.GetType()) {
 			case OT_GOTO_WAYPOINT:
 				if (!Waypoint::Get(v->current_order.GetDestination().ToStationID())->IsSingleTile()) {
 					/* In case of 'complex' waypoints we need to do a look

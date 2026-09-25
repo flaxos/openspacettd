@@ -150,10 +150,10 @@ TEST_CASE("Federation Identity - Order destination resolution across worlds")
 	REQUIRE(res_local.has_value());
 	CHECK(res_local->ToStationID() == st3_id);
 
-	/* ord_w2 (targeting W2) evaluated from W3 resolves to gate_w3 */
+	/* Destination resolution preserves a real station identity; gate routing is a separate adapter. */
 	auto res_gate = FederationIdentityRegistry::ResolveOrderDestination(ord_w2, WorldID{3});
 	REQUIRE(res_gate.has_value());
-	CHECK(res_gate->ToStationID() == StationID{static_cast<uint16_t>(gate_w3.base())});
+	CHECK(res_gate->ToStationID() == st2_id);
 
 	/* ord_w2 evaluated from W2 resolves to st2 */
 	auto res_w2 = FederationIdentityRegistry::ResolveOrderDestination(ord_w2, WorldID{2});
@@ -242,10 +242,17 @@ TEST_CASE("Consist Materializer - Restores Orders and Advances Order Index on Ar
 	wagon.cargo_provenance_unresolved = true;
 	snapshot.units.push_back(wagon);
 
-	GlobalStationID orig_st_id{.name_space = ns, .sequence = 50, .world_id = WorldID{3}};
+	GlobalStationID orig_st_id{.name_space = {ns.high + 1, ns.low}, .sequence = 50, .world_id = WorldID{3}};
 	snapshot.orders.push_back(GlobalOrderDestinationID::ForStation(orig_st_id, false));
 	snapshot.orders.push_back(GlobalOrderDestinationID::ForStation(*global_dest, false));
 	snapshot.current_order_index = 0; // Transited from origin order 0
+	const auto before = Vehicle::GetNumItems();
+	CHECK_FALSE(ConsistMaterializer::MaterializeFromTransfer(snapshot, exit_tile, DiagDirection::NE).success);
+	CHECK(Vehicle::GetNumItems() == before);
+	REQUIRE(Station::CanAllocateItem());
+	Station *origin_proxy = Station::Create(TileXY(30, 20));
+	origin_proxy->owner = CompanyID{0};
+	REQUIRE(FederationIdentityRegistry::RestoreStationMapping(origin_proxy->index, 50, orig_st_id.name_space, WorldID{3}));
 
 	/* Materialize consist on World 2 */
 	ConsistMaterializeResult mat_res = ConsistMaterializer::MaterializeFromTransfer(snapshot, exit_tile, DiagDirection::NE);

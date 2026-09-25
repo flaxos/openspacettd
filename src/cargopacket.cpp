@@ -15,6 +15,7 @@
 #include "cargoaction.h"
 #include "order_type.h"
 
+#include "portal/federation_cargo.h"
 #include "safeguards.h"
 
 /* Initialize the cargopacket-pool */
@@ -91,6 +92,17 @@ CargoPacket::CargoPacket(CargoPacketID index, uint16_t count, Money feeder_share
 		next_hop(original.next_hop)
 {
 	assert(count != 0);
+	FederationCargoRegistry::Copy(original.index.base(), this->index.base());
+}
+
+CargoPacket::~CargoPacket()
+{
+	FederationCargoRegistry::Release(this->index.base());
+}
+
+bool CargoPacket::HasSameFederationSource(const CargoPacket &other) const
+{
+	return FederationCargoRegistry::Same(this->index.base(), other.index.base());
 }
 
 /**

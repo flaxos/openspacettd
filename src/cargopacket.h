@@ -63,6 +63,8 @@ private:
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend SaveLoadTable GetCargoPacketDesc();
+	friend class ConsistSnapshotCodec;
+	friend class ConsistMaterializer;
 public:
 	/** Maximum number of items in a single cargo packet. */
 	static const uint16_t MAX_COUNT = UINT16_MAX;
@@ -73,7 +75,8 @@ public:
 	CargoPacket(CargoPacketID index, uint16_t count, Money feeder_share, CargoPacket &original);
 
 	/** Destroy the packet. */
-	~CargoPacket() { }
+	~CargoPacket();
+	bool HasSameFederationSource(const CargoPacket &other) const;
 
 	CargoPacket *Split(uint new_size);
 	void Merge(CargoPacket *cp);
@@ -509,7 +512,7 @@ public:
 		return cp1->source_xy == cp2->source_xy &&
 				cp1->periods_in_transit == cp2->periods_in_transit &&
 				cp1->first_station == cp2->first_station &&
-				cp1->source == cp2->source;
+				cp1->source == cp2->source && cp1->HasSameFederationSource(*cp2);
 	}
 };
 
@@ -623,7 +626,7 @@ public:
 		return cp1->source_xy == cp2->source_xy &&
 				cp1->periods_in_transit == cp2->periods_in_transit &&
 				cp1->first_station == cp2->first_station &&
-				cp1->source == cp2->source;
+				cp1->source == cp2->source && cp1->HasSameFederationSource(*cp2);
 	}
 };
 

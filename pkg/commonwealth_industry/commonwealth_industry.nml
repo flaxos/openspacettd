@@ -8,7 +8,7 @@ grf {
 	grfid: "OST\01";
 	name: string(STR_GRF_NAME);
 	desc: string(STR_GRF_DESC);
-	version: 3;
+	version: 4;
 	min_compatible_version: 3;
 }
 
@@ -39,7 +39,9 @@ item(FEAT_CARGOS, cargo_silc, 0x10) {
 		cargo_label: "SILC";
 		number: 16;
 		type_name: string(STR_CARGO_NAME_SILC);
-		unit_name: string(STR_CARGO_UNIT_SILC);
+		unit_name: string(STR_CARGO_NAME_SILC);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_SILC);
 		type_abbreviation: string(STR_CARGO_ABBR_SILC);
 		sprite: 0x1AC0;
 		weight: 1 ton;
@@ -57,7 +59,9 @@ item(FEAT_CARGOS, cargo_iron, 0x11) {
 		cargo_label: "IRON";
 		number: 17;
 		type_name: string(STR_CARGO_NAME_IRON);
-		unit_name: string(STR_CARGO_UNIT_IRON);
+		unit_name: string(STR_CARGO_NAME_IRON);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_IRON);
 		type_abbreviation: string(STR_CARGO_ABBR_IRON);
 		sprite: 0x1AC1;
 		weight: 1 ton;
@@ -75,7 +79,9 @@ item(FEAT_CARGOS, cargo_stel, 0x12) {
 		cargo_label: "STEL";
 		number: 18;
 		type_name: string(STR_CARGO_NAME_STEL);
-		unit_name: string(STR_CARGO_UNIT_STEL);
+		unit_name: string(STR_CARGO_NAME_STEL);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_STEL);
 		type_abbreviation: string(STR_CARGO_ABBR_STEL);
 		sprite: 0x1AC2;
 		weight: 1 ton;
@@ -93,7 +99,9 @@ item(FEAT_CARGOS, cargo_rare, 0x13) {
 		cargo_label: "RARE";
 		number: 19;
 		type_name: string(STR_CARGO_NAME_RARE);
-		unit_name: string(STR_CARGO_UNIT_RARE);
+		unit_name: string(STR_CARGO_NAME_RARE);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_RARE);
 		type_abbreviation: string(STR_CARGO_ABBR_RARE);
 		sprite: 0x1AC3;
 		weight: 1 ton;
@@ -111,7 +119,9 @@ item(FEAT_CARGOS, cargo_allo, 0x14) {
 		cargo_label: "ALLO";
 		number: 20;
 		type_name: string(STR_CARGO_NAME_ALLO);
-		unit_name: string(STR_CARGO_UNIT_ALLO);
+		unit_name: string(STR_CARGO_NAME_ALLO);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_ALLO);
 		type_abbreviation: string(STR_CARGO_ABBR_ALLO);
 		sprite: 0x1AC4;
 		weight: 1 ton;
@@ -130,7 +140,9 @@ item(FEAT_CARGOS, cargo_copr, 0x15) {
 		cargo_label: "COPR";
 		number: 21;
 		type_name: string(STR_CARGO_NAME_COPR);
-		unit_name: string(STR_CARGO_UNIT_COPR);
+		unit_name: string(STR_CARGO_NAME_COPR);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_COPR);
 		type_abbreviation: string(STR_CARGO_ABBR_COPR);
 		sprite: 0x1AC5;
 		weight: 1 ton;
@@ -148,7 +160,9 @@ item(FEAT_CARGOS, cargo_wire, 0x16) {
 		cargo_label: "WIRE";
 		number: 22;
 		type_name: string(STR_CARGO_NAME_WIRE);
-		unit_name: string(STR_CARGO_UNIT_WIRE);
+		unit_name: string(STR_CARGO_NAME_WIRE);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_WIRE);
 		type_abbreviation: string(STR_CARGO_ABBR_WIRE);
 		sprite: 0x1AC6;
 		weight: 1 ton;
@@ -166,7 +180,9 @@ item(FEAT_CARGOS, cargo_sand, 0x17) {
 		cargo_label: "SAND";
 		number: 23;
 		type_name: string(STR_CARGO_NAME_SAND);
-		unit_name: string(STR_CARGO_UNIT_SAND);
+		unit_name: string(STR_CARGO_NAME_SAND);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_SAND);
 		type_abbreviation: string(STR_CARGO_ABBR_SAND);
 		sprite: 0x1AC7;
 		weight: 1 ton;
@@ -184,7 +200,9 @@ item(FEAT_CARGOS, cargo_chip, 0x18) {
 		cargo_label: "CHIP";
 		number: 24;
 		type_name: string(STR_CARGO_NAME_CHIP);
-		unit_name: string(STR_CARGO_UNIT_CHIP);
+		unit_name: string(STR_CARGO_NAME_CHIP);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_CHIP);
 		type_abbreviation: string(STR_CARGO_ABBR_CHIP);
 		sprite: 0x1AC8;
 		weight: 1 ton;
@@ -203,7 +221,9 @@ item(FEAT_CARGOS, cargo_poly, 0x19) {
 		cargo_label: "POLY";
 		number: 25;
 		type_name: string(STR_CARGO_NAME_POLY);
-		unit_name: string(STR_CARGO_UNIT_POLY);
+		unit_name: string(STR_CARGO_NAME_POLY);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_POLY);
 		type_abbreviation: string(STR_CARGO_ABBR_POLY);
 		sprite: 0x1AC9;
 		weight: 1 ton;
@@ -222,7 +242,9 @@ item(FEAT_CARGOS, cargo_bcry, 0x1A) {
 		cargo_label: "BCRY";
 		number: 26;
 		type_name: string(STR_CARGO_NAME_BCRY);
-		unit_name: string(STR_CARGO_UNIT_BCRY);
+		unit_name: string(STR_CARGO_NAME_BCRY);
+		units_of_cargo: 0x004E; // Native item units.
+		items_of_cargo: string(STR_CARGO_UNIT_BCRY);
 		type_abbreviation: string(STR_CARGO_ABBR_BCRY);
 		sprite: 0x1ACA;
 		weight: 1 ton;
@@ -240,7 +262,9 @@ item(FEAT_CARGOS, cargo_qcry, 0x1B) {
 		cargo_label: "QCRY";
 		number: 27;
 		type_name: string(STR_CARGO_NAME_QCRY);
-		unit_name: string(STR_CARGO_UNIT_QCRY);
+		unit_name: string(STR_CARGO_NAME_QCRY);
+		units_of_cargo: 0x004E; // Native item units.
+		items_of_cargo: string(STR_CARGO_UNIT_QCRY);
 		type_abbreviation: string(STR_CARGO_ABBR_QCRY);
 		sprite: 0x1ACB;
 		weight: 1 ton;
@@ -258,7 +282,9 @@ item(FEAT_CARGOS, cargo_ccry, 0x1C) {
 		cargo_label: "CCRY";
 		number: 28;
 		type_name: string(STR_CARGO_NAME_CCRY);
-		unit_name: string(STR_CARGO_UNIT_CCRY);
+		unit_name: string(STR_CARGO_NAME_CCRY);
+		units_of_cargo: 0x004E; // Native item units.
+		items_of_cargo: string(STR_CARGO_UNIT_CCRY);
 		type_abbreviation: string(STR_CARGO_ABBR_CCRY);
 		sprite: 0x1ACC;
 		weight: 1 ton;

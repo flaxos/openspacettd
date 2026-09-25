@@ -3641,7 +3641,7 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 				}
 				if (PortalRegistry::IsInterServerPortal(v->tile)) {
 					if (v->IsMovingFront() && v->track == Track::Wormhole &&
-							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {
+							(!IsTunnelTile(v->tile) || DirToDiagDir(v->GetMovingDirection()) == GetTunnelBridgeDirection(v->tile))) {
 						const auto *link = PortalRegistry::GetInterServerPortal(v->tile);
 						std::string target_world = (link != nullptr) ? fmt::format("world_{}", link->remote_world.base()) : "";
 						auto access = CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
@@ -3653,7 +3653,7 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 								first->owner, target_world, v->tile.base(), access.reason);
 							return false;
 						}
-						if (FederationStagingManager::CheckAndDivertToStaging(first, v->tile)) {
+						if (!_networking && FederationStagingManager::CheckAndDivertToStaging(first, v->tile)) {
 							return false;
 						}
 						FederationTransferManager::InitiateConsistDeparture(first, v->tile);
@@ -3662,7 +3662,9 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 				}
 				uint32_t progress = PortalRegistry::AdvancePortalTransit(v->index);
 				uint32_t target = PORTAL_TRANSIT_DISTANCE;
-				if (progress >= target) {
+				/* Imported cars encode a signed pixel delay in the existing saved
+				 * progress field, so long consists emerge one car at a time. */
+				if (PortalRegistry::IsInterServerPortal(v->tile) ? static_cast<int32_t>(progress) >= static_cast<int32_t>(target) : progress >= target) {
 					PortalExitPosition exit = PortalRegistry::GetPortalExitPosition(v->tile);
 					Debug(misc, 3, "Portal vehicle {} emerges from {} at {}, travelling {}, backwards={}",
 						v->index, v->tile, exit.tile, to_underlying(exit.dir), v->IsDrivingBackwards());
@@ -3678,7 +3680,7 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 
 					gp.x = exit.x;
 					gp.y = exit.y;
-					gp.old_tile = GetOtherTunnelBridgeEnd(exit.tile);
+					gp.old_tile = PortalRegistry::IsInterServerPortal(exit.tile) ? exit.tile : GetOtherTunnelBridgeEnd(exit.tile);
 					gp.new_tile = exit.tile;
 
 					if (v->IsMovingFront()) {

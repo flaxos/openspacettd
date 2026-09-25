@@ -1,0 +1,170 @@
+{
+  "next_transfer_seq": 3,
+  "next_player_seq": 1,
+  "next_charter_seq": 1,
+  "worlds": {
+    "1": {
+      "world_id": 1,
+      "phase": 1,
+      "biome": "Temperate",
+      "name": "Native 1",
+      "address": "127.0.0.1:54701",
+      "description": "Federated Railway System",
+      "manifest_token": "",
+      "active_clients": 0,
+      "max_clients": 16,
+      "active_trains": 0,
+      "status": "online",
+      "population": 0,
+      "is_megacity": false,
+      "megacity_growth_state": "Subsistence",
+      "satisfaction_pct": 100.0,
+      "last_heartbeat": 1790117490.8269742
+    },
+    "2": {
+      "world_id": 2,
+      "phase": 1,
+      "biome": "Temperate",
+      "name": "Native 2",
+      "address": "127.0.0.1:37965",
+      "description": "Federated Railway System",
+      "manifest_token": "",
+      "active_clients": 0,
+      "max_clients": 16,
+      "active_trains": 0,
+      "status": "online",
+      "population": 0,
+      "is_megacity": false,
+      "megacity_growth_state": "Subsistence",
+      "satisfaction_pct": 100.0,
+      "last_heartbeat": 1790117491.3509426
+    }
+  },
+  "routes": {
+    "1": {
+      "route_id": 1,
+      "source_world": 1,
+      "source_gate": 10,
+      "dest_world": 2,
+      "dest_gate": 20,
+      "transit_delay_sec": 1.0,
+      "max_bandwidth_trains_per_min": 10,
+      "max_active_in_transit": 8,
+      "is_twin_array": false,
+      "current_in_transit_count": 0,
+      "total_trains_dispatched": 1,
+      "congestion_level": "CLEAR"
+    },
+    "2": {
+      "route_id": 2,
+      "source_world": 2,
+      "source_gate": 20,
+      "dest_world": 1,
+      "dest_gate": 10,
+      "transit_delay_sec": 1.0,
+      "max_bandwidth_trains_per_min": 10,
+      "max_active_in_transit": 8,
+      "is_twin_array": false,
+      "current_in_transit_count": 0,
+      "total_trains_dispatched": 1,
+      "congestion_level": "CLEAR"
+    }
+  },
+  "transfers": {
+    "TRANSFER-X000000001": {
+      "transfer_id": "TRANSFER-X000000001",
+      "request_id": "DEP-W1-G10-N3af1eab5a2c5c4c7:ae5adf4aa9286cae-C1-T2627",
+      "request_digest": "0ba68eb8449cfe60774bb9cb001a015926867dfa34678cc5cd4b200f03807818",
+      "source_world": 1,
+      "dest_world": 2,
+      "source_gate": 10,
+      "dest_gate": 20,
+      "snapshot_base64": "T1NDUwIAAADWAAAAo97xHAT0n7G/HmBjlSPYpdM/niwjD1LGsrUdJJTm/OfHxMWiterxOq5sKKlK31quAQAAAAAAAAAGmMcrWcf7q8mApszrUrEQBQBAAAEQx8TForXq8TqubCipSt9argEAAAAAAAAAAgAAAAkAAAAAAAAAAAAAngcAABIAAAByFQAAzB8AAAAAAAA1xVAAAAAAAOK/AAAdAAQBAB4AAAAKAAAAngcAABMAAAAAAAAA/wMAAAAAAAC+7QAAAAAAAGxsAQAAAAAAP/7WWg==",
+      "manifest_token": "",
+      "orders": [],
+      "current_order_index": 0,
+      "consist_id": "3af1eab5a2c5c4c7:ae5adf4aa9286cae:1",
+      "state": "COMPLETED",
+      "departure_time": 1790117531.2909806,
+      "arrival_time": 1790117532.2909806,
+      "transit_delay_sec": 1.0,
+      "total_cargo": 10,
+      "cargo_breakdown": {
+        "1": 10
+      },
+      "valuation_credits": 0,
+      "route_id": 1,
+      "priority": "STANDARD",
+      "status_message": "Consist emerged and materialized successfully",
+      "arrival_receipt": "RCPT-W2-TRANSFER-X000000001"
+    },
+    "TRANSFER-X000000002": {
+      "transfer_id": "TRANSFER-X000000002",
+      "request_id": "DEP-W2-G20-N3af1eab5a2c5c4c7:ae5adf4aa9286cae-C1-T3392",
+      "request_digest": "ce8e65c5d8ff1d51d428431cba7263594d124e40c571734f66727901348cff26",
+      "source_world": 2,
+      "dest_world": 1,
+      "source_gate": 20,
+      "dest_gate": 10,
+      "snapshot_base64": "T1NDUwIAAADWAAAAo97xHAT0n7G/HmBjlSPYpdM/niwjD1LGsrUdJJTm/OfHxMWiterxOq5sKKlK31quAQAAAAAAAABSXl/7Xj1PUkHJWuxnT2mABQBAAJ0QkwJdcrIQRcMmJdSJxsKCPgEAAAAAAAAAAgAAAAkAAAAAAAAAAAAAngcAABwAAAByFQAArR8AAAAAAAA1xVAAAAAAAOK/AAAdAAQBAB4AAAAKAAAAngcAAB0AAAAAAAAA/AMAAAAAAAC+7QAAAAAAAGxsAQAAAAAAI1DPVg==",
+      "manifest_token": "",
+      "orders": [],
+      "current_order_index": 0,
+      "consist_id": "3af1eab5a2c5c4c7:ae5adf4aa9286cae:1",
+      "state": "COMPLETED",
+      "departure_time": 1790117552.4912965,
+      "arrival_time": 1790117553.4912965,
+      "transit_delay_sec": 1.0,
+      "total_cargo": 10,
+      "cargo_breakdown": {
+        "1": 10
+      },
+      "valuation_credits": 0,
+      "route_id": 2,
+      "priority": "STANDARD",
+      "status_message": "Consist emerged and materialized successfully",
+      "arrival_receipt": "RCPT-W1-TRANSFER-X000000002"
+    }
+  },
+  "players": {},
+  "auth_tokens": {},
+  "charters": {},
+  "commodity_initiated": {
+    "1": 20
+  },
+  "commodity_in_transit": {
+    "1": 0
+  },
+  "commodity_completed": {
+    "1": 20
+  },
+  "world_trade": {
+    "1->2": {
+      "cargo_counts": {
+        "1": 10
+      },
+      "total_credits": 0,
+      "completed_transfers": 1
+    },
+    "2->1": {
+      "cargo_counts": {
+        "1": 10
+      },
+      "total_credits": 0,
+      "completed_transfers": 1
+    }
+  },
+  "megacities": {},
+  "spaceports": {},
+  "conduits": {},
+  "supply_chain_matrix": {
+    "frontier_to_refinery_cargo": 0,
+    "refinery_to_core_cargo": 0,
+    "frontier_to_core_cargo": 0,
+    "core_export_cargo": 20,
+    "spaceport_throughput_cargo": 0,
+    "edge_conduit_throughput_cargo": 0,
+    "total_interplanetary_cargo": 20,
+    "total_tariffs_generated": 200
+  }
+}

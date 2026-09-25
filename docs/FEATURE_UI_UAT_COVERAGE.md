@@ -1,5 +1,22 @@
 # Feature → implementation → player → verification evidence
 
+## Current user acceptance and direction — 23 September 2026
+
+The user confirms human UAT is OK and accepts the new graphics as good enough
+for now. Further graphics improvements are optional later work. This supersedes
+older blanket statements that human UAT and graphics acceptance are pending.
+This is a user-reported overall acceptance, without new per-subcase captures or
+a pinned build/save manifest; historical observations remain unchanged.
+
+The subsequent live test reproduced a local portal hop and client desync. The
+repair now passes a loaded, natural-entry round trip between two dedicated servers
+with one joined client each, including a run with two graphical clients. Ten cargo
+units and the global train identity return without a detected desync or duplicate.
+This is a controlled two-car fixture with no station orders; scheduled routes,
+restart recovery and human federation acceptance remain open. See
+[the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+
+
 Audited source `abbcd7e077` on 2026-09-15. The [master recovery plan](RECOVERY_PLAN_2026-09-15.md)
 sets dependencies; the [defect register](CRITICAL_BUG_REVIEW_2026-09-15.md) gives
 stable IDs. Human procedures/results remain [ALL-FEATURES-UAT](../demo/ALL-FEATURES-UAT.md)

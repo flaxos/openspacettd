@@ -1,5 +1,22 @@
 # Human UAT results — recovery / v1.1
 
+## Current user acceptance and direction — 23 September 2026
+
+The user confirms human UAT is OK and accepts the new graphics as good enough
+for now. Further graphics improvements are optional later work. This supersedes
+older blanket statements that human UAT and graphics acceptance are pending.
+This is a user-reported overall acceptance, without new per-subcase captures or
+a pinned build/save manifest; historical observations remain unchanged.
+
+The subsequent live test reproduced a local portal hop and client desync. The
+repair now passes a loaded, natural-entry round trip between two dedicated servers
+with one joined client each, including a run with two graphical clients. Ten cargo
+units and the global train identity return without a detected desync or duplicate.
+This is a controlled two-car fixture with no station orders; scheduled routes,
+restart recovery and human federation acceptance remain open. See
+[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+
+
 Suite/fixture ID: ______  Save SHA256/version: ______  Base graphics/version: ______
 Language/UI scale/resolution: ______  Simulation date: ______  Reset copy: ______
 
@@ -246,3 +263,52 @@ requires sufficient panel height; the wider HQ dashboard is not redesigned here.
 
 The visual check could not run because `orca-ide` was unavailable. Earlier human
 UAT gaps remain open; these automated results do not mark them accepted.
+
+## 2026-09-23 — Connected UAT crash and undefined cargo text
+
+Human UAT **failed** on the initial connected save: `GetPartialPixelZ` reached
+`NOT_REACHED` at landscape.cpp:298 while moving the viewport. The preserved
+crash save contained 742 tiles with adjacent corners differing by more than one
+height level. Direct flattening had left discontinuities at the construction
+band boundary. All 13 Commonwealth cargos also lacked their quantity/unit strings.
+
+The generator now smooths exposed terrain; a deterministic, preflighted load
+repair handles the marked legacy fixture without touching infrastructure or
+changing cargo, trains, cash or towns. Industry v4 supplies complete text; the
+unchanged v2/v3 binaries receive a pack-scoped text compatibility repair.
+
+Verification: 429 unit cases / 66,359 assertions; 440/440 CTests; repository
+linters, diff whitespace and reproducible GRF checks passed. The actual crash
+save passed 3,139,587 pixel-height queries and 1,046,529 inverse viewport queries,
+with zero invalid slopes, complete text for all 24 active cargos in English-US
+and English, exact state across reload and continued cargo-conserving simulation.
+The recovered copy retains 37 trains and the city with 1,107 people / 45 houses.
+The original crash save is unchanged. Fresh demo acceptance and legacy v2 WP-11
+acceptance passed. Human graphical retest remains **pending**.
+
+[Recovery evidence](CONNECTED-UAT-RECOVERY.evidence.json) ·
+[Reproduction](../docs/CONNECTED_ECONOMY_UAT.md#terrain-and-cargo-text-recovery-2026-09-23).
+
+## 2026-09-23 — Savegame authoring workflow
+
+Documented the terrain, cargo-text, logistics and recovery lessons in
+[Savegame authoring](../docs/SAVEGAME_AUTHORING.md), with a required `AGENTS.md`
+checklist. This documentation change adds no human acceptance claim or new save.
+
+## 2026-09-25 — Federation scheduled freight (draft)
+
+Branch `fix/federation-scheduled-recovery` integrates main with PRs #36/#37
+and the existing UAT cargo/terrain recovery and authoring guide. New work adds
+nonblocking multiplayer authority requests, explicit company/station mappings,
+portable station schedules, packet provenance and coordinated-checkpoint tools.
+
+This is **in progress, not sprint completion**. Combined unit tests previously
+passed 438 cases / 66,610 assertions. The transport-only fixture passed a
+30-second authority outage and destination restart with joined clients. The
+scheduled native coal fixture completed three loaded deliveries and empty
+returns (180 coal accepted) before its 600-second timeout; the required five
+cycles and full recovery matrix have **not passed**. Conservation/payment checks
+after five cycles, nonempty custom-state reload, blocked arrival and checkpoint
+phase coverage remain unverified. Human federation UAT remains pending.
+
+See [the implementation record](../docs/FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).

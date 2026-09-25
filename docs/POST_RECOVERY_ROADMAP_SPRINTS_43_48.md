@@ -8,7 +8,7 @@
 **Status:** ALL STRATEGIC SPRINTS 43–48 IMPLEMENTED & MERGED INTO MAIN (HUMAN UAT PENDING)
 **Date:** 2026-09-22
 **Governing Architecture:** Peter F. Hamilton *Commonwealth Saga* + Factorio-Scale Production + OpenTTD Determinism
-**Next Horizon:** Commonwealth Expansion (Sprints 49–52) & Human UAT Acceptance
+**Next priority:** Live federation with two multiplayer clients; human UAT and current graphics accepted by the user on 23 September 2026.
 
 ---
 
@@ -145,11 +145,17 @@ Through the `/grill-me` architectural interview, the long-term vision for OpenSp
 
 ---
 
-## 3. Beyond Sprint 48: The Commonwealth Expansion Era (Sprints 49–52)
+## 3. Current next steps — 23 September 2026
 
-Following the completion of Sprints 43–48, the late-game expansion roadmap expands into full galactic integration based on [`docs/world_roadmap.txt`](world_roadmap.txt). See the complete specification in [`docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md`](docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md):
+Human UAT and the current graphics are accepted by the user. Graphics refinement
+can follow later. The controlled two-server/two-client loaded natural-entry round
+trip now passes after the desync repair. Next prove scheduled loading/unloading,
+orders, ownership and money, then blocking, restarts and reconnects.
+[Live evidence](audit/2026-09-23/federation-multiplayer/README.md). See the
+[current acceptance target](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
 
-* **Sprint 49: Commonwealth Graph Engine & Prebuilt Lore Economies:** 108-world Commonwealth topology parsing (`assets/data/commonwealth_universe.json`), visual Galaxy Map tree browser with phase coloring and evidence badges, and prebuilt trade gateways (`PrebuiltTradeManager`) enabling local portals to trade off-world.
-* **Sprint 50: High-Capacity Gateway Staging & Private Corporate Charters:** Multi-track portal throat signalling, automated staging loops & overflow sidings, universal rail freight across Commonwealth worlds, and private corporate gate charters.
-* **Sprint 51: Expeditionary Survey Logistics & Silfen Intermodal Paths:** Hazardous frontier world surveying, non-rail Silfen paths with intermodal container pods, and High Angel / Kerensk orbital lighter docks, High Angel orbital shuttle docks.
-* **Sprint 52: Galactic Commonwealth Hegemony & Narrative Lore Scenarios:** Dynamic galactic commodity clearinghouse, corridor congestion surcharges, and historical narrative crisis scenarios (*The Dyson Alpha Crisis*, *Anshun Generator Retargeting*).
+Sprints 49–50 remain candidates for graph/trading and gateway operations after
+that proof. Sprints 51–52 are removed from active scope, including exploration,
+Silfen paths, orbital docks, galactic market/tariff expansion and crisis scenarios.
+Keep narrative and story-driven scenarios out of future work. Existing implemented
+features above remain historical records, not new commitments.

@@ -429,7 +429,9 @@ TileIndex PortalRegistry::GetOtherPortalEnd(TileIndex tile)
 PortalExitPosition PortalRegistry::GetPortalExitPosition(TileIndex entry_tile)
 {
 	PortalExitPosition pos;
-	TileIndex exit_tile = GetOtherPortalEnd(entry_tile);
+	/* Imported trailing cars emerge from this server's receiving head. They
+	 * have no other local endpoint; never redirect them to a local portal pair. */
+	TileIndex exit_tile = IsInterServerPortal(entry_tile) ? entry_tile : GetOtherPortalEnd(entry_tile);
 	if (exit_tile == INVALID_TILE) return pos;
 
 	DiagDirection enter_dir = GetTunnelBridgeDirection(exit_tile);

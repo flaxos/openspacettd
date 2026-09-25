@@ -7,6 +7,7 @@
 
 #include "../stdafx.h"
 #include "consist_materializer.h"
+#include "federation_cargo.h"
 #include "consist_snapshot.h"
 #include "content_manifest.h"
 #include "federation_identity.h"
@@ -218,7 +219,22 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 			result.error_message = "Invalid engine type";
 			return result;
 		}
-		if (u_snap.cargo_count > 0) required_cargo_packets++;
+		if (u_snap.cargo_count > 0) required_cargo_packets += u_snap.packets.empty() ? 1 : u_snap.packets.size();
+		uint32_t packet_count = 0;
+		for (const auto &packet : u_snap.packets) {
+			if (packet.count == 0 || packet.travelled_x < INT16_MIN || packet.travelled_x > INT16_MAX ||
+					packet.travelled_y < INT16_MIN || packet.travelled_y > INT16_MAX ||
+					((packet.source_x != UINT32_MAX || packet.source_y != UINT32_MAX) &&
+					(packet.source_x >= Map::SizeX() || packet.source_y >= Map::SizeY()))) {
+				result.error_message = "Invalid native cargo packet state";
+				return result;
+			}
+			packet_count += packet.count;
+		}
+		if (!u_snap.packets.empty() && packet_count != u_snap.cargo_count) {
+			result.error_message = "Cargo packet quantity mismatch";
+			return result;
+		}
 	}
 
 	if (!CargoPacket::CanAllocateItem(required_cargo_packets)) {
@@ -229,14 +245,52 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 	/* 4. Resolve local company */
 	CompanyID local_company = CompanyID::Invalid();
 	for (const auto &[cid, seq] : FederationIdentityRegistry::GetCompanyMappings()) {
-		if (snapshot.company_id.sequence == seq) {
+		if (FederationIdentityRegistry::FindCompany(CompanyID{cid}) == snapshot.company_id) {
 			local_company = CompanyID{cid};
 			break;
 		}
 	}
+	if (local_company == CompanyID::Invalid() && snapshot.company_id.IsValid() && !FederationIdentityRegistry::GetCompanyMappings().empty()) {
+		result.error_message = "No explicit mapping for the global company";
+		return result;
+	}
 	if (local_company == CompanyID::Invalid() || !Company::IsValidID(local_company)) {
 		local_company = (_current_company != COMPANY_SPECTATOR && Company::IsValidID(_current_company))
 			? _current_company : CompanyID{0};
+	}
+
+	/* Resolve every order before allocating vehicles; dropping one would shift the active index. */
+	WorldID exit_world = PlanetManager::GetTileWorld(exit_tile);
+	if (exit_world == INVALID_WORLD) {
+		const auto *link = PortalRegistry::GetInterServerPortal(exit_tile);
+		if (link != nullptr) exit_world = link->local_endpoint.world_id;
+	}
+	std::vector<Order> restored_orders;
+	if (!snapshot.orders.empty() && !OrderList::CanAllocateItem()) {
+		result.error_message = "Order list pool exhausted";
+		return result;
+	}
+	for (const auto &global_order : snapshot.orders) {
+		auto destination = FederationIdentityRegistry::ResolveOrderDestination(global_order, exit_world);
+		if (!destination) {
+			result.error_message = "No explicit local mapping for a scheduled destination";
+			return result;
+		}
+		Order order;
+		if (global_order.type == OrderDestinationType::Waypoint) order.MakeGoToWaypoint(destination->ToStationID());
+		else if (global_order.type == OrderDestinationType::Depot) order.MakeGoToDepot(*destination, OrderDepotTypeFlags{});
+		else order.MakeGoToStation(destination->ToStationID());
+		if (global_order.type == OrderDestinationType::Station && snapshot.station_order_flags.size() == snapshot.orders.size()) {
+			const auto flags = snapshot.station_order_flags[restored_orders.size()];
+			order.SetLoadType(static_cast<OrderLoadType>(flags & 7));
+			order.SetUnloadType(static_cast<OrderUnloadType>((flags >> 3) & 7));
+			OrderNonStopFlags non_stop;
+			if (flags & (1 << 6)) non_stop.Set(OrderNonStopFlag::NonStop);
+			if (flags & (1 << 7)) non_stop.Set(OrderNonStopFlag::GoVia);
+			order.SetNonStopType(non_stop);
+			order.SetStopLocation(static_cast<OrderStopLocation>(flags >> 8));
+		}
+		restored_orders.push_back(std::move(order));
 	}
 
 	/* 5. Calculate vehicle emergence position */
@@ -335,21 +389,31 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		prev = t;
 
 		if (u_snap.cargo_count > 0) {
-			StationID st_id = StationID::Invalid();
-			if (u_snap.cargo_source.IsValid() && u_snap.cargo_source.origin_station.IsValid()) {
-				st_id = StationID(static_cast<uint16_t>(u_snap.cargo_source.origin_station.sequence));
+			auto packets = u_snap.packets;
+			if (packets.empty()) {
+				/* Legacy V1/V2 snapshots only carried a wagon aggregate. */
+				packets.push_back({static_cast<uint16_t>(u_snap.cargo_count), 0, 0,
+					static_cast<int32_t>(TileX(exit_tile)), static_cast<int32_t>(TileY(exit_tile)),
+					TileX(exit_tile), TileY(exit_tile), u_snap.cargo_source});
 			}
-			TileIndex source_xy = u_snap.cargo_source.IsValid()
-				? TileXY(u_snap.cargo_source.origin_tile_x, u_snap.cargo_source.origin_tile_y)
-				: INVALID_TILE;
-			CargoPacket *cp = CargoPacket::Create(u_snap.cargo_count, 0, st_id, source_xy, 0);
-			if (cp == nullptr) {
-				rollback();
-				result.error_message = "Cargo packet allocation failed";
-				return result;
+			for (const auto &packet : packets) {
+				StationID station = StationID::Invalid();
+				if (auto resolved = FederationIdentityRegistry::ResolveStation(packet.source.origin_station)) station = *resolved;
+				TileIndex source_xy = packet.source_x == UINT32_MAX ? INVALID_TILE : TileXY(packet.source_x, packet.source_y);
+				CargoPacket *cargo = CargoPacket::Create(packet.count, packet.periods_in_transit, station, source_xy, Money{packet.feeder_share});
+				if (cargo == nullptr) {
+					rollback();
+					result.error_message = "Cargo packet allocation failed";
+					return result;
+				}
+				cargo->travelled = {static_cast<int16_t>(packet.travelled_x), static_cast<int16_t>(packet.travelled_y)};
+#ifdef WITH_ASSERT
+				cargo->in_vehicle = true;
+#endif
+				FederationCargoRegistry::Set(cargo->index.base(), packet.source);
+				t->cargo.Append(cargo);
+				total_cargo += packet.count;
 			}
-			t->cargo.Append(cp);
-			total_cargo += u_snap.cargo_count;
 		}
 	}
 
@@ -366,6 +430,23 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 	if (snapshot.driving_backwards) front->vehicle_flags.Set(VehicleFlag::DrivingBackwards);
 
 	front->ConsistChanged(CCF_ARRANGE);
+	/* Keep trailing cars inside the receiving wormhole until their actual
+	 * spacing behind the moving front has cleared the portal visibility frame. */
+	if (PortalRegistry::IsInterServerPortal(exit_tile)) {
+		int32_t distance = 0;
+		Train *previous = nullptr;
+		for (Train *unit = front->GetMovingFront(); unit != nullptr; unit = unit->GetMovingNext()) {
+			unit->SetMovingDirection(dir);
+			if (previous != nullptr) {
+				distance += (previous->gcache.cached_veh_length + unit->gcache.cached_veh_length) / 2;
+				unit->track = Track::Wormhole;
+				unit->vehstatus.Set(VehState::Hidden);
+				PortalRegistry::SetVehicleTransitProgress(unit->index, static_cast<uint32_t>(static_cast<int32_t>(PORTAL_TRANSIT_DISTANCE) - distance));
+			}
+			previous = unit;
+		}
+	}
+
 	for (Train *u = front; u != nullptr; u = u->Next()) {
 		u->UpdatePositionAndViewport();
 	}
@@ -379,39 +460,12 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 
 	/* 9. Restore persistent GlobalConsistID */
 	if (snapshot.consist_id.IsValid()) {
-		FederationIdentityRegistry::RestoreMapping(front->index, snapshot.consist_id.sequence);
+		FederationIdentityRegistry::RestoreMapping(front->index, snapshot.consist_id.sequence, snapshot.consist_id.name_space);
 	}
 
 	/* 10. Restore and resolve order schedule */
 	if (!snapshot.orders.empty() && OrderList::CanAllocateItem()) {
-		WorldID exit_world = PlanetManager::GetTileWorld(exit_tile);
-		if (exit_world == INVALID_WORLD) {
-			const InterServerPortalLink *link = PortalRegistry::GetInterServerPortal(exit_tile);
-			if (link != nullptr) exit_world = link->local_endpoint.world_id;
-		}
-
-		/* Cache master schedule for this consist in FederationIdentityRegistry */
-		if (snapshot.consist_id.IsValid()) {
-			FederationIdentityRegistry::SetConsistSchedule(snapshot.consist_id.sequence, snapshot.orders);
-		}
-
-		std::vector<Order> restored_orders;
-		restored_orders.reserve(snapshot.orders.size());
-
-		for (const GlobalOrderDestinationID &g_ord : snapshot.orders) {
-			auto dest_opt = FederationIdentityRegistry::ResolveOrderDestination(g_ord, exit_world);
-			if (dest_opt.has_value()) {
-				Order ord;
-				if (g_ord.type == OrderDestinationType::Waypoint) {
-					ord.MakeGoToWaypoint(dest_opt->ToStationID());
-				} else if (g_ord.type == OrderDestinationType::Depot) {
-					ord.MakeGoToDepot(*dest_opt, OrderDepotTypeFlags{});
-				} else {
-					ord.MakeGoToStation(dest_opt->ToStationID());
-				}
-				restored_orders.push_back(std::move(ord));
-			}
-		}
+		if (snapshot.consist_id.IsValid()) FederationIdentityRegistry::SetConsistSchedule(snapshot.consist_id, snapshot.orders);
 
 		if (!restored_orders.empty()) {
 			front->orders = OrderList::Create(std::move(restored_orders), front);
@@ -462,7 +516,7 @@ bool ConsistMaterializer::AssignRoundTripOrders(Train *consist, StationID origin
 
 	std::optional<GlobalConsistID> cid = FederationIdentityRegistry::GetOrCreate(front);
 	if (cid.has_value()) {
-		FederationIdentityRegistry::SetConsistSchedule(cid->sequence, master_schedule);
+		FederationIdentityRegistry::SetConsistSchedule(*cid, master_schedule);
 	}
 
 	/* Build local projection */

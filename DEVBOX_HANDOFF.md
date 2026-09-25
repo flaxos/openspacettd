@@ -5,7 +5,28 @@
 > This file records a point-in-time audit checkpoint from 15–16 September 2026. All work packages described herein as uncommitted (WP-01 through WP-11) have subsequently been committed, verified, and merged into `main` (PRs #4–#25).
 > For authoritative project status, see [docs/PROJECT_STATUS_AND_ROADMAP.md](docs/PROJECT_STATUS_AND_ROADMAP.md). For source-verified architecture, see [docs/CURRENT_ARCHITECTURE.md](docs/CURRENT_ARCHITECTURE.md). For the full sprint ledger, see [docs/SPRINT_LEDGER.md](docs/SPRINT_LEDGER.md).
 
-## Current checkpoint — 16 September, WP-11 structural slice
+## Current checkpoint — 23 September, multiplayer federation repair
+
+Human UAT and graphics are accepted by the user. The later federation check
+reproduced a local portal hop and a client desync. A controlled loaded round trip
+now passes between two independent dedicated servers with one client each, in
+both graphical and unattended runs. Gate configuration and physical transfers
+use replicated commands; only the server contacts the authority. Full train
+identity, wagon spacing and all ten cargo units are preserved.
+
+The two graphical clients are paused in `/tmp/federation-native-final`; ports are
+54701 and 37965. Use `scripts/federation_session.py --session
+/tmp/federation-native-final resume` from the repo root to replay the outward trip.
+The helper's `status`, `pause`, `reverse` and `stop` actions operate only on that
+session. [Evidence and limitations](docs/audit/2026-09-23/federation-multiplayer/README.md).
+
+All 430 isolated CTests and repository linters pass. The combined unit binary
+still fails in four legacy cases and aborts; this also reproduces with the new
+federation tests excluded. Do not report all tests green. Scheduled station routes,
+restarts/reconnects and human federation acceptance remain open. Sprints 51–52 and
+future narrative scope remain withdrawn.
+
+## Earlier checkpoint — 16 September, WP-11 structural slice
 
 The remaining WP-11 structural economic slice is implemented locally on
 `fix/wp11-content-economic-slice` (base `3081af218d`). Both binaries are rebuilt;

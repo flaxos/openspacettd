@@ -8,6 +8,7 @@
 /** @file order_cmd.cpp Handling of orders. */
 
 #include "stdafx.h"
+#include "portal/federation_orders.h"
 #include "debug.h"
 #include "command_func.h"
 #include "company_func.h"
@@ -563,6 +564,7 @@ static void DeleteOrderWarnings(const Vehicle *v)
  */
 TileIndex Order::GetLocation(const Vehicle *v, bool airport) const
 {
+	if (auto gate = GetFederationOrderGate(v, this)) return *gate;
 	switch (this->GetType()) {
 		case OT_GOTO_WAYPOINT:
 		case OT_GOTO_STATION:
@@ -1969,6 +1971,10 @@ VehicleOrderID ProcessConditionalOrder(const Order *order, const Vehicle *v)
  */
 bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth, bool pbs_look_ahead)
 {
+	if (auto gate = GetFederationOrderGate(v, order)) {
+		v->SetDestTile(*gate);
+		return *gate != INVALID_TILE;
+	}
 	if (conditional_depth > v->GetNumOrders()) {
 		v->current_order.Free();
 		v->SetDestTile(INVALID_TILE);
@@ -2196,6 +2202,7 @@ bool ProcessOrders(Vehicle *v)
  */
 bool Order::ShouldStopAtStation(const Vehicle *v, StationID station) const
 {
+	if (GetFederationOrderGate(v, this)) return false;
 	bool is_dest_station = this->IsType(OT_GOTO_STATION) && this->dest == station;
 
 	return (!this->IsType(OT_GOTO_DEPOT) || this->GetDepotOrderType().Test(OrderDepotTypeFlag::PartOfOrders)) &&

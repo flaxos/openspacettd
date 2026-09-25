@@ -1,7 +1,7 @@
 # OpenSpaceTTD Project Status and Roadmap
 
 Status: **CANONICAL**<br>
-As of: **2026-09-22**
+As of: **2026-09-23**
 
 Audited main branch HEAD: `e4baa35623` (Sprints 1–48 and WP-01–11 merged via PRs #4–#25)<br>
 Current working HEAD: `a6cf83e6a6` (branch `feature/sprint-50-gateway-staging-and-charters`; Sprints 49–50 **not yet merged to main**)
@@ -22,6 +22,76 @@ OpenSpaceTTD operates on a **single global OpenTTD map** (up to 4096×4096 tiles
 - **Working HEAD Milestone (`a6cf83e6a6`):** Sprints 49 and 50 are implemented on feature branches (`feature/sprint-49-commonwealth-graph-engine`, `feature/sprint-50-gateway-staging-and-charters`) with passing unit tests, but are **not yet merged to `main`**.
 - **Active Acceptance Gap:** Sprints 43–50 have zero recorded human visual UAT evidence. The v1.1 guided solo UAT save (`demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav`) has not been played through by a human tester.
 - **Immediate Milestone Goal:** Merge Sprints 49–50 to `main`, execute human UAT for Sprints 43–50, and commence Sprint 51 (Expeditionary Survey Logistics).
+
+## Current user acceptance and direction — 23 September 2026
+
+The user confirms human UAT is OK and accepts the new graphics as good enough
+for now. Further graphics improvements are optional later work. This supersedes
+older blanket statements that human UAT and graphics acceptance are pending.
+This is a user-reported overall acceptance, without new per-subcase captures or
+a pinned build/save manifest; historical observations remain unchanged.
+
+The subsequent live test reproduced a local portal hop and client desync. The
+repair now passes a loaded, natural-entry round trip between two dedicated servers
+with one joined client each, including a run with two graphical clients. Ten cargo
+units and the global train identity return without a detected desync or duplicate.
+This is a controlled two-car fixture with no station orders; scheduled routes,
+restart recovery and human federation acceptance remain open. See
+[the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+
+## Next priority: live federation with two clients
+
+1. **Recommended: scheduled-route federation acceptance.** The controlled
+   two-client natural-entry round trip now passes; extend it to station orders,
+   loading/unloading, company ownership and money. Run two
+   independent dedicated servers and a persistent Universe Authority. Join one
+   graphical multiplayer client to each server through the normal join/map-load
+   handshake. Use ordinary train orders to drive a loaded consist into a linked
+   gate on server A, observe arrival and continued movement on server B, then
+   return it. Do not use `federation_dispatch` to establish natural-entry success.
+   Reconcile consist identity, ownership, wagons, cargo, orders and money across
+   source, authority and destination; require no duplicates or client desyncs.
+2. **Federation resilience.** With clients connected, test a blocked arrival,
+   destination restart, authority restart, client reconnect and save/reload.
+   Retain build/content/save hashes, server/client logs and graphical evidence.
+3. **Then reassess Sprints 49–50.** Graph browsing/trading and gateway operations
+   remain future candidates after federation acceptance. Keep future scope focused
+   on transport and logistics. Narrative and story-driven scenarios are excluded.
+
+The proposed Sprints 51–52 (survey trains, Silfen transshipment, orbital docks,
+dynamic galactic markets, congestion tariffs and crisis scenarios) are removed
+from the active roadmap at the user's request. Existing Sprint 48 code is a
+historical implementation; this documentation change does not remove it.
+
+### Live federation repair — 23 September
+
+The user-reported local hop was not a cross-server transfer. Gate configuration
+changed only the server registry; departure and arrival also bypassed the native
+multiplayer command stream. The repair replicates gate changes, departure commits,
+arrival fragments and materialization through server-authored commands. Only the
+server contacts the authority. Imported wagons emerge with their proper spacing,
+and the full train identity retains its original namespace.
+
+`scripts/test_federation_multiplayer.py` now exercises normal map joins, gate
+conversion after both clients join, loaded natural entry, receiving-side movement,
+a native reversal and return. `federation_dispatch` is disabled in multiplayer;
+older manual-dispatch runners are historical developer tools and need migration.
+[Evidence, limitations and replay instructions](audit/2026-09-23/federation-multiplayer/README.md).
+
+### Earlier evidence review on 23 September (before the live repair)
+
+- `scripts/test_sprint35_cross_process.py` launches two dedicated servers and an
+  authority, but triggers outbound and return transfers via `federation_dispatch`.
+- `scripts/cluster_testbed.py` launches three dedicated servers and an authority;
+  its multi-hop and recovery tests also use `federation_dispatch` (for example,
+  lines 605 and 626). Neither runner launches graphical multiplayer clients.
+- Local `logs/cluster/world_1.log` and `world_2.log` contain actual departure and
+  materialisation events, including runs dated 21 September. These logs support
+  cross-process transfer activity, not the requested two-client acceptance.
+- No evidence was found in these runners or reviewed records for two joined
+  clients observing a natural gate-entry round trip. No new live run was made
+  during this documentation review. Historical automated counts below are not
+  evidence that this multiplayer workflow passed.
 
 ## Current recovery and post-recovery status
 
@@ -45,12 +115,13 @@ allocation or a later split fails; [WP-03 evidence](audit/2026-09-15/wp03/README
 records failure injection, reserve/rights boundaries and save/reload.
 WP-10 honest conduit delivery is merged (PR #8) with 6 dedicated Catch2 tests passing.
 External gate custody (WP-F1/WP-F2) and Horizon A multi-node cluster testbed are merged (PRs #12–#17, #21).
-Human acceptance is pending. Audit checks: 435+ registered CTests pass.
+General human UAT and graphics are user-accepted as of 23 September; the two-client
+federation workflow remains open. Historical audit checks: 427 registered CTests pass.
 
 Historical milestone descriptions below retain previous scope/test claims; they
 must not override this correction or be read as current player acceptance.
 
-## Current acceptance correction — v1.1 UAT refresh
+## Historical acceptance correction — v1.1 UAT refresh
 
 The [Sprints 1–42 player checklist](../demo/ALL-FEATURES-UAT.md) and
 [coverage matrix](FEATURE_UI_UAT_COVERAGE.md) supersede historical playable
@@ -162,7 +233,7 @@ Evidence is grouped in the [documentation index](README.md). The principal miles
 | Federation domain and authority protocol | Implemented; protocol accepted | Transfer, identity, admission, ledger, directory, congestion and recovery rules have automated coverage. |
 | Federation runtime | Implemented & verified via cluster testbed | Transport, WP-F1/F2 authority custody, and Horizon A 3-node live cluster testbed implemented and automated verified (`scripts/cluster_testbed.py`). |
 | Player and operator UI | Implemented through Sprint 48 | Main gameplay actions have native UI including Corporate HQ, Stockpiles, Logistics Hubs, In-Kind Fabrication controls, Commonwealth Tech Tree R&D tab, Empire Facility Overlays (Sprint 43), AI competitor controls (Sprint 44), and Prompt-to-Savegame Scenario Generator GUI (Sprint 48). Operator console commands allow runtime federation link management and status inspection. |
-| Guided UAT | Coverage refreshed; human acceptance pending | v1.1 maps Sprints 1–42, repairs player terminal ownership and hub attachment, and explicitly records blocked concepts. v1.0/v0.4 preserved for regression. |
+| Guided UAT | Overall human acceptance reported 23 September | v1.1 maps Sprints 1–42, repairs player terminal ownership and hub attachment, and explicitly records blocked concepts. v1.0/v0.4 preserved for regression. |
 | Commonwealth Track A — naming | Implemented | English and regional string alignment is present. |
 | Commonwealth Track B — gameplay/content/art | Implemented with Sprint 45 visuals | In-tree NML industry/cargo pack (`OST\x01`), CST rolling-stock pack (`OST\x02`), and Unified Commonwealth Visual Overhaul Pack (Sprint 45: monumental portal arches, animated wormhole horizons, 4 distinct biomes, arcologies, and 12-cargo fleet). |
 | Corporate HQ, Stockpiles, Fabrication, Tech Tree & Industry | Implemented; automated verified | Sprints 39–42 delivered Corporate HQ placement, multi-world stockpile accounting (`STCK`), bi-directional logistics hubs with reserve floors (`LHUB`), in-kind fabrication engine (`FABR`), Commonwealth Tech Tree R&D manager (`TECH`), and Factorio-scale 12-cargo production chains (`PROD`) across Pipelines A–D. |
@@ -233,7 +304,9 @@ Delivered Prompt-to-Savegame Generator with CLI, GUI, and procedural synthesis, 
 
 Future development work must follow this dependency order to prevent building advanced gameplay on fragile foundations:
 
-### Phase 1: Foundation & Correctness (Current Priority)
+## Historical evidence gaps — superseded by 23 September direction
+
+### Phase 1: Foundation & Correctness (historical priorities)
 1. **Authoritative Documentation & Baseline Alignment (Sprint 50/Audit):** Source-of-truth documentation tied to exact HEAD (`a6cf83e6a6`), resolving contradictions and establishing strict status definitions.
 2. **Central Validation of References:** Post-load and post-destruction reference validation across custom world, portal, and entity indices in `afterload.cpp`.
 3. **Complete Portal State Persistence:** Operational state, transit queue, and signal reservation persistence across save/load cycles.
@@ -350,3 +423,55 @@ research pass. Validation: 427 unit cases (66,233 assertions), 438/438 CTests,
 both repository linters, content rebuild verification and the legacy v2 WP-11 regression.
 See [reproduction, evidence and limits](CONNECTED_ECONOMY_UAT.md). The next acceptance
 gate is the short human play-through; Sprints 43–50 retain their separate UAT gaps.
+
+## 2026-09-23 — Connected UAT crash and undefined cargo text
+
+Human UAT **failed** on the initial connected save: `GetPartialPixelZ` reached
+`NOT_REACHED` at landscape.cpp:298 while moving the viewport. The preserved
+crash save contained 742 tiles with adjacent corners differing by more than one
+height level. Direct flattening had left discontinuities at the construction
+band boundary. All 13 Commonwealth cargos also lacked their quantity/unit strings.
+
+The generator now smooths exposed terrain; a deterministic, preflighted load
+repair handles the marked legacy fixture without touching infrastructure or
+changing cargo, trains, cash or towns. Industry v4 supplies complete text; the
+unchanged v2/v3 binaries receive a pack-scoped text compatibility repair.
+
+Verification: 429 unit cases / 66,359 assertions; 440/440 CTests; repository
+linters, diff whitespace and reproducible GRF checks passed. The actual crash
+save passed 3,139,587 pixel-height queries and 1,046,529 inverse viewport queries,
+with zero invalid slopes, complete text for all 24 active cargos in English-US
+and English, exact state across reload and continued cargo-conserving simulation.
+The recovered copy retains 37 trains and the city with 1,107 people / 45 houses.
+The original crash save is unchanged. Fresh demo acceptance and legacy v2 WP-11
+acceptance passed. Human graphical retest remains **pending**.
+
+[Recovery evidence](../demo/CONNECTED-UAT-RECOVERY.evidence.json) ·
+[Reproduction](CONNECTED_ECONOMY_UAT.md#terrain-and-cargo-text-recovery-2026-09-23).
+
+## 2026-09-23 — Savegame authoring workflow
+
+[Savegame authoring](SAVEGAME_AUTHORING.md) now records the reproducible build,
+early terrain/text audits, logistics proof, checkpoint use, content compatibility
+and publication workflow. `AGENTS.md` requires future scenario work to use it.
+Documentation-only follow-up: no engine, content or save changes; human visual
+acceptance remains pending. The guide explicitly distinguishes fixture-specific
+assumptions from reusable practices.
+
+## 2026-09-25 — Federation scheduled freight (draft)
+
+Branch `fix/federation-scheduled-recovery` integrates main with PRs #36/#37
+and the existing UAT cargo/terrain recovery and authoring guide. New work adds
+nonblocking multiplayer authority requests, explicit company/station mappings,
+portable station schedules, packet provenance and coordinated-checkpoint tools.
+
+This is **in progress, not sprint completion**. Combined unit tests previously
+passed 438 cases / 66,610 assertions. The transport-only fixture passed a
+30-second authority outage and destination restart with joined clients. The
+scheduled native coal fixture completed three loaded deliveries and empty
+returns (180 coal accepted) before its 600-second timeout; the required five
+cycles and full recovery matrix have **not passed**. Conservation/payment checks
+after five cycles, nonempty custom-state reload, blocked arrival and checkpoint
+phase coverage remain unverified. Human federation UAT remains pending.
+
+See [the implementation record](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).

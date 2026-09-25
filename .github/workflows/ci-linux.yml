@@ -114,12 +114,20 @@ jobs:
         python3 scripts/test_wp11_slice.py --year 1800 --output build/wp11-1800
         python3 scripts/test_wp11_slice.py --year 2300 --output build/wp11-2300
 
+    - name: Connected UAT terrain and cargo recovery
+      timeout-minutes: 10
+      run: |
+        python3 scripts/test_connected_uat_recovery.py --output build/connected-recovery-current
+        python3 scripts/test_connected_uat_recovery.py --save demo/regression/connected-legacy-terrain.sav --output build/connected-recovery-legacy
+
     - name: Preserve economic slice evidence
       if: always()
       uses: actions/upload-artifact@v7
       with:
         name: wp11-${{ inputs.compiler }}-${{ contains(inputs.extra-cmake-parameters, 'OPTION_DEDICATED') && 'dedicated' || 'standard' }}
-        path: build/wp11-*
+        path: |
+          build/wp11-*
+          build/connected-recovery-*
         retention-days: 7
 
     - name: Test

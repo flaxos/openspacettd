@@ -47,6 +47,7 @@
 #include "../tree_cmd.h"
 #include "../tunnelbridge_cmd.h"
 #include "../portal/portal_cmd.h"
+#include "../portal/federation_cmd.h"
 #include "../blueprint/blueprint_cmd.h"
 #include "../vehicle_cmd.h"
 #include "../viewport_cmd.h"
@@ -183,6 +184,16 @@ static constexpr auto _cmd_dispatch = MakeDispatchTable(std::make_integer_sequen
 static CommandQueue _local_wait_queue;
 /** Local queue of packets waiting for execution. */
 static CommandQueue _local_execution_queue;
+
+/** Commands not yet executed by this server, for controlled checkpoint barriers. */
+size_t NetworkPendingCommandCount()
+{
+	size_t count = _local_wait_queue.size() + _local_execution_queue.size();
+	if (_network_server) {
+		for (const NetworkClientSocket *client : NetworkClientSocket::Iterate()) count += client->incoming_queue.size();
+	}
+	return count;
+}
 
 
 /**

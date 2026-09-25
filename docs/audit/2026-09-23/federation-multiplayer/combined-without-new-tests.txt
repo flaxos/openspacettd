@@ -1,0 +1,57 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+openttd_test is a Catch v2.13.10 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Spaceport Manager - Lifecycle and Trade Calculation
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:210
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:250: FAILED:
+  CHECK( info->supplies_received == 100 )
+with expansion:
+  0 == 100
+
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:253: FAILED:
+  CHECK( SpaceportManager::CalculateTradeCargoProduction(*info) == 125 )
+with expansion:
+  75 == 125
+
+[2026-09-23 08:46:17] dbg: [sl:0] Game load failed... Broken savegame - Referencing invalid Town
+-------------------------------------------------------------------------------
+Sprint 9 - Savegame Serialization Round-Trip (SPRT & COND)
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:555
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:608: FAILED:
+  REQUIRE( load_res == SaveLoadResult::Ok )
+with expansion:
+  2 == 0
+
+-------------------------------------------------------------------------------
+Edge Conduit - Constructed tile survives save, reload and signal refresh
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:800
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_spaceports_and_conduits.cpp:815: FAILED:
+  REQUIRE( SaveOrLoad(save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok )
+with expansion:
+  2 == 0
+
+Error: Assertion failed at line 245 of /home/flax/games/openspacettd/src/cargotype.cpp: cargo->town_production_effect != TownProductionEffect::Invalid
+-------------------------------------------------------------------------------
+Sprint 30 Colonization - CmdColonizeOutpost Command and Rule Unlock
+-------------------------------------------------------------------------------
+/home/flax/games/openspacettd/src/tests/test_sprint30_biomes_colonization.cpp:319
+...............................................................................
+
+/home/flax/games/openspacettd/src/tests/test_sprint30_biomes_colonization.cpp:319: FAILED:
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases:   289 |   285 passed | 4 failed
+assertions: 61459 | 61454 passed | 5 failed
