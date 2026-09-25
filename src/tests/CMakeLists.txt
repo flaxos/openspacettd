@@ -26,6 +26,8 @@ add_test_files(
     test_portal_wormhole.cpp
     test_consist_traversal.cpp
     test_federation.cpp
+    test_authority_request_queue.cpp
+    test_federation_reliability.cpp
     test_federation_transfer.cpp
     test_federation_persistent_universe.cpp
     test_federation_megacity_economy.cpp

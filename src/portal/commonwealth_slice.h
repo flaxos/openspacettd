@@ -42,6 +42,9 @@ bool ConConnectedEconomy(std::span<std::string_view> argv);
  */
 bool RepairConnectedEconomyTerrain();
 
+/** Smooth exposed terrain before building an isolated UAT fixture. */
+bool SmoothExposedUATTerrain();
+
 /** Prepare a disposable empty-map federation test before any clients join. */
 bool ConFederationTestFixture(std::span<std::string_view> argv);
 

@@ -105,6 +105,7 @@ struct CommandPacket {
 void NetworkDistributeCommands();
 void NetworkExecuteLocalCommandQueue();
 void NetworkFreeLocalCommandQueue();
+size_t NetworkPendingCommandCount();
 void NetworkSyncCommandQueue(NetworkClientSocket *cs);
 void NetworkReplaceCommandClientId(CommandPacket &cp, ClientID client_id);
 

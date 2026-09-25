@@ -70,6 +70,11 @@ public:
 	static const std::string &GetAuthorityUrl();
 	static bool HasExternalAuthority();
 
+	/** Server-local checkpoint barrier; shared mutations still use native commands. */
+	static void SetTransportQuiescing(bool quiescing);
+	static bool IsTransportQuiescing();
+	static size_t PendingAuthorityRequests();
+
 	/**
 	 * Periodic simulation tick handler for background federation polling.
 	 */

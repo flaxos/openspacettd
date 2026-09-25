@@ -185,6 +185,16 @@ static CommandQueue _local_wait_queue;
 /** Local queue of packets waiting for execution. */
 static CommandQueue _local_execution_queue;
 
+/** Commands not yet executed by this server, for controlled checkpoint barriers. */
+size_t NetworkPendingCommandCount()
+{
+	size_t count = _local_wait_queue.size() + _local_execution_queue.size();
+	if (_network_server) {
+		for (const NetworkClientSocket *client : NetworkClientSocket::Iterate()) count += client->incoming_queue.size();
+	}
+	return count;
+}
+
 
 /**
  * Find the callback index of a callback pointer.

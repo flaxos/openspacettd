@@ -656,6 +656,11 @@ TEST_CASE("Consist Snapshot - v2 encode/decode with company, cargo source, and o
 	/* Encode as v2 */
 	ConsistSnapshotBytes encoded = ConsistSnapshotCodec::Encode(snapshot);
 	REQUIRE(encoded.Succeeded());
+	/* Remove the V3 empty packet lists to retain a genuine V2 regression. */
+	encoded.bytes.erase(encoded.bytes.end() - 4 - snapshot.units.size() * 2 - 2, encoded.bytes.end() - 4);
+	encoded.bytes[4] = 2;
+	WriteTestU32(encoded.bytes, 8, static_cast<uint32_t>(encoded.bytes.size()));
+	RefreshTestChecksum(encoded.bytes);
 	CHECK(encoded.bytes[4] == 2); // Version 2
 	CHECK(encoded.bytes[5] == 0);
 

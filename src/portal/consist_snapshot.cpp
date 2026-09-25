@@ -7,6 +7,7 @@
 
 #include "../stdafx.h"
 #include "consist_snapshot.h"
+#include "federation_cargo.h"
 
 #include "../base_consist.h"
 #include "../cargo_type.h"
@@ -120,6 +121,43 @@ private:
 	size_t offset = 0;
 };
 
+static void WritePacketSource(ByteWriter &writer, const GlobalCargoSourceID &source)
+{
+	writer.U64(source.name_space.high);
+	writer.U64(source.name_space.low);
+	writer.U64(source.origin_station.name_space.high);
+	writer.U64(source.origin_station.name_space.low);
+	writer.U64(source.origin_station.sequence);
+	writer.U32(source.origin_station.world_id.base());
+	writer.U8(static_cast<uint8_t>(source.source_type));
+	writer.U64(source.source_sequence);
+	writer.U32(source.origin_world.base());
+	writer.U32(source.origin_tile_x);
+	writer.U32(source.origin_tile_y);
+}
+
+static bool ReadPacketSource(ByteReader &reader, GlobalCargoSourceID &source)
+{
+	uint32_t station_world, world;
+	uint8_t type;
+	if (!reader.U64(source.name_space.high) ||
+			!reader.U64(source.name_space.low) ||
+			!reader.U64(source.origin_station.name_space.high) ||
+			!reader.U64(source.origin_station.name_space.low) ||
+			!reader.U64(source.origin_station.sequence) ||
+			!reader.U32(station_world) ||
+			!reader.U8(type) ||
+			!reader.U64(source.source_sequence) ||
+			!reader.U32(world) ||
+			!reader.U32(source.origin_tile_x) ||
+			!reader.U32(source.origin_tile_y)) return false;
+	if (type > static_cast<uint8_t>(SourceType::Headquarters)) return false;
+	source.origin_station.world_id = WorldID{station_world};
+	source.origin_world = WorldID{world};
+	source.source_type = static_cast<SourceType>(type);
+	return true;
+}
+
 static uint32_t SnapshotChecksum(std::span<const uint8_t> bytes)
 {
 	uint32_t crc = 0xFFFFFFFFU;
@@ -134,6 +172,12 @@ static bool IsSnapshotValid(const ConsistSnapshot &snapshot)
 {
 	if (!snapshot.consist_id.IsValid() || snapshot.units.empty() || snapshot.units.size() > CONSIST_SNAPSHOT_MAX_UNITS) return false;
 	if (snapshot.orders.size() > CONSIST_SNAPSHOT_MAX_ORDERS) return false;
+	if (!snapshot.station_order_flags.empty() && snapshot.station_order_flags.size() != snapshot.orders.size()) return false;
+	for (uint16_t flags : snapshot.station_order_flags) {
+		uint load = flags & 7, unload = (flags >> 3) & 7;
+		if ((load != 0 && load != 2 && load != 3 && load != 4) ||
+				(unload != 0 && unload != 1 && unload != 2 && unload != 4) || (flags >> 8) > 2) return false;
+	}
 	if (!snapshot.orders.empty() && snapshot.current_order_index >= snapshot.orders.size()) return false;
 	if (snapshot.orders.empty() && snapshot.current_order_index != 0) return false;
 	if (snapshot.direction >= to_underlying(Direction::End)) return false;
@@ -141,6 +185,14 @@ static bool IsSnapshotValid(const ConsistSnapshot &snapshot)
 		if (unit.engine_type == EngineID::Invalid().base()) return false;
 		if (unit.cargo_type >= NUM_CARGO) return false;
 		if (unit.cargo_count > unit.cargo_capacity) return false;
+		uint32_t packets_count = 0;
+		if (unit.packets.size() > CONSIST_SNAPSHOT_MAX_BYTES / sizeof(ConsistSnapshotPacket)) return false;
+		for (const auto &packet : unit.packets) {
+			if (packet.count == 0 || packet.travelled_x < INT16_MIN || packet.travelled_x > INT16_MAX ||
+					packet.travelled_y < INT16_MIN || packet.travelled_y > INT16_MAX) return false;
+			packets_count += packet.count;
+		}
+		if (!unit.packets.empty() && packets_count != unit.cargo_count) return false;
 		if (unit.cargo_count == 0) {
 			if (unit.cargo_provenance_unresolved || unit.cargo_source.IsValid()) return false;
 		} else {
@@ -214,7 +266,8 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 			const auto *packets = unit->cargo.Packets();
 			if (packets != nullptr && !packets->empty()) {
 				const CargoPacket *first_packet = packets->front();
-				GlobalCargoSourceID source = FederationIdentityRegistry::CreateCargoSource(
+				const auto *preserved = FederationCargoRegistry::Find(first_packet->index.base());
+				GlobalCargoSourceID source = preserved != nullptr ? *preserved : FederationIdentityRegistry::CreateCargoSource(
 					first_packet->GetFirstStation(),
 					first_packet->GetSource(),
 					first_packet->GetSourceXY()
@@ -230,11 +283,20 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 			}
 		}
 
+		for (const CargoPacket *packet : *unit->cargo.Packets()) {
+			const auto *preserved = FederationCargoRegistry::Find(packet->index.base());
+			const auto origin = preserved != nullptr ? *preserved : FederationIdentityRegistry::CreateCargoSource(
+				packet->GetFirstStation(), packet->GetSource(), packet->GetSourceXY());
+			snap_unit.packets.push_back({packet->Count(), packet->GetPeriodsInTransit(), packet->GetFeederShare().base(),
+				packet->travelled.x, packet->travelled.y,
+				packet->GetSourceXY() == INVALID_TILE ? UINT32_MAX : TileX(packet->GetSourceXY()),
+				packet->GetSourceXY() == INVALID_TILE ? UINT32_MAX : TileY(packet->GetSourceXY()), origin});
+		}
 		snapshot.units.push_back(snap_unit);
 	}
 
 	/* Check if a registered master schedule exists for this consist */
-	if (auto master = FederationIdentityRegistry::GetConsistSchedule(snapshot.consist_id.sequence); master.has_value() && !master->empty()) {
+	if (auto master = FederationIdentityRegistry::GetConsistSchedule(snapshot.consist_id); master.has_value() && !master->empty()) {
 		snapshot.orders = *master;
 		snapshot.current_order_index = (train->cur_real_order_index < snapshot.orders.size())
 			? static_cast<uint16_t>(train->cur_real_order_index) : 0;
@@ -257,6 +319,16 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 		snapshot.current_order_index = found_match ? matched_idx : 0;
 	}
 
+	if (train->orders != nullptr && snapshot.orders.size() == train->GetNumOrders()) {
+		for (size_t i = 0; i < snapshot.orders.size(); ++i) {
+			const Order *order = train->GetOrder(static_cast<VehicleOrderID>(i));
+			uint16_t flags = 0;
+			if (order->IsType(OT_GOTO_STATION)) flags = to_underlying(order->GetLoadType()) |
+				(to_underlying(order->GetUnloadType()) << 3) | (order->GetNonStopType().base() << 6) |
+				(to_underlying(order->GetStopLocation()) << 8);
+			snapshot.station_order_flags.push_back(flags);
+		}
+	}
 	if (!IsSnapshotValid(snapshot)) return {ConsistSnapshotError::InvalidConsist, std::nullopt};
 	return {ConsistSnapshotError::None, std::move(snapshot)};
 }
@@ -354,6 +426,22 @@ ConsistSnapshotBytes ConsistSnapshotCodec::Encode(const ConsistSnapshot &snapsho
 		writer.U32(order.target_world.base());
 	}
 
+	/* V3 appends native packet state; old V1/V2 envelopes remain readable. */
+	for (const auto &unit : snapshot.units) {
+		writer.U16(static_cast<uint16_t>(unit.packets.size()));
+		for (const auto &packet : unit.packets) {
+			writer.U16(packet.count);
+			writer.U16(packet.periods_in_transit);
+			writer.I64(packet.feeder_share);
+			writer.I32(packet.travelled_x);
+			writer.I32(packet.travelled_y);
+			writer.U32(packet.source_x);
+			writer.U32(packet.source_y);
+			WritePacketSource(writer, packet.source);
+		}
+	}
+	writer.U16(static_cast<uint16_t>(snapshot.station_order_flags.size()));
+	for (uint16_t flags : snapshot.station_order_flags) writer.U16(flags);
 	if (writer.data.size() + sizeof(uint32_t) > CONSIST_SNAPSHOT_MAX_BYTES) return {ConsistSnapshotError::TooLarge, {}};
 	uint32_t total_size = static_cast<uint32_t>(writer.data.size() + sizeof(uint32_t));
 	for (uint shift = 0; shift < 32; shift += 8) writer.data[SNAPSHOT_LENGTH_OFFSET + shift / 8] = static_cast<uint8_t>(total_size >> shift);
@@ -378,7 +466,7 @@ ConsistSnapshotResult ConsistSnapshotCodec::Decode(std::span<const uint8_t> byte
 		return {ConsistSnapshotError::Truncated, std::nullopt};
 	}
 	if (magic != SNAPSHOT_MAGIC) return {ConsistSnapshotError::InvalidMagic, std::nullopt};
-	if (version != 1 && version != 2) return {ConsistSnapshotError::UnsupportedVersion, std::nullopt};
+	if (version != 1 && version != 2 && version != 3) return {ConsistSnapshotError::UnsupportedVersion, std::nullopt};
 	if (reserved != 0) return {ConsistSnapshotError::InvalidField, std::nullopt};
 	if (total_size != bytes.size()) return {ConsistSnapshotError::LengthMismatch, std::nullopt};
 
@@ -481,6 +569,30 @@ ConsistSnapshotResult ConsistSnapshotCodec::Decode(std::span<const uint8_t> byte
 		}
 	}
 
+	if (version >= 3) {
+		for (auto &unit : snapshot.units) {
+			uint16_t count;
+			if (!reader.U16(count)) return {ConsistSnapshotError::Truncated, std::nullopt};
+			if (count > CONSIST_SNAPSHOT_MAX_BYTES / sizeof(ConsistSnapshotPacket)) return {ConsistSnapshotError::InvalidField, std::nullopt};
+			for (uint16_t i = 0; i < count; ++i) {
+				ConsistSnapshotPacket packet;
+				if (!reader.U16(packet.count) || !reader.U16(packet.periods_in_transit) || !reader.I64(packet.feeder_share) ||
+						!reader.I32(packet.travelled_x) || !reader.I32(packet.travelled_y) || !reader.U32(packet.source_x) ||
+						!reader.U32(packet.source_y) || !ReadPacketSource(reader, packet.source)) return {ConsistSnapshotError::Truncated, std::nullopt};
+				unit.packets.push_back(packet);
+			}
+		}
+	}
+	if (version >= 3) {
+		uint16_t count;
+		if (!reader.U16(count)) return {ConsistSnapshotError::Truncated, std::nullopt};
+		if (count > CONSIST_SNAPSHOT_MAX_ORDERS) return {ConsistSnapshotError::InvalidField, std::nullopt};
+		for (uint16_t i = 0; i < count; ++i) {
+			uint16_t flags;
+			if (!reader.U16(flags)) return {ConsistSnapshotError::Truncated, std::nullopt};
+			snapshot.station_order_flags.push_back(flags);
+		}
+	}
 	if (reader.Remaining() != 0) return {ConsistSnapshotError::LengthMismatch, std::nullopt};
 	if (!IsSnapshotValid(snapshot)) return {ConsistSnapshotError::InvalidField, std::nullopt};
 	return {ConsistSnapshotError::None, std::move(snapshot)};

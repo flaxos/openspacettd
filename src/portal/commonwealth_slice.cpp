@@ -7,6 +7,8 @@
 #include "portal_registry.h"
 #include "portal_cmd.h"
 #include "federation_cmd.h"
+#include "federation_identity.h"
+#include "consist_materializer.h"
 #include "../tunnel_map.h"
 #include "logistics_hub.h"
 #include "../command_func.h"
@@ -312,10 +314,12 @@ bool ConCommonwealthSlice(std::span<std::string_view> argv)
 /** Disposable native-engine fixture for a loaded natural gate entry with joined clients. */
 bool ConFederationTestFixture(std::span<std::string_view> argv)
 {
-	if (argv.size() != 2 || (argv[1] != "1" && argv[1] != "2")) {
-		IConsolePrint(CC_HELP, "federation_test_fixture 1|2: prepare a fresh empty test map before clients join");
+	if ((argv.size() != 2 && argv.size() != 3) || (argv[1] != "1" && argv[1] != "2") ||
+			(argv.size() == 3 && argv[2] != "scheduled")) {
+		IConsolePrint(CC_HELP, "federation_test_fixture 1|2 [scheduled]: prepare a fresh empty test map before clients join");
 		return true;
 	}
+	const bool scheduled = argv.size() == 3;
 	if ((_networking && (!_network_dedicated || HasClients())) || Company::GetNumItems() != 0 ||
 			Vehicle::GetNumItems() != 0 || Industry::GetNumItems() != 0 || PortalRegistry::Count() != 0 ||
 			Map::SizeX() != 512 || Map::SizeY() != 128) {
@@ -333,6 +337,10 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 		MakeClear(TileXY(x, y), ClearGround::Grass, 3);
 		SetTileHeight(TileXY(x, y), 1);
 	}
+	if (!SmoothExposedUATTerrain()) {
+		IConsolePrint(CC_ERROR, "Federation fixture terrain preflight failed");
+		return true;
+	}
 	extern Company *DoStartupNewCompany(bool is_ai, CompanyID company);
 	Company *company = DoStartupNewCompany(false, CompanyID{0});
 	if (company == nullptr) return true;
@@ -342,30 +350,67 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 	const uint32_t world = argv[1] == "1" ? 1 : 2;
 	PlanetManager::Reset();
 	PlanetManager::RegisterRegion({.id = WorldID{world}, .name = fmt::format("Federation Server {}", world),
-		.phase = WorldPhase::Phase1_Core, .biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1,
+		.phase = scheduled && world == 1 ? WorldPhase::Phase3_Frontier : WorldPhase::Phase1_Core,
+		.biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1,
 		.max_x = Map::SizeX() - 2, .max_y = Map::SizeY() - 2});
 	AutoRestoreBackup owner(_current_company, CompanyID{0});
-	for (uint x = 11; x < 50; x++) MakeRailNormal(TileXY(x, 40), company->index, TrackBits{Track::X}, RAILTYPE_RAIL);
+	for (uint x = 11; x < 50; x++) {
+		if (!SliceResult(Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, TileXY(x, 40), RAILTYPE_RAIL, Track::X, false), "federation rail")) return true;
+	}
 	MakeRailTunnel(TileXY(50, 40), company->index, DiagDirection::SW, RAILTYPE_RAIL);
 	/* Start as a local pair: the test converts the used head after clients
 	 * have joined, reproducing the configuration race from the reported session. */
 	MakeRailTunnel(TileXY(50, 60), company->index, DiagDirection::NE, RAILTYPE_RAIL);
 	PortalRegistry::RegisterPortalPair(TileXY(50, 40), DiagDirection::SW, WorldID{world}, TileXY(50, 60), DiagDirection::NE, WorldID{3}, 5);
 	if (!SliceResult(Command<Commands::BuildRailDepot>::Do(DoCommandFlag::Execute, TileXY(10, 40), RAILTYPE_RAIL, DiagDirection::SW), "federation depot")) return true;
+	StationID local_station = StationID::Invalid(), remote_station = StationID::Invalid();
+	if (scheduled) {
+		const auto local_namespace = FederationIdentityRegistry::DeriveNamespace(100 + world, 512, 128, 1950);
+		const auto remote_namespace = FederationIdentityRegistry::DeriveNamespace(103 - world, 512, 128, 1950);
+		const auto company_namespace = FederationIdentityRegistry::DeriveNamespace(101, 512, 128, 1950);
+		FederationIdentityRegistry::Reset();
+		FederationIdentityRegistry::RestoreState(local_namespace, 1);
+		if (!FederationIdentityRegistry::RestoreCompanyMapping(company->index, 1, company_namespace)) return true;
+		const uint station_x = world == 1 ? 20 : 30;
+		/* Native industry slots 0/1 are coal mine/power station; this fixture loads no GRFs. */
+		if (!SliceResult(Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, TileXY(station_x, 36),
+				static_cast<IndustryType>(world == 1 ? 0 : 1), 0, false, 1), "federation native industry")) return true;
+		if (!SliceResult(Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, TileXY(station_x, 40),
+				RAILTYPE_RAIL, Axis::X, 1, 3, STAT_CLASS_DFLT, 0, NEW_STATION, true), "federation industry station")) return true;
+		local_station = GetStationIndex(TileXY(station_x, 40));
+		Station::Get(local_station)->name = world == 1 ? "World 1 Coal Mine" : "World 2 Power Station";
+		if (!FederationIdentityRegistry::GetOrCreateStation(local_station)) return true;
+		/* A real local gate booking station keeps native orders and cargo routing valid.
+		 * Its explicit remote identity makes train pathfinding target the gate head. */
+		if (!SliceResult(Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, TileXY(44, 44),
+				RAILTYPE_RAIL, Axis::X, 1, 3, STAT_CLASS_DFLT, 0, NEW_STATION, true), "federation gate station")) return true;
+		remote_station = GetStationIndex(TileXY(44, 44));
+		Station::Get(remote_station)->name = world == 1 ? "World 2 Power Station via Gate" : "World 1 Coal Mine via Gate";
+		if (!FederationIdentityRegistry::RestoreStationMapping(remote_station, 1, remote_namespace, WorldID{3 - world})) return true;
+	}
 	if (world == 1) {
 		auto [cost, id, unused, capacity, refits] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, TileXY(10, 40), EngineID{0}, false, INVALID_CARGO, ClientID::Invalid);
 		if (!SliceResult(cost, "federation locomotive")) return true;
-		auto [wagon_cost, wagon_id, unused2, capacity2, refits2] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, TileXY(10, 40), EngineID{29}, false, INVALID_CARGO, ClientID::Invalid);
-		if (!SliceResult(wagon_cost, "federation coal wagon")) return true;
-		Train *wagon = Train::Get(wagon_id);
-		if (wagon->First()->index != id && !SliceResult(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, wagon_id, id, false), "federation consist")) return true;
-		if (wagon->cargo_cap < 10) return true;
-		if (!CargoPacket::CanAllocateItem()) return true;
-		wagon->cargo.Append(CargoPacket::Create(10, 0, StationID::Invalid(), TileXY(10, 40), 0));
-		/* Cargo is seeded only in the offline fixture; no cargo is injected during transit. */
+		for (uint i = 0; i < (scheduled ? 2u : 1u); ++i) {
+			auto [wagon_cost, wagon_id, unused2, capacity2, refits2] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, TileXY(10, 40), EngineID{29}, false, INVALID_CARGO, ClientID::Invalid);
+			if (!SliceResult(wagon_cost, "federation coal wagon")) return true;
+			Train *wagon = Train::Get(wagon_id);
+			if (wagon->First()->index != id && !SliceResult(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, wagon_id, id, false), "federation consist")) return true;
+			if (!scheduled) {
+				if (wagon->cargo_cap < 10 || !CargoPacket::CanAllocateItem()) return true;
+				CargoPacket *cargo = CargoPacket::Create(10, 0, StationID::Invalid(), TileXY(10, 40), 0);
+				cargo->UpdateLoadingTile(TileXY(10, 40));
+				wagon->cargo.Append(cargo);
+			}
+		}
+		if (scheduled && !ConsistMaterializer::AssignRoundTripOrders(Train::Get(id), local_station, WorldID{1}, remote_station, WorldID{2})) return true;
+		if (scheduled) {
+			Train::Get(id)->GetOrder(0)->SetLoadType(OrderLoadType::FullLoad);
+			Train::Get(id)->current_order = *Train::Get(id)->GetOrder(0);
+		}
 		if (!SliceResult(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, id, true), "federation start")) return true;
 	}
 	_pause_mode.Set(PauseMode::Normal);
-	IConsolePrint(CC_DEFAULT, "Federation fixture ready: world={}, gate={}, cargo={}", world, TileXY(50, 40).base(), world == 1 ? 10 : 0);
+	IConsolePrint(CC_DEFAULT, "Federation fixture ready: world={}, gate={}, cargo={}", world, TileXY(50, 40).base(), !scheduled && world == 1 ? 10 : 0);
 	return true;
 }

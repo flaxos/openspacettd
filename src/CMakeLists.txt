@@ -416,11 +416,18 @@ add_files(
     portal/federation_cmd.cpp
     portal/authority_transport.cpp
     portal/authority_transport.h
+    portal/authority_request_queue.h
     portal/federation_cmd.h
     portal/federation_auth_gui.cpp
     portal/federation_auth_gui.h
     portal/federation_identity.cpp
     portal/federation_identity.h
+    portal/federation_orders.cpp
+    portal/federation_orders.h
+    portal/federation_cargo.cpp
+    portal/federation_cargo.h
+    portal/federation_diagnostics.cpp
+    portal/federation_diagnostics.h
     portal/federation_player.cpp
     portal/federation_player.h
     portal/federation_staging.cpp

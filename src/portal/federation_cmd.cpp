@@ -8,6 +8,7 @@
 #include "../stdafx.h"
 #include "federation_cmd.h"
 #include "authority_transport.h"
+#include "authority_request_queue.h"
 #include "consist_materializer.h"
 #include "federation_identity.h"
 #include "planet_manager.h"
@@ -41,11 +42,28 @@
 
 static std::string _authority_url;
 static std::set<std::string> _network_departures_sent;
+static AuthorityRequestQueue _network_authority_requests;
+static std::map<WorldID, std::set<std::string>> _network_pending_transfers;
 static void PollNetworkFederation(uint64_t current_tick);
 
+void FederationTransferManager::SetTransportQuiescing(bool quiescing)
+{
+	_network_authority_requests.SetQuiescing(quiescing);
+}
+
+bool FederationTransferManager::IsTransportQuiescing()
+{
+	return _network_authority_requests.IsQuiescing();
+}
+
+size_t FederationTransferManager::PendingAuthorityRequests()
+{
+	return _network_authority_requests.PendingCount();
+}
 
 void FederationTransferManager::SetAuthorityUrl(std::string url)
 {
+	if (_authority_url != url) _network_authority_requests.Reset();
 	_authority_url = std::move(url);
 }
 
@@ -73,6 +91,8 @@ void FederationTransferManager::Reset()
 	TransferJournal::Reset();
 	_authority_url.clear();
 	_network_departures_sent.clear();
+	_network_pending_transfers.clear();
+	_network_authority_requests.Reset();
 }
 
 bool FederationTransferManager::InitiateConsistDeparture(Train *consist, TileIndex portal_tile)
@@ -640,13 +660,14 @@ static void PollNetworkFederation([[maybe_unused]] uint64_t current_tick)
 {
 	if (!FederationTransferManager::HasExternalAuthority()) return;
 	const auto &url = FederationTransferManager::GetAuthorityUrl();
+	_network_authority_requests.Sweep();
 	/* Copy: command execution can change the journal in a non-network test harness. */
 	const auto records = TransferJournal::GetAll();
 	for (const auto &[key, cp] : records) {
 		if (cp.request_id.starts_with("DEP-")) {
 			if (cp.state == TransferCheckpointState::Departed && !_network_departures_sent.contains(cp.transfer_id)) {
-				AuthorityRequest depart(url, AuthorityOperation::Depart, {{"transfer_id", cp.transfer_id}}, cp.source_world);
-				if (depart.ExecuteSync()) _network_departures_sent.insert(cp.transfer_id);
+				auto depart = _network_authority_requests.Poll(url, AuthorityOperation::Depart, cp.transfer_id, {{"transfer_id", cp.transfer_id}}, cp.source_world);
+				if (depart) _network_departures_sent.insert(cp.transfer_id);
 			} else if (cp.state == TransferCheckpointState::Prepared) {
 				auto decoded = ConsistSnapshotCodec::DecodeForCurrentContent(cp.snapshot);
 				if (!decoded.Succeeded()) continue;
@@ -659,24 +680,24 @@ static void PollNetworkFederation([[maybe_unused]] uint64_t current_tick)
 						breakdown[type] = breakdown.value(type, 0u) + unit.cargo_count;
 					}
 				}
-				AuthorityRequest initiate(url, AuthorityOperation::Initiate, {
+				auto initiate = _network_authority_requests.Poll(url, AuthorityOperation::Initiate, cp.request_id, {
 					{"request_id", cp.request_id}, {"source_world", cp.source_world}, {"dest_world", cp.destination_world},
 					{"source_gate", cp.source_gate_id}, {"dest_gate", cp.destination_gate_id},
 					{"snapshot_base64", Base64Encode(cp.snapshot)}, {"total_cargo", cargo}, {"cargo_breakdown", breakdown},
 					{"consist_id", fmt::format("{:x}:{:x}:{}", cp.namespace_high, cp.namespace_low, cp.consist_sequence)},
 					{"transit_delay_sec", 1.0}, {"priority", "STANDARD"}
 				}, cp.source_world);
-				if (initiate.ExecuteSync()) {
-					const auto tx = initiate.GetResponse().value("transfer_id", "");
+				if (initiate) {
+					const auto tx = initiate->value("transfer_id", "");
 					if (!tx.empty()) Command<Commands::CommitFederationDeparture>::Post(cp.source_world, cp.request_id, tx);
 				}
 			}
 		} else if (cp.request_id.starts_with("ARR-")) {
 			if (cp.state == TransferCheckpointState::Materialized) {
-				AuthorityRequest confirm(url, AuthorityOperation::Confirm, {{"transfer_id", cp.transfer_id},
+				auto confirm = _network_authority_requests.Poll(url, AuthorityOperation::Confirm, cp.transfer_id, {{"transfer_id", cp.transfer_id},
 					{"dest_world", cp.destination_world}, {"success", true}, {"arrival_receipt", cp.arrival_receipt}, {"advance_order", true}}, cp.destination_world);
-				if (confirm.ExecuteSync()) Command<Commands::ConfirmFederationArrival>::Post(cp.transfer_id);
-			} else if (cp.state == TransferCheckpointState::Prepared && ConsistSnapshotCodec::DecodeForCurrentContent(cp.snapshot).Succeeded()) {
+				if (confirm) Command<Commands::ConfirmFederationArrival>::Post(cp.transfer_id);
+			} else if (!_network_authority_requests.IsQuiescing() && cp.state == TransferCheckpointState::Prepared && ConsistSnapshotCodec::DecodeForCurrentContent(cp.snapshot).Succeeded()) {
 				Command<Commands::MaterializeFederationArrival>::Post(cp.transfer_id);
 			}
 		}
@@ -684,18 +705,22 @@ static void PollNetworkFederation([[maybe_unused]] uint64_t current_tick)
 	std::set<WorldID> worlds;
 	for (const auto &[tile, link] : PortalRegistry::GetAllInterServerPortals()) worlds.insert(link.local_endpoint.world_id);
 	for (WorldID world : worlds) {
-		AuthorityRequest pending(url, AuthorityOperation::Pending, nlohmann::json::object(), world.base());
-		if (!pending.ExecuteSync()) continue;
-		const auto &response = pending.GetResponse();
-		const auto transfers = response.value("pending_transfers", response.value("pending", nlohmann::json::array()));
-		if (!transfers.is_array()) continue;
-		for (const auto &item : transfers) {
-			if (!item.is_string()) continue;
-			const auto tx = item.get<std::string>();
+		auto pending = _network_authority_requests.Poll(url, AuthorityOperation::Pending, "pending", nlohmann::json::object(), world.base());
+		auto &known = _network_pending_transfers[world];
+		if (pending) {
+			const auto transfers = pending->value("pending_transfers", pending->value("pending", nlohmann::json::array()));
+			if (transfers.is_array()) {
+				known.clear();
+				for (const auto &item : transfers) {
+					if (item.is_string() && item.get_ref<const std::string &>().size() <= 128 && known.size() < 4096) known.insert(item.get<std::string>());
+				}
+			}
+		}
+		for (const auto &tx : known) {
 			if (TransferJournal::HasArrival(tx)) continue;
-			AuthorityRequest claim(url, AuthorityOperation::Claim, {{"transfer_id", tx}, {"dest_world", world.base()}}, world.base());
-			if (!claim.ExecuteSync()) continue;
-			const auto &data = claim.GetResponse();
+			auto claim = _network_authority_requests.Poll(url, AuthorityOperation::Claim, tx, {{"transfer_id", tx}, {"dest_world", world.base()}}, world.base());
+			if (!claim) continue;
+			const auto &data = *claim;
 			const auto bytes = Base64Decode(data.value("snapshot_base64", ""));
 			auto decoded = ConsistSnapshotCodec::DecodeForCurrentContent(bytes);
 			if (!decoded.Succeeded() || bytes.size() > 1024 * 1024) continue;

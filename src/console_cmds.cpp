@@ -54,6 +54,8 @@
 #include "misc_cmd.h"
 #include "portal/universe_authority.h"
 #include "portal/federation_cmd.h"
+#include "portal/federation_diagnostics.h"
+#include "network/network_internal.h"
 #include "portal/federation_player.h"
 #include "portal/federation_staging.h"
 #include "portal/megacity_manager.h"
@@ -2852,6 +2854,23 @@ static bool ConFederationAuthority(std::span<std::string_view> argv)
 	return true;
 }
 
+/** Drain server transport before a coordinated checkpoint. @copydoc IConsoleCmdProc */
+static bool ConFederationTransport(std::span<std::string_view> argv)
+{
+	if (argv.size() != 2 || (argv[1] != "status" && argv[1] != "quiesce" && argv[1] != "resume")) {
+		IConsolePrint(CC_HELP, "federation_transport status|quiesce|resume");
+		return true;
+	}
+	if (argv[1] != "status") FederationTransferManager::SetTransportQuiescing(argv[1] == "quiesce");
+	size_t commands = 0;
+	if (_networking) commands = NetworkPendingCommandCount();
+	IConsolePrint(CC_DEFAULT, "Federation transport {}", nlohmann::json{
+		{"quiescing", FederationTransferManager::IsTransportQuiescing()},
+		{"requests", FederationTransferManager::PendingAuthorityRequests()},
+		{"commands", commands}}.dump());
+	return true;
+}
+
 /** Link a portal gate to a remote server world gate. @copydoc IConsoleCmdProc */
 static bool ConFederationLinkGate(std::span<std::string_view> argv)
 {
@@ -4289,6 +4308,8 @@ void IConsoleStdLibRegister()
 	IConsole::AliasRegister("players",               "companies");
 	IConsole::CmdRegister("federation_status",       ConFederationStatus);
 	IConsole::CmdRegister("federation_authority",    ConFederationAuthority, ConHookServerOrNoNetwork);
+	IConsole::CmdRegister("federation_transport",    ConFederationTransport, ConHookServerOrNoNetwork);
+	IConsole::CmdRegister("federation_freight_status", ConFederationFreightStatus);
 	IConsole::CmdRegister("federation_link_gate",    ConFederationLinkGate, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_link_staging", ConFederationLinkStaging, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_set_world",    ConFederationSetWorld);

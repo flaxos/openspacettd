@@ -306,3 +306,24 @@ uses the same routine before constructing the network. No new save chunk or worl
 layout is introduced. `CommonwealthPackManager::RepairLegacyCargoStrings` repairs
 only the identified v2/v3 industry pack after GRF string mapping. Industry v4
 contains complete cargo text directly; legacy binaries retain their exact hashes.
+
+## Draft federation reliability branch — 25 September 2026
+
+The `fix/federation-scheduled-recovery` branch adds an asynchronous, bounded
+request queue for multiplayer authority traffic. HTTP results feed native
+replicated commands; singleplayer retains its existing transport path.
+Foreign station destinations resolve through explicit full-identity mappings to
+local gate booking stations. The adapter directs native station orders to the
+interserver gate without stopping at the booking station.
+
+Snapshot version 3 adds per-packet quantity, age, feeder share, payment vectors
+and global provenance, plus native station order flags. Versions 1/2 remain
+readable with their original aggregate-cargo limitations. New FSCH and FGCP
+chunks persist full-identity master schedules and packet provenance; FIDS
+preserves explicit foreign company/station aliases. These are draft changes:
+nonempty new-chunk reload and complete scheduled recovery acceptance remain
+unverified. Each server still owns one ordinary global tile map.
+
+The checkpoint tool hashes a matched pair of saves, authority state and binary.
+Its recovery contract accepts only the latest coordinated checkpoint, not
+arbitrary historical saves or unexpected-crash recovery.

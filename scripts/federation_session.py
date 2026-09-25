@@ -35,14 +35,14 @@ def main():
             continue
         commands = {"pause": "pause", "resume": "unpause", "status": "federation_trains",
                     "reverse": f"federation_train_action {args.vehicle} reverse"}
-        descriptor = os.open(directory / f"{record['name']}.console", os.O_WRONLY | os.O_NONBLOCK)
+        descriptor = os.open(record["console"], os.O_WRONLY | os.O_NONBLOCK)
         try:
             os.write(descriptor, (commands[args.action] + "\n").encode())
         finally:
             os.close(descriptor)
         if args.action == "status":
             time.sleep(.3)
-            log = (directory / f"{record['name']}.log").read_text(errors="replace")
+            log = Path(record.get("log", directory / f"{record['name']}.log")).read_text(errors="replace")
             index = log.rfind("Trains on this server:")
             print(record["name"], "port", record["port"])
             print(log[index:] if index != -1 else "\n".join(log.splitlines()[-10:]))

@@ -180,7 +180,7 @@ public:
 	static std::optional<GlobalCompanyID> GetOrCreateCompany(CompanyID company);
 	static void ReleaseCompany(CompanyID company);
 	static const std::map<uint8_t, uint64_t> &GetCompanyMappings();
-	static bool RestoreCompanyMapping(CompanyID company, uint64_t sequence);
+	static bool RestoreCompanyMapping(CompanyID company, uint64_t sequence, FederationNamespace name_space = {});
 	static void PruneStaleCompanyMappings();
 
 	/* Station identity */
@@ -188,7 +188,7 @@ public:
 	static std::optional<GlobalStationID> GetOrCreateStation(StationID station);
 	static void ReleaseStation(StationID station);
 	static const std::map<uint32_t, uint64_t> &GetStationMappings();
-	static bool RestoreStationMapping(StationID station, uint64_t sequence);
+	static bool RestoreStationMapping(StationID station, uint64_t sequence, FederationNamespace name_space = {}, WorldID world = INVALID_WORLD);
 	static void PruneStaleStationMappings();
 
 	/* Cargo source identity */
@@ -205,9 +205,12 @@ public:
 	static std::optional<DestinationID> ResolveOrderDestination(const GlobalOrderDestinationID &order, WorldID current_world);
 
 	/* Consist master schedule management */
-	static void SetConsistSchedule(uint64_t consist_seq, std::vector<GlobalOrderDestinationID> schedule);
-	static std::optional<std::vector<GlobalOrderDestinationID>> GetConsistSchedule(uint64_t consist_seq);
-	static void ClearConsistSchedule(uint64_t consist_seq);
+	static void SetConsistSchedule(GlobalConsistID consist_id, std::vector<GlobalOrderDestinationID> schedule);
+	static std::optional<std::vector<GlobalOrderDestinationID>> GetConsistSchedule(GlobalConsistID consist_id);
+	static void ClearConsistSchedule(GlobalConsistID consist_id);
+
+	static const std::map<GlobalConsistID, std::vector<GlobalOrderDestinationID>> &GetConsistSchedules();
+	static void PruneStaleSchedules();
 
 	/* Counters and restoration */
 	static void RestoreCounters(uint64_t next_company, uint64_t next_station, uint64_t next_source);

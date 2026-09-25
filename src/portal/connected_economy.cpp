@@ -543,6 +543,11 @@ bool RepairConnectedEconomyTerrain()
 	return SmoothTerrain();
 }
 
+bool SmoothExposedUATTerrain()
+{
+	return SmoothTerrain();
+}
+
 bool ConConnectedEconomy(std::span<std::string_view> argv)
 {
 	if (argv.size() != 2) {

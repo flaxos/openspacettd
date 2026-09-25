@@ -294,3 +294,21 @@ acceptance passed. Human graphical retest remains **pending**.
 Documented the terrain, cargo-text, logistics and recovery lessons in
 [Savegame authoring](../docs/SAVEGAME_AUTHORING.md), with a required `AGENTS.md`
 checklist. This documentation change adds no human acceptance claim or new save.
+
+## 2026-09-25 — Federation scheduled freight (draft)
+
+Branch `fix/federation-scheduled-recovery` integrates main with PRs #36/#37
+and the existing UAT cargo/terrain recovery and authoring guide. New work adds
+nonblocking multiplayer authority requests, explicit company/station mappings,
+portable station schedules, packet provenance and coordinated-checkpoint tools.
+
+This is **in progress, not sprint completion**. Combined unit tests previously
+passed 438 cases / 66,610 assertions. The transport-only fixture passed a
+30-second authority outage and destination restart with joined clients. The
+scheduled native coal fixture completed three loaded deliveries and empty
+returns (180 coal accepted) before its 600-second timeout; the required five
+cycles and full recovery matrix have **not passed**. Conservation/payment checks
+after five cycles, nonempty custom-state reload, blocked arrival and checkpoint
+phase coverage remain unverified. Human federation UAT remains pending.
+
+See [the implementation record](../docs/FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).
