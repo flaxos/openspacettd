@@ -2862,6 +2862,7 @@ static bool ConFederationTransport(std::span<std::string_view> argv)
 		return true;
 	}
 	if (argv[1] != "status") FederationTransferManager::SetTransportQuiescing(argv[1] == "quiesce");
+	FederationTransferManager::DrainCheckpointTransport();
 	size_t commands = 0;
 	if (_networking) commands = NetworkPendingCommandCount();
 	IConsolePrint(CC_DEFAULT, "Federation transport {}", nlohmann::json{
@@ -4309,6 +4310,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("federation_status",       ConFederationStatus);
 	IConsole::CmdRegister("federation_authority",    ConFederationAuthority, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_transport",    ConFederationTransport, ConHookServerOrNoNetwork);
+	IConsole::CmdRegister("federation_fixture_block", ConFederationFixtureBlock, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_freight_status", ConFederationFreightStatus);
 	IConsole::CmdRegister("federation_link_gate",    ConFederationLinkGate, ConHookServerOrNoNetwork);
 	IConsole::CmdRegister("federation_link_staging", ConFederationLinkStaging, ConHookServerOrNoNetwork);

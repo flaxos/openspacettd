@@ -16,6 +16,7 @@
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../industry_cmd.h"
+#include "../landscape_cmd.h"
 #include "../industrytype.h"
 #include "../newgrf_industries.h"
 #include "../rail_cmd.h"
@@ -413,4 +414,27 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 	_pause_mode.Set(PauseMode::Normal);
 	IConsolePrint(CC_DEFAULT, "Federation fixture ready: world={}, gate={}, cargo={}", world, TileXY(50, 40).base(), !scheduled && world == 1 ? 10 : 0);
 	return true;
+}
+
+/** Build/remove an actual stopped engine on the destination approach using replicated commands. */
+bool ConFederationFixtureBlock(std::span<std::string_view> argv)
+{
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (argv.size() != 2 || company == nullptr || company->name != "Federation Native Test" ||
+			Map::SizeX() != 512 || Map::SizeY() != 128 || (_networking && !_network_server)) return false;
+	AutoRestoreBackup owner(_current_company, company->index);
+	const TileIndex tile = TileXY(49, 40);
+	if (argv[1] == "depot") return Command<Commands::BuildRailDepot>::Post(tile, RAILTYPE_RAIL, DiagDirection::NE);
+	if (argv[1] == "engine") return Command<Commands::BuildVehicle>::Post(tile, EngineID{0}, false, INVALID_CARGO, ClientID::Invalid);
+	if (argv[1] == "sell") {
+		for (const Train *train : Train::Iterate()) {
+			if (train->tile == tile && train->IsFrontEngine() && train->IsInDepot() && !FederationIdentityRegistry::Find(train)) {
+				return Command<Commands::SellVehicle>::Post(tile, train->index, true, false, ClientID::Invalid);
+			}
+		}
+		return false;
+	}
+	if (argv[1] == "clear") return Command<Commands::LandscapeClear>::Post(tile);
+	if (argv[1] == "rail") return Command<Commands::BuildRail>::Post(tile, RAILTYPE_RAIL, Track::X, false);
+	return false;
 }

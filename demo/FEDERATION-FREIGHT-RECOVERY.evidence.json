@@ -1,0 +1,607 @@
+{
+  "passed": true,
+  "date": "2026-09-27",
+  "scope": "Native scheduled federation freight and latest coordinated checkpoint recovery; graphical human UAT pending",
+  "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+  "source_base": "d886260607 (merged PR #40), plus this follow-up changeset",
+  "global_consist_id": "87811625553b8bb6:697008beeada6700:1",
+  "baseline": {
+    "cold_start": true,
+    "deliveries_and_returns": 5,
+    "accounting": {
+      "initial_physical_cargo": 0,
+      "initial_authority_cargo": 0,
+      "allocated_production": 692,
+      "final_physical_cargo": 307,
+      "discarded": 85,
+      "consumed": 300,
+      "cash": [
+        {
+          "world": 1,
+          "money_before": 5062034,
+          "money_after": 5058849,
+          "native_cash_debits": 3185
+        },
+        {
+          "world": 2,
+          "money_before": 9291049,
+          "money_after": 9290053,
+          "native_cash_debits": 996
+        }
+      ],
+      "ledger": {
+        "total_transfers_initiated": 10,
+        "total_transfers_completed": 10,
+        "total_transfers_in_transit": 0,
+        "total_transfers_quarantined": 0,
+        "total_cargo_initiated": 300,
+        "total_cargo_completed": 300,
+        "total_cargo_in_transit": 0,
+        "is_conserved": true
+      }
+    },
+    "checkpoint": {
+      "path": "build/federation-recovery-acceptance-3/scheduled-verified",
+      "manifest_sha256": "85e1ef571e001c7e2d58658e747d96c7b734bedc1eb1f81ea99cdf7204c203cb",
+      "version": 1,
+      "contract": "latest-coordinated-checkpoint",
+      "phase": "confirmed-return",
+      "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+      "files": {
+        "world1.sav": "dd9ac5b1d666d5d7b3d0f0dd99b7ede39c18b07d3443f8e0821fa3da521eb3c5",
+        "world2.sav": "034d6efa301d6f597088c18aa4fcdcaed8b5b86dbb8dbdfbbd67283ac52ac837",
+        "authority.json": "8ffd5d70ef792d829077f9625d3004e3111f7bccf33b92f1848227be91a9a278"
+      }
+    }
+  },
+  "recovery_cases": [
+    {
+      "case": "blocked-arrival",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 307,
+        "initial_authority_cargo": 0,
+        "allocated_production": 243,
+        "final_physical_cargo": 158,
+        "discarded": 212,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5058849,
+            "money_after": 5056847,
+            "native_cash_debits": 2002
+          },
+          {
+            "world": 2,
+            "money_before": 9290053,
+            "money_after": 9288521,
+            "native_cash_debits": 1532
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 16,
+          "total_transfers_completed": 16,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 480,
+          "total_cargo_completed": 480,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-1/blocked-arrival-after",
+        "manifest_sha256": "b0c006f1c884461e51b51f8f063719e43fa451728d1a82983c2c0cf0c63424b7",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "dd8bc593746c456525dfe4d0e28aab7ecfa984f12d45866bcbedac28bd4028ca",
+          "world2.sav": "18da20aea419de7fdfdc9df2f0dbd5b5f3a31ca303e75c7806728c577cbc6ef3",
+          "authority.json": "644b7acdbea3a30c7376eff7f6afa6ed26233a508e11dd561510840608504321"
+        }
+      },
+      "blocked_transfers": [
+        "TRANSFER-X000000011"
+      ],
+      "held_without_materialization_seconds": 10
+    },
+    {
+      "case": "loaded-arrival-reload",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 169,
+        "initial_authority_cargo": 0,
+        "allocated_production": 208,
+        "final_physical_cargo": 122,
+        "discarded": 75,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5056563,
+            "money_after": 5055039,
+            "native_cash_debits": 1524
+          },
+          {
+            "world": 2,
+            "money_before": 9288330,
+            "money_after": 9287942,
+            "native_cash_debits": 388
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 22,
+          "total_transfers_completed": 22,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 660,
+          "total_cargo_completed": 660,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-1/loaded-arrival-reload-after",
+        "manifest_sha256": "8b801be4dcfc5905c1117fab8d254ae3adaac8726e8ce6c994b0a54631d7ea64",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "5eb443a1beced74452a39da7a5f3fe63c3cbe7b515ab70559b55f437e97ee642",
+          "world2.sav": "d12c130db0401d86a8d10f55091b2890abfa386687b6c9f169d11923e414b216",
+          "authority.json": "4d207e280f434a2feb556c2ad02500c62c8f6c0b13ff8f5f65b82419654ede0a"
+        }
+      },
+      "phase_before_checkpoint": {
+        "path": "build/federation-recovery-matrix-1/loaded-arrival-reload-before",
+        "manifest_sha256": "2e0e79db35ae2307d3de45b5f567cd233bcaab689535f062ed37c84bc33ebca3",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "loaded-arrival-reload",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "9e613cff4dea731ebc017a1153665c4a2072ced5730a98eb159712e67cb79187",
+          "world2.sav": "c58bcd623904429a760951d4feb3dbe63975737cb57eadfe98bd8cfbd024d63c",
+          "authority.json": "d060ac1ae4c84a37e0fc20d3d40fd5d64b20ff0dc8f5cdfd20b967e52aa1b177"
+        }
+      }
+    },
+    {
+      "case": "custody-reload",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 75,
+        "initial_authority_cargo": 60,
+        "allocated_production": 195,
+        "final_physical_cargo": 67,
+        "discarded": 83,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5054755,
+            "money_after": 5053230,
+            "native_cash_debits": 1525
+          },
+          {
+            "world": 2,
+            "money_before": 9287750,
+            "money_after": 9287364,
+            "native_cash_debits": 386
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 28,
+          "total_transfers_completed": 28,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 840,
+          "total_cargo_completed": 840,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-1/custody-reload-after",
+        "manifest_sha256": "1ad1f1c42daa0e46683d1f2d861723bd9653f25adb5375835f11d011fc0a6011",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "6f09bd70c72e82e31c66656c1546ee7238cddbea8ec8922c9c045d67c9e4a39b",
+          "world2.sav": "bb8807bf5e5dfbb42a4c00819f229715761058cd7075305d44ab46427e25b8e3",
+          "authority.json": "caf3132f596fa64ed30a6e262e25485aaf2e309f1f5fb148f4da79e6be17876e"
+        }
+      },
+      "custody_before_checkpoint": {
+        "path": "build/federation-recovery-matrix-1/custody-reload-before",
+        "manifest_sha256": "03a1a183e7ca90c7baed454a8b2531af69dfedfaa940522c447b7c7844519413",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "custody-reload",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "60a12c49d3866553c94ba6963becfa0ee7d069f0746e599cec03a34462ffb0a5",
+          "world2.sav": "6993ee95c805643d841a5910b862d14d1f28a8f2ed80c47e8137c799385d80e3",
+          "authority.json": "884bc55f40d040b43fdb02d835b37d9c86eb87514fbb9dc91dd0a6559221645e"
+        }
+      },
+      "phase_before_checkpoint": {
+        "path": "build/federation-recovery-matrix-1/custody-reload-before",
+        "manifest_sha256": "03a1a183e7ca90c7baed454a8b2531af69dfedfaa940522c447b7c7844519413",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "custody-reload",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "60a12c49d3866553c94ba6963becfa0ee7d069f0746e599cec03a34462ffb0a5",
+          "world2.sav": "6993ee95c805643d841a5910b862d14d1f28a8f2ed80c47e8137c799385d80e3",
+          "authority.json": "884bc55f40d040b43fdb02d835b37d9c86eb87514fbb9dc91dd0a6559221645e"
+        }
+      }
+    },
+    {
+      "case": "pre-departure-reload",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 66,
+        "initial_authority_cargo": 0,
+        "allocated_production": 232,
+        "final_physical_cargo": 31,
+        "discarded": 87,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5052753,
+            "money_after": 5050937,
+            "native_cash_debits": 1816
+          },
+          {
+            "world": 2,
+            "money_before": 9286980,
+            "money_after": 9286380,
+            "native_cash_debits": 600
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 34,
+          "total_transfers_completed": 34,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 1020,
+          "total_cargo_completed": 1020,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-2/pre-departure-reload-after",
+        "manifest_sha256": "0b90568508e07dad966e5af9d3f6f2b45f5d21d2d6ac52e19661b2d6cafb171a",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "c25a6b2b2c6a39a2323c119d598ed3301a0512193db1cd8d47486600c3feee41",
+          "world2.sav": "92d57a167e2c8fc95daa2526e0b176153914fd73155f8c531f2eb621c00fcffc",
+          "authority.json": "2576edc56449714ad05be74a949bde66b61e914ffb7de5dd289d9f7bb1a0f20e"
+        }
+      },
+      "phase_before_checkpoint": {
+        "path": "build/federation-recovery-matrix-1/pre-departure-reload-before",
+        "manifest_sha256": "e470c4095e34293d67505a8356f0a6007b5016046aa9b395426cfc2fbde0fd8a",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "pre-departure-reload",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "6bd99a438b3c6ec0db836efd54ba58e9e19e9e2b593da0e468a3a7c0f797e6b4",
+          "world2.sav": "d5334a552882c0e70201c7d2e353dbff966dcbe4614dd7286faac738aca4ba84",
+          "authority.json": "caf3132f596fa64ed30a6e262e25485aaf2e309f1f5fb148f4da79e6be17876e"
+        }
+      }
+    },
+    {
+      "case": "authority-outage",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 85,
+        "initial_authority_cargo": 0,
+        "allocated_production": 255,
+        "final_physical_cargo": 49,
+        "discarded": 111,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5050187,
+            "money_after": 5048100,
+            "native_cash_debits": 2087
+          },
+          {
+            "world": 2,
+            "money_before": 9285805,
+            "money_after": 9284977,
+            "native_cash_debits": 828
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 40,
+          "total_transfers_completed": 40,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 1200,
+          "total_cargo_completed": 1200,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-2/authority-outage-after",
+        "manifest_sha256": "d5d88a9d6fec72c4c62f7374f07b436e91a7e7b6c9892f401ba4044b27fd8686",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "2f27f3027fe2c9c56142f4a867c5f0ad43cc6c6ea8b86411c36c5e59d86f4534",
+          "world2.sav": "b90095187e971cdc256d24f20ae14e196a2a569b857319737eb2b868cb01fffa",
+          "authority.json": "92eb13fd493fa6e2c0e5659c0f3117d883b7f847db6ab502b9d27cbd44320a4d"
+        }
+      },
+      "phase_before_checkpoint": {
+        "path": "build/federation-recovery-matrix-2/authority-outage-before",
+        "manifest_sha256": "270bb7ba124e0d491cae8c07d94ab24c669c5aa324a08350ba8a9c361e00fd0e",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "authority-outage",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "67be8148ff3452c6e152ce352e4c5e1f402c33769136378e6bd44c04339f1bb9",
+          "world2.sav": "d68b5cb85b67099ff306ed270fd2c762d84b33e6b5f448fe3d8eb281081e671d",
+          "authority.json": "2576edc56449714ad05be74a949bde66b61e914ffb7de5dd289d9f7bb1a0f20e"
+        }
+      },
+      "outage_seconds": 30,
+      "maximum_console_response_seconds": 0.3317935290397145,
+      "prepared_request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T118856",
+      "recovered_transfer": "TRANSFER-X000000035"
+    },
+    {
+      "case": "destination-restart",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 49,
+        "initial_authority_cargo": 0,
+        "allocated_production": 275,
+        "final_physical_cargo": 30,
+        "discarded": 114,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5048100,
+            "money_after": 5045815,
+            "native_cash_debits": 2285
+          },
+          {
+            "world": 2,
+            "money_before": 9284977,
+            "money_after": 9283992,
+            "native_cash_debits": 985
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 46,
+          "total_transfers_completed": 46,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 1380,
+          "total_cargo_completed": 1380,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-2/destination-restart-after",
+        "manifest_sha256": "6d5c5b9204e9fbf4db81b2fb4e798ddf130853a045ab06139b06e2d0ab4f898a",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "b5dd050516f22cd615e5ccae3730403edda6835f824f0dd5c787979b23cdc887",
+          "world2.sav": "ac251d02ad2b0a1c0588799b2f30d61a282cb97573e5a6ac014e900c4c698b0b",
+          "authority.json": "63433acd43856bd7ca089c27d7cfcc997ead10724a68ad03cfebf7a196546918"
+        }
+      }
+    },
+    {
+      "case": "source-restart",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 30,
+        "initial_authority_cargo": 0,
+        "allocated_production": 335,
+        "final_physical_cargo": 59,
+        "discarded": 126,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5045815,
+            "money_after": 5043290,
+            "native_cash_debits": 2525
+          },
+          {
+            "world": 2,
+            "money_before": 9283992,
+            "money_after": 9282807,
+            "native_cash_debits": 1185
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 52,
+          "total_transfers_completed": 52,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 1560,
+          "total_cargo_completed": 1560,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-2/source-restart-after",
+        "manifest_sha256": "76523b6627d2944e60dbc2822a6a4fa83795e34e05b9f55802476f1e70d2e049",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "35ac067879e6f2de814e733da38323bce9fc4fe50a5cff73ea55b36b934903d2",
+          "world2.sav": "7ee0dbd0c1a24132d606a3dbc6cdea4e2ce7958531009f68be50237921198786",
+          "authority.json": "9502be799f35cb15d7994b2a74df132af572f5870d7875462efc8d417eb83f21"
+        }
+      }
+    },
+    {
+      "case": "client-reconnect",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 59,
+        "initial_authority_cargo": 0,
+        "allocated_production": 298,
+        "final_physical_cargo": 49,
+        "discarded": 128,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5043290,
+            "money_after": 5041199,
+            "native_cash_debits": 2091
+          },
+          {
+            "world": 2,
+            "money_before": 9282807,
+            "money_after": 9282010,
+            "native_cash_debits": 797
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 58,
+          "total_transfers_completed": 58,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 1740,
+          "total_cargo_completed": 1740,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-2/client-reconnect-after",
+        "manifest_sha256": "2a55574f08090f79e95a8f2d59271840645a4246d3c78889b008440e043be1df",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "3f6d0d01768fc81fa85821047f2277fff00545a60c4efe5dd5ad13d7678c0902",
+          "world2.sav": "63211c514d69d0dd7242ff194bd2a28a3e07a11d4427f417a0c5eee9f8601160",
+          "authority.json": "5f084816c1cd4ce41c62a135c1c788a33920b3180cc925e6693a1399498df87f"
+        }
+      }
+    },
+    {
+      "case": "complete-reload",
+      "additional_deliveries_and_returns": 3,
+      "accounting": {
+        "initial_physical_cargo": 49,
+        "initial_authority_cargo": 0,
+        "allocated_production": 303,
+        "final_physical_cargo": 53,
+        "discarded": 119,
+        "consumed": 180,
+        "cash": [
+          {
+            "world": 1,
+            "money_before": 5041199,
+            "money_after": 5039179,
+            "native_cash_debits": 2020
+          },
+          {
+            "world": 2,
+            "money_before": 9282010,
+            "money_after": 9281237,
+            "native_cash_debits": 773
+          }
+        ],
+        "ledger": {
+          "total_transfers_initiated": 64,
+          "total_transfers_completed": 64,
+          "total_transfers_in_transit": 0,
+          "total_transfers_quarantined": 0,
+          "total_cargo_initiated": 1920,
+          "total_cargo_completed": 1920,
+          "total_cargo_in_transit": 0,
+          "is_conserved": true
+        }
+      },
+      "checkpoint": {
+        "path": "build/federation-recovery-matrix-2/complete-reload-after",
+        "manifest_sha256": "41a377117b3ff69aad046b6b8e210ec460e9e0d5ee244e236742375a2a4c7f31",
+        "version": 1,
+        "contract": "latest-coordinated-checkpoint",
+        "phase": "confirmed-return",
+        "binary_sha256": "bafa1f88b35e5971d1c71047e9ebb07acfaeca51e81aecc134f676981e29f98b",
+        "files": {
+          "world1.sav": "94dc9f6d2f8211d4044aa3da94d4f535245b047616992014d2affbd20952c0f7",
+          "world2.sav": "564fff67aa1920ea69263e188d951fcbf398e0437b6dc66afd1c8e4e68b8aa5e",
+          "authority.json": "87b5335541c72a80edfa150358b1aa9a3a514028a43581003be86c1223b0c3f1"
+        }
+      }
+    }
+  ],
+  "final_ledger": {
+    "total_transfers_initiated": 64,
+    "total_transfers_completed": 64,
+    "total_transfers_in_transit": 0,
+    "total_transfers_quarantined": 0,
+    "total_cargo_initiated": 1920,
+    "total_cargo_completed": 1920,
+    "total_cargo_in_transit": 0,
+    "is_conserved": true
+  },
+  "reports": [
+    {
+      "path": "build/federation-recovery-matrix-2/scheduled-result.json",
+      "sha256": "3ca90093e95dfaba1a76223c5df9474c1a1d902b55653c9f105d1ad1ee886fde"
+    },
+    {
+      "path": "build/federation-recovery-matrix-2/scheduled-recovery.json",
+      "sha256": "f1a8d32568b69ba4c079797871cb642d21598f0e76738da3fd2a079e59bcc6a9"
+    }
+  ],
+  "continuations": [
+    "Cold baseline retained after client-join and physical-clearance corrections.",
+    "Recovery resumed from latest coordinated baseline checkpoint after harness correction.",
+    "Recovery resumed from latest pre-departure checkpoint after fixing partial stdout JSON framing; first three passed cases retained."
+  ],
+  "verification": {
+    "unit_cases": 439,
+    "unit_assertions": 66636,
+    "ctests": 450,
+    "randomized_federation_cases": 59,
+    "randomized_federation_assertions": 1172,
+    "checkpoint_and_stdout_tests": 3,
+    "solo_and_legacy_cargo_terrain_recovery": "passed"
+  }
+}

@@ -4,11 +4,23 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from federation_checkpoint import publish, validate
+from test_federation_multiplayer import Session
 
 
 class CheckpointTests(unittest.TestCase):
+    def test_diagnostic_reader_waits_for_complete_stdout_record(self):
+        session = Session.__new__(Session)
+        session.healthy = lambda: None
+        complete = 'Federation freight {"journal": ["' + 'x' * 5000 + '"]}\n'
+        chunks = iter([complete[:4096], complete])
+        session.text = lambda record: next(chunks)
+        with patch("test_federation_multiplayer.time.sleep"):
+            result = session.wait({}, "Federation freight ", timeout=1)
+        self.assertEqual(json.loads(result.split("Federation freight ", 1)[1]), {"journal": ["x" * 5000]})
+
     def test_complete_checkpoint_and_mixed_save_rejection(self):
         with tempfile.TemporaryDirectory() as root:
             root = Path(root)

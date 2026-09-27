@@ -4,6 +4,7 @@
 #include "../stdafx.h"
 #include "federation_diagnostics.h"
 #include "federation_cargo.h"
+#include "commonwealth_slice.h"
 #include "federation_identity.h"
 #include "transfer_journal.h"
 #include "../3rdparty/nlohmann/json.hpp"
@@ -17,13 +18,18 @@
 #include "../timer/timer_game_calendar.h"
 #include "../safeguards.h"
 
-bool ConFederationFreightStatus([[maybe_unused]] std::span<std::string_view> argv)
+bool ConFederationFreightStatus(std::span<std::string_view> argv)
 {
+	static CommonwealthSliceAudit audit;
+	if (argv.size() == 2 && argv[1] == "audit-start") {
+		audit = {};
+		_commonwealth_slice_audit = &audit;
+	}
 	const CargoType coal = GetCargoTypeByLabel(CargoLabel{"COAL"});
 	if (!IsValidCargoType(coal)) return false;
 	using nlohmann::json;
 	json result{{"date", TimerGameCalendar::date.base()}, {"coal", to_underlying(coal)},
-		{"companies", json::array()}, {"trains", json::array()}, {"receipts", json::array()}};
+		{"journal", json::array()}, {"companies", json::array()}, {"trains", json::array()}, {"receipts", json::array()}};
 	uint64_t produced = 0, transported = 0, accepted = 0, waiting = 0, onboard = 0;
 	for (const Industry *industry : Industry::Iterate()) {
 		for (const auto &cargo : industry->produced) if (cargo.cargo == coal) {
@@ -45,9 +51,11 @@ bool ConFederationFreightStatus([[maybe_unused]] std::span<std::string_view> arg
 			expenses += company->old_economy[i].expenses.base();
 			delivered += company->old_economy[i].delivered_cargo[coal];
 		}
+		int64_t ledger = 0;
+		for (const auto &year : company->yearly_expenses) for (Money amount : year) ledger += amount.base();
 		const auto identity = FederationIdentityRegistry::FindCompany(company->index);
 		result["companies"].push_back({{"company", company->index.base()}, {"money", company->money.base()},
-			{"income", income}, {"expenses", expenses}, {"delivered", delivered},
+			{"ledger", ledger}, {"income", income}, {"expenses", expenses}, {"delivered", delivered},
 			{"global_id", identity ? fmt::format("{:x}:{:x}:{}", identity->name_space.high, identity->name_space.low, identity->sequence) : ""}});
 	}
 	for (const Train *train : Train::Iterate()) if (train->IsFrontEngine()) {
@@ -77,8 +85,12 @@ bool ConFederationFreightStatus([[maybe_unused]] std::span<std::string_view> arg
 			{"global_id", identity ? fmt::format("{:x}:{:x}:{}", identity->name_space.high, identity->name_space.low, identity->sequence) : ""}});
 	}
 	for (const auto &[key, checkpoint] : TransferJournal::GetAll()) {
+		result["journal"].push_back({{"request", checkpoint.request_id}, {"transfer", checkpoint.transfer_id},
+			{"state", static_cast<uint8_t>(checkpoint.state)}, {"source", checkpoint.source_world}, {"destination", checkpoint.destination_world}});
 		if (checkpoint.state == TransferCheckpointState::Materialized || checkpoint.state == TransferCheckpointState::Confirmed) result["receipts"].push_back(checkpoint.transfer_id);
 	}
+	if (_commonwealth_slice_audit == &audit) result["audit"] = {{"produced", audit.produced[coal]},
+		{"unallocated", audit.unallocated[coal]}, {"discarded", audit.discarded[coal]}, {"consumed", audit.consumed[coal]}, {"cash_debits", audit.cash_debits}};
 	result["produced"] = produced;
 	result["transported"] = transported;
 	result["accepted"] = accepted;

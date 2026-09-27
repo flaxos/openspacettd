@@ -61,6 +61,11 @@ size_t FederationTransferManager::PendingAuthorityRequests()
 	return _network_authority_requests.PendingCount();
 }
 
+void FederationTransferManager::DrainCheckpointTransport()
+{
+	if (_networking && _network_server && IsTransportQuiescing()) PollNetworkFederation(0);
+}
+
 void FederationTransferManager::SetAuthorityUrl(std::string url)
 {
 	if (_authority_url != url) _network_authority_requests.Reset();

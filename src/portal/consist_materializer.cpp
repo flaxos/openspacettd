@@ -135,7 +135,7 @@ ConsistDespawnResult ConsistMaterializer::DespawnForTransfer(Train *consist, con
 	return result;
 }
 
-bool ConsistMaterializer::CheckThroatClearance(TileIndex exit_tile, DiagDirection /*enter_dir*/)
+bool ConsistMaterializer::CheckThroatClearance(TileIndex exit_tile, DiagDirection enter_dir)
 {
 	if (!IsValidTile(exit_tile)) {
 		return false;
@@ -148,11 +148,15 @@ bool ConsistMaterializer::CheckThroatClearance(TileIndex exit_tile, DiagDirectio
 		return false;
 	}
 
-	/* Check for vehicles currently on the exit tile */
-	for (const Vehicle *v : VehiclesOnTile(exit_tile)) {
-		if (v->type == VehicleType::Train) {
-			return false;
+	/* Keep the gate and immediate approach clear before creating a consist.
+	 * A stopped train in an approach depot is an obstruction too. */
+	TileIndex tile = exit_tile;
+	for (uint i = 0; i < 3; ++i) {
+		if (!IsValidTile(tile)) return false;
+		for (const Vehicle *v : VehiclesOnTile(tile)) {
+			if (v->type == VehicleType::Train) return false;
 		}
+		tile = TileAddByDiagDir(tile, ReverseDiagDir(enter_dir));
 	}
 
 	return true;
