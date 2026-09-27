@@ -327,3 +327,25 @@ unverified. Each server still owns one ordinary global tile map.
 The checkpoint tool hashes a matched pair of saves, authority state and binary.
 Its recovery contract accepts only the latest coordinated checkpoint, not
 arbitrary historical saves or unexpected-crash recovery.
+
+## Federation recovery follow-up — 27 September 2026
+
+Checkpoint coordination now pauses physical simulation first. A server-only
+console pump consumes outstanding HTTP responses while paused and posts any
+resulting state changes through the existing native replicated command stream.
+Saving requires both HTTP and native command queues to drain. Arrival clearance
+also checks for actual trains on the first two approach tiles, including stopped
+engines in depots; stale approach reservations alone are not treated as vehicles.
+
+The acceptance harness uses the existing CommonwealthSliceAudit hooks as
+process-local read-only observers of production, unallocated cargo, station loss,
+consumption and native cash debits. These counters do not enter savegame or
+lockstep state. Persistent train, cargo provenance, master schedules and identity
+are checked separately through real save/reload. Native industry histories remain
+diagnostics, avoiding rolling-history truncation during long recovery runs.
+
+The follow-up acceptance now passes five cold-start scheduled round trips plus
+three rounds after each of nine recovery faults (32 retained round trips). See
+[the evidence record](../demo/FEDERATION-FREIGHT-RECOVERY.evidence.json). This
+proves the specified two-server, same-company route and coordinated checkpoint
+contract; human graphical federation acceptance remains pending.

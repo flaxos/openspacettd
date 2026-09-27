@@ -74,6 +74,8 @@ public:
 	static void SetTransportQuiescing(bool quiescing);
 	static bool IsTransportQuiescing();
 	static size_t PendingAuthorityRequests();
+	/** Consume outstanding HTTP completions while a coordinated checkpoint is paused. */
+	static void DrainCheckpointTransport();
 
 	/**
 	 * Periodic simulation tick handler for background federation polling.

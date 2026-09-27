@@ -475,3 +475,37 @@ after five cycles, nonempty custom-state reload, blocked arrival and checkpoint
 phase coverage remain unverified. Human federation UAT remains pending.
 
 See [the implementation record](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).
+
+## Federation freight acceptance follow-up — 27 September 2026
+
+PR #40 is merged on main (`d886260607`). Follow-up work is on
+`fix/federation-freight-recovery-acceptance`.
+
+**Scheduled freight passes:** five automatic loaded outbound trips and empty
+returns delivered 300 coal. Native production, unallocated cargo, station losses,
+remaining stock and consumption reconcile exactly; all native cash changes also
+reconcile. The two clients remain connected with no detected desync or duplicate.
+The previous 600-second timeout was shorter than the native route's five-cycle
+runtime. The harness now budgets startup plus time per requested cycle.
+
+**All nine recovery cases pass:** physical blocked arrival, loaded-arrival
+reload, authority-custody reload, prepared-departure reload, a 30-second authority
+outage, destination restart, source restart, both clients reconnecting, and full
+coordinated reload. Each case completes three further loaded deliveries and
+empty returns with exact cargo and cash reconciliation. The retained sequence
+contains 32 round trips and 1,920 coal delivered. During the authority outage,
+both clients stayed connected and the maximum measured console response was
+0.332 seconds; the original prepared request completed exactly once.
+
+The loaded cargo/master-schedule save/load regression passes. Combined tests pass
+439 cases / 66,636 assertions, isolated CTests pass 450/450, randomized federation
+tests pass 59 cases / 1,172 assertions, and all three Python checkpoint/stdout
+regressions pass. Current and legacy solo cargo/terrain recovery regressions also
+pass. Graphical federation UAT remains separate and pending.
+
+Machine evidence is recorded in `demo/FEDERATION-FREIGHT-RECOVERY.evidence.json`,
+including the frozen binary hash, checkpoint hashes, accounting and continuation
+provenance. Recovery uses only the latest coordinated set; arbitrary crash
+recovery and old/mixed-save rollback are outside this acceptance boundary.
+
+See [acceptance method and evidence](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).

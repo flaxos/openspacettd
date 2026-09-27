@@ -10,6 +10,7 @@
 
 #include "../company_base.h"
 #include "../engine_base.h"
+#include "../engine_func.h"
 #include "../map_func.h"
 #include "../openttd.h"
 #include "../pathfinder/follow_track.hpp"
@@ -20,7 +21,9 @@
 #include "../portal/federation_cmd.h"
 #include "../portal/transfer_journal.h"
 #include "../portal/federation_identity.h"
+#include "../portal/federation_cargo.h"
 #include "../portal/portal_registry.h"
+#include "../portal/planet_manager.h"
 #include "../portal/universe_authority.h"
 #include "../rail_map.h"
 #include "../train.h"
@@ -36,7 +39,12 @@
 #include "../saveload/saveload.h"
 #include "../gfx_func.h"
 #include "../table/sprites.h"
+#include "../table/strings.h"
+#include "../town.h"
 #include "../fileio_func.h"
+#include "../strings_func.h"
+#include "../language.h"
+#include "../linkgraph/linkgraphschedule.h"
 
 #include <filesystem>
 
@@ -113,12 +121,40 @@ static uint32_t CountTrainCargo()
 
 static void InitSaveLoadHarness()
 {
+	if (_current_language == nullptr) {
+		extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+		auto paths = _valid_searchpaths;
+		auto binary = _searchpaths[Searchpath::BinaryDir];
+		_searchpaths[Searchpath::BinaryDir] = std::filesystem::exists("build/lang/english.lng") ? "build/" : "./";
+		_valid_searchpaths = {Searchpath::BinaryDir};
+		InitializeLanguagePacks();
+		_valid_searchpaths = std::move(paths);
+		_searchpaths[Searchpath::BinaryDir] = std::move(binary);
+	}
+	/* This is a fresh map, including pools and references from earlier test cases. */
+	LinkGraphSchedule::Clear();
+	PoolBase::Clean(PoolType::Normal);
+	FederationIdentityRegistry::Reset();
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
 	Map::Allocate(64, 64);
+	REQUIRE(Town::CanAllocateItem());
+	Town *town = Town::Create(TileXY(10, 10));
+	town->name = "Federation Reload Test";
+	town->townnametype = SPECSTR_TOWNNAME_START;
+	RebuildTownKdtree();
 	(void)MockEnvironment::Instance();
 	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
 	if (_valid_searchpaths.empty()) {
 		_valid_searchpaths.push_back(Searchpath::WorkingDir);
 	}
+}
+
+static void LoadFederationTestGame(const std::string &path)
+{
+	const auto result = SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false);
+	INFO(GetSaveLoadErrorMessage().GetDecodedString());
+	REQUIRE(result == SaveLoadResult::Ok);
 }
 
 static TransferCheckpoint MakeJournalCheckpoint(std::string request_id, TransferCheckpointState state)
@@ -896,6 +932,25 @@ TEST_CASE("Federation Transfer - Obstruction and Manifest Rejection")
 
 	SetTunnelBridgeReservation(exit_gate, false);
 
+	/* An actual train on the approach must prevent creation before it can collide. */
+	REQUIRE(Vehicle::CanAllocateItem());
+	Train *obstruction = Vehicle::Create<Train>();
+	obstruction->owner = c->index;
+	obstruction->engine_type = EngineID{0};
+	obstruction->cargo_type = CargoType{0};
+	obstruction->SetFrontEngine();
+	obstruction->SetEngine();
+	obstruction->tile = TileAddByDiagDir(exit_gate, DiagDirection::SW);
+	obstruction->x_pos = TileX(obstruction->tile) * TILE_SIZE + 8;
+	obstruction->y_pos = TileY(obstruction->tile) * TILE_SIZE + 8;
+	obstruction->UpdatePosition();
+	CHECK_FALSE(ConsistMaterializer::CheckThroatClearance(exit_gate, DiagDirection::NE));
+	const auto obstructed = ConsistMaterializer::MaterializeFromTransfer(snapshot, exit_gate, DiagDirection::NE);
+	CHECK_FALSE(obstructed.success);
+	CHECK(obstructed.error_message == "Portal throat is obstructed");
+	delete obstruction;
+	CHECK(ConsistMaterializer::CheckThroatClearance(exit_gate, DiagDirection::NE));
+
 	/* 2. Simulate manifest mismatch */
 	ConsistSnapshot bad_manifest_snap = snapshot;
 	bad_manifest_snap.content_manifest.fill(0xFF);
@@ -1197,7 +1252,7 @@ TEST_CASE("Federation Transfer - Journal checkpoints survive save reload")
 	TransferJournal::Reset();
 	CHECK(TransferJournal::GetAll().empty());
 
-	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	LoadFederationTestGame(test_save_file);
 
 	const TransferCheckpoint *loaded_prepared = TransferJournal::Find(1, "PREPARED");
 	REQUIRE(loaded_prepared != nullptr);
@@ -1284,7 +1339,7 @@ TEST_CASE("Federation Transfer - Journaled materialization confirms after save r
 
 	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
 	TransferJournal::Reset();
-	REQUIRE(SaveOrLoad(test_save_file, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	LoadFederationTestGame(test_save_file);
 	REQUIRE(TransferJournal::FindByTransferId(tx) != nullptr);
 
 	CHECK(FederationTransferManager::ProcessIncomingTransfers(WorldID{2}, 10) == 0);
@@ -1395,4 +1450,59 @@ TEST_CASE("Federation Transfer - Staged arrival restores cargo and foreign ident
 	PortalRegistry::Reset();
 	FederationIdentityRegistry::Reset();
 	TransferJournal::Reset();
+}
+
+TEST_CASE("Federation Transfer - Loaded packet provenance and master schedule survive native save reload")
+{
+	InitSaveLoadHarness();
+	_engine_mngr.ResetToDefaultMapping();
+	SetupEngines();
+	REQUIRE(Company::CanAllocateItem());
+	Company *company = Company::Create();
+	const CompanyID owner = company->index;
+	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{2}, .name = "Reload fixture", .min_x = 1, .min_y = 1, .max_x = 62, .max_y = 62}));
+	const TileIndex gate = TileXY(25, 25);
+	const TileIndex other = TileXY(35, 25);
+	MakeRailTunnel(other, owner, DiagDirection::SW, RAILTYPE_BEGIN);
+	PortalRegistry::RegisterPortalPair(gate, DiagDirection::NE, WorldID{2}, other, DiagDirection::SW, WorldID{2}, 5);
+	MakeRailTunnel(gate, owner, DiagDirection::NE, RAILTYPE_BEGIN);
+	PortalRegistry::RegisterInterServerPortal(gate, DiagDirection::NE, WorldID{2}, WorldID{1}, 10, 5);
+	auto snapshot = CreateSampleSnapshot(40);
+	const auto id = snapshot.consist_id;
+	REQUIRE(FederationIdentityRegistry::RestoreCompanyMapping(owner, snapshot.company_id.sequence, snapshot.company_id.name_space));
+	auto source = snapshot.units[1].cargo_source;
+	source.source_type = SourceType::Industry;
+	source.source_sequence = 17;
+	source.origin_station.world_id = WorldID{1};
+	REQUIRE(source.IsValid());
+	snapshot.units[1].packets = {{40, 7, 123, 9, -3, 12, 14, source}};
+	const auto materialized = ConsistMaterializer::MaterializeFromTransfer(snapshot, gate, DiagDirection::NE);
+	REQUIRE(materialized.success);
+	const VehicleID vehicle = materialized.consist->index;
+	const auto packet_id = materialized.consist->Next()->cargo.Packets()->front()->index;
+	const std::vector<GlobalOrderDestinationID> schedule{
+		GlobalOrderDestinationID::ForStation({id.name_space, 5, WorldID{1}}),
+		GlobalOrderDestinationID::ForStation({{0xAA, 0xBB}, 8, WorldID{2}})};
+	FederationIdentityRegistry::SetConsistSchedule(id, schedule);
+	const auto path = (std::filesystem::temp_directory_path() / "test_federation_loaded_state.sav").string();
+	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
+	FederationIdentityRegistry::Reset();
+	LoadFederationTestGame(path);
+	REQUIRE(Train::IsValidID(vehicle));
+	CHECK(FederationIdentityRegistry::Find(Train::Get(vehicle)) == id);
+	CHECK(FederationIdentityRegistry::FindCompany(owner) == snapshot.company_id);
+	REQUIRE(FederationIdentityRegistry::GetConsistSchedule(id).has_value());
+	CHECK(*FederationIdentityRegistry::GetConsistSchedule(id) == schedule);
+	REQUIRE(CargoPacket::IsValidID(packet_id));
+	const CargoPacket *packet = CargoPacket::Get(packet_id);
+	CHECK(packet->Count() == 40);
+	CHECK(packet->GetPeriodsInTransit() == 7);
+	CHECK(packet->GetFeederShare() == 123);
+	REQUIRE(FederationCargoRegistry::Find(packet_id.base()) != nullptr);
+	CHECK(*FederationCargoRegistry::Find(packet_id.base()) == source);
+	std::filesystem::remove(path);
+	_vehicle_pool.CleanPool();
+	_company_pool.CleanPool();
+	FederationIdentityRegistry::Reset();
+	PortalRegistry::Reset();
 }

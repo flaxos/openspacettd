@@ -45,6 +45,13 @@ bool RepairConnectedEconomyTerrain();
 /** Smooth exposed terrain before building an isolated UAT fixture. */
 bool SmoothExposedUATTerrain();
 
+/**
+ * Native-command obstruction controls restricted to the disposable federation fixture.
+ * @param argv Console command and requested obstruction action.
+ * @return True if the native command was posted; false for invalid fixture or action.
+ */
+bool ConFederationFixtureBlock(std::span<std::string_view> argv);
+
 /** Prepare a disposable empty-map federation test before any clients join. */
 bool ConFederationTestFixture(std::span<std::string_view> argv);
 
