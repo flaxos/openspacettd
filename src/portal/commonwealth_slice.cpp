@@ -416,7 +416,11 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 	return true;
 }
 
-/** Build/remove an actual stopped engine on the destination approach using replicated commands. */
+/**
+ * Build/remove an actual stopped engine on the destination approach using replicated commands.
+ * @param argv Console command and requested obstruction action.
+ * @return True if the native command was posted; false for invalid fixture or action.
+ */
 bool ConFederationFixtureBlock(std::span<std::string_view> argv)
 {
 	const Company *company = Company::GetIfValid(CompanyID{0});
