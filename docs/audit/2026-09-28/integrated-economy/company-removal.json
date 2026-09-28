@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "factories": 13,
+  "neutral_owner": 16,
+  "cold_reload": true,
+  "binary_sha256": "1bfe89a2d674520b86402fbb08b032a391ed1334a304e9b86dd11838e7e8cc6d",
+  "source_save_sha256": "ece807534f259c8d56f1c01b133ec24b09deefdde3fe2c228f4023629b12fa9f",
+  "save_sha256": "9f001a73c5ef3efbd8fbea83b125191ffa27bcfcd506af2eff505f46aa4c8b99"
+}

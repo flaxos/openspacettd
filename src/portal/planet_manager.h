@@ -11,6 +11,7 @@
 #define PLANET_MANAGER_H
 
 #include "planet_type.h"
+#include "../industry_type.h"
 #include "../tile_type.h"
 #include "../command_type.h"
 #include "../rail_type.h"
@@ -168,6 +169,7 @@ public:
 	 * @param is_farm Whether the industry is an agricultural / bio-farm facility.
 	 * @return Succeeded CommandCost if permitted; error CommandCost with explanation if restricted.
 	 */
+	static CommandCost CheckEconomicIndustry(TileIndex tile, IndustryType type, CompanyID company);
 	static CommandCost CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing, bool is_farm = false);
 
 	/**

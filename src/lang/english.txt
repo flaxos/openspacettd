@@ -5218,6 +5218,8 @@ STR_NEWS_CORPORATE_HQ_ESTABLISHED                            :{BIG_FONT}{BLACK}C
 STR_ERROR_CAN_T_BUILD_LOGISTICS_HUB                          :Can't build Company Logistics Hub...
 STR_ERROR_CAN_T_PLACE_CORPORATE_HQ                           :Can't place Corporate Headquarters...
 STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS                   :insufficient local stockpile materials. Select Cash purchase mode in the Blueprint Library or Map > Corporate Headquarters & Stockpiles.
+STR_ERROR_ECONOMY_MATERIALS                                :insufficient mandatory materials. Deliver goods to an owned warehouse on this world.
+STR_ERROR_ECONOMY_MATERIAL_DETAILS                         :physical materials must be delivered to an owned warehouse on this world. Missing: {RAW_STRING}
 
 
 # Local authority errors
@@ -6451,3 +6453,9 @@ STR_STELLAR_REMOTE_STOP                                         :{BLACK}Remote s
 STR_STELLAR_REMOTE_WORLDS                                       :{BLACK}Connected worlds
 
 STR_STELLAR_TOLL                                                :{BLACK}Set transit toll
+
+STR_ECONOMY_ACCELERATION :Toggle research material acceleration
+
+STR_ECONOMY_FACTORIES                                            :Factories
+STR_ECONOMY_CITY                                                 :City demand
+STR_ECONOMY_HQ                                                   :HQ and stockpiles

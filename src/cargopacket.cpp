@@ -651,8 +651,9 @@ uint VehicleCargoList::Unload(uint max_move, StationCargoList *dest, CargoType c
 	}
 	if (this->action_counts[MoveToAction::Transfer] == 0 && this->action_counts[MoveToAction::Deliver] > 0 && moved < max_move) {
 		uint move = std::min(this->action_counts[MoveToAction::Deliver], max_move - moved);
+		uint before = this->action_counts[MoveToAction::Deliver];
 		this->ShiftCargo(CargoDelivery(this, move, cargo, payment, current_tile));
-		moved += move;
+		moved += before - this->action_counts[MoveToAction::Deliver];
 	}
 	return moved;
 }

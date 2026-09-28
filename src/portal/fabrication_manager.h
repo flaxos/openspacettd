@@ -56,6 +56,9 @@ struct BillOfMaterials {
  */
 class FabricationManager {
 public:
+	static CommandCost QuoteRailStructure(TileIndex tile, RailType type, uint32_t units, BillOfMaterials &bill);
+	static bool UseForRail(CompanyID company, RailType type);
+	static bool UseForVehicle(CompanyID company, const Engine *engine);
 	/** Reset all company fabrication modes (e.g. on new game or load). */
 	static void Reset();
 

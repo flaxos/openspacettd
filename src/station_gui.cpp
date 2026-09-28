@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "portal/production_chain.h"
 #include "portal/logistics_hub.h"
+#include "portal/integrated_economy.h"
 #include "debug.h"
 #include "gui.h"
 #include "querystring_gui.h"
@@ -1553,6 +1554,16 @@ struct StationViewWindow : public Window {
 	{
 		if (widget == WID_SV_PRODUCTION_STATUS) {
 			Rect tr = r.Shrink(WidgetDimensions::scaled.frametext);
+			if (IntegratedEconomy::Enabled()) {
+				auto hub = LogisticsHubManager::GetHubForStation(StationID{this->window_number});
+				if (hub != nullptr) {
+					DrawStringMultiLine(tr,
+										"Warehouse: your unloaded freight enters company stock on this world. Storage earns no final "
+										"delivery payment and supplies no city growth, even when consumers share this station's catchment.",
+										TextColour::Black);
+					return;
+				}
+			}
 			const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(StationID{this->window_number});
 			const ProductionRecipe *recipe = facility == nullptr ? nullptr : ProductionChainManager::GetRecipe(facility->recipe_id);
 			if (recipe == nullptr) {
@@ -1616,6 +1627,7 @@ struct StationViewWindow : public Window {
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
+		if (widget == WID_SV_PRODUCTION_BUILD && IntegratedEconomy::Enabled()) return GetString(STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY);
 		if (widget == WID_SV_CAPTION) {
 			const Station *st = Station::Get(this->window_number);
 			const SpaceportInfo *spaceport = SpaceportManager::GetSpaceport(st->index);
@@ -2157,6 +2169,10 @@ struct StationViewWindow : public Window {
 				break;
 
 			case WID_SV_PRODUCTION_BUILD: {
+				if (IntegratedEconomy::Enabled()) {
+					ShowBuildIndustryWindow();
+					break;
+				}
 				const Station *station = Station::Get(this->window_number);
 				DropDownList list;
 				for (const auto &recipe : ProductionChainManager::GetAllRecipes()) {

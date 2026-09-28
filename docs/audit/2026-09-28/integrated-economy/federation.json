@@ -1,0 +1,2035 @@
+{
+  "binary_sha256": "1bfe89a2d674520b86402fbb08b032a391ed1334a304e9b86dd11838e7e8cc6d",
+  "passed": true,
+  "three_joined_clients": true,
+  "research_home": "2144359de8bfb97b:d7dab31ba88eb679",
+  "research_replicated": true,
+  "cached_through_outage": true,
+  "cold_reload": true,
+  "trips": {
+    "returns": 5,
+    "delivered": 400,
+    "identity": "87811625553b8bb6:697008beeada6700:1"
+  },
+  "resumed": {
+    "returns": 6,
+    "delivered": 480,
+    "identity": "87811625553b8bb6:697008beeada6700:1"
+  },
+  "accounting": {
+    "initial": [
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 0,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 4936136,
+            "money": 5063864
+          }
+        ],
+        "date": 712223,
+        "economy": {
+          "accounting": [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [],
+          "roles": [
+            [1, 0]
+          ],
+          "shared_research": {},
+          "version": 1
+        },
+        "journal": [],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "",
+            "materials_i": false
+          }
+        ],
+        "trains": [
+          {
+            "active_order": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "orders": [
+              {
+                "load": 2,
+                "station": "87811625553b8bb6:697008beeada6700:1",
+                "type": 1,
+                "world": 1
+              },
+              {
+                "load": 0,
+                "station": "8c08ee3d16c5a633:354d1c7bc925661d:1",
+                "type": 1,
+                "world": 3
+              }
+            ],
+            "tile": 20490,
+            "units": [
+              {
+                "cargo": 0,
+                "engine": 0,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              }
+            ],
+            "vehicle": 0
+          }
+        ],
+        "transported": 0,
+        "waiting": 0
+      },
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 0,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 2503510,
+            "money": 7496490
+          }
+        ],
+        "date": 712223,
+        "economy": {
+          "accounting": [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [],
+          "roles": [
+            [2, 2]
+          ],
+          "shared_research": {},
+          "version": 1
+        },
+        "journal": [],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "",
+            "materials_i": false
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      },
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 0,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 662076,
+            "money": 9337924
+          }
+        ],
+        "date": 712223,
+        "economy": {
+          "accounting": [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [
+            [
+              0,
+              0,
+              100,
+              0,
+              [],
+              0
+            ]
+          ],
+          "research": [],
+          "roles": [
+            [3, 1]
+          ],
+          "shared_research": {},
+          "version": 1
+        },
+        "journal": [],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "",
+            "materials_i": false
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      }
+    ],
+    "final": [
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 4721,
+          "consumed": 0,
+          "discarded": 3540,
+          "produced": 25589,
+          "unallocated": 20714
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": -4196,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 4940857,
+            "money": 5059143
+          }
+        ],
+        "date": 712870,
+        "economy": {
+          "accounting": [
+            [4498, 0, 2060, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25589, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4498, 0, 2060, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24254, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [],
+          "roles": [
+            [1, 0]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T15073",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000005"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T24393",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000009"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T33713",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000013"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T43033",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000017"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T5767",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000001"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000004",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000004"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000008",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000008"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000012",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000012"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000016",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000016"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000020",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000020"
+          }
+        ],
+        "onboard": 0,
+        "produced": 25589,
+        "receipts": [
+          "TRANSFER-X000000004",
+          "TRANSFER-X000000008",
+          "TRANSFER-X000000012",
+          "TRANSFER-X000000016",
+          "TRANSFER-X000000020"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [
+          {
+            "active_order": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "orders": [
+              {
+                "load": 2,
+                "station": "87811625553b8bb6:697008beeada6700:1",
+                "type": 1,
+                "world": 1
+              },
+              {
+                "load": 0,
+                "station": "8c08ee3d16c5a633:354d1c7bc925661d:1",
+                "type": 1,
+                "world": 3
+              }
+            ],
+            "tile": 20529,
+            "units": [
+              {
+                "cargo": 0,
+                "engine": 0,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              }
+            ],
+            "vehicle": 0
+          }
+        ],
+        "transported": 4875,
+        "waiting": 935
+      },
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 104538,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": -4013,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 2608048,
+            "money": 7391952
+          }
+        ],
+        "date": 712870,
+        "economy": {
+          "accounting": [
+            [4295, 0, 2068, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4295, 0, 2068, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [
+            [
+              0,
+              0,
+              4294967295,
+              false,
+              []
+            ]
+          ],
+          "roles": [
+            [2, 2]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000001",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000001"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000005",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000005"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000009",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000009"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000013",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000013"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000017",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000017"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T11760",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000004"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T21080",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000008"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T30400",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000012"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T39720",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000016"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T49040",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000020"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T16480",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000006"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T25800",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000010"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T35120",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000014"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T44440",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000018"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T7160",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000002"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000003",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000003"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000007",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000007"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000011",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000011"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000015",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000015"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000019",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000019"
+          }
+        ],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [
+          "TRANSFER-X000000001",
+          "TRANSFER-X000000005",
+          "TRANSFER-X000000009",
+          "TRANSFER-X000000013",
+          "TRANSFER-X000000017",
+          "TRANSFER-X000000003",
+          "TRANSFER-X000000007",
+          "TRANSFER-X000000011",
+          "TRANSFER-X000000015",
+          "TRANSFER-X000000019"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": true,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      },
+      {
+        "accepted": 400,
+        "audit": {
+          "cash_debits": 2270,
+          "consumed": 400,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 400,
+            "expenses": -4121,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 2376,
+            "ledger": 664346,
+            "money": 9335654
+          }
+        ],
+        "date": 712870,
+        "economy": {
+          "accounting": [
+            [4455, 0, 2005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4455, 0, 2005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [
+            [
+              0,
+              0,
+              100,
+              0,
+              [
+                [30, 0]
+              ],
+              200
+            ]
+          ],
+          "research": [],
+          "roles": [
+            [3, 1]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000002",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000002"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000006",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000006"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000010",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000010"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000014",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000014"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000018",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000018"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T10345",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000003"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T19665",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000007"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T28985",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000011"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T38305",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000015"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T47615",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000019"
+          }
+        ],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [
+          "TRANSFER-X000000002",
+          "TRANSFER-X000000006",
+          "TRANSFER-X000000010",
+          "TRANSFER-X000000014",
+          "TRANSFER-X000000018"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      }
+    ],
+    "supplied": 4875,
+    "discarded": 3540,
+    "consumed": 400,
+    "cash_reconciled": true,
+    "ledger": {
+      "total_transfers_initiated": 20,
+      "total_transfers_completed": 20,
+      "total_transfers_in_transit": 0,
+      "total_transfers_quarantined": 0,
+      "total_cargo_initiated": 800,
+      "total_cargo_completed": 800,
+      "total_cargo_in_transit": 0,
+      "is_conserved": true
+    }
+  },
+  "recovery": {
+    "initial": [
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 0,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": -4196,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 4940857,
+            "money": 5059143
+          }
+        ],
+        "date": 712870,
+        "economy": {
+          "accounting": [
+            [4498, 0, 2060, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25589, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4498, 0, 2060, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24254, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [],
+          "roles": [
+            [1, 0]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T15073",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000005"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T24393",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000009"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T33713",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000013"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T43033",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000017"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T5767",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000001"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000004",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000004"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000008",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000008"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000012",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000012"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000016",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000016"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000020",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000020"
+          }
+        ],
+        "onboard": 0,
+        "produced": 25589,
+        "receipts": [
+          "TRANSFER-X000000004",
+          "TRANSFER-X000000008",
+          "TRANSFER-X000000012",
+          "TRANSFER-X000000016",
+          "TRANSFER-X000000020"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [
+          {
+            "active_order": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "orders": [
+              {
+                "load": 2,
+                "station": "87811625553b8bb6:697008beeada6700:1",
+                "type": 1,
+                "world": 1
+              },
+              {
+                "load": 0,
+                "station": "8c08ee3d16c5a633:354d1c7bc925661d:1",
+                "type": 1,
+                "world": 3
+              }
+            ],
+            "tile": 20529,
+            "units": [
+              {
+                "cargo": 0,
+                "engine": 0,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              }
+            ],
+            "vehicle": 0
+          }
+        ],
+        "transported": 4875,
+        "waiting": 935
+      },
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 0,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": -4013,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 2608048,
+            "money": 7391952
+          }
+        ],
+        "date": 712870,
+        "economy": {
+          "accounting": [
+            [4295, 0, 2068, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4295, 0, 2068, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [
+            [
+              0,
+              0,
+              4294967295,
+              false,
+              []
+            ]
+          ],
+          "roles": [
+            [2, 2]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000001",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000001"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000005",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000005"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000009",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000009"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000013",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000013"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000017",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000017"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T11760",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000004"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T21080",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000008"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T30400",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000012"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T39720",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000016"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T49040",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000020"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T16480",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000006"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T25800",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000010"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T35120",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000014"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T44440",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000018"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T7160",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000002"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000003",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000003"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000007",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000007"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000011",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000011"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000015",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000015"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000019",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000019"
+          }
+        ],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [
+          "TRANSFER-X000000001",
+          "TRANSFER-X000000005",
+          "TRANSFER-X000000009",
+          "TRANSFER-X000000013",
+          "TRANSFER-X000000017",
+          "TRANSFER-X000000003",
+          "TRANSFER-X000000007",
+          "TRANSFER-X000000011",
+          "TRANSFER-X000000015",
+          "TRANSFER-X000000019"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": true,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      },
+      {
+        "accepted": 400,
+        "audit": {
+          "cash_debits": 0,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 400,
+            "expenses": -4121,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 2376,
+            "ledger": 664346,
+            "money": 9335654
+          }
+        ],
+        "date": 712870,
+        "economy": {
+          "accounting": [
+            [4455, 0, 2005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4455, 0, 2005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [
+            [
+              0,
+              0,
+              100,
+              0,
+              [
+                [30, 0]
+              ],
+              200
+            ]
+          ],
+          "research": [],
+          "roles": [
+            [3, 1]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000002",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000002"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000006",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000006"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000010",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000010"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000014",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000014"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000018",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000018"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T10345",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000003"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T19665",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000007"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T28985",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000011"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T38305",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000015"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T47615",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000019"
+          }
+        ],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [
+          "TRANSFER-X000000002",
+          "TRANSFER-X000000006",
+          "TRANSFER-X000000010",
+          "TRANSFER-X000000014",
+          "TRANSFER-X000000018"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      }
+    ],
+    "final": [
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 897,
+          "consumed": 0,
+          "discarded": 922,
+          "produced": 4893,
+          "unallocated": 4296
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": -4993,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 4941754,
+            "money": 5058246
+          }
+        ],
+        "date": 712996,
+        "economy": {
+          "accounting": [
+            [5345, 0, 2443, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30482, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [5345, 0, 2443, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29472, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [],
+          "roles": [
+            [1, 0]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T15073",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000005"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T24393",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000009"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T33713",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000013"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T43033",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000017"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T52353",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000021"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W1-G10-N87811625553b8bb6:697008beeada6700-C1-T5767",
+            "source": 1,
+            "state": 1,
+            "transfer": "TRANSFER-X000000001"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000004",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000004"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000008",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000008"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000012",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000012"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000016",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000016"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000020",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000020"
+          },
+          {
+            "destination": 1,
+            "request": "ARR-W1-TRANSFER-X000000024",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000024"
+          }
+        ],
+        "onboard": 0,
+        "produced": 30482,
+        "receipts": [
+          "TRANSFER-X000000004",
+          "TRANSFER-X000000008",
+          "TRANSFER-X000000012",
+          "TRANSFER-X000000016",
+          "TRANSFER-X000000020",
+          "TRANSFER-X000000024"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [
+          {
+            "active_order": 0,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "orders": [
+              {
+                "load": 2,
+                "station": "87811625553b8bb6:697008beeada6700:1",
+                "type": 1,
+                "world": 1
+              },
+              {
+                "load": 0,
+                "station": "8c08ee3d16c5a633:354d1c7bc925661d:1",
+                "type": 1,
+                "world": 3
+              }
+            ],
+            "tile": 20529,
+            "units": [
+              {
+                "cargo": 0,
+                "engine": 0,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              },
+              {
+                "cargo": 0,
+                "engine": 56,
+                "owner": 0,
+                "packets": []
+              }
+            ],
+            "vehicle": 0
+          }
+        ],
+        "transported": 5472,
+        "waiting": 530
+      },
+      {
+        "accepted": 0,
+        "audit": {
+          "cash_debits": 872,
+          "consumed": 0,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 0,
+            "expenses": -4785,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 0,
+            "ledger": 2608920,
+            "money": 7391080
+          }
+        ],
+        "date": 712996,
+        "economy": {
+          "accounting": [
+            [5144, 0, 2474, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [5144, 0, 2474, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [],
+          "research": [
+            [
+              0,
+              0,
+              4294967295,
+              false,
+              []
+            ]
+          ],
+          "roles": [
+            [2, 2]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000001",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000001"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000005",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000005"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000009",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000009"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000013",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000013"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000017",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000017"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000021",
+            "source": 1,
+            "state": 3,
+            "transfer": "TRANSFER-X000000021"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T11760",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000004"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T21080",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000008"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T30400",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000012"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T39720",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000016"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T49040",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000020"
+          },
+          {
+            "destination": 1,
+            "request": "DEP-W2-G20-N87811625553b8bb6:697008beeada6700-C1-T58340",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000024"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T16480",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000006"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T25800",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000010"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T35120",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000014"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T44440",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000018"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T53740",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000022"
+          },
+          {
+            "destination": 3,
+            "request": "DEP-W2-G21-N87811625553b8bb6:697008beeada6700-C1-T7160",
+            "source": 2,
+            "state": 1,
+            "transfer": "TRANSFER-X000000002"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000003",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000003"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000007",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000007"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000011",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000011"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000015",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000015"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000019",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000019"
+          },
+          {
+            "destination": 2,
+            "request": "ARR-W2-TRANSFER-X000000023",
+            "source": 3,
+            "state": 3,
+            "transfer": "TRANSFER-X000000023"
+          }
+        ],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [
+          "TRANSFER-X000000001",
+          "TRANSFER-X000000005",
+          "TRANSFER-X000000009",
+          "TRANSFER-X000000013",
+          "TRANSFER-X000000017",
+          "TRANSFER-X000000021",
+          "TRANSFER-X000000003",
+          "TRANSFER-X000000007",
+          "TRANSFER-X000000011",
+          "TRANSFER-X000000015",
+          "TRANSFER-X000000019",
+          "TRANSFER-X000000023"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": true,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      },
+      {
+        "accepted": 480,
+        "audit": {
+          "cash_debits": 439,
+          "consumed": 80,
+          "discarded": 0,
+          "produced": 0,
+          "unallocated": 0
+        },
+        "coal": 16,
+        "companies": [
+          {
+            "company": 0,
+            "delivered": 480,
+            "expenses": -4914,
+            "global_id": "87811625553b8bb6:697008beeada6700:1",
+            "income": 2830,
+            "ledger": 664785,
+            "money": 9335215
+          }
+        ],
+        "date": 712995,
+        "economy": {
+          "accounting": [
+            [5291, 0, 2401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 480, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 480, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 480, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [5291, 0, 2401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          "cities": [],
+          "factories": [
+            [
+              0,
+              0,
+              100,
+              0,
+              [
+                [30, 0]
+              ],
+              240
+            ]
+          ],
+          "research": [],
+          "roles": [
+            [3, 1]
+          ],
+          "shared_research": {
+            "87811625553b8bb6:697008beeada6700:1": {
+              "home": "2144359de8bfb97b:d7dab31ba88eb679",
+              "id": "87811625553b8bb6:697008beeada6700:1",
+              "kind": "research",
+              "manifest": "bb584372e71ee5d32c1d4521f55df9aeffae4d7313ca5b8d5cb548e42d5b8d2c",
+              "namespace": "2144359de8bfb97b:d7dab31ba88eb679",
+              "online": true,
+              "revision": 1,
+              "ruleset": 1,
+              "unlocks": [301]
+            }
+          },
+          "version": 1
+        },
+        "journal": [
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000002",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000002"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000006",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000006"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000010",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000010"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000014",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000014"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000018",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000018"
+          },
+          {
+            "destination": 3,
+            "request": "ARR-W3-TRANSFER-X000000022",
+            "source": 2,
+            "state": 3,
+            "transfer": "TRANSFER-X000000022"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T10345",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000003"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T19665",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000007"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T28985",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000011"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T38305",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000015"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T47615",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000019"
+          },
+          {
+            "destination": 2,
+            "request": "DEP-W3-G30-N87811625553b8bb6:697008beeada6700-C1-T56915",
+            "source": 3,
+            "state": 1,
+            "transfer": "TRANSFER-X000000023"
+          }
+        ],
+        "onboard": 0,
+        "produced": 0,
+        "receipts": [
+          "TRANSFER-X000000002",
+          "TRANSFER-X000000006",
+          "TRANSFER-X000000010",
+          "TRANSFER-X000000014",
+          "TRANSFER-X000000018",
+          "TRANSFER-X000000022"
+        ],
+        "research": [
+          {
+            "active": 0,
+            "can_research": false,
+            "home": "2144359de8bfb97b:d7dab31ba88eb679",
+            "materials_i": true
+          }
+        ],
+        "trains": [],
+        "transported": 0,
+        "waiting": 0
+      }
+    ],
+    "supplied": 597,
+    "discarded": 922,
+    "consumed": 80,
+    "cash_reconciled": true,
+    "ledger": {
+      "total_transfers_initiated": 24,
+      "total_transfers_completed": 24,
+      "total_transfers_in_transit": 0,
+      "total_transfers_quarantined": 0,
+      "total_cargo_initiated": 960,
+      "total_cargo_completed": 960,
+      "total_cargo_in_transit": 0,
+      "is_conserved": true
+    }
+  }
+}

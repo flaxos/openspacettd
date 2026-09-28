@@ -8,6 +8,7 @@
 /** @file afterload.cpp Code updating data after game load. */
 
 #include "../stdafx.h"
+#include "../portal/integrated_economy.h"
 #include "../portal/stellar_network.h"
 #include "../portal/universe_network.h"
 #include "../portal/commonwealth_slice.h"
@@ -3366,6 +3367,8 @@ bool AfterLoadGame()
 	LogisticsHubManager::ValidateAfterLoad();
 	ResourceSiteManager::ValidateAfterLoad();
 	StellarNetwork::ValidateAfterLoad();
+	if (!IntegratedEconomy::ValidateAfterLoad())
+		SlErrorCorrupt("Integrated Commonwealth economy content or persistent references are incompatible");
 	UniverseNetwork::ValidateAfterLoad();
 	if (!RemoteGateProjects::ValidateAfterLoad()) SlErrorCorrupt("Invalid remote gate project references");
 

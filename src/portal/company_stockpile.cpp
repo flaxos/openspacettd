@@ -8,6 +8,9 @@
 /** @file company_stockpile.cpp Implementation of planetary company stockpile ledger and manager. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
+#include "commonwealth_pack.h"
+#include "../company_base.h"
 #include "company_stockpile.h"
 #include "../cargotype.h"
 #include "production_chain.h"
@@ -73,7 +76,7 @@ bool StockpileManager::HasSufficient(WorldID world, CompanyID company, const std
 	return true;
 }
 
-bool StockpileManager::ConsumeBOM(WorldID world, CompanyID company, const std::map<CargoType, uint32_t> &bom)
+bool StockpileManager::ConsumeBOM(WorldID world, CompanyID company, const std::map<CargoType, uint32_t> &bom, bool consumed)
 {
 	if (world == INVALID_WORLD || company == CompanyID::Invalid()) return false;
 
@@ -91,6 +94,7 @@ bool StockpileManager::ConsumeBOM(WorldID world, CompanyID company, const std::m
 	/* Perform deduction */
 	for (const auto &[cargo, required] : bom) {
 		it->second.WithdrawCargo(cargo, required);
+		if (consumed) IntegratedEconomy::Record(EconomyFlow::Consumed, cargo, required);
 	}
 	return true;
 }
@@ -121,11 +125,36 @@ void StockpileManager::RestoreStockpile(WorldID world, CompanyID company, const 
 
 CargoType StockpileManager::RoleToDefaultCargo(FabricationRole role)
 {
+	if (IntegratedEconomy::Enabled() && role == FabricationRole::Ballast) return GetCargoTypeByLabel(CargoLabel{"BALL"});
 	static constexpr CommonwealthCargoID roles[] = {
 		CommonwealthCargoID::StoneSlag, CommonwealthCargoID::StructuralSteel,
 		CommonwealthCargoID::ConductiveWiring, CommonwealthCargoID::SiliconChips,
 		CommonwealthCargoID::Superalloys, CommonwealthCargoID::SyntheticComposites,
 		CommonwealthCargoID::BlankCrystals, CommonwealthCargoID::EnrichedQuantumCrystals,
 	};
+	if (IntegratedEconomy::Enabled() && role < FabricationRole::Count)
+		return GetCargoTypeByLabel(CommonwealthPackManager::GetCargoLabel(roles[static_cast<size_t>(role)]));
 	return role < FabricationRole::Count ? ProductionChainManager::GetDefaultCargo(roles[static_cast<size_t>(role)]) : INVALID_CARGO;
+}
+
+void StockpileManager::ChangeCompany(CompanyID old_owner, CompanyID new_owner)
+{
+	std::lock_guard<std::mutex> lock(_stockpile_mutex);
+	for (auto it = _company_stockpiles.begin(); it != _company_stockpiles.end();) {
+		if (it->second.company_id != old_owner) {
+			++it;
+			continue;
+		}
+		if (Company::IsValidID(new_owner)) {
+			auto &target = _company_stockpiles[{it->second.world_id, new_owner}];
+			target.world_id = it->second.world_id;
+			target.company_id = new_owner;
+			for (auto [cargo, units] : it->second.inventory)
+				target.AddCargo(cargo, units);
+		} else {
+			for (auto [cargo, units] : it->second.inventory)
+				IntegratedEconomy::Record(EconomyFlow::Discarded, cargo, units);
+		}
+		it = _company_stockpiles.erase(it);
+	}
 }

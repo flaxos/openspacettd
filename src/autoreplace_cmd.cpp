@@ -8,6 +8,8 @@
 /** @file autoreplace_cmd.cpp Deals with autoreplace execution but not the setup. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
+#include "portal/company_stockpile.h"
 #include "company_func.h"
 #include "train.h"
 #include "command_func.h"
@@ -799,12 +801,17 @@ CommandCost CmdAutoreplaceVehicle(DoCommandFlags flags, VehicleID veh_id)
 		 * to prevent desyncs and to replay newgrf callbacks during DoCommandFlag::Execute */
 		SavedRandomSeeds saved_seeds;
 		SaveRandomSeeds(&saved_seeds);
+		auto material_snapshot = IntegratedEconomy::Enabled() ? StockpileManager::GetAllStockpiles() : std::vector<CompanyWorldStockpile>{};
+		auto accounting_snapshot = IntegratedEconomy::Accounting();
 		if (free_wagon) {
 			cost.AddCost(ReplaceFreeUnit(&v, DoCommandFlags{flags}.Reset(DoCommandFlag::Execute), &nothing_to_do));
 		} else {
 			cost.AddCost(ReplaceChain(&v, DoCommandFlags{flags}.Reset(DoCommandFlag::Execute), wagon_removal, &nothing_to_do));
 		}
 		RestoreRandomSeeds(saved_seeds);
+		for (const auto &stock : material_snapshot)
+			StockpileManager::RestoreStockpile(stock.world_id, stock.company_id, stock.inventory);
+		IntegratedEconomy::RestoreAccounting(accounting_snapshot);
 
 		if (cost.Succeeded() && flags.Test(DoCommandFlag::Execute)) {
 			if (free_wagon) {
@@ -863,4 +870,3 @@ CommandCost CmdSetAutoReplace(DoCommandFlags flags, GroupID id_g, EngineID old_e
 
 	return cost;
 }
-

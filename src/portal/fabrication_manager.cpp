@@ -9,12 +9,17 @@
 
 #include "../stdafx.h"
 #include "fabrication_manager.h"
+#include "integrated_economy.h"
+#include "planet_manager.h"
+#include "../cargotype.h"
+#include "../company_func.h"
 #include "tech_tree.h"
 #include "commonwealth_pack.h"
 #include "../table/strings.h"
 #include "../engine_base.h"
 #include "../rail_type.h"
 #include "../train.h"
+#include "../strings_func.h"
 
 #include <mutex>
 #include <map>
@@ -70,7 +75,10 @@ BillOfMaterials FabricationManager::GetTrackBOM(RailType railtype)
 		case RAILTYPE_MAGLEV:
 			bom.AddRoleMaterial(FabricationRole::Superalloy, 2);
 			bom.AddRoleMaterial(FabricationRole::Wiring, 2);
-			bom.AddRoleMaterial(FabricationRole::Electronics, 1);
+			if (IntegratedEconomy::Enabled())
+				bom.AddCargoMaterial(GetCargoTypeByLabel(CargoLabel{"MGLA"}), 1);
+			else
+				bom.AddRoleMaterial(FabricationRole::Electronics, 1);
 			break;
 
 		case RAILTYPE_RAIL:
@@ -85,6 +93,10 @@ BillOfMaterials FabricationManager::GetTrackBOM(RailType railtype)
 BillOfMaterials FabricationManager::GetSignalBOM()
 {
 	BillOfMaterials bom;
+	if (IntegratedEconomy::Enabled()) {
+		bom.AddCargoMaterial(GetCargoTypeByLabel(CargoLabel{"SIGE"}), 1);
+		return bom;
+	}
 	bom.AddRoleMaterial(FabricationRole::StructuralMetal, 1);
 	bom.AddRoleMaterial(FabricationRole::Wiring, 1);
 	return bom;
@@ -104,7 +116,10 @@ BillOfMaterials FabricationManager::GetDepotBOM(RailType railtype)
 			bom.AddRoleMaterial(FabricationRole::Superalloy, 15);
 			bom.AddRoleMaterial(FabricationRole::Ballast, 8);
 			bom.AddRoleMaterial(FabricationRole::Wiring, 4);
-			bom.AddRoleMaterial(FabricationRole::Electronics, 2);
+			if (IntegratedEconomy::Enabled())
+				bom.AddCargoMaterial(GetCargoTypeByLabel(CargoLabel{"MGLA"}), 2);
+			else
+				bom.AddRoleMaterial(FabricationRole::Electronics, 2);
 			break;
 
 		case RAILTYPE_RAIL:
@@ -160,7 +175,10 @@ BillOfMaterials FabricationManager::GetVehicleBOM(const Engine *e)
 		case EngineClass::Maglev:
 			bom.AddRoleMaterial(FabricationRole::Superalloy, 50);
 			bom.AddRoleMaterial(FabricationRole::Wiring, 25);
-			bom.AddRoleMaterial(FabricationRole::Electronics, 15);
+			if (IntegratedEconomy::Enabled())
+				bom.AddCargoMaterial(GetCargoTypeByLabel(CargoLabel{"MGLA"}), 15);
+			else
+				bom.AddRoleMaterial(FabricationRole::Electronics, 15);
 			break;
 
 		default:
@@ -179,7 +197,21 @@ CommandCost FabricationManager::CheckMaterials(WorldID world, CompanyID company,
 	}
 	if (bom.GetRequirement(StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal)) > 0 &&
 			!TechTreeManager::IsTechUnlocked(company, TECH_MATERIALS_1)) return CommandCost(STR_ERROR_COMMONWEALTH_RESEARCH);
-	if (!StockpileManager::HasSufficient(world, company, bom.materials)) return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+	if (!StockpileManager::HasSufficient(world, company, bom.materials)) {
+		if (!IntegratedEconomy::Enabled()) return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+		CommandCost error(STR_ERROR_ECONOMY_MATERIALS);
+		if (company == _local_company) {
+			std::string missing;
+			for (auto [cargo, required] : bom.materials) {
+				auto stock = StockpileManager::GetStock(world, company, cargo);
+				if (stock >= required) continue;
+				if (!missing.empty()) missing += ", ";
+				missing += fmt::format("{} {}", required - stock, GetString(CargoSpec::Get(cargo)->name));
+			}
+			error.SetEncodedMessage(GetEncodedString(STR_ERROR_ECONOMY_MATERIAL_DETAILS, missing));
+		}
+		return error;
+	}
 	return CommandCost();
 }
 
@@ -250,4 +282,26 @@ void FabricationManager::RestoreCompanyMode(CompanyID company, bool enabled)
 	if (company == CompanyID::Invalid()) return;
 	std::lock_guard<std::mutex> lock(_fabrication_mutex);
 	_company_fabrication_modes[company] = enabled;
+}
+
+bool FabricationManager::UseForRail(CompanyID company, RailType type)
+{
+	return IsFabricateFromStockpileEnabled(company) || (IntegratedEconomy::Enabled() && type != RAILTYPE_RAIL);
+}
+bool FabricationManager::UseForVehicle(CompanyID company, const Engine *engine)
+{
+	if (IsFabricateFromStockpileEnabled(company)) return true;
+	if (!IntegratedEconomy::Enabled() || engine == nullptr || engine->type != VehicleType::Train) return false;
+	auto info = &engine->VehInfo<RailVehicleInfo>();
+	return info->railveh_type != RailVehicleType::Wagon &&
+		   (info->engclass == EngineClass::Electric || info->engclass == EngineClass::Monorail || info->engclass == EngineClass::Maglev);
+}
+
+CommandCost FabricationManager::QuoteRailStructure(TileIndex tile, RailType type, uint32_t units, BillOfMaterials &bill)
+{
+	if (!IntegratedEconomy::Enabled() || !UseForRail(_current_company, type)) return CommandCost();
+	bill = GetTrackBOM(type);
+	for (auto &[cargo, count] : bill.materials)
+		count *= units;
+	return CheckMaterials(PlanetManager::GetTileWorld(tile), _current_company, bill);
 }

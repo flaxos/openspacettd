@@ -78,6 +78,7 @@ struct CompanyWorldStockpile {
  */
 class StockpileManager {
 public:
+	static void ChangeCompany(CompanyID old_owner, CompanyID new_owner);
 	/** Reset all stockpiles across all worlds and companies (e.g. on new game or load). */
 	static void Reset();
 
@@ -107,7 +108,7 @@ public:
 	 * Precondition: HasSufficient must return true.
 	 * Returns true if deduction succeeded.
 	 */
-	static bool ConsumeBOM(WorldID world, CompanyID company, const std::map<CargoType, uint32_t> &bom);
+	static bool ConsumeBOM(WorldID world, CompanyID company, const std::map<CargoType, uint32_t> &bom, bool consumed = true);
 
 	/**
 	 * Retrieve all active stockpiles for save/load serialization and UI matrix display.

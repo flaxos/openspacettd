@@ -69,6 +69,32 @@ class StellarDirectory:
                             raise ValueError("Invalid train location")
                     elif row["state"] not in ("reserved", "built", "active", "cancelled") or not 0 <= int(row["price"]) < 2**63:
                         raise ValueError("Invalid landing reservation")
+            ruleset = host.setdefault("ruleset", 0)
+            if ruleset not in (0, 1):
+                raise ValueError("Unsupported economy ruleset")
+            entries = host.setdefault("researchs", [])
+            if not isinstance(entries, list) or len(entries) > 15:
+                raise ValueError("Invalid research records")
+            company_ids = {row["identity"] for row in host["companies"]}
+            for old_host in self.hosts.values():
+                shared_companies = company_ids.intersection(row["identity"] for row in old_host["companies"])
+                if shared_companies and old_host.get("ruleset", 0) != ruleset:
+                    raise ValueError("Mapped companies require the same economic ruleset")
+            for row in entries:
+                if ruleset != 1 or row["id"] not in company_ids or row["home"] != identity:
+                    raise ValueError("Research must originate at its company home")
+                unlocks = set(row["unlocks"])
+                valid_techs = {branch * 100 + tier for branch in (1, 2, 3) for tier in (1, 2, 3, 4)}
+                if not unlocks <= valid_techs or len(unlocks) != len(row["unlocks"]) or type(row["revision"]) is not int or row["revision"] != len(unlocks):
+                    raise ValueError("Invalid research revision")
+                for old_host in self.hosts.values():
+                    for old in old_host.get("researchs", []):
+                        if old["id"] == row["id"] and (old["home"] != identity or not set(old["unlocks"]) <= unlocks):
+                            raise ValueError("Conflicting research home or stale research revision")
+            if previous:
+                old_ids = {row["id"] for row in previous.get("researchs", [])}
+                if not old_ids <= {row["id"] for row in entries}:
+                    raise ValueError("Research home records cannot be removed")
             host["updated"] = time.time()
             self.hosts[identity] = host
             return True, {"accepted": identity}

@@ -105,7 +105,9 @@ bool CargoRemoval<VehicleCargoList>::operator()(CargoPacket *cp)
  */
 bool CargoDelivery::operator()(CargoPacket *cp)
 {
-	uint remove = this->Preprocess(cp);
+	uint remove = std::min({this->max_move, uint(cp->Count()), this->payment->DeliveryCapacity(this->cargo, cp)});
+	if (remove == 0) return false;
+	this->max_move -= remove;
 	this->source->RemoveFromMeta(cp, VehicleCargoList::MoveToAction::Deliver, remove);
 	this->payment->PayFinalDelivery(this->cargo, cp, remove, this->current_tile);
 	return this->Postprocess(cp, remove);

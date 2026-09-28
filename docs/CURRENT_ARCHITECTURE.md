@@ -1,5 +1,41 @@
 # OpenSpaceTTD Current Architecture
 
+## Source update — unified Commonwealth economy, 28 September 2026
+
+`codex/unified-commonwealth-economy` extends main `959fe33f18`. Worlds remain
+immutable logical regions of one native map. The versioned integrated economy
+applies only to new games with matching integrated content; legacy saves retain
+their former systems. [Complete contract](UNIFIED_COMMONWEALTH_ECONOMY.md).
+
+- `IntegratedEconomy` owns saved roles, native-industry factory identities,
+  capacity/yield remainders, city reserves, research kit escrow, confirmed research
+  homes/unlocks and physical-flow counters. `ECON` serializes version 1 and validates
+  references after native pools load. Native industry chunks own cargo buffers.
+- `PlanetManager` centralizes role/research/material placement policy. Roles are
+  assigned once, independently of colony development and access. CST sector
+  generation and the existing connected authoring harness use native commands.
+- `ProductionChainManager` exposes catalogue/dashboard projections of native
+  factories under integrated rules. Only the integrated monthly producer converts
+  their cargo; native tick/delivery/NewGRF production is suppressed. Legacy
+  station facilities remain available only under legacy rules.
+- Native cargo delivery has shared destination-capacity checks and explicit
+  warehouse priority. Factory buffers, city reserves and planetary company stock
+  are distinct custody locations. There is no factory-to-stockpile overflow.
+- Shared fabrication queries enforce advanced material bills through construction,
+  conversion, blueprints, vehicle cloning and replacement. Research reserves kits
+  separately from optional feedstock; cash progress cannot bypass material gates.
+- Core cities consume complete monthly baskets. Native growth and passenger hooks
+  apply the consumption result, including zero expansion with food alone and half
+  passenger generation during food shortages.
+- Existing authority metadata and server-authored directory commands carry a
+  monotonic research home/revision/unlock set. Same-company mixed rulesets and
+  conflicting homes are rejected. Confirmed unlocks persist through outages and
+  coordinated checkpoint reload; treasury and cargo do not federate implicitly.
+
+[Verification and hashes](audit/2026-09-28/integrated-economy/README.md).
+Human graphical acceptance remains Pending. Older architecture snapshots below
+apply to their recorded revisions.
+
 ## Source update — CST stellar network, 28 September 2026
 
 Branch `codex/cst-star-map-expansion` extends main `8464e9374a`. This update

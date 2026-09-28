@@ -34,6 +34,7 @@ struct CargoPayment : CargoPaymentPool::PoolItem<&_cargo_payment_pool> {
 	~CargoPayment();
 
 	Money PayTransfer(CargoType cargo, const CargoPacket *cp, uint count, TileIndex current_tile);
+	uint32_t DeliveryCapacity(CargoType cargo, const CargoPacket *packet) const;
 	void PayFinalDelivery(CargoType cargo, const CargoPacket *cp, uint count, TileIndex current_tile);
 };
 

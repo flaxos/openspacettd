@@ -8,6 +8,7 @@
 /** @file vehicle_cmd.cpp Commands for vehicles. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include "roadveh.h"
 #include "news_func.h"
 #include "airport.h"
@@ -134,7 +135,7 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 	const Engine *e = Engine::Get(eid);
 	Money veh_cost = e->GetCost();
 	WorldID veh_world = PlanetManager::GetTileWorld(tile);
-	bool use_veh_fab = (type == VehicleType::Train && veh_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	bool use_veh_fab = (type == VehicleType::Train && veh_world != INVALID_WORLD && FabricationManager::UseForVehicle(_current_company, e));
 	if (use_veh_fab) {
 		if (!FabricationManager::CanFabricateVehicle(veh_world, _current_company, e)) {
 			return { FabricationManager::CheckMaterials(veh_world, _current_company, FabricationManager::GetVehicleBOM(e)), VehicleID::Invalid(), 0, 0, {} };
@@ -192,9 +193,6 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 	CargoArray cargo_capacities{};
 	if (value.Succeeded()) {
 		if (subflags.Test(DoCommandFlag::Execute)) {
-			if (use_veh_fab) {
-				FabricationManager::ConsumeVehicleBOM(veh_world, _current_company, e);
-			}
 			v->unitnumber = unit_num;
 			v->value      = value.GetCost();
 			veh_id        = v->index;
@@ -250,6 +248,11 @@ std::tuple<CommandCost, VehicleID, uint, uint16_t, CargoArray> CmdBuildVehicle(D
 		if (flags != subflags) {
 			Command<Commands::SellVehicle>::Do(DoCommandFlag::Execute, v->index, false, false, ClientID::Invalid);
 		}
+	}
+
+	/* Temporary refit previews and failed builds must never consume physical stock. */
+	if (value.Succeeded() && flags.Test(DoCommandFlag::Execute) && use_veh_fab) {
+		FabricationManager::ConsumeVehicleBOM(veh_world, _current_company, e);
 	}
 
 	/* Only restore if we actually did some refitting */
@@ -857,7 +860,7 @@ static void CloneVehicleName(const Vehicle *src, Vehicle *dst)
  * @param share_orders shared orders, else copied orders
  * @return the cost of this operation + the new vehicle ID or an error
  */
-std::tuple<CommandCost, VehicleID> CmdCloneVehicle(DoCommandFlags flags, TileIndex tile, VehicleID veh_id, bool share_orders)
+static std::tuple<CommandCost, VehicleID> CloneVehicleInternal(DoCommandFlags flags, TileIndex tile, VehicleID veh_id, bool share_orders)
 {
 	CommandCost total_cost(ExpensesType::NewVehicles);
 
@@ -1168,4 +1171,35 @@ CommandCost CmdChangeServiceInt(DoCommandFlags flags, VehicleID veh_id, uint16_t
 	}
 
 	return CommandCost();
+}
+
+std::tuple<CommandCost, VehicleID> CmdCloneVehicle(DoCommandFlags flags, TileIndex tile, VehicleID veh_id, bool share_orders)
+{
+	/* Quote the complete consist: independent unit previews must not all reuse the same stock. */
+	if (IntegratedEconomy::Enabled()) {
+		auto vehicle = Vehicle::GetIfValid(veh_id);
+		if (vehicle != nullptr && vehicle->owner == _current_company && vehicle->type == VehicleType::Train) {
+			BillOfMaterials bill;
+			for (auto unit = vehicle; unit != nullptr; unit = unit->GetNextVehicle()) {
+				if (Train::From(unit)->IsRearDualheaded() || !FabricationManager::UseForVehicle(_current_company, unit->GetEngine())) continue;
+				for (const auto &[cargo, units] : FabricationManager::GetVehicleBOM(unit->GetEngine()).materials) {
+					if (units > UINT32_MAX - bill.materials[cargo]) return {CMD_ERROR, VehicleID::Invalid()};
+					bill.materials[cargo] += units;
+				}
+			}
+			if (!bill.IsEmpty()) {
+				auto check = FabricationManager::CheckMaterials(PlanetManager::GetTileWorld(tile), _current_company, bill);
+				if (check.Failed()) return {check, VehicleID::Invalid()};
+			}
+		}
+	}
+	auto stocks = IntegratedEconomy::Enabled() ? StockpileManager::GetAllStockpiles() : std::vector<CompanyWorldStockpile>{};
+	auto accounting = IntegratedEconomy::Accounting();
+	auto result = CloneVehicleInternal(flags, tile, veh_id, share_orders);
+	if (!flags.Test(DoCommandFlag::Execute) || std::get<0>(result).Failed()) {
+		for (const auto &stock : stocks)
+			StockpileManager::RestoreStockpile(stock.world_id, stock.company_id, stock.inventory);
+		IntegratedEconomy::RestoreAccounting(accounting);
+	}
+	return result;
 }

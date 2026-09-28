@@ -40,6 +40,7 @@
 #include "portal/planet_manager.h"
 #include "portal/edge_conduit.h"
 #include "portal/fabrication_manager.h"
+#include "portal/integrated_economy.h"
 
 #include "safeguards.h"
 
@@ -420,7 +421,7 @@ static inline bool ValParamTrackOrientation(Track track)
 Money GetNewRailTrackCost(RailType railtype, WorldID world, CompanyID company)
 {
 	Money cost = RailBuildCost(railtype);
-	if (world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(company)) {
+	if (world != INVALID_WORLD && FabricationManager::UseForRail(company, railtype)) {
 		cost = cost * (100 - FabricationManager::GetBOMDiscountPercent(company)) / 100;
 	}
 	return cost;
@@ -445,7 +446,7 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 	if (planet_res.Failed()) return planet_res;
 
 	WorldID track_world = PlanetManager::GetTileWorld(tile);
-	bool use_fabrication = (track_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	bool use_fabrication = (track_world != INVALID_WORLD && FabricationManager::UseForRail(_current_company, railtype));
 	if (use_fabrication && !FabricationManager::CanFabricateTrack(track_world, _current_company, railtype)) {
 		return FabricationManager::CheckMaterials(track_world, _current_company, FabricationManager::GetTrackBOM(railtype));
 	}
@@ -1050,7 +1051,7 @@ CommandCost CmdBuildTrainDepot(DoCommandFlags flags, TileIndex tile, RailType ra
 	}
 
 	WorldID depot_world = PlanetManager::GetTileWorld(tile);
-	bool use_depot_fab = (depot_world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company));
+	bool use_depot_fab = (depot_world != INVALID_WORLD && FabricationManager::UseForRail(_current_company, railtype));
 	if (use_depot_fab && !rotate_existing_depot) {
 		if (!FabricationManager::CanFabricateDepot(depot_world, _current_company, railtype)) {
 			return FabricationManager::CheckMaterials(depot_world, _current_company, FabricationManager::GetDepotBOM(railtype));
@@ -1644,7 +1645,8 @@ CommandCost CmdRemoveSignalTrack(DoCommandFlags flags, TileIndex tile, TileIndex
  * @param diagonal build diagonally or not.
  * @return the cost of this operation or an error
  */
-CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_start, RailType totype, bool diagonal)
+static CommandCost ConvertRailInternal(DoCommandFlags flags, TileIndex tile, TileIndex area_start, RailType totype, bool diagonal,
+									   std::map<WorldID, BillOfMaterials> *bills)
 {
 	TileIndex area_end = tile;
 
@@ -1701,6 +1703,7 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 			continue;
 		}
 
+		uint material_units = 1;
 		std::vector<Train *> vehicles_affected;
 
 		/* Vehicle on the tile when not converting Rail <-> ElRail
@@ -1771,7 +1774,8 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 							}
 						}
 						found_convertible_track = true;
-						cost.AddCost(RailConvertCost(type, totype) * GetTrackBits(tile).Count());
+						material_units = GetTrackBits(tile).Count();
+						cost.AddCost(RailConvertCost(type, totype) * material_units);
 						break;
 				}
 				break;
@@ -1846,6 +1850,7 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 				}
 
 				found_convertible_track = true;
+				material_units = structure_tiles;
 				cost.AddCost(structure_tiles * RailConvertCost(type, totype));
 				break;
 			}
@@ -1862,6 +1867,12 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 				break;
 		}
 
+		if (bills != nullptr) {
+			auto &bill = (*bills)[PlanetManager::GetTileWorld(tile)];
+			for (auto [cargo, units] : FabricationManager::GetTrackBOM(totype).materials)
+				bill.AddCargoMaterial(cargo, units * material_units);
+		}
+
 		for (uint i = 0; i < vehicles_affected.size(); ++i) {
 			TryPathReserve(vehicles_affected[i], true);
 		}
@@ -1875,6 +1886,29 @@ CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_
 	}
 
 	return found_convertible_track ? cost : error;
+}
+
+CommandCost CmdConvertRail(DoCommandFlags flags, TileIndex tile, TileIndex area_start, RailType totype, bool diagonal)
+{
+	if (!IntegratedEconomy::Enabled() || !FabricationManager::UseForRail(_current_company, totype))
+		return ConvertRailInternal(flags, tile, area_start, totype, diagonal, nullptr);
+	std::map<WorldID, BillOfMaterials> bills;
+	auto quote_flags = flags;
+	quote_flags.Reset(DoCommandFlag::Execute);
+	auto cost = ConvertRailInternal(quote_flags, tile, area_start, totype, diagonal, &bills);
+	if (cost.Failed()) return cost;
+	for (const auto &[world, bill] : bills) {
+		auto check = FabricationManager::CheckMaterials(world, _current_company, bill);
+		if (check.Failed()) return check;
+	}
+	if (flags.Test(DoCommandFlag::Execute)) {
+		cost = ConvertRailInternal(flags, tile, area_start, totype, diagonal, nullptr);
+		if (cost.Failed()) return cost;
+		for (const auto &[world, bill] : bills)
+			StockpileManager::ConsumeBOM(world, _current_company, bill.materials);
+	}
+	return CommandCost(ExpensesType::Construction,
+					   cost.GetCost() * (100 - FabricationManager::GetBOMDiscountPercent(_current_company)) / 100);
 }
 
 static CommandCost RemoveTrainDepot(TileIndex tile, DoCommandFlags flags)

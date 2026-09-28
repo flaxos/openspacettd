@@ -11,6 +11,7 @@
 #define PORTAL_CMD_H
 
 #include "../command_type.h"
+#include "../industry_type.h"
 #include "../direction_type.h"
 #include "../rail_type.h"
 #include "../station_type.h"
@@ -230,4 +231,8 @@ DEF_CMD_TRAIT(Commands::SetFacilityPlatformCapacity, CmdSetFacilityPlatformCapac
 DEF_CMD_TRAIT(Commands::ConfigurePortalStagingSiding, CmdConfigurePortalStagingSiding, {}, CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::SetCorporateAlliance, CmdSetCorporateAlliance, {}, CommandType::CompanySetting)
 
+CommandCost CmdSetResearchAcceleration(DoCommandFlags flags, bool enabled);
+CommandCost CmdManageEconomyFactory(DoCommandFlags flags, IndustryID industry, bool retire);
+DEF_CMD_TRAIT(Commands::SetResearchAcceleration, CmdSetResearchAcceleration, {}, CommandType::CompanySetting)
+DEF_CMD_TRAIT(Commands::ManageEconomyFactory, CmdManageEconomyFactory, {}, CommandType::LandscapeConstruction)
 #endif /* PORTAL_CMD_H */

@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "../console_func.h"
 #include "universe_network.h"
+#include "integrated_economy.h"
 #include "authority_transport.h"
 #include "federation_cmd.h"
 #include "transfer_journal.h"
@@ -59,7 +60,8 @@ GlobalStationID StationIdentity(const json &r)
 }
 bool Compatible(const json &r)
 {
-	return r.value("online", false) && r.value("manifest", "") == UniverseNetwork::Manifest();
+	return r.value("online", false) && r.value("manifest", "") == UniverseNetwork::Manifest() &&
+		   r.value("ruleset", 0u) == (IntegratedEconomy::Enabled() ? IntegratedEconomy::VERSION : 0);
 }
 } // namespace
 void UniverseNetwork::Reset()
@@ -106,6 +108,8 @@ json UniverseNetwork::Advertisement()
 	json host{{"namespace", ns},
 			  {"address", address ? address : fmt::format("127.0.0.1:{}", _settings_client.network.server_port)},
 			  {"manifest", Manifest()},
+			  {"ruleset", IntegratedEconomy::Enabled() ? IntegratedEconomy::VERSION : 0},
+			  {"researchs", IntegratedEconomy::ResearchAdvertisements()},
 			  {"worlds", json::array()},
 			  {"stations", json::array()},
 			  {"gates", json::array()},
@@ -118,6 +122,7 @@ json UniverseNetwork::Advertisement()
 		auto stellar = StellarNetwork::GetWorld(world.id);
 		host["worlds"].push_back({{"id", world.id.base()},
 								  {"name", world.name},
+								  {"role", IntegratedEconomy::Enabled() ? IntegratedEconomy::RoleName(world.id) : "Legacy"},
 								  {"catalogue", stellar ? stellar->catalogue_id : ""},
 								  {"x", stellar ? stellar->x : 0},
 								  {"y", stellar ? stellar->y : 0},
@@ -183,7 +188,7 @@ bool UniverseNetwork::Apply(const std::string &key, const json &record, bool exe
 	try {
 		std::string kind = record.at("kind"), ns = record.at("namespace");
 		if (!ParseNamespace(ns).IsValid() || (kind != "host" && kind != "world" && kind != "station" && kind != "gate" && kind != "zone" &&
-											  kind != "gateproject" && kind != "gatereply" && kind != "train"))
+											  kind != "gateproject" && kind != "gatereply" && kind != "train" && kind != "research"))
 			return false;
 		if (!record.at("manifest").is_string() || !record.at("online").is_boolean()) return false;
 		if (kind == "world" && (!record.at("id").is_number_unsigned() && !record.at("id").is_number_integer())) return false;
@@ -198,6 +203,7 @@ bool UniverseNetwork::Apply(const std::string &key, const json &record, bool exe
 		if (kind == "gate" &&
 			(record.at("toll").get<int64_t>() < 0 || record.at("toll").get<int64_t>() > INT32_MAX || record.at("rail").get<uint32_t>() >= RAILTYPE_END))
 			return false;
+		if (kind == "research" && (!Compatible(record) || !IntegratedEconomy::ApplyResearch(record, execute))) return false;
 		if (execute) directory[key] = record;
 		return true;
 	} catch (...) {
@@ -219,21 +225,26 @@ void UniverseNetwork::Tick(uint64_t tick)
 				std::map<std::string, json> records;
 				for (const auto &host : fetching->GetResponse().at("hosts")) {
 					std::string ns = host.at("namespace");
-					json common{{"namespace", ns}, {"manifest", host.at("manifest")}, {"online", host.at("online")}};
+					json common{{"namespace", ns},
+								{"manifest", host.at("manifest")},
+								{"online", host.at("online")},
+								{"ruleset", host.value("ruleset", 0u)}};
 					json h = common;
 					h["kind"] = "host";
 					h["address"] = host.at("address");
 					h["companies"] = host.at("companies");
 					records[ns] = h;
-					for (const auto &kind : {"world", "station", "gate", "zone", "gateproject", "gatereply", "train"}) {
+					for (const auto &kind : {"world", "station", "gate", "zone", "gateproject", "gatereply", "train", "research"}) {
 						for (const auto &entry : host.value(std::string(kind) + "s", json::array())) {
 							json r = common;
 							r.update(entry);
 							r["kind"] = kind;
-							std::string key = ns + "/" + kind + "/" +
-											  (std::string(kind) == "gateproject" || std::string(kind) == "gatereply" || std::string(kind) == "train"
-												   ? entry.at("id").get<std::string>()
-												   : fmt::format("{}", entry.at(std::string(kind) == "station" ? "sequence" : "id").get<uint64_t>()));
+							std::string key =
+								ns + "/" + kind + "/" +
+								(std::string(kind) == "gateproject" || std::string(kind) == "gatereply" || std::string(kind) == "train" ||
+										 std::string(kind) == "research"
+									 ? entry.at("id").get<std::string>()
+									 : fmt::format("{}", entry.at(std::string(kind) == "station" ? "sequence" : "id").get<uint64_t>()));
 							records[key] = r;
 						}
 					}
@@ -526,8 +537,18 @@ bool UniverseNetwork::Load(const std::string &state)
 		auto records = root.at("records");
 		directory.clear();
 		gate_orders.clear();
-		for (auto it = records.begin(); it != records.end(); ++it)
-			if (!Apply(it.key(), it.value())) return false;
+		for (auto it = records.begin(); it != records.end(); ++it) {
+			if (it.value().value("kind", "") == "research") {
+				/* ECON already restored confirmed unlocks. GRFs and the live content manifest
+				 * are not initialized yet: validate cached identity/revision without publishing. */
+				if (it.key().empty() || it.key().size() > 128 || it.value().dump().size() > 1200 ||
+					!it.value().at("manifest").is_string() || !it.value().at("online").is_boolean() ||
+					!IntegratedEconomy::ApplyResearch(it.value(), false)) return false;
+				directory[it.key()] = it.value();
+			} else if (!Apply(it.key(), it.value())) {
+				return false;
+			}
+		}
 		for (auto &row : root.at("pins")) {
 			auto gate = GlobalOrderDestinationID::ForPortalGate(ParseNamespace(row.at(1)), row.at(2).get<uint64_t>(), WorldID{row.at(3).get<uint32_t>()});
 			if (!gate.IsValid()) return false;

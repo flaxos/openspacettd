@@ -1,6 +1,8 @@
 /* This file is part of OpenSpaceTTD. Licensed under GPL-2.0. */
 /** @file connected_economy.cpp Reproducible offline connected production and megacity acceptance fixture. */
 #include "../stdafx.h"
+#include "integrated_economy.h"
+#include "../economy_func.h"
 #include "commonwealth_slice.h"
 #include "commonwealth_pack.h"
 #include "planet_manager.h"
@@ -48,6 +50,7 @@
 #include "../3rdparty/nlohmann/json.hpp"
 #include <queue>
 #include "resource_sites.h"
+#include "stellar_network.h"
 
 #include "../safeguards.h"
 
@@ -66,16 +69,47 @@ struct DemoNode {
 	RecipeID recipe = 0; ///< Processing recipe, or zero for a transport station.
 };
 /** Nodes with real rail platforms shared by dedicated freight services. */
-const std::vector<DemoNode> nodes = {{"HQ warehouse", 70}, {"Megacity consumers", 116},
-	{"Consumer crystals", 168, RECIPE_CONSUMER_CRYSTAL_FORMAT}, {"Food works", 148}, {"Ballast crusher", 300, RECIPE_BALLAST_CRUSHING},
-	{"Steel furnace", 318, RECIPE_STEEL_SMELTING}, {"Alloy foundry", 336, RECIPE_SUPERALLOY_FOUNDRY},
-	{"Copper works", 354, RECIPE_COPPER_SMELTING}, {"Silicon works", 372, RECIPE_SILICON_ARC},
-	{"Signal works", 390, RECIPE_SIGNALLING_ASSEMBLY}, {"Polymer works", 408, RECIPE_POLYMER_SYNTHESIS},
-	{"Propulsion works", 426, RECIPE_MAGLEV_WORKS}, {"Blank crystal fab", 444, RECIPE_MONOCRYSTAL_SYNTHESIS}, {"Stone quarry", 560},
-	{"Iron mine", 590}, {"Copper mine", 620}, {"Silica dunes", 650}, {"Rare earth mine", 680}, {"Farm", 710},
-	{"Quantum observatory", 820, RECIPE_QUANTUM_ENRICHMENT}, {"Frontier passengers", 875}, {"City distribution", 132},
-	{"Farm export warehouse", 730}, {"Stone export", 576}, {"Iron export", 606}, {"Copper export", 636}, {"Silica export", 666},
-	{"Rare earth export", 696}};
+const std::vector<DemoNode> legacy_nodes = {{"HQ warehouse", 70},
+											{"Megacity consumers", 116},
+											{"Consumer crystals", 168, RECIPE_CONSUMER_CRYSTAL_FORMAT},
+											{"Food works", 148},
+											{"Ballast crusher", 300, RECIPE_BALLAST_CRUSHING},
+											{"Steel furnace", 318, RECIPE_STEEL_SMELTING},
+											{"Alloy foundry", 336, RECIPE_SUPERALLOY_FOUNDRY},
+											{"Copper works", 354, RECIPE_COPPER_SMELTING},
+											{"Silicon works", 372, RECIPE_SILICON_ARC},
+											{"Signal works", 390, RECIPE_SIGNALLING_ASSEMBLY},
+											{"Polymer works", 408, RECIPE_POLYMER_SYNTHESIS},
+											{"Propulsion works", 426, RECIPE_MAGLEV_WORKS},
+											{"Blank crystal fab", 444, RECIPE_MONOCRYSTAL_SYNTHESIS},
+											{"Stone quarry", 560},
+											{"Iron mine", 590},
+											{"Copper mine", 620},
+											{"Silica dunes", 650},
+											{"Rare earth mine", 680},
+											{"Farm", 710},
+											{"Quantum observatory", 820, RECIPE_QUANTUM_ENRICHMENT},
+											{"Frontier passengers", 875},
+											{"City distribution", 132},
+											{"Farm export warehouse", 730},
+											{"Stone export", 576},
+											{"Iron export", 606},
+											{"Copper export", 636},
+											{"Silica export", 666},
+											{"Rare earth export", 696}};
+std::vector<DemoNode> nodes = legacy_nodes;
+void ConfigureIntegratedNodes()
+{
+	nodes = legacy_nodes;
+	if (!IntegratedEconomy::Enabled()) return;
+	nodes[3] = {"Food works", 450, 404};
+	for (size_t i = 4; i <= 12; ++i)
+		nodes[i].x = 300 + 15 * (i - 4);
+	nodes.push_back({"Oil wells", 736});
+	nodes.push_back({"Machine assembly", 435, RECIPE_MACHINE_MODULES});
+	nodes.push_back({"Industrial warehouse", 282});
+	nodes.push_back({"Research frontier warehouse", 850});
+}
 /** JSON representation of measured simulation state. */
 using Json = nlohmann::json;
 
@@ -153,6 +187,7 @@ EngineID EngineLocal(uint local)
 
 /** Number of dedicated long-distance corridors already constructed. */
 uint route_number = 0;
+std::vector<std::vector<std::pair<uint, uint>>> integrated_corridors;
 /**
  * Build and start a cargo service using ordinary construction and order commands.
  * @param source Source node index.
@@ -171,8 +206,24 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 	bool feeder = source >= 13 && source <= 18 && destination >= 22;
 	uint y = feeder ? TOP : TOP + 2 + 2 * route_number++;
 	uint left = std::min(nodes[source].x, nodes[destination].x), right = std::max(nodes[source].x, nodes[destination].x);
+	if (IntegratedEconomy::Enabled()) {
+		size_t row = 0;
+		for (; row < integrated_corridors.size(); ++row) {
+			if (std::ranges::none_of(integrated_corridors[row],
+									 [left, right](auto range) { return left - 3 <= range.second + 2 && right + 16 + 2 >= range.first; }))
+				break;
+		}
+		if (row == integrated_corridors.size()) integrated_corridors.emplace_back();
+		integrated_corridors[row].push_back({left - 3, right + 16});
+		y = TOP + 2 + 2 * row;
+		if (y - TOP >= 64) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL too many overlapping freight corridors");
+			return false;
+		}
+	}
+
 	for (uint x : {220u, 476u, 732u})
-		if (left < x && right > x) {
+		if (left < x && right > x + (IntegratedEconomy::Enabled() ? 58 : 0)) {
 			if (!Result(Command<Commands::BuildPortalPair>::Do(
 			                DoCommandFlag::Execute, TileXY(x, y), DiagDirection::SW, TileXY(x + 58, y), DiagDirection::NE, RAILTYPE_RAIL),
 			        "route portals"))
@@ -183,8 +234,9 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 	if (!feeder)
 		for (size_t node : {source, destination}) {
 			if (!Result(Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, TileXY(nodes[node].x, y), RAILTYPE_RAIL, Axis::X, 1,
-			                14, STAT_CLASS_DFLT, 0, Stop(node), true),
-			        "route platform"))
+																IntegratedEconomy::Enabled() ? 4 : 14, STAT_CLASS_DFLT, 0, Stop(node),
+																true),
+						fmt::format("route platform {} at {},{} ({} -> {})", node, nodes[node].x, y, source, destination)))
 				return false;
 		}
 	uint depot_x = left >= 256 ? left - 2 : right - 2;
@@ -196,8 +248,10 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 	if (!Rail(TileXY(depot_x, y), Corner(DiagDirection::NW, DiagDirection::SW))) return false;
 	EngineID wagon = EngineID::Invalid();
 	for (const Engine *e : Engine::Iterate()) {
-		if (e->type != VehicleType::Train || e->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID ||
-		    e->VehInfo<RailVehicleInfo>().railveh_type != RailVehicleType::Wagon)
+		if (e->type != VehicleType::Train ||
+			(e->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID &&
+			 !(IntegratedEconomy::Enabled() && e->grf_prop.grfid == COMMONWEALTH_INDUSTRY_GRFID)) ||
+			e->VehInfo<RailVehicleInfo>().railveh_type != RailVehicleType::Wagon)
 			continue;
 		if (e->GetDefaultCargoType() != cargo && !e->info.refit_mask.Test(cargo)) continue;
 		auto query = Command<Commands::BuildVehicle>::Do({}, depot, e->index, false, cargo, ClientID::Invalid);
@@ -215,7 +269,7 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 		    DoCommandFlag::Execute, depot, EngineLocal(right < 256 ? 0x20 : 0x22), false, INVALID_CARGO, ClientID::Invalid);
 		if (!Result(ec, "locomotive")) return false;
 		for (uint w = 0; w < wagons; ++w) {
-			bool livestock = (source == 18 || source == 22) && w >= wagons / 2;
+			bool livestock = !IntegratedEconomy::Enabled() && (source == 18 || source == 22) && w >= wagons / 2;
 			CargoType requested = livestock ? GetCargoTypeByLabel(CargoLabel{"LVST"}) : cargo;
 			EngineID wagon_engine = livestock ? EngineLocal(0x37) : wagon;
 			auto [wc, id, d, e, f] =
@@ -242,6 +296,7 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 		pickup.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
 		pickup.SetStopLocation(OrderStopLocation::NearEnd);
 		pickup.SetUnloadType(OrderUnloadType::NoUnload);
+		if (IntegratedEconomy::Enabled()) pickup.SetLoadType(OrderLoadType::FullLoad);
 		Order drop;
 		drop.MakeGoToStation(Stop(destination));
 		drop.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
@@ -307,11 +362,127 @@ bool SmoothTerrain()
 	return true;
 }
 
+/** Build a real factory or extraction site through the same command used by Fund Industry. */
+bool FundIntegratedNode(size_t node, IndustryType type)
+{
+	if (type == IT_INVALID) return false;
+	for (auto industry : Industry::Iterate())
+		if (industry->type == type && DistanceManhattan(industry->location.tile, TileXY(nodes[node].x, TOP)) < 20) return true;
+	bool primary = ResourceSiteManager::IsPrimary(type);
+	auto technology =
+		primary ? ResourceSiteManager::RequiredTech(type) : IntegratedEconomy::RecipeTech(IntegratedEconomy::IndustryRecipe(type));
+	if (technology != TECH_NONE && !TechTreeManager::IsTechUnlocked(CompanyID{0}, technology)) return false;
+	if (primary) {
+		TileIndex site = TileXY(nodes[node].x, TOP - 12);
+		ResourceSiteManager::AddSite(site, type, 16, 24);
+		auto survey = Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, site);
+		if (survey.Failed()) return false;
+	}
+	StringID last_error = INVALID_STRING_ID;
+	for (uint dy = 5; dy <= 12; ++dy)
+		for (size_t layout = 0; layout < GetIndustrySpec(type)->layouts.size(); ++layout) {
+			TileIndex tile = TileXY(nodes[node].x, TOP - dy);
+			auto quote = Command<Commands::BuildIndustry>::Do({}, tile, type, layout, false, 1);
+			if (quote.Failed()) {
+				last_error = quote.GetErrorMessage();
+				continue;
+			}
+			if (quote.GetCost() > Company::Get(CompanyID{0})->money) continue;
+			auto result = Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, tile, type, layout, false, 1);
+			if (result.Failed()) return false;
+			SubtractMoneyFromCompany(CompanyID{0}, result);
+			return true;
+		}
+	if (last_error != INVALID_STRING_ID) IConsolePrint(CC_DEFAULT, "CONNECTED pending {}: {}", nodes[node].name, GetString(last_error));
+	return false;
+}
+
+void ProgressIntegrated()
+{
+	if (StellarNetwork::Enabled() && TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_PORTAL_1)) {
+		if (StellarNetwork::Projects().empty()) {
+			auto result = Command<Commands::StartGateProject>::Do(DoCommandFlag::Execute, TileXY(84, 65), 1, Stop(0));
+			if (result.Succeeded()) SubtractMoneyFromCompany(CompanyID{0}, result);
+		}
+		for (const auto &[id, project] : StellarNetwork::Projects())
+			if (project.state == GateProjectState::Ready) {
+				auto result = Command<Commands::OperateGateProject>::Do(DoCommandFlag::Execute, id, false);
+				if (result.Succeeded()) SubtractMoneyFromCompany(CompanyID{0}, result);
+			}
+	}
+	for (size_t node = 0; node < nodes.size(); ++node) {
+		if (nodes[node].recipe == RECIPE_NONE) continue;
+		for (IndustryType type = 0; type < NUM_INDUSTRYTYPES; ++type) {
+			if (IntegratedEconomy::IndustryRecipe(type) == nodes[node].recipe) {
+				FundIntegratedNode(node, type);
+				break;
+			}
+		}
+	}
+	for (auto [node, local] : {std::pair{15u, 0x16u}, std::pair{16u, 0x18u}, std::pair{17u, 0x14u}, std::pair{18u, 0x22u}})
+		FundIntegratedNode(node, MapNewGRFIndustryType(0x80 | local, COMMONWEALTH_INDUSTRY_GRFID));
+	for (IndustryType type = 0; type < NUM_INDUSTRYTYPES; ++type) {
+		auto spec = GetIndustrySpec(type);
+		if (spec->enabled && ResourceSiteManager::IsPrimary(type) && !spec->behaviour.Test(IndustryBehaviour::BuiltOnWater) &&
+			std::ranges::find(spec->produced_cargo, GetCargoTypeByLabel(CargoLabel{"OIL_"})) != spec->produced_cargo.end()) {
+			FundIntegratedNode(28, type);
+			break;
+		}
+	}
+	if (TechTreeManager::GetActiveProject(CompanyID{0}) == TECH_NONE) {
+		for (auto tech : {TECH_PORTAL_1, TECH_MATERIALS_2, TECH_MATERIALS_3, TECH_MATERIALS_4, TECH_TRACTION_3, TECH_PORTAL_2,
+						  TECH_PORTAL_3, TECH_TRACTION_4, TECH_PORTAL_4}) {
+			if (TechTreeManager::IsTechUnlocked(CompanyID{0}, tech)) continue;
+			std::string error;
+			if (TechTreeManager::CanResearch(CompanyID{0}, tech, error)) {
+				Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, tech);
+				Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, 250000);
+			}
+			break;
+		}
+	}
+}
+
+bool PrepareIntegratedServices()
+{
+	for (size_t node : {30u, 31u})
+		if (!Result(Command<Commands::BuildLogisticsHub>::Do(DoCommandFlag::Execute, TileXY(nodes[node].x, TOP), Stop(node),
+															 std::string(nodes[node].name)),
+					"construction warehouse"))
+			return false;
+	ProgressIntegrated();
+	struct Flow {
+		size_t from;
+		size_t to;
+		const char *label;
+	};
+	const Flow flows[] = {{13, 4, "SILC"},	{14, 5, "IRON"},  {15, 7, "COPR"}, {16, 8, "SAND"}, {18, 3, "GRAI"},  {28, 10, "OIL_"},
+						  {4, 0, "BALL"},	{4, 1, "BALL"},	  {5, 0, "STEL"},  {5, 1, "STEL"},	{5, 6, "STEL"},	  {5, 29, "STEL"},
+						  {5, 30, "STEL"},	{5, 31, "STEL"},  {7, 8, "WIRE"},  {7, 9, "WIRE"},	{7, 29, "WIRE"},  {7, 11, "WIRE"},
+						  {7, 0, "WIRE"},	{8, 0, "CHIP"},	  {8, 1, "CHIP"},  {8, 9, "CHIP"},	{8, 29, "CHIP"},  {29, 0, "MACH"},
+						  {29, 30, "MACH"}, {29, 31, "MACH"}, {9, 0, "SIGE"},  {17, 6, "RARE"}, {17, 12, "RARE"}, {16, 12, "SAND"},
+						  {6, 11, "ALLO"},	{6, 0, "ALLO"},	  {10, 0, "POLY"}, {11, 0, "MGLA"}, {12, 0, "BCRY"},  {12, 2, "BCRY"},
+						  {12, 19, "BCRY"}, {19, 0, "QCRY"},  {2, 1, "CCRY"},  {3, 1, "FOOD"}};
+	for (const auto &flow : flows) {
+		CargoLabel label;
+		std::copy_n(flow.label, 4, label.begin());
+		uint wagons = (flow.from == 3 || (flow.from >= 13 && flow.from <= 18) || flow.from == 28) ? 6 : 2;
+		if (!TrainRoute(flow.from, flow.to, GetCargoTypeByLabel(label), wagons)) return false;
+	}
+	for (uint i = 0; i < 4; ++i)
+		StellarNetwork::RegisterWorld({WorldID{i}, fmt::format("uat-{}", i), fmt::format("UAT world {}", i), int32_t(i * 3), 0, true});
+	StellarNetwork::RegisterZone({1, WorldID{3}, TileXY(900, 200), DiagDirection::NE});
+	if (!Result(Command<Commands::BuildPortalGate>::Do(DoCommandFlag::Execute, TileXY(84, 65), DiagDirection::SW, RAILTYPE_RAIL),
+				"project source gate"))
+		return false;
+	return true;
+}
+
 /**
  * Construct the isolated four-world fixture on a fresh map.
  * @return Whether all construction and configuration commands succeeded.
  */
-bool Prepare(bool resources = false)
+bool Prepare(bool resources = false, bool integrated = false)
 {
 	if (Map::SizeX() != 1024 || Map::SizeY() != 1024 || Company::GetNumItems() != 0 || Industry::GetNumItems() != 0 ||
 	    Vehicle::GetNumItems() != 0) {
@@ -344,6 +515,11 @@ bool Prepare(bool resources = false)
 		        .development_score = 10000}))
 			return false;
 	}
+	if (integrated) {
+		IntegratedEconomy::Reset();
+		if (!IntegratedEconomy::StartNewGame()) return false;
+	}
+	ConfigureIntegratedNodes();
 	for (uint y = 50; y <= 230; ++y)
 		for (uint x = 1; x < 1023; ++x) {
 			TileIndex tile = TileXY(x, y);
@@ -370,6 +546,7 @@ bool Prepare(bool resources = false)
 	FabricationManager::SetFabricateFromStockpile(company->index, false);
 	TechTreeManager::RestoreCompanyTech(company->index, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_TRACTION_1, TECH_TRACTION_2});
 	route_number = 0;
+	integrated_corridors.clear();
 	for (auto [x, y, name] : {std::tuple{120u, 74u, "Commonwealth Metropolis"}, std::tuple{880u, 74u, "Research Settlement"}}) {
 		AutoRestoreBackup deity(_current_company, OWNER_DEITY);
 		auto [cost, money, town] = Command<Commands::FoundTown>::Do(
@@ -388,7 +565,7 @@ bool Prepare(bool resources = false)
 			return false;
 		if (!Result(Command<Commands::RenameStation>::Do(DoCommandFlag::Execute, Stop(i), std::string(node.name)), "station name"))
 			return false;
-		if (node.recipe != 0) {
+		if (node.recipe != 0 && !integrated) {
 			if (!Result(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, Stop(i), node.recipe), node.name))
 				return false;
 			if (!Result(Command<Commands::SetFacilityPlatformCapacity>::Do(DoCommandFlag::Execute, Stop(i), 4096), "factory rail dispatch"))
@@ -397,7 +574,7 @@ bool Prepare(bool resources = false)
 	}
 	if (resources) {
 		if (!Result(Command<Commands::PlaceCorporateHQ>::Do(DoCommandFlag::Execute, TileXY(70, 60), std::string("Commonwealth HQ")), "survey research HQ")) return false;
-		for (TechID tech : {TECH_MATERIALS_2, TECH_MATERIALS_3}) {
+		for (TechID tech : integrated ? std::vector<TechID>{} : std::vector<TechID>{TECH_MATERIALS_2, TECH_MATERIALS_3}) {
 			if (!Result(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, tech), "resource research")) return false;
 			if (!Result(Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, TechTreeManager::GetNode(tech)->cost_rp * 1000), "resource research budget")) return false;
 			TechTreeManager::ProcessMonthlyResearch();
@@ -407,6 +584,7 @@ bool Prepare(bool resources = false)
 	for (auto [node, local] :
 	    {std::pair{13u, 0x10u}, std::pair{14u, 0x12u}, std::pair{15u, 0x16u}, std::pair{16u, 0x18u}, std::pair{17u, 0x14u}}) {
 		IndustryType type = MapNewGRFIndustryType(0x80 | local, COMMONWEALTH_INDUSTRY_GRFID);
+		if (integrated && ResourceSiteManager::RequiredTech(type) != TECH_NONE) continue;
 		if (resources) {
 			TileIndex site = TileXY(nodes[node].x, TOP - 5);
 			if (ResourceSiteManager::AddSite(site, type, 16, 16) == 0 || !Result(Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, site), "resource survey")) return false;
@@ -416,7 +594,8 @@ bool Prepare(bool resources = false)
 			return false;
 	}
 	// Native Arctic farm and food processor supply actual food, not proxy minerals.
-	for (auto [node, type] : {std::pair{18u, IndustryType{9}}, std::pair{3u, IndustryType{13}}}) {
+	for (auto [node, type] : integrated ? std::vector<std::pair<uint, IndustryType>>{}
+										: std::vector<std::pair<uint, IndustryType>>{{18u, IndustryType{9}}, {3u, IndustryType{13}}}) {
 		if (resources && ResourceSiteManager::IsPrimary(type)) {
 			TileIndex site = TileXY(nodes[node].x, TOP - 12);
 			if (ResourceSiteManager::AddSite(site, type, 16, 24) == 0 || !Result(Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, site), "farm survey")) return false;
@@ -445,7 +624,7 @@ bool Prepare(bool resources = false)
 	                DoCommandFlag::Execute, TileXY(nodes[22].x, TOP), Stop(22), std::string("Farm export warehouse")),
 	        "farm warehouse"))
 		return false;
-	for (size_t i = 23; i < nodes.size(); ++i)
+	for (size_t i = 23; i < legacy_nodes.size(); ++i)
 		if (!Result(Command<Commands::BuildLogisticsHub>::Do(
 		                DoCommandFlag::Execute, TileXY(nodes[i].x, TOP), Stop(i), std::string(nodes[i].name)),
 		        "raw export warehouse"))
@@ -455,34 +634,61 @@ bool Prepare(bool resources = false)
 		return false;
 	if (!Result(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_PORTAL_1), "research project")) return false;
 	if (!Result(Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, 25000), "research budget")) return false;
-	using C = CommonwealthCargoID;
-	const std::vector<std::tuple<size_t, size_t, C>> flows = {{23, 4, C::StoneSlag}, {4, 0, C::StoneSlag}, {24, 5, C::IronOre},
-	    {5, 6, C::StructuralSteel}, {5, 0, C::StructuralSteel}, {27, 6, C::RareEarthMinerals}, {6, 11, C::Superalloys},
-	    {11, 0, C::Superalloys}, {25, 7, C::CopperOre}, {7, 9, C::ConductiveWiring}, {7, 10, C::ConductiveWiring},
-	    {7, 11, C::ConductiveWiring}, {7, 0, C::ConductiveWiring}, {26, 8, C::SilicaSand}, {8, 9, C::SiliconChips}, {9, 0, C::SiliconChips},
-	    {21, 1, C::SiliconChips}, {21, 1, C::SyntheticComposites}, {10, 0, C::SyntheticComposites}, {26, 12, C::SilicaSand},
-	    {27, 12, C::RareEarthMinerals}, {12, 19, C::BlankCrystals}, {12, 2, C::BlankCrystals}, {19, 0, C::EnrichedQuantumCrystals},
-	    {2, 1, C::EncryptedConsumerCrystals}};
-	for (auto [from, to, cargo] : std::vector<std::tuple<size_t, size_t, C>>{
-	         {13, 23, C::StoneSlag}, {14, 24, C::IronOre}, {15, 25, C::CopperOre}, {16, 26, C::SilicaSand}, {17, 27, C::RareEarthMinerals}})
-		if (!TrainRoute(from, to, Cargo(cargo), 3)) return false;
-	for (auto [from, to, cargo] : flows)
-		if (!TrainRoute(from, to, Cargo(cargo),
-		        from == 21                                            ? 1
-		        : from == 5 && to == 6                                ? 1
-		        : from == 7 && to != 0                                ? 1
-		        : from == 26 && to == 12                              ? 4
-		        : from == 24 || from == 25 || (from == 26 && to == 8) ? 12
-		                                                              : 8))
+	if (!integrated) {
+		using C = CommonwealthCargoID;
+		const std::vector<std::tuple<size_t, size_t, C>> flows = {{23, 4, C::StoneSlag},
+																  {4, 0, C::StoneSlag},
+																  {24, 5, C::IronOre},
+																  {5, 6, C::StructuralSteel},
+																  {5, 0, C::StructuralSteel},
+																  {27, 6, C::RareEarthMinerals},
+																  {6, 11, C::Superalloys},
+																  {11, 0, C::Superalloys},
+																  {25, 7, C::CopperOre},
+																  {7, 9, C::ConductiveWiring},
+																  {7, 10, C::ConductiveWiring},
+																  {7, 11, C::ConductiveWiring},
+																  {7, 0, C::ConductiveWiring},
+																  {26, 8, C::SilicaSand},
+																  {8, 9, C::SiliconChips},
+																  {9, 0, C::SiliconChips},
+																  {21, 1, C::SiliconChips},
+																  {21, 1, C::SyntheticComposites},
+																  {10, 0, C::SyntheticComposites},
+																  {26, 12, C::SilicaSand},
+																  {27, 12, C::RareEarthMinerals},
+																  {12, 19, C::BlankCrystals},
+																  {12, 2, C::BlankCrystals},
+																  {19, 0, C::EnrichedQuantumCrystals},
+																  {2, 1, C::EncryptedConsumerCrystals}};
+		for (auto [from, to, cargo] : std::vector<std::tuple<size_t, size_t, C>>{{13, 23, C::StoneSlag},
+																				 {14, 24, C::IronOre},
+																				 {15, 25, C::CopperOre},
+																				 {16, 26, C::SilicaSand},
+																				 {17, 27, C::RareEarthMinerals}})
+			if (!TrainRoute(from, to, Cargo(cargo), 3)) return false;
+		for (auto [from, to, cargo] : flows)
+			if (!TrainRoute(from, to, Cargo(cargo),
+							from == 21											  ? 1
+							: from == 5 && to == 6								  ? 1
+							: from == 7 && to != 0								  ? 1
+							: from == 26 && to == 12							  ? 4
+							: from == 24 || from == 25 || (from == 26 && to == 8) ? 12
+																				  : 8))
+				return false;
+		CargoType farm_cargo = GetCargoTypeByLabel(CargoLabel{"WHEA"});
+		if (!IsValidCargoType(farm_cargo)) farm_cargo = GetCargoTypeByLabel(CargoLabel{"GRAI"});
+		if (!TrainRoute(22, 3, farm_cargo, 12) || !TrainRoute(18, 22, farm_cargo, 2) ||
+			!TrainRoute(3, 21, GetCargoTypeByLabel(CargoLabel{"FOOD"}), 2) ||
+			!TrainRoute(21, 1, GetCargoTypeByLabel(CargoLabel{"FOOD"}), 2))
 			return false;
-	CargoType farm_cargo = GetCargoTypeByLabel(CargoLabel{"WHEA"});
-	if (!IsValidCargoType(farm_cargo)) farm_cargo = GetCargoTypeByLabel(CargoLabel{"GRAI"});
-	if (!TrainRoute(22, 3, farm_cargo, 12) || !TrainRoute(18, 22, farm_cargo, 2) ||
-	    !TrainRoute(3, 21, GetCargoTypeByLabel(CargoLabel{"FOOD"}), 2) || !TrainRoute(21, 1, GetCargoTypeByLabel(CargoLabel{"FOOD"}), 2))
-		return false;
-	if (!TrainRoute(1, 20, GetCargoTypeByLabel(CargoLabel{"PASS"}), 4) || !TrainRoute(20, 1, GetCargoTypeByLabel(CargoLabel{"PASS"}), 4))
-		return false;
-	if (!TrainRoute(22, 3, farm_cargo, 12, 1)) return false;
+		if (!TrainRoute(1, 20, GetCargoTypeByLabel(CargoLabel{"PASS"}), 4) ||
+			!TrainRoute(20, 1, GetCargoTypeByLabel(CargoLabel{"PASS"}), 4))
+			return false;
+		if (!TrainRoute(22, 3, farm_cargo, 12, 1)) return false;
+	} else {
+		if (!PrepareIntegratedServices()) return false;
+	}
 	for (auto [x, y, name] : {std::tuple{120u, 60u, "START: City growth"}, std::tuple{100u, 198u, "CST prefab test area"},
 	         std::tuple{70u, 60u, "HQ: research and stockpiles"}}) {
 		if (!Result(ExtractCommandCost(Command<Commands::PlaceSign>::Do(DoCommandFlag::Execute, TileXY(x, y), std::string(name))),
@@ -525,16 +731,42 @@ Json Snapshot()
 	for (const auto &f : ProductionChainManager::GetAllFacilities()) {
 		r["facilities"].push_back({{"id", f.id}, {"recipe", f.recipe_id}, {"batches", f.total_produced}, {"inputs", f.input_buffers},
 		    {"outputs", f.output_buffers}});
-		for (auto [c, n] : f.input_buffers)
-			held[c] += n;
-		for (auto [c, n] : f.output_buffers)
-			held[c] += n;
+		if (!IntegratedEconomy::Enabled())
+			for (auto [c, n] : f.input_buffers)
+				held[c] += n;
+		if (!IntegratedEconomy::Enabled())
+			for (auto [c, n] : f.output_buffers)
+				held[c] += n;
 	}
 	r["stocks"] = Json::array();
 	for (const auto &s : StockpileManager::GetAllStockpiles()) {
 		for (auto [c, n] : s.inventory)
 			held[c] += n;
 		r["stocks"].push_back({{"world", s.world_id.base()}, {"inventory", s.inventory}});
+	}
+	if (IntegratedEconomy::Enabled()) {
+		r["economy"] = Json::parse(IntegratedEconomy::Save());
+		r["stellar"] = Json::parse(StellarNetwork::Save());
+		for (const auto &[id, project] : StellarNetwork::Projects()) {
+			if (project.state == GateProjectState::Supplying || project.state == GateProjectState::Ready) {
+				held[GetCargoTypeByLabel(CargoLabel{"STEL"})] += project.steel;
+				held[GetCargoTypeByLabel(CargoLabel{"MACH"})] += project.machines;
+			}
+		}
+		for (auto i : Industry::Iterate()) {
+			if (!IntegratedEconomy::Managed(i)) continue;
+			for (const auto &c : i->accepted)
+				if (IsValidCargoType(c.cargo)) held[c.cargo] += c.waiting;
+			for (const auto &c : i->produced)
+				if (IsValidCargoType(c.cargo)) held[c.cargo] += c.waiting;
+		}
+		for (auto town : Town::Iterate())
+			if (auto city = IntegratedEconomy::City(town->index))
+				for (auto [c, n] : city->reserves)
+					held[c] += n;
+		if (auto research = IntegratedEconomy::Research(CompanyID{0}))
+			for (auto [c, n] : research->reserved)
+				held[c] += n;
 	}
 	r["held"] = held;
 	r["research"] = Json::array();
@@ -580,8 +812,8 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		IConsolePrint(CC_ERROR, "CONNECTED FAIL requires isolated game with active Commonwealth content");
 		return true;
 	}
-	if (argv[1] == "prepare" || argv[1] == "prepare-surveys") {
-		if (Prepare(argv[1] == "prepare-surveys")) IConsolePrint(CC_DEFAULT, "CONNECTED prepared");
+	if (argv[1] == "prepare" || argv[1] == "prepare-surveys" || argv[1] == "prepare-integrated") {
+		if (Prepare(argv[1] != "prepare", argv[1] == "prepare-integrated")) IConsolePrint(CC_DEFAULT, "CONNECTED prepared");
 		return true;
 	}
 	const Company *company = Company::GetIfValid(CompanyID{0});
@@ -590,7 +822,12 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		return true;
 	}
 	AutoRestoreBackup owner(_current_company, CompanyID{0});
-	if (argv[1] == "audit") {
+	ConfigureIntegratedNodes();
+	if (argv[1] == "progress" && IntegratedEconomy::Enabled()) {
+		ProgressIntegrated();
+		UpdateSignalsInBuffer();
+		IConsolePrint(CC_DEFAULT, "CONNECTED state {}", Snapshot().dump());
+	} else if (argv[1] == "audit") {
 		Json result = {{"invalid_slopes", Json::array()}, {"cargo", Json::array()}};
 		for (uint y = 0; y < Map::MaxY(); ++y) {
 			for (uint x = 0; x < Map::MaxX(); ++x) {
@@ -611,6 +848,23 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 				{"large_quantity", GetString(cs.quantifier, 100000)}, {"abbreviation", GetString(cs.abbrev)}});
 		}
 		result["language"] = GetCurrentLanguageIsoCode();
+		if (IntegratedEconomy::Enabled()) {
+			result["freight_refits"] = Json::array();
+			for (const char *label : {"SILC", "IRON", "STEL", "COPR", "WIRE", "SAND", "CHIP", "RARE", "ALLO", "POLY",
+									  "BCRY", "QCRY", "CCRY", "BALL", "SIGE", "MGLA", "MACH", "OIL_", "GRAI", "FOOD"}) {
+				CargoLabel cargo_label;
+				std::copy_n(label, 4, cargo_label.begin());
+				CargoType cargo = GetCargoTypeByLabel(cargo_label);
+				Json engines = Json::array();
+				for (auto engine : Engine::Iterate()) {
+					if (engine->type != VehicleType::Train || engine->VehInfo<RailVehicleInfo>().railveh_type != RailVehicleType::Wagon)
+						continue;
+					if (engine->GetDefaultCargoType() == cargo || engine->info.refit_mask.Test(cargo))
+						engines.push_back(engine->index.base());
+				}
+				result["freight_refits"].push_back({{"label", label}, {"engines", engines}});
+			}
+		}
 		result["pixel_queries"] = 0;
 		result["viewport_queries"] = 0;
 		if (result["invalid_slopes"].empty()) {
@@ -633,6 +887,8 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 	} else if (argv[1] == "status")
 		IConsolePrint(CC_DEFAULT, "CONNECTED state {}", Snapshot().dump());
 	else if (argv[1] == "advance") {
+		/* Console authoring calls native Do directly: flush queued signal edits before ticking. */
+		UpdateSignalsInBuffer();
 		Json before = Snapshot();
 		CommonwealthSliceAudit audit;
 		AutoRestoreBackup observer(_commonwealth_slice_audit, &audit);
@@ -643,7 +899,7 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 			StateGameLoop();
 		Json after = Snapshot();
 		std::array<int64_t, NUM_CARGO> net{};
-		for (size_t i = 0; i < after["facilities"].size(); ++i) {
+		for (size_t i = 0; !IntegratedEconomy::Enabled() && i < after["facilities"].size(); ++i) {
 			const auto &f = after["facilities"][i];
 			uint64_t batches = f["batches"].get<uint64_t>() - before["facilities"][i]["batches"].get<uint64_t>();
 			const auto *recipe = ProductionChainManager::GetRecipe(f["recipe"].get<RecipeID>());
@@ -696,6 +952,22 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		    Json({{"exact", exact}, {"required", required}, {"quote", static_cast<int64_t>(quote.GetCost())},
 		             {"cost", static_cast<int64_t>(cost.GetCost())}})
 		        .dump());
+	} else if (argv[1] == "electric" && IntegratedEconomy::Enabled()) {
+		if (!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_TRACTION_3)) return false;
+		const TileIndex tile = TileXY(100, 210);
+		auto before = Snapshot()["stocks"];
+		auto quote = Command<Commands::BuildRail>::Do({}, tile, RAILTYPE_ELECTRIC, Track::X, false);
+		if (!Result(quote, "electric material preview")) return true;
+		bool unchanged = before == Snapshot()["stocks"];
+		auto result = Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, tile, RAILTYPE_ELECTRIC, Track::X, false);
+		if (!Result(result, "electric construction")) return true;
+		SubtractMoneyFromCompany(CompanyID{0}, result);
+		IConsolePrint(CC_DEFAULT, "CONNECTED electric {}",
+					  Json({{"preview_unchanged", unchanged},
+							{"cash_mode", !FabricationManager::IsFabricateFromStockpileEnabled(CompanyID{0})},
+							{"materials_consumed", before != Snapshot()["stocks"]},
+							{"built", IsPlainRailTile(tile) && GetRailType(tile) == RAILTYPE_ELECTRIC}})
+						  .dump());
 	} else if (argv[1] == "research") {
 		TechID project = TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_PORTAL_1) ? TECH_PORTAL_2 : TECH_PORTAL_1;
 		if (!Result(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, project), "research demonstration")) return true;
@@ -703,8 +975,10 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 	} else if (argv[1] == "stop-food" || argv[1] == "start-food") {
 		bool stop = argv[1] == "stop-food";
 		for (Train *t : Train::Iterate())
-			if (t->IsFrontEngine() && t->name == "Food to megacity" && t->Next() != nullptr &&
-			    t->Next()->cargo_type == GetCargoTypeByLabel(CargoLabel{"FOOD"}) && t->vehstatus.Test(VehState::Stopped) != stop) {
+			if (t->IsFrontEngine() &&
+				(t->name == "Food to megacity" || (IntegratedEconomy::Enabled() && t->name.starts_with("Food works >"))) &&
+				t->Next() != nullptr && t->Next()->cargo_type == GetCargoTypeByLabel(CargoLabel{"FOOD"}) &&
+				t->vehstatus.Test(VehState::Stopped) != stop) {
 				if (!Result(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, t->index, true), "food service")) return true;
 			}
 		IConsolePrint(CC_DEFAULT, "CONNECTED food {}", stop ? "stopped" : "started");

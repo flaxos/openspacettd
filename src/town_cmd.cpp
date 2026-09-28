@@ -8,6 +8,7 @@
 /** @file town_cmd.cpp Handling of town tiles. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include "portal/commonwealth_slice.h"
 #include "misc/history_type.hpp"
 #include "misc/history_func.hpp"
@@ -536,7 +537,8 @@ static void TownGenerateCargo(Town *t, CargoType cargo, uint amount, StationFind
 	/* Boost passenger and mail generation in HyperGrowth Megacities */
 	if (MegacityManager::IsMegacity(t->index)) {
 		const MegacityProfile *prof = MegacityManager::GetProfile(t->index);
-		if (prof != nullptr && prof->passenger_multiplier > 1.0f) {
+		if (prof != nullptr &&
+			(IntegratedEconomy::Enabled() ? cargo == GetCargoTypeByLabel(CargoLabel{"PASS"}) : prof->passenger_multiplier > 1.0f)) {
 			amount = static_cast<uint>(amount * prof->passenger_multiplier);
 		}
 	}
@@ -546,6 +548,8 @@ static void TownGenerateCargo(Town *t, CargoType cargo, uint amount, StationFind
 	supplied.history[THIS_MONTH].production += amount;
 	uint transported = MoveGoodsToStation(cargo, amount, {t->index, SourceType::Town}, stations.GetStations());
 	supplied.history[THIS_MONTH].transported += transported;
+	IntegratedEconomy::Record(EconomyFlow::Produced, cargo, amount);
+	IntegratedEconomy::Record(EconomyFlow::Discarded, cargo, amount - transported);
 	if (_commonwealth_slice_audit != nullptr) {
 		_commonwealth_slice_audit->produced[cargo] += amount;
 		_commonwealth_slice_audit->unallocated[cargo] += amount - transported;
@@ -3981,7 +3985,8 @@ static void UpdateTownGrowthRate(Town *t)
 	if (MegacityManager::IsMegacity(t->index)) {
 		const MegacityProfile *prof = MegacityManager::GetProfile(t->index);
 		if (prof != nullptr) {
-			if (prof->growth_state == MegacityGrowthState::Starvation) {
+			if (prof->growth_state == MegacityGrowthState::Starvation ||
+				(IntegratedEconomy::Enabled() && prof->growth_multiplier == 0.0f)) {
 				t->growth_rate = TOWN_GROWTH_RATE_NONE;
 			} else if (prof->growth_multiplier > 1.0f && t->growth_rate != TOWN_GROWTH_RATE_NONE && t->growth_rate > 1) {
 				uint16_t accelerated = static_cast<uint16_t>(t->growth_rate / prof->growth_multiplier);

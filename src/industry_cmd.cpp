@@ -8,6 +8,7 @@
 /** @file industry_cmd.cpp Handling of industry tiles. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include "portal/commonwealth_slice.h"
 #include "misc/history_type.hpp"
 #include "misc/history_func.hpp"
@@ -200,6 +201,7 @@ const IndustryTileSpec *GetIndustryTileSpec(IndustryGfx gfx)
 /** Remove any reference to this industry from the game. */
 Industry::~Industry()
 {
+	IntegratedEconomy::RemoveIndustry(this->index);
 	if (CleaningPool()) return;
 	ResourceSiteManager::Release(this->index);
 
@@ -469,6 +471,16 @@ static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, Ca
 	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
 	const Industry *ind = Industry::GetByTile(tile);
 
+	/* Integrated processors advertise their authoritative recipe, not the cargo
+	 * of the native graphics/layout used by the content pack. Capacity is checked
+	 * again for each packet at unloading time. */
+	if (IntegratedEconomy::Managed(ind)) {
+		for (const auto &input : ind->accepted) {
+			if (IsValidCargoType(input.cargo)) acceptance[input.cargo] += 8;
+		}
+		return;
+	}
+
 	/* Starting point for acceptance */
 	auto accepts_cargo = itspec->accepts_cargo;
 	auto cargo_acceptance = itspec->acceptance;
@@ -587,16 +599,22 @@ static bool TransportIndustryGoods(TileIndex tile)
 	for (auto &p : i->produced) {
 		uint cw = ClampTo<uint8_t>(p.waiting);
 		if (cw > indspec->minimal_cargo && IsValidCargoType(p.cargo)) {
-			p.waiting -= cw;
+			if (!IntegratedEconomy::Managed(i)) p.waiting -= cw;
 
 			/* fluctuating economy? */
-			if (EconomyIsInRecession()) cw = (cw + 1) / 2;
+			if (!IntegratedEconomy::Managed(i) && EconomyIsInRecession()) cw = (cw + 1) / 2;
 
-			p.history[THIS_MONTH].production += cw;
+			if (!IntegratedEconomy::Managed(i)) p.history[THIS_MONTH].production += cw;
 
 			uint am = MoveGoodsToStation(p.cargo, cw, {i->index, SourceType::Industry}, i->stations_near, i->exclusive_consumer);
+			if (IntegratedEconomy::Managed(i))
+				p.waiting -= am;
+			else {
+				IntegratedEconomy::Record(EconomyFlow::Produced, p.cargo, cw);
+				IntegratedEconomy::Record(EconomyFlow::Discarded, p.cargo, cw - am);
+			}
 			p.history[THIS_MONTH].transported += am;
-			if (_commonwealth_slice_audit != nullptr) {
+			if (_commonwealth_slice_audit != nullptr && !IntegratedEconomy::Managed(i)) {
 				_commonwealth_slice_audit->produced[p.cargo] += cw;
 				_commonwealth_slice_audit->unallocated[p.cargo] += cw - am;
 			}
@@ -1218,6 +1236,7 @@ static void ProduceIndustryGoodsHelper(Industry *i, bool scale)
 
 static void ProduceIndustryGoods(Industry *i)
 {
+	if (IntegratedEconomy::Managed(i)) return;
 	const IndustrySpec *indsp = GetIndustrySpec(i->type);
 
 	/* play a sound? */
@@ -1908,7 +1927,7 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, IndustryType type, 
 	}
 
 	if (_generating_world) {
-		if (indspec->callback_mask.Test(IndustryCallbackMask::Production256Ticks)) {
+		if (!IntegratedEconomy::Managed(i) && indspec->callback_mask.Test(IndustryCallbackMask::Production256Ticks)) {
 			IndustryProductionCallback(i, 1);
 			for (auto &p : i->produced) {
 				if (IsValidCargoType(p.cargo)) p.history[LAST_MONTH].production = ScaleByCargoScale(p.waiting * 8, false);
@@ -2071,6 +2090,8 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 	const IndustryTileLayout &layout = indspec->layouts[layout_index];
 
 	*ip = nullptr;
+	CommandCost economy_policy = PlanetManager::CheckEconomicIndustry(tile, type, founder);
+	if (economy_policy.Failed()) return economy_policy;
 	if (ResourceSiteManager::Enabled()) {
 		CommandCost policy = ResourceSiteManager::CheckPlacement(founder, tile, type, layout,
 			!_generating_world && _game_mode != GameMode::Editor && Company::IsValidID(founder));
@@ -2120,6 +2141,8 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 		if (!custom_shape_check) CheckIfCanLevelIndustryPlatform(tile, {DoCommandFlag::NoWater, DoCommandFlag::Execute}, layout);
 		DoCreateNewIndustry(*ip, tile, type, layout, layout_index, t, founder, random_initial_bits);
 		ResourceSiteManager::Occupy(tile, type, layout, (*ip)->index);
+		IntegratedEconomy::ConsumeIndustryMaterials(tile, type, founder);
+		IntegratedEconomy::RegisterIndustry(*ip);
 	}
 
 	return CommandCost();
@@ -2144,9 +2167,31 @@ void GenerateResourceSites(uint target)
 	for (auto [type, weight] : types) {
 		const auto *spec = GetIndustrySpec(type);
 		uint wanted = std::max(1u, target * weight / total_weight);
+		const PlanetRegion *preferred = nullptr;
+		if (IntegratedEconomy::Enabled() && StellarNetwork::Enabled()) {
+			bool starter = false, rare = false;
+			for (auto cargo : spec->produced_cargo)
+				if (IsValidCargoType(cargo)) {
+					const auto label = CargoSpec::Get(cargo)->label;
+					rare |= label == CargoLabel{"RARE"};
+					starter |= label == CargoLabel{"SILC"} || label == CargoLabel{"IRON"} || label == CargoLabel{"OIL_"} ||
+							   label == CargoLabel{"GRAI"} || label == CargoLabel{"COPR"} || label == CargoLabel{"SAND"};
+				}
+			for (const auto &world : PlanetManager::GetAllRegions()) {
+				auto stellar = StellarNetwork::GetWorld(world.id);
+				if (!stellar || IntegratedEconomy::Role(world.id) != EconomicRole::Frontier) continue;
+				if ((starter && stellar->opened) || (rare && !stellar->opened)) {
+					preferred = PlanetManager::GetRegion(world.id);
+					break;
+				}
+			}
+		}
 		uint placed = 0;
 		for (uint attempt = 0; attempt < std::min(200000u, wanted * 2000) && placed < wanted; ++attempt) {
 			TileIndex tile = RandomTile();
+			if (placed == 0 && preferred != nullptr)
+				tile = TileXY(preferred->min_x + RandomRange(preferred->max_x - preferred->min_x + 1),
+							  preferred->min_y + RandomRange(preferred->max_y - preferred->min_y + 1));
 			size_t layout_index = RandomRange(static_cast<uint32_t>(spec->layouts.size()));
 			const auto &layout = spec->layouts[layout_index];
 			Industry *unused = nullptr;
@@ -2419,6 +2464,12 @@ static uint32_t GetScaledIndustryGenerationProbability(IndustryType it, std::opt
 	const IndustrySpec *ind_spc = GetIndustrySpec(it);
 	if (water.has_value() && ind_spc->behaviour.Test(IndustryBehaviour::BuiltOnWater) != *water) return 0;
 
+	if (IntegratedEconomy::Enabled() && !ResourceSiteManager::IsPrimary(it) &&
+		(IntegratedEconomy::IndustryRecipe(it) == RECIPE_NONE ||
+		 IntegratedEconomy::RecipeTech(IntegratedEconomy::IndustryRecipe(it)) > TECH_MATERIALS_1)) {
+		*force_at_least_one = false;
+		return 0;
+	}
 	if (ResourceSiteManager::Enabled() && ((!StellarNetwork::Enabled() && !ResourceSiteManager::IsPrimary(it)) || ResourceSiteManager::RequiredTech(it) != TECH_NONE)) {
 		*force_at_least_one = false;
 		return 0;
@@ -2503,8 +2554,21 @@ static uint GetNumberOfIndustries()
 static Industry *PlaceIndustry(IndustryType type, IndustryAvailabilityCallType creation_type, bool try_hard)
 {
 	uint tries = try_hard ? 10000u : 2000u;
+	std::vector<const PlanetRegion *> bootstrap_regions;
+	if (_generating_world && IntegratedEconomy::Enabled() && StellarNetwork::Enabled()) {
+		const auto role = ResourceSiteManager::IsPrimary(type) ? EconomicRole::Frontier : EconomicRole::Industrial;
+		for (const auto &[id, world] : StellarNetwork::Worlds()) {
+			if (world.opened && IntegratedEconomy::Role(id) == role) bootstrap_regions.push_back(PlanetManager::GetRegion(id));
+		}
+	}
 	for (; tries > 0; tries--) {
-		Industry *ind = CreateNewIndustry(RandomTile(), type, creation_type);
+		TileIndex tile = RandomTile();
+		if (!bootstrap_regions.empty()) {
+			const auto region = bootstrap_regions[tries % bootstrap_regions.size()];
+			tile = TileXY(region->min_x + RandomRange(region->max_x - region->min_x + 1),
+						  region->min_y + RandomRange(region->max_y - region->min_y + 1));
+		}
+		Industry *ind = CreateNewIndustry(tile, type, creation_type);
 		if (ind != nullptr) return ind;
 	}
 	return nullptr;
@@ -2990,6 +3054,7 @@ static const uint PERCENT_TRANSPORTED_80 = 204;
  */
 static void ChangeIndustryProduction(Industry *i, bool monthly)
 {
+	if (IntegratedEconomy::Managed(i)) return;
 	StringID str = STR_NULL;
 	bool closeit = false;
 	const IndustrySpec *indspec = GetIndustrySpec(i->type);

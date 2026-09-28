@@ -6,6 +6,7 @@
 /** @file resource_sites.cpp Deterministic resource-site placement and company surveying. */
 #include "../stdafx.h"
 #include "resource_sites.h"
+#include "integrated_economy.h"
 #include "stellar_network.h"
 #include "planet_manager.h"
 #include "../command_func.h"
@@ -212,6 +213,29 @@ bool ConResourceSites(std::span<std::string_view> argv)
 	if (argv.size() != 1) { IConsolePrint(CC_HELP, "resource_sites: show economy mode and resource counts"); return true; }
 	nlohmann::json result{{"player_built", ResourceSiteManager::Enabled()}, {"sites", ResourceSiteManager::Sites().size()},
 		{"industries", Industry::GetNumItems()}, {"unoccupied_sites", 0}, {"processing", 0}, {"advanced", 0}, {"survey_companies", ResourceSiteManager::Surveys().size()}};
+	result["integrated_economy"] = nlohmann::json::parse(IntegratedEconomy::Save());
+	if (IntegratedEconomy::Enabled()) {
+		result["resource_details"] = nlohmann::json::array();
+		for (const auto &site : ResourceSiteManager::Sites()) {
+			auto type = ResourceSiteManager::ResolveType(site);
+			if (type == IT_INVALID) continue;
+			for (auto cargo : GetIndustrySpec(type)->produced_cargo)
+				if (IsValidCargoType(cargo))
+					result["resource_details"].push_back({site.world.base(), CargoSpec::Get(cargo)->label.AsString(), site.anchor.base()});
+		}
+		result["factory_recipes"] = nlohmann::json::array();
+		for (IndustryType type = 0; type < NUM_INDUSTRYTYPES; ++type) {
+			auto spec = GetIndustrySpec(type);
+			auto recipe = IntegratedEconomy::IndustryRecipe(type);
+			if (!spec->enabled || recipe == RECIPE_NONE) continue;
+			nlohmann::json inputs = nlohmann::json::array(), outputs = nlohmann::json::array();
+			for (auto cargo : spec->accepts_cargo)
+				if (IsValidCargoType(cargo)) inputs.push_back(CargoSpec::Get(cargo)->label.AsString());
+			for (auto cargo : spec->produced_cargo)
+				if (IsValidCargoType(cargo)) outputs.push_back(CargoSpec::Get(cargo)->label.AsString());
+			result["factory_recipes"].push_back({recipe, inputs, outputs});
+		}
+	}
 	for (const auto &site : ResourceSiteManager::Sites()) {
 		if (!Industry::IsValidID(site.occupant)) result["unoccupied_sites"] = result["unoccupied_sites"].get<uint>() + 1;
 	}

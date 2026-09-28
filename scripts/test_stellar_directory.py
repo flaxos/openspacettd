@@ -48,5 +48,26 @@ class DirectoryTests(unittest.TestCase):
         h=self.host(); h["stations"]=[{"world":2,"namespace":"1:1","sequence":1,"name":"bad"}]
         self.assertFalse(d.publish({"token":"secret", "host":h})[0])
 
+    def test_research_home_monotonicity_and_cold_reload(self):
+        d = StellarDirectory("secret")
+        h = self.host()
+        h["ruleset"] = 1
+        h["companies"] = [{"identity": "1:1:1", "local": 0}]
+        h["researchs"] = [{"id": "1:1:1", "home": "1:1", "revision": 1, "unlocks": [301]}]
+        self.assertTrue(d.publish({"token": "secret", "host": h})[0])
+        self.assertTrue(d.publish({"token": "secret", "host": h})[0])
+        other = StellarDirectory("secret")
+        other.import_state(d.export_state())
+        self.assertEqual(other.export_state()["1:1"]["researchs"], d.export_state()["1:1"]["researchs"])
+        h["researchs"][0].update(revision=2, unlocks=[301, 302])
+        self.assertTrue(other.publish({"token": "secret", "host": h})[0])
+        h["researchs"][0].update(revision=1, unlocks=[301])
+        self.assertFalse(other.publish({"token": "secret", "host": h})[0])
+        remote = self.host("2:2", 2)
+        remote.update(ruleset=1, companies=h["companies"], researchs=[{"id": "1:1:1", "home": "2:2", "revision": 2, "unlocks": [301,302]}])
+        self.assertFalse(other.publish({"token": "secret", "host": remote})[0])
+        remote.update(ruleset=0, researchs=[])
+        self.assertFalse(other.publish({"token": "secret", "host": remote})[0])
+
 if __name__ == "__main__":
     unittest.main()

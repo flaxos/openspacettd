@@ -6,6 +6,8 @@
 /** @file megacity_gui.cpp Implementation of Megacity overview window. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
+#include "../cargotype.h"
 #include "megacity_gui.h"
 #include "megacity_manager.h"
 #include "planet_manager.h"
@@ -24,25 +26,53 @@
 
 static constexpr std::initializer_list<NWidgetPart> _nested_megacity_overview_widgets = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, Colours::Brown),
-		NWidget(WWT_CAPTION, Colours::Brown, WID_MCO_CAPTION),
-		NWidget(WWT_SHADEBOX, Colours::Brown),
-		NWidget(WWT_DEFSIZEBOX, Colours::Brown),
-		NWidget(WWT_STICKYBOX, Colours::Brown),
+	NWidget(WWT_CLOSEBOX, Colours::Brown),
+	NWidget(WWT_CAPTION, Colours::Brown, WID_MCO_CAPTION),
+	NWidget(WWT_SHADEBOX, Colours::Brown),
+	NWidget(WWT_DEFSIZEBOX, Colours::Brown),
+	NWidget(WWT_STICKYBOX, Colours::Brown),
 	EndContainer(),
-	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_HEADER_PANEL), SetMinimalSize(440, 72), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_HEADER_PANEL),
+	SetMinimalSize(440, 92),
+	SetFill(1, 0),
+	SetResize(1, 0),
+	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
-		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_PREV_CITY), SetFill(1, 0), SetStringTip(STR_MEGACITY_BUTTON_PREV, STR_MEGACITY_BUTTON_PREV_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_NEXT_CITY), SetFill(1, 0), SetStringTip(STR_MEGACITY_BUTTON_NEXT, STR_MEGACITY_BUTTON_NEXT_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_LOCATE), SetFill(1, 0), SetStringTip(STR_MEGACITY_BUTTON_LOCATE, STR_MEGACITY_BUTTON_LOCATE_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_DESIGNATE), SetFill(1, 0), SetStringTip(STR_MEGACITY_BUTTON_DESIGNATE, STR_MEGACITY_BUTTON_DESIGNATE_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_PREV_CITY),
+	SetFill(1, 0),
+	SetStringTip(STR_MEGACITY_BUTTON_PREV, STR_MEGACITY_BUTTON_PREV_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_NEXT_CITY),
+	SetFill(1, 0),
+	SetStringTip(STR_MEGACITY_BUTTON_NEXT, STR_MEGACITY_BUTTON_NEXT_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_LOCATE),
+	SetFill(1, 0),
+	SetStringTip(STR_MEGACITY_BUTTON_LOCATE, STR_MEGACITY_BUTTON_LOCATE_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::Brown, WID_MCO_DESIGNATE),
+	SetFill(1, 0),
+	SetStringTip(STR_MEGACITY_BUTTON_DESIGNATE, STR_MEGACITY_BUTTON_DESIGNATE_TOOLTIP),
 	EndContainer(),
-	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER1_PANEL), SetMinimalSize(440, 52), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER2_PANEL), SetMinimalSize(440, 52), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER3_PANEL), SetMinimalSize(440, 52), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER1_PANEL),
+	SetMinimalSize(440, 74),
+	SetFill(1, 0),
+	SetResize(1, 0),
+	EndContainer(),
+	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER2_PANEL),
+	SetMinimalSize(440, 74),
+	SetFill(1, 0),
+	SetResize(1, 0),
+	EndContainer(),
+	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER3_PANEL),
+	SetMinimalSize(440, 74),
+	SetFill(1, 0),
+	SetResize(1, 0),
+	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::Brown, WID_MCO_STATUS_BAR), SetMinimalSize(428, 24), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX, Colours::Brown),
+	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_STATUS_BAR),
+	SetMinimalSize(428, 24),
+	SetFill(1, 0),
+	SetResize(1, 0),
+	EndContainer(),
+	NWidget(WWT_RESIZEBOX, Colours::Brown),
 	EndContainer(),
 };
 
@@ -172,6 +202,8 @@ struct MegacityOverviewWindow : Window {
 					std::string supply_str = fmt::format("Overall Commodity Satisfaction: {:.1f}% (Growth: {:.1f}x, Traffic: {:.1f}x)",
 						profile->overall_supply_index * 100.0f, profile->growth_multiplier, profile->passenger_multiplier);
 					DrawString(tr, supply_str, TextColour::White);
+					tr.top += GetCharacterHeight(FontSize::Normal);
+					if (IntegratedEconomy::Enabled()) DrawString(tr, IntegratedEconomy::CityStatus(town->index), TextColour::White);
 				} else {
 					DrawString(tr, "Status: Not registered as Megacity. Click 'Designate Megacity' to activate quotas.", TextColour::Silver);
 				}
@@ -195,6 +227,28 @@ struct MegacityOverviewWindow : Window {
 				DrawString(tr, tier_label, TextColour::Gold);
 				tr.top += GetCharacterHeight(FontSize::Normal) + 2;
 
+				if (IntegratedEconomy::Enabled() && town != nullptr && !IntegratedEconomy::CityDemand(town->index).empty()) {
+					auto demand = IntegratedEconomy::CityDemand(town->index);
+					auto city = IntegratedEconomy::City(town->index);
+					for (auto [cargo, required] : demand) {
+						auto label = CargoSpec::Get(cargo)->label;
+						size_t tier =
+							label == CargoLabel{"FOOD"} ? 0 : (label == CargoLabel{"STEL"} || label == CargoLabel{"BALL"} ? 1 : 2);
+						if (tier != tier_idx) continue;
+						uint32_t stock = 0, consumed = 0;
+						if (city) {
+							if (auto i = city->reserves.find(cargo); i != city->reserves.end()) stock = i->second;
+							if (auto i = city->consumed.find(cargo); i != city->consumed.end()) consumed = i->second;
+						}
+						tr.top = DrawStringMultiLine(
+									 tr,
+									 fmt::format("{}: reserve {} / {}; used {} last month{}", GetString(CargoSpec::Get(cargo)->name), stock,
+												 required * (tier == 0 ? 3 : 1), consumed, stock < required ? " - delivery needed" : ""),
+									 TextColour::White) +
+								 2;
+					}
+					break;
+				}
 				uint32_t current = profile != nullptr ? profile->delivered_current[tier_idx] : 0;
 				uint32_t quota   = profile != nullptr ? profile->monthly_quota[tier_idx] : (tier_idx == 0 ? 50 : (tier_idx == 1 ? 30 : 10));
 				float pct        = profile != nullptr ? profile->satisfaction_pct[tier_idx] : 0.0f;

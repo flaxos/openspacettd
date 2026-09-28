@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "commonwealth_slice.h"
 #include "commonwealth_pack.h"
+#include "integrated_economy.h"
 #include "planet_manager.h"
 #include "portal_registry.h"
 #include "portal_cmd.h"
@@ -316,12 +317,13 @@ bool ConCommonwealthSlice(std::span<std::string_view> argv)
 bool ConFederationTestFixture(std::span<std::string_view> argv)
 {
 	if ((argv.size() != 2 && argv.size() != 3) || (argv[1] != "1" && argv[1] != "2" && argv[1] != "3") ||
-			(argv.size() == 3 && argv[2] != "scheduled" && argv[2] != "multihop")) {
+		(argv.size() == 3 && argv[2] != "scheduled" && argv[2] != "multihop" && argv[2] != "integrated")) {
 		IConsolePrint(CC_HELP, "federation_test_fixture 1|2|3 [scheduled|multihop]: prepare a fresh empty test map before clients join");
 		return true;
 	}
 	const bool scheduled = argv.size() == 3;
-	const bool multihop = scheduled && argv[2] == "multihop";
+	const bool integrated = scheduled && argv[2] == "integrated";
+	const bool multihop = scheduled && (argv[2] == "multihop" || integrated);
 	if ((_networking && (!_network_dedicated || HasClients())) || Company::GetNumItems() != 0 ||
 			Vehicle::GetNumItems() != 0 || Industry::GetNumItems() != 0 || PortalRegistry::Count() != 0 ||
 			Map::SizeX() != 512 || Map::SizeY() != 128) {
@@ -357,6 +359,17 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 		.biome = WorldBiome::Temperate, .min_x = 1, .min_y = 1,
 		.max_x = Map::SizeX() - 2, .max_y = Map::SizeY() - 2});
 	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	if (integrated) {
+		if (!IntegratedEconomy::ContentReady()) return false;
+		IntegratedEconomy::SetEnabled(true);
+		IntegratedEconomy::RegisterRole(WorldID{world}, world == 1	 ? EconomicRole::Frontier
+														: world == 2 ? EconomicRole::Core
+																	 : EconomicRole::Industrial);
+		if (world == 2 && !SliceResult(Command<Commands::PlaceCorporateHQ>::Do(DoCommandFlag::Execute, TileXY(25, 55),
+																			   std::string("Federated research home")),
+									   "research home"))
+			return true;
+	}
 	for (uint x = 11; x < 50; x++) {
 		if (!SliceResult(Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, TileXY(x, 40), RAILTYPE_RAIL, Track::X, false), "federation rail")) return true;
 	}
@@ -377,8 +390,11 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 		if (!(multihop && world == 2)) {
 		const uint station_x = world == 1 ? 20 : 30;
 		/* Native industry slots 0/1 are coal mine/power station; this fixture loads no GRFs. */
-		if (!SliceResult(Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, TileXY(station_x, 36),
-				static_cast<IndustryType>(world == 1 ? 0 : 1), 0, false, 1), "federation native industry")) return true;
+		IndustryType industry_type = integrated ? MapNewGRFIndustryType(0x80 | (world == 1 ? 0x10 : 0x11), COMMONWEALTH_INDUSTRY_GRFID)
+												: static_cast<IndustryType>(world == 1 ? 0 : 1);
+		if (!SliceResult(Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, TileXY(station_x, 36), industry_type, 0, false, 1),
+						 "federation native industry"))
+			return true;
 		if (!SliceResult(Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, TileXY(station_x, 40),
 				RAILTYPE_RAIL, Axis::X, 1, 3, STAT_CLASS_DFLT, 0, NEW_STATION, true), "federation industry station")) return true;
 		local_station = GetStationIndex(TileXY(station_x, 40));
@@ -397,7 +413,14 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 		auto [cost, id, unused, capacity, refits] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, TileXY(10, 40), EngineID{0}, false, INVALID_CARGO, ClientID::Invalid);
 		if (!SliceResult(cost, "federation locomotive")) return true;
 		for (uint i = 0; i < (scheduled ? 2u : 1u); ++i) {
-			auto [wagon_cost, wagon_id, unused2, capacity2, refits2] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, TileXY(10, 40), EngineID{29}, false, INVALID_CARGO, ClientID::Invalid);
+			EngineID wagon_engine{29};
+			if (integrated)
+				for (auto engine : Engine::Iterate())
+					if (engine->grf_prop.grfid == COMMONWEALTH_INDUSTRY_GRFID && engine->grf_prop.local_id == 0x38)
+						wagon_engine = engine->index;
+			auto [wagon_cost, wagon_id, unused2, capacity2, refits2] = Command<Commands::BuildVehicle>::Do(
+				DoCommandFlag::Execute, TileXY(10, 40), wagon_engine, false,
+				integrated ? GetCargoTypeByLabel(CargoLabel{"SILC"}) : INVALID_CARGO, ClientID::Invalid);
 			if (!SliceResult(wagon_cost, "federation coal wagon")) return true;
 			Train *wagon = Train::Get(wagon_id);
 			if (wagon->First()->index != id && !SliceResult(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, wagon_id, id, false), "federation consist")) return true;
@@ -442,6 +465,9 @@ bool ConFederationFixtureBlock(std::span<std::string_view> argv)
 			Map::SizeX() != 512 || Map::SizeY() != 128 || (_networking && !_network_server)) return false;
 	AutoRestoreBackup owner(_current_company, company->index);
 	const TileIndex tile = TileXY(49, 40);
+	if (argv[1] == "research" && IntegratedEconomy::Enabled()) {
+		return Command<Commands::SelectResearchProject>::Post(TECH_MATERIALS_1) && Command<Commands::SetResearchBudget>::Post(100000);
+	}
 	if (argv[1] == "depot") return Command<Commands::BuildRailDepot>::Post(tile, RAILTYPE_RAIL, DiagDirection::NE);
 	if (argv[1] == "engine") return Command<Commands::BuildVehicle>::Post(tile, EngineID{0}, false, INVALID_CARGO, ClientID::Invalid);
 	if (argv[1] == "sell") {

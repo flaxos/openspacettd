@@ -17,5 +17,8 @@ enum StellarWidgets : WidgetID {
 	SW_ACCESS,
 	SW_REMOTE,
 	SW_TOLL,
+	SW_FACTORIES,
+	SW_CITY,
+	SW_HQ,
 };
 #endif

@@ -31,6 +31,7 @@ enum CorporateHQWidgets : WidgetID {
 	WID_CHQ_BUILD_HUB,          ///< Select an owned rail station for a logistics hub.
 	WID_CHQ_SELECT_HUB,         ///< Choose an owned hub for reserve editing.
 	WID_CHQ_SELECT_CARGO,       ///< Choose a cargo for reserve editing.
+	WID_CHQ_ACCELERATION,       ///< Toggle optional research feedstock consumption.
 	WID_CHQ_SET_RESERVE,        ///< Set the selected hub cargo reserve.
 };
 

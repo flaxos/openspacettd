@@ -8,6 +8,7 @@
 /** @file genworld.cpp Functions to generate a map. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include "landscape.h"
 #include "company_func.h"
 #include "town_cmd.h"
@@ -142,6 +143,7 @@ static void _GenerateWorld()
 			if (_game_mode != GameMode::Menu) FlatEmptyWorld(_settings_game.game_creation.se_flat_world_height);
 
 			ConvertGroundTilesIntoWaterTiles();
+			IntegratedEconomy::StartNewGame();
 			Map::CountLandTiles();
 			IncreaseGeneratingWorldProgress(GenWorldProgress::Objects);
 
@@ -154,6 +156,7 @@ static void _GenerateWorld()
 					return;
 				}
 			}
+			IntegratedEconomy::StartNewGame();
 			Map::CountLandTiles();
 
 			/* Only generate towns, tree and industries in newgame mode. */

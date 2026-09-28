@@ -25,13 +25,15 @@ class StellarSession(Session):
                 time.sleep(.1)
         base=(ROOT/"demo/wp11_slice.cfg").read_text().split("[newgrf]")[0]
         base=base.replace("[construction]","[construction]\ncommand_pause_level = 3").replace("min_active_clients = 0","min_active_clients = 1").replace("autosave_on_exit = true","autosave_on_exit = false").replace("threaded_saves = true","threaded_saves = false")
+        if getattr(self,"integrated",False):
+            base += "\n[newgrf]\n" + "".join(f"{ROOT}/bin/newgrf/{name} =\n" for name in ("openspacettd_integrated_v1.grf","openspacettd_rail_v3.grf","openspacettd_equipment_v1.grf"))
         for world in (1,2,3):
             port=free_port(); config=self.output/f"server{world}.cfg"; config.write_text(base)
             env={**os.environ,"OPENSPACETTD_WORLD_COUNT":"1","OPENSPACETTD_AUTHORITY_URL":self.url,"OPENTTD_UNIVERSE_HOST_TOKEN":token,"OPENTTD_UNIVERSE_GAME_ADDRESS":f"127.0.0.1:{port}"}
             game=["-g",str(Path(checkpoint)/f"world{world}.sav")] if checkpoint else ["-g"]
             server=self.spawn(f"server{world}",[str(self.binary),"-D",f"127.0.0.1:{port}","-c",str(config),"-x","-I","OpenGFX",*game,"-G","11","-t","1950","-d","net=2,desync=2"],env,True)
             server["port"]=port; self.servers.append(server); self.wait(server,"paused (",timeout=90)
-            if not checkpoint: self.command(server,f"federation_test_fixture {world} multihop","Federation fixture ready:")
+            if not checkpoint: self.command(server,f"federation_test_fixture {world} {'integrated' if getattr(self,'integrated',False) else 'multihop'}","Federation fixture ready:")
         for world,server in enumerate(self.servers,1):
             config=self.output/f"client{world}.cfg"; config.write_text(f"[network]\nclient_name = Native Observer {world}\n[video]\nfullscreen = false\n[gui]\nautosave_on_exit = false\n")
             env={**os.environ,"SDL_VIDEODRIVER":"dummy"}; env.pop("OPENSPACETTD_AUTHORITY_URL",None)
