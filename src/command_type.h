@@ -414,6 +414,7 @@ enum class Commands : uint8_t {
 	StageFederationArrival, ///< replicate bounded arrival snapshot fragments
 	MaterializeFederationArrival, ///< replicate physical arrival from a staged snapshot
 	ConfirmFederationArrival, ///< replicate authority receipt confirmation
+	SurveyResources, ///< survey a resource area for the current company
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

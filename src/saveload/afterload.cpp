@@ -80,6 +80,8 @@
 
 #include "table/strings.h"
 
+#include "../portal/resource_sites.h"
+
 #include "../safeguards.h"
 
 extern Company *DoStartupNewCompany(bool is_ai, CompanyID company = CompanyID::Invalid());
@@ -3360,6 +3362,7 @@ bool AfterLoadGame()
 	/* Compute station catchment areas. This is needed here in case UpdateStationAcceptance is called below. */
 	Station::RecomputeCatchmentForAll();
 	LogisticsHubManager::ValidateAfterLoad();
+	ResourceSiteManager::ValidateAfterLoad();
 
 	/* Station acceptance is some kind of cache */
 	if (IsSavegameVersionBefore(SaveLoadVersion::TownAcceptance)) {

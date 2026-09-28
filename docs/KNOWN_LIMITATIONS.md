@@ -287,3 +287,16 @@ provenance. Recovery uses only the latest coordinated set; arbitrary crash
 recovery and old/mixed-save rollback are outside this acceptance boundary.
 
 See [acceptance method and evidence](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).
+
+## Player-built resource economy — 28 September 2026
+
+Human visual UAT and starting-economy balance remain pending. Site abundance is a
+bounded target; unsuitable terrain, insufficient world area and content callbacks
+can prevent requested sites. Unrecognised primary resources use the basic research
+tier. Third-party NewGRF coverage is not exhaustive. Survey knowledge is filtered
+in the UI/API, not cryptographically hidden from clients. Resource sites do not
+introduce depletion, exclusive claims, survey vehicles or existing-save conversion.
+The connected resource fixture proves a funded authored network, not low-budget
+startup balance or random generation. Its town-growth check is separate from the
+original showcase's three-new-houses-within-ten-minutes target.
+[Details and reproduction](PLAYER_BUILT_RESOURCE_ECONOMY.md).

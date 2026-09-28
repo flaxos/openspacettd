@@ -349,3 +349,14 @@ three rounds after each of nine recovery faults (32 retained round trips). See
 [the evidence record](../demo/FEDERATION-FREIGHT-RECOVERY.evidence.json). This
 proves the specified two-server, same-company route and coordinated checkpoint
 contract; human graphical federation acceptance remains pending.
+
+## Player-built resource economy — 28 September 2026
+
+New games default to a company-built economy with native basic primary starters
+and persistent surveyed resource sites. `ResourceSiteManager` owns site geometry,
+stable content identities and per-company coverage; the `RSRC` save chunk persists
+it. Native industry commands enforce discovery, Materials research and complete
+layout bounds. Shared command handlers serve the GUI and script API; industry
+production remains native and existing station processing/fabrication is reused.
+Classic saves retain their rules. This does not change the single global map.
+[Behaviour, interfaces and acceptance](PLAYER_BUILT_RESOURCE_ECONOMY.md).

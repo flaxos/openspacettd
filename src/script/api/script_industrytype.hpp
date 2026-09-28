@@ -19,6 +19,17 @@
  */
 class ScriptIndustryType : public ScriptObject {
 public:
+	/** Survey the 16x16 area beginning at tile in Player-built mode.
+  * @param tile Top-left map tile.
+  * @return Whether the paid company command succeeded.
+  * @pre ScriptCompanyMode must select a valid company.
+  */
+	static bool SurveyResources(TileIndex tile);
+	/** List this company's discovered sites of a type: anchor tile => occupied (0 or 1).
+  * @param industry_type Industry type to list.
+  * @return A list, empty for invalid types or when no discoveries exist.
+  */
+	static ScriptList *GetDiscoveredResourceSites(IndustryType industry_type);
 	/**
 	 * Special IndustryTypes.
 	 */

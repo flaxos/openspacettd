@@ -46,6 +46,8 @@
 
 #include "table/strings.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 
@@ -157,6 +159,9 @@ static void _GenerateWorld()
 					HandleGeneratingWorldAbortion();
 					return;
 				}
+				ResourceSiteManager::SetEnabled(_settings_game.game_creation.player_built_economy);
+				/* Resource sites, rather than town identity, bound new industrial development. */
+				if (ResourceSiteManager::Enabled()) _settings_game.economy.multiple_industry_per_town = true;
 				GenerateIndustries();
 				GenerateObjects();
 				GenerateTrees();

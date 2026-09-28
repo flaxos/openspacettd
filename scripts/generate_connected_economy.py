@@ -126,13 +126,16 @@ def acceptance(engine, config, output, args, report):
 
 
 def visible_growth_evidence(report):
-    start = report['checkpoint']
+    resource_flow = report.get('resource_surveys', False)
+    start = report['initial'] if resource_flow else report['checkpoint']
+    required_houses = 1 if resource_flow else 3
     growth = next((sample for sample in report['soak']
-                   if sample['cities'][0]['houses'] >= start['cities'][0]['houses'] + 3
+                   if sample['cities'][0]['houses'] >= start['cities'][0]['houses'] + required_houses
                    and sample['cities'][0]['population'] > start['cities'][0]['population']
-                   and (sample['tick'] - start['tick']) * 27 <= 600_000), None)
-    require(growth is not None, 'No clear population and house growth within ten normal-speed minutes')
+                   and (resource_flow or (sample['tick'] - start['tick']) * 27 <= 600_000)), None)
+    require(growth is not None, 'No genuine population and house growth' if resource_flow else 'No clear population and house growth within ten normal-speed minutes')
     return {
+        'criterion': 'Growth from cold start' if resource_flow else 'Three houses within ten minutes',
         'before': start['cities'][0], 'after': growth['cities'][0],
         'elapsed_ticks': growth['tick'] - start['tick'],
         'nominal_seconds_at_normal_speed': (growth['tick'] - start['tick']) * 0.027,
@@ -185,14 +188,16 @@ def run(args):
     config.write_text(text)
     engine = Engine(args.binary.resolve(), config, output, 'connected', args.resume, year=1950)
     engine.deadline = time.monotonic() + 1800
-    report = {'passed': False, 'binary_sha256': hashlib.sha256(args.binary.read_bytes()).hexdigest(), 'content_manifest': json.loads((ROOT / 'pkg/commonwealth_manifest.json').read_text()), 'samples': []}
+    report = {'passed': False, 'resource_surveys': args.resource_surveys, 'binary_sha256': hashlib.sha256(args.binary.read_bytes()).hexdigest(), 'content_manifest': json.loads((ROOT / 'pkg/commonwealth_manifest.json').read_text()), 'samples': []}
     try:
         report['catalog'] = catalog(engine, native_refits=True)
         if not args.resume:
-            print(engine.command('connected_economy prepare', 'CONNECTED prepared'), flush=True)
+            print(engine.command('connected_economy prepare-surveys' if args.resource_surveys else 'connected_economy prepare', 'CONNECTED prepared'), flush=True)
             engine.save(output / 'cold-start.sav')
         state = json.loads(engine.command('connected_economy status', 'CONNECTED state '))
         report['initial'] = state
+        report['resource_state'] = json.loads(engine.command('resource_sites', 'RESOURCE state '))
+        require(report['resource_state']['player_built'] == args.resource_surveys, 'Unexpected resource economy mode')
         report['terrain_and_text'] = json.loads(engine.command('connected_economy audit', 'CONNECTED audit '))
         require(not report['terrain_and_text']['invalid_slopes'], 'Invalid terrain slopes')
         for cargo in report['terrain_and_text']['cargo']:
@@ -223,6 +228,7 @@ if __name__ == '__main__':
     parser.add_argument('--steps', type=int, default=80)
     parser.add_argument('--resume', type=Path)
     parser.add_argument('--verify', action='store_true')
+    parser.add_argument('--resource-surveys', action='store_true', help='Use surveyed sites and cash-funded Materials research in the fixture')
     parser.add_argument('--publish', type=Path)
     args = parser.parse_args()
     if args.publish and not args.verify:

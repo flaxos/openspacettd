@@ -57,6 +57,8 @@
 
 #include <bitset>
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 bool _ignore_industry_restrictions;
@@ -287,6 +289,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_build_industry_widge
 		NWidget(WWT_TEXTBTN, Colours::DarkGreen, WID_DPI_FUND_WIDGET), SetFill(1, 0), SetResize(1, 0),
 		NWidget(WWT_RESIZEBOX, Colours::DarkGreen),
 	EndContainer(),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_DPI_SURVEY_WIDGET), SetStringTip(STR_RESOURCE_OPEN, STR_RESOURCE_HELP), SetFill(1, 0), SetResize(1, 0),
 };
 
 /** Window definition of the dynamic place industries gui */
@@ -328,7 +331,7 @@ class BuildIndustryWindow : public Window {
 				/* Rule is that editor mode loads all industries.
 				 * In game mode, all non raw industries are loaded too
 				 * and raw ones are loaded only when setting allows it */
-				if (_game_mode != GameMode::Editor && indsp->IsRawIndustry() && _settings_game.construction.raw_industry_construction == 0) {
+				if (_game_mode != GameMode::Editor && indsp->IsRawIndustry() && !ResourceSiteManager::Enabled() && _settings_game.construction.raw_industry_construction == 0) {
 					/* Unselect if the industry is no longer in the list */
 					if (this->selected_type == ind) this->selected_type = IT_INVALID;
 					continue;
@@ -349,6 +352,7 @@ class BuildIndustryWindow : public Window {
 	/** Update status of the fund and display-chain widgets. */
 	void SetButtons()
 	{
+		this->SetWidgetDisabledState(WID_DPI_SURVEY_WIDGET, !ResourceSiteManager::Enabled());
 		this->SetWidgetDisabledState(WID_DPI_FUND_WIDGET, this->selected_type != IT_INVALID && !this->enabled);
 		this->SetWidgetDisabledState(WID_DPI_DISPLAY_WIDGET, this->selected_type == IT_INVALID && this->enabled);
 	}
@@ -426,7 +430,7 @@ public:
 
 			case WID_DPI_INFOPANEL: {
 				/* Extra line for cost outside of editor. */
-				int height = 2 + (_game_mode == GameMode::Editor ? 0 : 1);
+				int height = 2 + (_game_mode == GameMode::Editor ? 0 : 1) + (ResourceSiteManager::Enabled() ? 4 : 0);
 				uint extra_lines_req = 0;
 				uint extra_lines_prd = 0;
 				uint extra_lines_newgrf = 0;
@@ -493,7 +497,7 @@ public:
 				}
 				if (this->selected_type != IT_INVALID) {
 					const IndustrySpec *indsp = GetIndustrySpec(this->selected_type);
-					return GetString((_settings_game.construction.raw_industry_construction == 2 && indsp->IsRawIndustry()) ? STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY : STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY);
+					return GetString((!ResourceSiteManager::Enabled() && _settings_game.construction.raw_industry_construction == 2 && indsp->IsRawIndustry()) ? STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY : STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY);
 				}
 				return GetString(STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY);
 
@@ -559,6 +563,10 @@ public:
 					DrawString(ir, GetString(STR_FUND_INDUSTRY_INDUSTRY_BUILD_COST, indsp->GetConstructionCost()));
 					ir.top += GetCharacterHeight(FontSize::Normal);
 				}
+
+                if (ResourceSiteManager::Enabled() && ResourceSiteManager::IsPrimary(this->selected_type)) {
+                    ir.top = DrawStringMultiLine(ir, ResourceSiteManager::CanDiscover(_local_company, this->selected_type) ? STR_RESOURCE_SITE_REQUIRED : STR_RESOURCE_RESEARCH_REQUIRED);
+                }
 
 				CargoSuffix cargo_suffix[std::tuple_size_v<decltype(indsp->accepts_cargo)>];
 
@@ -662,7 +670,7 @@ public:
 					this->SetDirty();
 
 					if (_thd.GetCallbackWnd() == this &&
-							((_game_mode != GameMode::Editor && _settings_game.construction.raw_industry_construction == 2 && indsp != nullptr && indsp->IsRawIndustry()) || !this->enabled)) {
+							((_game_mode != GameMode::Editor && !ResourceSiteManager::Enabled() && _settings_game.construction.raw_industry_construction == 2 && indsp != nullptr && indsp->IsRawIndustry()) || !this->enabled)) {
 						/* Reset the button state if going to prospecting or "build many industries" */
 						this->RaiseButtons();
 						ResetObjectToPlace();
@@ -678,9 +686,10 @@ public:
 				if (this->selected_type != IT_INVALID) ShowIndustryCargoesWindow(this->selected_type);
 				break;
 
+			case WID_DPI_SURVEY_WIDGET: ShowResourceSurveyWindow(); break;
 			case WID_DPI_FUND_WIDGET: {
 				if (this->selected_type != IT_INVALID) {
-					if (_game_mode != GameMode::Editor && _settings_game.construction.raw_industry_construction == 2 && GetIndustrySpec(this->selected_type)->IsRawIndustry()) {
+					if (_game_mode != GameMode::Editor && !ResourceSiteManager::Enabled() && _settings_game.construction.raw_industry_construction == 2 && GetIndustrySpec(this->selected_type)->IsRawIndustry()) {
 						Command<Commands::BuildIndustry>::Post(STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY, TileIndex{}, this->selected_type, 0, false, InteractiveRandom());
 						this->HandleButtonClick(WID_DPI_FUND_WIDGET);
 					} else {

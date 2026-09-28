@@ -167,6 +167,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_generate_landscape_w
 						EndContainer(),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWNNAME_DROPDOWN), SetToolTip(STR_MAPGEN_TOWN_NAME_DROPDOWN_TOOLTIP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWN_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_TOWNS_TOOLTIP), SetFill(1, 1),
+						NWidget(WWT_PUSHTXTBTN, Colours::Orange, WID_GL_RESOURCE_MODE), SetToolTip(STR_RESOURCE_MODE_HELP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_INDUSTRY_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES_TOOLTIP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_WATER_PULLDOWN), SetToolTip(STR_MAPGEN_SEA_LEVEL_TOOLTIP), SetFill(1, 1),
 						/* Spacer due to fewer items in columns 3-4 than in 1-2. */
@@ -306,6 +307,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_heightmap_load_widge
 						EndContainer(),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWNNAME_DROPDOWN), SetToolTip(STR_MAPGEN_TOWN_NAME_DROPDOWN_TOOLTIP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWN_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_TOWNS_TOOLTIP), SetFill(1, 1),
+						NWidget(WWT_PUSHTXTBTN, Colours::Orange, WID_GL_RESOURCE_MODE), SetToolTip(STR_RESOURCE_MODE_HELP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_INDUSTRY_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES_TOOLTIP), SetFill(1, 1),
 						NWidget(NWID_SPACER), SetFill(1, 1),
 					EndContainer(),
@@ -435,6 +437,7 @@ struct GenerateLandscapeWindow : public Window {
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
 		switch (widget) {
+			case WID_GL_RESOURCE_MODE: return GetString(_settings_newgame.game_creation.player_built_economy ? STR_RESOURCE_MODE_PLAYER : STR_RESOURCE_MODE_CLASSIC);
 			case WID_GL_START_DATE_TEXT:      return GetString(STR_JUST_DATE_LONG, TimerGameCalendar::ConvertYMDToDate(_settings_newgame.game_creation.starting_year, 0, 1));
 			case WID_GL_MAPSIZE_X_PULLDOWN:   return GetString(STR_JUST_INT, 1LL << _settings_newgame.game_creation.map_x);
 			case WID_GL_MAPSIZE_Y_PULLDOWN:   return GetString(STR_JUST_INT, 1LL << _settings_newgame.game_creation.map_y);
@@ -463,10 +466,10 @@ struct GenerateLandscapeWindow : public Window {
 				if (_game_mode == GameMode::Editor) {
 					return GetString(STR_CONFIG_SETTING_OFF);
 				}
-				if (_settings_newgame.difficulty.industry_density == IndustryDensity::Custom) {
+				if ((_settings_newgame.game_creation.player_built_economy ? _settings_newgame.game_creation.resource_density : _settings_newgame.difficulty.industry_density) == IndustryDensity::Custom) {
 					return GetString(STR_NUM_CUSTOM_NUMBER, _settings_newgame.game_creation.custom_industry_number);
 				}
-				return GetString(_num_inds[to_underlying(_settings_newgame.difficulty.industry_density)]);
+				return GetString(_num_inds[to_underlying((_settings_newgame.game_creation.player_built_economy ? _settings_newgame.game_creation.resource_density : _settings_newgame.difficulty.industry_density))]);
 
 			case WID_GL_MAX_HEIGHT_PULLDOWN:
 				if (_settings_newgame.difficulty.terrain_type == GenworldMaxHeight::Custom) {
@@ -659,6 +662,10 @@ struct GenerateLandscapeWindow : public Window {
 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
+			case WID_GL_RESOURCE_MODE:
+				_settings_newgame.game_creation.player_built_economy = !_settings_newgame.game_creation.player_built_economy;
+				this->SetDirty();
+				break;
 			case WID_GL_TEMPERATE:
 			case WID_GL_ARCTIC:
 			case WID_GL_TROPICAL:
@@ -684,7 +691,7 @@ struct GenerateLandscapeWindow : public Window {
 				break;
 
 			case WID_GL_INDUSTRY_PULLDOWN: // Number of industries
-				ShowDropDownMenu(this, _num_inds, to_underlying(_settings_newgame.difficulty.industry_density), WID_GL_INDUSTRY_PULLDOWN, 0, 0);
+				ShowDropDownMenu(this, _num_inds, to_underlying((_settings_newgame.game_creation.player_built_economy ? _settings_newgame.game_creation.resource_density : _settings_newgame.difficulty.industry_density)), WID_GL_INDUSTRY_PULLDOWN, 0, 0);
 				break;
 
 			case WID_GL_GENERATE_BUTTON: { // Generate
@@ -906,7 +913,7 @@ struct GenerateLandscapeWindow : public Window {
 					this->widget_id = widget;
 					ShowQueryString(GetString(STR_JUST_INT, _settings_newgame.game_creation.custom_industry_number), STR_MAPGEN_NUMBER_OF_INDUSTRIES, 5, this, CS_NUMERAL, {});
 				}
-				_settings_newgame.difficulty.industry_density = static_cast<IndustryDensity>(index);
+				(_settings_newgame.game_creation.player_built_economy ? _settings_newgame.game_creation.resource_density : _settings_newgame.difficulty.industry_density) = static_cast<IndustryDensity>(index);
 				break;
 
 			case WID_GL_MAX_HEIGHT_PULLDOWN: {

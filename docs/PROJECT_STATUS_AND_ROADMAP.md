@@ -509,3 +509,15 @@ provenance. Recovery uses only the latest coordinated set; arbitrary crash
 recovery and old/mixed-save rollback are outside this acceptance boundary.
 
 See [acceptance method and evidence](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).
+
+## Player-built resource economy — 28 September 2026
+
+User-directed feature: new maps default to basic primary starters plus hidden
+resource sites, with processing industries built by players. Paid area surveying,
+private company discoveries, Materials II/III resource unlocks, native construction,
+script commands and persistent state are integrated. Old saves remain Classic.
+Verification passes: 447 unit cases, 458/458 CTests, linters, generation/join/reload,
+command replication and the 24-month resource economy acceptance. Human visual
+acceptance and economy balancing remain separate next steps.
+[Evidence](audit/2026-09-28/resource-economy/README.md).
+[Player flow and implementation](PLAYER_BUILT_RESOURCE_ECONOMY.md).

@@ -47,6 +47,7 @@ def assert_equal(states, label):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("test_binary", help="built openttd_test executable")
+    parser.add_argument("--resource-surveys", action="store_true", help="Exercise private surveys and competing industry construction")
     args = parser.parse_args()
     workers = []
     sockets = []
@@ -63,6 +64,8 @@ def main():
             env = os.environ.copy()
             env["OSTTD_AUTHORITY_LOOPBACK_FD"] = str(child.fileno())
             env["OSTTD_AUTHORITY_LOOPBACK_ROLE"] = role
+            if args.resource_surveys:
+                env["OSTTD_RESOURCE_LOOPBACK"] = "1"
             process = subprocess.Popen(
                 [args.test_binary, CASE],
                 env=env,
@@ -80,7 +83,7 @@ def main():
         baseline = states[0]
         changed = 0
 
-        for origin, command, success in (
+        operations = (
             (1, "D", False),  # company 0 attempts company 1 HQ
             (1, "I", False),  # invalid HQ tier
             (1, "U", True),   # one HQ tier
@@ -90,7 +93,11 @@ def main():
             (2, "U", False),  # duplicate HQ target
             (1, "C", False),  # already colonized world
             (2, "V", False),  # unknown world
-        ):
+        )
+        if args.resource_surveys:
+            operations = ((1, "N", False), (1, "Q", True), (2, "N", False),
+                          (2, "J", True), (1, "M", True), (2, "N", False))
+        for origin, command, success in operations:
             if command == "C" and not success and states[0] != baseline and changed == 1:
                 # Set the same low cash balance in all independent fixtures.
                 for sock in sockets:
@@ -132,6 +139,9 @@ def main():
             state = states[0].decode("utf-8")
             if success:
                 required = {
+                    "Q": (";survey:0:1950", "company:0:9999000;"),
+                    "J": (";survey:1:1950", "company:1:9999000;"),
+                    "M": (";industries:1", ";site:1:1950:0"),
                     "U": ("hq:0:2:Authority HQ;", "company:0:10000000;"),
                     "C": ("world:0:3:10100:Relay Outpost:", "company:0:9995000;"),
                     "P": ("world:0:2:10350:Relay Outpost:", "company:0:9987000;"),
@@ -142,7 +152,7 @@ def main():
             print(f"{command}: {'accepted' if success else 'denied'}; frame state {states[0].decode('utf-8', 'replace')}")
 
         if changed != 3 or states[0] == baseline:
-            raise AssertionError("expected exactly HQ upgrade, colonization, promotion")
+            raise AssertionError("expected exactly three accepted state changes")
 
         for sock in sockets:
             send(sock, "R")

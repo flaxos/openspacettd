@@ -444,6 +444,8 @@ struct NetworkSettings {
 
 /** Settings related to the creation of games. */
 struct GameCreationSettings {
+	bool player_built_economy; ///< New maps use surveyed primary sites. Saved in RSRC.
+	IndustryDensity resource_density; ///< Starter primary industry density in player-built maps.
 	uint32_t generation_seed; ///< noise seed for world generation
 	TimerGameCalendar::Year starting_year; ///< starting date
 	TimerGameCalendar::Year ending_year; ///< scoring end date

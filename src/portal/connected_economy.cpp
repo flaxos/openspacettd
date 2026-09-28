@@ -47,6 +47,8 @@
 #include "../core/backup_type.hpp"
 #include "../3rdparty/nlohmann/json.hpp"
 #include <queue>
+#include "resource_sites.h"
+
 #include "../safeguards.h"
 
 extern Company *DoStartupNewCompany(bool, CompanyID);
@@ -309,7 +311,7 @@ bool SmoothTerrain()
  * Construct the isolated four-world fixture on a fresh map.
  * @return Whether all construction and configuration commands succeeded.
  */
-bool Prepare()
+bool Prepare(bool resources = false)
 {
 	if (Map::SizeX() != 1024 || Map::SizeY() != 1024 || Company::GetNumItems() != 0 || Industry::GetNumItems() != 0 ||
 	    Vehicle::GetNumItems() != 0) {
@@ -325,6 +327,8 @@ bool Prepare()
 				return false;
 			}
 		}
+	ResourceSiteManager::Reset();
+	ResourceSiteManager::SetEnabled(resources);
 	PlanetManager::Reset();
 	const char *names[] = {"Core Commonwealth", "Industrial Commonwealth", "Extraction frontier", "Research frontier"};
 	for (uint i = 0; i < 4; ++i) {
@@ -391,15 +395,32 @@ bool Prepare()
 				return false;
 		}
 	}
+	if (resources) {
+		if (!Result(Command<Commands::PlaceCorporateHQ>::Do(DoCommandFlag::Execute, TileXY(70, 60), std::string("Commonwealth HQ")), "survey research HQ")) return false;
+		for (TechID tech : {TECH_MATERIALS_2, TECH_MATERIALS_3}) {
+			if (!Result(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, tech), "resource research")) return false;
+			if (!Result(Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, TechTreeManager::GetNode(tech)->cost_rp * 1000), "resource research budget")) return false;
+			TechTreeManager::ProcessMonthlyResearch();
+			if (!TechTreeManager::IsTechUnlocked(company->index, tech)) return false;
+		}
+	}
 	for (auto [node, local] :
 	    {std::pair{13u, 0x10u}, std::pair{14u, 0x12u}, std::pair{15u, 0x16u}, std::pair{16u, 0x18u}, std::pair{17u, 0x14u}}) {
 		IndustryType type = MapNewGRFIndustryType(0x80 | local, COMMONWEALTH_INDUSTRY_GRFID);
+		if (resources) {
+			TileIndex site = TileXY(nodes[node].x, TOP - 5);
+			if (ResourceSiteManager::AddSite(site, type, 16, 16) == 0 || !Result(Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, site), "resource survey")) return false;
+		}
 		if (!Result(Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, TileXY(nodes[node].x, TOP - 5), type, 0, false, 1),
 		        "raw extraction"))
 			return false;
 	}
 	// Native Arctic farm and food processor supply actual food, not proxy minerals.
 	for (auto [node, type] : {std::pair{18u, IndustryType{9}}, std::pair{3u, IndustryType{13}}}) {
+		if (resources && ResourceSiteManager::IsPrimary(type)) {
+			TileIndex site = TileXY(nodes[node].x, TOP - 12);
+			if (ResourceSiteManager::AddSite(site, type, 16, 24) == 0 || !Result(Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, site), "farm survey")) return false;
+		}
 		bool built = false;
 		for (uint dy = 5; dy <= 12 && !built; ++dy)
 			for (uint layout = 0; layout < GetIndustrySpec(type)->layouts.size() && !built; ++layout) {
@@ -429,7 +450,7 @@ bool Prepare()
 		                DoCommandFlag::Execute, TileXY(nodes[i].x, TOP), Stop(i), std::string(nodes[i].name)),
 		        "raw export warehouse"))
 			return false;
-	if (!Result(Command<Commands::PlaceCorporateHQ>::Do(DoCommandFlag::Execute, TileXY(70, 60), std::string("Commonwealth HQ")),
+	if (!resources && !Result(Command<Commands::PlaceCorporateHQ>::Do(DoCommandFlag::Execute, TileXY(70, 60), std::string("Commonwealth HQ")),
 	        "Corporate HQ"))
 		return false;
 	if (!Result(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_PORTAL_1), "research project")) return false;
@@ -551,7 +572,7 @@ bool SmoothExposedUATTerrain()
 bool ConConnectedEconomy(std::span<std::string_view> argv)
 {
 	if (argv.size() != 2) {
-		IConsolePrint(CC_HELP, "connected_economy prepare|status|audit|advance|stop-food|start-food|fabricate|research: isolated demo only");
+		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-surveys|status|audit|advance|stop-food|start-food|fabricate|research: isolated demo only");
 		return true;
 	}
 	if (_game_mode != GameMode::Normal || (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) ||
@@ -559,8 +580,8 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		IConsolePrint(CC_ERROR, "CONNECTED FAIL requires isolated game with active Commonwealth content");
 		return true;
 	}
-	if (argv[1] == "prepare") {
-		if (Prepare()) IConsolePrint(CC_DEFAULT, "CONNECTED prepared");
+	if (argv[1] == "prepare" || argv[1] == "prepare-surveys") {
+		if (Prepare(argv[1] == "prepare-surveys")) IConsolePrint(CC_DEFAULT, "CONNECTED prepared");
 		return true;
 	}
 	const Company *company = Company::GetIfValid(CompanyID{0});
@@ -635,7 +656,7 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		after["errors"] = Json::array();
 		for (CargoType c{0}; c < NUM_CARGO; ++c) {
 			int64_t expected = before["held"][c].get<int64_t>() + audit.produced[c] - audit.unallocated[c] - audit.discarded[c] -
-			                   audit.consumed[c] + net[c];
+			                   audit.consumed[c] + net[c] + audit.processing_bonus[c];
 			if (expected != after["held"][c].get<int64_t>()) {
 				after["conserved"] = false;
 				after["errors"].push_back({c, expected, after["held"][c]});

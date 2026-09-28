@@ -55,6 +55,8 @@
 
 #include "table/strings.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 ClientSettings _settings_client;
@@ -907,6 +909,9 @@ void IniSaveWindowSettings(IniFile &ini, std::string_view grpname, WindowDesc *d
  */
 bool SettingDesc::IsEditable(bool do_command) const
 {
+	if ((this->GetName() == "construction.raw_industry_construction" || this->GetName() == "difficulty.industry_density") &&
+     (_game_mode == GameMode::Menu ? _settings_newgame.game_creation.player_built_economy : ResourceSiteManager::Enabled())) return false;
+
 	if (!do_command && !this->flags.Test(SettingFlag::NoNetworkSync) && _networking && !_network_server && !this->flags.Test(SettingFlag::PerCompany)) return false;
 	if (do_command && this->flags.Test(SettingFlag::NoNetworkSync)) return false;
 	if (this->flags.Test(SettingFlag::NetworkOnly) && !_networking && _game_mode != GameMode::Menu) return false;

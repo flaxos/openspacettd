@@ -135,7 +135,7 @@ static void EnsureNodesInitialized()
 		"High-purity monocrystalline silicon and induction-drawn copper wire fabrication for signalling networks.",
 		250,
 		{TECH_MATERIALS_1},
-		"Enables in-kind fabrication of catenary wiring, inductive coils, and signalling microchips."
+		"Reveals copper and silica in surveyed areas and permits extraction there; enables electronics fabrication."
 	});
 	_tech_nodes.push_back({
 		TECH_MATERIALS_3,
@@ -145,7 +145,7 @@ static void EnsureNodesInitialized()
 		"Carbon-nanotube reinforced polymers and niobium-tin superalloys reducing rolling stock mass.",
 		600,
 		{TECH_MATERIALS_2},
-		"Grants a 90% cash discount on in-kind fabrication and increases processing-facility output by 15%."
+		"Reveals rare minerals in surveyed areas and permits extraction there; grants a 90% fabrication cash discount and 15% processing output bonus."
 	});
 	_tech_nodes.push_back({
 		TECH_MATERIALS_4,

@@ -44,6 +44,8 @@
 #include "portal/spaceport_manager.h"
 #include "portal/edge_conduit.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 extern TileIndex _cur_tileloop_tile;
@@ -141,6 +143,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	LogisticsHubManager::Reset();
 	CorporateHQManager::Reset();
 	TechTreeManager::Reset();
+	ResourceSiteManager::Reset();
 	FabricationManager::Reset();
 	PlanetManager::Reset();
 	PortalRegistry::Reset();

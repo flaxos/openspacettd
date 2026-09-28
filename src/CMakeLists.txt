@@ -388,6 +388,9 @@ add_files(
     portal/fabrication_manager.h
     portal/tech_tree.cpp
     portal/tech_tree.h
+    portal/resource_sites.cpp
+    portal/resource_sites.h
+    portal/resource_sites_gui.cpp
     portal/production_chain.cpp
     portal/production_chain.h
     portal/empire_facilities_gui.cpp

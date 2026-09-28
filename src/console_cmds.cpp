@@ -93,6 +93,8 @@
 
 #include "table/strings.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 /* scriptfile handling */
@@ -4330,6 +4332,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
 	IConsole::CmdRegister("connected_economy", ConConnectedEconomy);
 	IConsole::CmdRegister("federation_test_fixture", ConFederationTestFixture);
+	IConsole::CmdRegister("resource_sites", ConResourceSites);
 	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);
 	IConsole::CmdRegister("commonwealth_status",     ConCommonwealthStatus);
 	IConsole::CmdRegister("setup_uat_fixtures",      ConSetupUATFixtures);

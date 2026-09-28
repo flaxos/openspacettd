@@ -58,6 +58,8 @@
 #include "table/industry_land.h"
 #include "table/build_industry.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 IndustryPool _industry_pool("Industry");
@@ -198,6 +200,7 @@ const IndustryTileSpec *GetIndustryTileSpec(IndustryGfx gfx)
 Industry::~Industry()
 {
 	if (CleaningPool()) return;
+	ResourceSiteManager::Release(this->index);
 
 	/* Industry can also be destroyed when not fully initialized.
 	 * This means that we do not have to clear tiles either.
@@ -1635,7 +1638,7 @@ static CommandCost CheckIfIndustryIsAllowed(TileIndex tile, IndustryType type, c
 	                spec->check_proc == IndustryCheck::Plantation ||
 	                spec->behaviour.Test(IndustryBehaviour::PlantFields) ||
 	                spec->behaviour.Test(IndustryBehaviour::PlantOnBuild));
-	CommandCost planet_res = PlanetManager::CheckIndustryPlacement(tile, spec->IsRawIndustry(), spec->IsProcessingIndustry(), is_farm);
+	CommandCost planet_res = PlanetManager::CheckIndustryPlacement(tile, ResourceSiteManager::Enabled() ? ResourceSiteManager::IsPrimary(type) : spec->IsRawIndustry(), spec->IsProcessingIndustry(), is_farm);
 	if (planet_res.Failed()) return planet_res;
 
 	if (spec->behaviour.Test(IndustryBehaviour::Town1200More) && t->cache.population < 1200) {
@@ -2067,6 +2070,11 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 	const IndustryTileLayout &layout = indspec->layouts[layout_index];
 
 	*ip = nullptr;
+	if (ResourceSiteManager::Enabled()) {
+		CommandCost policy = ResourceSiteManager::CheckPlacement(founder, tile, type, layout,
+			!_generating_world && _game_mode != GameMode::Editor && Company::IsValidID(founder));
+		if (policy.Failed()) return policy;
+	}
 
 	/* 1. Cheap: Built-in checks on industry level. */
 	CommandCost ret = CheckIfFarEnoughFromConflictingIndustry(tile, type);
@@ -2110,9 +2118,46 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 		*ip = Industry::Create(tile);
 		if (!custom_shape_check) CheckIfCanLevelIndustryPlatform(tile, {DoCommandFlag::NoWater, DoCommandFlag::Execute}, layout);
 		DoCreateNewIndustry(*ip, tile, type, layout, layout_index, t, founder, random_initial_bits);
+		ResourceSiteManager::Occupy(tile, type, layout, (*ip)->index);
 	}
 
 	return CommandCost();
+}
+
+/** Generate undeveloped sites using the same native terrain and content checks as construction. */
+void GenerateResourceSites(uint target)
+{
+	AutoRestoreBackup cur_company(_current_company, OWNER_NONE);
+	std::vector<std::pair<IndustryType, uint>> types;
+	uint total_weight = 0;
+	for (IndustryType type = 0; type < NUM_INDUSTRYTYPES; ++type) {
+		const auto *spec = GetIndustrySpec(type);
+		if (!spec->enabled || !ResourceSiteManager::IsPrimary(type) || spec->layouts.empty()) continue;
+		uint weight = GetIndustryProbabilityCallback(type, IndustryAvailabilityCallType::UserCreation, std::max<uint>(1, spec->appear_creation[to_underlying(_settings_game.game_creation.landscape)]));
+		if (weight == 0) continue;
+		types.emplace_back(type, weight);
+		total_weight += weight;
+	}
+	for (auto [type, weight] : types) {
+		const auto *spec = GetIndustrySpec(type);
+		uint wanted = std::max(1u, target * weight / total_weight);
+		uint placed = 0;
+		for (uint attempt = 0; attempt < std::min(200000u, wanted * 2000) && placed < wanted; ++attempt) {
+			TileIndex tile = RandomTile();
+			size_t layout_index = RandomRange(static_cast<uint32_t>(spec->layouts.size()));
+			const auto &layout = spec->layouts[layout_index];
+			Industry *unused = nullptr;
+			if (CreateNewIndustryHelper(tile, type, {}, spec, layout_index, 0, 0, OWNER_NONE, IndustryAvailabilityCallType::UserCreation, &unused).Failed()) continue;
+			uint width = 16, height = 16;
+			for (const auto &entry : layout) {
+				if (entry.gfx == GFX_WATERTILE_SPECIALCHECK) continue;
+				width = std::max(width, static_cast<uint>(entry.ti.x + 1));
+				height = std::max(height, static_cast<uint>(entry.ti.y + 1));
+			}
+			if (ResourceSiteManager::AddSite(tile, type, width, height) != 0) ++placed;
+		}
+		if (placed < wanted) Debug(misc, 0, "Resource sites: type {} placed {} of {} requested", type, placed, wanted);
+	}
 }
 
 /**
@@ -2136,7 +2181,7 @@ CommandCost CmdBuildIndustry(DoCommandFlags flags, TileIndex tile, IndustryType 
 
 	/* If the setting for raw-material industries is not on, you cannot build raw-material industries.
 	 * Raw material industries are industries that do not accept cargo (at least for now) */
-	if (_game_mode != GameMode::Editor && _current_company != OWNER_DEITY && _settings_game.construction.raw_industry_construction == 0 && indspec->IsRawIndustry()) {
+	if (_game_mode != GameMode::Editor && _current_company != OWNER_DEITY && !ResourceSiteManager::Enabled() && _settings_game.construction.raw_industry_construction == 0 && indspec->IsRawIndustry()) {
 		return CMD_ERROR;
 	}
 
@@ -2153,7 +2198,7 @@ CommandCost CmdBuildIndustry(DoCommandFlags flags, TileIndex tile, IndustryType 
 	const bool deity_prospect = _current_company == OWNER_DEITY && !fund;
 
 	Industry *ind = nullptr;
-	if (deity_prospect || (_game_mode != GameMode::Editor && _current_company != OWNER_DEITY && _settings_game.construction.raw_industry_construction == 2 && indspec->IsRawIndustry())) {
+	if ((!ResourceSiteManager::Enabled() && deity_prospect) || (!ResourceSiteManager::Enabled() && _game_mode != GameMode::Editor && _current_company != OWNER_DEITY && _settings_game.construction.raw_industry_construction == 2 && indspec->IsRawIndustry())) {
 		if (flags.Test(DoCommandFlag::Execute)) {
 			/* Prospecting has a chance to fail, however we cannot guarantee that something can
 			 * be built on the map, so the chance gets lower when the map is fuller, but there
@@ -2370,9 +2415,13 @@ static uint32_t GetScaledIndustryGenerationProbability(IndustryType it, std::opt
 	const IndustrySpec *ind_spc = GetIndustrySpec(it);
 	if (water.has_value() && ind_spc->behaviour.Test(IndustryBehaviour::BuiltOnWater) != *water) return 0;
 
+	if (ResourceSiteManager::Enabled() && (!ResourceSiteManager::IsPrimary(it) || ResourceSiteManager::RequiredTech(it) != TECH_NONE)) {
+		*force_at_least_one = false;
+		return 0;
+	}
 	uint32_t chance = ind_spc->appear_creation[to_underlying(_settings_game.game_creation.landscape)];
 	if (!ind_spc->enabled || ind_spc->layouts.empty() ||
-			(_game_mode != GameMode::Editor && _settings_game.difficulty.industry_density == IndustryDensity::FundedOnly) ||
+			(_game_mode != GameMode::Editor && (ResourceSiteManager::Enabled() ? _settings_game.game_creation.resource_density : _settings_game.difficulty.industry_density) == IndustryDensity::FundedOnly) ||
 			(chance = GetIndustryProbabilityCallback(it, IndustryAvailabilityCallType::MapGeneration, chance)) == 0) {
 		*force_at_least_one = false;
 		return 0;
@@ -2395,7 +2444,7 @@ static uint32_t GetScaledIndustryGenerationProbability(IndustryType it, std::opt
  */
 static uint16_t GetIndustryGamePlayProbability(IndustryType it, uint8_t *min_number)
 {
-	if (_settings_game.difficulty.industry_density == IndustryDensity::FundedOnly) {
+	if (ResourceSiteManager::Enabled() || _settings_game.difficulty.industry_density == IndustryDensity::FundedOnly) {
 		*min_number = 0;
 		return 0;
 	}
@@ -2431,7 +2480,7 @@ static uint GetNumberOfIndustries()
 	};
 
 	assert(lengthof(numof_industry_table) == to_underlying(IndustryDensity::End));
-	IndustryDensity density = (_game_mode != GameMode::Editor) ? _settings_game.difficulty.industry_density : IndustryDensity::VeryLow;
+	IndustryDensity density = (_game_mode != GameMode::Editor) ? (ResourceSiteManager::Enabled() ? _settings_game.game_creation.resource_density : _settings_game.difficulty.industry_density) : IndustryDensity::VeryLow;
 
 	if (density == IndustryDensity::Custom) return std::min<uint>(IndustryPool::MAX_SIZE, _settings_game.game_creation.custom_industry_number);
 
@@ -2509,7 +2558,7 @@ void IndustryBuildData::Reset()
 void IndustryBuildData::EconomyMonthlyLoop()
 {
 	static const int NEWINDS_PER_MONTH = 0x38000 / (10 * 12); // lower 16 bits is a float fraction, 3.5 industries per decade, divided by 10 * 12 months.
-	if (_settings_game.difficulty.industry_density == IndustryDensity::FundedOnly) return; // 'no industries' setting.
+	if (ResourceSiteManager::Enabled() || _settings_game.difficulty.industry_density == IndustryDensity::FundedOnly) return; // 'no industries' setting.
 
 	/* To prevent running out of unused industries for the player to connect,
 	 * add a fraction of new industries each month, but only if the manager can keep up. */
@@ -2550,7 +2599,9 @@ static IndustryGenerationProbabilities GetScaledProbabilities(bool water)
  */
 void GenerateIndustries()
 {
-	if (_game_mode != GameMode::Editor && _settings_game.difficulty.industry_density == IndustryDensity::FundedOnly) return; // No industries in the game.
+	/* Sites exist even when the player requests no operating starter industries. */
+	struct GenerateSitesOnExit { ~GenerateSitesOnExit() { if (ResourceSiteManager::Enabled()) GenerateResourceSites(4 * GetNumberOfIndustries()); } } generate_sites;
+	if (_game_mode != GameMode::Editor && (ResourceSiteManager::Enabled() ? _settings_game.game_creation.resource_density : _settings_game.difficulty.industry_density) == IndustryDensity::FundedOnly) return; // No industries in the game.
 
 	/* Get the probabilities for all industries. This is done first as we need the total of
 	 * both land and water for scaling later. */
@@ -2566,7 +2617,7 @@ void GenerateIndustries()
 		if (lprob.total + wprob.total > 0) total_amount = p.total * GetNumberOfIndustries() / (lprob.total + wprob.total);
 
 		/* Scale land-based industries to the land proportion, unless the player has set a custom industry count. */
-		if (!water && _settings_game.difficulty.industry_density != IndustryDensity::Custom) total_amount = Map::ScaleByLandProportion(total_amount);
+		if (!water && (ResourceSiteManager::Enabled() ? _settings_game.game_creation.resource_density : _settings_game.difficulty.industry_density) != IndustryDensity::Custom) total_amount = Map::ScaleByLandProportion(total_amount);
 
 		/* Ensure that forced industries are generated even if the scaled amounts are too low. */
 		if (p.total == 0 || total_amount < p.num_forced) {
@@ -2739,6 +2790,7 @@ void IndustryBuildData::SetupTargetCount()
  */
 void IndustryBuildData::TryBuildNewIndustry()
 {
+	if (ResourceSiteManager::Enabled()) return;
 	this->SetupTargetCount();
 
 	int missing = 0;       // Number of industries that need to be build.
@@ -3259,7 +3311,7 @@ bool IndustrySpec::IsProcessingIndustry() const
 Money IndustrySpec::GetConstructionCost() const
 {
 	/* Building raw industries like secondary uses different price base */
-	return (_price[(_settings_game.construction.raw_industry_construction == 1 && this->IsRawIndustry()) ?
+	return (_price[((ResourceSiteManager::Enabled() || _settings_game.construction.raw_industry_construction == 1) && (this->IsRawIndustry() || (ResourceSiteManager::Enabled() && this->behaviour.Test(IndustryBehaviour::CutTrees)))) ?
 			Price::BuildIndustryRaw : Price::BuildIndustry] * this->cost_multiplier) >> 8;
 }
 

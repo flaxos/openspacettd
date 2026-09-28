@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class Engine:
-    def __init__(self, binary, config, output, name, save=None, year=1950):
+    def __init__(self, binary, config, output, name, save=None, year=1950, world_count=1):
         self.log = (output / f"{name}.log").open("w")
         self.lines = []
         self.deadline = time.monotonic() + 120
@@ -28,6 +28,7 @@ class Engine:
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
+        self.port = port
         args = [str(binary), f"-D127.0.0.1:{port}", "-s", "null", "-m", "null",
                 "-x", "-c", str(config), "-G", "11", "-t", str(year), "-g"]
         if save:
@@ -35,7 +36,7 @@ class Engine:
         self.process = subprocess.Popen(args, cwd=ROOT, stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                         text=True, bufsize=1,
-                                        env={**os.environ, "OPENSPACETTD_WORLD_COUNT": "1"})
+                                        env={**os.environ, "OPENSPACETTD_WORLD_COUNT": str(world_count)})
         threading.Thread(target=self.read, daemon=True).start()
         try:
             if save:
