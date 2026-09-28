@@ -8,6 +8,8 @@
 /** @file planet_manager.cpp Implementation of spatial planet region manager and query index. */
 
 #include "../stdafx.h"
+#include "stellar_network.h"
+#include "resource_sites.h"
 #include "planet_manager.h"
 #include "../map_func.h"
 #include "../table/strings.h"
@@ -268,7 +270,7 @@ CommandCost PlanetManager::CheckConstructionPlacement(TileIndex tile)
 		return CommandCost(STR_ERROR_CANNOT_BUILD_IN_VOID_SPACE);
 	}
 
-	return CommandCost();
+	return StellarNetwork::CheckPlacement(tile);
 }
 
 CommandCost PlanetManager::CheckTownPlacement(TileIndex tile)
@@ -286,6 +288,8 @@ CommandCost PlanetManager::CheckTownPlacement(TileIndex tile)
 
 CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, bool is_processing, bool is_farm)
 {
+	CommandCost stellar = StellarNetwork::CheckPlacement(tile);
+	if (stellar.Failed()) return stellar;
 	if (Count() == 0) return CommandCost();
 
 	WorldID world = GetTileWorld(tile);
@@ -294,7 +298,7 @@ CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, b
 	}
 
 	WorldPhase phase = GetTilePhase(tile);
-	if (phase == WorldPhase::Phase4_Expansion) {
+	if (phase == WorldPhase::Phase4_Expansion && !(is_raw && ResourceSiteManager::GeneratingSites())) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
 	}
 	if (phase == WorldPhase::Phase1_Core && is_raw) {
@@ -312,6 +316,8 @@ CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, b
 
 CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype)
 {
+	CommandCost stellar = StellarNetwork::CheckPlacement(tile);
+	if (stellar.Failed()) return stellar;
 	if (Count() == 0) return CommandCost();
 
 	WorldID world = GetTileWorld(tile);
@@ -333,6 +339,8 @@ CommandCost PlanetManager::CheckDepotPlacement(TileIndex tile, RailType railtype
 
 CommandCost PlanetManager::CheckTrackPlacement(TileIndex tile, RailType railtype)
 {
+	CommandCost stellar = StellarNetwork::CheckPlacement(tile);
+	if (stellar.Failed()) return stellar;
 	if (Count() == 0) return CommandCost();
 
 	WorldID world = GetTileWorld(tile);

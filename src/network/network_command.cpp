@@ -56,6 +56,8 @@
 #include "../script/script_cmd.h"
 
 #include "../portal/resource_sites.h"
+#include "../portal/stellar_network.h"
+#include "../portal/universe_network.h"
 
 #include "../safeguards.h"
 

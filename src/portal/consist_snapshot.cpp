@@ -7,6 +7,7 @@
 
 #include "../stdafx.h"
 #include "consist_snapshot.h"
+#include "universe_network.h"
 #include "federation_cargo.h"
 
 #include "../base_consist.h"
@@ -296,7 +297,7 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 	}
 
 	/* Check if a registered master schedule exists for this consist */
-	if (auto master = FederationIdentityRegistry::GetConsistSchedule(snapshot.consist_id); master.has_value() && !master->empty()) {
+	if (auto master = FederationIdentityRegistry::GetConsistSchedule(snapshot.consist_id); master.has_value() && !master->empty() && train->orders == nullptr) {
 		snapshot.orders = *master;
 		snapshot.current_order_index = (train->cur_real_order_index < snapshot.orders.size())
 			? static_cast<uint16_t>(train->cur_real_order_index) : 0;
@@ -318,6 +319,8 @@ ConsistSnapshotResult ConsistSnapshotCodec::Capture(const Train *train, const Co
 		}
 		snapshot.current_order_index = found_match ? matched_idx : 0;
 	}
+
+	if (!snapshot.orders.empty() && UniverseNetwork::IsPinnedGate(snapshot.orders[snapshot.current_order_index], train->tile)) snapshot.current_order_index = (snapshot.current_order_index + 1) % snapshot.orders.size();
 
 	if (train->orders != nullptr && snapshot.orders.size() == train->GetNumOrders()) {
 		for (size_t i = 0; i < snapshot.orders.size(); ++i) {

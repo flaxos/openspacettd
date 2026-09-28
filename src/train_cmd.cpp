@@ -8,6 +8,8 @@
 /** @file train_cmd.cpp Handling of trains. */
 
 #include "stdafx.h"
+#include "portal/stellar_network.h"
+#include "portal/universe_network.h"
 #include "error.h"
 #include "articulated_vehicles.h"
 #include "command_func.h"
@@ -3152,7 +3154,7 @@ static void TrainEnterStation(Train *consist, StationID station)
 static inline bool CheckCompatibleRail(const Train *v, TileIndex tile, bool check_railtype)
 {
 	Owner tile_owner = GetTileOwner(tile);
-	return CorporateAllianceManager::CanTraverseTrack(v->owner, tile_owner) &&
+	return StellarNetwork::CanTraverseTile(tile, v->owner, CorporateAllianceManager::CanTraverseTrack(v->owner, tile_owner)) &&
 			(!check_railtype || !v->IsFrontEngine() || v->compatible_railtypes.Test(GetRailType(tile)));
 }
 
@@ -3614,12 +3616,18 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 			}
 		} else {
 			if (PortalRegistry::IsPortalTile(v->tile)) {
+				if (v->IsMovingFront() && v->track == Track::Wormhole &&
+						DirToDiagDir(v->GetMovingDirection()) == GetTunnelBridgeDirection(v->tile) &&
+						!StellarNetwork::AdmitTrain(v->tile, first->index, first->owner)) {
+					first->cur_speed = 0;
+					return false;
+				}
 				if (PrebuiltTradeManager::Instance().IsTradeGateway(v->tile)) {
 					if (v->IsMovingFront() && v->track == Track::Wormhole &&
 							(!IsTunnelTile(v->tile) || DirToDiagDir(v->direction) == GetTunnelBridgeDirection(v->tile))) {
 						const auto *gw = PrebuiltTradeManager::Instance().GetTradeGateway(v->tile);
 						std::string target_world = (gw != nullptr) ? gw->target_world_id : "";
-						auto access = CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
+						auto access = StellarNetwork::Policy(v->tile) ? GateAccessResult{true, 0, {}} : CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
 						if (!access.allowed) {
 							/* Access denied: lack of charter or insufficient reputation */
 							first->cur_speed = 0;
@@ -3644,7 +3652,7 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 							(!IsTunnelTile(v->tile) || DirToDiagDir(v->GetMovingDirection()) == GetTunnelBridgeDirection(v->tile))) {
 						const auto *link = PortalRegistry::GetInterServerPortal(v->tile);
 						std::string target_world = (link != nullptr) ? fmt::format("world_{}", link->remote_world.base()) : "";
-						auto access = CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
+						auto access = StellarNetwork::Policy(v->tile) ? GateAccessResult{true, 0, {}} : CorporateCharterManager::Instance().CheckAndProcessAccess(first->owner, v->tile, target_world);
 						if (!access.allowed) {
 							first->cur_speed = 0;
 							first->vehstatus.Set(VehState::Stopped);
@@ -3669,6 +3677,10 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 					Debug(misc, 3, "Portal vehicle {} emerges from {} at {}, travelling {}, backwards={}",
 						v->index, v->tile, exit.tile, to_underlying(exit.dir), v->IsDrivingBackwards());
 					PortalRegistry::ClearPortalTransit(v->index);
+					if (v->IsMovingFront()) {
+						UniverseNetwork::AdvanceGateOrder(first, v->tile);
+						StellarNetwork::ReleaseTrain(first->index);
+					}
 
 					v->tile = exit.tile;
 					v->track = exit.track;

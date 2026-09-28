@@ -107,6 +107,14 @@ void ProductionChainManager::InitDefaultRecipes()
 	CargoType c_enrich= GetDefaultCargo(CommonwealthCargoID::EnrichedQuantumCrystals);
 	CargoType c_mail  = GetDefaultCargo(CommonwealthCargoID::EncryptedConsumerCrystals);
 
+	CargoType machines = GetCargoTypeByLabel(CargoLabel{"MACH"});
+	if (machines != INVALID_CARGO && GetCargoTypeByLabel(CargoLabel{"WIRE"}) != INVALID_CARGO && GetCargoTypeByLabel(CargoLabel{"CHIP"}) != INVALID_CARGO) {
+		RegisterRecipe({.id = RECIPE_MACHINE_MODULES, .pipeline = PipelineType::Electronics,
+			.name = "Machine Module Assembly", .description = "Assembles gateway machinery from steel, wiring and control electronics.",
+			.inputs = {{c_steel, 2}, {c_wire, 1}, {c_chips, 1}}, .outputs = {{machines, 1}},
+			.allowed_phases = {WorldPhase::Phase2_Developed}});
+	}
+
 	/* Pipeline A: Structural & Track Infrastructure */
 	RegisterRecipe({
 		.id = RECIPE_BALLAST_CRUSHING,

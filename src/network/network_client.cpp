@@ -8,6 +8,7 @@
 /** @file network_client.cpp Client part of the network protocol. */
 
 #include "../stdafx.h"
+#include "../portal/universe_network.h"
 #include "network_gui.h"
 #include "../saveload/saveload_func.h"
 #include "../saveload/saveload_filter.h"
@@ -904,6 +905,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::ReceiveServerMapDone(Packet &)
 	}
 
 	SocialIntegration::EventEnterMultiplayer(Map::SizeX(), Map::SizeY());
+	UniverseNetwork::FinishVisit();
 
 	return NetworkRecvStatus::Okay;
 }

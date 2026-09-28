@@ -83,7 +83,7 @@ static void EnsureNodesInitialized()
 		"Sheldon-Ozzie metric tensor coils establishing stable single-track artificial Einstein-Rosen bridges.",
 		100,
 		{},
-		"Stabilizes single-track wormhole portal gateway links."
+		"Commission permanent gate links up to 10 stellar units. Existing CST routes need no research."
 	});
 	_tech_nodes.push_back({
 		TECH_PORTAL_2,
@@ -93,7 +93,7 @@ static void EnsureNodesInitialized()
 		"Harmonic resonance dampeners allowing parallel dual-track gateway throat arrays without field interference.",
 		300,
 		{TECH_PORTAL_1},
-		"Enables dual-track portal throat arrays, doubling throughput."
+		"Extends gate commissioning range to 25 stellar units."
 	});
 	_tech_nodes.push_back({
 		TECH_PORTAL_3,
@@ -103,7 +103,7 @@ static void EnsureNodesInitialized()
 		"Synchronized inter-server priority signaling for high-frequency bulk commodity transit.",
 		750,
 		{TECH_PORTAL_2},
-		"Establishes inter-server priority corridors for bulk raw material transit."
+		"Extends gate commissioning range to 50 stellar units, including registered remote worlds."
 	});
 	_tech_nodes.push_back({
 		TECH_PORTAL_4,
@@ -113,7 +113,7 @@ static void EnsureNodesInitialized()
 		"Monumental twin-array macroscopic wormholes supporting continuous, high-speed multi-track transit.",
 		2000,
 		{TECH_PORTAL_3},
-		"Unlocks continuous twin-array wormholes for high-frequency trans-galactic corridors."
+		"Extends gate commissioning range to 100 stellar units."
 	});
 
 	/* Branch 2: Materials & Fabrication */

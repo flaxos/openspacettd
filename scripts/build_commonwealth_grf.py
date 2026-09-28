@@ -36,6 +36,13 @@ PACKS = (
         "grfid_hex": "0254534f",
         "version": 3,
     },
+    {
+        "name": "openspacettd_equipment_v1.grf",
+        "source": REPO_ROOT / "pkg/commonwealth_equipment/commonwealth_equipment.nml",
+        "grfid": "OST\\u0005",
+        "grfid_hex": "0554534f",
+        "version": 1,
+    },
 )
 
 CARGO_LABELS = (
@@ -102,6 +109,8 @@ def make_manifest(compiled: list[tuple[dict[str, object], bytes]]) -> dict[str, 
         "compiler": {"name": "nmlc", "version": PINNED_NML_VERSION},
         "commonwealth_packages": [digest_entry(pack, data) for pack, data in compiled],
         "cargo_labels": list(CARGO_LABELS),
+        "equipment_cargo_labels": ["MACH"],
+        "equipment_wagon_refits": {"0x30": ["MACH", "STEL", "WIRE", "CHIP"]},
         "industry_local_ids": [f"0x{item:02x}" for item in INDUSTRY_LOCAL_IDS],
         "vehicle_local_ids": [f"0x{item:02x}" for item in VEHICLE_LOCAL_IDS],
         "wagon_refits": WAGON_REFITS,

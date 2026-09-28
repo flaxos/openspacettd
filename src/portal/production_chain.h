@@ -51,6 +51,7 @@ enum class PipelineType : uint8_t {
 };
 
 using RecipeID = uint16_t;
+static constexpr RecipeID RECIPE_MACHINE_MODULES = 204; ///< Gate construction equipment, requires MACH cargo.
 static constexpr RecipeID RECIPE_NONE                     = 0;
 
 /* Pipeline A: Structural & Track Infrastructure */

@@ -8,6 +8,8 @@
 /** @file portal_cmd.cpp Implementation of gateway portal construction, linking, and demolition commands. */
 
 #include "../stdafx.h"
+#include "stellar_network.h"
+#include "remote_gate_projects.h"
 #include "portal_cmd.h"
 #include "portal_registry.h"
 #include "portal_terminal.h"
@@ -191,6 +193,7 @@ CommandCost CmdBuildPortalGate(DoCommandFlags flags, TileIndex tile, DiagDirecti
 
 CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex tile_b)
 {
+	if (StellarNetwork::Enabled() && !StellarNetwork::InternalConstruction()) return CommandCost(STR_ERROR_STELLAR_PROJECT_REQUIRED);
 	if (!IsValidTile(tile_a) || !IsValidTile(tile_b) || tile_a == tile_b) return CMD_ERROR;
 
 	/* Both must be registered unlinked gates */
@@ -237,6 +240,7 @@ CommandCost CmdLinkPortalGates(DoCommandFlags flags, TileIndex tile_a, TileIndex
 
 CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirection dir_a, TileIndex tile_b, DiagDirection dir_b, RailType railtype)
 {
+	if (StellarNetwork::Enabled() && !StellarNetwork::InternalConstruction()) return CommandCost(STR_ERROR_STELLAR_PROJECT_REQUIRED);
 	if (tile_a == tile_b) return CMD_ERROR;
 	CommandCost placement_a = PlanetManager::CheckConstructionPlacement(tile_a);
 	if (placement_a.Failed()) return placement_a;
@@ -334,6 +338,9 @@ CommandCost CmdBuildPortalPair(DoCommandFlags flags, TileIndex tile_a, DiagDirec
 
 CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demolish_both)
 {
+	if (RemoteGateProjects::OwnsGate(tile)) return CommandCost(STR_ERROR_STELLAR_RESERVED);
+	auto reservation = StellarNetwork::CheckPlacement(tile);
+	if (reservation.Failed()) return reservation;
 	if (!IsValidTile(tile)) return CMD_ERROR;
 
 	PortalGateClassification gate = PortalRegistry::ClassifyGate(tile);

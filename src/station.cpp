@@ -8,6 +8,7 @@
 /** @file station.cpp Implementation of the station base class. */
 
 #include "stdafx.h"
+#include "portal/stellar_network.h"
 #include "portal/production_chain.h"
 #include "portal/logistics_hub.h"
 #include "core/flatset_type.hpp"
@@ -96,6 +97,7 @@ Station::~Station()
 		return;
 	}
 
+	StellarNetwork::RemoveSupplyStation(this->index);
 	ProductionChainManager::RemoveForStation(this->index);
 	LogisticsHubManager::RemoveForStation(this->index);
 

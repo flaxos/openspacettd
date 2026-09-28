@@ -8,6 +8,7 @@
 /** @file vehicle.cpp Base implementations of all vehicles. */
 
 #include "stdafx.h"
+#include "portal/stellar_network.h"
 #include "error.h"
 #include "roadveh.h"
 #include "ship.h"
@@ -907,6 +908,8 @@ void Vehicle::PreDestructor()
 
 Vehicle::~Vehicle()
 {
+	StellarNetwork::ReleaseTrain(this->index);
+	if (!CleaningPool()) CloseWindowById(WindowClass::UniverseDestinations, this->index);
 	if (CleaningPool()) {
 		this->cargo.OnCleanPool();
 		return;

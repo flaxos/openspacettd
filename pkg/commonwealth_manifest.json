@@ -34,11 +34,32 @@
       "sha256": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
       "source": "pkg/commonwealth_rail/commonwealth_rail.nml",
       "version": 3
+    },
+    {
+      "bytes": 467,
+      "grfid": "OST\\u0005",
+      "grfid_hex": "0554534f",
+      "md5": "c1c6370d61ca39d19191d10ca807f791",
+      "name": "openspacettd_equipment_v1.grf",
+      "sha256": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21",
+      "source": "pkg/commonwealth_equipment/commonwealth_equipment.nml",
+      "version": 1
     }
   ],
   "compiler": {
     "name": "nmlc",
     "version": "0.9.0"
+  },
+  "equipment_cargo_labels": [
+    "MACH"
+  ],
+  "equipment_wagon_refits": {
+    "0x30": [
+      "MACH",
+      "STEL",
+      "WIRE",
+      "CHIP"
+    ]
   },
   "industry_local_ids": [
     "0x10",

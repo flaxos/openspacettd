@@ -1,0 +1,21 @@
+{
+  "fixture_version": 1,
+  "passed": true,
+  "binary_sha256": "e71b4883cd0f93e90461bcc2c9eba149a322c310a59b97e24cbf248fc66870e5",
+  "pack_sha256": {
+    "industry": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
+    "rail": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87"
+  },
+  "reload_equal": true,
+  "blocked_route_conserved": true,
+  "post_reload_deliveries": 3,
+  "artifacts": {
+    "completed.sav": "15b9728fbcbe6b90c81349f1b7d12d84990590260c7babb8df02cefed768df73",
+    "mid-route.sav": "e0b18ec408c06faa7f4f34d05365ed0a3e3ab4586a887da7cad065a7f2360dca",
+    "operational.sav": "798ef170b637354ba82336c082fc04ce3e198bc02a7d4e8dcebce0922c448c5b",
+    "construction-ready.sav": "7aa7cec1e86a99a9ab373d604c724b861de21787cc066390da22f9b871021682"
+  },
+  "advance_count": 61,
+  "full_evidence": "classic-economy.full.json.gz",
+  "full_evidence_uncompressed_sha256": "d50531aac85594ea9ae2e21f637822d3166bd921dd3e31f09ecf91e887803c57"
+}

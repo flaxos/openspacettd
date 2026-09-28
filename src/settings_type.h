@@ -444,6 +444,7 @@ struct NetworkSettings {
 
 /** Settings related to the creation of games. */
 struct GameCreationSettings {
+	bool cst_sector; ///< Authored seven-world CST start, persisted through STLR.
 	bool player_built_economy; ///< New maps use surveyed primary sites. Saved in RSRC.
 	IndustryDensity resource_density; ///< Starter primary industry density in player-built maps.
 	uint32_t generation_seed; ///< noise seed for world generation

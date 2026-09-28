@@ -8,6 +8,7 @@
 /** @file logistics_hub.cpp Implementation of dedicated company logistics hub and warehouse buffering. */
 
 #include "../stdafx.h"
+#include "stellar_network.h"
 #include "logistics_hub.h"
 #include "company_stockpile.h"
 #include "planet_manager.h"
@@ -189,7 +190,8 @@ bool LogisticsHubManager::DepositToStockpile(TileIndex tile, CompanyID company, 
 	std::lock_guard<std::mutex> lock(_hub_mutex);
 	for (auto &[id, hub] : _logistics_hubs) {
 		if (hub.tile == tile && hub.company_id == company && ValidateForStationUnlocked(hub)) {
-			StockpileManager::AddCargo(hub.world_id, company, cargo, amount);
+			uint32_t reserved = StellarNetwork::ReceiveDelivery(hub.station_id, company, cargo, amount);
+			StockpileManager::AddCargo(hub.world_id, company, cargo, amount - reserved);
 			hub.total_deposited += amount;
 			return true;
 		}

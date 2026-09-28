@@ -6,6 +6,7 @@
 /** @file federation_cmd.cpp Federation inter-server transfer commands and coordinator implementation. */
 
 #include "../stdafx.h"
+#include "universe_network.h"
 #include "federation_cmd.h"
 #include "authority_transport.h"
 #include "authority_request_queue.h"
@@ -58,12 +59,15 @@ bool FederationTransferManager::IsTransportQuiescing()
 
 size_t FederationTransferManager::PendingAuthorityRequests()
 {
-	return _network_authority_requests.PendingCount();
+	return _network_authority_requests.PendingCount() + UniverseNetwork::PendingRequests();
 }
 
 void FederationTransferManager::DrainCheckpointTransport()
 {
-	if (_networking && _network_server && IsTransportQuiescing()) PollNetworkFederation(0);
+	if (_networking && _network_server && IsTransportQuiescing()) {
+		PollNetworkFederation(0);
+		UniverseNetwork::Tick(0);
+	}
 }
 
 void FederationTransferManager::SetAuthorityUrl(std::string url)
@@ -437,6 +441,7 @@ size_t FederationTransferManager::ProcessIncomingTransfers(WorldID local_world, 
 
 void FederationTransferManager::OnGameTick(uint64_t current_tick)
 {
+	UniverseNetwork::Tick(current_tick);
 	if (_networking) {
 		if (_network_server && (current_tick % 10) == 0) PollNetworkFederation(current_tick);
 		return;

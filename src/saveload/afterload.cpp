@@ -8,6 +8,8 @@
 /** @file afterload.cpp Code updating data after game load. */
 
 #include "../stdafx.h"
+#include "../portal/stellar_network.h"
+#include "../portal/universe_network.h"
 #include "../portal/commonwealth_slice.h"
 #include "../portal/logistics_hub.h"
 #include "../void_map.h"
@@ -3363,6 +3365,9 @@ bool AfterLoadGame()
 	Station::RecomputeCatchmentForAll();
 	LogisticsHubManager::ValidateAfterLoad();
 	ResourceSiteManager::ValidateAfterLoad();
+	StellarNetwork::ValidateAfterLoad();
+	UniverseNetwork::ValidateAfterLoad();
+	if (!RemoteGateProjects::ValidateAfterLoad()) SlErrorCorrupt("Invalid remote gate project references");
 
 	/* Station acceptance is some kind of cache */
 	if (IsSavegameVersionBefore(SaveLoadVersion::TownAcceptance)) {

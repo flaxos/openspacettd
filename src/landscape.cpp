@@ -10,6 +10,8 @@
 /** @defgroup SnowLineGroup Snowline functions and data structures */
 
 #include "stdafx.h"
+#include "portal/planet_manager.h"
+#include "portal/stellar_network.h"
 #include "heightmap.h"
 #include "clear_map.h"
 #include "spritecache.h"
@@ -685,6 +687,8 @@ bool IsMapSurroundedByWater()
  */
 CommandCost CmdLandscapeClear(DoCommandFlags flags, TileIndex tile)
 {
+	CommandCost placement = StellarNetwork::Enabled() ? PlanetManager::CheckConstructionPlacement(tile) : CommandCost();
+	if (placement.Failed()) return placement;
 	CommandCost cost(ExpensesType::Construction);
 	bool do_clear = false;
 	/* Test for stuff which results in water when cleared. Then add the cost to also clear the water. */

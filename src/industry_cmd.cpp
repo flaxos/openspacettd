@@ -59,6 +59,7 @@
 #include "table/build_industry.h"
 
 #include "portal/resource_sites.h"
+#include "portal/stellar_network.h"
 
 #include "safeguards.h"
 
@@ -2127,6 +2128,8 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 /** Generate undeveloped sites using the same native terrain and content checks as construction. */
 void GenerateResourceSites(uint target)
 {
+	ResourceSiteManager::SetGeneratingSites(true);
+	struct ProbeScope { ~ProbeScope() { ResourceSiteManager::SetGeneratingSites(false); } } probe_scope;
 	AutoRestoreBackup cur_company(_current_company, OWNER_NONE);
 	std::vector<std::pair<IndustryType, uint>> types;
 	uint total_weight = 0;
@@ -2392,6 +2395,7 @@ CommandCost CmdIndustrySetText(DoCommandFlags flags, IndustryID ind_id, const En
  */
 static Industry *CreateNewIndustry(TileIndex tile, IndustryType type, IndustryAvailabilityCallType creation_type)
 {
+	if (_generating_world && StellarNetwork::Enabled() && !ResourceSiteManager::IsPrimary(type) && Industry::GetIndustryTypeCount(type) >= 1) return nullptr;
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 
 	uint32_t seed = Random();
@@ -2415,7 +2419,7 @@ static uint32_t GetScaledIndustryGenerationProbability(IndustryType it, std::opt
 	const IndustrySpec *ind_spc = GetIndustrySpec(it);
 	if (water.has_value() && ind_spc->behaviour.Test(IndustryBehaviour::BuiltOnWater) != *water) return 0;
 
-	if (ResourceSiteManager::Enabled() && (!ResourceSiteManager::IsPrimary(it) || ResourceSiteManager::RequiredTech(it) != TECH_NONE)) {
+	if (ResourceSiteManager::Enabled() && ((!StellarNetwork::Enabled() && !ResourceSiteManager::IsPrimary(it)) || ResourceSiteManager::RequiredTech(it) != TECH_NONE)) {
 		*force_at_least_one = false;
 		return 0;
 	}

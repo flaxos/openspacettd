@@ -1,4 +1,5 @@
 add_test_files(
+    test_stellar_network.cpp
     test_resource_sites.cpp
     alternating_iterator.cpp
     bitmath_func.cpp
@@ -100,3 +101,9 @@ add_test(NAME WP09_GUI_establishment_and_process_reload
         -P "${CMAKE_CURRENT_SOURCE_DIR}/wp09_gui_persistence.cmake")
 set_tests_properties(WP09_GUI_establishment_and_process_reload PROPERTIES
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" TIMEOUT 100 LABELS "integration;requires-baseset")
+
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME Stellar_directory_authentication_and_restart
+        COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_stellar_directory.py")
+endif()

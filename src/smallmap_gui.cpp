@@ -8,6 +8,8 @@
 /** @file smallmap_gui.cpp GUI that shows a small map of the world with metadata like owner or height. */
 
 #include "stdafx.h"
+#include "portal/stellar_network.h"
+#include "portal/planet_manager.h"
 #include "core/backup_type.hpp"
 #include "clear_map.h"
 #include "industry.h"
@@ -1355,6 +1357,7 @@ protected:
 	 */
 	uint32_t GetTileColours(const TileArea &ta) const
 	{
+		for (TileIndex ti : ta) if (!StellarNetwork::WorldAccessible(PlanetManager::GetTileWorld(ti))) return MKCOLOUR_XXXX(PC_BLACK);
 		int importance = 0;
 		TileIndex tile = INVALID_TILE; // Position of the most important tile.
 		TileType et = TileType::Void;         // Effective tile type at that position.

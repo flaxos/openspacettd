@@ -1,5 +1,42 @@
 # OpenSpaceTTD Known Limitations
 
+## Current CST expansion limits — 28 September 2026
+
+The new implementation on `codex/cst-star-map-expansion` is based on main
+`8464e9374a`. Automated evidence and exact checks are retained in the
+[stellar-network audit](audit/2026-09-28/stellar-network/README.md).
+
+- Human star-map layout, equipment logistics and cross-host Visit acceptance are
+  **Pending**. English custom panels contain literal text; localization and
+  nondefault UI-scale readability are not proven by native button tests.
+- Each server still simulates one contiguous map with immutable logical regions.
+  The lore catalogue is metadata; the new preset instantiates seven selected
+  worlds. It does not load arbitrary catalogue worlds or resize existing saves.
+- Hosts need matching content, disjoint generated world IDs, registration secrets
+  and explicit global-company mappings before play. Native server/company
+  passwords still apply. Treasury balances remain host-local.
+- Remote projects resume idempotently, but recovery is accepted only from the
+  latest coordinated all-host + authority checkpoint. Independent save rollback
+  and arbitrary cluster power-loss recovery are not claimed.
+- Committed remote projects cannot cancel and remote links cannot yet be
+  demolished. Access/tolls are managed at the commissioning end. Cross-host
+  acquisitions/mergers and orphan-project administration need a separate lifecycle
+  workflow. Do not treat local company ownership as a claim to a whole world.
+- Remote schedules support the verified station load/unload route and explicit
+  gate pins. Shared order pools do not span hosts. General conditional/timetable/
+  depot-refit portability is not part of this acceptance. Directory location
+  updates lag train movement; a follow action may need retrying.
+- Research distances and equipment quantities are initial game balance. Raw
+  sites obey terrain/biome restrictions; each world is not guaranteed each
+  resource. Colonisation, development and prospecting remain separate gates.
+- Three-host repeated freight and reload tests do not establish large-universe
+  performance, every branch topology, or full remote-project outage coverage.
+
+See [setup and implementation boundaries](CST_STELLAR_NETWORK.md). Historical
+limitations below retain their dates; the 27/28 September evidence supersedes
+older blanket claims that natural scheduled federation is absent.
+
+
 **Date:** 2026-09-22
 **Verified at:** HEAD `a6cf83e6a6`
 

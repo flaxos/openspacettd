@@ -53,6 +53,7 @@ add_files(
     smallmap_widget.h
     station_widget.h
     statusbar_widget.h
+    stellar_widget.h
     story_widget.h
     subsidy_widget.h
     terraform_widget.h

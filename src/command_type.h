@@ -415,6 +415,14 @@ enum class Commands : uint8_t {
 	MaterializeFederationArrival, ///< replicate physical arrival from a staged snapshot
 	ConfirmFederationArrival, ///< replicate authority receipt confirmation
 	SurveyResources, ///< survey a resource area for the current company
+	MapUniverseCompany, ///< administrator maps a fresh local company into the registered universe
+	EnsureUniverseIdentities, ///< advertise stable local identities
+	UpdateUniverseRecord, ///< replicate authority directory data
+	AddUniverseOrder, ///< add a globally identified remote station order
+	RemoteGateProject,
+	StartGateProject, ///< reserve and supply a stellar gate connection
+	OperateGateProject, ///< commission or cancel a gate project
+	SetStellarGateAccess, ///< configure player gateway access
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

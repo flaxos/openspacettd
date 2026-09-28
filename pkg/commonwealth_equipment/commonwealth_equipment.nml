@@ -1,0 +1,49 @@
+/* OpenSpaceTTD CST equipment add-on. GPL version 2. */
+grf {
+ grfid: "OST\05";
+ name: string(STR_GRF_NAME);
+ desc: string(STR_GRF_DESC);
+ version: 1;
+ min_compatible_version: 1;
+}
+cargotable { MACH, STEL, WIRE, CHIP }
+item(FEAT_CARGOS, cargo_mach, 0x1D) {
+ property {
+  is_freight: 1;
+  cargo_label: "MACH";
+  number: 29;
+  type_name: string(STR_CARGO_NAME);
+  unit_name: string(STR_CARGO_NAME);
+  units_of_cargo: 0x0050;
+  items_of_cargo: string(STR_CARGO_QUANTITY);
+  type_abbreviation: string(STR_CARGO_ABBR);
+  sprite: 0x1AC2;
+  weight: 1 ton;
+  price_factor: 180;
+  penalty_lowerbound: 20;
+  single_penalty_length: 80;
+  cargo_classes: bitmask(CC_PIECE_GOODS);
+  town_growth_effect: TOWNGROWTH_NONE;
+ }
+}
+
+/* Native sprites keep this additive pack independent of existing GRF hashes. */
+item(FEAT_TRAINS, cst_equipment_car, 0x30) {
+ property {
+  name: string(STR_EQUIPMENT_CAR);
+  climates_available: ALL_CLIMATES;
+  introduction_date: date(0, 1, 1);
+  model_life: VEHICLE_NEVER_EXPIRES;
+  vehicle_life: 40;
+  power: 0 hp;
+  cost_factor: 16;
+  running_cost_factor: 10;
+  speed: 250 km/h;
+  weight: 24 ton;
+  default_cargo_type: MACH;
+  refittable_cargo_classes: 0;
+  cargo_allow_refit: [MACH, STEL, WIRE, CHIP];
+  cargo_capacity: 40;
+  track_type: RAIL;
+ }
+}

@@ -5,6 +5,8 @@ Centralized transaction coordinator, player authentication, corporate registry,
 dynamic world discovery directory, and commodity conservation ledger.
 """
 
+from stellar_directory import StellarDirectory
+
 import argparse
 import base64
 import hashlib
@@ -51,6 +53,7 @@ class UniverseAuthority:
         self.next_transfer_seq = 1
         self.next_player_seq = 1
         self.next_charter_seq = 1
+        self.stellar = StellarDirectory(os.environ.get("OPENTTD_UNIVERSE_HOST_TOKEN", ""))
         self.worlds = {}
         self.routes = {}
         self.transfers = {}
@@ -90,6 +93,7 @@ class UniverseAuthority:
 
     def export_state(self):
         return {
+            "stellar": self.stellar.export_state(),
             "next_transfer_seq": self.next_transfer_seq,
             "next_player_seq": self.next_player_seq,
             "next_charter_seq": self.next_charter_seq,
@@ -110,6 +114,7 @@ class UniverseAuthority:
         }
 
     def import_state(self, state):
+        self.stellar.import_state(state.get("stellar", {}))
         self.next_transfer_seq = state.get("next_transfer_seq", 1)
         self.next_player_seq = state.get("next_player_seq", 1)
         self.next_charter_seq = state.get("next_charter_seq", 1)
@@ -1252,6 +1257,8 @@ class AuthorityHandler(BaseHTTPRequestHandler):
 
         if url.path in ("/health", "/status"):
             self._send_json(200, {"status": "ok", "worlds": len(AUTHORITY.worlds)})
+        elif url.path == "/universe/directory":
+            self._send_json(200, AUTHORITY.stellar.snapshot())
         elif url.path in ("/worlds", "/directory/worlds"):
             min_phase = int(qs.get("min_phase", [0])[0])
             prune = qs.get("prune", ["false"])[0].lower() in ("true", "1")
@@ -1337,7 +1344,21 @@ class AuthorityHandler(BaseHTTPRequestHandler):
         data = self._read_json()
 
         # Auth endpoints
-        if url.path == "/auth/register":
+        if url.path == "/universe/publish":
+            ok, res = AUTHORITY.stellar.publish(data)
+            if ok:
+                host = data["host"]
+                for world in host["worlds"]:
+                    AUTHORITY.update_heartbeat({"world_id": world["id"], "name": world["name"], "address": host["address"], "manifest_token": host["manifest"]})
+                    AUTHORITY.worlds[int(world["id"])]["manifest_token"] = host["manifest"]
+                for gate in host["gates"]:
+                    if any(r["source_world"] == gate["world"] and r["source_gate"] == gate["id"] and r["dest_world"] == gate["destination"] and r["dest_gate"] == gate["dest_gate"] for r in AUTHORITY.routes.values()):
+                        continue
+                    route_id = max(AUTHORITY.routes, default=0) + 1
+                    AUTHORITY.register_route({"route_id": route_id, "source_world": gate["world"], "source_gate": gate["id"], "dest_world": gate["destination"], "dest_gate": gate["dest_gate"], "transit_delay_sec": 1})
+                AUTHORITY._maybe_auto_save()
+            self._send_json(200 if ok else 400, res if ok else {"error": res})
+        elif url.path == "/auth/register":
             ok, res = AUTHORITY.register_player(data)
             self._send_json(200 if ok else 400, res if ok else {"error": res})
         elif url.path == "/auth/login":

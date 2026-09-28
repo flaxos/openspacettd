@@ -6,6 +6,7 @@
 /** @file consist_materializer.cpp Engine functions for consist despawn and materialization. */
 
 #include "../stdafx.h"
+#include "universe_network.h"
 #include "consist_materializer.h"
 #include "federation_cargo.h"
 #include "consist_snapshot.h"
@@ -276,6 +277,12 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 	}
 	for (const auto &global_order : snapshot.orders) {
 		auto destination = FederationIdentityRegistry::ResolveOrderDestination(global_order, exit_world);
+		if (!destination && global_order.type == OrderDestinationType::Station) {
+			if (auto proxy = UniverseNetwork::EnsureStation(global_order.station_id)) destination = DestinationID{*proxy};
+		}
+		if (!destination && global_order.type == OrderDestinationType::PortalGate) {
+			if (auto proxy = UniverseNetwork::EnsureGate(global_order)) destination = DestinationID{*proxy};
+		}
 		if (!destination) {
 			result.error_message = "No explicit local mapping for a scheduled destination";
 			return result;
@@ -474,16 +481,16 @@ ConsistMaterializeResult ConsistMaterializer::MaterializeFromTransfer(
 		if (!restored_orders.empty()) {
 			front->orders = OrderList::Create(std::move(restored_orders), front);
 
-			/* Advance order index if the previous order was targeting the origin world */
-			uint16_t active_idx = 0;
-			if (snapshot.current_order_index < snapshot.orders.size()) {
-				const auto &orig_order = snapshot.orders[snapshot.current_order_index];
-				if (orig_order.target_world == exit_world) {
-					active_idx = snapshot.current_order_index;
-				} else {
-					active_idx = static_cast<uint16_t>((snapshot.current_order_index + 1) % snapshot.orders.size());
-				}
-			}
+			/* Current envelopes preserve the scheduled destination across intermediate hosts.
+             * Legacy envelopes without station flags may describe a completed origin leg. */
+            uint16_t active_idx = snapshot.current_order_index;
+            if (active_idx < snapshot.orders.size() && snapshot.station_order_flags.empty()) {
+                const auto &order = snapshot.orders[active_idx];
+                const auto *arrival = PortalRegistry::GetInterServerPortal(exit_tile);
+                if (arrival && order.type != OrderDestinationType::PortalGate && order.target_world == arrival->remote_world && order.target_world != exit_world) {
+                    active_idx = (active_idx + 1) % snapshot.orders.size();
+                }
+            }
 
 			if (active_idx >= front->GetNumOrders()) active_idx = 0;
 			front->cur_real_order_index = active_idx;
