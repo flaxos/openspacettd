@@ -1,4 +1,5 @@
 add_test_files(
+    test_resource_sites.cpp
     alternating_iterator.cpp
     bitmath_func.cpp
     enum_over_optimisation.cpp

@@ -346,3 +346,27 @@ provenance. Recovery uses only the latest coordinated set; arbitrary crash
 recovery and old/mixed-save rollback are outside this acceptance boundary.
 
 See [acceptance method and evidence](../docs/FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).
+
+## Player-built resource economy — 28 September 2026
+
+Implementation: new-game default, basic starter industries, hidden primary sites,
+paid company surveys, Materials II/III unlocks, industry placement, script API and
+save/load are integrated. Existing saves/demo configs retain Classic rules.
+
+Human UAT: **Pending**. Use a new Player-built game at the player's language/UI
+scale. Open Industries → Fund new industry → Survey / discovered sites; check
+quoted price and 16×16 preview, survey an empty and a productive area, inspect the
+site list/blue and red outlines, build a basic primary and processor, research
+Materials II/III, and build newly revealed resources. Confirm ordinary production,
+transport, a saved/reloaded discovery, and another company's independent survey.
+Check long industry/world names, resized windows and placement errors.
+
+Automated verification: incremental build; **447 unit cases / 66,829 assertions**;
+**458/458 CTests**; file-description and unused-string linters; whitespace checks.
+Native fresh generation, two client map joins, cold reload, private command
+replication, competing construction and the Classic WP-11 economy regression pass.
+The resource fixture passes every service's repeated delivery, a 24-month soak,
+conservation, reload, starvation/recovery, fabrication and research consumption.
+Its genuine growth check starts from the cold map; it does not claim the original
+showcase's separate three-houses-in-ten-minutes presentation target.
+[Retained machine evidence](../docs/audit/2026-09-28/resource-economy/README.md). [Design and reproduction](../docs/PLAYER_BUILT_RESOURCE_ECONOMY.md).

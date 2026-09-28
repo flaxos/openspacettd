@@ -768,6 +768,7 @@ enum class WindowClass : uint16_t {
 	CorporateHQ,
 
 	/** Empire-wide industrial processing facilities and supply chain dashboard. */
+	ResourceSurvey, ///< Company resource survey and discovered sites.
 	EmpireFacilities,
 
 	/** Narrative Prompt-to-Savegame procedural scenario generator window. */

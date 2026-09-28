@@ -17,6 +17,8 @@
 #include "../../newgrf_industries.h"
 #include "../../industry_cmd.h"
 
+#include "../../portal/resource_sites.h"
+
 #include "../../safeguards.h"
 
 /* static */ bool ScriptIndustryType::IsValidIndustryType(IndustryType industry_type)
@@ -51,7 +53,7 @@
 /* static */ Money ScriptIndustryType::GetConstructionCost(IndustryType industry_type)
 {
 	if (!IsValidIndustryType(industry_type)) return -1;
-	if (::GetIndustrySpec(industry_type)->IsRawIndustry() && _settings_game.construction.raw_industry_construction == 0) return -1;
+	if (::GetIndustrySpec(industry_type)->IsRawIndustry() && !ResourceSiteManager::Enabled() && _settings_game.construction.raw_industry_construction == 0) return -1;
 
 	return ::GetIndustrySpec(industry_type)->GetConstructionCost();
 }
@@ -101,7 +103,7 @@
 	if (!::GetIndustrySpec(industry_type)->IsRawIndustry()) return true;
 
 	/* raw_industry_construction == 1 means "Build as other industries" */
-	return _settings_game.construction.raw_industry_construction == 1;
+	return ResourceSiteManager::Enabled() ? ResourceSiteManager::CanDiscover(ScriptObject::GetCompany(), industry_type) : _settings_game.construction.raw_industry_construction == 1;
 }
 
 /* static */ bool ScriptIndustryType::CanProspectIndustry(IndustryType industry_type)
@@ -113,7 +115,7 @@
 	if (::GetIndustryProbabilityCallback(industry_type, deity ? IndustryAvailabilityCallType::RandomCreation : IndustryAvailabilityCallType::UserCreation, 1) == 0) return false;
 
 	/* raw_industry_construction == 2 means "prospect" */
-	return deity || _settings_game.construction.raw_industry_construction == 2;
+	return !ResourceSiteManager::Enabled() && (deity || _settings_game.construction.raw_industry_construction == 2);
 }
 
 /* static */ bool ScriptIndustryType::BuildIndustry(IndustryType industry_type, TileIndex tile)
@@ -162,4 +164,22 @@
 	EnforcePrecondition(IT_INVALID, IsInsideBS(grf_local_id, 0x00, NUM_INDUSTRYTYPES_PER_GRF));
 
 	return _industry_mngr.GetID(grf_local_id, UnflattenNewGRFLabel<GrfID>(std::byteswap(static_cast<uint32_t>(grfid))));
+}
+
+/* static */ bool ScriptIndustryType::SurveyResources(TileIndex tile)
+{
+	EnforceCompanyModeValid(false);
+	EnforcePrecondition(false, ScriptMap::IsValidTile(tile));
+	return ScriptObject::Command<Commands::SurveyResources>::Do(tile);
+}
+/* static */ ScriptList *ScriptIndustryType::GetDiscoveredResourceSites(IndustryType industry_type)
+{
+	ScriptList *list = new ScriptList();
+	if (!ResourceSiteManager::Enabled() || !IsValidIndustryType(industry_type)) return list;
+	for (const auto &site : ResourceSiteManager::Sites()) {
+		if (ResourceSiteManager::ResolveType(site) == industry_type && ResourceSiteManager::Discovered(ScriptObject::GetCompany(), site)) {
+			list->AddItem(site.anchor.base(), Industry::IsValidID(site.occupant) ? 1 : 0);
+		}
+	}
+	return list;
 }

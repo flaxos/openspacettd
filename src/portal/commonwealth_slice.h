@@ -11,6 +11,7 @@
 
 /** Optional observer counters used by the offline WP11 economic slice harness. */
 struct CommonwealthSliceAudit {
+	std::array<uint64_t, NUM_CARGO> processing_bonus{}; ///< Extra output from research, observed after per-month rounding.
 	std::array<uint64_t, NUM_CARGO> produced{}; ///< Native production released by cargo.
 	std::array<uint64_t, NUM_CARGO> unallocated{}; ///< Produced cargo not allocated to a station.
 	std::array<uint64_t, NUM_CARGO> discarded{}; ///< Station cargo removed by truncation or rating loss.

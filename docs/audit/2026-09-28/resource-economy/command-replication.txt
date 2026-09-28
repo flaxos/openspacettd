@@ -1,0 +1,8 @@
+N: denied; frame state company:0:10000000;company:1:10000000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;site:1:1950:65535;industries:0
+Q: accepted; frame state company:0:9999000;company:1:10000000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;survey:0:1950;site:1:1950:65535;industries:0
+N: denied; frame state company:0:9999000;company:1:10000000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;survey:0:1950;site:1:1950:65535;industries:0
+J: accepted; frame state company:0:9999000;company:1:9999000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;survey:0:1950;survey:1:1950;site:1:1950:65535;industries:0
+M: accepted; frame state company:0:9916969;company:1:9999000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;survey:0:1950;survey:1:1950;site:1:1950:0;industries:1
+N: denied; frame state company:0:9916969;company:1:9999000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;survey:0:1950;survey:1:1950;site:1:1950:0;industries:1
+save/reload: company:0:9916969;company:1:9999000;hq:0:1:Authority HQ;world:0:2:10000:Authority world:4294967295;directory:0:2:Authority world;towns:1;survey:0:1950;survey:1:1950;site:1:1950:0;industries:1
+WP-05 TCP loopback: native server queue and two independent client queues, denial, save/reload equality PASS

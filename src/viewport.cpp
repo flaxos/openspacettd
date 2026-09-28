@@ -101,6 +101,8 @@
 #include "table/strings.h"
 #include "table/string_colours.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 Point _tile_fract_coords;
@@ -1120,6 +1122,12 @@ static void HighlightTownLocalAuthorityTiles(const TileInfo *ti)
  */
 static void DrawTileSelection(const TileInfo *ti)
 {
+	switch (GetResourceOverlay(ti->tile)) {
+		case 1: DrawTileSelectionRect(ti, PALETTE_SEL_TILE_BLUE); break;
+		case 2: DrawTileSelectionRect(ti, PALETTE_SEL_TILE_RED); break;
+	}
+
+
 	/* Highlight tiles inside local authority of selected towns. */
 	HighlightTownLocalAuthorityTiles(ti);
 

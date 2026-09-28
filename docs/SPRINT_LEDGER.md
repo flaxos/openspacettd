@@ -253,3 +253,17 @@ provenance. Recovery uses only the latest coordinated set; arbitrary crash
 recovery and old/mixed-save rollback are outside this acceptance boundary.
 
 See [acceptance method and evidence](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md).
+
+## Player-built resource economy — 28 September 2026
+
+Feature branch `codex/player-built-resource-surveys` implements the approved
+player-built default, basic primary starters, hidden sites for primary industries,
+paid surveys, company knowledge, Materials research gating, GUI/script construction
+and `RSRC` persistence. Native production, station facilities and fabrication are
+retained. Existing-save conversion, depletion, claims and survey trains are excluded.
+
+Automated verification: **447 unit cases / 66,829 assertions, 458/458 CTests**;
+linters, fresh generation/two-client joins/cold reload, native command replication,
+24-month connected resource economy and Classic WP-11 regression pass.
+[Retained evidence](audit/2026-09-28/resource-economy/README.md). Human graphical UAT is **Pending**, not implied by passing
+engine tests. [Specification and reproduction](PLAYER_BUILT_RESOURCE_ECONOMY.md).

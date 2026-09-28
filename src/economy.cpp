@@ -72,6 +72,8 @@
 #include "table/strings.h"
 #include "table/pricebase.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 
@@ -333,6 +335,7 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
  */
 void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 {
+	ResourceSiteManager::ChangeCompany(old_owner, new_owner);
 	/* We need to set _current_company to old_owner before we try to move
 	 * the client. This is needed as it needs to know whether "you" really
 	 * are the current local company. */

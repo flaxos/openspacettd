@@ -55,6 +55,8 @@
 #include "../waypoint_cmd.h"
 #include "../script/script_cmd.h"
 
+#include "../portal/resource_sites.h"
+
 #include "../safeguards.h"
 
 /** Typed list of all possible callbacks. */

@@ -10,6 +10,10 @@
 #include "../network/network_internal.h"
 #include "../network/core/packet.h"
 #include "../portal/portal_cmd.h"
+#include "../portal/resource_sites.h"
+#include "../industry.h"
+#include "../industry_cmd.h"
+#include "../economy_base.h"
 #include "../portal/corporate_hq.h"
 #include "mock_environment.h"
 
@@ -75,6 +79,13 @@ void WriteMessage(int fd, char op, std::span<const uint8_t> data = {})
 void WriteState(int fd)
 {
 	std::string state = CommandAuthorityState();
+	if (ResourceSiteManager::Enabled()) {
+		for (const auto &[company, surveys] : ResourceSiteManager::Surveys()) {
+			for (TileIndex tile : surveys) state += fmt::format(";survey:{}:{}", company.base(), tile.base());
+		}
+		for (const auto &site : ResourceSiteManager::Sites()) state += fmt::format(";site:{}:{}:{}", site.id, site.anchor.base(), site.occupant.base());
+		state += fmt::format(";industries:{}", Industry::GetNumItems());
+	}
 	WriteMessage(fd, 'S', std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(state.data()), state.size()));
 }
 
@@ -121,6 +132,16 @@ CommandPacket MakeCommand(char op)
 	cp.err_msg = StringID{0};
 	cp.callback = nullptr;
 	switch (op) {
+		case 'Q': case 'J':
+			cp.company = CompanyID{static_cast<uint8_t>(op == 'J' ? 1 : 0)};
+			cp.cmd = Commands::SurveyResources;
+			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(TileXY(30, 30)));
+			break;
+		case 'M': case 'N':
+			cp.company = CompanyID{static_cast<uint8_t>(op == 'N' ? 1 : 0)};
+			cp.cmd = Commands::BuildIndustry;
+			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(TileXY(30, 30), IndustryType{0}, uint32_t{0}, true, uint32_t{1}));
+			break;
 		case 'U':
 			cp.cmd = Commands::UpgradeCorporateHQ;
 			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(CompanyID{0}, CorporateHQTier::PlanetaryHQ));
@@ -162,7 +183,15 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 	int fd = std::atoi(fd_env);
 	REQUIRE(fd >= 3);
 	(void)MockEnvironment::Instance();
-	SetupCommandAuthorityWorld(WorldPhase::Phase4_Expansion, 10000);
+	const bool resources = std::getenv("OSTTD_RESOURCE_LOOPBACK") != nullptr;
+	SetupCommandAuthorityWorld(resources ? WorldPhase::Phase2_Developed : WorldPhase::Phase4_Expansion, 10000);
+	ResourceSiteManager::Reset();
+	if (resources) {
+		ResetIndustries();
+		ResourceSiteManager::SetEnabled(true);
+		_price[Price::BuildIndustryRaw] = 100000;
+		REQUIRE(ResourceSiteManager::AddSite(TileXY(30, 30), IndustryType{0}, 16, 16) != 0);
+	}
 	_networking = true;
 	const char *role = std::getenv("OSTTD_AUTHORITY_LOOPBACK_ROLE");
 	const bool server = role != nullptr && std::string_view(role) == "server";
@@ -205,7 +234,7 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 			WriteState(fd);
 			continue;
 		}
-		if (op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V') {
+		if (op == 'Q' || op == 'J' || op == 'M' || op == 'N' || op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V') {
 			auto bytes = WirePacket(handler, MakeCommand(op));
 			WriteMessage(fd, 'K', bytes);
 			continue;

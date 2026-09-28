@@ -1432,7 +1432,7 @@ STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :Maximum tunnel 
 STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH_HELPTEXT                   :Maximum length for building tunnels
 
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :Manual primary industry construction method: {STRING2}
-STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_HELPTEXT    :Method of funding a primary industry. 'none' means it is not possible to fund any, 'prospecting' means funding is possible, but construction occurs in a random spot on the map and may as well fail, 'as other industries' means raw industries can be constructed by companies like processing industries in any position they like
+STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_HELPTEXT    :Classic mode only; Player-built mode requires surveyed sites. Method of funding a primary industry. 'none' means it is not possible to fund any, 'prospecting' means funding is possible, but construction occurs in a random spot on the map and may as well fail, 'as other industries' means raw industries can be constructed by companies like processing industries in any position they like
 ###length 3
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :None
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :As other industries
@@ -6402,3 +6402,28 @@ STR_QUANTITY_COMMONWEALTH_POLY                                  :{WEIGHT_LONG} o
 STR_QUANTITY_COMMONWEALTH_BCRY                                  :{COMMA}{NBSP}blank data crystals
 STR_QUANTITY_COMMONWEALTH_QCRY                                  :{COMMA}{NBSP}quantum data crystals
 STR_QUANTITY_COMMONWEALTH_CCRY                                  :{COMMA}{NBSP}consumer data crystals
+
+# Resource surveying
+STR_RESOURCE_MODE_SETTING                                          :Player-built economy for new games: {STRING2}
+STR_RESOURCE_MODE_HELP                                             :Player-built: generate basic primary industries and hidden resource sites. Survey before building additional primary industries; build processing industries yourself. No spontaneous openings. Classic retains the original industry rules.
+STR_RESOURCE_DENSITY_SETTING                                       :Starter primary industry density: {STRING2}
+STR_RESOURCE_DENSITY_HELP                                          :Initial basic primary industries in Player-built mode. Hidden resource sites are generated even with Funding only. No new industries open spontaneously.
+STR_RESOURCE_MODE_PLAYER                                           :{BLACK}Economy: Player-built
+STR_RESOURCE_MODE_CLASSIC                                          :{BLACK}Economy: Classic
+STR_RESOURCE_SURVEY_BOUNDARY                                       :Survey and industry areas must stay within one world and outside void space
+STR_RESOURCE_RESEARCH_REQUIRED                                     :Research Materials II for copper/silica, or Materials III for rare minerals
+STR_RESOURCE_NOT_SURVEYED                                          :Your company must survey this resource site first
+STR_RESOURCE_OCCUPIED                                              :This resource site already has an industry
+STR_RESOURCE_SITE_REQUIRED                                         :Build the entire primary industry inside a matching surveyed resource site
+STR_RESOURCE_OPEN                                                  :{BLACK}Survey / discovered sites
+STR_RESOURCE_CAPTION                                               :{WHITE}Resource surveys and discovered sites
+STR_RESOURCE_HELP                                                  :Survey an area, then select a discovered site and choose Build at site. Blue outlines are available sites; red outlines are occupied. Surveys do not reserve land.
+STR_RESOURCE_SURVEY                                                :{BLACK}Survey area
+STR_RESOURCE_GOTO                                                  :{BLACK}Go to site
+STR_RESOURCE_BUILD                                                 :{BLACK}Build at site
+STR_RESOURCE_INSTRUCTIONS                                          :{BLACK}Survey a 16 x 16 area for {CURRENCY_LONG}. Results are immediate; empty surveys still cost money. Fully surveyed areas are free to repeat.{}{BLACK}Materials II reveals copper and silica; Materials III reveals rare minerals, including in areas already surveyed. Select a site, then Build at site and click inside its outline.
+STR_RESOURCE_ROW                                                   :{STRING} - {RAW_STRING} ({NUM}, {NUM}) - {STRING}
+STR_RESOURCE_MAIN_WORLD                                            :Main world
+STR_RESOURCE_OCCUPIED_LABEL                                        :Occupied
+STR_RESOURCE_AVAILABLE                                             :Available
+STR_RESOURCE_SURVEY_FAILED                                         :Cannot survey this area

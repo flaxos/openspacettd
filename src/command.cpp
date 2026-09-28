@@ -64,6 +64,8 @@
 
 #include "table/strings.h"
 
+#include "portal/resource_sites.h"
+
 #include "safeguards.h"
 
 

@@ -32,6 +32,8 @@
 #include "../portal/prebuilt_trade.h"
 #include "../portal/universe_graph.h"
 
+#include "../portal/resource_sites.h"
+
 #include "../safeguards.h"
 
 /** Temporary storage for PlanetRegion serialization. */
@@ -1292,6 +1294,75 @@ struct ISPRChunkHandler : ChunkHandler {
 	}
 };
 
+/** A single named-table record in the resource-site and survey chunk. */
+struct SlResourceRecord {
+	uint8_t kind = 0; ///< 0 mode, 1 site, 2 survey.
+	uint8_t company = 0;
+	uint32_t id = 0;
+	uint32_t tile = 0;
+	uint16_t width = 0;
+	uint16_t height = 0;
+	uint32_t world = 0;
+	uint8_t grfid[4]{};
+	uint16_t local_id = 0;
+	uint16_t occupant = IndustryID::Invalid().base();
+};
+static const SaveLoad _resource_desc[] = {
+	SLE_VAR(SlResourceRecord, kind, VarTypes::U8),
+	SLE_VAR(SlResourceRecord, company, VarTypes::U8),
+	SLE_VAR(SlResourceRecord, id, VarTypes::U32),
+	SLE_VAR(SlResourceRecord, tile, VarTypes::U32),
+	SLE_VAR(SlResourceRecord, width, VarTypes::U16),
+	SLE_VAR(SlResourceRecord, height, VarTypes::U16),
+	SLE_VAR(SlResourceRecord, world, VarTypes::U32),
+	SLE_ARR(SlResourceRecord, grfid, VarTypes::U8, 4),
+	SLE_VAR(SlResourceRecord, local_id, VarTypes::U16),
+	SLE_VAR(SlResourceRecord, occupant, VarTypes::U16),
+};
+/** Old saves have no RSRC chunk and remain Classic after InitializeGame resets the manager. */
+struct RSRCChunkHandler : ChunkHandler {
+	RSRCChunkHandler() : ChunkHandler("RSRC", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_resource_desc);
+		int index = 0;
+		SlResourceRecord rec{};
+		rec.id = ResourceSiteManager::Enabled();
+		SlSetArrayIndex(index++);
+		SlObject(&rec, _resource_desc);
+		for (const auto &site : ResourceSiteManager::Sites()) {
+			rec = {};
+			rec.kind = 1; rec.id = site.id; rec.tile = site.anchor.base();
+			rec.width = site.width; rec.height = site.height; rec.world = site.world.base();
+			std::copy(site.grfid.begin(), site.grfid.end(), rec.grfid);
+			rec.local_id = site.local_id; rec.occupant = site.occupant.base();
+			SlSetArrayIndex(index++); SlObject(&rec, _resource_desc);
+		}
+		for (const auto &[company, surveys] : ResourceSiteManager::Surveys()) {
+			for (TileIndex anchor : surveys) {
+				rec = {}; rec.kind = 2; rec.company = company.base(); rec.tile = anchor.base();
+				SlSetArrayIndex(index++); SlObject(&rec, _resource_desc);
+			}
+		}
+	}
+	void Load() const override
+	{
+		ResourceSiteManager::Reset();
+		const auto slt = SlTableHeader(_resource_desc);
+		SlResourceRecord rec{};
+		while (SlIterateArray() != -1) {
+			rec = {}; SlObject(&rec, slt);
+			switch (rec.kind) {
+				case 0: ResourceSiteManager::SetEnabled(rec.id != 0); break;
+				case 1: ResourceSiteManager::RestoreSite({rec.id, TileIndex{rec.tile}, rec.width, rec.height,
+     WorldID{rec.world}, GrfID{rec.grfid}, rec.local_id, IndustryID{rec.occupant}}); break;
+				case 2: ResourceSiteManager::RestoreSurvey(CompanyID{rec.company}, TileIndex{rec.tile}); break;
+				default: SlErrorCorrupt("Invalid resource record kind");
+			}
+		}
+	}
+};
+
 /** Temporary storage for Commonwealth Tech Tree serialization (TECH). */
 struct SlTechRecord {
 	uint8_t kind;             ///< 0 = Company research state, 1 = Unlocked technology node
@@ -1630,6 +1701,7 @@ static const LHUBChunkHandler LHUB;
 static const CHQSChunkHandler CHQS;
 static const FABRChunkHandler FABR;
 static const ALLIChunkHandler ALLI;
+static const RSRCChunkHandler RSRC;
 static const TECHChunkHandler TECH;
 static const PRODChunkHandler PROD;
 static const LOREChunkHandler LORE;
@@ -1784,6 +1856,7 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	ALLI,
 	FJRN,
 	FTJR,
+	RSRC,
 	TECH,
 	PROD,
 	LORE,

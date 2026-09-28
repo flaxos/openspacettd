@@ -1,0 +1,219 @@
+{
+  "passed": true,
+  "binary_sha256": "77abc17fb89601622b8579de9fc116c350dccea70a51b1904143100555d42f1c",
+  "unit_cases": 447,
+  "unit_assertions": 66829,
+  "ctests": 458,
+  "human_visual_uat": "pending",
+  "generation": [
+    {
+      "name": "default",
+      "initial": {
+        "advanced": 0,
+        "industries": 77,
+        "player_built": true,
+        "processing": 0,
+        "sites": 363,
+        "survey_companies": 0,
+        "unoccupied_sites": 286
+      },
+      "reloaded": {
+        "advanced": 0,
+        "industries": 77,
+        "player_built": true,
+        "processing": 0,
+        "sites": 363,
+        "survey_companies": 0,
+        "unoccupied_sites": 286
+      },
+      "joined_clients": 2
+    },
+    {
+      "name": "funding-only",
+      "initial": {
+        "advanced": 0,
+        "industries": 0,
+        "player_built": true,
+        "processing": 0,
+        "sites": 6,
+        "survey_companies": 0,
+        "unoccupied_sites": 6
+      },
+      "reloaded": {
+        "advanced": 0,
+        "industries": 0,
+        "player_built": true,
+        "processing": 0,
+        "sites": 6,
+        "survey_companies": 0,
+        "unoccupied_sites": 6
+      },
+      "joined_clients": 0
+    },
+    {
+      "name": "classic",
+      "initial": {
+        "advanced": 0,
+        "industries": 10,
+        "player_built": false,
+        "processing": 5,
+        "sites": 0,
+        "survey_companies": 0,
+        "unoccupied_sites": 0
+      },
+      "reloaded": {
+        "advanced": 0,
+        "industries": 10,
+        "player_built": false,
+        "processing": 5,
+        "sites": 0,
+        "survey_companies": 0,
+        "unoccupied_sites": 0
+      },
+      "joined_clients": 0
+    }
+  ],
+  "command_replication": "Three independent native workers; paid private surveys, competing construction, denial and actual save/reload equality pass.",
+  "economy": {
+    "resource_state": {
+      "advanced": 3,
+      "industries": 7,
+      "player_built": true,
+      "processing": 1,
+      "sites": 6,
+      "survey_companies": 1,
+      "unoccupied_sites": 0
+    },
+    "routes": 40,
+    "minimum_delivery_intervals": 2,
+    "soak_months": 24,
+    "reload_equal": true,
+    "starvation_and_recovery": true,
+    "fabrication": {
+      "cost": 360,
+      "exact": true,
+      "quote": 360,
+      "required": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        32,
+        0,
+        18,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "research_feedstock_consumed": 45,
+    "town_growth": {
+      "criterion": "Growth from cold start",
+      "before": {
+        "current": [
+          0,
+          0,
+          0
+        ],
+        "houses": 31,
+        "id": 1,
+        "last": [
+          0,
+          0,
+          0
+        ],
+        "population": 904,
+        "quotas": [
+          50,
+          30,
+          10
+        ],
+        "state": 1
+      },
+      "after": {
+        "current": [
+          40,
+          35,
+          20
+        ],
+        "houses": 33,
+        "id": 1,
+        "last": [
+          70,
+          35,
+          260
+        ],
+        "population": 964,
+        "quotas": [
+          50,
+          30,
+          10
+        ],
+        "state": 3
+      },
+      "elapsed_ticks": 61440,
+      "nominal_seconds_at_normal_speed": 1658.8799999999999
+    },
+    "checkpoint_sha256": "f5247a0e84ca4c86484cd72dacaf7cc07f951fe242738bbfa82368f37f601bef"
+  },
+  "classic_regression": "scripts/test_wp11_slice.py passed: active catalog, real cargo movement, reload, repeated delivery and fabrication.",
+  "limitations": [
+    "Graphical UAT and low-budget startup balance pending.",
+    "Resource fixture uses authored sites; random generation is tested separately.",
+    "Resource-flow growth is measured from cold start; the original showcase retains its separate ten-minute target."
+  ]
+}

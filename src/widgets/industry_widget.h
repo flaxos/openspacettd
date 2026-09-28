@@ -19,6 +19,7 @@ enum DynamicPlaceIndustriesWidgets : WidgetID {
 	WID_DPI_SCROLLBAR,                       ///< Scrollbar of the matrix.
 	WID_DPI_INFOPANEL,                       ///< Info panel about the industry.
 	WID_DPI_DISPLAY_WIDGET,                  ///< Display chain button.
+	WID_DPI_SURVEY_WIDGET, ///< Open resource surveying and discovered sites.
 	WID_DPI_FUND_WIDGET,                     ///< Fund button.
 };
 

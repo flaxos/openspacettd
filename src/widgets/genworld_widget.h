@@ -20,6 +20,7 @@ enum GenerateLandscapeWidgets : WidgetID {
 	WID_GL_MAPSIZE_X_PULLDOWN,          ///< Dropdown 'map X size'.
 	WID_GL_MAPSIZE_Y_PULLDOWN,          ///< Dropdown 'map Y size'.
 
+	WID_GL_RESOURCE_MODE, ///< Player-built or Classic economy.
 	WID_GL_TOWN_PULLDOWN,               ///< Dropdown 'No. of towns'.
 	WID_GL_TOWNNAME_DROPDOWN,           ///< Dropdown 'Townnames'.
 	WID_GL_INDUSTRY_PULLDOWN,           ///< Dropdown 'No. of industries'.

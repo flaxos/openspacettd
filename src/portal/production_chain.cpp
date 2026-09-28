@@ -9,6 +9,7 @@
 
 #include "../stdafx.h"
 #include "production_chain.h"
+#include "commonwealth_slice.h"
 #include "commonwealth_pack.h"
 #include "planet_manager.h"
 #include "logistics_hub.h"
@@ -585,6 +586,7 @@ void ProductionChainManager::ProcessMonthlyProduction()
 		for (const auto &[out_cargo, out_base] : rec->outputs) {
 			uint32_t produced_units = (max_batches * out_base * yield_mult_percent) / 100;
 			f.output_buffers[out_cargo] += produced_units;
+			if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->processing_bonus[out_cargo] += produced_units - max_batches * out_base;
 		}
 
 		f.last_month_production = max_batches;
