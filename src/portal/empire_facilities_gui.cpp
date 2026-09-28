@@ -8,6 +8,7 @@
 #include "../stdafx.h"
 #include "empire_facilities_gui.h"
 #include "production_chain.h"
+#include "integrated_economy.h"
 #include "portal_cmd.h"
 #include "planet_manager.h"
 #include "logistics_hub.h"
@@ -180,11 +181,13 @@ struct EmpireFacilitiesWindow : Window {
 					TextColour status_col = TextColour::Green;
 					switch (status) {
 						case FacilityStatus::Overflow:
-							status_badge = fmt::format("[Overflow: {} t to Hub]", f.last_month_hub_overflow);
+							status_badge = IntegratedEconomy::Enabled() ? "[Output blocked]"
+																		: fmt::format("[Overflow: {} t to Hub]", f.last_month_hub_overflow);
 							status_col = TextColour::Gold;
 							break;
 						case FacilityStatus::Active:
-							status_badge = fmt::format("[Active: {}/{} t/mo]", f.last_month_production, f.monthly_capacity);
+							status_badge = fmt::format("[Active: {}/{} {}]", f.last_month_production, f.monthly_capacity,
+													   IntegratedEconomy::Enabled() ? "batches/mo" : "t/mo");
 							status_col = TextColour::White;
 							break;
 						case FacilityStatus::Starved:
@@ -217,6 +220,11 @@ struct EmpireFacilitiesWindow : Window {
 					}
 
 					std::string out_desc = fmt::format("Plat Target: {} t", f.platform_capacity);
+					if (IntegratedEconomy::Enabled()) {
+						out_desc = "Out: ";
+						for (auto [c, n] : f.output_buffers)
+							out_desc += fmt::format("{} {}; ", n, GetString(CargoSpec::Get(c)->name));
+					}
 					std::string line3 = fmt::format("{} | {}", in_desc, out_desc);
 					Rect line3_r = Rect{row_rect.left + 2, y + 30, row_rect.right - 155, y + 46};
 					DrawString(line3_r, line3, TextColour::Silver);
@@ -232,7 +240,9 @@ struct EmpireFacilitiesWindow : Window {
 
 					Rect btn_target = Rect{row_rect.right - 150, y + 26, row_rect.right - 4, y + 44};
 					GfxFillRect(btn_target, GetColourGradient(Colours::Grey, Shade::Normal));
-					std::string target_label = (f.platform_capacity == 0) ? "Platform: 0 (Hub)" : fmt::format("Platform: {} t", f.platform_capacity);
+					std::string target_label = IntegratedEconomy::Enabled() ? "Locate factory"
+											   : (f.platform_capacity == 0) ? "Platform: 0 (Hub)"
+																			: fmt::format("Platform: {} t", f.platform_capacity);
 					DrawString(btn_target, target_label, TextColour::White, AlignmentH::Centre);
 
 					y += ROW_HEIGHT;
@@ -299,6 +309,10 @@ struct EmpireFacilitiesWindow : Window {
 			case WID_EF_UPGRADE_ALL_BTN: {
 				auto filtered = this->GetFilteredFacilities();
 				for (const auto &f : filtered) {
+					if (IntegratedEconomy::Enabled()) {
+						Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, false);
+						continue;
+					}
 					if (f.linked_station != StationID::Invalid()) {
 						Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
 					}
@@ -319,6 +333,13 @@ struct EmpireFacilitiesWindow : Window {
 				const auto &f = filtered[idx];
 				int rel_y = (pt.y - r.top) % ROW_HEIGHT;
 
+				if (IntegratedEconomy::Enabled()) {
+					if (pt.x >= r.right - 150 && pt.x <= r.right - 4 && rel_y >= 4 && rel_y <= 22)
+						Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, pt.x > r.right - 58);
+					else
+						ScrollMainWindowToTile(f.tile);
+					return;
+				}
 				/* Check button clicks on right side */
 				if (pt.x >= r.right - 150 && pt.x <= r.right - 4) {
 					if (rel_y >= 4 && rel_y <= 22) {

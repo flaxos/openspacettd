@@ -8,6 +8,9 @@
 /** @file station_cmd.cpp Handling of station tiles. */
 
 #include "stdafx.h"
+#include "portal/fabrication_manager.h"
+#include "portal/integrated_economy.h"
+#include "portal/planet_manager.h"
 #include "portal/megacity_manager.h"
 #include "portal/commonwealth_slice.h"
 #include "portal/production_chain.h"
@@ -1494,7 +1497,8 @@ void SetRailStationTileFlags(TileIndex tile, const StationSpec *statspec)
  * @param adjacent allow stations directly adjacent to other stations.
  * @return the cost of this operation or an error
  */
-CommandCost CmdBuildRailStation(DoCommandFlags flags, TileIndex tile_org, RailType rt, Axis axis, uint8_t numtracks, uint8_t plat_len, StationClassID spec_class, uint16_t spec_index, StationID station_to_join, bool adjacent)
+CommandCost BuildRailStationInternal(DoCommandFlags flags, TileIndex tile_org, RailType rt, Axis axis, uint8_t numtracks, uint8_t plat_len,
+									 StationClassID spec_class, uint16_t spec_index, StationID station_to_join, bool adjacent)
 {
 	/* Does the authority allow this? */
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile_org, flags);
@@ -4031,6 +4035,7 @@ static void TruncateCargo(const CargoSpec *cs, GoodsEntry *ge, uint amount = UIN
 	uint before = ge->TotalCount();
 	ge->GetData().cargo.Truncate(amount, &waiting_per_source);
 	if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->discarded[cs->Index()] += before - ge->TotalCount();
+	IntegratedEconomy::Record(EconomyFlow::Discarded, cs->Index(), before - ge->TotalCount());
 	for (StationCargoAmountMap::iterator i(waiting_per_source.begin()); i != waiting_per_source.end(); ++i) {
 		Station *source_station = Station::GetIfValid(i->first);
 		if (source_station == nullptr) continue;
@@ -5501,3 +5506,21 @@ extern const TileTypeProcs _tile_type_station_procs = {
 	.terraform_tile_proc = TerraformTile_Station,
 	.check_build_above_proc = CheckBuildAbove_Station,
 };
+
+CommandCost CmdBuildRailStation(DoCommandFlags flags, TileIndex tile_org, RailType rt, Axis axis, uint8_t numtracks, uint8_t plat_len,
+								StationClassID spec_class, uint16_t spec_index, StationID station_to_join, bool adjacent)
+{
+	if (!ValParamRailType(rt)) return CMD_ERROR;
+	BillOfMaterials bill;
+	auto check = FabricationManager::QuoteRailStructure(tile_org, rt, uint32_t(numtracks) * plat_len, bill);
+	if (check.Failed()) return check;
+	auto result =
+		BuildRailStationInternal(flags, tile_org, rt, axis, numtracks, plat_len, spec_class, spec_index, station_to_join, adjacent);
+	if (result.Succeeded() && !bill.IsEmpty()) {
+		if (flags.Test(DoCommandFlag::Execute))
+			StockpileManager::ConsumeBOM(PlanetManager::GetTileWorld(tile_org), _current_company, bill.materials);
+		return CommandCost(ExpensesType::Construction,
+						   result.GetCost() * (100 - FabricationManager::GetBOMDiscountPercent(_current_company)) / 100);
+	}
+	return result;
+}

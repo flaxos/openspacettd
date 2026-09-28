@@ -22,6 +22,7 @@ MANIFEST_PATH = REPO_ROOT / "pkg" / "commonwealth_manifest.json"
 PINNED_NML_VERSION = "0.9.0"
 
 PACKS = (
+    {"name": "openspacettd_integrated_v1.grf", "source": REPO_ROOT / "pkg/commonwealth_integrated/commonwealth_integrated.nml", "grfid": "OST\\u0001", "grfid_hex": "0154534f", "version": 5},
     {
         "name": "openspacettd_industry_v4.grf",
         "source": INDUSTRY_DIR / "commonwealth_industry.nml",
@@ -110,6 +111,7 @@ def make_manifest(compiled: list[tuple[dict[str, object], bytes]]) -> dict[str, 
         "commonwealth_packages": [digest_entry(pack, data) for pack, data in compiled],
         "cargo_labels": list(CARGO_LABELS),
         "equipment_cargo_labels": ["MACH"],
+        "integrated_economy": {"ruleset": 1, "industry_version": 5, "new_cargo_labels": ["BALL", "SIGE", "MGLA"], "feedstocks": ["GRAI", "OIL_", "FOOD"], "freight_refits": list(CARGO_LABELS) + ["MACH", "BALL", "SIGE", "MGLA", "GRAI", "OIL_", "FOOD"]},
         "equipment_wagon_refits": {"0x30": ["MACH", "STEL", "WIRE", "CHIP"]},
         "industry_local_ids": [f"0x{item:02x}" for item in INDUSTRY_LOCAL_IDS],
         "vehicle_local_ids": [f"0x{item:02x}" for item in VEHICLE_LOCAL_IDS],

@@ -1,0 +1,23 @@
+ nmlc info: 0 sprites, 0 cached, 0 orphaned, 0 duplicates, 0 newly encoded (native)
+ nmlc info: Train items: 1/65420
+ nmlc info: Industry items: 19/128
+ nmlc info: Cargo items: 21/64
+ nmlc info: Concurrent spritegroups: 2/256 ("commonwealth_integrated.nml", line 369)
+ nmlc info: Concurrent ActionD registers: 2/64 ("commonwealth_integrated.nml", line 76)
+ nmlc info: Cargo translation table: 20/254
+ nmlc info: DCxx strings: 76/10240
+ nmlc info: 0 sprites, 0 cached, 0 orphaned, 0 duplicates, 0 newly encoded (native)
+ nmlc info: Industry items: 14/128
+ nmlc info: Cargo items: 13/64
+ nmlc info: Cargo translation table: 13/254
+ nmlc info: DCxx strings: 53/10240
+ nmlc info: 0 sprites, 0 cached, 0 orphaned, 0 duplicates, 0 newly encoded (native)
+ nmlc info: Train items: 13/65420
+ nmlc info: Cargo translation table: 23/254
+ nmlc info: Railtype translation table: 3/256
+ nmlc info: 0 sprites, 0 cached, 0 orphaned, 0 duplicates, 0 newly encoded (native)
+ nmlc info: Train items: 1/65420
+ nmlc info: Cargo items: 1/64
+ nmlc info: Cargo translation table: 4/254
+ nmlc info: DCxx strings: 3/10240
+[OK] Commonwealth GRFs and manifest match their NML sources

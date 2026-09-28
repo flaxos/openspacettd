@@ -8,6 +8,7 @@
 /** @file portal_cmd.cpp Implementation of gateway portal construction, linking, and demolition commands. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "stellar_network.h"
 #include "remote_gate_projects.h"
 #include "portal_cmd.h"
@@ -851,6 +852,7 @@ CommandCost CmdSetResearchBudget(DoCommandFlags flags, uint32_t budget)
 
 CommandCost CmdBuildProcessingFacility(DoCommandFlags flags, StationID station, RecipeID recipe)
 {
+	if (IntegratedEconomy::Enabled()) return CommandCost(STR_ERROR_PRODUCTION_WORLD);
 	Station *st = Station::GetIfValid(station);
 	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || !st->facilities.Test(StationFacility::Train)) return CMD_ERROR;
 	if (ProductionChainManager::GetFacilityForStation(station) != nullptr) return CommandCost(STR_ERROR_PRODUCTION_ALREADY_BUILT);

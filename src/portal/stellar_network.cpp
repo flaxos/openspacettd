@@ -1,6 +1,7 @@
 /* This file is part of OpenSpaceTTD, licensed under GNU GPL version 2. */
 /** @file stellar_network.cpp Authoritative gate projects, range, reservations and shared access. */
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "stellar_network.h"
 #include "remote_gate_projects.h"
 #include "planet_manager.h"
@@ -245,6 +246,8 @@ CommandCost StellarNetwork::Operate(DoCommandFlags flags, uint32_t project, bool
 		MarkWholeScreenDirty();
 		policies[p.source] = policies[z.tile] = {p.owner, false, 0};
 		RebuildTerminalAccess();
+		IntegratedEconomy::Record(EconomyFlow::Consumed, GetCargoTypeByLabel(CT_STEEL), p.steel);
+		IntegratedEconomy::Record(EconomyFlow::Consumed, GetCargoTypeByLabel(CargoLabel{"MACH"}), p.machines);
 		p.steel = p.machines = 0;
 		p.state = GateProjectState::Active;
 	}

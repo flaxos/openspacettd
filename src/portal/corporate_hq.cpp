@@ -8,6 +8,7 @@
 /** @file corporate_hq.cpp Implementation of corporate headquarters management and validation. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "corporate_hq.h"
 #include "planet_manager.h"
 #include "federation_identity.h"
@@ -85,7 +86,8 @@ bool CorporateHQManager::CanPlaceHQ(CompanyID company, TileIndex tile, std::stri
 		err_msg = "Headquarters must be placed within a registered world boundary";
 		return false;
 	}
-	if (region->phase != WorldPhase::Phase1_Core) {
+	if (IntegratedEconomy::Enabled() ? IntegratedEconomy::Role(region->id) != EconomicRole::Core
+									 : region->phase != WorldPhase::Phase1_Core) {
 		err_msg = "Corporate Headquarters must be founded on a Phase 1 Core World";
 		return false;
 	}
@@ -122,7 +124,9 @@ bool CorporateHQManager::CanPlaceHQ(CompanyID company, TileIndex tile, std::stri
 		if (operated != nullptr && operated->phase != WorldPhase::Phase4_Expansion) phases_present.insert(operated->phase);
 	}
 
-	if (phases_present.size() < 3) {
+	/* Integrated research must bootstrap before expansion, including when the
+	 * research home is hosted on a server containing only its Core world. */
+	if (!IntegratedEconomy::Enabled() && phases_present.size() < 3) {
 		err_msg = "Corporate network must span operations across at least 3 distinct world phases";
 		return false;
 	}

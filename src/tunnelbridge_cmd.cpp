@@ -11,6 +11,9 @@
  */
 
 #include "stdafx.h"
+#include "portal/fabrication_manager.h"
+#include "portal/planet_manager.h"
+#include "portal/integrated_economy.h"
 #include "viewport_func.h"
 #include "command_func.h"
 #include "town.h"
@@ -313,7 +316,8 @@ static CommandCost CheckBuildAbove(TileIndex tile, DoCommandFlags flags, Axis ax
  * @param roadtype road type for road bridge, or \c INVALID_ROADTYPE
  * @return the cost of this operation or an error
  */
-CommandCost CmdBuildBridge(DoCommandFlags flags, TileIndex tile_end, TileIndex tile_start, TransportType transport_type, BridgeType bridge_type, RailType railtype, RoadType roadtype)
+static CommandCost BuildBridgeInternal(DoCommandFlags flags, TileIndex tile_end, TileIndex tile_start, TransportType transport_type,
+									   BridgeType bridge_type, RailType railtype, RoadType roadtype)
 {
 	CompanyID company = _current_company;
 
@@ -646,7 +650,8 @@ CommandCost CmdBuildBridge(DoCommandFlags flags, TileIndex tile_end, TileIndex t
  * @param roadtype road type for road tunnel, or \c INVALID_ROADTYPE
  * @return the cost of this operation or an error
  */
-CommandCost CmdBuildTunnel(DoCommandFlags flags, TileIndex start_tile, TransportType transport_type, RailType railtype, RoadType roadtype)
+static CommandCost BuildTunnelInternal(DoCommandFlags flags, TileIndex start_tile, TransportType transport_type, RailType railtype,
+									   RoadType roadtype)
 {
 	CompanyID company = _current_company;
 
@@ -2194,3 +2199,42 @@ extern const TileTypeProcs _tile_type_tunnelbridge_procs = {
 	.terraform_tile_proc = TerraformTile_TunnelBridge,
 	.check_build_above_proc = CheckBuildAbove_TunnelBridge,
 };
+
+CommandCost CmdBuildBridge(DoCommandFlags flags, TileIndex tile_end, TileIndex tile_start, TransportType transport_type,
+						   BridgeType bridge_type, RailType railtype, RoadType roadtype)
+{
+	if (!IntegratedEconomy::Enabled() || transport_type != TransportType::Rail ||
+		!FabricationManager::UseForRail(_current_company, railtype))
+		return BuildBridgeInternal(flags, tile_end, tile_start, transport_type, bridge_type, railtype, roadtype);
+	if (!IsValidTile(tile_start) || !IsValidTile(tile_end) || !ValParamRailType(railtype)) return CMD_ERROR;
+	BillOfMaterials bill;
+	auto check = FabricationManager::QuoteRailStructure(tile_start, railtype, DistanceManhattan(tile_start, tile_end) + 1, bill);
+	if (check.Failed()) return check;
+	auto result = BuildBridgeInternal(flags, tile_end, tile_start, transport_type, bridge_type, railtype, roadtype);
+	if (result.Failed()) return result;
+	if (flags.Test(DoCommandFlag::Execute))
+		StockpileManager::ConsumeBOM(PlanetManager::GetTileWorld(tile_start), _current_company, bill.materials);
+	return CommandCost(ExpensesType::Construction,
+					   result.GetCost() * (100 - FabricationManager::GetBOMDiscountPercent(_current_company)) / 100);
+}
+CommandCost CmdBuildTunnel(DoCommandFlags flags, TileIndex start_tile, TransportType transport_type, RailType railtype, RoadType roadtype)
+{
+	if (!IntegratedEconomy::Enabled() || transport_type != TransportType::Rail ||
+		!FabricationManager::UseForRail(_current_company, railtype))
+		return BuildTunnelInternal(flags, start_tile, transport_type, railtype, roadtype);
+	auto preview_flags = flags;
+	preview_flags.Reset(DoCommandFlag::Execute);
+	auto result = BuildTunnelInternal(preview_flags, start_tile, transport_type, railtype, roadtype);
+	if (result.Failed()) return result;
+	BillOfMaterials bill;
+	auto check =
+		FabricationManager::QuoteRailStructure(start_tile, railtype, DistanceManhattan(start_tile, _build_tunnel_endtile) + 1, bill);
+	if (check.Failed()) return check;
+	if (flags.Test(DoCommandFlag::Execute)) {
+		result = BuildTunnelInternal(flags, start_tile, transport_type, railtype, roadtype);
+		if (result.Failed()) return result;
+		StockpileManager::ConsumeBOM(PlanetManager::GetTileWorld(start_tile), _current_company, bill.materials);
+	}
+	return CommandCost(ExpensesType::Construction,
+					   result.GetCost() * (100 - FabricationManager::GetBOMDiscountPercent(_current_company)) / 100);
+}

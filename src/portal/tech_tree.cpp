@@ -8,6 +8,7 @@
 /** @file tech_tree.cpp Implementation of Commonwealth Tech Tree and R&D progression. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "tech_tree.h"
 #include "corporate_hq.h"
 #include "company_stockpile.h"
@@ -195,6 +196,8 @@ std::vector<TechProjectNode> TechTreeManager::GetNodesByBranch(TechBranch branch
 
 bool TechTreeManager::IsTechUnlocked(CompanyID company, TechID id)
 {
+	if (IntegratedEconomy::SharedUnlock(company, id)) return true;
+	if (IntegratedEconomy::Enabled() && !IntegratedEconomy::CanConductResearch(company)) return false;
 	if (company == CompanyID::Invalid() || id == TECH_NONE) return false;
 
 	std::lock_guard<std::mutex> lock(_tech_mutex);
@@ -250,6 +253,14 @@ bool TechTreeManager::CanResearch(CompanyID company, TechID id, std::string &err
 		return false;
 	}
 
+	if (IntegratedEconomy::Enabled() && (id == TECH_TRACTION_4 || id == TECH_PORTAL_4) && !IsTechUnlocked(company, TECH_MATERIALS_4)) {
+		err_msg = "Materials IV is required.";
+		return false;
+	}
+	if (!IntegratedEconomy::CanConductResearch(company)) {
+		err_msg = "Research must run at the confirmed company research home.";
+		return false;
+	}
 	if (!CorporateHQManager::HasHQ(company)) {
 		err_msg = "Must establish an active Corporate Headquarters on a Phase 1 Core World first.";
 		return false;
@@ -280,6 +291,7 @@ bool TechTreeManager::SetActiveProject(CompanyID company, TechID id)
 	if (company == CompanyID::Invalid()) return false;
 
 	if (id == TECH_NONE) {
+		IntegratedEconomy::CancelResearch(company);
 		std::lock_guard<std::mutex> lock(_tech_mutex);
 		auto &state = _company_techs[company];
 		state.active_project = TECH_NONE;
@@ -288,6 +300,7 @@ bool TechTreeManager::SetActiveProject(CompanyID company, TechID id)
 
 	std::string err_msg;
 	if (!CanResearch(company, id, err_msg)) return false;
+	if (IntegratedEconomy::Enabled() && GetActiveProject(company) != id) IntegratedEconomy::CancelResearch(company);
 
 	std::lock_guard<std::mutex> lock(_tech_mutex);
 	auto &state = _company_techs[company];
@@ -309,7 +322,7 @@ bool TechTreeManager::SetMonthlyBudget(CompanyID company, uint32_t budget)
 
 void TechTreeManager::AddResearchPoints(CompanyID company, uint32_t rp)
 {
-	if (company == CompanyID::Invalid() || rp == 0) return;
+	if (company == CompanyID::Invalid() || !IntegratedEconomy::CanConductResearch(company)) return;
 
 	std::lock_guard<std::mutex> lock(_tech_mutex);
 	auto it = _company_techs.find(company);
@@ -321,9 +334,10 @@ void TechTreeManager::AddResearchPoints(CompanyID company, uint32_t rp)
 	const TechProjectNode *node = GetNode(state.active_project);
 	if (node == nullptr) return;
 
-	state.accumulated_rp += rp;
+	state.accumulated_rp = static_cast<uint32_t>(std::min<uint64_t>(uint64_t(state.accumulated_rp) + rp, node->cost_rp));
 
-	if (state.accumulated_rp >= node->cost_rp) {
+	if (state.accumulated_rp >= node->cost_rp && IntegratedEconomy::PrepareResearch(company, state.active_project)) {
+		IntegratedEconomy::FinishResearch(company);
 		state.unlocked_techs.insert(state.active_project);
 		state.active_project = TECH_NONE;
 		state.accumulated_rp = 0;
@@ -345,7 +359,7 @@ void TechTreeManager::ProcessMonthlyResearch()
 	}
 
 	for (CompanyID cid : companies_to_process) {
-		if (!CorporateHQManager::HasHQ(cid)) continue;
+		if (!CorporateHQManager::HasHQ(cid) || !IntegratedEconomy::CanConductResearch(cid)) continue;
 		const CorporateHQProfile *hq = CorporateHQManager::GetHQ(cid);
 		if (hq == nullptr || hq->world_id == INVALID_WORLD) continue;
 
@@ -357,6 +371,13 @@ void TechTreeManager::ProcessMonthlyResearch()
 			budget = it->second.monthly_budget;
 		}
 
+		IntegratedEconomy::PrepareResearch(cid, GetActiveProject(cid));
+		if (IntegratedEconomy::Enabled()) {
+			AddResearchPoints(cid, 0);
+			if (GetActiveProject(cid) == TECH_NONE) continue;
+			auto node = GetNode(GetActiveProject(cid));
+			if (node != nullptr && GetAccumulatedRP(cid) >= node->cost_rp) continue;
+		}
 		uint32_t generated_rp = 0;
 
 		/* 1. Process cash budget (1 RP per 1,000 credits) */
@@ -372,9 +393,10 @@ void TechTreeManager::ProcessMonthlyResearch()
 		/* Enriched Quantum Data Crystals: 10 RP per unit, up to 5 units per month */
 		CargoType cr_cargo = StockpileManager::RoleToDefaultCargo(FabricationRole::EnrichedCrystals);
 		uint32_t avail_cr = StockpileManager::GetStock(hq->world_id, cid, cr_cargo);
-		uint32_t burn_cr = std::min(avail_cr, 5u);
+		uint32_t burn_cr = IntegratedEconomy::Accelerates(cid) ? std::min(avail_cr, 5u) : 0;
 		if (burn_cr > 0) {
 			StockpileManager::WithdrawCargo(hq->world_id, cid, cr_cargo, burn_cr);
+			IntegratedEconomy::Record(EconomyFlow::Consumed, cr_cargo, burn_cr);
 			if (_commonwealth_slice_audit != nullptr) {
 				_commonwealth_slice_audit->consumed[cr_cargo] += burn_cr;
 				_commonwealth_slice_audit->research_consumed[cr_cargo] += burn_cr;
@@ -385,9 +407,10 @@ void TechTreeManager::ProcessMonthlyResearch()
 		/* High-Tech Electronics: 5 RP per unit, up to 10 units per month */
 		CargoType el_cargo = StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics);
 		uint32_t avail_el = StockpileManager::GetStock(hq->world_id, cid, el_cargo);
-		uint32_t burn_el = std::min(avail_el, 10u);
+		uint32_t burn_el = IntegratedEconomy::Accelerates(cid) ? std::min(avail_el, 10u) : 0;
 		if (burn_el > 0) {
 			StockpileManager::WithdrawCargo(hq->world_id, cid, el_cargo, burn_el);
+			IntegratedEconomy::Record(EconomyFlow::Consumed, el_cargo, burn_el);
 			if (_commonwealth_slice_audit != nullptr) {
 				_commonwealth_slice_audit->consumed[el_cargo] += burn_el;
 				_commonwealth_slice_audit->research_consumed[el_cargo] += burn_el;
@@ -395,7 +418,7 @@ void TechTreeManager::ProcessMonthlyResearch()
 			generated_rp += burn_el * 5;
 		}
 
-		if (generated_rp > 0) {
+		if (generated_rp > 0 || IntegratedEconomy::Enabled()) {
 			AddResearchPoints(cid, generated_rp);
 		}
 	}

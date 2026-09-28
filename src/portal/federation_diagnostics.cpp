@@ -4,6 +4,7 @@
 #include "../stdafx.h"
 #include "federation_diagnostics.h"
 #include "federation_cargo.h"
+#include "integrated_economy.h"
 #include "commonwealth_slice.h"
 #include "federation_identity.h"
 #include "transfer_journal.h"
@@ -25,13 +26,25 @@ bool ConFederationFreightStatus(std::span<std::string_view> argv)
 		audit = {};
 		_commonwealth_slice_audit = &audit;
 	}
-	const CargoType coal = GetCargoTypeByLabel(CargoLabel{"COAL"});
+	const CargoType coal = GetCargoTypeByLabel(IntegratedEconomy::Enabled() ? CargoLabel{"SILC"} : CargoLabel{"COAL"});
 	if (!IsValidCargoType(coal)) return false;
 	using nlohmann::json;
 	json result{{"date", TimerGameCalendar::date.base()}, {"coal", to_underlying(coal)},
 		{"journal", json::array()}, {"companies", json::array()}, {"trains", json::array()}, {"receipts", json::array()}};
 	uint64_t produced = 0, transported = 0, accepted = 0, waiting = 0, onboard = 0;
+	if (IntegratedEconomy::Enabled()) {
+		result["economy"] = json::parse(IntegratedEconomy::Save());
+		result["research"] = json::array();
+		for (auto company : Company::Iterate())
+			result["research"].push_back({{"home", IntegratedEconomy::ResearchHome(company->index)},
+										  {"can_research", IntegratedEconomy::CanConductResearch(company->index)},
+										  {"materials_i", TechTreeManager::IsTechUnlocked(company->index, TECH_MATERIALS_1)},
+										  {"active", TechTreeManager::GetActiveProject(company->index)}});
+	}
 	for (const Industry *industry : Industry::Iterate()) {
+		if (IntegratedEconomy::Managed(industry))
+			for (const auto &cargo : industry->accepted)
+				if (cargo.cargo == coal) waiting += cargo.waiting;
 		for (const auto &cargo : industry->produced) if (cargo.cargo == coal) {
 			for (uint i = 0; i < HISTORY_MONTH.last; ++i) {
 				produced += cargo.history[i].production;

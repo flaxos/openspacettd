@@ -1,0 +1,15 @@
+{
+  "base_commit": "959fe33f18440ed75864da2dcad73494ef0e0c16",
+  "branch": "codex/unified-commonwealth-economy",
+  "binary_sha256": "1bfe89a2d674520b86402fbb08b032a391ed1334a304e9b86dd11838e7e8cc6d",
+  "source_status": "modified branch before commit; source delivered in this audit commit",
+  "files": {
+    "bin/newgrf/openspacettd_integrated_v1.grf": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+    "bin/newgrf/openspacettd_industry_v4.grf": "7f709d575d4ae1507865bf94351a698c5106be3c4f8099a6753c12f35960823d",
+    "bin/newgrf/openspacettd_rail_v3.grf": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+    "bin/newgrf/openspacettd_equipment_v1.grf": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21",
+    "demo/OpenSpaceTTD-Integrated-Economy-UAT.sav": "ece807534f259c8d56f1c01b133ec24b09deefdde3fe2c228f4023629b12fa9f",
+    "demo/OpenSpaceTTD-Integrated-CST-Sector.sav": "22cc1a89f619d80d05a2945488868bb11529e061a340f8ddee26951ea4d2c94c"
+  },
+  "human_graphical_acceptance": "Pending"
+}

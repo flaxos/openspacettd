@@ -16,6 +16,16 @@
   ],
   "commonwealth_packages": [
     {
+      "bytes": 4867,
+      "grfid": "OST\\u0001",
+      "grfid_hex": "0154534f",
+      "md5": "bca354b9eb1b8fff0efbdb696fb23583",
+      "name": "openspacettd_integrated_v1.grf",
+      "sha256": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+      "source": "pkg/commonwealth_integrated/commonwealth_integrated.nml",
+      "version": 5
+    },
+    {
       "bytes": 2502,
       "grfid": "OST\\u0001",
       "grfid_hex": "0154534f",
@@ -77,6 +87,42 @@
     "0x1c",
     "0x1d"
   ],
+  "integrated_economy": {
+    "feedstocks": [
+      "GRAI",
+      "OIL_",
+      "FOOD"
+    ],
+    "freight_refits": [
+      "SILC",
+      "IRON",
+      "STEL",
+      "COPR",
+      "WIRE",
+      "SAND",
+      "CHIP",
+      "RARE",
+      "ALLO",
+      "POLY",
+      "BCRY",
+      "QCRY",
+      "CCRY",
+      "MACH",
+      "BALL",
+      "SIGE",
+      "MGLA",
+      "GRAI",
+      "OIL_",
+      "FOOD"
+    ],
+    "industry_version": 5,
+    "new_cargo_labels": [
+      "BALL",
+      "SIGE",
+      "MGLA"
+    ],
+    "ruleset": 1
+  },
   "schema_version": 2,
   "vehicle_local_ids": [
     "0x20",

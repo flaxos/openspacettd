@@ -8,6 +8,7 @@
 /** @file planet_manager.cpp Implementation of spatial planet region manager and query index. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "stellar_network.h"
 #include "resource_sites.h"
 #include "planet_manager.h"
@@ -301,10 +302,10 @@ CommandCost PlanetManager::CheckIndustryPlacement(TileIndex tile, bool is_raw, b
 	if (phase == WorldPhase::Phase4_Expansion && !(is_raw && ResourceSiteManager::GeneratingSites())) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_EXPANSION_WORLD);
 	}
-	if (phase == WorldPhase::Phase1_Core && is_raw) {
+	if (!IntegratedEconomy::Enabled() && phase == WorldPhase::Phase1_Core && is_raw) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_CORE_WORLD);
 	}
-	if (phase == WorldPhase::Phase3_Frontier && is_processing) {
+	if (!IntegratedEconomy::Enabled() && phase == WorldPhase::Phase3_Frontier && is_processing) {
 		return CommandCost(STR_ERROR_CANNOT_BUILD_ON_FRONTIER_WORLD);
 	}
 	if (is_farm && GetTileBiome(tile) == WorldBiome::Volcanic) {
@@ -562,3 +563,7 @@ size_t PlanetManager::GetWorldIndustryCount(WorldID world)
 	return count;
 }
 
+CommandCost PlanetManager::CheckEconomicIndustry(TileIndex tile, IndustryType type, CompanyID company)
+{
+	return IntegratedEconomy::CheckIndustry(tile, type, company);
+}

@@ -1,0 +1,2454 @@
+{
+  "passed": true,
+  "binary_sha256": "1bfe89a2d674520b86402fbb08b032a391ed1334a304e9b86dd11838e7e8cc6d",
+  "initial_audit": {
+    "cargo": [
+      {
+        "abbreviation": "PS",
+        "id": 0,
+        "large_quantity": "100,000\u00a0passengers",
+        "name": "Passengers",
+        "quantity": "100\u00a0passengers",
+        "single": "Passenger",
+        "units": "100\u00a0passengers",
+        "zero_quantity": "0\u00a0passengers"
+      },
+      {
+        "abbreviation": "CL",
+        "id": 1,
+        "large_quantity": "100,000\u00a0tonnes of coal",
+        "name": "Coal",
+        "quantity": "100\u00a0tonnes of coal",
+        "single": "Coal",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of coal"
+      },
+      {
+        "abbreviation": "DC",
+        "id": 2,
+        "large_quantity": "100,000\u00a0data crystals",
+        "name": "Data Crystals",
+        "quantity": "100\u00a0data crystals",
+        "single": "Data Crystal",
+        "units": "100\u00a0data crystals",
+        "zero_quantity": "0\u00a0data crystals"
+      },
+      {
+        "abbreviation": "OL",
+        "id": 3,
+        "large_quantity": "100,000,000\u00a0litres of oil",
+        "name": "Oil",
+        "quantity": "100,000\u00a0litres of oil",
+        "single": "Oil",
+        "units": "100\u00a0liters",
+        "zero_quantity": "0\u00a0litres of oil"
+      },
+      {
+        "abbreviation": "LV",
+        "id": 4,
+        "large_quantity": "100,000\u00a0head of livestock",
+        "name": "Livestock",
+        "quantity": "100\u00a0head of livestock",
+        "single": "Livestock",
+        "units": "100\u00a0items",
+        "zero_quantity": "0\u00a0head of livestock"
+      },
+      {
+        "abbreviation": "GD",
+        "id": 5,
+        "large_quantity": "100,000\u00a0crates of goods",
+        "name": "Manufactured Goods & Colony Supplies",
+        "quantity": "100\u00a0crates of goods",
+        "single": "Manufactured Goods & Colony Supplies",
+        "units": "100\u00a0crates",
+        "zero_quantity": "0\u00a0crates of goods"
+      },
+      {
+        "abbreviation": "GR",
+        "id": 6,
+        "large_quantity": "100,000\u00a0tonnes of grain",
+        "name": "Bio-Grain",
+        "quantity": "100\u00a0tonnes of grain",
+        "single": "Bio-Grain",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of grain"
+      },
+      {
+        "abbreviation": "WD",
+        "id": 7,
+        "large_quantity": "100,000\u00a0tonnes of wood",
+        "name": "Wood",
+        "quantity": "100\u00a0tonnes of wood",
+        "single": "Wood",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of wood"
+      },
+      {
+        "abbreviation": "OR",
+        "id": 8,
+        "large_quantity": "100,000\u00a0tonnes of iron ore",
+        "name": "Heavy Iron Ore",
+        "quantity": "100\u00a0tonnes of iron ore",
+        "single": "Heavy Iron Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of iron ore"
+      },
+      {
+        "abbreviation": "STEL",
+        "id": 9,
+        "large_quantity": "100,000\u00a0tonnes of structural steel",
+        "name": "Structural Steel",
+        "quantity": "100\u00a0tonnes of structural steel",
+        "single": "Structural Steel",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of structural steel"
+      },
+      {
+        "abbreviation": "VL",
+        "id": 10,
+        "large_quantity": "100,000\u00a0bags of valuables",
+        "name": "Valuables & Rare Crystals",
+        "quantity": "100\u00a0bags of valuables",
+        "single": "Valuables & Rare Crystals",
+        "units": "100\u00a0bags",
+        "zero_quantity": "0\u00a0bags of valuables"
+      },
+      {
+        "abbreviation": "SILC",
+        "id": 16,
+        "large_quantity": "100,000\u00a0tonnes of silicates",
+        "name": "Silicates & Ballast Slag",
+        "quantity": "100\u00a0tonnes of silicates",
+        "single": "Silicates & Ballast Slag",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silicates"
+      },
+      {
+        "abbreviation": "IRON",
+        "id": 17,
+        "large_quantity": "100,000\u00a0tonnes of iron ore",
+        "name": "Iron Ore",
+        "quantity": "100\u00a0tonnes of iron ore",
+        "single": "Iron Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of iron ore"
+      },
+      {
+        "abbreviation": "RARE",
+        "id": 19,
+        "large_quantity": "100,000\u00a0tonnes of rare earth minerals",
+        "name": "Rare Earth Minerals",
+        "quantity": "100\u00a0tonnes of rare earth minerals",
+        "single": "Rare Earth Minerals",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of rare earth minerals"
+      },
+      {
+        "abbreviation": "ALLO",
+        "id": 20,
+        "large_quantity": "100,000\u00a0tonnes of superalloys",
+        "name": "Superalloys & Superconductors",
+        "quantity": "100\u00a0tonnes of superalloys",
+        "single": "Superalloys & Superconductors",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of superalloys"
+      },
+      {
+        "abbreviation": "COPR",
+        "id": 21,
+        "large_quantity": "100,000\u00a0tonnes of copper ore",
+        "name": "Copper Ore",
+        "quantity": "100\u00a0tonnes of copper ore",
+        "single": "Copper Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of copper ore"
+      },
+      {
+        "abbreviation": "WIRE",
+        "id": 22,
+        "large_quantity": "100,000\u00a0tonnes of conductive wiring",
+        "name": "Conductive Wiring & Coils",
+        "quantity": "100\u00a0tonnes of conductive wiring",
+        "single": "Conductive Wiring & Coils",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of conductive wiring"
+      },
+      {
+        "abbreviation": "SAND",
+        "id": 23,
+        "large_quantity": "100,000\u00a0tonnes of silica sand",
+        "name": "Silica Sand & Quartz",
+        "quantity": "100\u00a0tonnes of silica sand",
+        "single": "Silica Sand & Quartz",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silica sand"
+      },
+      {
+        "abbreviation": "CHIP",
+        "id": 24,
+        "large_quantity": "100,000\u00a0tonnes of silicon chips",
+        "name": "Silicon Wafers & Chips",
+        "quantity": "100\u00a0tonnes of silicon chips",
+        "single": "Silicon Wafers & Chips",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silicon chips"
+      },
+      {
+        "abbreviation": "POLY",
+        "id": 25,
+        "large_quantity": "100,000\u00a0tonnes of synthetic polymers",
+        "name": "Synthetic Polymers & Composites",
+        "quantity": "100\u00a0tonnes of synthetic polymers",
+        "single": "Synthetic Polymers & Composites",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of synthetic polymers"
+      },
+      {
+        "abbreviation": "BCRY",
+        "id": 26,
+        "large_quantity": "100,000 blank data crystals",
+        "name": "Blank Data Crystals",
+        "quantity": "100 blank data crystals",
+        "single": "Blank Data Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 blank data crystals"
+      },
+      {
+        "abbreviation": "QCRY",
+        "id": 27,
+        "large_quantity": "100,000 quantum data crystals",
+        "name": "Enriched Quantum Crystals",
+        "quantity": "100 quantum data crystals",
+        "single": "Enriched Quantum Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 quantum data crystals"
+      },
+      {
+        "abbreviation": "CCRY",
+        "id": 28,
+        "large_quantity": "100,000 consumer data crystals",
+        "name": "Encrypted Consumer Crystals",
+        "quantity": "100 consumer data crystals",
+        "single": "Encrypted Consumer Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 consumer data crystals"
+      },
+      {
+        "abbreviation": "MM",
+        "id": 29,
+        "large_quantity": "100,000\u00a0tonnes of machine modules",
+        "name": "Machine Modules",
+        "quantity": "100\u00a0tonnes of machine modules",
+        "single": "Machine Modules",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of machine modules"
+      },
+      {
+        "abbreviation": "Ball",
+        "id": 30,
+        "large_quantity": "100,000 tonnes of ballast and concrete",
+        "name": "Ballast and Concrete",
+        "quantity": "100 tonnes of ballast and concrete",
+        "single": "Ballast and Concrete",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of ballast and concrete"
+      },
+      {
+        "abbreviation": "Sign",
+        "id": 31,
+        "large_quantity": "100,000 tonnes of signalling equipment",
+        "name": "Signalling Equipment",
+        "quantity": "100 tonnes of signalling equipment",
+        "single": "Signalling Equipment",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of signalling equipment"
+      },
+      {
+        "abbreviation": "Mglv",
+        "id": 32,
+        "large_quantity": "100,000 tonnes of maglev assemblies",
+        "name": "Maglev Assemblies",
+        "quantity": "100 tonnes of maglev assemblies",
+        "single": "Maglev Assemblies",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of maglev assemblies"
+      },
+      {
+        "abbreviation": "Food",
+        "id": 33,
+        "large_quantity": "100,000 tonnes of food",
+        "name": "Food",
+        "quantity": "100 tonnes of food",
+        "single": "Food",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of food"
+      }
+    ],
+    "freight_refits": [
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "SILC"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "IRON"
+      },
+      {
+        "engines": [51, 54, 56, 66, 98, 256],
+        "label": "STEL"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "COPR"
+      },
+      {
+        "engines": [51, 54, 56, 62, 94, 256],
+        "label": "WIRE"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "SAND"
+      },
+      {
+        "engines": [52, 54, 56, 62, 94, 256],
+        "label": "CHIP"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "RARE"
+      },
+      {
+        "engines": [52, 54, 56, 62, 94],
+        "label": "ALLO"
+      },
+      {
+        "engines": [30, 53, 54, 56, 60, 92],
+        "label": "POLY"
+      },
+      {
+        "engines": [37, 49, 54, 56, 62, 67, 94, 99],
+        "label": "BCRY"
+      },
+      {
+        "engines": [37, 49, 54, 56, 62, 67, 94, 99],
+        "label": "QCRY"
+      },
+      {
+        "engines": [28, 49, 54, 56, 58, 62, 90, 94],
+        "label": "CCRY"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "BALL"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "SIGE"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "MGLA"
+      },
+      {
+        "engines": [56, 62, 94, 256],
+        "label": "MACH"
+      },
+      {
+        "engines": [30, 56, 60, 92],
+        "label": "OIL_"
+      },
+      {
+        "engines": [50, 56, 63, 95],
+        "label": "GRAI"
+      },
+      {
+        "engines": [38, 52, 56, 62, 68, 94, 100],
+        "label": "FOOD"
+      }
+    ],
+    "invalid_slopes": [],
+    "language": "en_US",
+    "pixel_queries": 3139587,
+    "viewport_queries": 1046529
+  },
+  "english_audit": {
+    "cargo": [
+      {
+        "abbreviation": "PS",
+        "id": 0,
+        "large_quantity": "100,000\u00a0passengers",
+        "name": "Passengers",
+        "quantity": "100\u00a0passengers",
+        "single": "Passenger",
+        "units": "100\u00a0passengers",
+        "zero_quantity": "0\u00a0passengers"
+      },
+      {
+        "abbreviation": "CL",
+        "id": 1,
+        "large_quantity": "100,000\u00a0tonnes of coal",
+        "name": "Coal",
+        "quantity": "100\u00a0tonnes of coal",
+        "single": "Coal",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of coal"
+      },
+      {
+        "abbreviation": "DC",
+        "id": 2,
+        "large_quantity": "100,000\u00a0data crystals",
+        "name": "Data Crystals",
+        "quantity": "100\u00a0data crystals",
+        "single": "Data Crystal",
+        "units": "100\u00a0data crystals",
+        "zero_quantity": "0\u00a0data crystals"
+      },
+      {
+        "abbreviation": "OL",
+        "id": 3,
+        "large_quantity": "100,000,000\u00a0litres of oil",
+        "name": "Oil",
+        "quantity": "100,000\u00a0litres of oil",
+        "single": "Oil",
+        "units": "100\u00a0litres",
+        "zero_quantity": "0\u00a0litres of oil"
+      },
+      {
+        "abbreviation": "LV",
+        "id": 4,
+        "large_quantity": "100,000\u00a0items of livestock",
+        "name": "Livestock",
+        "quantity": "100\u00a0items of livestock",
+        "single": "Livestock",
+        "units": "100\u00a0items",
+        "zero_quantity": "0\u00a0items of livestock"
+      },
+      {
+        "abbreviation": "GD",
+        "id": 5,
+        "large_quantity": "100,000\u00a0crates of goods",
+        "name": "Manufactured Goods & Colony Supplies",
+        "quantity": "100\u00a0crates of goods",
+        "single": "Manufactured Goods & Colony Supplies",
+        "units": "100\u00a0crates",
+        "zero_quantity": "0\u00a0crates of goods"
+      },
+      {
+        "abbreviation": "GR",
+        "id": 6,
+        "large_quantity": "100,000\u00a0tonnes of grain",
+        "name": "Bio-Grain",
+        "quantity": "100\u00a0tonnes of grain",
+        "single": "Bio-Grain",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of grain"
+      },
+      {
+        "abbreviation": "WD",
+        "id": 7,
+        "large_quantity": "100,000\u00a0tonnes of wood",
+        "name": "Wood",
+        "quantity": "100\u00a0tonnes of wood",
+        "single": "Wood",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of wood"
+      },
+      {
+        "abbreviation": "OR",
+        "id": 8,
+        "large_quantity": "100,000\u00a0tonnes of iron ore",
+        "name": "Heavy Iron Ore",
+        "quantity": "100\u00a0tonnes of iron ore",
+        "single": "Heavy Iron Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of iron ore"
+      },
+      {
+        "abbreviation": "STEL",
+        "id": 9,
+        "large_quantity": "100,000\u00a0tonnes of structural steel",
+        "name": "Structural Steel",
+        "quantity": "100\u00a0tonnes of structural steel",
+        "single": "Structural Steel",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of structural steel"
+      },
+      {
+        "abbreviation": "VL",
+        "id": 10,
+        "large_quantity": "100,000\u00a0bags of valuables",
+        "name": "Valuables & Rare Crystals",
+        "quantity": "100\u00a0bags of valuables",
+        "single": "Valuables & Rare Crystals",
+        "units": "100\u00a0bags",
+        "zero_quantity": "0\u00a0bags of valuables"
+      },
+      {
+        "abbreviation": "SILC",
+        "id": 16,
+        "large_quantity": "100,000\u00a0tonnes of silicates",
+        "name": "Silicates & Ballast Slag",
+        "quantity": "100\u00a0tonnes of silicates",
+        "single": "Silicates & Ballast Slag",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silicates"
+      },
+      {
+        "abbreviation": "IRON",
+        "id": 17,
+        "large_quantity": "100,000\u00a0tonnes of iron ore",
+        "name": "Iron Ore",
+        "quantity": "100\u00a0tonnes of iron ore",
+        "single": "Iron Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of iron ore"
+      },
+      {
+        "abbreviation": "RARE",
+        "id": 19,
+        "large_quantity": "100,000\u00a0tonnes of rare earth minerals",
+        "name": "Rare Earth Minerals",
+        "quantity": "100\u00a0tonnes of rare earth minerals",
+        "single": "Rare Earth Minerals",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of rare earth minerals"
+      },
+      {
+        "abbreviation": "ALLO",
+        "id": 20,
+        "large_quantity": "100,000\u00a0tonnes of superalloys",
+        "name": "Superalloys & Superconductors",
+        "quantity": "100\u00a0tonnes of superalloys",
+        "single": "Superalloys & Superconductors",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of superalloys"
+      },
+      {
+        "abbreviation": "COPR",
+        "id": 21,
+        "large_quantity": "100,000\u00a0tonnes of copper ore",
+        "name": "Copper Ore",
+        "quantity": "100\u00a0tonnes of copper ore",
+        "single": "Copper Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of copper ore"
+      },
+      {
+        "abbreviation": "WIRE",
+        "id": 22,
+        "large_quantity": "100,000\u00a0tonnes of conductive wiring",
+        "name": "Conductive Wiring & Coils",
+        "quantity": "100\u00a0tonnes of conductive wiring",
+        "single": "Conductive Wiring & Coils",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of conductive wiring"
+      },
+      {
+        "abbreviation": "SAND",
+        "id": 23,
+        "large_quantity": "100,000\u00a0tonnes of silica sand",
+        "name": "Silica Sand & Quartz",
+        "quantity": "100\u00a0tonnes of silica sand",
+        "single": "Silica Sand & Quartz",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silica sand"
+      },
+      {
+        "abbreviation": "CHIP",
+        "id": 24,
+        "large_quantity": "100,000\u00a0tonnes of silicon chips",
+        "name": "Silicon Wafers & Chips",
+        "quantity": "100\u00a0tonnes of silicon chips",
+        "single": "Silicon Wafers & Chips",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silicon chips"
+      },
+      {
+        "abbreviation": "POLY",
+        "id": 25,
+        "large_quantity": "100,000\u00a0tonnes of synthetic polymers",
+        "name": "Synthetic Polymers & Composites",
+        "quantity": "100\u00a0tonnes of synthetic polymers",
+        "single": "Synthetic Polymers & Composites",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of synthetic polymers"
+      },
+      {
+        "abbreviation": "BCRY",
+        "id": 26,
+        "large_quantity": "100,000 blank data crystals",
+        "name": "Blank Data Crystals",
+        "quantity": "100 blank data crystals",
+        "single": "Blank Data Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 blank data crystals"
+      },
+      {
+        "abbreviation": "QCRY",
+        "id": 27,
+        "large_quantity": "100,000 quantum data crystals",
+        "name": "Enriched Quantum Crystals",
+        "quantity": "100 quantum data crystals",
+        "single": "Enriched Quantum Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 quantum data crystals"
+      },
+      {
+        "abbreviation": "CCRY",
+        "id": 28,
+        "large_quantity": "100,000 consumer data crystals",
+        "name": "Encrypted Consumer Crystals",
+        "quantity": "100 consumer data crystals",
+        "single": "Encrypted Consumer Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 consumer data crystals"
+      },
+      {
+        "abbreviation": "MM",
+        "id": 29,
+        "large_quantity": "100,000\u00a0tonnes of machine modules",
+        "name": "Machine Modules",
+        "quantity": "100\u00a0tonnes of machine modules",
+        "single": "Machine Modules",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of machine modules"
+      },
+      {
+        "abbreviation": "Ball",
+        "id": 30,
+        "large_quantity": "100,000 tonnes of ballast and concrete",
+        "name": "Ballast and Concrete",
+        "quantity": "100 tonnes of ballast and concrete",
+        "single": "Ballast and Concrete",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of ballast and concrete"
+      },
+      {
+        "abbreviation": "Sign",
+        "id": 31,
+        "large_quantity": "100,000 tonnes of signalling equipment",
+        "name": "Signalling Equipment",
+        "quantity": "100 tonnes of signalling equipment",
+        "single": "Signalling Equipment",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of signalling equipment"
+      },
+      {
+        "abbreviation": "Mglv",
+        "id": 32,
+        "large_quantity": "100,000 tonnes of maglev assemblies",
+        "name": "Maglev Assemblies",
+        "quantity": "100 tonnes of maglev assemblies",
+        "single": "Maglev Assemblies",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of maglev assemblies"
+      },
+      {
+        "abbreviation": "Food",
+        "id": 33,
+        "large_quantity": "100,000 tonnes of food",
+        "name": "Food",
+        "quantity": "100 tonnes of food",
+        "single": "Food",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of food"
+      }
+    ],
+    "freight_refits": [
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "SILC"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "IRON"
+      },
+      {
+        "engines": [51, 54, 56, 66, 98, 256],
+        "label": "STEL"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "COPR"
+      },
+      {
+        "engines": [51, 54, 56, 62, 94, 256],
+        "label": "WIRE"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "SAND"
+      },
+      {
+        "engines": [52, 54, 56, 62, 94, 256],
+        "label": "CHIP"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "RARE"
+      },
+      {
+        "engines": [52, 54, 56, 62, 94],
+        "label": "ALLO"
+      },
+      {
+        "engines": [30, 53, 54, 56, 60, 92],
+        "label": "POLY"
+      },
+      {
+        "engines": [37, 49, 54, 56, 62, 67, 94, 99],
+        "label": "BCRY"
+      },
+      {
+        "engines": [37, 49, 54, 56, 62, 67, 94, 99],
+        "label": "QCRY"
+      },
+      {
+        "engines": [28, 49, 54, 56, 58, 62, 90, 94],
+        "label": "CCRY"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "BALL"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "SIGE"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "MGLA"
+      },
+      {
+        "engines": [56, 62, 94, 256],
+        "label": "MACH"
+      },
+      {
+        "engines": [30, 56, 60, 92],
+        "label": "OIL_"
+      },
+      {
+        "engines": [50, 56, 63, 95],
+        "label": "GRAI"
+      },
+      {
+        "engines": [38, 52, 56, 62, 68, 94, 100],
+        "label": "FOOD"
+      }
+    ],
+    "invalid_slopes": [],
+    "language": "en_GB",
+    "pixel_queries": 3139587,
+    "viewport_queries": 1046529
+  },
+  "soak_months": 24,
+  "electric": {
+    "built": true,
+    "cash_mode": true,
+    "materials_consumed": true,
+    "preview_unchanged": true
+  },
+  "soak_cash_delta": 5047664,
+  "food_recovered": true,
+  "audit": {
+    "cargo": [
+      {
+        "abbreviation": "PS",
+        "id": 0,
+        "large_quantity": "100,000\u00a0passengers",
+        "name": "Passengers",
+        "quantity": "100\u00a0passengers",
+        "single": "Passenger",
+        "units": "100\u00a0passengers",
+        "zero_quantity": "0\u00a0passengers"
+      },
+      {
+        "abbreviation": "CL",
+        "id": 1,
+        "large_quantity": "100,000\u00a0tonnes of coal",
+        "name": "Coal",
+        "quantity": "100\u00a0tonnes of coal",
+        "single": "Coal",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of coal"
+      },
+      {
+        "abbreviation": "DC",
+        "id": 2,
+        "large_quantity": "100,000\u00a0data crystals",
+        "name": "Data Crystals",
+        "quantity": "100\u00a0data crystals",
+        "single": "Data Crystal",
+        "units": "100\u00a0data crystals",
+        "zero_quantity": "0\u00a0data crystals"
+      },
+      {
+        "abbreviation": "OL",
+        "id": 3,
+        "large_quantity": "100,000,000\u00a0litres of oil",
+        "name": "Oil",
+        "quantity": "100,000\u00a0litres of oil",
+        "single": "Oil",
+        "units": "100\u00a0liters",
+        "zero_quantity": "0\u00a0litres of oil"
+      },
+      {
+        "abbreviation": "LV",
+        "id": 4,
+        "large_quantity": "100,000\u00a0head of livestock",
+        "name": "Livestock",
+        "quantity": "100\u00a0head of livestock",
+        "single": "Livestock",
+        "units": "100\u00a0items",
+        "zero_quantity": "0\u00a0head of livestock"
+      },
+      {
+        "abbreviation": "GD",
+        "id": 5,
+        "large_quantity": "100,000\u00a0crates of goods",
+        "name": "Manufactured Goods & Colony Supplies",
+        "quantity": "100\u00a0crates of goods",
+        "single": "Manufactured Goods & Colony Supplies",
+        "units": "100\u00a0crates",
+        "zero_quantity": "0\u00a0crates of goods"
+      },
+      {
+        "abbreviation": "GR",
+        "id": 6,
+        "large_quantity": "100,000\u00a0tonnes of grain",
+        "name": "Bio-Grain",
+        "quantity": "100\u00a0tonnes of grain",
+        "single": "Bio-Grain",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of grain"
+      },
+      {
+        "abbreviation": "WD",
+        "id": 7,
+        "large_quantity": "100,000\u00a0tonnes of wood",
+        "name": "Wood",
+        "quantity": "100\u00a0tonnes of wood",
+        "single": "Wood",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of wood"
+      },
+      {
+        "abbreviation": "OR",
+        "id": 8,
+        "large_quantity": "100,000\u00a0tonnes of iron ore",
+        "name": "Heavy Iron Ore",
+        "quantity": "100\u00a0tonnes of iron ore",
+        "single": "Heavy Iron Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of iron ore"
+      },
+      {
+        "abbreviation": "STEL",
+        "id": 9,
+        "large_quantity": "100,000\u00a0tonnes of structural steel",
+        "name": "Structural Steel",
+        "quantity": "100\u00a0tonnes of structural steel",
+        "single": "Structural Steel",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of structural steel"
+      },
+      {
+        "abbreviation": "VL",
+        "id": 10,
+        "large_quantity": "100,000\u00a0bags of valuables",
+        "name": "Valuables & Rare Crystals",
+        "quantity": "100\u00a0bags of valuables",
+        "single": "Valuables & Rare Crystals",
+        "units": "100\u00a0bags",
+        "zero_quantity": "0\u00a0bags of valuables"
+      },
+      {
+        "abbreviation": "SILC",
+        "id": 16,
+        "large_quantity": "100,000\u00a0tonnes of silicates",
+        "name": "Silicates & Ballast Slag",
+        "quantity": "100\u00a0tonnes of silicates",
+        "single": "Silicates & Ballast Slag",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silicates"
+      },
+      {
+        "abbreviation": "IRON",
+        "id": 17,
+        "large_quantity": "100,000\u00a0tonnes of iron ore",
+        "name": "Iron Ore",
+        "quantity": "100\u00a0tonnes of iron ore",
+        "single": "Iron Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of iron ore"
+      },
+      {
+        "abbreviation": "RARE",
+        "id": 19,
+        "large_quantity": "100,000\u00a0tonnes of rare earth minerals",
+        "name": "Rare Earth Minerals",
+        "quantity": "100\u00a0tonnes of rare earth minerals",
+        "single": "Rare Earth Minerals",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of rare earth minerals"
+      },
+      {
+        "abbreviation": "ALLO",
+        "id": 20,
+        "large_quantity": "100,000\u00a0tonnes of superalloys",
+        "name": "Superalloys & Superconductors",
+        "quantity": "100\u00a0tonnes of superalloys",
+        "single": "Superalloys & Superconductors",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of superalloys"
+      },
+      {
+        "abbreviation": "COPR",
+        "id": 21,
+        "large_quantity": "100,000\u00a0tonnes of copper ore",
+        "name": "Copper Ore",
+        "quantity": "100\u00a0tonnes of copper ore",
+        "single": "Copper Ore",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of copper ore"
+      },
+      {
+        "abbreviation": "WIRE",
+        "id": 22,
+        "large_quantity": "100,000\u00a0tonnes of conductive wiring",
+        "name": "Conductive Wiring & Coils",
+        "quantity": "100\u00a0tonnes of conductive wiring",
+        "single": "Conductive Wiring & Coils",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of conductive wiring"
+      },
+      {
+        "abbreviation": "SAND",
+        "id": 23,
+        "large_quantity": "100,000\u00a0tonnes of silica sand",
+        "name": "Silica Sand & Quartz",
+        "quantity": "100\u00a0tonnes of silica sand",
+        "single": "Silica Sand & Quartz",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silica sand"
+      },
+      {
+        "abbreviation": "CHIP",
+        "id": 24,
+        "large_quantity": "100,000\u00a0tonnes of silicon chips",
+        "name": "Silicon Wafers & Chips",
+        "quantity": "100\u00a0tonnes of silicon chips",
+        "single": "Silicon Wafers & Chips",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of silicon chips"
+      },
+      {
+        "abbreviation": "POLY",
+        "id": 25,
+        "large_quantity": "100,000\u00a0tonnes of synthetic polymers",
+        "name": "Synthetic Polymers & Composites",
+        "quantity": "100\u00a0tonnes of synthetic polymers",
+        "single": "Synthetic Polymers & Composites",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of synthetic polymers"
+      },
+      {
+        "abbreviation": "BCRY",
+        "id": 26,
+        "large_quantity": "100,000 blank data crystals",
+        "name": "Blank Data Crystals",
+        "quantity": "100 blank data crystals",
+        "single": "Blank Data Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 blank data crystals"
+      },
+      {
+        "abbreviation": "QCRY",
+        "id": 27,
+        "large_quantity": "100,000 quantum data crystals",
+        "name": "Enriched Quantum Crystals",
+        "quantity": "100 quantum data crystals",
+        "single": "Enriched Quantum Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 quantum data crystals"
+      },
+      {
+        "abbreviation": "CCRY",
+        "id": 28,
+        "large_quantity": "100,000 consumer data crystals",
+        "name": "Encrypted Consumer Crystals",
+        "quantity": "100 consumer data crystals",
+        "single": "Encrypted Consumer Crystals",
+        "units": "100\u00a0items",
+        "zero_quantity": "0 consumer data crystals"
+      },
+      {
+        "abbreviation": "MM",
+        "id": 29,
+        "large_quantity": "100,000\u00a0tonnes of machine modules",
+        "name": "Machine Modules",
+        "quantity": "100\u00a0tonnes of machine modules",
+        "single": "Machine Modules",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0\u00a0tonnes of machine modules"
+      },
+      {
+        "abbreviation": "Ball",
+        "id": 30,
+        "large_quantity": "100,000 tonnes of ballast and concrete",
+        "name": "Ballast and Concrete",
+        "quantity": "100 tonnes of ballast and concrete",
+        "single": "Ballast and Concrete",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of ballast and concrete"
+      },
+      {
+        "abbreviation": "Sign",
+        "id": 31,
+        "large_quantity": "100,000 tonnes of signalling equipment",
+        "name": "Signalling Equipment",
+        "quantity": "100 tonnes of signalling equipment",
+        "single": "Signalling Equipment",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of signalling equipment"
+      },
+      {
+        "abbreviation": "Mglv",
+        "id": 32,
+        "large_quantity": "100,000 tonnes of maglev assemblies",
+        "name": "Maglev Assemblies",
+        "quantity": "100 tonnes of maglev assemblies",
+        "single": "Maglev Assemblies",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of maglev assemblies"
+      },
+      {
+        "abbreviation": "Food",
+        "id": 33,
+        "large_quantity": "100,000 tonnes of food",
+        "name": "Food",
+        "quantity": "100 tonnes of food",
+        "single": "Food",
+        "units": "100\u00a0tonnes",
+        "zero_quantity": "0 tonnes of food"
+      }
+    ],
+    "freight_refits": [
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "SILC"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "IRON"
+      },
+      {
+        "engines": [51, 54, 56, 66, 98, 256],
+        "label": "STEL"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "COPR"
+      },
+      {
+        "engines": [51, 54, 56, 62, 94, 256],
+        "label": "WIRE"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "SAND"
+      },
+      {
+        "engines": [52, 54, 56, 62, 94, 256],
+        "label": "CHIP"
+      },
+      {
+        "engines": [29, 50, 54, 56, 59, 91],
+        "label": "RARE"
+      },
+      {
+        "engines": [52, 54, 56, 62, 94],
+        "label": "ALLO"
+      },
+      {
+        "engines": [30, 53, 54, 56, 60, 92],
+        "label": "POLY"
+      },
+      {
+        "engines": [37, 49, 54, 56, 62, 67, 94, 99],
+        "label": "BCRY"
+      },
+      {
+        "engines": [37, 49, 54, 56, 62, 67, 94, 99],
+        "label": "QCRY"
+      },
+      {
+        "engines": [28, 49, 54, 56, 58, 62, 90, 94],
+        "label": "CCRY"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "BALL"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "SIGE"
+      },
+      {
+        "engines": [56, 62, 94],
+        "label": "MGLA"
+      },
+      {
+        "engines": [56, 62, 94, 256],
+        "label": "MACH"
+      },
+      {
+        "engines": [30, 56, 60, 92],
+        "label": "OIL_"
+      },
+      {
+        "engines": [50, 56, 63, 95],
+        "label": "GRAI"
+      },
+      {
+        "engines": [38, 52, 56, 62, 68, 94, 100],
+        "label": "FOOD"
+      }
+    ],
+    "invalid_slopes": [],
+    "language": "en_US",
+    "pixel_queries": 3139587,
+    "viewport_queries": 1046529
+  },
+  "exit_before_close": null,
+  "cold_reload": true,
+  "save_sha256": "ece807534f259c8d56f1c01b133ec24b09deefdde3fe2c228f4023629b12fa9f",
+  "initial": {
+    "year": 1950,
+    "month": 0,
+    "money": 56216385,
+    "research": [
+      {
+        "budget": 25000,
+        "project": 201,
+        "rp": 0,
+        "unlocked": [101, 102, 301]
+      }
+    ],
+    "cities": [
+      {
+        "current": [0, 0, 0],
+        "houses": 32,
+        "id": 1,
+        "last": [0, 0, 0],
+        "population": 1396,
+        "quotas": [69, 34, 13],
+        "state": 0
+      }
+    ],
+    "facilities": [
+      {
+        "batches": 0,
+        "id": 3,
+        "inputs": [
+          [6, 0]
+        ],
+        "outputs": [
+          [33, 0]
+        ],
+        "recipe": 404
+      },
+      {
+        "batches": 0,
+        "id": 4,
+        "inputs": [
+          [16, 0]
+        ],
+        "outputs": [
+          [30, 0]
+        ],
+        "recipe": 101
+      },
+      {
+        "batches": 0,
+        "id": 5,
+        "inputs": [
+          [17, 0]
+        ],
+        "outputs": [
+          [9, 0]
+        ],
+        "recipe": 102
+      }
+    ],
+    "economy": {
+      "accounting": [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "cities": [],
+      "factories": [
+        [
+          2,
+          0,
+          100,
+          0,
+          [],
+          0
+        ],
+        [
+          3,
+          0,
+          100,
+          0,
+          [],
+          0
+        ],
+        [
+          4,
+          0,
+          100,
+          0,
+          [],
+          0
+        ]
+      ],
+      "research": [],
+      "roles": [
+        [0, 2],
+        [1, 1],
+        [2, 0],
+        [3, 0]
+      ],
+      "shared_research": {},
+      "version": 1
+    },
+    "stocks": [],
+    "stellar": {
+      "admitted": [],
+      "next": 1,
+      "policies": [],
+      "projects": [],
+      "version": 1,
+      "worlds": [
+        [0, "uat-0", "UAT world 0", 0, 0, true],
+        [1, "uat-1", "UAT world 1", 3, 0, true],
+        [2, "uat-2", "UAT world 2", 6, 0, true],
+        [3, "uat-3", "UAT world 3", 9, 0, true]
+      ],
+      "zones": [
+        [1, 3, 205700, 0]
+      ]
+    }
+  },
+  "progression_complete": {
+    "year": 1956,
+    "month": 9,
+    "money": 19574790,
+    "research": [
+      {
+        "budget": 250000,
+        "project": 0,
+        "rp": 0,
+        "unlocked": [101, 102, 103, 104, 201, 202, 203, 204, 301, 302, 303, 304]
+      }
+    ],
+    "cities": [
+      {
+        "current": [0, 0, 0],
+        "houses": 37,
+        "id": 1,
+        "last": [0, 0, 0],
+        "population": 1464,
+        "quotas": [77, 38, 15],
+        "state": 1
+      }
+    ],
+    "facilities": [
+      {
+        "batches": 3510,
+        "id": 3,
+        "inputs": [
+          [6, 270]
+        ],
+        "outputs": [
+          [33, 5]
+        ],
+        "recipe": 404
+      },
+      {
+        "batches": 3510,
+        "id": 4,
+        "inputs": [
+          [16, 270]
+        ],
+        "outputs": [
+          [30, 5]
+        ],
+        "recipe": 101
+      },
+      {
+        "batches": 3340,
+        "id": 5,
+        "inputs": [
+          [17, 70]
+        ],
+        "outputs": [
+          [9, 2]
+        ],
+        "recipe": 102
+      },
+      {
+        "batches": 3105,
+        "id": 8,
+        "inputs": [
+          [21, 0]
+        ],
+        "outputs": [
+          [22, 4]
+        ],
+        "recipe": 201
+      },
+      {
+        "batches": 2640,
+        "id": 9,
+        "inputs": [
+          [22, 0],
+          [23, 170]
+        ],
+        "outputs": [
+          [24, 2]
+        ],
+        "recipe": 202
+      },
+      {
+        "batches": 1190,
+        "id": 10,
+        "inputs": [
+          [22, 300],
+          [24, 70]
+        ],
+        "outputs": [
+          [31, 5]
+        ],
+        "recipe": 203
+      },
+      {
+        "batches": 360,
+        "id": 11,
+        "inputs": [
+          [9, 0],
+          [22, 300],
+          [24, 300]
+        ],
+        "outputs": [
+          [29, 4]
+        ],
+        "recipe": 204
+      },
+      {
+        "batches": 270,
+        "id": 15,
+        "inputs": [
+          [26, 0]
+        ],
+        "outputs": [
+          [28, 5]
+        ],
+        "recipe": 403
+      },
+      {
+        "batches": 160,
+        "id": 16,
+        "inputs": [
+          [9, 0],
+          [19, 300]
+        ],
+        "outputs": [
+          [20, 2]
+        ],
+        "recipe": 103
+      },
+      {
+        "batches": 480,
+        "id": 17,
+        "inputs": [
+          [3, 0]
+        ],
+        "outputs": [
+          [25, 5]
+        ],
+        "recipe": 301
+      },
+      {
+        "batches": 1350,
+        "id": 18,
+        "inputs": [
+          [19, 300],
+          [23, 270]
+        ],
+        "outputs": [
+          [26, 5]
+        ],
+        "recipe": 401
+      },
+      {
+        "batches": 105,
+        "id": 19,
+        "inputs": [
+          [20, 0],
+          [22, 430]
+        ],
+        "outputs": [
+          [32, 5]
+        ],
+        "recipe": 302
+      },
+      {
+        "batches": 150,
+        "id": 20,
+        "inputs": [
+          [26, 60]
+        ],
+        "outputs": [
+          [27, 5]
+        ],
+        "recipe": 402
+      }
+    ],
+    "economy": {
+      "accounting": [
+        [48065, 0, 24853, 6676, 0, 0, 141701, 0, 0, 3684, 0, 0, 0, 0, 0, 0, 98640, 137014, 0, 42059, 368, 132648, 6898, 133056, 2976, 1104, 3105, 345, 621, 403, 7749, 2716, 241, 7749, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 960, 0, 0, 7290, 0, 0, 3440, 0, 0, 0, 0, 0, 0, 7290, 6750, 0, 2110, 350, 6210, 6790, 8420, 2800, 480, 1320, 140, 40, 320, 2740, 1280, 160, 3969, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 2160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 140, 0, 1360, 0, 840, 480, 420, 140, 0, 320, 2480, 1280, 160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 960, 0, 0, 7020, 0, 0, 1900, 0, 0, 0, 0, 0, 0, 7020, 6680, 0, 1510, 210, 6210, 4400, 7980, 1760, 0, 860, 40, 30, 100, 240, 0, 0, 3887, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [48065, 0, 24853, 5594, 0, 0, 133816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 90976, 129801, 0, 39114, 0, 125790, 0, 123773, 0, 365, 977, 160, 381, 0, 4563, 1271, 15, 3540, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "cities": [
+        [
+          1,
+          [
+            [9, 0],
+            [24, 10],
+            [28, 10],
+            [30, 20],
+            [33, 82]
+          ],
+          [
+            [33, 78]
+          ]
+        ]
+      ],
+      "factories": [
+        [
+          2,
+          0,
+          100,
+          0,
+          [
+            [33, 0]
+          ],
+          3510
+        ],
+        [
+          3,
+          0,
+          100,
+          0,
+          [
+            [30, 0]
+          ],
+          3510
+        ],
+        [
+          4,
+          0,
+          100,
+          100,
+          [
+            [9, 25]
+          ],
+          3340
+        ],
+        [
+          7,
+          0,
+          100,
+          5,
+          [
+            [22, 50]
+          ],
+          3105
+        ],
+        [
+          8,
+          0,
+          100,
+          80,
+          [
+            [24, 0]
+          ],
+          2640
+        ],
+        [
+          9,
+          0,
+          100,
+          0,
+          [
+            [31, 0]
+          ],
+          1190
+        ],
+        [
+          10,
+          0,
+          100,
+          0,
+          [
+            [29, 50]
+          ],
+          360
+        ],
+        [
+          14,
+          0,
+          100,
+          0,
+          [
+            [28, 0]
+          ],
+          270
+        ],
+        [
+          15,
+          0,
+          100,
+          0,
+          [
+            [20, 0]
+          ],
+          160
+        ],
+        [
+          16,
+          0,
+          100,
+          20,
+          [
+            [25, 0]
+          ],
+          480
+        ],
+        [
+          17,
+          0,
+          100,
+          0,
+          [
+            [26, 0]
+          ],
+          1350
+        ],
+        [
+          18,
+          0,
+          100,
+          0,
+          [
+            [32, 50]
+          ],
+          105
+        ],
+        [
+          19,
+          0,
+          100,
+          0,
+          [
+            [27, 0]
+          ],
+          150
+        ]
+      ],
+      "research": [
+        [
+          0,
+          0,
+          4294967295,
+          false,
+          []
+        ]
+      ],
+      "roles": [
+        [0, 2],
+        [1, 1],
+        [2, 0],
+        [3, 0]
+      ],
+      "shared_research": {},
+      "version": 1
+    },
+    "stocks": [
+      {
+        "inventory": [
+          [9, 350],
+          [20, 140],
+          [22, 1360],
+          [24, 660],
+          [25, 480],
+          [26, 400],
+          [27, 100],
+          [29, 110],
+          [30, 2480],
+          [31, 1280],
+          [32, 160]
+        ],
+        "world": 0
+      },
+      {
+        "inventory": [
+          [9, 680],
+          [29, 40]
+        ],
+        "world": 1
+      },
+      {
+        "inventory": [
+          [9, 510],
+          [29, 70]
+        ],
+        "world": 3
+      }
+    ],
+    "stellar": {
+      "admitted": [],
+      "next": 2,
+      "policies": [
+        [66644, 0, false, 0],
+        [205700, 0, false, 0]
+      ],
+      "projects": [
+        [1, 0, 66644, 1, 0, 0, 0, 1, 2]
+      ],
+      "version": 1,
+      "worlds": [
+        [0, "uat-0", "UAT world 0", 0, 0, true],
+        [1, "uat-1", "UAT world 1", 3, 0, true],
+        [2, "uat-2", "UAT world 2", 6, 0, true],
+        [3, "uat-3", "UAT world 3", 9, 0, true]
+      ],
+      "zones": [
+        [1, 3, 205700, 0]
+      ]
+    }
+  },
+  "food_interrupted": {
+    "year": 1959,
+    "month": 4,
+    "money": 26104693,
+    "research": [
+      {
+        "budget": 250000,
+        "project": 0,
+        "rp": 0,
+        "unlocked": [101, 102, 103, 104, 201, 202, 203, 204, 301, 302, 303, 304]
+      }
+    ],
+    "cities": [
+      {
+        "current": [0, 0, 0],
+        "houses": 37,
+        "id": 1,
+        "last": [0, 0, 0],
+        "population": 1431,
+        "quotas": [71, 35, 14],
+        "state": 0
+      }
+    ],
+    "facilities": [
+      {
+        "batches": 4960,
+        "id": 3,
+        "inputs": [
+          [6, 70]
+        ],
+        "outputs": [
+          [33, 5]
+        ],
+        "recipe": 404
+      },
+      {
+        "batches": 4960,
+        "id": 4,
+        "inputs": [
+          [16, 70]
+        ],
+        "outputs": [
+          [30, 5]
+        ],
+        "recipe": 101
+      },
+      {
+        "batches": 4590,
+        "id": 5,
+        "inputs": [
+          [17, 270]
+        ],
+        "outputs": [
+          [9, 3]
+        ],
+        "recipe": 102
+      },
+      {
+        "batches": 4420,
+        "id": 8,
+        "inputs": [
+          [21, 70]
+        ],
+        "outputs": [
+          [22, 5]
+        ],
+        "recipe": 201
+      },
+      {
+        "batches": 3680,
+        "id": 9,
+        "inputs": [
+          [22, 80],
+          [23, 240]
+        ],
+        "outputs": [
+          [24, 1]
+        ],
+        "recipe": 202
+      },
+      {
+        "batches": 1890,
+        "id": 10,
+        "inputs": [
+          [22, 230],
+          [24, 0]
+        ],
+        "outputs": [
+          [31, 5]
+        ],
+        "recipe": 203
+      },
+      {
+        "batches": 560,
+        "id": 11,
+        "inputs": [
+          [9, 0],
+          [22, 300],
+          [24, 260]
+        ],
+        "outputs": [
+          [29, 4]
+        ],
+        "recipe": 204
+      },
+      {
+        "batches": 630,
+        "id": 15,
+        "inputs": [
+          [26, 0]
+        ],
+        "outputs": [
+          [28, 5]
+        ],
+        "recipe": 403
+      },
+      {
+        "batches": 320,
+        "id": 16,
+        "inputs": [
+          [9, 0],
+          [19, 300]
+        ],
+        "outputs": [
+          [20, 2]
+        ],
+        "recipe": 103
+      },
+      {
+        "batches": 840,
+        "id": 17,
+        "inputs": [
+          [3, 0]
+        ],
+        "outputs": [
+          [25, 4]
+        ],
+        "recipe": 301
+      },
+      {
+        "batches": 2970,
+        "id": 18,
+        "inputs": [
+          [19, 165],
+          [23, 0]
+        ],
+        "outputs": [
+          [26, 4]
+        ],
+        "recipe": 401
+      },
+      {
+        "batches": 210,
+        "id": 19,
+        "inputs": [
+          [20, 0],
+          [22, 600]
+        ],
+        "outputs": [
+          [32, 5]
+        ],
+        "recipe": 302
+      },
+      {
+        "batches": 390,
+        "id": 20,
+        "inputs": [
+          [26, 60]
+        ],
+        "outputs": [
+          [27, 5]
+        ],
+        "recipe": 402
+      }
+    ],
+    "economy": {
+      "accounting": [
+        [65335, 0, 33872, 8038, 0, 0, 198821, 0, 0, 5121, 0, 0, 0, 0, 0, 0, 139492, 176394, 0, 62399, 736, 181613, 9923, 187772, 4172, 1932, 6831, 897, 1449, 633, 11084, 4326, 483, 11084, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1680, 0, 0, 9990, 0, 0, 5040, 0, 0, 0, 0, 0, 0, 9990, 9450, 0, 3755, 700, 8910, 9680, 13540, 4040, 980, 2940, 360, 70, 560, 3760, 2000, 400, 5179, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 2960, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 280, 0, 1920, 0, 1260, 980, 840, 360, 0, 560, 3440, 2000, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1680, 0, 0, 9920, 0, 0, 2681, 0, 0, 0, 0, 0, 0, 9920, 9180, 0, 3290, 420, 8840, 6551, 13300, 2690, 0, 2060, 40, 60, 100, 302, 0, 0, 5111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [65335, 0, 33872, 6177, 0, 0, 188194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 129058, 166527, 0, 57493, 0, 172118, 0, 172470, 0, 853, 2900, 472, 1142, 0, 6700, 2048, 31, 5320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "cities": [
+        [
+          1,
+          [
+            [9, 20],
+            [24, 10],
+            [28, 10],
+            [30, 20],
+            [33, 68]
+          ],
+          []
+        ]
+      ],
+      "factories": [
+        [
+          2,
+          0,
+          100,
+          100,
+          [
+            [33, 0]
+          ],
+          4960
+        ],
+        [
+          3,
+          0,
+          100,
+          100,
+          [
+            [30, 0]
+          ],
+          4960
+        ],
+        [
+          4,
+          0,
+          100,
+          0,
+          [
+            [9, 75]
+          ],
+          4590
+        ],
+        [
+          7,
+          0,
+          100,
+          100,
+          [
+            [22, 0]
+          ],
+          4420
+        ],
+        [
+          8,
+          0,
+          100,
+          0,
+          [
+            [24, 0]
+          ],
+          3680
+        ],
+        [
+          9,
+          0,
+          100,
+          0,
+          [
+            [31, 0]
+          ],
+          1890
+        ],
+        [
+          10,
+          0,
+          100,
+          40,
+          [
+            [29, 50]
+          ],
+          560
+        ],
+        [
+          14,
+          0,
+          100,
+          30,
+          [
+            [28, 0]
+          ],
+          630
+        ],
+        [
+          15,
+          0,
+          100,
+          0,
+          [
+            [20, 0]
+          ],
+          320
+        ],
+        [
+          16,
+          0,
+          100,
+          0,
+          [
+            [25, 0]
+          ],
+          840
+        ],
+        [
+          17,
+          0,
+          100,
+          35,
+          [
+            [26, 0]
+          ],
+          2970
+        ],
+        [
+          18,
+          0,
+          100,
+          0,
+          [
+            [32, 0]
+          ],
+          210
+        ],
+        [
+          19,
+          0,
+          100,
+          0,
+          [
+            [27, 0]
+          ],
+          390
+        ]
+      ],
+      "research": [
+        [
+          0,
+          0,
+          4294967295,
+          false,
+          []
+        ]
+      ],
+      "roles": [
+        [0, 2],
+        [1, 1],
+        [2, 0],
+        [3, 0]
+      ],
+      "shared_research": {},
+      "version": 1
+    },
+    "stocks": [
+      {
+        "inventory": [
+          [9, 669],
+          [20, 280],
+          [22, 1919],
+          [24, 1080],
+          [25, 980],
+          [26, 820],
+          [27, 320],
+          [29, 190],
+          [30, 3438],
+          [31, 2000],
+          [32, 400]
+        ],
+        "world": 0
+      },
+      {
+        "inventory": [
+          [9, 1000],
+          [29, 120]
+        ],
+        "world": 1
+      },
+      {
+        "inventory": [
+          [9, 670],
+          [29, 150]
+        ],
+        "world": 3
+      }
+    ],
+    "stellar": {
+      "admitted": [],
+      "next": 2,
+      "policies": [
+        [66644, 0, false, 0],
+        [205700, 0, false, 0]
+      ],
+      "projects": [
+        [1, 0, 66644, 1, 0, 0, 0, 1, 2]
+      ],
+      "version": 1,
+      "worlds": [
+        [0, "uat-0", "UAT world 0", 0, 0, true],
+        [1, "uat-1", "UAT world 1", 3, 0, true],
+        [2, "uat-2", "UAT world 2", 6, 0, true],
+        [3, "uat-3", "UAT world 3", 9, 0, true]
+      ],
+      "zones": [
+        [1, 3, 205700, 0]
+      ]
+    }
+  },
+  "final": {
+    "year": 1961,
+    "month": 2,
+    "money": 30849971,
+    "research": [
+      {
+        "budget": 250000,
+        "project": 0,
+        "rp": 0,
+        "unlocked": [101, 102, 103, 104, 201, 202, 203, 204, 301, 302, 303, 304]
+      }
+    ],
+    "cities": [
+      {
+        "current": [0, 0, 0],
+        "houses": 39,
+        "id": 1,
+        "last": [0, 0, 0],
+        "population": 1618,
+        "quotas": [77, 38, 15],
+        "state": 1
+      }
+    ],
+    "facilities": [
+      {
+        "batches": 5940,
+        "id": 3,
+        "inputs": [
+          [6, 0]
+        ],
+        "outputs": [
+          [33, 5]
+        ],
+        "recipe": 404
+      },
+      {
+        "batches": 5940,
+        "id": 4,
+        "inputs": [
+          [16, 0]
+        ],
+        "outputs": [
+          [30, 4]
+        ],
+        "recipe": 101
+      },
+      {
+        "batches": 5535,
+        "id": 5,
+        "inputs": [
+          [17, 0]
+        ],
+        "outputs": [
+          [9, 3]
+        ],
+        "recipe": 102
+      },
+      {
+        "batches": 5365,
+        "id": 8,
+        "inputs": [
+          [21, 70]
+        ],
+        "outputs": [
+          [22, 5]
+        ],
+        "recipe": 201
+      },
+      {
+        "batches": 4640,
+        "id": 9,
+        "inputs": [
+          [22, 80],
+          [23, 210]
+        ],
+        "outputs": [
+          [24, 4]
+        ],
+        "recipe": 202
+      },
+      {
+        "batches": 2380,
+        "id": 10,
+        "inputs": [
+          [22, 300],
+          [24, 70]
+        ],
+        "outputs": [
+          [31, 5]
+        ],
+        "recipe": 203
+      },
+      {
+        "batches": 640,
+        "id": 11,
+        "inputs": [
+          [9, 0],
+          [22, 300],
+          [24, 300]
+        ],
+        "outputs": [
+          [29, 4]
+        ],
+        "recipe": 204
+      },
+      {
+        "batches": 870,
+        "id": 15,
+        "inputs": [
+          [26, 0]
+        ],
+        "outputs": [
+          [28, 5]
+        ],
+        "recipe": 403
+      },
+      {
+        "batches": 440,
+        "id": 16,
+        "inputs": [
+          [9, 0],
+          [19, 300]
+        ],
+        "outputs": [
+          [20, 2]
+        ],
+        "recipe": 103
+      },
+      {
+        "batches": 1080,
+        "id": 17,
+        "inputs": [
+          [3, 0]
+        ],
+        "outputs": [
+          [25, 3]
+        ],
+        "recipe": 301
+      },
+      {
+        "batches": 4050,
+        "id": 18,
+        "inputs": [
+          [19, 300],
+          [23, 270]
+        ],
+        "outputs": [
+          [26, 4]
+        ],
+        "recipe": 401
+      },
+      {
+        "batches": 280,
+        "id": 19,
+        "inputs": [
+          [20, 0],
+          [22, 600]
+        ],
+        "outputs": [
+          [32, 2]
+        ],
+        "recipe": 302
+      },
+      {
+        "batches": 570,
+        "id": 20,
+        "inputs": [
+          [26, 0]
+        ],
+        "outputs": [
+          [27, 5]
+        ],
+        "recipe": 402
+      }
+    ],
+    "economy": {
+      "accounting": [
+        [77780, 0, 40245, 8958, 0, 0, 239141, 0, 0, 6208, 0, 0, 0, 0, 0, 0, 169708, 203658, 0, 72575, 1012, 217280, 12096, 232128, 5276, 2484, 9315, 1311, 2001, 725, 13338, 5453, 644, 13338, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 2160, 0, 0, 11880, 0, 0, 6120, 0, 0, 0, 0, 0, 0, 11880, 11070, 0, 5090, 980, 10800, 11820, 17860, 5030, 1330, 4080, 540, 100, 720, 4540, 2480, 560, 6293, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 3600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 420, 0, 2320, 0, 1540, 1330, 1200, 540, 0, 720, 4160, 2480, 560, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 2160, 0, 0, 11880, 0, 0, 3141, 0, 0, 0, 0, 0, 0, 11880, 11070, 0, 4490, 560, 10730, 8221, 17380, 3290, 0, 2900, 40, 90, 100, 362, 0, 0, 6137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [77780, 0, 40245, 6553, 0, 0, 226609, 0, 0, 0, 0, 0, 0, 0, 0, 0, 157366, 191944, 0, 66701, 0, 205992, 0, 212418, 0, 1057, 4167, 706, 1672, 0, 8095, 2752, 41, 6672, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "cities": [
+        [
+          1,
+          [
+            [9, 0],
+            [24, 10],
+            [28, 10],
+            [30, 20],
+            [33, 156]
+          ],
+          [
+            [33, 78]
+          ]
+        ]
+      ],
+      "factories": [
+        [
+          2,
+          0,
+          100,
+          35,
+          [
+            [33, 0]
+          ],
+          5940
+        ],
+        [
+          3,
+          0,
+          100,
+          35,
+          [
+            [30, 0]
+          ],
+          5940
+        ],
+        [
+          4,
+          0,
+          100,
+          0,
+          [
+            [9, 50]
+          ],
+          5535
+        ],
+        [
+          7,
+          0,
+          100,
+          100,
+          [
+            [22, 50]
+          ],
+          5365
+        ],
+        [
+          8,
+          0,
+          100,
+          40,
+          [
+            [24, 0]
+          ],
+          4640
+        ],
+        [
+          9,
+          0,
+          100,
+          0,
+          [
+            [31, 0]
+          ],
+          2380
+        ],
+        [
+          10,
+          0,
+          100,
+          0,
+          [
+            [29, 50]
+          ],
+          640
+        ],
+        [
+          14,
+          0,
+          100,
+          30,
+          [
+            [28, 0]
+          ],
+          870
+        ],
+        [
+          15,
+          0,
+          100,
+          0,
+          [
+            [20, 0]
+          ],
+          440
+        ],
+        [
+          16,
+          0,
+          100,
+          0,
+          [
+            [25, 0]
+          ],
+          1080
+        ],
+        [
+          17,
+          0,
+          100,
+          0,
+          [
+            [26, 0]
+          ],
+          4050
+        ],
+        [
+          18,
+          0,
+          100,
+          0,
+          [
+            [32, 0]
+          ],
+          280
+        ],
+        [
+          19,
+          0,
+          100,
+          0,
+          [
+            [27, 0]
+          ],
+          570
+        ]
+      ],
+      "research": [
+        [
+          0,
+          0,
+          4294967295,
+          false,
+          []
+        ]
+      ],
+      "roles": [
+        [0, 2],
+        [1, 1],
+        [2, 0],
+        [3, 0]
+      ],
+      "shared_research": {},
+      "version": 1
+    },
+    "stocks": [
+      {
+        "inventory": [
+          [9, 909],
+          [20, 420],
+          [22, 2319],
+          [24, 1360],
+          [25, 1330],
+          [26, 1180],
+          [27, 500],
+          [29, 190],
+          [30, 4158],
+          [31, 2480],
+          [32, 560]
+        ],
+        "world": 0
+      },
+      {
+        "inventory": [
+          [9, 1240],
+          [29, 200]
+        ],
+        "world": 1
+      },
+      {
+        "inventory": [
+          [9, 830],
+          [29, 230]
+        ],
+        "world": 3
+      }
+    ],
+    "stellar": {
+      "admitted": [],
+      "next": 2,
+      "policies": [
+        [66644, 0, false, 0],
+        [205700, 0, false, 0]
+      ],
+      "projects": [
+        [1, 0, 66644, 1, 0, 0, 0, 1, 2]
+      ],
+      "version": 1,
+      "worlds": [
+        [0, "uat-0", "UAT world 0", 0, 0, true],
+        [1, "uat-1", "UAT world 1", 3, 0, true],
+        [2, "uat-2", "UAT world 2", 6, 0, true],
+        [3, "uat-3", "UAT world 3", 9, 0, true]
+      ],
+      "zones": [
+        [1, 3, 205700, 0]
+      ]
+    }
+  },
+  "conserved_steps": 116,
+  "all_steps_conserved": true,
+  "all_trains_uncrashed": true
+}

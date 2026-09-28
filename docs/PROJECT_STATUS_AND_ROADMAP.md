@@ -1,5 +1,33 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Unified Commonwealth economy — 28 September 2026
+
+Delivery branch `codex/unified-commonwealth-economy`, based on main `959fe33f18`
+(PR #43). New games with integrated content now connect stable world roles,
+surveyed resources, physical industry buffers, ordinary freight, local stockpiles,
+research kits, mandatory advanced-construction materials and specific city baskets.
+One confirmed company research home publishes unlocks across registered hosts;
+stock and money stay local. Existing saves keep their legacy rules and content.
+
+[Rules and architecture](UNIFIED_COMMONWEALTH_ECONOMY.md) ·
+[Automated evidence](audit/2026-09-28/integrated-economy/README.md) ·
+[Human UAT and new saves](../demo/INTEGRATED-ECONOMY-UAT.md).
+Native progression covers all 13 recipes, all 12 technologies, delivered gate
+commissioning, electric construction, a profitable 24-month soak, food interruption
+and recovery, and exact cold reload. Three hosts with three joined clients pass
+five freight round trips, shared research and authority outage, then a coordinated
+cold restart and sixth trip with cargo/cash reconciled. Full unit suite: **473 cases / 67,508
+assertions**; **485/485 CTests**. Human graphical acceptance is **Pending**.
+This supersedes the earlier recommendation to integrate the economy; historical
+roadmap sections below retain their original dates and scope.
+
+Next priorities: **(1) human economy/star-map UAT**, (2) minimum-loan bootstrap and
+supply/throughput balance across additional seeds, (3) broader federation company
+lifecycle and interruption acceptance. The connected fixture uses authored
+infrastructure/capital; its profitable operating service is not a proof of
+minimum-capital progression. Historical recovery packages remain delivered;
+removed narrative/crisis features are not restored by this work.
+
 ## CST star map and gate expansion — 28 September 2026
 
 Current delivery branch: `codex/cst-star-map-expansion`, based on main

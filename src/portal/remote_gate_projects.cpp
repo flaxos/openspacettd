@@ -1,6 +1,7 @@
 /* This file is part of OpenSpaceTTD, licensed under GNU GPL version 2. */
 /** @file remote_gate_projects.cpp Idempotent remote reservations, equipment escrow and native far-end construction. */
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "remote_gate_projects.h"
 #include "universe_network.h"
 #include "federation_identity.h"
@@ -367,6 +368,8 @@ void RemoteGateProjects::Reconcile(const json &r)
 														  WorldID{p.at("target_world").get<uint32_t>()}, r.at("tile").get<uint32_t>(), 1, source.base());
 			if (gate == INVALID_PORTAL) return;
 			StellarNetwork::ConfigureRemoteAccess(source, owner, false, 0);
+			IntegratedEconomy::Record(EconomyFlow::Consumed, GetCargoTypeByLabel(CT_STEEL), p.at("steel").get<uint32_t>());
+			IntegratedEconomy::Record(EconomyFlow::Consumed, GetCargoTypeByLabel(CargoLabel{"MACH"}), p.at("machines").get<uint32_t>());
 			p["steel"] = 0;
 			p["machines"] = 0;
 			p["state"] = "active";

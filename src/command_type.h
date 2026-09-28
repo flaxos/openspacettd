@@ -423,6 +423,8 @@ enum class Commands : uint8_t {
 	StartGateProject, ///< reserve and supply a stellar gate connection
 	OperateGateProject, ///< commission or cancel a gate project
 	SetStellarGateAccess, ///< configure player gateway access
+	SetResearchAcceleration, ///< enable optional research feedstock consumption
+	ManageEconomyFactory,    ///< upgrade or retire an owned physical factory
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

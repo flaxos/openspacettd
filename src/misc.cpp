@@ -8,6 +8,7 @@
 /** @file misc.cpp Misc functions that shouldn't be here. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include "portal/universe_network.h"
 #include "portal/stellar_network.h"
 #include "portal/production_chain.h"
@@ -146,6 +147,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	CorporateHQManager::Reset();
 	TechTreeManager::Reset();
 	ResourceSiteManager::Reset();
+	IntegratedEconomy::Reset();
 	StellarNetwork::Reset();
 	UniverseNetwork::Reset();
 	FabricationManager::Reset();

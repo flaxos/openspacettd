@@ -8,6 +8,8 @@
 /** @file production_chain.cpp Commonwealth multi-world production chains and industrial processing facilities. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
+#include "../industry.h"
 #include "production_chain.h"
 #include "commonwealth_slice.h"
 #include "commonwealth_pack.h"
@@ -228,6 +230,7 @@ void ProductionChainManager::InitDefaultRecipes()
 		.outputs = { {c_mail, 2} },
 		.allowed_phases = { WorldPhase::Phase1_Core }
 	});
+	IntegratedEconomy::ConfigureRecipes();
 }
 
 void ProductionChainManager::RegisterRecipe(const ProductionRecipe &recipe)
@@ -352,6 +355,9 @@ FacilityStatus ProductionChainManager::GetFacilityStatus(const ProcessingFacilit
 	if (f == nullptr) return FacilityStatus::None;
 	const ProductionRecipe *rec = GetRecipe(f->recipe_id);
 	if (rec == nullptr) return FacilityStatus::Idle;
+	if (IntegratedEconomy::Enabled() && f->id > 0 &&
+		IntegratedEconomy::OutputBatchLimit(Industry::GetIfValid(IndustryID{uint16_t(f->id - 1)})) == 0)
+		return FacilityStatus::Overflow;
 
 	if (f->last_month_hub_overflow > 0) return FacilityStatus::Overflow;
 	if (f->last_month_production > 0) return FacilityStatus::Active;
@@ -399,6 +405,7 @@ void ProductionChainManager::ChangeCompanyOwner(CompanyID old_owner, CompanyID n
 
 bool ProductionChainManager::AcceptsCargo(StationID station, CargoType cargo)
 {
+	if (IntegratedEconomy::Enabled()) return false;
 	if (cargo >= NUM_CARGO || CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid) return false;
 	const ProcessingFacility *f = GetFacilityForStation(station);
 	const Station *st = Station::GetIfValid(station);
@@ -474,6 +481,30 @@ void ProductionChainManager::PublishStationOutput(ProcessingFacility &f)
 
 std::vector<ProcessingFacility> ProductionChainManager::GetAllFacilities()
 {
+	if (IntegratedEconomy::Enabled()) {
+		std::vector<ProcessingFacility> result;
+		for (const auto &[id, f] : IntegratedEconomy::Factories()) {
+			auto i = Industry::GetIfValid(id);
+			if (!i) continue;
+			ProcessingFacility view{.id = uint32_t(id.base()) + 1,
+									.tile = i->location.tile,
+									.world_id = PlanetManager::GetTileWorld(i->location.tile),
+									.recipe_id = IntegratedEconomy::IndustryRecipe(i->type),
+									.owner = f.owner,
+									.monthly_capacity = f.capacity,
+									.last_month_production = f.last_batches,
+									.input_buffers = {},
+									.output_buffers = {}};
+			view.total_produced = f.total_batches;
+			for (auto &a : i->accepted)
+				if (IsValidCargoType(a.cargo)) view.input_buffers[a.cargo] = a.waiting;
+			for (auto &p : i->produced)
+				if (IsValidCargoType(p.cargo)) view.output_buffers[p.cargo] = p.waiting;
+			result.push_back(view);
+		}
+		return result;
+	}
+
 	std::vector<ProcessingFacility> res;
 	res.reserve(_facilities.size());
 	for (const auto &[id, f] : _facilities) {
@@ -559,6 +590,10 @@ uint32_t ProductionChainManager::WithdrawOutput(FacilityID id, CargoType cargo, 
 
 void ProductionChainManager::ProcessMonthlyProduction()
 {
+	if (IntegratedEconomy::Enabled()) {
+		IntegratedEconomy::Produce();
+		return;
+	}
 	_last_month_hub_overflow = 0;
 	for (auto &[id, f] : _facilities) {
 		f.last_month_hub_overflow = 0;

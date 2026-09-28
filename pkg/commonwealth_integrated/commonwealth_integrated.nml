@@ -1,0 +1,598 @@
+/*
+ * Commonwealth Industry and Cargo Pack for OpenSpaceTTD
+ * Copyright (C) 2026 OpenSpaceTTD Developers
+ * Licensed under the GNU General Public License version 2 (GPL-2.0).
+ */
+
+grf {
+	grfid: "OST\01";
+	name: string(STR_GRF_NAME);
+	desc: string(STR_GRF_DESC);
+	version: 5;
+	min_compatible_version: 5;
+}
+
+cargotable {
+	SILC, // Stone & Slag / Silicates
+	IRON, // Iron Ore
+	STEL, // Structural Steel
+	COPR, // Copper Ore
+	WIRE, // Conductive Wiring & Coils
+	SAND, // Silica Sand & Quartz
+	CHIP, // Silicon Wafers & Chips
+	RARE, // Rare Earth Minerals
+	ALLO, // Superalloys & Superconductors
+	POLY, // Synthetic Polymers & Composites
+	BCRY, // Blank Data Crystals
+	QCRY, // Enriched Quantum Crystals
+	CCRY, BALL, SIGE, MGLA, MACH, OIL_, GRAI, FOOD // Encrypted Consumer Crystals
+}
+
+/* ====================================================================
+ * CARGO DEFINITIONS (Pipelines A, B, C, D)
+ * ==================================================================== */
+
+/* Pipeline A: Structural & Track Infrastructure */
+item(FEAT_CARGOS, cargo_silc, 0x10) {
+	property {
+		is_freight: 1;
+		cargo_label: "SILC";
+		number: 16;
+		type_name: string(STR_CARGO_NAME_SILC);
+		unit_name: string(STR_CARGO_NAME_SILC);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_SILC);
+		type_abbreviation: string(STR_CARGO_ABBR_SILC);
+		sprite: 0x1AC0;
+		weight: 1 ton;
+		price_factor: 120;
+		penalty_lowerbound: 15;
+		single_penalty_length: 60;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+item(FEAT_CARGOS, cargo_iron, 0x11) {
+	property {
+		is_freight: 1;
+		cargo_label: "IRON";
+		number: 17;
+		type_name: string(STR_CARGO_NAME_IRON);
+		unit_name: string(STR_CARGO_NAME_IRON);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_IRON);
+		type_abbreviation: string(STR_CARGO_ABBR_IRON);
+		sprite: 0x1AC1;
+		weight: 1 ton;
+		price_factor: 135;
+		penalty_lowerbound: 12;
+		single_penalty_length: 55;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+if (climate == CLIMATE_TEMPERATE) {
+item(FEAT_CARGOS, cargo_stel_native, 0x09) {
+	property {
+		is_freight: 1;
+		cargo_label: "STEL";
+		number: 18;
+		type_name: string(STR_CARGO_NAME_STEL);
+		unit_name: string(STR_CARGO_NAME_STEL);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_STEL);
+		type_abbreviation: string(STR_CARGO_ABBR_STEL);
+		sprite: 0x1AC2;
+		weight: 1 ton;
+		price_factor: 180;
+		penalty_lowerbound: 10;
+		single_penalty_length: 50;
+		cargo_classes: bitmask(CC_PIECE_GOODS);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+} else {
+item(FEAT_CARGOS, cargo_stel, 0x12) {
+	property {
+		is_freight: 1;
+		cargo_label: "STEL";
+		number: 18;
+		type_name: string(STR_CARGO_NAME_STEL);
+		unit_name: string(STR_CARGO_NAME_STEL);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_STEL);
+		type_abbreviation: string(STR_CARGO_ABBR_STEL);
+		sprite: 0x1AC2;
+		weight: 1 ton;
+		price_factor: 180;
+		penalty_lowerbound: 10;
+		single_penalty_length: 50;
+		cargo_classes: bitmask(CC_PIECE_GOODS);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+}
+
+item(FEAT_CARGOS, cargo_rare, 0x13) {
+	property {
+		is_freight: 1;
+		cargo_label: "RARE";
+		number: 19;
+		type_name: string(STR_CARGO_NAME_RARE);
+		unit_name: string(STR_CARGO_NAME_RARE);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_RARE);
+		type_abbreviation: string(STR_CARGO_ABBR_RARE);
+		sprite: 0x1AC3;
+		weight: 1 ton;
+		price_factor: 240;
+		penalty_lowerbound: 8;
+		single_penalty_length: 40;
+		cargo_classes: bitmask(CC_BULK, CC_SPECIAL);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+item(FEAT_CARGOS, cargo_allo, 0x14) {
+	property {
+		is_freight: 1;
+		cargo_label: "ALLO";
+		number: 20;
+		type_name: string(STR_CARGO_NAME_ALLO);
+		unit_name: string(STR_CARGO_NAME_ALLO);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_ALLO);
+		type_abbreviation: string(STR_CARGO_ABBR_ALLO);
+		sprite: 0x1AC4;
+		weight: 1 ton;
+		price_factor: 260;
+		penalty_lowerbound: 6;
+		single_penalty_length: 35;
+		cargo_classes: bitmask(CC_PIECE_GOODS, CC_SPECIAL);
+		town_growth_effect: TOWNGROWTH_GOODS;
+	}
+}
+
+/* Pipeline B: Electronics, Signalling & Catenary */
+if (climate == CLIMATE_TROPICAL) {
+item(FEAT_CARGOS, cargo_copr_native, 0x08) {
+	property {
+		is_freight: 1;
+		cargo_label: "COPR";
+		number: 21;
+		type_name: string(STR_CARGO_NAME_COPR);
+		unit_name: string(STR_CARGO_NAME_COPR);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_COPR);
+		type_abbreviation: string(STR_CARGO_ABBR_COPR);
+		sprite: 0x1AC5;
+		weight: 1 ton;
+		price_factor: 130;
+		penalty_lowerbound: 14;
+		single_penalty_length: 55;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+} else {
+item(FEAT_CARGOS, cargo_copr, 0x15) {
+	property {
+		is_freight: 1;
+		cargo_label: "COPR";
+		number: 21;
+		type_name: string(STR_CARGO_NAME_COPR);
+		unit_name: string(STR_CARGO_NAME_COPR);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_COPR);
+		type_abbreviation: string(STR_CARGO_ABBR_COPR);
+		sprite: 0x1AC5;
+		weight: 1 ton;
+		price_factor: 130;
+		penalty_lowerbound: 14;
+		single_penalty_length: 55;
+		cargo_classes: bitmask(CC_BULK, CC_NON_POTABLE);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+}
+
+item(FEAT_CARGOS, cargo_wire, 0x16) {
+	property {
+		is_freight: 1;
+		cargo_label: "WIRE";
+		number: 22;
+		type_name: string(STR_CARGO_NAME_WIRE);
+		unit_name: string(STR_CARGO_NAME_WIRE);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_WIRE);
+		type_abbreviation: string(STR_CARGO_ABBR_WIRE);
+		sprite: 0x1AC6;
+		weight: 1 ton;
+		price_factor: 175;
+		penalty_lowerbound: 9;
+		single_penalty_length: 45;
+		cargo_classes: bitmask(CC_PIECE_GOODS);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+item(FEAT_CARGOS, cargo_sand, 0x17) {
+	property {
+		is_freight: 1;
+		cargo_label: "SAND";
+		number: 23;
+		type_name: string(STR_CARGO_NAME_SAND);
+		unit_name: string(STR_CARGO_NAME_SAND);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_SAND);
+		type_abbreviation: string(STR_CARGO_ABBR_SAND);
+		sprite: 0x1AC7;
+		weight: 1 ton;
+		price_factor: 110;
+		penalty_lowerbound: 18;
+		single_penalty_length: 65;
+		cargo_classes: bitmask(CC_BULK);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+item(FEAT_CARGOS, cargo_chip, 0x18) {
+	property {
+		is_freight: 1;
+		cargo_label: "CHIP";
+		number: 24;
+		type_name: string(STR_CARGO_NAME_CHIP);
+		unit_name: string(STR_CARGO_NAME_CHIP);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_CHIP);
+		type_abbreviation: string(STR_CARGO_ABBR_CHIP);
+		sprite: 0x1AC8;
+		weight: 1 ton;
+		price_factor: 275;
+		penalty_lowerbound: 5;
+		single_penalty_length: 30;
+		cargo_classes: bitmask(CC_EXPRESS, CC_PIECE_GOODS);
+		town_growth_effect: TOWNGROWTH_GOODS;
+	}
+}
+
+/* Pipeline C: Advanced Train Propulsion */
+item(FEAT_CARGOS, cargo_poly, 0x19) {
+	property {
+		is_freight: 1;
+		cargo_label: "POLY";
+		number: 25;
+		type_name: string(STR_CARGO_NAME_POLY);
+		unit_name: string(STR_CARGO_NAME_POLY);
+		units_of_cargo: 0x0050; // Native weight units, including player unit conversion.
+		items_of_cargo: string(STR_CARGO_UNIT_POLY);
+		type_abbreviation: string(STR_CARGO_ABBR_POLY);
+		sprite: 0x1AC9;
+		weight: 1 ton;
+		price_factor: 195;
+		penalty_lowerbound: 8;
+		single_penalty_length: 40;
+		cargo_classes: bitmask(CC_PIECE_GOODS, CC_LIQUID);
+		town_growth_effect: TOWNGROWTH_GOODS;
+	}
+}
+
+/* Pipeline D: Data Crystals & Scientific R&D */
+item(FEAT_CARGOS, cargo_bcry, 0x1A) {
+	property {
+		is_freight: 1;
+		cargo_label: "BCRY";
+		number: 26;
+		type_name: string(STR_CARGO_NAME_BCRY);
+		unit_name: string(STR_CARGO_NAME_BCRY);
+		units_of_cargo: 0x004E; // Native item units.
+		items_of_cargo: string(STR_CARGO_UNIT_BCRY);
+		type_abbreviation: string(STR_CARGO_ABBR_BCRY);
+		sprite: 0x1ACA;
+		weight: 1 ton;
+		price_factor: 220;
+		penalty_lowerbound: 6;
+		single_penalty_length: 35;
+		cargo_classes: bitmask(CC_EXPRESS, CC_ARMOURED);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+item(FEAT_CARGOS, cargo_qcry, 0x1B) {
+	property {
+		is_freight: 1;
+		cargo_label: "QCRY";
+		number: 27;
+		type_name: string(STR_CARGO_NAME_QCRY);
+		unit_name: string(STR_CARGO_NAME_QCRY);
+		units_of_cargo: 0x004E; // Native item units.
+		items_of_cargo: string(STR_CARGO_UNIT_QCRY);
+		type_abbreviation: string(STR_CARGO_ABBR_QCRY);
+		sprite: 0x1ACB;
+		weight: 1 ton;
+		price_factor: 350;
+		penalty_lowerbound: 4;
+		single_penalty_length: 25;
+		cargo_classes: bitmask(CC_EXPRESS, CC_ARMOURED, CC_SPECIAL);
+		town_growth_effect: TOWNGROWTH_NONE;
+	}
+}
+
+item(FEAT_CARGOS, cargo_ccry, 0x1C) {
+	property {
+		is_freight: 1;
+		cargo_label: "CCRY";
+		number: 28;
+		type_name: string(STR_CARGO_NAME_CCRY);
+		unit_name: string(STR_CARGO_NAME_CCRY);
+		units_of_cargo: 0x004E; // Native item units.
+		items_of_cargo: string(STR_CARGO_UNIT_CCRY);
+		type_abbreviation: string(STR_CARGO_ABBR_CCRY);
+		sprite: 0x1ACC;
+		weight: 1 ton;
+		price_factor: 300;
+		penalty_lowerbound: 3;
+		single_penalty_length: 20;
+		cargo_classes: bitmask(CC_MAIL, CC_EXPRESS);
+		town_growth_effect: TOWNGROWTH_MAIL;
+	}
+}
+
+/* ====================================================================
+ * INDUSTRY DEFINITIONS
+ * ==================================================================== */
+
+/* Pipeline A: Structural */
+item(FEAT_INDUSTRIES, ind_quarry, 0x10) {
+	property {
+		substitute: 0x00;
+		name: string(STR_IND_NAME_QUARRY);
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("SILC", 180)];
+	}
+}
+
+item(FEAT_INDUSTRIES, ind_crusher, 0x11) {
+	property {
+		substitute: 0x02;
+		name: string(STR_IND_NAME_CRUSHER);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SILC"), produce_cargo("BALL", 16)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_iron_mine, 0x12) {
+	property {
+		substitute: 0x12;
+		name: string(STR_IND_NAME_IRON_MINE);
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("IRON", 200)];
+	}
+}
+
+item(FEAT_INDUSTRIES, ind_steel_mill, 0x13) {
+	property {
+		substitute: 0x08;
+		name: string(STR_IND_NAME_STEEL_MILL);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("IRON"), produce_cargo("STEL", 15)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_rare_mine, 0x14) {
+	property {
+		substitute: 0x00;
+		name: string(STR_IND_NAME_RARE_MINE);
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("RARE", 120)];
+	}
+}
+
+item(FEAT_INDUSTRIES, ind_superalloy_foundry, 0x15) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_SUPERALLOY_FOUNDRY);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("STEL"), accept_cargo("RARE"), produce_cargo("ALLO", 14)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+/* Pipeline B: Electronics & Signalling */
+item(FEAT_INDUSTRIES, ind_copper_mine, 0x16) {
+	property {
+		substitute: 0x00;
+		name: string(STR_IND_NAME_COPPER_MINE);
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("COPR", 180)];
+	}
+}
+
+item(FEAT_INDUSTRIES, ind_copper_smelter, 0x17) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_COPPER_SMELTER);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("COPR"), produce_cargo("WIRE", 16)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_silica_dunes, 0x18) {
+	property {
+		substitute: 0x00;
+		name: string(STR_IND_NAME_SILICA_DUNES);
+		life_type: IND_LIFE_TYPE_EXTRACTIVE;
+		cargo_types: [produce_cargo("SAND", 220)];
+	}
+}
+
+item(FEAT_INDUSTRIES, ind_silicon_arcology, 0x19) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_SILICON_ARCOLOGY);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SAND"), accept_cargo("WIRE"), produce_cargo("CHIP", 12)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+/* Pipeline C: Propulsion & Polymers */
+item(FEAT_INDUSTRIES, ind_polymer_complex, 0x1A) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_POLYMER_COMPLEX);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("OIL_"), produce_cargo("POLY", 15)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+/* Pipeline D: Data Crystals & R&D */
+item(FEAT_INDUSTRIES, ind_monocrystal_fab, 0x1B) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_MONOCRYSTAL_FAB);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("SAND"), accept_cargo("RARE"), produce_cargo("BCRY", 14)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_quantum_observatory, 0x1C) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_QUANTUM_OBSERVATORY);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("BCRY"), produce_cargo("QCRY", 10)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_megacity_formatting, 0x1D) {
+	property {
+		substitute: 0x06;
+		name: string(STR_IND_NAME_MEGACITY_FORMATTING);
+		life_type: IND_LIFE_TYPE_PROCESSING;
+		cargo_types: [accept_cargo("BCRY"), produce_cargo("CCRY", 16)];
+	}
+
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_CARGOS, cargo_ball, 30) {
+ property {
+  is_freight: 1; cargo_label: "BALL"; number: 30;
+  type_name: string(STR_CARGO_NAME_BALL); unit_name: string(STR_CARGO_NAME_BALL);
+  units_of_cargo: 0x0050; items_of_cargo: string(STR_CARGO_UNIT_BALL);
+  type_abbreviation: string(STR_CARGO_ABBR_BALL); sprite: 0x1AC2; weight: 1 ton;
+  price_factor: 180; penalty_lowerbound: 15; single_penalty_length: 60;
+  cargo_classes: bitmask(CC_PIECE_GOODS); town_growth_effect: TOWNGROWTH_NONE;
+ }
+}
+
+item(FEAT_CARGOS, cargo_sige, 31) {
+ property {
+  is_freight: 1; cargo_label: "SIGE"; number: 31;
+  type_name: string(STR_CARGO_NAME_SIGE); unit_name: string(STR_CARGO_NAME_SIGE);
+  units_of_cargo: 0x0050; items_of_cargo: string(STR_CARGO_UNIT_SIGE);
+  type_abbreviation: string(STR_CARGO_ABBR_SIGE); sprite: 0x1AC2; weight: 1 ton;
+  price_factor: 180; penalty_lowerbound: 15; single_penalty_length: 60;
+  cargo_classes: bitmask(CC_PIECE_GOODS); town_growth_effect: TOWNGROWTH_NONE;
+ }
+}
+
+item(FEAT_CARGOS, cargo_mgla, 32) {
+ property {
+  is_freight: 1; cargo_label: "MGLA"; number: 32;
+  type_name: string(STR_CARGO_NAME_MGLA); unit_name: string(STR_CARGO_NAME_MGLA);
+  units_of_cargo: 0x0050; items_of_cargo: string(STR_CARGO_UNIT_MGLA);
+  type_abbreviation: string(STR_CARGO_ABBR_MGLA); sprite: 0x1AC2; weight: 1 ton;
+  price_factor: 180; penalty_lowerbound: 15; single_penalty_length: 60;
+  cargo_classes: bitmask(CC_PIECE_GOODS); town_growth_effect: TOWNGROWTH_NONE;
+ }
+}
+
+if (!cargotype_available("FOOD")) {
+item(FEAT_CARGOS, cargo_food, 33) {
+ property { is_freight: 1; cargo_label: "FOOD"; number: 33;
+ type_name: string(STR_CARGO_NAME_FOOD); unit_name: string(STR_CARGO_NAME_FOOD);
+ units_of_cargo: 0x0050; items_of_cargo: string(STR_CARGO_UNIT_FOOD);
+ type_abbreviation: string(STR_CARGO_ABBR_FOOD); sprite: 0x1AC2; weight: 1 ton;
+ price_factor: 150; penalty_lowerbound: 10; single_penalty_length: 30;
+ cargo_classes: bitmask(CC_PIECE_GOODS, CC_REFRIGERATED); town_growth_effect: TOWNGROWTH_FOOD;
+ }
+}
+
+}
+
+item(FEAT_INDUSTRIES, ind_signals, 30) { property { substitute: 0x06; name: string(STR_IND_NAME_SIGNALS); life_type: IND_LIFE_TYPE_PROCESSING; cargo_types: [accept_cargo("CHIP"), accept_cargo("WIRE"), produce_cargo("SIGE", 12)]; }
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_maglev, 31) { property { substitute: 0x06; name: string(STR_IND_NAME_MAGLEV); life_type: IND_LIFE_TYPE_PROCESSING; cargo_types: [accept_cargo("ALLO"), accept_cargo("WIRE"), produce_cargo("MGLA", 12)]; }
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_machine, 32) { property { substitute: 0x06; name: string(STR_IND_NAME_MACHINE); life_type: IND_LIFE_TYPE_PROCESSING; cargo_types: [accept_cargo("STEL"), accept_cargo("WIRE"), accept_cargo("CHIP"), produce_cargo("MACH", 12)]; }
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_INDUSTRIES, ind_food, 33) { property { substitute: 0x06; name: string(STR_IND_NAME_FOOD); life_type: IND_LIFE_TYPE_PROCESSING; cargo_types: [accept_cargo("GRAI"), produce_cargo("FOOD", 12)]; }
+ graphics { location_check: CB_RESULT_LOCATION_ALLOW; }
+}
+
+item(FEAT_TRAINS, integrated_freight_car, 0x38) {
+ property {
+ name: string(STR_INTEGRATED_FREIGHT); climates_available: ALL_CLIMATES;
+ introduction_date: date(0, 1, 1); model_life: VEHICLE_NEVER_EXPIRES; vehicle_life: 40;
+ power: 0 hp; cost_factor: 16; running_cost_factor: 10; speed: 250 km/h; weight: 24 ton;
+ default_cargo_type: BALL; refittable_cargo_classes: 0;
+ cargo_allow_refit: [SILC,IRON,STEL,COPR,WIRE,SAND,CHIP,RARE,ALLO,POLY,BCRY,QCRY,CCRY,BALL,SIGE,MGLA,MACH,OIL_,GRAI,FOOD];
+ cargo_capacity: 40; track_type: RAIL;
+ }
+}
+
+if (!cargotype_available("GRAI")) {
+item(FEAT_CARGOS, cargo_grain, 34) {
+ property { is_freight: 1; cargo_label: "GRAI"; number: 34;
+ type_name: string(STR_CARGO_NAME_GRAIN); unit_name: string(STR_CARGO_NAME_GRAIN);
+ units_of_cargo: 0x0050; items_of_cargo: string(STR_CARGO_UNIT_GRAIN);
+ type_abbreviation: string(STR_CARGO_ABBR_GRAIN); sprite: 0x1AC2; weight: 1 ton;
+ price_factor: 150; penalty_lowerbound: 10; single_penalty_length: 30;
+ cargo_classes: bitmask(CC_PIECE_GOODS, CC_BULK); town_growth_effect: TOWNGROWTH_NONE;
+ }
+}
+
+}
+
+if (!cargotype_available("OIL_")) {
+item(FEAT_CARGOS, cargo_oil, 35) {
+ property { is_freight: 1; cargo_label: "OIL_"; number: 35;
+ type_name: string(STR_CARGO_NAME_OIL); unit_name: string(STR_CARGO_NAME_OIL);
+ units_of_cargo: 0x0050; items_of_cargo: string(STR_CARGO_UNIT_OIL);
+ type_abbreviation: string(STR_CARGO_ABBR_OIL); sprite: 0x1AC2; weight: 1 ton;
+ price_factor: 150; penalty_lowerbound: 10; single_penalty_length: 30;
+ cargo_classes: bitmask(CC_PIECE_GOODS, CC_BULK); town_growth_effect: TOWNGROWTH_NONE;
+ }
+}
+
+}
+
+item(FEAT_INDUSTRIES, integrated_grain_farm, 0x22) { property { substitute: 0x09; name: string(STR_IND_NAME_GRAIN_FARM); life_type: IND_LIFE_TYPE_ORGANIC; cargo_types: [produce_cargo("GRAI", 160)]; } }

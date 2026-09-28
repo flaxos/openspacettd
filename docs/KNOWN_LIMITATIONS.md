@@ -1,5 +1,36 @@
 # OpenSpaceTTD Known Limitations
 
+## Integrated economy acceptance boundaries — 28 September 2026
+
+The implementation and reproducible evidence are recorded in the
+[integrated economy audit](audit/2026-09-28/integrated-economy/README.md).
+
+- Human Fund Industry, Facilities, HQ, city, warehouse and star-map readability
+  at the player's language/UI scale is **Pending**. Several custom panel strings
+  remain English literals. Headless native tests do not prove visual usability.
+- New games only: integrated industry content is version 5 with minimum compatible
+  version 5. Never replace the legacy industry GRF in an existing save. Published
+  legacy files remain unchanged and two representative saves pass native reload
+  and continued simulation with their original content.
+- The all-chain fixture authors its initial network and capital, then earns money
+  and moves physical cargo without recurring injections. It proves reachable
+  progression and profitable operation, not minimum-loan bootstrap balance. Its
+  commissioned gate adds a link to an already accessible fixture world; separate
+  stellar tests cover opening access and colonisation rules.
+- Seven-world generation on seeds 11, 101 and 2026 verifies accessible food/stone/iron/oil,
+  surveyable copper/silica and rare-mineral expansion, but exhaustive generation
+  across all seeds, climates and map sizes is not claimed. Site placement retains
+  bounded terrain/biome searches. Economic pacing and raw throughput need playtesting.
+- Physical counters distinguish core freight, factory, city, material and explicit
+  discard events. The acceptance reconciles those bounded flows; it is not an audit
+  of every arbitrary crash/demolition or legacy edge-conduit/spaceport scenario.
+- Federation requires matching content/rules, registration and company mapping.
+  One confirmed research home is fixed; no relocation, independent save rollback,
+  cross-host acquisition workflow or automatic server provisioning is supplied.
+  Recovery uses coordinated checkpoints. Large-universe scale is not established.
+- Commodity markets, new narratives, per-warehouse inventories and save conversion
+  remain outside scope. Earlier dated limits below retain their historical context.
+
 ## Current CST expansion limits — 28 September 2026
 
 The new implementation on `codex/cst-star-map-expansion` is based on main

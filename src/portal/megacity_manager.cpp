@@ -6,6 +6,7 @@
 /** @file megacity_manager.cpp Implementation of Megacity sustained commodity demand mechanics. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "megacity_manager.h"
 #include "visual_overhaul.h"
 #include "../town.h"
@@ -45,6 +46,11 @@ bool MegacityManager::RegisterMegacity(TownID town_id, WorldID world_id, const s
 	profile.growth_state = MegacityGrowthState::Subsistence;
 	profile.growth_multiplier = 1.0f;
 	profile.passenger_multiplier = 1.0f;
+	if (IntegratedEconomy::Enabled() && IntegratedEconomy::Role(world_id) == EconomicRole::Core) {
+		profile.growth_state = MegacityGrowthState::Starvation;
+		profile.growth_multiplier = 0.0f;
+		profile.passenger_multiplier = 0.5f;
+	}
 
 	_megacities[town_id.base()] = std::move(profile);
 	return true;
@@ -168,6 +174,16 @@ void MegacityManager::EvaluateMonthlySupply()
 		profile.delivered_last = profile.delivered_current;
 		profile.delivered_current.fill(0);
 
+		if (IntegratedEconomy::EvaluateCity(profile.town_id, profile.growth_multiplier, profile.passenger_multiplier)) {
+			profile.satisfaction_pct = {profile.passenger_multiplier >= 1 ? 1.0f : 0.0f, profile.growth_multiplier >= 1 ? 1.0f : 0.0f,
+										profile.growth_multiplier >= 2 ? 1.0f : 0.0f};
+			profile.overall_supply_index = (profile.satisfaction_pct[0] + profile.satisfaction_pct[1] + profile.satisfaction_pct[2]) / 3.0f;
+			profile.growth_state = profile.passenger_multiplier < 1 ? MegacityGrowthState::Starvation
+								   : profile.growth_multiplier >= 2 ? MegacityGrowthState::HyperGrowth
+								   : profile.growth_multiplier > 0	? MegacityGrowthState::MetropolitanBoom
+																	: MegacityGrowthState::Subsistence;
+			continue;
+		}
 		float total_sat = 0.0f;
 		for (size_t i = 0; i < 3; i++) {
 			if (profile.monthly_quota[i] > 0) {

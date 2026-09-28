@@ -67,10 +67,12 @@ CommonwealthContentStatus CommonwealthPackManager::GetContentStatus()
 	}
 	if (industry == nullptr && rail == nullptr) return {};
 	for (const GRFConfig *config : {industry, rail}) {
-		if (config == nullptr || (config->version != 2 && config->version != 3 &&
-				(config->ident.grfid != COMMONWEALTH_INDUSTRY_GRFID || config->version != 4)) || config->status != GRFStatus::Activated ||
-				config->flags.Any({GRFConfigFlag::Invalid, GRFConfigFlag::Compatible})) {
-			return {CommonwealthContentMode::Invalid, "Exact Commonwealth industry v2/v3/v4 and rail v2/v3 packs must be active"};
+		if (config == nullptr ||
+			(config->version != 2 && config->version != 3 &&
+			 (config->ident.grfid != COMMONWEALTH_INDUSTRY_GRFID || (config->version != 4 && config->version != 5))) ||
+			config->status != GRFStatus::Activated || config->flags.Any({GRFConfigFlag::Invalid, GRFConfigFlag::Compatible})) {
+			return {CommonwealthContentMode::Invalid,
+					"Exact Commonwealth industry v2/v3/v4 or integrated v1, and rail v2/v3 packs must be active"};
 		}
 	}
 	for (uint8_t i = 0; i < static_cast<uint8_t>(CommonwealthCargoID::Count); ++i) {
@@ -79,7 +81,8 @@ CommonwealthContentStatus CommonwealthPackManager::GetContentStatus()
 		for (const CargoSpec *cargo : CargoSpec::Iterate()) {
 			if (cargo->label != label) continue;
 			if (cargo->grffile == nullptr || cargo->grffile->grfid != COMMONWEALTH_INDUSTRY_GRFID) {
-				return {CommonwealthContentMode::Invalid, "A Commonwealth cargo is supplied by conflicting content"};
+				return {CommonwealthContentMode::Invalid,
+						fmt::format("Commonwealth cargo {} is supplied by conflicting content", label.AsString())};
 			}
 			++count;
 		}

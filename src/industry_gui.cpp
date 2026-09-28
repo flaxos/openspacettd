@@ -8,6 +8,7 @@
 /** @file industry_gui.cpp GUIs related to industries. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include <ranges>
 #include "error.h"
 #include "gui.h"
@@ -430,7 +431,8 @@ public:
 
 			case WID_DPI_INFOPANEL: {
 				/* Extra line for cost outside of editor. */
-				int height = 2 + (_game_mode == GameMode::Editor ? 0 : 1) + (ResourceSiteManager::Enabled() ? 4 : 0);
+				int height = (IntegratedEconomy::Enabled() ? 5 : 2) + (_game_mode == GameMode::Editor ? 0 : 1) +
+							 (ResourceSiteManager::Enabled() ? 4 : 0);
 				uint extra_lines_req = 0;
 				uint extra_lines_prd = 0;
 				uint extra_lines_newgrf = 0;
@@ -571,6 +573,10 @@ public:
 				CargoSuffix cargo_suffix[std::tuple_size_v<decltype(indsp->accepts_cargo)>];
 
 				/* Draw the accepted cargoes, if any. Otherwise, will print "Nothing". */
+				if (IntegratedEconomy::Enabled()) {
+					auto description = IntegratedEconomy::IndustryDescription(this->selected_type);
+					if (!description.empty()) ir.top = DrawStringMultiLine(ir, description, TextColour::White) + 2;
+				}
 				GetAllCargoSuffixes(CargoSuffixDirection::In, CargoSuffixType::Fund, nullptr, this->selected_type, indsp, indsp->accepts_cargo, cargo_suffix);
 				std::string cargostring = this->MakeCargoListString(indsp->accepts_cargo, cargo_suffix, STR_INDUSTRY_VIEW_REQUIRES_N_CARGO);
 				ir.top = DrawStringMultiLine(ir, cargostring);

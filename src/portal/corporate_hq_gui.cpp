@@ -6,6 +6,7 @@
 /** @file corporate_hq_gui.cpp Implementation of Corporate Headquarters and Planetary Stockpile window. */
 
 #include "../stdafx.h"
+#include "integrated_economy.h"
 #include "corporate_hq_gui.h"
 #include "corporate_hq.h"
 #include "company_stockpile.h"
@@ -51,43 +52,93 @@ enum class CorporatePlacement : uint8_t { None, HQ, Hub };
 
 static constexpr std::initializer_list<NWidgetPart> _nested_corporate_hq_widgets = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, Colours::DarkGreen),
-		NWidget(WWT_CAPTION, Colours::DarkGreen, WID_CHQ_CAPTION), SetStringTip(STR_CORPORATE_HQ_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_SHADEBOX, Colours::DarkGreen),
-		NWidget(WWT_DEFSIZEBOX, Colours::DarkGreen),
-		NWidget(WWT_STICKYBOX, Colours::DarkGreen),
+	NWidget(WWT_CLOSEBOX, Colours::DarkGreen),
+	NWidget(WWT_CAPTION, Colours::DarkGreen, WID_CHQ_CAPTION),
+	SetStringTip(STR_CORPORATE_HQ_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	NWidget(WWT_SHADEBOX, Colours::DarkGreen),
+	NWidget(WWT_DEFSIZEBOX, Colours::DarkGreen),
+	NWidget(WWT_STICKYBOX, Colours::DarkGreen),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_OVERVIEW), SetMinimalSize(70, 20), SetStringTip(STR_CORPORATE_HQ_TAB_OVERVIEW, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_STOCKPILES), SetMinimalSize(80, 20), SetStringTip(STR_CORPORATE_HQ_TAB_STOCKPILES, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_LOGISTICS_HUBS), SetMinimalSize(80, 20), SetStringTip(STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_TECH_TREE), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_TECH_TREE, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_ALLIANCES), SetMinimalSize(75, 20), SetStringTip(STR_CORPORATE_HQ_TAB_ALLIANCES, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_OVERVIEW),
+	SetMinimalSize(70, 20),
+	SetStringTip(STR_CORPORATE_HQ_TAB_OVERVIEW, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_STOCKPILES),
+	SetMinimalSize(80, 20),
+	SetStringTip(STR_CORPORATE_HQ_TAB_STOCKPILES, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_LOGISTICS_HUBS),
+	SetMinimalSize(80, 20),
+	SetStringTip(STR_CORPORATE_HQ_TAB_LOGISTICS_HUBS, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_FABRICATION),
+	SetMinimalSize(75, 20),
+	SetStringTip(STR_CORPORATE_HQ_TAB_FABRICATION, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_TECH_TREE),
+	SetMinimalSize(75, 20),
+	SetStringTip(STR_CORPORATE_HQ_TAB_TECH_TREE, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TAB_ALLIANCES),
+	SetMinimalSize(75, 20),
+	SetStringTip(STR_CORPORATE_HQ_TAB_ALLIANCES, STR_EMPTY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_ALLIANCE_TOGGLE_BTN), SetMinimalSize(90, 20), SetStringTip(STR_CORPORATE_ALLIANCE_BTN_NEUTRAL, STR_EMPTY),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_RESEARCH_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_START_RESEARCH, STR_TECH_TREE_BTN_START_RESEARCH_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_BUDGET_BTN), SetMinimalSize(85, 20), SetStringTip(STR_TECH_TREE_BTN_SET_BUDGET, STR_TECH_TREE_BTN_SET_BUDGET_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_LOCATE), SetMinimalSize(55, 20), SetStringTip(STR_CORPORATE_HQ_BTN_LOCATE, STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_UPGRADE), SetMinimalSize(55, 20), SetStringTip(STR_CORPORATE_HQ_BTN_UPGRADE, STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_ALLIANCE_TOGGLE_BTN),
+	SetMinimalSize(90, 20),
+	SetStringTip(STR_CORPORATE_ALLIANCE_BTN_NEUTRAL, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_RESEARCH_BTN),
+	SetMinimalSize(85, 20),
+	SetStringTip(STR_TECH_TREE_BTN_START_RESEARCH, STR_TECH_TREE_BTN_START_RESEARCH_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_TECH_BUDGET_BTN),
+	SetMinimalSize(85, 20),
+	SetStringTip(STR_TECH_TREE_BTN_SET_BUDGET, STR_TECH_TREE_BTN_SET_BUDGET_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_LOCATE),
+	SetMinimalSize(55, 20),
+	SetStringTip(STR_CORPORATE_HQ_BTN_LOCATE, STR_CORPORATE_HQ_BTN_LOCATE_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_UPGRADE),
+	SetMinimalSize(55, 20),
+	SetStringTip(STR_CORPORATE_HQ_BTN_UPGRADE, STR_CORPORATE_HQ_BTN_UPGRADE_TOOLTIP),
 	EndContainer(),
-	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE), SetFill(1, 0), SetStringTip(STR_FABRICATION_MODE_STOCKPILE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_ACCELERATION),
+	SetFill(1, 0),
+	SetStringTip(STR_ECONOMY_ACCELERATION, STR_EMPTY),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_FABRICATION_TOGGLE),
+	SetFill(1, 0),
+	SetStringTip(STR_FABRICATION_MODE_STOCKPILE, STR_FABRICATION_BTN_TOGGLE_TOOLTIP),
 	NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_BUILD_HQ), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_BUILD_HQ, STR_CORPORATE_HQ_BTN_BUILD_HQ_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_BUILD_HUB), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_BUILD_HUB, STR_CORPORATE_HQ_BTN_BUILD_HUB_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SELECT_HUB), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_SELECT_HUB, STR_CORPORATE_HQ_BTN_SELECT_HUB_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SELECT_CARGO), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_SELECT_CARGO, STR_CORPORATE_HQ_BTN_SELECT_CARGO_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SET_RESERVE), SetFill(1, 0), SetStringTip(STR_CORPORATE_HQ_BTN_SET_RESERVE, STR_CORPORATE_HQ_BTN_SET_RESERVE_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_BUILD_HQ),
+	SetFill(1, 0),
+	SetStringTip(STR_CORPORATE_HQ_BTN_BUILD_HQ, STR_CORPORATE_HQ_BTN_BUILD_HQ_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_BUILD_HUB),
+	SetFill(1, 0),
+	SetStringTip(STR_CORPORATE_HQ_BTN_BUILD_HUB, STR_CORPORATE_HQ_BTN_BUILD_HUB_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SELECT_HUB),
+	SetFill(1, 0),
+	SetStringTip(STR_CORPORATE_HQ_BTN_SELECT_HUB, STR_CORPORATE_HQ_BTN_SELECT_HUB_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SELECT_CARGO),
+	SetFill(1, 0),
+	SetStringTip(STR_CORPORATE_HQ_BTN_SELECT_CARGO, STR_CORPORATE_HQ_BTN_SELECT_CARGO_TOOLTIP),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkGreen, WID_CHQ_SET_RESERVE),
+	SetFill(1, 0),
+	SetStringTip(STR_CORPORATE_HQ_BTN_SET_RESERVE, STR_CORPORATE_HQ_BTN_SET_RESERVE_TOOLTIP),
 	EndContainer(),
-	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_HEADER_PANEL), SetMinimalSize(880, 60), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_MAIN_PANEL), SetMinimalSize(868, 280), SetFill(1, 1), SetResize(1, 1), EndContainer(),
-		NWidget(NWID_VSCROLLBAR, Colours::DarkGreen, WID_CHQ_SCROLLBAR),
+	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_HEADER_PANEL),
+	SetMinimalSize(880, 60),
+	SetFill(1, 0),
+	SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR), SetMinimalSize(868, 42), SetFill(1, 0), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX, Colours::DarkGreen),
+	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_MAIN_PANEL),
+	SetMinimalSize(868, 280),
+	SetFill(1, 1),
+	SetResize(1, 1),
+	EndContainer(),
+	NWidget(NWID_VSCROLLBAR, Colours::DarkGreen, WID_CHQ_SCROLLBAR),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+	NWidget(WWT_PANEL, Colours::DarkGreen, WID_CHQ_STATUS_BAR),
+	SetMinimalSize(868, 42),
+	SetFill(1, 0),
+	SetResize(1, 0),
+	EndContainer(),
+	NWidget(WWT_RESIZEBOX, Colours::DarkGreen),
 	EndContainer(),
 };
 
@@ -182,8 +233,12 @@ struct CorporateHQWindow : Window {
 
 		this->SetWidgetDisabledState(WID_CHQ_LOCATE, !has_hq || profile == nullptr || profile->tile == INVALID_TILE);
 		this->SetWidgetDisabledState(WID_CHQ_UPGRADE, !own_company || !has_hq || (profile != nullptr && profile->tier >= CorporateHQTier::CST_Arcology));
-		this->SetWidgetDisabledState(WID_CHQ_TECH_RESEARCH_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
-		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, !own_company || this->active_tab != CorporateHQTab::TechTree || !has_hq);
+		this->SetWidgetDisabledState(WID_CHQ_ACCELERATION, !IntegratedEconomy::Enabled() || !own_company || !has_hq ||
+															   !IntegratedEconomy::CanConductResearch(this->company));
+		this->SetWidgetDisabledState(WID_CHQ_TECH_RESEARCH_BTN, !IntegratedEconomy::CanConductResearch(this->company) || !own_company ||
+																	this->active_tab != CorporateHQTab::TechTree || !has_hq);
+		this->SetWidgetDisabledState(WID_CHQ_TECH_BUDGET_BTN, !IntegratedEconomy::CanConductResearch(this->company) || !own_company ||
+																  this->active_tab != CorporateHQTab::TechTree || !has_hq);
 		this->SetWidgetDisabledState(WID_CHQ_FABRICATION_TOGGLE, !own_company);
 		this->SetWidgetDisabledState(WID_CHQ_ALLIANCE_TOGGLE_BTN, !own_company || this->active_tab != CorporateHQTab::Alliances || this->selected_alliance_company == CompanyID::Invalid());
 		if (this->selected_alliance_company != CompanyID::Invalid() && Company::IsValidID(this->selected_alliance_company)) {
@@ -291,7 +346,8 @@ struct CorporateHQWindow : Window {
 					paragraph("Attach a hub to an owned rail station. Normal unload orders put cargo into the world's stockpile.");
 					paragraph("Loading trains collect stock above the hub's reserve. Transfer and No Unload orders keep their usual meaning.");
 					paragraph("Research", TextColour::Gold);
-					paragraph("Open Commonwealth Tech Tree to choose a project and monthly budget. Research also uses HQ-world electronics and enriched crystals.");
+					paragraph("Open Commonwealth Tech Tree to choose a project and monthly budget. Advanced projects require delivered "
+							  "material kits. Optional acceleration consumes additional HQ-world electronics and crystals.");
 				} else if (this->active_tab == CorporateHQTab::Stockpiles) {
 					DrawString(tr, "World              | Steel (Tons) | Ballast (Tons) | Goods/Wiring | Valuables/Chips | Crystals", TextColour::Gold);
 					tr.top += GetCharacterHeight(FontSize::Normal) + 4;
@@ -373,6 +429,28 @@ struct CorporateHQWindow : Window {
 					DrawString(tr, fmt::format("HQ Stockpile: {} Enriched Crystals (10 RP/ea) | {} Electronics (5 RP/ea) | Budget: {:L} Cr/mo (1 RP/1k Cr)", cr_stock, el_stock, budget), TextColour::White);
 					tr.top += GetCharacterHeight(FontSize::Normal) + 6;
 
+					if (IntegratedEconomy::Enabled()) {
+						TechID shown = this->selected_tech != TECH_NONE ? this->selected_tech : active;
+						auto requirements = IntegratedEconomy::ResearchKit(shown);
+						auto state = IntegratedEconomy::Research(this->company);
+						bool reserved = state && state->kit_project == shown && shown != TECH_NONE;
+						std::string kit = requirements.empty() ? "Kit: none required." : "Kit: ";
+						for (auto [cargo, units] : requirements) {
+							uint32_t available = reserved ? units : StockpileManager::GetStock(hq_world, this->company, cargo);
+							kit += fmt::format("{} {} ({} available); ", units, GetString(CargoSpec::Get(cargo)->name), available);
+						}
+						if (!requirements.empty()) kit += reserved ? "[reserved]" : "[reserve on project when available]";
+						DrawString(tr, kit, TextColour::White);
+						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+						DrawString(tr,
+								   fmt::format("Research home: {} | Acceleration: {}",
+											   IntegratedEconomy::ResearchHome(this->company).empty()
+												   ? "Local / awaiting registration"
+												   : IntegratedEconomy::ResearchHome(this->company),
+											   IntegratedEconomy::Accelerates(this->company) ? "On" : "Off"),
+								   TextColour::White);
+						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+					}
 					auto render_branch = [&](TechBranch branch, const char *title) {
 						DrawString(tr, fmt::format("─── {} ───", title), TextColour::Gold);
 						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
@@ -498,7 +576,10 @@ struct CorporateHQWindow : Window {
 				/* Installing a tool aborts the previous one, including our own. */
 				SetObjectToPlaceWnd(SPR_CURSOR_MOUSE, PAL_NONE, HT_RECT, this);
 				this->placement = CorporatePlacement::HQ;
-				this->status_message = "HQ: 2,500,000 Cr. Select a Core World site; requires 5,000,000 Cr cash and three phases of presence.";
+				this->status_message =
+					IntegratedEconomy::Enabled()
+						? "HQ: 2,500,000 Cr. Select a Core economic world; requires 5,000,000 Cr cash."
+						: "HQ: 2,500,000 Cr. Select a Core World site; requires 5,000,000 Cr cash and three phases of presence.";
 				this->SetDirty();
 				break;
 			case WID_CHQ_BUILD_HUB:
@@ -616,6 +697,10 @@ struct CorporateHQWindow : Window {
 				}
 				break;
 
+			case WID_CHQ_ACCELERATION:
+				if (this->company == _local_company)
+					Command<Commands::SetResearchAcceleration>::Post(!IntegratedEconomy::Accelerates(this->company));
+				break;
 			case WID_CHQ_TECH_BUDGET_BTN: {
 				uint32_t cur_b = TechTreeManager::GetMonthlyBudget(this->company);
 				uint32_t next_b = 0;

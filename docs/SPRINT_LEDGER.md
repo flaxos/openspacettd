@@ -1,5 +1,17 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Unified Commonwealth economy delivery — 28 September 2026
+
+| Feature | Source and dependency order | Automated evidence | Human UAT | Base / branch | Status |
+|---|---|---|---|---|---|
+| Integrated Commonwealth ruleset 1 | Rules/content → physical factories/freight → research/construction/cities → federation/UI → native acceptance | 473 unit cases / 67,508 assertions; 485 CTests; 13-chain progression, 24-month soak, food recovery, cold reload; legacy saves; three hosts, shared research/outage and 5+1 trips across cold restart | Pending; [checklist](../demo/INTEGRATED-ECONOMY-UAT.md) | `959fe33f18` / `codex/unified-commonwealth-economy` | TESTED |
+
+[Implementation contract](UNIFIED_COMMONWEALTH_ECONOMY.md) ·
+[Evidence and limits](audit/2026-09-28/integrated-economy/README.md).
+This is an additional feature delivery after CST star-map PR #43, not a renumbering
+or reopening of the historical sprint register. Automated status does not imply
+human acceptance. Bootstrap balance and visual review remain recorded limitations.
+
 **Canonical Sprint Index · Sprints 1 through 52**
 **Audited at commit:** `a6cf83e6a6` (Sprint 50 feature branch); `main` branch HEAD: `e4baa35623`
 **Date:** 2026-09-22

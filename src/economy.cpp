@@ -8,6 +8,7 @@
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
+#include "portal/integrated_economy.h"
 #include "portal/stellar_network.h"
 #include "portal/commonwealth_slice.h"
 #include <ranges>
@@ -528,6 +529,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	}
 
 	ProductionChainManager::ChangeCompanyOwner(old_owner, new_owner);
+	IntegratedEconomy::ChangeCompany(old_owner, new_owner);
 	LogisticsHubManager::ChangeCompanyOwner(old_owner, new_owner);
 
 	/* do the same for waypoints (we need to do this here so deleted waypoints are converted too) */
@@ -1045,11 +1047,38 @@ static const LogisticsHub *GetOwnedFreightHub(StationID station, CompanyID compa
 	return hub != nullptr && hub->company_id == company && hub->tile != INVALID_TILE && hub->world_id != INVALID_WORLD ? hub : nullptr;
 }
 
+/** Remaining physical destination capacity, shared by staging and gradual unloading. */
+static uint32_t IntegratedDeliverySpace(const Station *st, CompanyID company, CargoType cargo, IndustryID source = IndustryID::Invalid())
+{
+	if (!IntegratedEconomy::Enabled() || GetOwnedFreightHub(st->index, company, cargo) != nullptr) return UINT32_MAX;
+	uint64_t space = 0;
+	for (const auto &entry : st->industries_near) {
+		auto ind = entry.industry;
+		if (ind->index == source) continue;
+		if (!ind->IsCargoAccepted(cargo) || IndustryTemporarilyRefusesCargo(ind, cargo)) continue;
+		if (ind->exclusive_supplier != INVALID_OWNER && ind->exclusive_supplier != st->owner) continue;
+		space +=
+			IntegratedEconomy::Managed(ind) ? IntegratedEconomy::IndustrySpace(ind, cargo) : 65535 - ind->GetCargoAccepted(cargo)->waiting;
+	}
+	if (MegacityManager::IsConsumerStation(st)) {
+		auto demand = IntegratedEconomy::CityDemand(st->town->index);
+		if (demand.contains(cargo))
+			space += IntegratedEconomy::AcceptCity(st->town->index, cargo, UINT32_MAX, false);
+		else if (st->always_accepted.Test(cargo))
+			return UINT32_MAX;
+	} else if (st->always_accepted.Test(cargo))
+		return UINT32_MAX;
+	return std::min<uint64_t>(space, UINT32_MAX);
+}
+
 /** Use the same acceptance rule when staging cargo and when unloading it. */
 static bool AcceptsCargoForDelivery(const Station *st, CompanyID company, CargoType cargo_type)
 {
-	return st->goods[cargo_type].status.Test(GoodsEntry::State::Acceptance) ||
-			GetOwnedFreightHub(st->index, company, cargo_type) != nullptr;
+	return IntegratedDeliverySpace(st, company, cargo_type) != 0 &&
+		   (st->goods[cargo_type].status.Test(GoodsEntry::State::Acceptance) ||
+			(IntegratedEconomy::Enabled() && MegacityManager::IsConsumerStation(st) &&
+			 IntegratedEconomy::AcceptCity(st->town->index, cargo_type, 1, false) != 0) ||
+			GetOwnedFreightHub(st->index, company, cargo_type) != nullptr);
 }
 
 /**
@@ -1091,8 +1120,14 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
 		/* Insert the industry into _cargo_delivery_destinations, if not yet contained */
 		include(_cargo_delivery_destinations, ind);
 
-		uint amount = std::min(num_pieces, 0xFFFFu - it->waiting);
-		it->waiting += amount;
+		uint amount = IntegratedEconomy::Managed(ind) ? IntegratedEconomy::AcceptIndustry(ind, cargo_type, num_pieces)
+													  : std::min(num_pieces, 0xFFFFu - it->waiting);
+		if (!IntegratedEconomy::Managed(ind)) {
+			it->waiting += amount;
+			IntegratedEconomy::Record(EconomyFlow::Consumed, cargo_type, amount);
+			if (IntegratedEconomy::Enabled() && _commonwealth_slice_audit != nullptr)
+				_commonwealth_slice_audit->consumed[cargo_type] += amount;
+		}
 		it->GetOrCreateHistory()[THIS_MONTH].accepted += amount;
 		it->last_accepted = TimerGameEconomy::date;
 		num_pieces -= amount;
@@ -1139,11 +1174,21 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 
 	/* If this cargo type is always accepted, the town accepts the remainder. */
 	uint accepted_total = hub == nullptr && st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
+	if (IntegratedEconomy::Enabled() && hub == nullptr && MegacityManager::IsConsumerStation(st) &&
+		IntegratedEconomy::CityDemand(st->town->index).contains(cargo_type)) {
+		accepted_total = accepted_facility + accepted_ind +
+						 IntegratedEconomy::AcceptCity(st->town->index, cargo_type, num_pieces - accepted_facility - accepted_ind, true);
+	}
 
 	if (_commonwealth_slice_audit != nullptr) {
-		_commonwealth_slice_audit->consumed[cargo_type] += accepted_total - accepted_facility;
+		if (!IntegratedEconomy::Enabled()) _commonwealth_slice_audit->consumed[cargo_type] += accepted_total - accepted_facility;
 		_commonwealth_slice_audit->deliveries[dest.base()][cargo_type] += accepted_total + stored;
 		_commonwealth_slice_audit->vehicle_deliveries[delivery_vehicle.base()][cargo_type] += accepted_total + stored;
+	}
+	IntegratedEconomy::Record(EconomyFlow::Transported, cargo_type, accepted_total + stored);
+	IntegratedEconomy::Record(EconomyFlow::Stored, cargo_type, stored);
+	if (hub == nullptr && !IntegratedEconomy::CityDemand(st->town->index).contains(cargo_type)) {
+		IntegratedEconomy::Record(EconomyFlow::Consumed, cargo_type, accepted_total - accepted_facility - accepted_ind);
 	}
 
 	/* Update station statistics */
@@ -1158,7 +1203,8 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		SpaceportManager::RecordSupplyDelivery(dest, cargo_type, accepted_total);
 	}
 	PlanetManager::RecordCargoDelivery(st->xy, cargo_type, accepted_total, src_tile);
-	if (MegacityManager::IsConsumerStation(st)) {
+	if (MegacityManager::IsConsumerStation(st) &&
+		(!IntegratedEconomy::Enabled() || IntegratedEconomy::CityDemand(st->town->index).empty())) {
 		MegacityManager::RecordDeliveryByCargo(st->town->index, cargo_type, accepted_total - accepted_facility - accepted_ind);
 	}
 
@@ -1212,6 +1258,7 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
  */
 static void TriggerIndustryProduction(Industry *i)
 {
+	if (IntegratedEconomy::Managed(i)) return;
 	const IndustrySpec *indspec = GetIndustrySpec(i->type);
 	IndustryCallbackMasks cbm = indspec->callback_mask;
 
@@ -1287,6 +1334,13 @@ CargoPayment::~CargoPayment()
  * @param count The number of packets to pay for.
  * @param current_tile Current tile the payment is happening on.
  */
+uint32_t CargoPayment::DeliveryCapacity(CargoType cargo, const CargoPacket *packet) const
+{
+	auto source = packet->GetSource();
+	return IntegratedDeliverySpace(Station::Get(this->current_station), this->front->owner, cargo,
+								   source.type == SourceType::Industry ? source.ToIndustryID() : IndustryID::Invalid());
+}
+
 void CargoPayment::PayFinalDelivery(CargoType cargo, const CargoPacket *cp, uint count, TileIndex current_tile)
 {
 	/* Handle end of route payment */
@@ -1783,6 +1837,9 @@ static void LoadUnloadVehicle(Vehicle *front)
 				}
 			}
 
+			if (IntegratedEconomy::Enabled() && v->cargo.ActionCount(VehicleCargoList::MoveToAction::Deliver) > 0) {
+				amount_unloaded = std::min(amount_unloaded, IntegratedDeliverySpace(st, front->owner, v->cargo_type));
+			}
 			assert(payment != nullptr);
 			amount_unloaded = v->cargo.Unload(amount_unloaded, &ge->GetOrCreateData().cargo, v->cargo_type, payment, v->GetCargoTile());
 			remaining = v->cargo.UnloadCount() > 0;

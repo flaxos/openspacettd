@@ -399,6 +399,8 @@ add_files(
     portal/resource_sites.cpp
     portal/resource_sites.h
     portal/resource_sites_gui.cpp
+    portal/integrated_economy.cpp
+    portal/integrated_economy.h
     portal/production_chain.cpp
     portal/production_chain.h
     portal/empire_facilities_gui.cpp

@@ -2,6 +2,11 @@
 /** @file stellar_network_gui.cpp Interactive stellar routes and delivered-equipment gate projects. */
 #include "../stdafx.h"
 #include "stellar_network.h"
+#include "integrated_economy.h"
+#include "empire_facilities_gui.h"
+#include "corporate_hq_gui.h"
+#include "megacity_gui.h"
+#include "../town.h"
 #include "universe_network.h"
 #include "planet_manager.h"
 #include "portal_registry.h"
@@ -56,6 +61,17 @@ static constexpr auto _stellar_widgets = std::to_array<NWidgetPart>({
 	SetFill(1, 0),
 	NWidget(WWT_PUSHTXTBTN, Colours::DarkBlue, SW_VISIT),
 	SetStringTip(STR_STELLAR_VISIT),
+	SetFill(1, 0),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkBlue, SW_FACTORIES),
+	SetStringTip(STR_ECONOMY_FACTORIES),
+	SetFill(1, 0),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkBlue, SW_CITY),
+	SetStringTip(STR_ECONOMY_CITY),
+	SetFill(1, 0),
+	NWidget(WWT_PUSHTXTBTN, Colours::DarkBlue, SW_HQ),
+	SetStringTip(STR_ECONOMY_HQ),
 	SetFill(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -182,7 +198,7 @@ struct StellarNetworkWindow : Window {
 			resize.height = GetCharacterHeight(FontSize::Normal) + padding.height + 4;
 			size.height = resize.height * 5;
 		}
-		if (widget == SW_INFO) size.height = GetCharacterHeight(FontSize::Normal) * 8 + padding.height;
+		if (widget == SW_INFO) size.height = GetCharacterHeight(FontSize::Normal) * 12 + padding.height;
 	}
 	void OnResize() override { scroll->SetCapacityFromWidget(this, SW_PROJECTS); }
 	void OnPaint() override { DrawWidgets(); }
@@ -226,6 +242,20 @@ struct StellarNetworkWindow : Window {
 			if (auto w = StellarNetwork::GetWorld(selected)) {
 				text += fmt::format("Destination: {}. Arrival zone {}. {}\n", w->name, zone,
 									w->opened ? "Established world" : "Gate access does not found a colony or reveal deposits.");
+				if (IntegratedEconomy::Enabled()) {
+					auto region = PlanetManager::GetRegion(selected);
+					text += fmt::format("Economic role: {}. Development level: {}.\n", IntegratedEconomy::RoleName(selected),
+										region ? uint(region->phase) : 0);
+					uint factories = 0, batches = 0;
+					for (const auto &f : ProductionChainManager::GetAllFacilities())
+						if (f.world_id == selected && f.owner == company) {
+							++factories;
+							batches += f.last_month_production;
+						}
+					text += fmt::format("Local factories: {}; last month: {} batches. ", factories, batches);
+					if (auto town = PlanetManager::GetWorldPrimaryTown(selected)) text += IntegratedEconomy::CityStatus(town->index);
+					text += "\n";
+				}
 				auto from = StellarNetwork::GetWorld(source == INVALID_TILE ? INVALID_WORLD : PlanetManager::GetTileWorld(source));
 				if (from && from != w) {
 					uint bands = StellarNetwork::DistanceBands(*from, *w);
@@ -292,6 +322,15 @@ struct StellarNetworkWindow : Window {
 			break;
 		case SW_CANCEL:
 			Command<Commands::OperateGateProject>::Post(STR_ERROR_STELLAR_ACTION, project, true);
+			break;
+		case SW_FACTORIES:
+			ShowEmpireFacilitiesWindow(company);
+			break;
+		case SW_HQ:
+			ShowCorporateHQ(company);
+			break;
+		case SW_CITY:
+			if (auto town = PlanetManager::GetWorldPrimaryTown(selected)) ShowMegacityOverview(town->index);
 			break;
 		case SW_VISIT:
 			if (StellarNetwork::WorldAccessible(selected)) PlanetManager::JumpToPlanet(selected);

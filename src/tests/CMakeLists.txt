@@ -1,4 +1,5 @@
 add_test_files(
+    test_integrated_economy.cpp
     test_stellar_network.cpp
     test_resource_sites.cpp
     alternating_iterator.cpp

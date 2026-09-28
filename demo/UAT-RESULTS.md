@@ -1,5 +1,21 @@
 # Human UAT results — recovery / v1.1
 
+## Unified Commonwealth economy — 28 September 2026
+
+**Human graphical status: Pending.** No human pass is inferred from automation.
+The new [UAT checklist and saves](INTEGRATED-ECONOMY-UAT.md) cover Fund Industry,
+physical factories, warehouse priority, research kits, construction materials,
+city baskets and shared research. The earlier user acceptance below applies to
+its earlier build.
+
+Automated evidence: full 473-case unit suite / 67,508 assertions, 485 CTests,
+all-chain native progression, a profitable 24-month operating soak, food
+interruption/recovery, electric construction, save/reload, sector generation and
+two legacy-save regressions. Three hosts with three joined clients pass shared
+research/outage and five round trips plus a sixth after coordinated cold restart,
+with cargo and cash reconciled. Exact hashes and federation results are retained in
+[the audit](../docs/audit/2026-09-28/integrated-economy/README.md).
+
 ## Current user acceptance and direction — 23 September 2026
 
 The user confirms human UAT is OK and accepts the new graphics as good enough

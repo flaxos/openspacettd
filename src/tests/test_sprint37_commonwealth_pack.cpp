@@ -464,7 +464,7 @@ TEST_CASE("Commonwealth exact v3 packs retain label bindings", "[wp11][connected
 	_grfconfig.back()->version = 4;
 	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
 	_grfconfig.back()->version = 3;
-	_grfconfig.front()->version = 5;
+	_grfconfig.front()->version = 6;
 	CHECK(CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Invalid);
 }
 

@@ -67,12 +67,14 @@ void AddBOM(RequiredMaterials &required, WorldID world, const BillOfMaterials &b
 CommandCost CheckAggregateMaterials(const RequiredMaterials &required)
 {
 	for (const auto &[world, cargos] : required) {
+		BillOfMaterials bill;
 		for (const auto &[cargo, amount] : cargos) {
 			if (cargo >= NUM_CARGO) return CommandCost(STR_ERROR_COMMONWEALTH_CONTENT);
-			if (StockpileManager::GetStock(world, _current_company, cargo) < amount) {
-				return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
-			}
+			if (amount > UINT32_MAX) return CommandCost(STR_ERROR_INSUFFICIENT_STOCKPILE_MATERIALS);
+			bill.AddCargoMaterial(cargo, amount);
 		}
+		auto check = FabricationManager::CheckMaterials(world, _current_company, bill);
+		if (check.Failed()) return check;
 	}
 	return CommandCost();
 }
@@ -204,6 +206,10 @@ CommandCost CmdPlaceBlueprint(DoCommandFlags flags, TileIndex origin_tile, const
 			op.axis = first.axis;
 			op.plat_len = first.axis == Axis::X ? width : height;
 			op.numtracks = first.axis == Axis::X ? height : width;
+			BillOfMaterials station_bill;
+			auto materials = FabricationManager::QuoteRailStructure(op.tile, op.railtype, uint32_t(width) * height, station_bill);
+			if (materials.Failed()) return materials;
+			AddBOM(required, PlanetManager::GetTileWorld(op.tile), station_bill);
 			op.spec_class = first.spec_class;
 			op.spec_index = first.spec_index;
 			CommandCost child = RunPlacementOp(op, test_flags);
@@ -223,7 +229,7 @@ CommandCost CmdPlaceBlueprint(DoCommandFlags flags, TileIndex origin_tile, const
 			TileIndex target = targets[i];
 			RailType rt = ResolveRailType(cell, railtype_override);
 			WorldID world = PlanetManager::GetTileWorld(target);
-			bool fabrication = world != INVALID_WORLD && FabricationManager::IsFabricateFromStockpileEnabled(_current_company);
+			bool fabrication = world != INVALID_WORLD && FabricationManager::UseForRail(_current_company, rt);
 			if (cell.type == BlueprintTileType::Track) {
 				if (cell.trackbits.None() || TrackBits{cell.trackbits}.Reset(TRACK_BIT_ALL).Any()) return CommandCost(STR_ERROR_BLUEPRINT_INVALID);
 				bool original_rail = IsPlainRailTile(target);
