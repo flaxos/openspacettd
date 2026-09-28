@@ -1,0 +1,7 @@
+##grflangid 0x01
+STR_GRF_NAME :OpenSpaceTTD CST Equipment
+STR_GRF_DESC :Machine modules for delivered-equipment gate commissioning. Requires the Commonwealth industry pack.
+STR_CARGO_NAME :Machine Modules
+STR_CARGO_QUANTITY :{WEIGHT} of machine modules
+STR_CARGO_ABBR :MM
+STR_EQUIPMENT_CAR :CST Gate Equipment Carrier

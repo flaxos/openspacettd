@@ -21,6 +21,7 @@ enum OrderWidgets : WidgetID {
 	WID_O_STOP_SHARING,              ///< Stop sharing orders.
 	WID_O_NON_STOP,                  ///< Goto non-stop to destination.
 	WID_O_DEPOT_UNBUNCHING,          ///< Toggle unbunching.
+	WID_O_REMOTE,                    ///< Add a registered remote station.
 	WID_O_GOTO,                      ///< Goto destination.
 	WID_O_FULL_LOAD,                 ///< Select full load.
 	WID_O_UNLOAD,                    ///< Select unload.

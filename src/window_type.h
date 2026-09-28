@@ -768,6 +768,8 @@ enum class WindowClass : uint16_t {
 	CorporateHQ,
 
 	/** Empire-wide industrial processing facilities and supply chain dashboard. */
+	UniverseDestinations, ///< Registered remote worlds and train destinations.
+	StellarNetwork, ///< Star map and gate projects.
 	ResourceSurvey, ///< Company resource survey and discovered sites.
 	EmpireFacilities,
 

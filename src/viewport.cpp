@@ -61,6 +61,8 @@
  */
 
 #include "stdafx.h"
+#include "portal/stellar_network.h"
+#include "portal/planet_manager.h"
 #include "core/backup_type.hpp"
 #include "landscape.h"
 #include "viewport_func.h"
@@ -1321,7 +1323,7 @@ static void ViewportAddLandscape()
 				_vd.last_foundation_child[FoundationPart::Normal] = LAST_CHILD_NONE;
 				_vd.last_foundation_child[FoundationPart::Halftile] = LAST_CHILD_NONE;
 
-				_tile_type_procs[tile_type]->draw_tile_proc(&_cur_ti);
+				_tile_type_procs[_cur_ti.tile != INVALID_TILE && !StellarNetwork::WorldAccessible(PlanetManager::GetTileWorld(_cur_ti.tile)) ? TileType::Void : tile_type]->draw_tile_proc(&_cur_ti);
 				if (_cur_ti.tile != INVALID_TILE) DrawTileSelection(&_cur_ti);
 			}
 		}

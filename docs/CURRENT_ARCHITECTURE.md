@@ -1,5 +1,38 @@
 # OpenSpaceTTD Current Architecture
 
+## Source update — CST stellar network, 28 September 2026
+
+Branch `codex/cst-star-map-expansion` extends main `8464e9374a`. This update
+supersedes older statements below about manual-only federation and absence of a
+player-facing directory. It does not change the single-map architecture.
+
+- `StellarNetwork` owns authored geography, three arrival zones per world,
+  range/BOM checks, local commissioning, terminal access and per-train admission.
+  `STLR` persists this state and validates references after native pools load.
+- `RemoteGateProjects` owns source equipment escrow and receiver reservation /
+  build acknowledgement. It is persisted inside `UNET`; loading a directory does
+  not execute construction. Only replicated native commands reconcile metadata.
+- `UniverseNetwork` publishes host-authenticated metadata through the existing
+  async authority transport, replicates the directory and finds stable multi-hop
+  routes. `UNET` also persists remote gate-order proxies. Station/global consist
+  identities and native cargo snapshots retain their existing chunks.
+- Native orders get a remote station/gate picker. Schedule revisions reject stale
+  remote edits; prepared departures freeze native order mutation. Materialization
+  preserves the final station through intermediate hosts.
+- The multiplayer client reconnects through native network authentication and
+  verifies destination host/company, restores a world camera and can reopen a
+  globally identified train. There is one active map per client.
+- Mito–Merredin is an opt-in seven-region preset. Existing saves without stellar
+  metadata keep direct gate rules. Equipment v1 adds MACH in slot 29 without
+  changing the published industry v4 / rail v3 packs.
+- Checkpoint draining includes directory HTTP work. Coordinated checkpoint
+  validation now requires every authority world, preserving two-world format v1.
+
+[Detailed contract](CST_STELLAR_NETWORK.md) and
+[verification evidence](audit/2026-09-28/stellar-network/README.md). Older snapshot
+identifiers below apply to their original sections. Human GUI UAT remains pending.
+
+
 **Source-verified snapshot at HEAD `a6cf83e6a6`** (branch `feature/sprint-50-gateway-staging-and-charters`)
 **Date:** 2026-09-22
 **Main branch HEAD:** `e4baa35623` (Sprints 49–50 are on feature branches, not yet merged to `main`)

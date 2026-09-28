@@ -370,3 +370,26 @@ conservation, reload, starvation/recovery, fabrication and research consumption.
 Its genuine growth check starts from the cold map; it does not claim the original
 showcase's separate three-houses-in-ten-minutes presentation target.
 [Retained machine evidence](../docs/audit/2026-09-28/resource-economy/README.md). [Design and reproduction](../docs/PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## CST star map and gate expansion — 28 September 2026
+
+Implementation: Mito–Merredin preset, existing public CST backbone, research
+range checks, delivered-equipment gate projects, cancellation/refunds, native
+arrival construction, access/tolls, connected-host directory, remote station
+orders/gate pins, automatic multi-hop routing and client host visits.
+
+Automated results: see the exact counts, hashes and test boundaries in
+[the retained audit](../docs/audit/2026-09-28/stellar-network/README.md). The
+generation runner uses a new map and cold reload. The multi-hop runner uses
+three actual servers with joined SDL dummy clients and native freight. Native
+window tests invoke the star-map project buttons through ordinary commands.
+
+Native suite: **457 unit cases / 67,032 assertions; 469/469 CTests**.
+Three-server freight and cold restart pass: six total round trips / 24 native
+gate crossings, 360 coal consumed, conserved cargo and reconciled cash on all
+hosts, preserved global train identity and no detected client desync.
+
+Human graphical UAT: **Pending**, including seamless Visit, camera restoration,
+remote train follow, UI scaling, equipment loading/refits and commissioning during
+an authority interruption. Use [the player checklist](CST-STELLAR-UAT.md). Earlier
+overall user acceptance is preserved but does not imply acceptance of this new UI.

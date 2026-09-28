@@ -8,6 +8,8 @@
 /** @file terraform_cmd.cpp Commands related to terraforming. */
 
 #include "stdafx.h"
+#include "portal/planet_manager.h"
+#include "portal/stellar_network.h"
 #include "command_func.h"
 #include "tunnel_map.h"
 #include "bridge_map.h"
@@ -210,6 +212,10 @@ std::tuple<CommandCost, Money, TileIndex> CmdTerraformLand(DoCommandFlags flags,
 			/* TileType::Void tiles can be terraformed but as tunnels and bridges
 			 * cannot go under / over these tiles they don't need checking. */
 			if (IsTileType(t, TileType::Void)) continue;
+			if (StellarNetwork::Enabled()) {
+				auto placement = PlanetManager::CheckConstructionPlacement(t);
+				if (placement.Failed()) return {placement, 0, t};
+			}
 
 			/* Find new heights of tile corners */
 			int z_N = TerraformGetHeightOfTile(&ts, t + TileDiffXY(0, 0));

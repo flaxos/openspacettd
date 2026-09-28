@@ -9,7 +9,7 @@
 #include <functional>
 #include <memory>
 
-enum class AuthorityOperation { RegisterWorld, Heartbeat, Initiate, Depart, Pending, Claim, Confirm };
+enum class AuthorityOperation { PublishUniverse, UniverseDirectory, RegisterWorld, Heartbeat, Initiate, Depart, Pending, Claim, Confirm };
 
 /** One request with an independently retained HTTP callback.
  * Cancellation/timeout is asynchronous: the callback outlives a destroyed request

@@ -6225,8 +6225,8 @@ STR_UNIVERSE_DIRECTORY_FILTER_P3                                :P3: Frontier
 STR_UNIVERSE_DIRECTORY_FILTER_P3_TOOLTIP                        :Show Phase 3 Frontier Agricultural Worlds
 STR_UNIVERSE_DIRECTORY_FILTER_P4                                :P4: Wilderness
 STR_UNIVERSE_DIRECTORY_FILTER_P4_TOOLTIP                        :Show Phase 4 Wilderness and Expansion Worlds
-STR_UNIVERSE_DIRECTORY_TRADE_GATE                               :Trade Gateway
-STR_UNIVERSE_DIRECTORY_TRADE_GATE_TOOLTIP                       :Configure selected Commonwealth node as a simulated trade partner
+STR_UNIVERSE_DIRECTORY_TRADE_GATE                               :Star map
+STR_UNIVERSE_DIRECTORY_TRADE_GATE_TOOLTIP                       :Open the CST star map to commission gate connections and visit registered worlds
 STR_MAP_MENU_UNIVERSE_DIRECTORY                                 :Universe Directory
 
 # OpenSpaceTTD Sprint 25: Player Rail Blueprints
@@ -6427,3 +6427,27 @@ STR_RESOURCE_MAIN_WORLD                                            :Main world
 STR_RESOURCE_OCCUPIED_LABEL                                        :Occupied
 STR_RESOURCE_AVAILABLE                                             :Available
 STR_RESOURCE_SURVEY_FAILED                                         :Cannot survey this area
+
+STR_STELLAR_TITLE                                               :{WHITE}CST star map
+STR_STELLAR_OPEN                                                :{BLACK}Star map
+STR_STELLAR_SOURCE                                              :{BLACK}Source gate
+STR_STELLAR_ZONE                                                :{BLACK}Arrival zone
+STR_STELLAR_START                                               :{BLACK}Start project
+STR_STELLAR_ACTIVATE                                            :{BLACK}Activate
+STR_STELLAR_CANCEL                                              :{BLACK}Cancel project
+STR_STELLAR_VISIT                                               :{BLACK}Visit world
+STR_STELLAR_ACCESS                                              :{BLACK}Toggle public access
+STR_STELLAR_PRESET_GENERIC                                      :{BLACK}Worlds: procedural
+STR_STELLAR_PRESET_MITO                                         :{BLACK}Worlds: Mito–Merredin sector
+STR_ERROR_STELLAR_PROJECT                                       :Gate project is unavailable or no longer valid
+STR_ERROR_STELLAR_RANGE                                         :Destination is beyond your researched gate range
+STR_ERROR_STELLAR_SUPPLY                                        :Build an owned logistics hub and rail station within 32 tiles of the departure gate
+STR_ERROR_STELLAR_CARGO                                         :This project requires structural steel and machine module cargo definitions
+STR_ERROR_STELLAR_CLOSED                                        :Commission a gate before constructing on this world
+STR_ERROR_STELLAR_RESERVED                                      :A gate project has reserved this site or supply terminal
+STR_ERROR_STELLAR_PROJECT_REQUIRED                              :Use the star map to commission a gate connection
+STR_ERROR_STELLAR_ACTION                                        :Cannot change stellar network
+STR_STELLAR_REMOTE_STOP                                         :{BLACK}Remote stop
+STR_STELLAR_REMOTE_WORLDS                                       :{BLACK}Connected worlds
+
+STR_STELLAR_TOLL                                                :{BLACK}Set transit toll

@@ -167,6 +167,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_generate_landscape_w
 						EndContainer(),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWNNAME_DROPDOWN), SetToolTip(STR_MAPGEN_TOWN_NAME_DROPDOWN_TOOLTIP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWN_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_TOWNS_TOOLTIP), SetFill(1, 1),
+						NWidget(WWT_PUSHTXTBTN, Colours::Orange, WID_GL_STELLAR_PRESET), SetFill(1, 1),
 						NWidget(WWT_PUSHTXTBTN, Colours::Orange, WID_GL_RESOURCE_MODE), SetToolTip(STR_RESOURCE_MODE_HELP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_INDUSTRY_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES_TOOLTIP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_WATER_PULLDOWN), SetToolTip(STR_MAPGEN_SEA_LEVEL_TOOLTIP), SetFill(1, 1),
@@ -307,6 +308,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_heightmap_load_widge
 						EndContainer(),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWNNAME_DROPDOWN), SetToolTip(STR_MAPGEN_TOWN_NAME_DROPDOWN_TOOLTIP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_TOWN_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_TOWNS_TOOLTIP), SetFill(1, 1),
+						NWidget(WWT_PUSHTXTBTN, Colours::Orange, WID_GL_STELLAR_PRESET), SetFill(1, 1),
 						NWidget(WWT_PUSHTXTBTN, Colours::Orange, WID_GL_RESOURCE_MODE), SetToolTip(STR_RESOURCE_MODE_HELP), SetFill(1, 1),
 						NWidget(WWT_DROPDOWN, Colours::Orange, WID_GL_INDUSTRY_PULLDOWN), SetToolTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES_TOOLTIP), SetFill(1, 1),
 						NWidget(NWID_SPACER), SetFill(1, 1),
@@ -329,6 +331,18 @@ static constexpr std::initializer_list<NWidgetPart> _nested_heightmap_load_widge
 
 static void StartGeneratingLandscape(GenerateLandscapeWindowMode mode)
 {
+ if (_settings_newgame.game_creation.cst_sector) {
+  std::vector<const GRFConfig *> required;
+  for (GrfID id : {GrfID{"OST\x01"},GrfID{"OST\x02"},GrfID{"OST\x05"}}) {
+   auto grf=FindGRFConfig(id,FindGRFConfigMode::NewestValid);
+   if (!grf) { ShowErrorMessage(GetEncodedString(STR_ERROR_STELLAR_CARGO),{},WarningLevel::Error); return; }
+   required.push_back(grf);
+  }
+  for (auto grf : required) if (std::none_of(_grfconfig_newgame.begin(),_grfconfig_newgame.end(),[&](const auto &c) { return c->ident.grfid==grf->ident.grfid; })) _grfconfig_newgame.push_back(std::make_unique<GRFConfig>(*grf));
+  _settings_newgame.game_creation.map_x=std::max<uint8_t>(10,_settings_newgame.game_creation.map_x);
+  _settings_newgame.game_creation.map_y=std::max<uint8_t>(10,_settings_newgame.game_creation.map_y);
+ }
+
 	CloseAllNonVitalWindows();
 	ClearErrorMessages();
 
@@ -437,6 +451,7 @@ struct GenerateLandscapeWindow : public Window {
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
 	{
 		switch (widget) {
+			case WID_GL_STELLAR_PRESET: return GetString(_settings_newgame.game_creation.cst_sector ? STR_STELLAR_PRESET_MITO : STR_STELLAR_PRESET_GENERIC);
 			case WID_GL_RESOURCE_MODE: return GetString(_settings_newgame.game_creation.player_built_economy ? STR_RESOURCE_MODE_PLAYER : STR_RESOURCE_MODE_CLASSIC);
 			case WID_GL_START_DATE_TEXT:      return GetString(STR_JUST_DATE_LONG, TimerGameCalendar::ConvertYMDToDate(_settings_newgame.game_creation.starting_year, 0, 1));
 			case WID_GL_MAPSIZE_X_PULLDOWN:   return GetString(STR_JUST_INT, 1LL << _settings_newgame.game_creation.map_x);
@@ -662,6 +677,14 @@ struct GenerateLandscapeWindow : public Window {
 	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
+			case WID_GL_STELLAR_PRESET:
+				_settings_newgame.game_creation.cst_sector = !_settings_newgame.game_creation.cst_sector;
+				if (_settings_newgame.game_creation.cst_sector) {
+					_settings_newgame.game_creation.map_x = std::max<uint8_t>(10, _settings_newgame.game_creation.map_x);
+					_settings_newgame.game_creation.map_y = std::max<uint8_t>(10, _settings_newgame.game_creation.map_y);
+				}
+				this->SetDirty();
+				break;
 			case WID_GL_RESOURCE_MODE:
 				_settings_newgame.game_creation.player_built_economy = !_settings_newgame.game_creation.player_built_economy;
 				this->SetDirty();

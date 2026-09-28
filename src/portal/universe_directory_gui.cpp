@@ -7,6 +7,7 @@
 
 #include "../stdafx.h"
 #include "universe_directory_gui.h"
+#include "stellar_network.h"
 #include "universe_authority.h"
 #include "universe_graph.h"
 #include "prebuilt_trade.h"
@@ -228,7 +229,7 @@ struct UniverseDirectoryWindow : Window {
 			this->SetWidgetDisabledState(WID_UD_FILTER_P2, true);
 			this->SetWidgetDisabledState(WID_UD_FILTER_P3, true);
 			this->SetWidgetDisabledState(WID_UD_FILTER_P4, true);
-			this->SetWidgetDisabledState(WID_UD_TRADE_GATE_BTN, true);
+			this->SetWidgetDisabledState(WID_UD_TRADE_GATE_BTN, false);
 		} else {
 			this->UpdateGalaxyNodeList();
 			this->vscroll->SetCount(this->displayed_galaxy_nodes.size());
@@ -238,7 +239,7 @@ struct UniverseDirectoryWindow : Window {
 			this->SetWidgetDisabledState(WID_UD_FILTER_P2, false);
 			this->SetWidgetDisabledState(WID_UD_FILTER_P3, false);
 			this->SetWidgetDisabledState(WID_UD_FILTER_P4, false);
-			this->SetWidgetDisabledState(WID_UD_TRADE_GATE_BTN, this->selected_galaxy_node_id.empty());
+			this->SetWidgetDisabledState(WID_UD_TRADE_GATE_BTN, false);
 
 			this->SetWidgetLoweredState(WID_UD_FILTER_ALL, this->phase_filter == GalaxyPhaseFilter::All);
 			this->SetWidgetLoweredState(WID_UD_FILTER_P1, this->phase_filter == GalaxyPhaseFilter::Phase1);
@@ -653,24 +654,9 @@ struct UniverseDirectoryWindow : Window {
 				break;
 			}
 
-			case WID_UD_TRADE_GATE_BTN: {
-				if (!this->selected_galaxy_node_id.empty()) {
-					TileIndex p_tile = INVALID_TILE;
-					WorldID local_w = DEFAULT_WORLD;
-					for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
-						if (link.end_a.IsValid()) {
-							p_tile = link.end_a.tile;
-							local_w = link.end_a.world_id;
-							break;
-						}
-					}
-					if (p_tile != INVALID_TILE) {
-						PrebuiltTradeManager::Instance().RegisterTradeGateway(p_tile, this->selected_galaxy_node_id, local_w, 32);
-					}
-					this->SetDirty();
-				}
+			case WID_UD_TRADE_GATE_BTN:
+				ShowStellarNetwork();
 				break;
-			}
 
 			case WID_UD_JUMP_BTN: {
 				if (this->selected_world != INVALID_WORLD && PlanetManager::GetRegion(this->selected_world) != nullptr) {

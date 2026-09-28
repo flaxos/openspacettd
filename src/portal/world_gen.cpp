@@ -9,6 +9,8 @@
 
 #include "../stdafx.h"
 #include "world_gen.h"
+#include "stellar_network.h"
+#include "../settings_type.h"
 #include "planet_manager.h"
 #include "portal_registry.h"
 #include "portal_terminal.h"
@@ -23,16 +25,29 @@
 #include "../map_func.h"
 #include <algorithm>
 #include <cstdlib>
+#include <charconv>
 #include <vector>
 
 namespace {
+
+/** Invalid configured ranges fail generation rather than alias another host's worlds. */
+uint32_t ConfiguredWorldBase()
+{
+	const char *value = std::getenv("OPENSPACETTD_WORLD_ID_BASE");
+	if (value == nullptr) return 0;
+	uint32_t base = 0;
+	const char *end = value + std::strlen(value);
+	auto parsed = std::from_chars(value, end, base);
+	return parsed.ec == std::errc{} && parsed.ptr == end ? base : UINT32_MAX;
+}
+
 
 /**
  * Find the nearest clear, level site for a generated gateway head and its full
  * two-lane terminal. This keeps the local rail transition physically valid
  * without constraining the remote endpoint to a matching coordinate or axis.
  */
-static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex nominal, DiagDirection &enter_dir)
+static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex nominal, DiagDirection &enter_dir, const std::set<TileIndex> *claimed = nullptr)
 {
 	int nominal_x = TileX(nominal);
 	int nominal_y = TileY(nominal);
@@ -47,7 +62,7 @@ static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex 
 	for (DiagDirection candidate_dir : directions) {
 		for (int radius = 0; radius <= max_radius; radius++) {
 			for (int dy = -radius; dy <= radius; dy++) {
-				for (int dx = -radius; dx <= radius; dx++) {
+				for (int dx = -radius; dx <= radius; dx += (radius == 0 || std::abs(dy) == radius) ? 1 : 2 * radius) {
 					if (std::max(std::abs(dx), std::abs(dy)) != radius) continue;
 					int x = nominal_x + dx;
 					int y = nominal_y + dy;
@@ -55,13 +70,13 @@ static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex 
 							y < static_cast<int>(region.min_y) || y > static_cast<int>(region.max_y)) continue;
 
 					TileIndex tile = TileXY(x, y);
-					if (!IsTileType(tile, TileType::Clear) || GetTileSlope(tile) != SLOPE_FLAT) continue;
+					if ((claimed && claimed->contains(tile)) || (!IsTileType(tile, TileType::Clear) && !IsTileType(tile, TileType::Trees)) || GetTileSlope(tile) != SLOPE_FLAT) continue;
 					std::optional<PortalTerminalLayout> terminal = PortalTerminal::Plan(tile, candidate_dir, region.id);
 					if (!terminal.has_value()) continue;
 
 					bool suitable = true;
 					for (const PortalTerminalTile &part : terminal->tiles) {
-						if (!IsTileType(part.tile, TileType::Clear) || GetTileSlope(part.tile) != SLOPE_FLAT ||
+						if ((claimed && claimed->contains(part.tile)) || (!IsTileType(part.tile, TileType::Clear) && !IsTileType(part.tile, TileType::Trees)) || GetTileSlope(part.tile) != SLOPE_FLAT ||
 								TileHeight(part.tile) != TileHeight(tile)) {
 							suitable = false;
 							break;
@@ -114,13 +129,15 @@ void MultiWorldGen::SetDefaultWorldCount(uint32_t count)
 std::vector<PlanetRegion> MultiWorldGen::CalculateLayout(uint32_t size_x, uint32_t size_y)
 {
 	Config cfg;
-	cfg.world_count = GetDefaultWorldCount();
+	cfg.cst_sector = _settings_game.game_creation.cst_sector;
+	cfg.world_id_base = ConfiguredWorldBase();
+	cfg.world_count = cfg.cst_sector ? 7 : GetDefaultWorldCount();
 	return CalculateLayout(size_x, size_y, cfg);
 }
 
 std::vector<PlanetRegion> MultiWorldGen::CalculateLayout(uint32_t size_x, uint32_t size_y, const Config &config)
 {
-	if (config.world_count == 0 || size_x < 32 || size_y < 32) return {};
+	if ((config.cst_sector && config.world_count != 7) || config.world_count == 0 || config.world_count > 16 || uint64_t(config.world_id_base) + config.world_count >= UINT32_MAX || size_x < 32 || size_y < 32) return {};
 
 	bool split_y = (size_y >= size_x);
 	uint32_t total_length = split_y ? size_y : size_x;
@@ -156,7 +173,7 @@ std::vector<PlanetRegion> MultiWorldGen::CalculateLayout(uint32_t size_x, uint32
 	for (uint32_t i = 0; i < config.world_count; i++) {
 		uint32_t span = base_world_span + (i < remainder ? 1 : 0);
 		PlanetRegion region;
-		region.id = WorldID{i};
+		region.id = WorldID{config.world_id_base + i};
 		region.development_score = 0;
 
 		switch (i) {
@@ -192,6 +209,12 @@ std::vector<PlanetRegion> MultiWorldGen::CalculateLayout(uint32_t size_x, uint32
 			}
 		}
 
+		if (config.cst_sector && i < 7) {
+			static const char *names[]{"Mito", "Merredin", "Clonclurry", "Valvida", "Chelva", "Tandil", "Pioneer Reach"};
+			region.name = names[i];
+			region.phase = i == 0 ? WorldPhase::Phase1_Core : i == 1 ? WorldPhase::Phase2_Developed : i < 4 ? WorldPhase::Phase3_Frontier : WorldPhase::Phase4_Expansion;
+			region.biome = i == 1 ? WorldBiome::AridDesert : i == 4 ? WorldBiome::Volcanic : i == 5 ? WorldBiome::SubArctic : WorldBiome::Temperate;
+		}
 		if (split_y) {
 			region.min_x = pad;
 			region.max_x = cross_length - 1 - pad;
@@ -214,7 +237,9 @@ std::vector<PlanetRegion> MultiWorldGen::CalculateLayout(uint32_t size_x, uint32
 bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y)
 {
 	Config cfg;
-	cfg.world_count = GetDefaultWorldCount();
+	cfg.cst_sector = _settings_game.game_creation.cst_sector;
+	cfg.world_id_base = ConfiguredWorldBase();
+	cfg.world_count = cfg.cst_sector ? 7 : GetDefaultWorldCount();
 	return GenerateMultiWorldLayout(size_x, size_y, cfg);
 }
 
@@ -247,6 +272,13 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 		PlanetManager::RegisterRegion(reg);
 	}
 
+	if (config.cst_sector) {
+		static const char *ids[]{"world_mito", "world_merredin", "world_clonclurry", "world_valvida", "world_chelva", "world_tandil", "scenario_pioneer_reach"};
+		static constexpr int x[]{0, 8, 11, 12, 18, 35, 65}, y[]{0, 0, 5, -5, 0, 10, 10};
+		StellarNetwork::Reset();
+		for (size_t i = 0; i < regions.size() && i < 7; ++i) StellarNetwork::RegisterWorld({regions[i].id, ids[i], regions[i].name, x[i], y[i], i < 4});
+	}
+
 	/* 2b. Apply alien biome environmental stylization across worlds */
 	for (const auto &reg : regions) {
 		ApplyBiomeStyling(reg);
@@ -258,8 +290,8 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 
 		bool split_y = (size_y >= size_x);
 
-		for (size_t i = 0; i < regions.size() - 1; i++) {
-			const auto &reg_a = regions[i];
+		for (size_t i = 0; i < (config.cst_sector ? size_t{3} : regions.size() - 1); i++) {
+			const auto &reg_a = regions[config.cst_sector && i == 2 ? 1 : i];
 			const auto &reg_b = regions[i + 1];
 
 			TileIndex t_a;
@@ -313,6 +345,7 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 			uint32_t virt_dist = split_y ? (reg_b.min_y - reg_a.max_y - 1) : (reg_b.min_x - reg_a.max_x - 1);
 			virt_dist = std::max(2u, virt_dist);
 
+			if (config.cst_sector) { StellarNetwork::RegisterCSTGate(t_a); StellarNetwork::RegisterCSTGate(t_b); }
 			PortalRegistry::RegisterPortalPair(
 				t_a, dir_a, reg_a.id,
 				t_b, dir_b, reg_b.id,
@@ -322,6 +355,32 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 		UpdateSignalsInBuffer();
 	}
 
+	return true;
+}
+
+bool MultiWorldGen::FinalizeStellarZones()
+{
+	{
+		const auto &regions = PlanetManager::GetAllRegions();
+		uint32_t zone_id = 1;
+		std::set<TileIndex> claimed;
+		for (const auto &region : regions) {
+			for (uint32_t slot = 0; slot < 3; ++slot) {
+				DiagDirection dir = DiagDirection::NE;
+				TileIndex nominal = TileXY(region.min_x + (region.max_x - region.min_x) * (slot + 1) / 4,
+					region.min_y + (region.max_y - region.min_y) / 2);
+				TileIndex tile = FindGeneratedGatewaySite(region, nominal, dir, &claimed);
+				if (tile == INVALID_TILE) return false;
+				auto layout = PortalTerminal::Plan(tile, dir, region.id);
+				if (!layout) return false;
+				/* Repeated nominal searches must never advertise overlapping arrival zones. */
+				for (const auto &part : layout->tiles) if (claimed.contains(part.tile)) return false;
+				claimed.insert(tile);
+				for (const auto &part : layout->tiles) claimed.insert(part.tile);
+				StellarNetwork::RegisterZone({zone_id++, region.id, tile, dir});
+			}
+		}
+	}
 	return true;
 }
 

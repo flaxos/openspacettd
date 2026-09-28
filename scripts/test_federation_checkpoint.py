@@ -40,6 +40,20 @@ class CheckpointTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "artifact changed"):
                 validate(checkpoint, binary)
 
+    def test_three_world_checkpoint_requires_every_registered_world(self):
+        with tempfile.TemporaryDirectory() as root:
+            root = Path(root)
+            binary = root / "binary"; binary.write_bytes(b"verified")
+            save = root / "save"; save.write_bytes(b"world")
+            authority = root / "authority.json"
+            authority.write_text(json.dumps({"worlds": {str(w): {} for w in (1, 2, 3)}, "transfers": {}}))
+            with self.assertRaisesRegex(ValueError, "every authority world"):
+                publish(root / "incomplete", binary, {1: save, 2: save}, authority, phase="return")
+            checkpoint = root / "complete"
+            expected = publish(checkpoint, binary, {w: save for w in (1, 2, 3)}, authority, phase="return")
+            self.assertEqual(validate(checkpoint, binary), expected)
+            self.assertIn("world3.sav", expected["files"])
+
     def test_incomplete_set_and_changed_binary_rejection(self):
         with tempfile.TemporaryDirectory() as root:
             root = Path(root)

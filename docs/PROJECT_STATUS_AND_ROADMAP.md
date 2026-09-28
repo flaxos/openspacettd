@@ -1,5 +1,32 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## CST star map and gate expansion — 28 September 2026
+
+Current delivery branch: `codex/cst-star-map-expansion`, based on main
+`8464e9374a` after PR #42. The opt-in Mito–Merredin preset, public CST backbone,
+research-limited player gate projects, delivered machine modules, private/public
+access and tolls are implemented. Connected hosts advertise actual worlds and
+stations; trains use native remote schedules and gate pins, while multiplayer
+clients can visit a registered host and follow a global train. Each server still
+uses one global map with immutable logical world regions.
+
+[Design, setup and scope](CST_STELLAR_NETWORK.md) ·
+[Automated evidence](audit/2026-09-28/stellar-network/README.md) ·
+[Human UAT checklist](../demo/CST-STELLAR-UAT.md).
+Automated native checks: **457 unit cases / 67,032 assertions; 469/469 CTests**.
+Three-server freight passes five round trips plus a cold-reload continuation:
+360 coal consumed, cargo and cash reconciled, no detected client desync.
+Human graphical acceptance for this new feature is **Pending**; the user's
+23 September acceptance is retained for the earlier build. Verification counts
+and recovery boundaries are recorded with the evidence, not inferred from old
+sprint totals. Existing historical statuses below retain their original dates.
+
+Next priorities: (1) human star-map, commissioning and host-visit UAT;
+(2) interrupted remote-project and company-lifecycle acceptance; (3) progression
+and freight balance using the new sector. The historical recovery and strategic
+sprint registers remain delivered; removed narrative/Silfen/crisis plans are not
+reactivated by this transport feature.
+
 Status: **CANONICAL**<br>
 As of: **2026-09-23**
 

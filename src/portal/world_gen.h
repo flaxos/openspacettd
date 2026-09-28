@@ -26,6 +26,8 @@ public:
 	 * Configuration parameters for generating multi-world layouts.
 	 */
 	struct Config {
+		bool cst_sector = false;       ///< Seven fixed lore and frontier regions.
+		uint32_t world_id_base = 0;     ///< First world ID; hosts in a universe need disjoint ranges.
 		uint32_t world_count = 3;       ///< Number of distinct planetary worlds to generate (default 3).
 		uint32_t buffer_width = 0;      ///< Width of void buffer bands in tiles (0 = automatic based on map size).
 		bool place_gateways = true;     ///< Whether to place and link starting interplanetary gateways.
@@ -56,6 +58,7 @@ public:
 	 * @param config Optional configuration settings.
 	 * @return true if generation succeeded; false if map is too small or invalid.
 	 */
+	static bool FinalizeStellarZones();
 	static bool GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y);
 	static bool GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, const Config &config);
 

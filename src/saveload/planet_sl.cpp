@@ -8,6 +8,8 @@
 /** @file planet_sl.cpp Code handling saving and loading of planetary worlds, wormholes, and consist transit. */
 
 #include "../stdafx.h"
+#include "../portal/universe_network.h"
+#include "../portal/stellar_network.h"
 
 #include "saveload.h"
 #include "../portal/planet_manager.h"
@@ -1363,6 +1365,44 @@ struct RSRCChunkHandler : ChunkHandler {
 	}
 };
 
+/** Versioned persistent stellar network, with bounded post-load validation. */
+struct SlStellarState { std::string data; };
+static const SaveLoad _stellar_desc[] = { SLE_SSTR(SlStellarState, data, VarTypes::STR) };
+struct STLRChunkHandler : ChunkHandler {
+ STLRChunkHandler() : ChunkHandler("STLR", ChunkType::Table) {}
+ void Save() const override {
+  SlTableHeader(_stellar_desc); SlSetArrayIndex(0);
+  SlStellarState state{StellarNetwork::Save()}; SlObject(&state, _stellar_desc);
+ }
+ void Load() const override {
+  auto table = SlTableHeader(_stellar_desc); bool seen = false;
+  while (SlIterateArray() != -1) {
+   SlStellarState state; SlObject(&state, table);
+   if (seen || state.data.size() > 4 * 1024 * 1024 || !StellarNetwork::Load(state.data)) SlErrorCorrupt("Invalid stellar network");
+   seen = true;
+  }
+ }
+};
+
+/** Versioned persistent universe directory, with bounded post-load validation. */
+struct SlUniverseState { std::string data; };
+static const SaveLoad _universe_network_desc[] = { SLE_SSTR(SlUniverseState, data, VarTypes::STR) };
+struct UNETChunkHandler : ChunkHandler {
+ UNETChunkHandler() : ChunkHandler("UNET", ChunkType::Table) {}
+ void Save() const override {
+  SlTableHeader(_universe_network_desc); SlSetArrayIndex(0);
+  SlUniverseState state{UniverseNetwork::Save()}; SlObject(&state, _universe_network_desc);
+ }
+ void Load() const override {
+  auto table = SlTableHeader(_universe_network_desc); bool seen = false;
+  while (SlIterateArray() != -1) {
+   SlUniverseState state; SlObject(&state, table);
+   if (seen || state.data.size() > 4 * 1024 * 1024 || !UniverseNetwork::Load(state.data)) SlErrorCorrupt("Invalid universe directory");
+   seen = true;
+  }
+ }
+};
+
 /** Temporary storage for Commonwealth Tech Tree serialization (TECH). */
 struct SlTechRecord {
 	uint8_t kind;             ///< 0 = Company research state, 1 = Unlocked technology node
@@ -1702,6 +1742,8 @@ static const CHQSChunkHandler CHQS;
 static const FABRChunkHandler FABR;
 static const ALLIChunkHandler ALLI;
 static const RSRCChunkHandler RSRC;
+static const STLRChunkHandler STLR;
+static const UNETChunkHandler UNET;
 static const TECHChunkHandler TECH;
 static const PRODChunkHandler PROD;
 static const LOREChunkHandler LORE;
@@ -1857,6 +1899,8 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	FJRN,
 	FTJR,
 	RSRC,
+	STLR,
+	UNET,
 	TECH,
 	PROD,
 	LORE,

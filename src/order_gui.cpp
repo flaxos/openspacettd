@@ -8,6 +8,7 @@
 /** @file order_gui.cpp GUI related to orders. */
 
 #include "stdafx.h"
+#include "portal/universe_network.h"
 #include "command_func.h"
 #include "viewport_func.h"
 #include "depot_map.h"
@@ -1243,6 +1244,9 @@ public:
 				}
 				break;
 
+			case WID_O_REMOTE:
+				ShowUniverseDestinations(this->vehicle->index);
+				break;
 			case WID_O_GOTO:
 				if (this->GetWidget<NWidgetLeaf>(widget)->ButtonHit(pt)) {
 					if (this->goto_type != OPOS_NONE) {
@@ -1635,6 +1639,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_orders_train_widgets
 				NWidget(WWT_PUSHTXTBTN, Colours::Grey, WID_O_STOP_SHARING), SetMinimalSize(124, 12), SetFill(1, 0),
 														SetStringTip(STR_ORDERS_STOP_SHARING_BUTTON, STR_ORDERS_STOP_SHARING_TOOLTIP), SetResize(1, 0),
 			EndContainer(),
+			NWidget(WWT_PUSHTXTBTN, Colours::Grey, WID_O_REMOTE), SetStringTip(STR_STELLAR_REMOTE_STOP), SetFill(1, 0), SetResize(1, 0),
 			NWidget(NWID_BUTTON_DROPDOWN, Colours::Grey, WID_O_GOTO), SetMinimalSize(124, 12), SetFill(1, 0),
 													SetStringTip(STR_ORDERS_GO_TO_BUTTON, STR_ORDERS_GO_TO_TOOLTIP), SetResize(1, 0),
 		EndContainer(),

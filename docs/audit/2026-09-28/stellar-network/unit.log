@@ -1,0 +1,71 @@
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 5 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 18 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 5 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 18 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 5 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 0 placed 0 of 2 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 3 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 5 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 9 placed 0 of 2 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 11 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 18 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 0 placed 0 of 3 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 3 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 5 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 9 placed 0 of 3 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 11 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Resource sites: type 18 placed 0 of 1 requested
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 1 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 1 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 1 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 1 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 1 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 2 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 2 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 2 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 4 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 4 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 4 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 8 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 8 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 8 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 1 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Source buffer too short: 2 > 0
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+'-2 -'
+[2026-09-28 13:51:37] dbg: [misc:0] Integer out of range: 'ffffFFFF'+' fff'
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+'-1aa'
+[2026-09-28 13:51:37] dbg: [misc:0] Integer out of range: '1234567890123'+' 123'
+[2026-09-28 13:51:37] dbg: [misc:0] Integer out of range: '1234567890123'+' 123'
+[2026-09-28 13:51:37] dbg: [misc:0] Integer out of range: 'ffffFFFFffffFFFE'+' fff'
+[2026-09-28 13:51:37] dbg: [misc:0] Integer out of range: 'ffffFFFFffffFFFE'+' fff'
+[2026-09-28 13:51:37] dbg: [misc:0] Integer out of range: 'ffffFFFFffffFFFE'+' fff'
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+' '
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:37] dbg: [misc:0] Cannot parse integer: ''+''
+[2026-09-28 13:51:39] dbg: [script:0] The savegame has an AI by the name '', version -1 which is no longer available.
+[2026-09-28 13:51:39] dbg: [script:0] A random other AI will be loaded in its place.
+[2026-09-28 13:51:39] dbg: [script:0] The savegame has an AI by the name '', version -1 which is no longer available.
+[2026-09-28 13:51:39] dbg: [script:0] A random other AI will be loaded in its place.
+[2026-09-28 13:51:39] dbg: [script:0] The savegame has an AI by the name '', version -1 which is no longer available.
+[2026-09-28 13:51:39] dbg: [script:0] A random other AI will be loaded in its place.
+[2026-09-28 13:51:39] dbg: [script:0] No suitable AI found, loading 'dummy' AI.
+[2026-09-28 13:51:39] dbg: [script:0] No suitable AI found, loading 'dummy' AI.
+[2026-09-28 13:51:39] dbg: [script:0] No suitable AI found, loading 'dummy' AI.
+[SimulateYears] Taking initial baseline snapshot...
+[SimulateYears] Baseline snapshot taken successfully!
+[SimulateYears] Stepping simulation from year 2030 to 2031...
+===============================================================================
+All tests passed (67032 assertions in 457 test cases)

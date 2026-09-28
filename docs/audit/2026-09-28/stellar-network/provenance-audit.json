@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "train_observations": 1934,
+  "receiving_host_packet_observations": 916,
+  "identities": [
+    "87811625553b8bb6:697008beeada6700:1"
+  ],
+  "local_owners": [
+    0
+  ],
+  "cargo_origin_worlds": [
+    1
+  ]
+}

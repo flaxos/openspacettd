@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Publish and validate an explicitly coordinated federation checkpoint.
 
-The caller must first drain commands/HTTP and pause both game servers. This
+The caller must first drain commands/HTTP and pause all participating game servers. This
 module validates the resulting files; it cannot make live, unrelated saves atomic.
 """
 import hashlib
@@ -22,12 +22,13 @@ def publish(directory, binary, saves, authority, *, phase):
     directory = Path(directory)
     if directory.exists():
         raise ValueError("Checkpoint directory must be new; preserve the previous checkpoint")
-    if set(saves) != {1, 2}:
-        raise ValueError("Checkpoint requires saves for worlds 1 and 2")
+    if len(saves) < 2 or any(not isinstance(world, int) or world < 0 or world >= 2**32-1 for world in saves):
+        raise ValueError("Checkpoint requires saves for at least two valid worlds")
     state = json.loads(Path(authority).read_text())
-    if not isinstance(state.get("transfers"), dict) or set(state.get("worlds", {})) != {"1", "2"}:
-        raise ValueError("Authority state must describe this two-world session")
-    sources = {"world1.sav": Path(saves[1]), "world2.sav": Path(saves[2]), "authority.json": Path(authority)}
+    if not isinstance(state.get("transfers"), dict) or set(state.get("worlds", {})) != {str(world) for world in saves}:
+        raise ValueError("Checkpoint requires saves for every authority world")
+    sources = {f"world{world}.sav": Path(path) for world, path in sorted(saves.items())}
+    sources["authority.json"] = Path(authority)
     for source in sources.values():
         if not source.is_file() or source.stat().st_size == 0:
             raise ValueError(f"Missing or empty checkpoint artifact: {source}")
@@ -63,7 +64,11 @@ def validate(directory, binary):
         raise ValueError("Unsupported checkpoint contract")
     if manifest.get("binary_sha256") != digest(binary):
         raise ValueError("Checkpoint binary differs from the verified session")
-    if set(manifest.get("files", {})) != {"world1.sav", "world2.sav", "authority.json"}:
+    state = json.loads((directory / "authority.json").read_text())
+    worlds = state.get("worlds", {})
+    if len(worlds) < 2 or any(not world.isdigit() or str(int(world)) != world or int(world) >= 2**32-1 for world in worlds):
+        raise ValueError("Invalid checkpoint world set")
+    if set(manifest.get("files", {})) != {"authority.json", *(f"world{world}.sav" for world in worlds)}:
         raise ValueError("Checkpoint artifact set is incomplete")
     for name, expected in manifest["files"].items():
         if digest(directory / name) != expected:

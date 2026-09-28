@@ -1,0 +1,56 @@
+{
+  "binary": "/home/flax/games/openspacettd/build/openttd-cst-verified",
+  "binary_sha256": "e71b4883cd0f93e90461bcc2c9eba149a322c310a59b97e24cbf248fc66870e5",
+  "authority": "http://127.0.0.1:52941",
+  "processes": [
+    {
+      "name": "authority",
+      "pid": 2511661,
+      "port": null,
+      "console": "/tmp/cst-three-server-final/authority.console",
+      "log": "/tmp/cst-three-server-final/authority.log"
+    },
+    {
+      "name": "server1",
+      "pid": 2511663,
+      "port": 37073,
+      "console": "/tmp/cst-three-server-final/server1.console",
+      "log": "/tmp/cst-three-server-final/server1.log"
+    },
+    {
+      "name": "server2",
+      "pid": 2511682,
+      "port": 51609,
+      "console": "/tmp/cst-three-server-final/server2.console",
+      "log": "/tmp/cst-three-server-final/server2.log"
+    },
+    {
+      "name": "server3",
+      "pid": 2511684,
+      "port": 38009,
+      "console": "/tmp/cst-three-server-final/server3.console",
+      "log": "/tmp/cst-three-server-final/server3.log"
+    },
+    {
+      "name": "client1",
+      "pid": 2511695,
+      "port": null,
+      "console": "/tmp/cst-three-server-final/client1.console",
+      "log": "/tmp/cst-three-server-final/client1.log"
+    },
+    {
+      "name": "client2",
+      "pid": 2511827,
+      "port": null,
+      "console": "/tmp/cst-three-server-final/client2.console",
+      "log": "/tmp/cst-three-server-final/client2.log"
+    },
+    {
+      "name": "client3",
+      "pid": 2511962,
+      "port": null,
+      "console": "/tmp/cst-three-server-final/client3.console",
+      "log": "/tmp/cst-three-server-final/client3.log"
+    }
+  ]
+}

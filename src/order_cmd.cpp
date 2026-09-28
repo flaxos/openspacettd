@@ -8,6 +8,7 @@
 /** @file order_cmd.cpp Handling of orders. */
 
 #include "stdafx.h"
+#include "portal/universe_network.h"
 #include "portal/federation_orders.h"
 #include "debug.h"
 #include "command_func.h"
@@ -627,6 +628,7 @@ CommandCost CmdInsertOrder(DoCommandFlags flags, VehicleID veh, VehicleOrderID s
 	Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == nullptr || !IsCompanyBuildableVehicleType(v) || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(v)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
@@ -947,6 +949,7 @@ CommandCost CmdDeleteOrder(DoCommandFlags flags, VehicleID veh_id, VehicleOrderI
 
 	if (v == nullptr || !IsCompanyBuildableVehicleType(v) || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(v)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
@@ -1049,6 +1052,7 @@ CommandCost CmdSkipToOrder(DoCommandFlags flags, VehicleID veh_id, VehicleOrderI
 
 	if (v == nullptr || !IsCompanyBuildableVehicleType(v) || !v->IsPrimaryVehicle() || sel_ord == v->cur_implicit_order_index || sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(v)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
@@ -1086,6 +1090,7 @@ CommandCost CmdMoveOrder(DoCommandFlags flags, VehicleID veh, VehicleOrderID mov
 	Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == nullptr || !IsCompanyBuildableVehicleType(v) || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(v)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
@@ -1186,6 +1191,7 @@ CommandCost CmdModifyOrder(DoCommandFlags flags, VehicleID veh, VehicleOrderID s
 	Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == nullptr || !IsCompanyBuildableVehicleType(v) || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(v)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
@@ -1512,16 +1518,19 @@ CommandCost CmdCloneOrder(DoCommandFlags flags, CloneOptions action, VehicleID v
 	Vehicle *dst = Vehicle::GetIfValid(veh_dst);
 	if (dst == nullptr || !IsCompanyBuildableVehicleType(dst) || !dst->IsPrimaryVehicle()) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(dst)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(dst->owner);
 	if (ret.Failed()) return ret;
 
 	switch (action) {
 		case CO_SHARE: {
 			Vehicle *src = Vehicle::GetIfValid(veh_src);
+			if (UniverseNetwork::HasUniverseOrders(src) || UniverseNetwork::HasUniverseOrders(dst)) return CMD_ERROR;
 
 			/* Sanity checks */
 			if (src == nullptr || !IsCompanyBuildableVehicleType(src) || !src->IsPrimaryVehicle() || dst->type != src->type || dst == src) return CMD_ERROR;
 
+			if (!UniverseNetwork::ScheduleEditable(src)) return CMD_ERROR;
 			ret = CheckOwnership(src->owner);
 			if (ret.Failed()) return ret;
 
@@ -1579,6 +1588,7 @@ CommandCost CmdCloneOrder(DoCommandFlags flags, CloneOptions action, VehicleID v
 			/* Sanity checks */
 			if (src == nullptr || !IsCompanyBuildableVehicleType(src) || !src->IsPrimaryVehicle() || dst->type != src->type || dst == src) return CMD_ERROR;
 
+			if (!UniverseNetwork::ScheduleEditable(src)) return CMD_ERROR;
 			ret = CheckOwnership(src->owner);
 			if (ret.Failed()) return ret;
 
@@ -1651,6 +1661,7 @@ CommandCost CmdOrderRefit(DoCommandFlags flags, VehicleID veh, VehicleOrderID or
 	const Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == nullptr || !IsCompanyBuildableVehicleType(v) || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
+	if (!UniverseNetwork::ScheduleEditable(v)) return CMD_ERROR;
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 

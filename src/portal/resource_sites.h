@@ -35,6 +35,8 @@ public:
 	static constexpr uint SURVEY_SIZE = 16;
 	static void Reset();
 	static bool Enabled();
+	static bool GeneratingSites();
+	static void SetGeneratingSites(bool value);
 	static void SetEnabled(bool enabled);
 	static bool IsPrimary(IndustryType type);
 	static TechID RequiredTech(IndustryType type);

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "contract": "latest-coordinated-checkpoint",
+  "phase": "confirmed-return",
+  "binary_sha256": "e71b4883cd0f93e90461bcc2c9eba149a322c310a59b97e24cbf248fc66870e5",
+  "files": {
+    "world1.sav": "158c36a8a261de4794d834f0c931f3d297deed92928e880305c196c0628ff46c",
+    "world2.sav": "589737325808292b739ca6e773c0e93fcfa5cd4c6eb4383f964857a035d882f5",
+    "world3.sav": "dfeb1265ff84c1dab4eee289bda4c77a8a7987900f6050f746b73b9fea7c2269",
+    "authority.json": "6ae3e54f411b6d84951cce22a7d59810ba3de1357a58cf0a9b5f2d97cb231c3e"
+  }
+}

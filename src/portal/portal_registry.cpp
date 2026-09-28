@@ -8,6 +8,7 @@
 /** @file portal_registry.cpp Implementation of wormhole portal registry. */
 
 #include "../stdafx.h"
+#include "stellar_network.h"
 #include "portal_registry.h"
 #include "edge_conduit.h"
 #include "federation_identity.h"
@@ -68,6 +69,8 @@ bool PortalRegistry::UnregisterPortal(PortalID id)
 	auto it = portal_links.find(id.base());
 	if (it == portal_links.end()) return false;
 
+	StellarNetwork::RemoveGate(it->second.end_a.tile);
+	StellarNetwork::RemoveGate(it->second.end_b.tile);
 	tile_to_portal.erase(it->second.end_a.tile);
 	tile_to_portal.erase(it->second.end_b.tile);
 	portal_links.erase(it);
@@ -77,6 +80,7 @@ bool PortalRegistry::UnregisterPortal(PortalID id)
 bool PortalRegistry::UnregisterPortalByTile(TileIndex tile)
 {
 	if (tile == INVALID_TILE) return false;
+	StellarNetwork::RemoveGate(tile);
 
 	auto it_is = interserver_portals.find(tile);
 	if (it_is != interserver_portals.end()) {
@@ -229,6 +233,7 @@ const InterServerPortalLink *PortalRegistry::GetInterServerPortal(TileIndex tile
 
 bool PortalRegistry::UnregisterInterServerPortal(TileIndex tile)
 {
+	StellarNetwork::RemoveGate(tile);
 	return interserver_portals.erase(tile) > 0;
 }
 

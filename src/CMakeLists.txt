@@ -388,6 +388,14 @@ add_files(
     portal/fabrication_manager.h
     portal/tech_tree.cpp
     portal/tech_tree.h
+    portal/stellar_network_gui.cpp
+    portal/universe_network_gui.cpp
+    portal/universe_network.cpp
+    portal/universe_network.h
+    portal/remote_gate_projects.cpp
+    portal/remote_gate_projects.h
+    portal/stellar_network.cpp
+    portal/stellar_network.h
     portal/resource_sites.cpp
     portal/resource_sites.h
     portal/resource_sites_gui.cpp

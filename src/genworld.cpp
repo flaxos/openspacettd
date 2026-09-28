@@ -148,8 +148,11 @@ static void _GenerateWorld()
 			_settings_game.game_creation.snow_line_height = DEF_SNOWLINE_HEIGHT;
 		} else {
 			GenerateClearTile();
-			if (MultiWorldGen::IsEnabled()) {
-				MultiWorldGen::GenerateMultiWorldLayout(Map::SizeX(), Map::SizeY());
+			if (MultiWorldGen::IsEnabled() || _settings_game.game_creation.cst_sector) {
+				if (!MultiWorldGen::GenerateMultiWorldLayout(Map::SizeX(), Map::SizeY())) {
+					HandleGeneratingWorldAbortion();
+					return;
+				}
 			}
 			Map::CountLandTiles();
 
@@ -166,6 +169,11 @@ static void _GenerateWorld()
 				GenerateObjects();
 				GenerateTrees();
 			}
+		}
+
+		if (_settings_game.game_creation.cst_sector && !MultiWorldGen::FinalizeStellarZones()) {
+			HandleGeneratingWorldAbortion();
+			return;
 		}
 
 		/* These are probably pointless when inside the scenario editor. */

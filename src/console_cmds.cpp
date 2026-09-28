@@ -12,6 +12,7 @@
 #include "vehicle_cmd.h"
 #include "portal/portal_cmd.h"
 #include "portal/federation_identity.h"
+#include "portal/universe_network.h"
 #include "3rdparty/nlohmann/json.hpp"
 #include <charconv>
 #include "core/string_consumer.hpp"
@@ -4323,6 +4324,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("federation_dispatch",     ConFederationDispatch);
 	IConsole::CmdRegister("universe_auth",           ConUniverseAuth);
 	IConsole::CmdRegister("universe_worlds",         ConUniverseWorlds);
+	IConsole::CmdRegister("universe_company_map", ConUniverseCompanyMap, ConHookServerOnly);
 	IConsole::CmdRegister("universe_company",        ConUniverseCompany);
 	IConsole::CmdRegister("universe_trade",          ConUniverseTrade);
 	IConsole::CmdRegister("universe_corridors",      ConUniverseCorridors);

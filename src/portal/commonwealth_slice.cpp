@@ -315,12 +315,13 @@ bool ConCommonwealthSlice(std::span<std::string_view> argv)
 /** Disposable native-engine fixture for a loaded natural gate entry with joined clients. */
 bool ConFederationTestFixture(std::span<std::string_view> argv)
 {
-	if ((argv.size() != 2 && argv.size() != 3) || (argv[1] != "1" && argv[1] != "2") ||
-			(argv.size() == 3 && argv[2] != "scheduled")) {
-		IConsolePrint(CC_HELP, "federation_test_fixture 1|2 [scheduled]: prepare a fresh empty test map before clients join");
+	if ((argv.size() != 2 && argv.size() != 3) || (argv[1] != "1" && argv[1] != "2" && argv[1] != "3") ||
+			(argv.size() == 3 && argv[2] != "scheduled" && argv[2] != "multihop")) {
+		IConsolePrint(CC_HELP, "federation_test_fixture 1|2|3 [scheduled|multihop]: prepare a fresh empty test map before clients join");
 		return true;
 	}
 	const bool scheduled = argv.size() == 3;
+	const bool multihop = scheduled && argv[2] == "multihop";
 	if ((_networking && (!_network_dedicated || HasClients())) || Company::GetNumItems() != 0 ||
 			Vehicle::GetNumItems() != 0 || Industry::GetNumItems() != 0 || PortalRegistry::Count() != 0 ||
 			Map::SizeX() != 512 || Map::SizeY() != 128) {
@@ -348,7 +349,8 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 	company->name = "Federation Native Test";
 	company->money = 10000000;
 	company->avail_railtypes.Set(RAILTYPE_RAIL);
-	const uint32_t world = argv[1] == "1" ? 1 : 2;
+	const uint32_t world = argv[1] == "1" ? 1 : argv[1] == "2" ? 2 : 3;
+	const uint32_t final_world = multihop ? 3 : 2;
 	PlanetManager::Reset();
 	PlanetManager::RegisterRegion({.id = WorldID{world}, .name = fmt::format("Federation Server {}", world),
 		.phase = scheduled && world == 1 ? WorldPhase::Phase3_Frontier : WorldPhase::Phase1_Core,
@@ -363,15 +365,16 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 	 * have joined, reproducing the configuration race from the reported session. */
 	MakeRailTunnel(TileXY(50, 60), company->index, DiagDirection::NE, RAILTYPE_RAIL);
 	PortalRegistry::RegisterPortalPair(TileXY(50, 40), DiagDirection::SW, WorldID{world}, TileXY(50, 60), DiagDirection::NE, WorldID{3}, 5);
-	if (!SliceResult(Command<Commands::BuildRailDepot>::Do(DoCommandFlag::Execute, TileXY(10, 40), RAILTYPE_RAIL, DiagDirection::SW), "federation depot")) return true;
+	if (!(multihop && world == 2) && !SliceResult(Command<Commands::BuildRailDepot>::Do(DoCommandFlag::Execute, TileXY(10, 40), RAILTYPE_RAIL, DiagDirection::SW), "federation depot")) return true;
 	StationID local_station = StationID::Invalid(), remote_station = StationID::Invalid();
 	if (scheduled) {
 		const auto local_namespace = FederationIdentityRegistry::DeriveNamespace(100 + world, 512, 128, 1950);
-		const auto remote_namespace = FederationIdentityRegistry::DeriveNamespace(103 - world, 512, 128, 1950);
+		const auto remote_namespace = FederationIdentityRegistry::DeriveNamespace(100 + (world == 1 ? final_world : 1), 512, 128, 1950);
 		const auto company_namespace = FederationIdentityRegistry::DeriveNamespace(101, 512, 128, 1950);
 		FederationIdentityRegistry::Reset();
 		FederationIdentityRegistry::RestoreState(local_namespace, 1);
 		if (!FederationIdentityRegistry::RestoreCompanyMapping(company->index, 1, company_namespace)) return true;
+		if (!(multihop && world == 2)) {
 		const uint station_x = world == 1 ? 20 : 30;
 		/* Native industry slots 0/1 are coal mine/power station; this fixture loads no GRFs. */
 		if (!SliceResult(Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, TileXY(station_x, 36),
@@ -387,7 +390,8 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 				RAILTYPE_RAIL, Axis::X, 1, 3, STAT_CLASS_DFLT, 0, NEW_STATION, true), "federation gate station")) return true;
 		remote_station = GetStationIndex(TileXY(44, 44));
 		Station::Get(remote_station)->name = world == 1 ? "World 2 Power Station via Gate" : "World 1 Coal Mine via Gate";
-		if (!FederationIdentityRegistry::RestoreStationMapping(remote_station, 1, remote_namespace, WorldID{3 - world})) return true;
+		if (!FederationIdentityRegistry::RestoreStationMapping(remote_station, 1, remote_namespace, WorldID{world == 1 ? final_world : 1})) return true;
+		}
 	}
 	if (world == 1) {
 		auto [cost, id, unused, capacity, refits] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, TileXY(10, 40), EngineID{0}, false, INVALID_CARGO, ClientID::Invalid);
@@ -404,13 +408,23 @@ bool ConFederationTestFixture(std::span<std::string_view> argv)
 				wagon->cargo.Append(cargo);
 			}
 		}
-		if (scheduled && !ConsistMaterializer::AssignRoundTripOrders(Train::Get(id), local_station, WorldID{1}, remote_station, WorldID{2})) return true;
+		if (scheduled && !ConsistMaterializer::AssignRoundTripOrders(Train::Get(id), local_station, WorldID{1}, remote_station, WorldID{final_world})) return true;
 		if (scheduled) {
 			Train::Get(id)->GetOrder(0)->SetLoadType(OrderLoadType::FullLoad);
 			Train::Get(id)->current_order = *Train::Get(id)->GetOrder(0);
 		}
 		if (!SliceResult(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, id, true), "federation start")) return true;
 	}
+	if (multihop) {
+  PortalRegistry::UnregisterPortalByTile(TileXY(50,40));
+  if (world==2) {
+   MakeRailTunnel(TileXY(10,40),company->index,DiagDirection::NE,RAILTYPE_RAIL);
+   PortalRegistry::RegisterInterServerPortal(TileXY(10,40),DiagDirection::NE,WorldID{2},WorldID{1},10,5,20);
+   PortalRegistry::RegisterInterServerPortal(TileXY(50,40),DiagDirection::SW,WorldID{2},WorldID{3},30,5,21);
+  } else {
+   PortalRegistry::RegisterInterServerPortal(TileXY(50,40),DiagDirection::SW,WorldID{world},WorldID{2},world==1?20:21,5,world*10);
+  }
+ }
 	_pause_mode.Set(PauseMode::Normal);
 	IConsolePrint(CC_DEFAULT, "Federation fixture ready: world={}, gate={}, cargo={}", world, TileXY(50, 40).base(), !scheduled && world == 1 ? 10 : 0);
 	return true;

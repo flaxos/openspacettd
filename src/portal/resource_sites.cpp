@@ -6,6 +6,7 @@
 /** @file resource_sites.cpp Deterministic resource-site placement and company surveying. */
 #include "../stdafx.h"
 #include "resource_sites.h"
+#include "stellar_network.h"
 #include "planet_manager.h"
 #include "../command_func.h"
 #include "../company_base.h"
@@ -23,6 +24,9 @@
 #include "../safeguards.h"
 
 static bool _resource_economy = false;
+static bool _generating_sites = false;
+bool ResourceSiteManager::GeneratingSites() { return _generating_sites; }
+void ResourceSiteManager::SetGeneratingSites(bool value) { _generating_sites = value; }
 static std::vector<ResourceSite> _resource_sites;
 static std::map<CompanyID, std::set<TileIndex>> _resource_surveys;
 
@@ -92,6 +96,7 @@ CommandCost ResourceSiteManager::Survey(DoCommandFlags flags, CompanyID company,
 {
 	if (!Enabled() || !Company::IsValidID(company) || tile >= Map::Size()) return CMD_ERROR;
 	WorldID world = PlanetManager::GetTileWorld(tile);
+	if (!StellarNetwork::WorldAccessible(world)) return CommandCost(STR_ERROR_STELLAR_CLOSED);
 	bool covered = true;
 	for (uint y = TileY(tile); y < std::min(Map::SizeY(), TileY(tile) + SURVEY_SIZE); ++y) {
 		for (uint x = TileX(tile); x < std::min(Map::SizeX(), TileX(tile) + SURVEY_SIZE); ++x) {
@@ -214,6 +219,20 @@ bool ConResourceSites(std::span<std::string_view> argv)
 		if (!ResourceSiteManager::IsPrimary(industry->type)) result["processing"] = result["processing"].get<uint>() + 1;
 		if (ResourceSiteManager::RequiredTech(industry->type) != TECH_NONE) result["advanced"] = result["advanced"].get<uint>() + 1;
 	}
+	if (StellarNetwork::Enabled()) {
+  auto stellar=nlohmann::json::parse(StellarNetwork::Save());
+  result["site_worlds"]=nlohmann::json::object();
+  for (const auto &site : ResourceSiteManager::Sites()) { auto key=fmt::format("{}",site.world.base()); result["site_worlds"][key]=result["site_worlds"].value(key,0u)+1; }
+  result["stellar_worlds"]=stellar.at("worlds"); result["landing_zones"]=stellar.at("zones"); result["gate_policies"]=stellar.at("policies");
+  uint32_t bad=0;
+  for (uint32_t y=0;y<Map::SizeY();++y) for (uint32_t x=0;x<Map::SizeX();++x) {
+   int h=TileHeight(TileXY(x,y));
+   if (x+1<Map::SizeX() && std::abs(h-int(TileHeight(TileXY(x+1,y))))>1) ++bad;
+   if (y+1<Map::SizeY() && std::abs(h-int(TileHeight(TileXY(x,y+1))))>1) ++bad;
+  }
+  result["invalid_height_edges"]=bad;
+  result["machine_cargo"]=GetCargoTypeByLabel(CargoLabel{"MACH"});
+ }
 	IConsolePrint(CC_DEFAULT, "RESOURCE state {}", result.dump());
 	return true;
 }

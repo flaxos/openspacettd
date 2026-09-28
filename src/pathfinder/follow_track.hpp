@@ -10,6 +10,7 @@
 #ifndef  FOLLOW_TRACK_HPP
 #define  FOLLOW_TRACK_HPP
 
+#include "../portal/stellar_network.h"
 #include "../pbs.h"
 #include "../roadveh.h"
 #include "../station_base.h"
@@ -392,7 +393,7 @@ protected:
 		/* Neutral railway (OWNER_NONE / CST) and allied railway are shared infrastructure.
 		 * Competitor-owned railway without an established alliance remains private or hostile. */
 		Owner tile_owner = GetTileOwner(this->new_tile);
-		if (IsRailTT() && !CorporateAllianceManager::CanTraverseTrack(this->veh_owner, tile_owner)) {
+		if (IsRailTT() && !StellarNetwork::CanTraverseTile(this->new_tile, this->veh_owner, CorporateAllianceManager::CanTraverseTrack(this->veh_owner, tile_owner))) {
 			/* unauthorized track owner */
 			this->err = ErrorCode::NoWay;
 			return false;

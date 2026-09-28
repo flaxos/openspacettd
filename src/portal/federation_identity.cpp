@@ -6,6 +6,7 @@
 /** @file federation_identity.cpp Stable identities for future inter-server consist transfer. */
 
 #include "../stdafx.h"
+#include "universe_network.h"
 #include "federation_identity.h"
 #include "federation_cargo.h"
 
@@ -377,6 +378,7 @@ std::optional<GlobalStationID> FederationIdentityRegistry::GetOrCreateStation(St
 
 void FederationIdentityRegistry::ReleaseStation(StationID station)
 {
+	UniverseNetwork::ReleaseStation(station);
 	_station_mappings.erase(station.base());
 	_station_aliases.erase(station.base());
 }
@@ -509,6 +511,7 @@ std::optional<GlobalOrderDestinationID> FederationIdentityRegistry::FindOrderDes
 	switch (order_type) {
 		case OT_GOTO_STATION:
 		case OT_IMPLICIT: {
+			if (auto pin = UniverseNetwork::GateOrder(dest.ToStationID())) return pin;
 			auto st = FindStation(dest.ToStationID());
 			if (!st.has_value()) return std::nullopt;
 			return GlobalOrderDestinationID::ForStation(*st, false);
@@ -534,6 +537,7 @@ std::optional<GlobalOrderDestinationID> FederationIdentityRegistry::GetOrCreateO
 	switch (order_type) {
 		case OT_GOTO_STATION:
 		case OT_IMPLICIT: {
+			if (auto pin = UniverseNetwork::GateOrder(dest.ToStationID())) return pin;
 			auto st = GetOrCreateStation(dest.ToStationID());
 			if (!st.has_value()) return std::nullopt;
 			return GlobalOrderDestinationID::ForStation(*st, false);

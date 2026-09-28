@@ -54,6 +54,8 @@ AuthorityRequest::AuthorityRequest(std::string base_url, AuthorityOperation oper
 	}
 	std::string path;
 	switch (operation) {
+		case AuthorityOperation::PublishUniverse: path = "/universe/publish"; break;
+		case AuthorityOperation::UniverseDirectory: path = "/universe/directory"; break;
 		case AuthorityOperation::RegisterWorld: path = "/worlds/register"; break;
 		case AuthorityOperation::Heartbeat: path = "/worlds/heartbeat"; break;
 		case AuthorityOperation::Initiate: path = "/transfers/initiate"; break;
@@ -64,7 +66,7 @@ AuthorityRequest::AuthorityRequest(std::string base_url, AuthorityOperation oper
 		default: this->error = "Unknown authority operation"; return;
 	}
 	this->uri = base_url + path;
-	if (operation != AuthorityOperation::Pending) {
+	if (operation != AuthorityOperation::Pending && operation != AuthorityOperation::UniverseDirectory) {
 		if (!payload.is_object()) {
 			this->error = "Authority request must be a JSON object";
 			return;
