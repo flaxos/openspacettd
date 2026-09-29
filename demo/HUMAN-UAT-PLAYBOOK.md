@@ -1,13 +1,24 @@
-# OpenSpaceTTD Commonwealth UAT Playbook
+# OpenSpaceTTD Commonwealth Human UAT Playbook
 
-This playbook provides human verification steps for the OpenSpaceTTD Commonwealth features introduced and stabilized in Sprint 50. Use the generated `OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` fixture to execute these tests.
+> **Current Active Playbook (28 September 2026):**
+> For the authoritative, comprehensive playthrough manual and testing checklists covering the **Unified Commonwealth Economy (PR #44)** and **CST Star Map (PR #43)**, consult:
+> - **[HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md)**: Full step-by-step visual playthrough guide and multi-scale UI audit.
+> - **[HUMAN-UAT-CHECKLIST.md](HUMAN-UAT-CHECKLIST.md)**: Printable/fillable testing score sheet with Pass/Fail recording.
+> - **[INTEGRATED-ECONOMY-UAT.md](INTEGRATED-ECONOMY-UAT.md)**: Economy contract and savegame overview.
 
-## Preparation
-1. Load `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` in the game.
-2. You will start as **Company 0 (Commonwealth Interplanetary Transport)**.
-3. Pause the game to review the map and company status before starting.
+## Current Preparation
+1. Launch the primary running economy test fixture:
+   ```bash
+   ./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Integrated-Economy-UAT.sav
+   ```
+2. You will start as **Company 0**.
+3. Follow the 8 testing tracks detailed in [HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md).
 
-## Test Cases
+---
+
+## Historical Sprint 50 Test Cases (`OpenSpaceTTD-Commonwealth-UAT-v1.0.sav`)
+
+The test cases below are preserved from Sprint 50 for regression reference:
 
 ### UAT-01: Blueprint Stamping & BOM Consumption
 **Objective:** Verify that CST blueprints can be placed and that they correctly consume resources from the planetary stockpile.

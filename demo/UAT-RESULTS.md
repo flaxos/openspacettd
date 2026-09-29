@@ -3,7 +3,8 @@
 ## Unified Commonwealth economy — 28 September 2026
 
 **Human graphical status: Pending.** No human pass is inferred from automation.
-The new [UAT checklist and saves](INTEGRATED-ECONOMY-UAT.md) cover Fund Industry,
+Follow the comprehensive **[HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md)** and use **[HUMAN-UAT-CHECKLIST.md](HUMAN-UAT-CHECKLIST.md)** to record visual observations and test results.
+The [UAT checklist and saves](INTEGRATED-ECONOMY-UAT.md) cover Fund Industry,
 physical factories, warehouse priority, research kits, construction materials,
 city baskets and shared research. The earlier user acceptance below applies to
 its earlier build.

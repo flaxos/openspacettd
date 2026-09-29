@@ -31,8 +31,11 @@ Dedicated sprint records are point-in-time evidence. They retain the test totals
 
 ## UAT documentation
 
-- [Solo UAT overview](../demo/README.md) and [Sprint 28 walkthrough](../demo/SPRINT28-UAT.md) cover the v0.4 single-player fixture through Sprint 27.
-- [Federation UAT](../demo/FEDERATION-UAT.md) covers authority API and cluster-supervisor procedures. Consult the canonical status page for the live game-process limitation.
+- [Human graphical UAT playbook & guide](../demo/HUMAN-GRAPHICAL-UAT-GUIDE.md) — comprehensive step-by-step visual playthrough manual and multi-scale UI audit guidelines for the Unified Commonwealth Economy.
+- [Human graphical UAT checklist](../demo/HUMAN-UAT-CHECKLIST.md) — fillable test score sheet for recording human visual observations and Pass/Fail status.
+- [Integrated Commonwealth economy UAT](../demo/INTEGRATED-ECONOMY-UAT.md) and [CST star map UAT](../demo/CST-STELLAR-UAT.md).
+- [Solo UAT overview](../demo/README.md) and [Sprint 28 walkthrough](../demo/SPRINT28-UAT.md) cover the legacy v0.4 single-player fixture through Sprint 27.
+- [Federation UAT](../demo/FEDERATION-UAT.md) covers authority API and cluster-supervisor procedures.
 - Earlier portal, Sprint 10 and Sprint 11 guides are historical regression fixtures.
 
 ## Historical and upstream references

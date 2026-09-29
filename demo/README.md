@@ -3,7 +3,8 @@
 ### Current Active UAT: Unified Commonwealth Economy (28 September 2026)
 
 The active acceptance entry point is the **Unified Commonwealth Economy** and **CST Star Map**.
-Follow the step-by-step checklist in **[INTEGRATED-ECONOMY-UAT.md](INTEGRATED-ECONOMY-UAT.md)** (and [CST-STELLAR-UAT.md](CST-STELLAR-UAT.md)) and record observations in [UAT-RESULTS.md](UAT-RESULTS.md).
+Follow the comprehensive **[HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md)** and fill in **[HUMAN-UAT-CHECKLIST.md](HUMAN-UAT-CHECKLIST.md)**.
+Reference specifications in [INTEGRATED-ECONOMY-UAT.md](INTEGRATED-ECONOMY-UAT.md) and [CST-STELLAR-UAT.md](CST-STELLAR-UAT.md), and record observations in [UAT-RESULTS.md](UAT-RESULTS.md).
 
 #### Quick Launch: Unified Commonwealth Economy
 ```bash
