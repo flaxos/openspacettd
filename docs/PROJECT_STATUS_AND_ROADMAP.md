@@ -1,5 +1,16 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Empty-tooltip crash repair — 29 September 2026
+
+**TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.
+Human desktop retest remains Pending.
+
+The reported `crash20260929060130` abort occurs when a nonempty encoded tooltip
+resolves to zero-width text. Tooltip admission now rejects that text before
+multiline sizing. Prompt-generator, HQ, facilities and trade buttons use
+`STR_NULL` for absent help. Simulation and save formats are unchanged.
+[Verification and UAT](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Organic UAT World Layouts & Realistic Civil Rail Infrastructure — 29 September 2026
 
 Delivery branch `feature/organic-uat-world-layouts`. Transforms the procedural UAT world

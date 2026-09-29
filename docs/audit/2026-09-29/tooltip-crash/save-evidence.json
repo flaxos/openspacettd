@@ -1,0 +1,10 @@
+{
+  "crash_save_sha256": "b1a6923f3ea076c7e67093c977ec5a06f9d079882d2ca305c912b6060d05d567",
+  "binary_sha256": "2636d2925aeb8fd776d447286e67700e90d03aa1a024577608a09ab2899128af",
+  "before": "1955-04-23",
+  "after": "1955-04-24",
+  "reloaded": "1955-04-24",
+  "native_load": true,
+  "continued_simulation": true,
+  "new_save_cold_reload": true
+}

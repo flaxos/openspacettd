@@ -1,0 +1,3 @@
+Filters: Tooltips reject empty rendered text and preserve visible help
+===============================================================================
+All tests passed (60 assertions in 1 test case)

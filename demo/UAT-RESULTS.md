@@ -1,5 +1,18 @@
 # Human UAT results — recovery / v1.1
 
+## Empty-tooltip crash repair — 29 September 2026
+
+**Human graphical retest: Pending.** Automated tooltip windows exercise empty,
+newline-only and normal text at 100%, 150% and 200% scale. The reported crash save
+is preserved; native load, continued simulation and a separate save/reload were
+checked. See [repair evidence](../docs/audit/2026-09-29/tooltip-crash/README.md).
+
+To retest: load the crash save using the fixed build at 150% UI scale, open the
+prompt generator and hover/right-click its presets and Generate button. Repeat
+for HQ tabs, facilities filters and trade tabs. Buttons without help should not
+open a tooltip; title-bar help should still appear. Do not overwrite the original
+crash save while testing.
+
 ## Unified Commonwealth economy — 28 September 2026
 
 **Human graphical status: Pending.** No human pass is inferred from automation.
