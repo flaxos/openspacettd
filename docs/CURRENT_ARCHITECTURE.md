@@ -1,5 +1,14 @@
 # OpenSpaceTTD Current Architecture
 
+## Tooltip rendering repair — 29 September 2026
+
+`GuiShowTooltips` closes the prior tooltip, then rejects encoded text whose
+decoded bounding box has no width before constructing a `TooltipsWindow`.
+`EncodedString::empty()` alone cannot detect `STR_EMPTY` or empty parameters.
+The positive-width contract of `GetStringHeight` is preserved; buttons with no
+help declare `STR_NULL`. This is a GUI-only change with no simulation or save
+migration. [Evidence](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Source update — unified Commonwealth economy, 28 September 2026
 
 `codex/unified-commonwealth-economy` extends main `959fe33f18`. Worlds remain

@@ -1,5 +1,16 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Empty-tooltip crash repair — 29 September 2026
+
+**TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.
+Human desktop retest remains Pending.
+
+GUI-only correction for `crash20260929060130`: reject zero-width decoded
+help and use `STR_NULL` for absent tooltips. Regression exercises real window
+creation at three UI scales for hover and right-click. No save migration.
+Automated verification and human-UAT status are recorded in the
+[repair evidence](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Unified Commonwealth economy delivery — 28 September 2026
 
 | Feature | Source and dependency order | Automated evidence | Human UAT | Base / branch | Status |
