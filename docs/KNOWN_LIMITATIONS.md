@@ -1,5 +1,13 @@
 # OpenSpaceTTD Known Limitations
 
+## Tooltip crash follow-up — 29 September 2026
+
+The reported zero-width tooltip assertion is repaired and covered by native
+window tests at 100%, 150% and 200% scale. Human hover/right-click retesting of
+the reported desktop layout remains Pending. This repair does not establish
+acceptance of unrelated scenario-generator work or the full economy/star-map UI.
+[Scope and evidence](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Integrated economy acceptance boundaries — 28 September 2026
 
 The implementation and reproducible evidence are recorded in the

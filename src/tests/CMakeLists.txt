@@ -5,6 +5,7 @@ add_test_files(
     alternating_iterator.cpp
     bitmath_func.cpp
     enum_over_optimisation.cpp
+    test_tooltips.cpp
     test_error_gui.cpp
     test_command_authority.cpp
     test_command_authority_network.cpp
@@ -83,6 +84,7 @@ add_test_files(
 # These editbox cases install a null video driver and must run in isolated
 # processes. Catch's default discovery excludes their hidden tag.
 foreach(case IN ITEMS
+    "Tooltips reject empty rendered text and preserve visible help"
     "Blueprint GUI captures a selected map rectangle and saves the chosen name"
     "Blueprint GUI exports the transformed selection and imports a real file"
     "Blueprint GUI reports invalid imports collisions and export failures truthfully"

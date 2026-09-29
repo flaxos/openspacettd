@@ -23,6 +23,7 @@
 #include "../portal/commonwealth_slice.h"
 #include "../company_base.h"
 #include "../clear_map.h"
+#include "../void_map.h"
 #include "../landscape.h"
 #include "../table/strings.h"
 
@@ -567,7 +568,9 @@ TEST_CASE("Connected terrain recovery is continuous, scoped and atomic", "[conne
 {
 	Map::Allocate(1024, 1024);
 	for (auto tile : Map::Iterate()) {
-		MakeClear(tile, ClearGround::Grass, 3);
+		/* Native map edges must remain void, including in debug fixtures. */
+		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
+		else MakeVoid(tile);
 		SetTileHeight(tile, 1);
 	}
 	_company_pool.CleanPool();
