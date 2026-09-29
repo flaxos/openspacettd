@@ -69,9 +69,9 @@ player-facing directory. It does not change the single-map architecture.
 identifiers below apply to their original sections. Human GUI UAT remains pending.
 
 
-**Source-verified snapshot at HEAD `a6cf83e6a6`** (branch `feature/sprint-50-gateway-staging-and-charters`)
-**Date:** 2026-09-22
-**Main branch HEAD:** `e4baa35623` (Sprints 49–50 are on feature branches, not yet merged to `main`)
+**Source-verified snapshot at HEAD `bc18c2c8fc`** (main branch; Unified Commonwealth Economy PR #44)
+**Date:** 2026-09-29
+**Main branch HEAD:** `bc18c2c8fc` (Sprints 1–50 and feature deliveries through Unified Commonwealth Economy are merged)
 
 This document records what the source code actually implements. It is authoritative
 over historical sprint docs and roadmap claims. When this document conflicts with

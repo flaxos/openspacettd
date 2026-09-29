@@ -68,8 +68,8 @@ limitations below retain their dates; the 27/28 September evidence supersedes
 older blanket claims that natural scheduled federation is absent.
 
 
-**Date:** 2026-09-22
-**Verified at:** HEAD `a6cf83e6a6`
+**Date:** 2026-09-29
+**Verified at:** HEAD `bc18c2c8fc`
 
 This document records known gaps, architectural limitations, and unproven claims.
 It is derived from source audit, git verification, and comparison of documentation
@@ -91,12 +91,15 @@ These features have passing automated tests but **no recorded human acceptance e
 | Narrative Generator & Balancing Critic | 48 | ✅ Pass | ❌ Not run |
 | Commonwealth Graph Engine | 49 | ✅ Pass | ❌ Not run |
 | Gateway Staging & Charters | 50 | ✅ Pass | ❌ Not run |
-| All-Feature Guided Solo UAT (v1.1) | 36 | ✅ Artifact | ❌ Not run |
+| All-Feature Guided Solo UAT (v1.1) | 36 | ✅ Artifact | ❌ Not run (superseded by v2/integrated saves) |
 | Blueprint Placement (post WP-01 fix) | 25 | ✅ Pass | ⚠️ Graphical retest pending |
-| Cross-process federation transport | 35 | ✅ Protocol | ❌ Natural gate-entry not proven |
+| Cross-process federation transport | 35 | ✅ Protocol / Cluster | ⚠️ Scheduled freight proven (PR #41); graphical multiplayer UAT pending |
+| Scheduled Federation Freight & Recovery | — | ✅ Pass | ❌ Graphical retest pending (PRs #40, #41) |
+| Player-Built Resource Surveys | — | ✅ Pass | ❌ Not run (PR #42) |
+| CST Star Map & Commissioned Gates | — | ✅ Pass | ❌ Not run; [checklist](../demo/CST-STELLAR-UAT.md) (PR #43) |
+| Unified Commonwealth Economy | — | ✅ Pass | ❌ Not run; [checklist](../demo/INTEGRATED-ECONOMY-UAT.md) (PR #44) |
 
-**The v1.1 UAT save (`demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav`) has never been
-played through by a human tester.**
+**The active UAT saves (`demo/OpenSpaceTTD-Integrated-Economy-UAT.sav` and `demo/OpenSpaceTTD-Integrated-CST-Sector.sav`, superseding the legacy v1.1 save) have not been played through by a human tester.**
 
 See `docs/FEATURE_UI_UAT_COVERAGE.md` for the full feature→UAT mapping.
 

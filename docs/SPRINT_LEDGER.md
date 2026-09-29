@@ -13,8 +13,8 @@ or reopening of the historical sprint register. Automated status does not imply
 human acceptance. Bootstrap balance and visual review remain recorded limitations.
 
 **Canonical Sprint Index · Sprints 1 through 52**
-**Audited at commit:** `a6cf83e6a6` (Sprint 50 feature branch); `main` branch HEAD: `e4baa35623`
-**Date:** 2026-09-22
+**Audited at commit:** `bc18c2c8fc` (main branch HEAD, PR #44); Sprints 1–50 and deliveries through Unified Commonwealth Economy merged
+**Date:** 2026-09-29
 
 > **Status Values Governing This Ledger (Strict Subset):**
 > `PLANNED` · `IMPLEMENTED` · `TESTED` · `UAT-ACCEPTED` · `SUPERSEDED` · `BLOCKED`
@@ -113,10 +113,14 @@ human acceptance. Bootstrap balance and visual review remain recorded limitation
 | **46** | Seamless Multi-Server Federation Universe & Live Cluster | `scripts/cluster_testbed.py`, `src/portal/federation_staging.cpp`, `src/portal/transfer_journal.cpp` (`FJRN`) | 3-node live cluster testbed, transfer custody, staging sidings | `test_sprint46_live_federation.cpp`, cluster testbed | None (human UAT **Not run**) | Merged to `main` via PR #21 | `6b3de33e96` | [POST_RECOVERY_ROADMAP_SPRINTS_43_48.md](POST_RECOVERY_ROADMAP_SPRINTS_43_48.md) | TESTED |
 | **47** | Colonial Megaprojects, Corporate Alliances & Arcologies | `src/portal/corporate_alliance.cpp` (`ALLI`), `src/portal/planet_manager.cpp` | Wilderness megaprojects, alliance treaties, trackage rights, arcology evolution | `test_sprint47_alliances_and_neutral_tracks.cpp` | None (human UAT **Not run**) | Merged to `main` via PR #18 | `f2997bdd3c` | [POST_RECOVERY_ROADMAP_SPRINTS_43_48.md](POST_RECOVERY_ROADMAP_SPRINTS_43_48.md) | TESTED |
 | **48** | LLM Narrative Scenario Synthesis & Autonomous Balancing Critic | `src/portal/prompt_scenario_generator.cpp`, `src/portal/balancing_critic.cpp` | CLI/GUI scenario generation, 50-year headless simulation harness | `test_sprint48_prompt_to_savegame.cpp`, `test_sprint48_balancing_critic.cpp` | None (human UAT **Not run**) | Merged to `main` via PRs #19 and #20 | `c2a7ca3830`, `869b234a82` | [POST_RECOVERY_ROADMAP_SPRINTS_43_48.md](POST_RECOVERY_ROADMAP_SPRINTS_43_48.md) | TESTED |
-| **49** | Commonwealth Graph Engine & Prebuilt Lore Economies | `src/portal/universe_graph.cpp`, `src/portal/prebuilt_trade.cpp`, `src/saveload/planet_sl.cpp` (`TRAD`) | 108-world graph model, connection topology, off-world trade simulation proxy | `test_universe_graph.cpp`, `test_prebuilt_trade.cpp` | None (human UAT **Not run**) | **Feature branch `feature/sprint-49-commonwealth-graph-engine`; not yet merged to `main`** | `15149a1109`, `ab88ff9f98` | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | TESTED |
-| **50** | High-Capacity Gateway Staging & Corporate Charters | `src/portal/federation_staging.cpp`, `src/portal/corporate_charter.cpp` | Multi-track gateway throat signalling, staging sidings, charter access tolls | `test_sprint50_throat_and_staging.cpp`, `test_sprint50_universal_and_charters.cpp` | None (human UAT **Not run**) | **Working HEAD `a6cf83e6a6`; not yet merged to `main`** | `125d6d48b5`, `a6cf83e6a6` | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | TESTED |
-| **51** | Expeditionary Survey Logistics & Silfen Intermodal Paths | None yet | Planned: exploration and intermodal transshipment for frontier worlds | None | None | No source code implemented yet | None | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | PLANNED |
-| **52** | Galactic Commonwealth Hegemony & Narrative Lore Scenarios | None yet | Planned: 108-world unified dynamic tariffs, hegemon victory condition | None | None | No source code implemented yet | None | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | PLANNED |
+| **49** | Commonwealth Graph Engine & Prebuilt Lore Economies | `src/portal/universe_graph.cpp`, `src/portal/prebuilt_trade.cpp`, `src/saveload/planet_sl.cpp` (`TRAD`) | 108-world graph model, connection topology, off-world trade simulation proxy | `test_universe_graph.cpp`, `test_prebuilt_trade.cpp` | None (human UAT **Not run**) | Merged to `main` via PR #26 | `15149a1109`, `ab88ff9f98` | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | TESTED |
+| **50** | High-Capacity Gateway Staging & Corporate Charters | `src/portal/federation_staging.cpp`, `src/portal/corporate_charter.cpp` | Multi-track gateway throat signalling, staging sidings, charter access tolls | `test_sprint50_throat_and_staging.cpp`, `test_sprint50_universal_and_charters.cpp` | None (human UAT **Not run**) | Merged to `main` via PR #28 | `125d6d48b5`, `a6cf83e6a6` | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | TESTED |
+| **51** | Expeditionary Survey Logistics & Silfen Intermodal Paths | None yet | Planned: exploration and intermodal transshipment for frontier worlds | None | None | Withdrawn from active scope on 23 Sep 2026; retained as design history | None | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | SUPERSEDED |
+| **52** | Galactic Commonwealth Hegemony & Narrative Lore Scenarios | None yet | Planned: 108-world unified dynamic tariffs, hegemon victory condition | None | None | Withdrawn from active scope on 23 Sep 2026; retained as design history | None | [SPRINTS_49_52_COMMONWEALTH_EXPANSION.md](SPRINTS_49_52_COMMONWEALTH_EXPANSION.md) | SUPERSEDED |
+| **—** | Scheduled Federation Freight & 9-Scenario Recovery | `src/portal/authority_request_queue.h`, `src/portal/federation_orders.cpp` | Nonblocking async authority, portable schedules, 5-cycle coal transport, 9 recovery scenarios | `test_federation_reliability.cpp`, 59 Catch2 cases | Human UAT pending | Merged to `main` via PRs #40, #41 | `d886260607`, `19f6e249da` | [FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md) | TESTED |
+| **—** | Player-Built Resource Surveys & Gated Extraction | `src/portal/resource_sites.cpp`, `src/portal/resource_sites_gui.cpp` (`RSRC`) | Hidden primary industry sites, paid survey commands, company knowledge, Materials research gating | `test_resource_sites.cpp`, 458 CTests | Human UAT pending | Merged to `main` via PR #42 | `8464e9374a` | [PLAYER_BUILT_RESOURCE_ECONOMY.md](PLAYER_BUILT_RESOURCE_ECONOMY.md) | TESTED |
+| **—** | CST Star Map, Commissioned Gates & Remote Schedules | `src/portal/stellar_network.cpp`, `src/portal/universe_network.cpp` (`STLR`, `UNET`) | 7-world Mito–Merredin sector, remote station orders, 3-server live freight, visitor mode | `test_stellar_network.cpp`, 469 CTests | Human UAT pending; [checklist](../demo/CST-STELLAR-UAT.md) | Merged to `main` via PR #43 | `959fe33f18` | [CST_STELLAR_NETWORK.md](CST_STELLAR_NETWORK.md) | TESTED |
+| **—** | Unified Commonwealth Economy & Progression | `src/portal/integrated_economy.cpp`, `src/saveload/planet_sl.cpp` (`ECON`) | 13 physical factory recipes, warehouse priority, research kit escrow, mandatory material bills, city baskets | `test_integrated_economy.cpp`, 485 CTests, 473 Catch2 cases | Human UAT pending; [checklist](../demo/INTEGRATED-ECONOMY-UAT.md) | Merged to `main` via PR #44 | `bc18c2c8fc` | [UNIFIED_COMMONWEALTH_ECONOMY.md](UNIFIED_COMMONWEALTH_ECONOMY.md) | TESTED |
 
 ---
 
@@ -128,8 +132,8 @@ human acceptance. Bootstrap balance and visual review remain recorded limitation
 | **IMPLEMENTED** | 8 | 15, 16, 20, 21, 23, 29, 31–33, 35, 36 |
 | **UAT-ACCEPTED** | 2 | 10 (stabilisation gate), 28 (v0.4 solo UAT) |
 | **BLOCKED** | 2 | 25 (blueprint placement retest pending), 26 (CST prefabs pending WP-07 routing) |
-| **SUPERSEDED** | 1 | 34 (documentation consolidation superseded by recovery baseline) |
-| **PLANNED** | 3 | 38 (bespoke original art), 51 (survey logistics), 52 (galactic hegemony) |
+| **SUPERSEDED** | 3 | 34 (documentation consolidation), 51 (withdrawn), 52 (withdrawn) |
+| **PLANNED** | 1 | 38 (bespoke original art) |
 | **Total** | **53** | 52 Sprints + 1 Historical Super-Milestone |
 
 
