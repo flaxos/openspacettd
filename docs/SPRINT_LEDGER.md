@@ -1,5 +1,11 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Organic UAT World Layouts & Realistic Civil Rail Infrastructure — 29 September 2026
+
+| Feature | Source and dependency order | Automated evidence | Human UAT | Base / branch | Status |
+|---|---|---|---|---|---|
+| Organic UAT World Layouts & Civil Infrastructure | Procedural biome elevation → multi-block street grids → central terminals with scissors crossovers & PBS signals → safe industry placement → pre-seeded consist fleets | 81/81 assertions in Catch2 `[prefab_world]`; 485/485 CTests; clean generation and verification of `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` under dedicated server | Pending; Track 9 in [HUMAN-GRAPHICAL-UAT-GUIDE.md](../demo/HUMAN-GRAPHICAL-UAT-GUIDE.md) | `1a7fe3348b` / `feature/organic-uat-world-layouts` | TESTED |
+
 ## Unified Commonwealth economy delivery — 28 September 2026
 
 | Feature | Source and dependency order | Automated evidence | Human UAT | Base / branch | Status |

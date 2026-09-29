@@ -12,7 +12,7 @@ Use this checklist alongside [HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-
 | **Testing Date** | |
 | **Build Commit SHA** | `bc18c2c8fc` (PR #44 / #45) |
 | **Binary Hash (SHA256)** | `sha256sum build/openttd` |
-| **Savegame Tested** | [ ] `demo/OpenSpaceTTD-Integrated-Economy-UAT.sav`<br>[ ] `demo/OpenSpaceTTD-Integrated-CST-Sector.sav` |
+| **Savegame Tested** | [ ] `demo/OpenSpaceTTD-Integrated-Economy-UAT.sav`<br>[ ] `demo/OpenSpaceTTD-Integrated-CST-Sector.sav`<br>[ ] `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` |
 | **Display Resolution** | e.g. 1920×1080 / 2560×1440 / 3840×2160 |
 | **GUI Scale Tested** | [ ] 100% (1.0x) · [ ] 125% (1.25x) · [ ] 150% (1.5x) · [ ] 200% (2.0x) |
 | **Interface Language** | [ ] English (UK) · [ ] English (US) · [ ] Other: ______ |
@@ -51,6 +51,7 @@ Execute the functional gameplay verification tracks from the [How-To Guide](HUMA
 | **Track 6: Material-Gated Construction** | 1. Cash mode electric rail/maglev requires physical stock; shows missing bills if absent.<br>2. Construction succeeds when materials present and deducts stock.<br>3. Blueprint Library purchase mode toggles between Cash and Stockpile mode.<br>4. CST prefab stamps cleanly onto terrain and deducts materials. | | |
 | **Track 7: Megacity Basket & Starvation** | 1. Megacity Overview shows balanced Tier 1, 2, and 3 demand bars.<br>2. Cutting off food for >3 months halts growth and freezes timer.<br>3. Passenger and mail production drops by 50% during starvation.<br>4. Restoring food replenishes reserves, clears warning, and resumes growth. | | |
 | **Track 8: Gate Commissioning & Orders** | 1. Consists traverse portal wormholes smoothly without wagon snapping.<br>2. Commissioning gate receives delivered Steel + Machine Modules.<br>3. Once 100% delivered, Activate button opens link to destination.<br>4. Train timetable accepts `Remote stop` and traverses inter-world route. | | |
+| **Track 9: Organic Layouts & Infrastructure** | 1. Contoured organic terrain with natural biome hills ($|\Delta h| \le 1$).<br>2. Multi-block street grids with town buildings facing avenues.<br>3. 2-track central terminals with scissors crossovers & PBS signals.<br>4. Holding sidings and engine depots properly positioned.<br>5. Pre-seeded Iron Ore freight consist operates round-trip via portal. | | |
 
 ---
 

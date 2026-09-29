@@ -1,5 +1,32 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Organic UAT World Layouts & Realistic Civil Rail Infrastructure — 29 September 2026
+
+Delivery branch `feature/organic-uat-world-layouts`. Transforms the procedural UAT world
+generator (`PromptScenarioGenerator`) from flat test benches into contoured organic
+landscapes with biomes, multi-block urban street grids, realistic city clusters, and
+engineered rail infrastructure.
+
+- **Organic Contoured Terrain:** Multi-octave procedural elevation per biome with smooth
+  edge fades and a neighbor relaxation pass enforcing OpenTTD's slope invariant
+  ($|\Delta h| \le 1$) across all non-void tiles. The central transport corridor
+  ($[-8, 8] \times [-8, 8]$ around world centers) is cleanly graded for station platforms,
+  scissors throats, and industry catchments.
+- **Engineered Multi-Block Street Grids:** Capital cities founded with orthogonal avenue/cross-street
+  grids, town houses, commercial buildings, corporate headquarters, and megacity registries.
+- **Realistic Rail Infrastructure:** High-capacity 2-track central terminals with covered
+  canopies, station throat scissors double-crossover switches, realistic PBS one-way
+  signalling (`SignalType::PathOneWay`), engine depots, and adjacent holding loop sidings.
+- **Operating Consist Fleets:** Pre-seeded freight consists (e.g. Merredin Iron Ore Express
+  with 100t ore) with active orders traversing gateway portals between worlds.
+- **Headless Save Synthesis Bugfix:** Fixed a null pointer dereference in `TryBuildTownHouse`
+  during dedicated server world generation (`openttd -D`) by ensuring `InitializeBuildingCounts()`
+  is called upon procedural town founding.
+- **Automated Evidence:** 81/81 assertions pass in Catch2 `[prefab_world]`; 485/485 CTests pass;
+  `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` generated, loaded, and verified cleanly.
+- **Human UAT:** Track 9 added to [HUMAN-GRAPHICAL-UAT-GUIDE.md](../demo/HUMAN-GRAPHICAL-UAT-GUIDE.md)
+  and [HUMAN-UAT-CHECKLIST.md](../demo/HUMAN-UAT-CHECKLIST.md). Status: **Pending**.
+
 ## Unified Commonwealth economy — 28 September 2026
 
 Delivery branch `codex/unified-commonwealth-economy`, based on main `959fe33f18`

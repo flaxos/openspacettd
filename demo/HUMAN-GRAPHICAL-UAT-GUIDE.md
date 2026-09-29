@@ -18,12 +18,13 @@
    - `openspacettd_equipment_v1.grf`
 
 ### 1.2 Test Saves Provided
-The repository contains two verified test fixtures in `demo/`:
+The repository contains three verified test fixtures in `demo/`:
 
 | Savegame File | Purpose | Use When Testing |
 |---|---|---|
 | `demo/OpenSpaceTTD-Integrated-Economy-UAT.sav` | **Running, fully-connected Commonwealth economy.** Contains 40 operating trains, 13 physical factories, Megacity delivery networks, and an active commissioned gate. | Testing steady-state factory buffers, starvation/recovery, research escrow, warehouse priority, and gate transit. |
 | `demo/OpenSpaceTTD-Integrated-CST-Sector.sav` | **Clean-slate 7-world Mito–Merredin sector.** Initial capital, zero trains, empty city reserves, and unprospected frontier sites. | Testing cold-start world roles, paid prospecting/surveying, initial Fund Industry placement, and baseline startup ergonomics. |
+| `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` | **Organic contoured 4-world Commonwealth gateway testbed.** Features multi-octave biome landscapes, multi-block city grids, double-track terminals with scissors crossovers, PBS signalling, holding sidings, and pre-seeded freight consist. | Visual evaluation of natural terrain contours, civil rail engineering, city planning, and cross-world freight operations. |
 
 ### 1.3 Launching the Game
 Launch the graphical client with the integrated configuration:
@@ -32,8 +33,11 @@ Launch the graphical client with the integrated configuration:
 # Launch the running economy scenario (Primary Playthrough):
 ./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Integrated-Economy-UAT.sav
 
-# Or launch the clean-slate sector:
+# Launch the clean-slate sector:
 ./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Integrated-CST-Sector.sav
+
+# Launch the organic Commonwealth prefab world:
+./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav
 ```
 
 ---
@@ -289,6 +293,42 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
    * Open train orders window → Click **Remote stop**.
    * Verify the picker displays reachable stations across the portal network.
    * Add a remote station to the timetable and confirm the train executes the schedule.
+
+---
+
+### Track 9: Organic Contoured World Layouts & Civil Rail Infrastructure
+
+**Objective:** Visually audit the natural procedural landscapes, multi-block street grids, central passenger/cargo terminals with scissors crossovers, PBS signalling, holding sidings, and pre-seeded freight consists in `OpenSpaceTTD-Commonwealth-UAT-v1.0.sav`.
+
+1. **Inspect Terrain & Biome Elevation Contours:**
+   * Launch `OpenSpaceTTD-Commonwealth-UAT-v1.0.sav`.
+   * Zoom out and pan across each of the 4 worlds: **Augusta**, **Merredin**, **Barrow**, and **Erewhon**.
+   * **Expected:**
+     * No artificial billiard-table flat worlds. Landscapes have smooth natural hills and valleys with biome variation (e.g. mountainous uplands, undulating tundra, red iron wastes).
+     * Slope invariant $|\Delta h| \le 1$ holds everywhere; no vertical cliff tears, step discontinuities, or invalid slopes at world borders.
+     * Central transport corridor ($[-8, 8] \times [-8, 8]$ around world centers) is cleanly graded for station throats, junctions, and industries.
+2. **Inspect City Planning & Multi-Block Street Grids:**
+   * Zoom in to the capital cities situated in front of each world's central terminal.
+   * **Expected:**
+     * Engineered orthogonal street grid (avenues and cross streets) directly connecting the urban core to the terminal forecourt.
+     * Populated houses, commercial buildings, and corporate HQs (Commonwealth Central HQ on Augusta) properly aligned along the street frontages.
+     * No floating buildings, detached dead-end fragments, or roads cutting through rail tracks.
+3. **Inspect Terminal Infrastructure & Station Throats:**
+   * Inspect **Augusta CST Hub Central Terminal** and **Merredin Mining Colony Central Terminal**.
+   * **Expected:**
+     * 2-track high-capacity terminal platform with covered canopies.
+     * Station throat equipped with scissors double-crossover switches allowing trains on either mainline track to access either platform.
+     * Realistic PBS signalling (`SignalType::PathOneWay`) facing inbound and outbound directions.
+     * Dedicated engine depot siding and an adjacent holding/staging loop siding (**Augusta Gateway Holding Siding**) for traffic queuing.
+4. **Observe Pre-Seeded Freight Operations:**
+   * Center the view on **Merredin**.
+   * Inspect the Iron Ore Mine located immediately north-west of the terminal.
+   * Select Consist #1 (Iron Ore Express) in the train list:
+     * Check cargo inventory: pre-seeded with 100 metric tonnes of Iron Ore.
+     * Unpause the game (`F8` or Pause button) and follow the consist:
+     * Train departs Merredin Central Terminal, routes through the scissors throat, enters the Gateway Portal, emerges at Augusta, and delivers ore to the Factory/Steel Mill.
+   * **Expected:**
+     * Seamless traversal, zero derailments, and valid revenue earned upon delivery.
 
 ---
 

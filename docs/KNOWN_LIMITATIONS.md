@@ -1,5 +1,21 @@
 # OpenSpaceTTD Known Limitations
 
+## Organic UAT World Layouts & Prefab Scenario Synthesis — 29 September 2026
+
+- **Corridor Grading Box:** The procedural organic terrain generator flattens a central
+  box of $[-8, 8] \times [-8, 8]$ tiles around world centers to height 0. This ensures
+  that 2-track terminal platforms, station throat scissors crossovers, holding loops,
+  and nearby canonical industries (e.g. Iron Mine, Steel Mill, Factory) sit on coplanar
+  ground without triggering steep slope or tunnel errors during placement.
+- **Slope Invariant Enforcement:** Non-corridor terrain undergoes an iterative neighbor
+  relaxation pass that clamps elevation deltas to $|\Delta h| \le 1$. Slopes adhere to
+  OpenTTD height-field invariants, avoiding sheer drops or corner mismatches.
+- **Dedicated Server Town Founding:** Procedurally founded towns now explicitly initialize
+  `InitializeBuildingCounts()` before house expansion or placement is queried, preventing
+  null pointer dereferences in `TryBuildTownHouse`.
+- **Human Acceptance Pending:** Visual evaluation of landscape naturalness, urban layout
+  readability, and railway throat operation is pending human visual playthrough (Track 9).
+
 ## Integrated economy acceptance boundaries — 28 September 2026
 
 The implementation and reproducible evidence are recorded in the
