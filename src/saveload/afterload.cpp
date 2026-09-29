@@ -74,6 +74,7 @@
 #include "../picker_func.h"
 
 #include "../portal/planet_manager.h"
+#include "../portal/prompt_scenario_generator.h"
 #include "../portal/portal_registry.h"
 #include "../video/video_driver.hpp"
 
@@ -713,6 +714,8 @@ bool AfterLoadGame()
 			}
 		}
 	}
+
+	if (!PromptScenarioGenerator::RepairLegacyOrganicUATTerrain()) SlErrorCorrupt("Organic UAT terminal terrain cannot be repaired without changing edited infrastructure or vehicle support; use an earlier save");
 
 	if (!RepairConnectedEconomyTerrain()) SlErrorCorrupt("Connected demo terrain repair would alter infrastructure; load an earlier autosave");
 

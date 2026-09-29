@@ -1,0 +1,2 @@
+Published and crash-save audit before repair:
+Invalid foundation at (63, 103): type 1, slope 6, tracks 18, corners 0/0/1/1, world Augusta CST Hub center 127/94

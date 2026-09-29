@@ -1,5 +1,23 @@
 # Human UAT results — recovery / v1.1
 
+## Organic UAT crashes — 30 September 2026
+
+**Human graphical retest: Pending.** Both reported failures are addressed on
+`codex/fix-organic-uat-crashes`: merged empty-tooltip fix plus complete terminal
+terrain protection and scoped recovery of the original UAT save. Automated native
+rendering-query and SDL smoke checks pass; see
+[the audit](../docs/audit/2026-09-30/organic-uat-crash/README.md).
+
+Restart the rebuilt game with the original command:
+
+```sh
+./build/openttd -g demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav
+```
+
+Inspect and scroll around Augusta's portal terminal, then hover/right-click the
+prompt-generator, HQ and facility buttons at 150% scale. Use a new save filename
+for your retest; the original scenario and crash saves have not been overwritten.
+
 ## Empty-tooltip crash repair — 29 September 2026
 
 **Human graphical retest: Pending.** Automated tooltip windows exercise empty,

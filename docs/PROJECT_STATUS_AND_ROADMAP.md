@@ -1,5 +1,20 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Organic UAT crash recovery — 30 September 2026
+
+`codex/fix-organic-uat-crashes` follows organic-layout PR #48 and incorporates
+merged tooltip fix PR #47. The organic generator now protects all shared corners
+of existing portal terminals, rather than only the small gate-head area. Whole-map
+terrain/foundation validation runs before fleets are spawned or a save is written.
+The recognized legacy four-world UAT can safely recover its neutral terminal
+terrain on load; the original published and crash saves are preserved.
+
+**TESTED:** 473 unit cases / 67,547 assertions; 486/486 CTests. Native save recovery,
+3/4/6-world generation, cold reload and SDL rendering smoke evidence are retained
+in [the audit](audit/2026-09-30/organic-uat-crash/README.md). Human graphical UAT is
+still Pending. Next: human retest of the original launch, then real route/delivery
+acceptance and bootstrap balance; this repair does not prove a profitable network.
+
 ## Empty-tooltip crash repair — 29 September 2026
 
 **TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.

@@ -1,5 +1,15 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Organic UAT crash repair — 30 September 2026
+
+| Delivery | Automated evidence | Human UAT | Status |
+|---|---|---|---|
+| Complete terminal-corner anchors, bounded height relaxation, foundation audit, narrow atomic legacy recovery; merged tooltip fix incorporated | 473 unit cases / 67,547 assertions; 486 CTests; recovery/refusal regressions, original/crash saves, fresh 3/4/6-world reloads, SDL drawing smoke | Pending | TESTED |
+
+[Evidence, hashes and boundaries](audit/2026-09-30/organic-uat-crash/README.md).
+This supersedes the earlier claim that headless organic save verification alone
+proved rendering safety; no broader human acceptance is inferred.
+
 ## Empty-tooltip crash repair — 29 September 2026
 
 **TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.

@@ -1,5 +1,20 @@
 # OpenSpaceTTD Known Limitations
 
+## Organic UAT crash follow-up — 30 September 2026
+
+The earlier headless verification omitted native foundation queries: it accepted
+sloped terminal switches that crashed rendering. The new complete geometry audit
+and SDL smoke check close that specific gap. Human graphical acceptance remains
+Pending; the smoke test uses SDL's dummy video driver, not the user's NVIDIA
+OpenGL desktop. See [evidence](audit/2026-09-30/organic-uat-crash/README.md).
+
+Automatic recovery is restricted to the recognized 256×256, four-world legacy
+UAT. It refuses to modify edited terminal infrastructure, other structures sharing
+changed corners, or terrain supporting a live vehicle. Other saves are untouched;
+this is not a generic repair for arbitrary corrupt terrain. Existing generated
+corridor reachability, freight profitability and organic startup balance still
+need gameplay acceptance independently of rendering safety.
+
 ## Tooltip crash follow-up — 29 September 2026
 
 The reported zero-width tooltip assertion is repaired and covered by native
