@@ -1,6 +1,25 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Functional progression priority revision — 1 October 2026
+
+**PLANNED; documentation only.** Owner-approved functional-first direction is
+explicit in the [current roadmap](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026)
+and the sole [next-slice proposal](ACTIVE_EXECUTION_PLAN.md). Implemented systems,
+functional end-to-end proof, ordinary-start viability, human UAT and balance/pacing
+have separate acceptance definitions. No gameplay, save, content or architecture
+changes are delivered here; no gameplay milestone or human acceptance advances.
+
+Fresh ancestry confirms PR65 owner-merged at `91846666f6`, PR64 art preserved and
+PR62 confined to the old A1 branch. Generation's T+C+D+S proof is assessed on its
+own contract; revised A1's −£170 cash failure remains failed economic evidence.
+PR66 separately owns portability. The recommended FOOD + paid Materials I mission
+has one disclosed cash allowance and fixed test bounds; all its gameplay evidence
+is NOT RUN. [Review, source/evidence custody and docs gates](audit/2026-10-01/functional-replan/README.md).
+
 ## New integrated-game generation — 1 October 2026
+
+> Historical pre-replan delivery status; the current entry above supersedes its
+> blanket active block and records the subsequently verified merge.
 
 **TESTED T+C+D+S; BLOCKED revised A1; human UAT Pending.** Approved PR63 scope
 implements complete generation-local terminal/join claims, two pre-publication

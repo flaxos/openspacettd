@@ -1,6 +1,40 @@
 # OpenSpaceTTD Known Limitations
 
+## Functional-first acceptance boundaries — 1 October 2026
+
+Current priority follows the owner's [functional-first approval](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026).
+Older finance-related active blockers below are historical. Cash losses remain
+economic evidence; they no longer block accepting an independently proven
+generation contract or proposing a labelled functional mission.
+
+- PR65 is merged in main `91846666f6`; its T+C+D+S native proof stands separately
+  from revised A1 finances. Portability is still a delivery issue owned by
+  [PR66](https://github.com/flaxos/openspacettd/pull/66), not waived by this replan.
+- Revised seed11 ends at −£170 cash/£190k debt after two further loads, £14,007
+  revenue and £23,929 charges. Revised seed101/2026 operation remains NOT RUN.
+  Neither assisted cash nor positive final balance can turn that into a pass.
+- The [next functional proposal](ACTIVE_EXECUTION_PLAN.md) is NOT RUN: actual
+  FOOD consumption, player command designation, HQ/research and cold continuation
+  from its fresh start are unproven. PR62 partial code is still outside main.
+- Independent source review also found that `CanResearch` inserts default research
+  state during eligibility queries/GUI inspection; its invalid company ID is
+  dropped on load. The next slice explicitly includes a narrow read-only query
+  repair and atomicity regressions. Cash assistance or pre-seeded state cannot
+  mask this command/save-integrity defect.
+- Its one proposed £6m cash grant preserves costs and native commands; it supplies
+  HQ eligibility rather than proving earned income. FOOD does not cause the tech
+  unlock. No cargo/RP/material/tech grants, authored receiver or rule changes are
+  authorized. MoneyCheat is offline-only; dedicated proof needs labelled offline
+  setup and guarded continuation, never a command-flag bypass.
+- Human manual build/play acceptance remains Pending. Food alone sustains without
+  growth; Materials I availability is not earned A2 expansion. Exact profitability,
+  ordinary HQ affordability, waiting times and broader seed viability await a
+  separate bounded economic/balance pass. No new economic tuning is approved.
+
 ## New integrated-game generation and revised A1 — 1 October 2026
+
+> Historical generation delivery record. Current acceptance boundaries above
+> supersede its requirement for a financial replan before any functional work.
 
 Future ordinary integrated games enforce clear/legal public joining geometry and
 one living Core town with its own same-world house. Native terrain, configured
