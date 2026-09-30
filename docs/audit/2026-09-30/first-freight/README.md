@@ -217,9 +217,29 @@ The owner approved a clean delivery branch from freshly fetched main
 compliant commit subject. This preserves published history instead of rewriting
 the integration merge. [Historical draft PR59](https://github.com/flaxos/openspacettd/pull/59)
 and its branch remain intact; the replacement draft description records both heads.
-All A1 source, scripts, canonical config, content and retained proof artifacts are
-byte-identical to reviewed head `93e73cee41029bf2d847d7e84c05e2c31a17760f`; only this
+At initial clean replacement `f31206e543`, all A1 source, scripts, canonical config,
+content and retained proof artifacts are byte-identical to reviewed head `93e73cee41029bf2d847d7e84c05e2c31a17760f`; only this
 lineage prose changes. Main's newer changes are workflow permissions only. The
 clean replacement adds no competing implementation, economic policy or next slice.
 Final checks and remote CI identify the replacement's exact SHA separately. CI
 maintenance retains ownership of history-depth/range plumbing.
+
+## Windows compilation follow-up
+
+The first full platform run at `f31206e543` found a new A1 Windows x86/x64 compile
+failure at the planner's `near`/`far` locals. It is separate from PR58's inherited
+warning cleanup. The native network include chain reaches Windows headers;
+[Microsoft's minwindef.h](https://raw.githubusercontent.com/microsoft/win32metadata/main/generation/WinSDK/RecompiledIdlHeaders/shared/minwindef.h)
+defines both names as empty macros. Rename only those locals and uses to
+`station_near`/`station_far`; leave SDK macros and Windows checks intact.
+
+[Targeted regression metadata](windows-macro-regression.json) and
+[raw compile reproduction and original Windows logs](windows-macro-regression.tar.gz)
+retain the full native translation-unit compile under those two empty macros:
+baseline fails at the same declarations; corrected source compiles without warnings.
+Inverse identifier normalization gives exact source equality to `f31206e543`,
+so prior six-load simulation behavior and all proof/content/save hashes remain
+valid. This local GCC preprocessing proof is distinct from real MSVC x86/x64 CI.
+Final corrected-head local checks, independent review and completed platform CI
+are required and recorded in the draft PR/handoff; human graphical UAT stays Pending.
+No maintenance warning changes or economic/progression policy are included.

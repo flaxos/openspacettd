@@ -55,3 +55,9 @@ initialization. No executable behavior changes from the retained native proof.
 The owner-authorized clean delivery replay preserves the original branch/PR and
 all hashes; A1 source/scripts/config/content equivalence is checked separately from
 delivery lineage prose. Required checks identify the replacement head.
+
+Independent Windows portability review finds no blocking issue in the three-line
+local rename. Inverse naming independently gives baseline-identical source bytes,
+with types, scope, lifetime, expressions and evaluation order unchanged. Before/after
+macro-probe logs support the diagnosis. Original six-load proof retains original
+source/binary provenance; corrected-head local and real MSVC checks remain separate.

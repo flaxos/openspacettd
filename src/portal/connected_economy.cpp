@@ -931,9 +931,9 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 		DiagDirection positive = axis == Axis::X ? DiagDirection::SW : DiagDirection::SE;
 		DiagDirection dir = axis == Axis::X ? (TileX(target) > TileX(station) ? positive : ReverseDiagDir(positive)) :
 			(TileY(target) > TileY(station) ? positive : ReverseDiagDir(positive));
-		TileIndex near = dir == positive ? TileAddByDiagDir(station, positive) : station;
-		TileIndex far = dir == positive ? station : TileAddByDiagDir(station, positive);
-		TileIndex start = TileAddByDiagDir(near, dir), depot = TileAddByDiagDir(far, ReverseDiagDir(dir));
+		TileIndex station_near = dir == positive ? TileAddByDiagDir(station, positive) : station;
+		TileIndex station_far = dir == positive ? station : TileAddByDiagDir(station, positive);
+		TileIndex start = TileAddByDiagDir(station_near, dir), depot = TileAddByDiagDir(station_far, ReverseDiagDir(dir));
 		if (!Command<Commands::BuildRailDepot>::Do(DoCommandFlag::QueryCost, depot, RAILTYPE_RAIL, dir).Succeeded()) continue;
 		/* Weighted A* is a bounded feasible-route search, not a minimum-cost claim. State retains native track direction; ties are stable. */
 		using Q = std::tuple<uint, int, uint>;
