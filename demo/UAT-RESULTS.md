@@ -4,13 +4,15 @@
 
 **Human graphical status: Pending.** The owner-approved Codex takeover implements
 only the approved Option A slice. Use the exact build/profile/content and
-[5–10minute timeboxed fresh New Game mission](../docs/audit/2026-09-30/first-freight/README.md#owner-mission--510-minute-timebox).
+[5–10 minute timeboxed fresh New Game mission](../docs/audit/2026-09-30/first-freight/README.md).
 Fast-forward is necessary; manual construction time and normal UI usability have
 not been measured. Native automation and saved command-built checkpoints do not
 substitute for the fresh graphical mission.
 
-The runner seed correction supersedes the earlier28September three-seed generation
-claim: all those labelled runs actually used seed11. Historical files remain intact.
+The runner seed correction supersedes the earlier 28 September three-seed generation
+claim: all those labelled runs actually used seed 11. Historical files remain intact.
+All three actual native seeds pass the bounded command/cargo/cost/output-buffer/
+cold-reload proof; complete datasets and retained failures are linked in the audit.
 Record actual build/seed/content, elapsed time, cash/loan before/after, first unexpected
 action/message and inaccessible controls. No human pass or A2 completion is inferred.
 

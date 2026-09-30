@@ -2,15 +2,18 @@
 
 **Human UAT: Pending.** This is bounded ordinary-start automated evidence under
 [the approved Option A plan](../../../ACTIVE_EXECUTION_PLAN.md), not A2, an
-indefinite whole-economy proof or graphical acceptance. Final seed results and
-verification are recorded below when complete; failures remain retained.
+indefinite whole-economy proof or graphical acceptance. All three representative native seeds pass the frozen-build proof below.
+Discovery and economic failures remain retained; exact delivery-head checks are
+recorded separately from this long proof.
 
 ## Authority and changes
 
 The owner approved GPT-6.1 Sol Codex taking over implementation; only executor
 identity supersedes the checked-in Antigravity wording. PR53 Option A at
 `a683e0b08b9830490daea415749e2df7912829ff` is an ancestor of the reviewed base
-`309dbe92a3e523b870a3c33a3493c1857829d80d`. That base incorporates merged PR54's
+`309dbe92a3e523b870a3c33a3493c1857829d80d`. The branch also safely merges reviewed
+main `a8cae8f6d9fc73b10c89b041ec307e3d414f9b28` (PR56: a documentation tab and
+the separate ASan diagnostic helper). The earlier base incorporates merged PR54's
 separate prefab-hash lifetime/script-mode CI repairs. A1 does not duplicate those
 changes or cherry-pick replacement PR55.
 
@@ -64,7 +67,7 @@ Do not overwrite an existing evidence directory:
 ```sh
 ninja -C build -j2
 python3 scripts/test_acceptance_seed.py
-python3 scripts/test_integrated_economy.py --first-freight --steps 120 \
+python3 scripts/test_integrated_economy.py --first-freight --steps 240 \
   --seeds 11 101 2026 --output build/owner-a1-proof
 ./build/openttd_test
 ctest --test-dir build --output-on-failure -j1
@@ -111,9 +114,9 @@ a search failure is not proof that no human-built route exists.
 
 Objective: establish and observe repeat iron income through the generated public
 backbone using ordinary New Game controls. Use seed11 and the exact profile above.
-Fast-forward is needed: the initial seed11 proof's three loads take34.10 nominal
-normal-speed minutes, and three reload loads take38.71. Manual construction time
-has not been measured; stop at10minutes and report the first unmet step rather
+Fast-forward is needed: seed 11's three input loads take 36.86 nominal
+normal-speed minutes, and three reload loads take 43.32. Manual construction time
+has not been measured; stop at 10 minutes and report the first unmet step rather
 than treating an automated checkpoint as fresh graphical acceptance.
 
 1. Launch `./build/openttd -x -c demo/integrated_economy.cfg`; choose **New Game**,
@@ -121,11 +124,13 @@ than treating an automated checkpoint as fresh graphical acceptance.
    Verify cash/loan£100,000 and max loan£300,000; pause while building.
 2. Locate Clonclurry's generated iron mine and Merredin's accepting steel mill
    using world/industry controls. Inspect the generated public gate connection
-   and £100 admission in each direction. Use the final seed11 coordinates and
-   route preview retained below as a construction reference, not granted assets.
-3. Build two2-tile stations, connecting ordinary rail/wooden bridges to the public
-   terminals and a depot. Buy the CST Pioneer steam engine plus one ore hopper
-   (45iron); set Full Load/No Unload at mine and No Load at mill, then release it.
+   and £100 admission in each direction. For seed 11: mine `(115,348)`, mill `(525,235)`, source gate `(254,343)`
+   and destination gate `(764,217)`. Stations start at `(122,344)` and `(532,231)`;
+   source depot `(121,344)`. The exact native rail/bridge preview in
+   [seed-summary.json](seed-summary.json) is a construction reference, not granted assets.
+3. Build two 2-tile stations, connecting ordinary rail/wooden bridges to the public
+   terminals and a depot. Buy the CST Pioneer steam engine plus three ore hoppers
+   (135 iron in total); set Full Load/No Unload at mine and No Load at mill, then release it.
 4. Fast-forward and observe at least two loads, money increases, actual mill input
    consumption and steel output. Inspect finance/tolls and the £86k-class ordinary
    output-to-warehouse option plus remaining normal loan headroom.
@@ -140,4 +145,65 @@ route inspection, clearly separate from the required fresh New Game mission.
 
 ## Final results
 
-Pending completion of the corrected frozen-build three-seed run and delivery checks.
+The clean long-proof source is `14bcbcb5e606aea4fc8ccc1c320dff994c0296d6`.
+All three actual native seeds pass with unchanged content/settings and a Pioneer
+plus three normally purchased 45-unit hoppers (135 total, exactly two platform tiles).
+Each delivers 405 iron before expansion and 405 after cold reload. No starting
+assets, research, cash, cargo or new gate commissioning are authored. Grain/food
+opportunities were considered independently; these successful routes use iron/steel.
+
+| Actual seed | Mine → mill tile / public link | Starter cost | Initial net cash | Output step | Reload net cash | Final cash / debt / headroom |
+|---:|---|---:|---:|---:|---:|---|
+| 11 | 356467 → 241165 / 2 | £80,681 | +£145,634 | £86,432 | +£141,512 | £219,780 / £100,000 / £200,000 |
+| 101 | 327169 → 176459 / 2 | £112,267 | +£24,537 | £87,152 | +£10,080 | £24,795 / £190,000 / £110,000 |
+| 2026 | 495901 → 188782 / 3 | £83,191 | +£107,098 | £87,180 | +£102,446 | £138,919 / £100,000 / £200,000 |
+
+Seed 101 borrows £30,000 for startup and another £60,000 for the output step;
+seeds 11/2026 retain the initial £100,000 debt throughout. Minimum sampled cash is
+£17,877 / £6,314 / £15,367 respectively. No operating-phase borrowing changes debt.
+Every interval between complete 135-unit input loads gains cash. All routes pay
+£600 outbound and £500 return over the recorded six loaded deliveries; the sixth
+empty return has not completed at the final checkpoint. Each admission is £100.
+
+| Seed / phase | Gross freight revenue | Train running | Interest | Other (includes gate toll) | Net cash |
+|---|---:|---:|---:|---:|---:|
+| 11 starter | £153,034 | £0 | £6,000 | £1,400 | +£145,634 |
+| 11 reload, both trains | £153,276 | £2,922 | £7,167 | £1,675 | +£141,512 |
+| 101 starter | £38,571 | £0 | £12,134 | £1,900 | +£24,537 |
+| 101 reload, both trains | £37,365 | £4,476 | £20,584 | £2,225 | +£10,080 |
+| 2026 starter | £114,690 | £0 | £6,167 | £1,425 | +£107,098 |
+| 2026 reload, both trains | £114,018 | £2,922 | £7,000 | £1,650 | +£102,446 |
+
+The short output-start intervals cost £253 / £403 / £254 respectively, earn no
+warehouse revenue and move real steel. Expense totals handle every yearly ledger
+rollover; subtracting only the final three-year ledger would lose older costs.
+The currently zero CST input running cost is an inherited content limitation above.
+
+Final custody: all seeds deliver 810 iron. Seed 11 consumes all 810 and produces
+405 steel: 320 warehouse + 15 train + 47 station + 23 mill. Seed 101 consumes 674
+with 136 mill input and produces 337 steel: 320 warehouse + 14 train + 3 mill.
+Seed 2026 consumes 674 with 136 mill input and produces 337 steel: 320 warehouse +
+15 train + 2 mill. Input capacity is 600 iron; output capacity is 300 steel.
+Each mill retains output batch limit 100 and substantial free output capacity.
+Steel consumption/research is zero; this is real raw consumption plus output relief.
+
+Normal-speed three-load timings (starter / reload): seed 11 36.86 / 43.32 minutes;
+seed 101 57.14 / 66.36; seed 2026 37.79 / 43.32. These are simulation timings, not
+measured human construction or desktop fast-forward times.
+
+[Compact per-seed metrics and full route previews](seed-summary.json) ·
+[Manifest with exact hashes](native-proof-manifest.json) ·
+[All raw JSON/log/config/save evidence](native-proof.tar.gz) ·
+[Independent review](independent-review.md) ·
+[Retained one-wagon result](one-wagon-result.json) ·
+[Retained one-wagon raw evidence](one-wagon-evidence.tar.gz).
+The actual generator seed is recorded both in each native snapshot and the manifest;
+no older labelled report is used as representative coverage.
+
+Final delivery verification rebuilds and tests the delivery commit after this evidence
+commit. Exact SHA, build/unit/isolated CTest/linters/seed-regression/SDL/cold-load results
+and remote CI are recorded in the draft PR and recoverable
+`build/agent-logs/a1-final-verification.json` plus its per-command logs. The long proof
+commit remains distinct: intervening changes affect only evidence/docs and the
+separate API documentation/ASan helper; A1 source, runner and gameplay config remain
+byte-identical. No redundant long soak is claimed at a metadata-only delivery SHA.
