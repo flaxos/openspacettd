@@ -10,11 +10,32 @@
 #include "mock_environment.h"
 
 #include "../window_gui.h"
+#include "../window_func.h"
+#include "../command_func.h"
+#include "../company_base.h"
+#include "../company_func.h"
+#include "../town.h"
+#include "../town_map.h"
+#include "../newgrf_house.h"
+#include "../town_kdtree.h"
+#include "../station_base.h"
+#include "../station_func.h"
+#include "../station_map.h"
+#include "../station_kdtree.h"
+#include "../network/network.h"
+#include "../network/network_internal.h"
+#include "../network/network_client.h"
+#include "../network/core/packet.h"
 #include "../widgets/town_widget.h"
 #include "../widgets/megacity_widget.h"
 #include "../widgets/freight_corridor_widget.h"
 #include "../widgets/universe_directory_widget.h"
 #include "../portal/megacity_manager.h"
+#include "../portal/megacity_gui.h"
+#include "../portal/portal_cmd.h"
+#include "../portal/integrated_economy.h"
+#include "../portal/corporate_hq.h"
+#include "../cargotype.h"
 #include "../portal/universe_authority.h"
 #include "../portal/planet_manager.h"
 
@@ -24,6 +45,240 @@
 #include "../safeguards.h"
 
 extern std::vector<WindowDesc*> *_window_descs;
+extern void SetupCommandAuthorityWorld(WorldPhase phase, uint32_t score);
+extern void SaveReloadCommandAuthority();
+
+namespace {
+struct MegacityCommandFixture {
+	TownID town;
+	MegacityCommandFixture()
+	{
+		IntegratedEconomy::Reset();
+		SetupCommandAuthorityWorld(WorldPhase::Phase3_Frontier, 0);
+		CorporateHQManager::Reset();
+		town = (*Town::Iterate().begin())->index;
+		Company::Get(CompanyID{0})->money = 0;
+	}
+	~MegacityCommandFixture()
+	{
+		_networking = _network_server = false;
+		_current_company = _local_company = CompanyID{0};
+		NetworkFreeLocalCommandQueue();
+		UnInitWindowSystem();
+		MegacityManager::Reset();
+		IntegratedEconomy::Reset();
+		SetupCargoForClimate(LandscapeType::Temperate);
+	}
+};
+
+/** Capture the real client Post path before it reaches a socket. */
+struct MegacityPacketClient : ClientNetworkGameSocketHandler {
+	std::vector<uint8_t> command_packet;
+	MegacityPacketClient() : ClientNetworkGameSocketHandler(INVALID_SOCKET, "megacity-post-test") {}
+	void SendPacket(std::unique_ptr<Packet> &&packet) override
+	{
+		REQUIRE(command_packet.empty());
+		packet->PrepareToSend();
+		command_packet.resize(packet->Size());
+		size_t offset = 0;
+		while (offset < command_packet.size()) {
+			REQUIRE(packet->TransferOut([&](std::span<const uint8_t> part) -> ssize_t {
+				std::copy(part.begin(), part.end(), command_packet.begin() + offset);
+				offset += part.size();
+				return static_cast<ssize_t>(part.size());
+			}) > 0);
+		}
+	}
+	CommandPacket ReadCommand()
+	{
+		Packet packet(nullptr, 0);
+		size_t offset = 0;
+		auto transfer = [&](std::span<uint8_t> part) -> ssize_t {
+			REQUIRE(offset + part.size() <= command_packet.size());
+			std::copy_n(command_packet.begin() + offset, part.size(), part.begin());
+			offset += part.size();
+			return static_cast<ssize_t>(part.size());
+		};
+		REQUIRE(packet.TransferIn(transfer) == 2);
+		REQUIRE(packet.ParsePacketSize());
+		REQUIRE(packet.Size() == command_packet.size());
+		while (offset < command_packet.size()) REQUIRE(packet.TransferIn(transfer) > 0);
+		REQUIRE(packet.PrepareToRead());
+		REQUIRE(packet.Recv_uint8() == to_underlying(PacketGameType::ClientCommand));
+		CommandPacket command;
+		REQUIRE_FALSE(this->ReceiveCommand(packet, command).has_value());
+		return command;
+	}
+};
+} // namespace
+
+TEST_CASE("Megacity designation queries reject invalid towns without mutation and preserve free eligibility", "[megacity-designation]")
+{
+	MegacityCommandFixture fixture;
+	const auto query = Command<Commands::DesignateMegacity>::Do({}, fixture.town);
+	REQUIRE(query.Succeeded());
+	CHECK(query.GetCost() == 0);
+	CHECK(MegacityManager::GetAllMegacities().empty());
+	CHECK(Company::Get(CompanyID{0})->money == 0);
+	for (TownID invalid : {TownID::Invalid(), TownID{200}}) {
+		CHECK(Command<Commands::DesignateMegacity>::Do({}, invalid).Failed());
+		CHECK(Command<Commands::DesignateMegacity>::Do(DoCommandFlag::Execute, invalid).Failed());
+	}
+	CHECK(MegacityManager::GetAllMegacities().empty());
+
+	/* Query arguments contain only town identity; execute uses the live town. */
+	Town *town = Town::Get(fixture.town);
+	town->name = "Live renamed town";
+	town->cache.population = 1240;
+	PlanetManager::Reset();
+	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{7}, .name = "Frontier designation", .phase = WorldPhase::Phase3_Frontier,
+		.min_x = 1, .min_y = 1, .max_x = 62, .max_y = 62}));
+	_current_company = _local_company = CompanyID{1};
+	const Money other_balance = Company::Get(CompanyID{1})->money;
+	REQUIRE(Command<Commands::DesignateMegacity>::Post(fixture.town));
+	const MegacityProfile *profile = MegacityManager::GetProfile(fixture.town);
+	REQUIRE(profile != nullptr);
+	CHECK(profile->world_id == WorldID{7});
+	CHECK(profile->town_name == town->name);
+	CHECK(profile->population == 1240);
+	CHECK(profile->monthly_quota == std::array<uint32_t, 3>{62, 31, 12});
+	CHECK(Company::Get(CompanyID{0})->money == 0);
+	CHECK(Company::Get(CompanyID{1})->money == other_balance);
+	MegacityManager::RecordDelivery(fixture.town, MegacityDemandTier::Tier1_Sustenance, 17);
+	CHECK(Command<Commands::DesignateMegacity>::Do({}, fixture.town).Failed());
+	CHECK(Command<Commands::DesignateMegacity>::Do(DoCommandFlag::Execute, fixture.town).Failed());
+	CHECK_FALSE(Command<Commands::DesignateMegacity>::Post(fixture.town));
+	CHECK(profile->delivered_current[0] == 17);
+	CHECK(MegacityManager::GetAllMegacities().size() == 1);
+	SaveReloadCommandAuthority();
+	profile = MegacityManager::GetProfile(fixture.town);
+	REQUIRE(profile != nullptr);
+	CHECK(profile->world_id == WorldID{7});
+	CHECK(profile->town_name == "Live renamed town");
+	CHECK(profile->population == 1240);
+	CHECK(profile->delivered_current[0] == 17);
+	CHECK(profile->monthly_quota == std::array<uint32_t, 3>{62, 31, 12});
+	CHECK(Company::Get(CompanyID{0})->money == 0);
+	CHECK(Company::Get(CompanyID{1})->money == other_balance);
+}
+
+TEST_CASE("Megacity designation preserves the existing world zero fallback", "[megacity-designation]")
+{
+	MegacityCommandFixture fixture;
+	PlanetManager::Reset();
+	REQUIRE(Command<Commands::DesignateMegacity>::Post(fixture.town));
+	CHECK(MegacityManager::GetProfile(fixture.town)->world_id == WorldID{0});
+}
+
+TEST_CASE("Megacity designation preserves spectator eligibility through the native command", "[megacity-designation][command-authority]")
+{
+	MegacityCommandFixture fixture;
+	_current_company = _local_company = COMPANY_SPECTATOR;
+	REQUIRE(Command<Commands::DesignateMegacitySpectator>::Do({}, fixture.town).Succeeded());
+	CHECK_FALSE(MegacityManager::IsMegacity(fixture.town));
+	ShowMegacityOverview(fixture.town);
+	Window *window = FindWindowById(WindowClass::MegacityOverview, fixture.town.base());
+	REQUIRE(window != nullptr);
+	window->OnClick({}, WID_MCO_DESIGNATE, 1);
+	CHECK(MegacityManager::IsMegacity(fixture.town));
+	CHECK(Company::Get(CompanyID{0})->money == 0);
+	CHECK(Company::Get(CompanyID{1})->money == 10000000);
+	CHECK(_current_company == COMPANY_SPECTATOR);
+}
+
+TEST_CASE("Megacity Designate GUI waits for native command execution", "[megacity-designation][command-authority]")
+{
+	MegacityCommandFixture fixture;
+	ShowMegacityOverview(fixture.town);
+	Window *window = FindWindowById(WindowClass::MegacityOverview, fixture.town.base());
+	REQUIRE(window != nullptr);
+	_networking = _network_server = true;
+	_frame_counter = _frame_counter_max = 0;
+	window->OnClick({}, WID_MCO_DESIGNATE, 1);
+	CHECK(NetworkPendingCommandCount() == 1);
+	CHECK_FALSE(MegacityManager::IsMegacity(fixture.town));
+	NetworkDistributeCommands();
+	CHECK_FALSE(MegacityManager::IsMegacity(fixture.town));
+	++_frame_counter;
+	NetworkExecuteLocalCommandQueue();
+	CHECK(NetworkPendingCommandCount() == 0);
+	REQUIRE(MegacityManager::IsMegacity(fixture.town));
+	CHECK(MegacityManager::GetProfile(fixture.town)->town_name == Town::Get(fixture.town)->name);
+	CHECK(Company::Get(CompanyID{0})->money == 0);
+	/* An already designated town cannot reset demand. */
+	MegacityManager::RecordDelivery(fixture.town, MegacityDemandTier::Tier1_Sustenance, 23);
+	window->OnClick({}, WID_MCO_DESIGNATE, 1);
+	_frame_counter_max = _frame_counter;
+	NetworkDistributeCommands();
+	++_frame_counter;
+	NetworkExecuteLocalCommandQueue();
+	CHECK(MegacityManager::GetProfile(fixture.town)->delivered_current[0] == 23);
+}
+
+TEST_CASE("Megacity GUI client packets preserve normal company and spectator sender identities", "[megacity-designation][command-authority]")
+{
+	MegacityCommandFixture fixture;
+	const CompanyID client_playas = GENERATE(CompanyID{0}, COMPANY_SPECTATOR);
+	_current_company = _local_company = client_playas;
+	_networking = true;
+	_network_server = false;
+	MegacityPacketClient client;
+	ShowMegacityOverview(fixture.town);
+	Window *window = FindWindowById(WindowClass::MegacityOverview, fixture.town.base());
+	REQUIRE(window != nullptr);
+	window->OnClick({}, WID_MCO_DESIGNATE, 1);
+	CHECK_FALSE(MegacityManager::IsMegacity(fixture.town));
+	REQUIRE_FALSE(client.command_packet.empty());
+	const CommandPacket command = client.ReadCommand();
+	/* Full native server receive rejects company != client_playas; test the
+	 * actual GUI packet, not a manually assigned relay packet. */
+	CHECK(command.company == client_playas);
+	CHECK(command.cmd == (client_playas == COMPANY_SPECTATOR ? Commands::DesignateMegacitySpectator : Commands::DesignateMegacity));
+	CHECK(EndianBufferReader::ToValue<CommandTraits<Commands::DesignateMegacity>::Args>(command.data) == std::make_tuple(fixture.town));
+	CHECK(_current_company == client_playas);
+	CHECK(Company::Get(CompanyID{0})->money == 0);
+}
+
+TEST_CASE("Designated town consumer stations require a house belonging to their own town", "[megacity-designation][catchment]")
+{
+	MegacityCommandFixture fixture;
+	const CargoType food{1};
+	CargoSpec::Get(food)->label = CargoLabel{"FOOD"};
+	BuildCargoLabelMap();
+	Town *town = Town::Get(fixture.town);
+	Station *station = Station::Create(TileXY(12, 10));
+	station->name = "Town receiving station";
+	station->owner = CompanyID{0};
+	station->town = town;
+	station->facilities.Set(StationFacility::Train);
+	station->train_station = TileArea(station->xy, 1, 1);
+	station->spread = station->train_station;
+	MakeRailStation(station->xy, station->owner, station->index, Axis::X, 0, RAILTYPE_RAIL);
+	RebuildStationKdtree();
+	station->RecomputeCatchment();
+	CHECK_FALSE(MegacityManager::IsConsumerStation(station));
+	REQUIRE(Command<Commands::DesignateMegacity>::Post(fixture.town));
+	CHECK_FALSE(MegacityManager::IsConsumerStation(station));
+	UpdateStationAcceptance(station, false);
+	CHECK_FALSE(station->goods[food].status.Test(GoodsEntry::State::Acceptance));
+
+	Town *other = Town::Create(TileXY(20, 20));
+	other->name = "Other catchment town";
+	other->townnametype = SPECSTR_TOWNNAME_START;
+	RebuildTownKdtree();
+	MakeHouseTile(TileXY(12, 11), other->index, 0, TOWN_HOUSE_COMPLETED, HouseID{0}, 0, false);
+	CHECK_FALSE(MegacityManager::IsConsumerStation(station));
+	MakeHouseTile(TileXY(10, 11), fixture.town, 0, TOWN_HOUSE_COMPLETED, HouseID{0}, 0, false);
+	REQUIRE(MegacityManager::IsConsumerStation(station));
+	UpdateStationAcceptance(station, false);
+	CHECK(station->goods[food].status.Test(GoodsEntry::State::Acceptance));
+	CHECK(station->always_accepted.Test(food));
+	station->town = other;
+	CHECK_FALSE(MegacityManager::IsConsumerStation(station));
+	station->town = town;
+	station->catchment_tiles.Reset();
+	CHECK_FALSE(MegacityManager::IsConsumerStation(station));
+}
 
 class MegacityGuiFixture {
 private:

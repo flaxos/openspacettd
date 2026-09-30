@@ -16,6 +16,7 @@
 #include "../rail_type.h"
 #include "../station_type.h"
 #include "../cargo_type.h"
+#include "../town_type.h"
 #include "portal_type.h"
 #include "tech_tree.h"
 #include "production_chain.h"
@@ -74,6 +75,9 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
  * @return Command cost or failure.
  */
 CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station);
+
+/** Designate a live town using its current world, name and population, at no cost. */
+CommandCost CmdDesignateMegacity(DoCommandFlags flags, TownID town);
 
 /**
  * Build an edge extraction conduit on a world perimeter tile adjacent to void space.
@@ -200,6 +204,10 @@ DEF_CMD_TRAIT(Commands::BuildPortalPair,          CmdBuildPortalPair,          C
 DEF_CMD_TRAIT(Commands::DestroyPortalGate,        CmdDestroyPortalGate,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)
 
 DEF_CMD_TRAIT(Commands::DesignateSpaceport,        CmdDesignateSpaceport,        {},                                                   CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::DesignateMegacity,         CmdDesignateMegacity,         {},                                                   CommandType::OtherManagement)
+/* Spectator commands execute and post as spectator. Ordinary clients retain
+ * their company in the packet so native receive can validate client_playas. */
+DEF_CMD_TRAIT(Commands::DesignateMegacitySpectator, CmdDesignateMegacity,         CommandFlag::Spectator,                                CommandType::OtherManagement)
 DEF_CMD_TRAIT(Commands::ConfigureSpaceportBridge,  CmdConfigureSpaceportBridge,  {},                                                   CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::BuildEdgeConduit,          CmdBuildEdgeConduit,          CommandFlags({CommandFlag::Auto, CommandFlag::NoWater}), CommandType::LandscapeConstruction)
 DEF_CMD_TRAIT(Commands::DestroyEdgeConduit,        CmdDestroyEdgeConduit,        CommandFlag::Auto,                                     CommandType::LandscapeConstruction)

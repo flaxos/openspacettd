@@ -15,6 +15,8 @@
 #include "../industry_cmd.h"
 #include "../economy_base.h"
 #include "../portal/corporate_hq.h"
+#include "../portal/megacity_manager.h"
+#include "../town.h"
 #include "mock_environment.h"
 
 #include <array>
@@ -79,6 +81,10 @@ void WriteMessage(int fd, char op, std::span<const uint8_t> data = {})
 void WriteState(int fd)
 {
 	std::string state = CommandAuthorityState();
+	for (const auto &city : MegacityManager::GetAllMegacities()) {
+		state += fmt::format(";megacity:{}:{}:{}:{}:{}:{}:{}", city.town_id.base(), city.world_id.base(), city.town_name,
+			city.population, city.monthly_quota[0], city.monthly_quota[1], city.monthly_quota[2]);
+	}
 	if (ResourceSiteManager::Enabled()) {
 		for (const auto &[company, surveys] : ResourceSiteManager::Surveys()) {
 			for (TileIndex tile : surveys) state += fmt::format(";survey:{}:{}", company.base(), tile.base());
@@ -132,6 +138,15 @@ CommandPacket MakeCommand(char op)
 	cp.err_msg = StringID{0};
 	cp.callback = nullptr;
 	switch (op) {
+		case 'G': case 'F':
+			cp.cmd = Commands::DesignateMegacity;
+			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(op == 'F' ? TownID::Invalid() : TownID{0}));
+			break;
+		case 'E': case 'X':
+			cp.company = COMPANY_SPECTATOR;
+			cp.cmd = Commands::DesignateMegacitySpectator;
+			cp.data = EndianBufferWriter<CommandDataBuffer>::FromValue(std::make_tuple(op == 'X' ? TownID::Invalid() : TownID{1}));
+			break;
 		case 'Q': case 'J':
 			cp.company = CompanyID{static_cast<uint8_t>(op == 'J' ? 1 : 0)};
 			cp.cmd = Commands::SurveyResources;
@@ -184,7 +199,15 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 	REQUIRE(fd >= 3);
 	(void)MockEnvironment::Instance();
 	const bool resources = std::getenv("OSTTD_RESOURCE_LOOPBACK") != nullptr;
-	SetupCommandAuthorityWorld(resources ? WorldPhase::Phase2_Developed : WorldPhase::Phase4_Expansion, 10000);
+	const bool megacity = std::getenv("OSTTD_MEGACITY_LOOPBACK") != nullptr;
+	SetupCommandAuthorityWorld(megacity ? WorldPhase::Phase3_Frontier : resources ? WorldPhase::Phase2_Developed : WorldPhase::Phase4_Expansion, 10000);
+	if (megacity) {
+		Town::Get(TownID{0})->cache.population = 1240;
+		Town *town = Town::Create(TileXY(20, 30));
+		town->name = "Spectator settlement";
+		town->townnametype = SPECSTR_TOWNNAME_START;
+		town->cache.population = 1000;
+	}
 	ResourceSiteManager::Reset();
 	if (resources) {
 		ResetIndustries();
@@ -234,7 +257,7 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 			WriteState(fd);
 			continue;
 		}
-		if (op == 'Q' || op == 'J' || op == 'M' || op == 'N' || op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V') {
+		if (op == 'G' || op == 'F' || op == 'E' || op == 'X' || op == 'Q' || op == 'J' || op == 'M' || op == 'N' || op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V') {
 			auto bytes = WirePacket(handler, MakeCommand(op));
 			WriteMessage(fd, 'K', bytes);
 			continue;

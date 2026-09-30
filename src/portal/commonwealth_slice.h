@@ -7,6 +7,7 @@
 #include <array>
 #include <map>
 #include <span>
+#include <vector>
 #include <string_view>
 
 /** Optional observer counters used by the offline WP11 economic slice harness. */
@@ -20,6 +21,13 @@ struct CommonwealthSliceAudit {
 	std::array<uint64_t, NUM_CARGO> research_consumed{}; ///< Actual research feedstock withdrawals.
 	std::map<uint32_t, std::array<uint64_t, NUM_CARGO>> deliveries; ///< Accepted cargo by destination station.
 	std::map<uint32_t, std::pair<uint64_t, int64_t>> gate_tolls; ///< Per-gate admissions and actual tolls, observer only.
+	std::vector<std::array<int64_t, 6>> payments; ///< Tick, front, station, cargo, accepted units and native packet revenue.
+	std::vector<std::array<int64_t, 3>> arrivals; ///< Native tick, front and station at BeginLoading, distinguishing trips from fragments.
+	std::vector<std::array<int64_t, 4>> city_months; ///< Calendar date, town, FOOD basket consumed and remaining FOOD reserve.
+	std::map<uint32_t, int64_t> service_income; ///< Actual completed CargoPayment cash credits by front.
+	std::map<uint32_t, int64_t> service_running; ///< Actual integer cash charges from native fractional train running debits.
+	std::map<uint32_t, int64_t> vehicle_tolls; ///< Actual toll cash debits by front.
+	std::map<uint8_t, int64_t> expenses; ///< Native company debits by expense type across year rollovers.
 	int64_t cash_debits = 0; ///< Actual company cash debits observed during the run.
 };
 /** Active WP11 audit observer, or nullptr outside the harness. */
