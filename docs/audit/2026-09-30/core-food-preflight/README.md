@@ -16,7 +16,7 @@ Historical PR59 and all A1 evidence remain unchanged. No merge by this task.
 
 ## Decisive native evidence
 
-Final source `abeb8f00459f8510a9a4fbf8dfeb4c809dd39277`, clean at execution;
+Blocked seed11 run source `abeb8f00459f8510a9a4fbf8dfeb4c809dd39277`, clean at execution;
 binary SHA-256 `09eb6676ba5883bf2e689b3b679e8117fd73ac60ea7ae6a4b1d976f33f25e789`.
 The retained start hash is
 `51ce35b791d419b3b4106a8f63f715bca89ae54f88522997a6295171320b5ce0`.
@@ -120,12 +120,54 @@ construction, designation or switch of the canonical start occurred. The matchin
 retain script, snapshots and native logs. This establishes a receiver prerequisite
 for a possible revised seed2026 start, without proving a usable whole chain.
 
+The owner then authorised a bounded [seed2026 route/affordability preflight and
+conditional replan](seed2026-preflight.md). Both complete-chain candidates fail at
+processor9's prescribed link2 approach: target `(765,188)` already has neutral
+horizontal rail from another terminal and ordinary ownership rules prohibit adding
+the required vertical rail. No larger-bound search, state progression or spending
+ran. Complete-chain quotes/affordability remain unavailable. Changing only the
+start seed is therefore not yet a supportable replan; the blocked terminal approach
+needs an explicit construction/access decision. Canonical seed11 remains unchanged.
+
+The final native access probe confirms all34 public terminal parts are intact and
+traversable, but there is only one external joining edge. Its incompatible target
+fails native following (`NoWay`) and vertical-track query (`STR_ERROR_OWNED_BY`).
+Compatible public-track reuse is allowed by established traversal rules, but a
+bounded planner-only change does not repair this retained terminal's missing
+connection. No ownership/access exception is selected.
+
 Exact published-head CI is recorded in the draft PR. Owner merge 5183d2e's default
 `Merge pull request #61…` subject separately fails PR60's commit checker in
 [run36746847174](https://github.com/flaxos/openspacettd/actions/runs/36746847174/job/109995081251).
 That owner history is preserved. PR58's warning cleanup is on main, while this
 unmerged dependency still contains the inherited warning baseline; full aggregate
 CI cannot be inferred from main. The food draft makes no merge/full-green claim.
+
+PR62's first exact-head commit-checker run separately found this task's non-ASCII
+`£30k` source comment in original implementation commit34838de
+([job110012064434](https://github.com/flaxos/openspacettd/actions/runs/36751810653/job/110012064434)).
+The current comment is corrected to ASCII `GBP 30k`, with no executable change.
+Because the checker validates individual historical diffs, an additional correction
+cannot clear the original commit's failure. That delivery/history issue is recorded
+for parent disposition; no published history is rewritten or replaced here.
+[Smallest normal-history delivery option](delivery-options.md): one exact-tree
+replacement on actual PR60 head if elected, with PR62 retained/closed as history;
+no replacement is published in this task.
+
+The same first CI run found a Mac Release test-only temporary-directory collision
+after all designation relay operations agreed, plus missing command-header Doxygen
+parameter/return documentation. Scoped fixes retain every save/load/state check:
+bounded atomic directory allocation, a deterministic pre-existing-directory
+regression, and declaration documentation. Final executable source
+`74f0ea20ed13299445b22c1d0b65d07b23f25736` adds these fixes and a guarded
+query-only native access diagnostic. Its build,481 unit cases /67,754 assertions,
+495/495 sequential CTests and both linters/script-mode checks pass. The allocation
+success assertion is enforced by the helper's atomic success/FAIL contract, so
+raw assertion totals differ from the earlier run; no save/state test was dropped.
+Final access-probe binary SHA-256:
+`3b6f31534d575a0e6a8c3ef49740c8fd8d8d258741e698aaf70aaf963e7eaf3f`.
+[Recovery verification](recovery-verification.json) and [raw logs/manifest](recovery-manifest.json).
+The earlier source/binary/evidence archives remain intact with their provenance.
 
 ## Owner options and short human mission
 
@@ -135,8 +177,9 @@ CI cannot be inferred from main. The food draft makes no merge/full-green claim.
 2. The already retained seed2026 operation save has an existing Core receiver and
    needs no authored town. Choosing it requires an owner-approved revised
    start/acceptance contract. Its £36,473 cash/£100,000 debt and failed retained
-   bounded grain searches leave full-chain legality, supply and affordability
-   unproven; a new bounded preflight may still stop for route or cost decisions.
+   bounded grain searches and the now-reproduced neutral terminal target conflict
+   leave full-chain legality, supply and affordability unproven. A seed-only switch
+   is insufficient; an explicit approach-method/access decision is needed first.
 3. If every ordinary start should support Core food delivery, explicitly authorise
    a Core-generation guarantee or changed generation settings as a separate
    prerequisite. That changes future New Game and needs new generation/A1 proof;

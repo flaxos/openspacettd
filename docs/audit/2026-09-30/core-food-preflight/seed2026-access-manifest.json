@@ -1,0 +1,36 @@
+{
+  "mode": "native-query-only-public-terminal-access",
+  "source_head": "74f0ea20ed13299445b22c1d0b65d07b23f25736",
+  "files": [
+    {
+      "path": "build/agent-logs/core-food-seed2026-access.py",
+      "bytes": 2780,
+      "sha256": "6cb357d0c846854cdc06634fa82a76727587234d9dc562c6bbdf45ae6cae9c51"
+    },
+    {
+      "path": "build/agent-logs/core-food-seed2026-access.log",
+      "bytes": 6553,
+      "sha256": "81abc416eafc89d8dadfb96c7d0304bfdfa98539faff42cac7e57217adba56d7"
+    },
+    {
+      "path": "build/core-food-seed2026-access/continuation.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    },
+    {
+      "path": "build/core-food-seed2026-access/evidence.json",
+      "bytes": 126373,
+      "sha256": "5ce69b335d492b0bec0118e4ab2e9affdfce28acee24184942d1d57490fb3631"
+    },
+    {
+      "path": "build/core-food-seed2026-access/native.log",
+      "bytes": 52654,
+      "sha256": "d3725cabeefa333102b67de7431c03c22f72356e6a4fa1fcdcd2deef19926a85"
+    },
+    {
+      "path": "build/core-food-seed2026-access/operation-copy.sav",
+      "bytes": 149868,
+      "sha256": "5ace1f1f3f1627334034a6d2bcff1584282777d91268b7a43f32d2dce519b038"
+    }
+  ]
+}

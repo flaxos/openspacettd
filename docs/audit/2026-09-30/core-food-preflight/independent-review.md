@@ -44,3 +44,19 @@ town count one is obeyed; this disproves the chosen seed11 receiver assumption,
 without establishing native count noncompliance. The revised owner options are
 accurate. Ordinary town founding is Forbidden by default, so it would also need
 an explicit policy/setting change.
+
+Final source review also covers `74f0ea20ed13299445b22c1d0b65d07b23f25736`:
+the guarded native access probe is query-only, and the temporary-directory fix
+retains save/load/state assertions with a deterministic real-collision regression.
+Final logs confirm481 cases /67,754 assertions and495/495 CTests. The reviewer
+verified all6 seed2026 chain-preflight members and all6 native-access members,
+binary/save hashes, exact original A1 equality and unchanged repeated snapshots.
+
+Independent native track-mask enumeration confirms one external ground-rail edge,
+70 internal directed edges and one gate edge. All34 terminal parts are intact and
+publicly traversable; the lone incompatible neighbor rejects native following and
+ordinary construction. Existing compatible-public traversal is allowed, but its
+reuse alone cannot connect this retained terminal. No alternate compatible open
+joining edge exists in the unchanged ground-rail search. Food affordability and
+operation remain unproven, and the revised conditional proposal preserves the
+canonical seed11 stop. No source/evidence blocker found within this blocked scope.

@@ -1,0 +1,91 @@
+{
+  "source_head": "74f0ea20ed13299445b22c1d0b65d07b23f25736",
+  "binary_sha256": "3b6f31534d575a0e6a8c3ef49740c8fd8d8d258741e698aaf70aaf963e7eaf3f",
+  "files": [
+    {
+      "path": "build/agent-logs/core-food-ci-fixes-build.log",
+      "bytes": 17524,
+      "sha256": "afbdbbc8477cd2da323043590d7d9fd58b62bd09feca96926757ffd889a0646b"
+    },
+    {
+      "path": "build/agent-logs/core-food-ci-fixes-build-2.log",
+      "bytes": 3390,
+      "sha256": "1087743c2298bd6a928cc857390ab7d6ba93a07de63b371e0e1e9a6683d40831"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-recovery-build.log",
+      "bytes": 812,
+      "sha256": "fead34ea70cef4c6f9ce799140b1f4752f3d632cc3e9c58883e997ce818a5741"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-recovery-unit.log",
+      "bytes": 5299,
+      "sha256": "c557011c212cc395d8e3e8f020563aa9b7c30d2a93b0c1aa35ecef08d2537a8b"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-recovery-ctest.log",
+      "bytes": 124005,
+      "sha256": "ea77525637be91ed36e7f3b0fe2c93356cd0e62677ac3b827d6f29c16ee7bb04"
+    },
+    {
+      "path": "build/agent-logs/core-food-save-directory-regression.log",
+      "bytes": 154,
+      "sha256": "2c6e8740ddbf72a2dced732c97607a97474499721d820414458e1c9a73b467a4"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-recovery-file-descriptions.log",
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-recovery-unused-strings.log",
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-recovery-script-mode.log",
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "path": "build/agent-logs/core-food-ci-macos-release.log",
+      "bytes": 347040,
+      "sha256": "81f252958bcfa37b63b17f55f3b59d1babfa5129c7aee354b985a3d0a06fc241"
+    },
+    {
+      "path": "build/agent-logs/core-food-ci-docs.log",
+      "bytes": 1725220,
+      "sha256": "0b45fe73574c74ef50243d5bc904b1b035842ec7f8a9049dc2dbf85df8e73cb6"
+    },
+    {
+      "path": "build/agent-logs/core-food-ci-commit-checker.log",
+      "bytes": 32249,
+      "sha256": "7de41e2e38b5f25de89579497363c8f5d8e5ed559f6a53982251599809334b9e"
+    },
+    {
+      "path": "build/agent-logs/core-food-existing-history-check.log",
+      "bytes": 613,
+      "sha256": "8f6aca1403da98dcf788d888c77de3fc6f2e53fbfa6c7d6b0c814ed7217090d4"
+    },
+    {
+      "path": "build/agent-logs/core-food-recovery-seed11-preflight.log",
+      "bytes": 666,
+      "sha256": "209a9e6071064d73e6ed5a79e70b5644d652bba02517b62cf94e70308c26fb8f"
+    },
+    {
+      "path": "build/core-food-recovery-seed11-preflight/evidence.json",
+      "bytes": 179900,
+      "sha256": "058db7fd8b05174a0da370a327fb54c1874c2c44fffb87260f48973f05aaa6b0"
+    },
+    {
+      "path": "build/core-food-recovery-seed11-preflight/continuation.log",
+      "bytes": 54625,
+      "sha256": "42374359777a2dc294d9aa0ec7f606b68b935e232c15bf8a300db8eb3f1bcd2d"
+    },
+    {
+      "path": "build/core-food-recovery-seed11-preflight/continuation.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    }
+  ]
+}

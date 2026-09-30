@@ -1,0 +1,36 @@
+{
+  "mode": "query-only-seed2026-alternate-start-preflight",
+  "source_head": "c8f813127b4a18dd87851a8d7e7a82edaf09ab6c",
+  "files": [
+    {
+      "path": "build/agent-logs/core-food-seed2026-preflight.py",
+      "bytes": 2802,
+      "sha256": "2b82e9d52b8205eb2ff5064be7563df670ab3d1b45434023ae98c3d95c6cc949"
+    },
+    {
+      "path": "build/agent-logs/core-food-seed2026-preflight.log",
+      "bytes": 379,
+      "sha256": "268be77c9de78dfca9b3c0f8d2a49ca76d715bec28b441a9117f564206f44d19"
+    },
+    {
+      "path": "build/core-food-seed2026-preflight/continuation.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    },
+    {
+      "path": "build/core-food-seed2026-preflight/evidence.json",
+      "bytes": 121220,
+      "sha256": "f87d834859beed6db95d21fdf2ee4493a25ab6ed9de92413fb202e696b98b8ba"
+    },
+    {
+      "path": "build/core-food-seed2026-preflight/native.log",
+      "bytes": 52159,
+      "sha256": "d86f2b2fc02e53dc7f4a470d20ca0d0ec436e01701b2bf834fea1294c06d2416"
+    },
+    {
+      "path": "build/core-food-seed2026-preflight/operation-copy.sav",
+      "bytes": 149868,
+      "sha256": "5ace1f1f3f1627334034a6d2bcff1584282777d91268b7a43f32d2dce519b038"
+    }
+  ]
+}
