@@ -1,5 +1,22 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## First Functional Core Supply recovery — 1 October 2026
+
+**Draft remains incomplete; ASSISTED FUNCTIONAL recovery FAIL before its first
+state snapshot, £0 total assistance, human UAT Pending.** The one explicit recovery
+reached START/READY, then a read-only map hash asserted on an ownerless native
+tile. The ownerless-tile and FIFO teardown repairs pass focused regressions,
+496 full native cases and 511 CTests; they do not prove food/HQ/research/cold
+progression. The diagnostic crash save is not a usable mission checkpoint.
+[Preserved failures, exact ledger and next action](audit/2026-10-01/functional-core/README.md#current-recovery-evidence-and-smallest-next-action).
+
+The handoff carried prior startup usage and the original absolute four-hour
+deadline; no gameplay counts or spending were reset. Its single recovery is
+consumed, so another canonical campaign needs a new explicit handoff. One total
+£6m allowance also leaves funded replay NOT RUN. Executor access succeeds. No
+economic/human acceptance, milestone, balance change, merge or second slice advances.
+The prior execution entry below remains the first-attempt record.
+
 ## First Functional Core Supply execution — 1 October 2026
 
 **Draft implementation; ASSISTED FUNCTIONAL campaign FAIL at offline startup.**
@@ -39,7 +56,7 @@ source, imports no partial gameplay and neither merges nor edits those PRs.
 | Dimension | What passes it | Current evidence / remaining gap |
 |---|---|---|
 | Implemented systems | Owning source and focused tests exist and agree on behavior. | Native generation/processing/city/HQ/research/save systems exist. The current draft repairs designation replication and eligibility-state mutation with focused regressions; these changes remain outside main until owner merge. Source presence is not an end-to-end pass. |
-| Functional end-to-end proof | Player-equivalent legal commands connect construction → delivery → processing → actual town consumption → paid next unlock → cold continuation, with accounting/determinism controls. Cash-assisted runs must be labelled. | Generation T+C+D+S passes actual seeds11/101/2026. The first assisted campaign **FAILS at offline startup**; all food/research/control/cold phases and replay are NOT RUN. Narrower fixtures/historical freight do not complete this outcome. |
+| Functional end-to-end proof | Player-equivalent legal commands connect construction → delivery → processing → actual town consumption → paid next unlock → cold continuation, with accounting/determinism controls. Cash-assisted runs must be labelled. | Generation T+C+D+S passes actual seeds11/101/2026. The original assisted startup fails; its one authorized recovery reaches console readiness then **FAILS before the first state snapshot**. All food/research/control/cold phases and replay are NOT RUN. Narrower fixtures/historical freight do not complete this outcome. |
 | Ordinary-start economic viability | Fresh ordinary cash/loan, no assistance, legal complete startup and measured operating continuation/next-step affordability over a stated horizon. | Original A1 three-seed bounded proof passes at its revision. Revised seed11 loses cash after reload; seed101/2026 revised operation NOT RUN. Food and HQ affordability remain unproven; no indefinite sustainability claim. |
 | Human playable UAT | A human can find controls, build/operate the mission, understand feedback and reload on an identified build. | Generation, A1, food/research and optional art acceptance remain **Pending** for these scopes. Native tests/SDL smoke/prebuilt saves cannot promote them. |
 | Balance and pacing | Owner-chosen costs, rewards, waiting times and progression targets are evaluated across representative ordinary starts. | Deferred separate pass. Preserve every cost/revenue/wait measurement now; do not tune HQ, loans, tolls, running costs, yields or research timing in functional proof. |

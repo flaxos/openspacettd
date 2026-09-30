@@ -1,5 +1,21 @@
 # Human UAT results — recovery / v1.1
 
+## First Functional Core Supply recovery — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL single recovery: FAIL before first
+state snapshot.** START/READY reached; the map fingerprint asserted on an
+ownerless tile. Original and recovery failures are retained. Focused corrected
+map/teardown and full native gates pass, but no flow, paid HQ/I/II or cold mission
+was run. Total assistance applied is £0; ending cash/debt are unobserved. The
+crash save is diagnostic and must not be offered as an observation checkpoint.
+
+The [safe checkout and six-step manual feedback mission](../docs/audit/2026-10-01/functional-core/README.md#safe-fresh-checkout-and-manual-owner-feedback)
+remains unverified. Record exact build/content, manual actions, total assistance,
+cash/debt, elapsed time and first failure. Any further automated campaign needs
+a new explicit handoff carrying the consumed recovery and existing bounds; funded
+replay would exceed the one-total allowance. No human/economic acceptance or
+next slice follows from automated gates. The prior entry below is historical.
+
 ## First Functional Core Supply implementation — 1 October 2026
 
 **Human status: Pending. ASSISTED FUNCTIONAL automated campaign: FAIL at startup.**

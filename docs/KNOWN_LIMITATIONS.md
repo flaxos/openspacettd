@@ -1,5 +1,23 @@
 # OpenSpaceTTD Known Limitations
 
+## First Functional Core Supply recovery boundary — 1 October 2026
+
+Canonical console readiness now has direct evidence, but the sole authorized
+recovery crashed at its first state query on forbidden Void/House/Industry owner
+reads. The narrow map-observer/teardown repair passes native/synthetic regressions
+and full gates; canonical progression after that repair is NOT RUN. £0 assistance
+was applied across both attempts. Ending finances are unobserved and the crash
+save is diagnostic, not a pristine or usable mission save.
+
+The explicit one-recovery handoff is consumed; another canonical startup requires
+a new handoff carrying both failures' usage and the original absolute deadline.
+One total £6m allowance prevents a second funded replay, so repeatability remains
+NOT RUN. No verified coordinates, food consumption, paid HQ/research unlock or
+cold continuation exists. Human acceptance Pending; economics and balance remain
+separate. Executor command/read access succeeds.
+[Preserved evidence and smallest next action](audit/2026-10-01/functional-core/README.md#current-recovery-evidence-and-smallest-next-action).
+The earlier entry below describes the original startup failure.
+
 ## First Functional Core Supply execution limit — 1 October 2026
 
 The current draft repairs replicated designation and query-state mutation, but

@@ -1,5 +1,23 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Functional Core Supply recovery stop — 1 October 2026
+
+**ASSISTED FUNCTIONAL FAIL; £0 applied across both attempts; human UAT Pending.**
+The explicit single recovery at `6e9e09bf1c` received both handshake markers but
+crashed in `FunctionalSnapshot` before emitting pristine state. The original
+RuntimeError evidence/archive remains unchanged; new native/crash evidence is
+preserved separately. The crash save is diagnostic, not a playable checkpoint.
+
+`c99e7a1357` fixes ownership observation for Void/House/Industry and preserves the
+original failure through broken FIFO teardown. Focused regressions and full
+496-case/511-CTest gates pass. No grant, gameplay advance, route search or further
+campaign followed; flow/HQ/research/cold/replay remain NOT RUN. The original
+four-hour deadline and active startup usage were carried. One total £6m prevents
+funded replay; the consumed recovery requires another explicit handoff before a
+canonical campaign. [Current evidence and ledger](audit/2026-10-01/functional-core/README.md).
+No balance, content, acceptance, merge or next slice changes. The entry below is
+the preserved first-stop record.
+
 ## First Functional Core Supply and Materials I — 1 October 2026
 
 **Draft prerequisite implementation; ASSISTED FUNCTIONAL FAIL at offline startup;

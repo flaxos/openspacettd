@@ -1,4 +1,99 @@
-# First Functional Core Supply and Materials I — stopped execution
+# First Functional Core Supply and Materials I — recovery stopped
+
+**ASSISTED FUNCTIONAL: FAIL before the first state snapshot. Human UAT: Pending.**
+The explicit recovery handoff authorized one repaired canonical startup and
+same-instance continuation, with carried bounds and **ONE TOTAL £6m** virtual
+allowance. That attempt reached both console handshake markers, then hit a
+diagnosed source assertion in the read-only snapshot. Assistance remains **£0**;
+no candidates, paid construction, requested simulation advances, deliveries, consuming
+months, HQ/research or cold proof occurred. This draft does not complete the
+functional roadmap row. Ordinary-start economics remain unproven.
+
+## Current recovery evidence and smallest next action
+
+The original failure at `d7a3a12006efb0e890a3020849eccb12be0aeac1` remains unchanged:
+`RuntimeError: Timed out waiting for FUNCTIONAL_OFFLINE_START`. Its
+[native-proof.tar.gz](native-proof.tar.gz) still has SHA256
+`c7ad60f085c3d8aa83874cd521c43027d699ab3c560b17e9d57d82e434c28c43`;
+the original failed evidence JSON remains
+`f8b490f7e4de124f46461e2b224a5c338d6e2a90992572825e446ef2102f979a`.
+
+One recovery ran at `6e9e09bf1c89dce67b7007c5db7be070323c3c9f`, after successful
+executor reads and confirmation of zero prior grants, advances and saves.
+`FUNCTIONAL_OFFLINE_START` and `FUNCTIONAL_OFFLINE_READY` were received. The
+first `connected_economy functional-start` query then aborted with
+`GetTileOwner: Assertion IsValidTile(tile) failed` at `src/tile_map.h:179`.
+Symbolized caller: `FunctionalSnapshot`, `connected_economy.cpp:1597` at that
+commit. Its full-map fingerprint unconditionally queried ownership for Void,
+House and Industry tiles, which the native API forbids. This is a source observer
+defect, separate from the repaired buffered-log/FIFO setup defect; no material
+design or economic stop was observed.
+
+Latest live main is `85c423b4a2dd57e5a2c2cf1f6d29bc2e4667845d`: the owner merged
+reviewed PR67 at 23:15:49 UTC. PR66 remains open/unmerged at the exact dependency
+head `d1bb617664dcbb122aaefc1d4175c34ae1a17e2e`, so PR68 still targets
+`codex/generation-money-comparison`. The branch-time main `91846666f6` and exact
+PR66 are ancestors of this implementation; refreshed main is not an ancestor.
+The normal reviewed-docs cherry-pick retains identical plan content. This task
+did not merge anything or duplicate the PR66 correction.
+
+The primary Python error is `Engine exited while waiting for CONNECTED
+functional-state ; see log`. FIFO teardown also raised `BrokenPipeError: [Errno
+32] Broken pipe`, masking that error at the report's top level. Both raw errors
+are preserved. The automatic crash save is diagnostic evidence, **not a pristine
+or usable proof checkpoint**. No pristine state or ending cash/debt was emitted.
+[recovery-proof.tar.gz](recovery-proof.tar.gz) retains the report, native command
+transcript, driver/crash logs, crash save/image and focused/full-gate logs.
+[recovery-manifest.json](recovery-manifest.json) pins every member and separates
+the failed run from the corrected source and local gates.
+
+`c99e7a1357af00284526de626676411f61afdb56` normalizes ownerless tiles to
+`OWNER_NONE`, retains every tile's type/height and meaningful ownership, and
+catches the expected broken FIFO close without masking the native error. A real
+64² native-map regression and synthetic teardown regression pass. Full Catch
+passes **496 cases / 306,282 assertions**; sequential CTest passes **511/511**.
+Both linters, script-mode and Python/diff checks pass. These focused tests do not
+re-run or pass the canonical mission. Exact final-head CI and independent Astra
+review are reported on [draft PR68](https://github.com/flaxos/openspacettd/pull/68).
+
+Recovery carried **52 seconds** of original active generation/preflight use,
+leaving 1,748 seconds at its launch, and retained the absolute four-hour cutoff
+**2026-10-01 02:24:44 UTC**. Infrastructure diagnosis/repair was recorded separately
+from active preflight usage. The recovery's own elapsed startup use is retained
+for any next handoff. All search, gross-spending and 240 × 2048 tick caps remain.
+The latest one-total allowance disables a second funded replay; repeatability
+stays **NOT RUN**, even if a later primary succeeds.
+
+The recovery handoff explicitly required: “If startup still fails, stop with exact
+logs and cause, no repeated blind reruns.” The [reviewed plan](../../../ACTIVE_EXECUTION_PLAN.md#bounds-and-failure-handling)
+also says: “another full campaign requires explicit handoff/replan.” The single
+recovery is consumed. The smallest next action is a **new explicit handoff for
+one startup confirmation at the corrected head**, naming both retained failures
+and carrying their used time/counts plus the unused original cash allowance.
+No additional campaign, grant increase, relaxed authority, balance change, human
+acceptance, merge or next slice is inferred. Executor command/read access succeeds;
+the disconnection notification did not block these checks or evidence custody.
+
+| Current ledger / proof | Result |
+|---|---|
+| Total allowance / applied across both attempts | One £6,000,000 virtual in-game / **£0**; no real-money transaction |
+| Grant commands / native transactions | 0 / empty ledger |
+| Observed ending cash/debt / complete reconciliation | Unobserved (`null`) / NOT RUN |
+| Gameplay candidates / requested advances | 0 / 0 initial + 0 cold |
+| Canonical console transport | PASS for START/READY; first state query FAIL |
+| Flow, control, paid HQ/I/II, cold continuation and replay | NOT RUN |
+| Ordinary-start economic proof / human acceptance | NOT RUN / Pending |
+
+For owner feedback, use the [fresh checkout/rebuild and six-step mission below](#safe-fresh-checkout-and-manual-owner-feedback).
+It is still an unverified manual mission with no route coordinates or observation
+save. Report the exact build, assistance/cash/debt and first unexpected event;
+the crash save must not be presented as a prepared mission.
+
+## Original stop record preserved from the first delivery
+
+The remainder records the first stopped attempt and its frozen source/archive.
+The current recovery section above supersedes its active next-action/source
+statements; its historical observations and archived bytes remain intact.
 
 **ASSISTED FUNCTIONAL: FAIL at offline startup. Human UAT: Pending.** The single
 bounded campaign stopped before the runner received its native startup marker.
