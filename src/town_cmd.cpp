@@ -27,6 +27,7 @@
 #include "company_base.h"
 #include "news_func.h"
 #include "error.h"
+#include "debug.h"
 #include "object.h"
 #include "genworld.h"
 #include "newgrf_debug.h"
@@ -2451,6 +2452,179 @@ static Town *CreateRandomTown(uint attempts, uint32_t townnameparts, TownSize si
 	return nullptr;
 }
 
+static IntegratedCoreTownGenerationStats _integrated_core_town_stats; ///< Generation-local evidence, never saved.
+
+const IntegratedCoreTownGenerationStats &GetIntegratedCoreTownGenerationStats()
+{
+	return _integrated_core_town_stats;
+}
+
+/**
+ * Check a native candidate's population, economic role and same-world own-house identity.
+ * @param town Native town to inspect.
+ * @return true if its real state meets the initial Core-town predicate.
+ */
+static bool IsValidIntegratedCoreTown(const Town *town)
+{
+	if (town->cache.population == 0) return false;
+	WorldID world = PlanetManager::GetTileWorld(town->xy);
+	if (world == INVALID_WORLD || IntegratedEconomy::Role(world) != EconomicRole::Core) return false;
+	const PlanetRegion *region = PlanetManager::GetRegion(world);
+	if (region == nullptr) return false;
+	for (uint y = region->min_y; y <= region->max_y; ++y) {
+		for (uint x = region->min_x; x <= region->max_x; ++x) {
+			TileIndex tile = TileXY(x, y);
+			if (IsTileType(tile, TileType::House) && GetTownIndex(tile) == town->index && PlanetManager::GetTileWorld(tile) == world) return true;
+		}
+	}
+	return false;
+}
+
+bool HasValidIntegratedCoreTown()
+{
+	for (const Town *town : Town::Iterate()) {
+		if (IsValidIntegratedCoreTown(town)) return true;
+	}
+	return false;
+}
+
+/** A final-center probe is shared by ordinary and coastal candidates, even when rejected. */
+struct CoreTownSearch {
+	static constexpr uint PROBE_LIMIT = 10000; ///< Approved distinct final-center budget.
+	static constexpr uint CREATION_LIMIT = 20; ///< Approved native founding-call budget.
+	std::set<TileIndex> visited; ///< Centers already charged, including rejected coastal landings.
+	TownLayout layout; ///< Native requested road grid.
+
+	/**
+	 * Charge before economic-role, terrain or native placement validation; never validate a center twice.
+	 * @param tile Aligned final center being considered.
+	 * @param coastal Whether this center comes from coastal relocation.
+	 * @return true if this distinct center was charged within the budget.
+	 */
+	bool Charge(TileIndex tile, bool coastal)
+	{
+		if (_integrated_core_town_stats.probes == PROBE_LIMIT || !this->visited.insert(tile).second) return false;
+		++_integrated_core_town_stats.probes;
+		if (coastal) ++_integrated_core_town_stats.coastal_probes;
+		_integrated_core_town_stats.probe_hash = (_integrated_core_town_stats.probe_hash ^ tile.base()) * 1099511628211ULL;
+		return true;
+	}
+
+	/**
+	 * Retain economic-role and native placement restrictions on a charged final center.
+	 * @param tile Charged center to validate.
+	 * @return true if ordinary native founding is legal in economic Core.
+	 */
+	bool CanPlace(TileIndex tile) const
+	{
+		WorldID world = PlanetManager::GetTileWorld(tile);
+		return world != INVALID_WORLD && IntegratedEconomy::Role(world) == EconomicRole::Core && TownCanBePlacedHere(tile, true).Succeeded();
+	}
+
+	/**
+	 * Native-sized coastal scans, with every aligned landing sharing the final-center budget.
+	 * @param tile Charged water center from which to search.
+	 * @return A charged legal Core landing, or INVALID_TILE.
+	 */
+	TileIndex FindCoastalSpot(TileIndex tile)
+	{
+		for (TileIndex coast : SpiralTileSequence(tile, 40)) {
+			if (!IsTileType(coast, TileType::Clear)) continue;
+			TileIndex furthest = INVALID_TILE;
+			uint max_dist = 0;
+			for (TileIndex test : SpiralTileSequence(coast, 10)) {
+				if (!IsTileAlignedToGrid(test, this->layout)) continue;
+				if (_integrated_core_town_stats.probes == PROBE_LIMIT) break;
+				if (!this->Charge(test, true)) continue;
+				if (!IsTileType(test, TileType::Clear) || !IsTileFlat(test) || !this->CanPlace(test)) continue;
+				uint dist = GetClosestWaterDistance(test, true);
+				if (dist > max_dist) {
+					furthest = test;
+					max_dist = dist;
+				}
+			}
+			return furthest;
+		}
+		return INVALID_TILE;
+	}
+};
+
+/**
+ * Native creation and deletion for one requested slot; no population/house/RNG substitutions.
+ * @param townnameparts Native generated name, shared by candidates for this slot.
+ * @param city Native city-frequency result for the reserved slot.
+ * @param layout Native requested road layout.
+ * @return A qualifying native Core town, or nullptr with a bounded failure reason.
+ */
+static Town *CreateIntegratedCoreTown(uint32_t townnameparts, bool city, TownLayout layout)
+{
+	std::vector<const PlanetRegion *> regions;
+	for (const PlanetRegion &region : PlanetManager::GetAllRegions()) {
+		if (IntegratedEconomy::Role(region.id) == EconomicRole::Core) regions.push_back(&region);
+	}
+	std::sort(regions.begin(), regions.end(), [](const PlanetRegion *a, const PlanetRegion *b) { return a->id < b->id; });
+	if (regions.empty()) {
+		_integrated_core_town_stats.failure = IntegratedCoreTownFailure::NoCoreRegion;
+		return nullptr;
+	}
+
+	CoreTownSearch search{{}, layout};
+	uint grid = layout == TownLayout::Grid2x2 ? 3 : layout == TownLayout::Grid3x3 ? 4 : 1;
+	for (const PlanetRegion *region : regions) {
+		uint first_x = ((region->min_x + grid - 1) / grid) * grid;
+		uint first_y = ((region->min_y + grid - 1) / grid) * grid;
+		if (first_x > region->max_x || first_y > region->max_y) continue;
+		uint width = (region->max_x - first_x) / grid + 1;
+		uint height = (region->max_y - first_y) / grid + 1;
+		uint count = width * height;
+		/* A seeded cyclic permutation visits each aligned center once without
+		 * shuffling a whole map or relying on repeated random hits. Regions stay
+		 * in WorldID order. Both choices use the synchronized native RNG. */
+		uint start = RandomRange(count);
+		uint stride = RandomRange(count) + 1;
+		while (std::gcd(stride, count) != 1) ++stride;
+		for (uint i = 0; i < count; ++i) {
+			if (_integrated_core_town_stats.probes == CoreTownSearch::PROBE_LIMIT ||
+					_integrated_core_town_stats.creation_attempts == CoreTownSearch::CREATION_LIMIT) break;
+			uint pos = (start + static_cast<uint64_t>(i) * stride) % count;
+			TileIndex tile = TileXY(first_x + (pos % width) * grid, first_y + (pos / width) * grid);
+			if (!search.Charge(tile, false)) continue;
+			/* A water center and all of its aligned coastal landings consume the
+			 * same distinct probe budget. A landing outside economic Core fails. */
+			if (IsTileType(tile, TileType::Water)) {
+				tile = search.FindCoastalSpot(tile);
+				if (tile == INVALID_TILE) continue;
+			} else if (!search.CanPlace(tile)) continue;
+
+			if (!Town::CanAllocateItem()) {
+				_integrated_core_town_stats.failure = IntegratedCoreTownFailure::TownPoolFull;
+				return nullptr;
+			}
+			Town *town = Town::Create(tile);
+			++_integrated_core_town_stats.creation_attempts;
+			DoCreateTown(town, tile, townnameparts, TownSize::Random, city, layout, false);
+			if (IsValidIntegratedCoreTown(town)) {
+				_integrated_core_town_stats.core_town = town->index;
+				return town;
+			}
+			if (town->cache.population == 0) ++_integrated_core_town_stats.zero_population_candidates;
+			else ++_integrated_core_town_stats.no_core_house_candidates;
+			AutoRestoreBackup cur_company(_current_company, OWNER_TOWN);
+			CommandCost rc = Command<Commands::DeleteTown>::Do(DoCommandFlag::Execute, town->index);
+			if (rc.Failed()) {
+				_integrated_core_town_stats.failure = IntegratedCoreTownFailure::CleanupFailed;
+				return nullptr;
+			}
+			++_integrated_core_town_stats.deleted_candidates;
+		}
+		if (_integrated_core_town_stats.probes == CoreTownSearch::PROBE_LIMIT ||
+				_integrated_core_town_stats.creation_attempts == CoreTownSearch::CREATION_LIMIT) break;
+	}
+	_integrated_core_town_stats.failure = _integrated_core_town_stats.creation_attempts == CoreTownSearch::CREATION_LIMIT ? IntegratedCoreTownFailure::CreationBudget :
+			_integrated_core_town_stats.probes == CoreTownSearch::PROBE_LIMIT ? IntegratedCoreTownFailure::ProbeBudget : IntegratedCoreTownFailure::SitesExhausted;
+	return nullptr;
+}
+
 /**
  * Calculate the number of towns which should be on the map according to the current "town density" newgame setting and the map size.
  * If the number of towns is set to "custom", the function will always return that value instead.
@@ -2474,6 +2648,8 @@ uint GetDefaultTownsForMapSize()
  */
 bool GenerateTowns(TownLayout layout, std::optional<uint> number)
 {
+	_integrated_core_town_stats = {};
+	_integrated_core_town_stats.active = _game_mode == GameMode::Normal && _generating_world && IntegratedEconomy::Enabled();
 	uint current_number = 0;
 	uint total;
 	if (number.has_value()) {
@@ -2485,6 +2661,7 @@ bool GenerateTowns(TownLayout layout, std::optional<uint> number)
 	}
 
 	total = Clamp<uint>(total, 1, TownPool::MAX_SIZE);
+	_integrated_core_town_stats.target = total;
 	uint32_t townnameparts;
 	TownNames town_names;
 
@@ -2498,18 +2675,38 @@ bool GenerateTowns(TownLayout layout, std::optional<uint> number)
 	/* Randomised offset for city status. This means with e.g. 1-in-4 towns being cities, a map with 10 towns
 	 * may have 2 or 3 cities, instead of always 3. */
 	uint city_random_offset = _settings_game.economy.larger_towns == 0 ? 0 : (Random() % _settings_game.economy.larger_towns);
+	_integrated_core_town_stats.city_offset = city_random_offset;
+
+	if (_integrated_core_town_stats.active) {
+		IncreaseGeneratingWorldProgress(GenWorldProgress::Towns);
+		bool city = _settings_game.economy.larger_towns != 0 && city_random_offset == 0;
+		bool named = GenerateTownName(_random, &townnameparts, &town_names);
+		if (!named) _integrated_core_town_stats.failure = IntegratedCoreTownFailure::NameUnavailable;
+		if (!named || CreateIntegratedCoreTown(townnameparts, city, layout) == nullptr) {
+			RebuildTownKdtree();
+			static constexpr std::string_view failures[] = {"None", "NoCoreRegion", "NameUnavailable", "TownPoolFull", "ProbeBudget", "CreationBudget", "SitesExhausted", "CleanupFailed"};
+			Debug(map, 0, "Integrated Core town generation failed: reason={} target={} probes={} coastal={} creations={} deleted={} zero_population={} no_core_house={} probe_hash={}",
+					failures[to_underlying(_integrated_core_town_stats.failure)], _integrated_core_town_stats.target, _integrated_core_town_stats.probes,
+					_integrated_core_town_stats.coastal_probes, _integrated_core_town_stats.creation_attempts, _integrated_core_town_stats.deleted_candidates,
+					_integrated_core_town_stats.zero_population_candidates, _integrated_core_town_stats.no_core_house_candidates, _integrated_core_town_stats.probe_hash);
+			ShowErrorMessage(GetEncodedString(STR_ERROR_COULD_NOT_CREATE_CORE_TOWN), {}, WarningLevel::Critical);
+			return false;
+		}
+		++current_number;
+		--total;
+	}
 
 	/* First attempt will be made at creating the suggested number of towns.
 	 * Note that this is really a suggested value, not a required one.
 	 * We would not like the system to lock up just because the user wanted 100 cities on a 64*64 map, would we? */
-	do {
+	for (; total > 0; --total) {
 		bool city = (_settings_game.economy.larger_towns != 0 && ((city_random_offset + current_number) % _settings_game.economy.larger_towns) == 0);
 		IncreaseGeneratingWorldProgress(GenWorldProgress::Towns);
 		/* Get a unique name for the town. */
 		if (!GenerateTownName(_random, &townnameparts, &town_names)) continue;
 		/* try 20 times to create a random-sized town for the first loop. */
 		if (CreateRandomTown(20, townnameparts, TownSize::Random, city, layout) != nullptr) current_number++; // If creation was successful, raise a flag.
-	} while (--total);
+	}
 
 	town_names.clear();
 

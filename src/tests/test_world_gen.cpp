@@ -21,6 +21,10 @@
 #include "../rail_map.h"
 #include "../water_map.h"
 #include "../signal_func.h"
+#include "../portal/stellar_network.h"
+#include "../clear_map.h"
+#include "../direction_func.h"
+#include "../core/random_func.hpp"
 
 #include "../safeguards.h"
 
@@ -53,6 +57,111 @@ static void CheckGeneratedTerminal(const PortalEndpoint &endpoint)
 		CHECK(HasSignalOnTrack(signal.tile, signal.track));
 		CHECK(GetSignalType(signal.tile, signal.track) == SignalType::PathOneWay);
 	}
+	TileIndex join = TileAddByDiagDir(terminal->connection_tile, terminal->outward_dir);
+	CHECK(IsInnerTile(join));
+	CHECK(PlanetManager::GetTileWorld(join) == endpoint.world_id);
+	CHECK((IsTileType(join, TileType::Clear) || IsTileType(join, TileType::Trees)));
+	CHECK(GetTileSlope(join) == SLOPE_FLAT);
+	CHECK(TileHeight(join) == TileHeight(endpoint.tile));
+}
+
+TEST_CASE("Generated terminal validation includes the external joining tile", "[world_gen][generated-join]")
+{
+	Map::Allocate(128, 128);
+	PlanetManager::Reset();
+	PortalRegistry::Reset();
+	StellarNetwork::Reset();
+	PlanetRegion region;
+	region.id = WorldID{41};
+	region.phase = WorldPhase::Phase1_Core;
+	region.min_x = region.min_y = 2;
+	region.max_x = region.max_y = 125;
+	PlanetManager::RegisterRegion(region);
+	for (TileIndex tile : Map::Iterate()) {
+		SetTileHeight(tile, 0);
+		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
+		else MakeVoid(tile);
+	}
+	DiagDirection direction = GENERATE(DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW);
+	TileIndex head = TileXY(64, 64);
+	auto layout = PortalTerminal::Plan(head, direction, region.id);
+	REQUIRE(layout.has_value());
+	TileIndex join = TileAddByDiagDir(layout->connection_tile, layout->outward_dir);
+	CHECK(MultiWorldGen::CanPlaceGeneratedGateway(head, direction, region.id, {}));
+	CHECK_FALSE(MultiWorldGen::CanPlaceGeneratedGateway(head, direction, WorldID{42}, {}));
+	CHECK_FALSE(MultiWorldGen::CanPlaceGeneratedGateway(INVALID_TILE, direction, region.id, {}));
+	CHECK_FALSE(MultiWorldGen::CanPlaceGeneratedGateway(head, direction, region.id, {join}));
+	CHECK_FALSE(MultiWorldGen::CanPlaceGeneratedGateway(head, direction, region.id, {head}));
+
+	SECTION("incompatible neutral rail beyond intact footprint") {
+		MakeRailNormal(join, OWNER_NONE, DiagDirToDiagTrack(ChangeDiagDir(layout->outward_dir, DiagDirDiff::Right90)), RAILTYPE_BEGIN);
+	}
+	SECTION("foreign rail is never rebuilt") {
+		MakeRailNormal(join, CompanyID{2}, DiagDirToDiagTrack(layout->outward_dir), RAILTYPE_BEGIN);
+	}
+	SECTION("void joining tile") { MakeVoid(join); }
+	SECTION("water joining tile") { MakeSea(join); }
+	SECTION("later house obstruction") { SetTileType(join, TileType::House); }
+	SECTION("changed shared corner") { SetTileHeight(join, 1); }
+	auto before_type = GetTileType(join);
+	uint before_height = TileHeight(join);
+	uint32_t before_rng[]{_random.state[0], _random.state[1]};
+	CHECK_FALSE(MultiWorldGen::CanPlaceGeneratedGateway(head, direction, region.id, {}));
+	CHECK(GetTileType(join) == before_type);
+	CHECK(TileHeight(join) == before_height);
+	CHECK(PortalRegistry::Count() == 0);
+	CHECK(_random.state[0] == before_rng[0]);
+	CHECK(_random.state[1] == before_rng[1]);
+	PlanetManager::Reset();
+	StellarNetwork::Reset();
+}
+
+TEST_CASE("Generated terminal final audit catches later obstruction and zone collision", "[world_gen][generated-join]")
+{
+	Map::Allocate(256, 256);
+	StellarNetwork::Reset();
+	MultiWorldGen::Config config;
+	config.cst_sector = true;
+	config.world_count = 7;
+	REQUIRE(MultiWorldGen::GenerateMultiWorldLayout(256, 256, config));
+	REQUIRE(MultiWorldGen::FinalizeStellarZones());
+	std::string error;
+	REQUIRE(MultiWorldGen::ValidateGeneratedTerminals(&error));
+	REQUIRE(PortalRegistry::Count() == 3);
+	const auto endpoint = PortalRegistry::GetAllPortals().begin()->second.end_a;
+	auto layout = PortalTerminal::Plan(endpoint.tile, endpoint.enter_dir, endpoint.world_id);
+	REQUIRE(layout.has_value());
+	TileIndex join = TileAddByDiagDir(layout->connection_tile, layout->outward_dir);
+	SECTION("later rail at the external join") {
+		MakeRailNormal(join, OWNER_NONE, DiagDirToDiagTrack(ChangeDiagDir(layout->outward_dir, DiagDirDiff::Right90)), RAILTYPE_BEGIN);
+		CHECK_FALSE(MultiWorldGen::ValidateGeneratedTerminals(&error));
+		CHECK(error.find("external joining tile") != std::string::npos);
+		CHECK(IsPlainRailTile(join));
+	}
+	SECTION("a later corner change invalidates terminal geometry") {
+		SetTileHeight(layout->connection_tile, 1);
+		CHECK_FALSE(MultiWorldGen::ValidateGeneratedTerminals(&error));
+		CHECK(error.find("rail geometry") != std::string::npos);
+	}
+	SECTION("zone cannot consume public terminal footprint") {
+		StellarNetwork::RegisterZone({999, endpoint.world_id, endpoint.tile, endpoint.enter_dir});
+		CHECK_FALSE(MultiWorldGen::ValidateGeneratedTerminals(&error));
+		CHECK(error.find("arrival zone overlaps") != std::string::npos);
+	}
+	SECTION("native signal geometry remains required") {
+		const auto &signal = layout->signals.front();
+		SetSignalType(signal.tile, signal.track, SignalType::Block);
+		CHECK_FALSE(MultiWorldGen::ValidateGeneratedTerminals(&error));
+		CHECK(error.find("terminal signal") != std::string::npos);
+	}
+	SECTION("incompatible native rail type cannot pass the final audit") {
+		SetRailType(layout->connection_tile, RAILTYPE_MONO);
+		CHECK_FALSE(MultiWorldGen::ValidateGeneratedTerminals(&error));
+		CHECK(error.find("rail geometry") != std::string::npos);
+	}
+	StellarNetwork::Reset();
+	PortalRegistry::Reset();
+	PlanetManager::Reset();
 }
 
 TEST_CASE("MultiWorldGen - Layout Calculation Geometry")

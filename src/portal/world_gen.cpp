@@ -23,6 +23,9 @@
 #include "../direction_func.h"
 #include "../tile_map.h"
 #include "../map_func.h"
+#include "../tunnelbridge_map.h"
+#include "../rail.h"
+#include "../track_func.h"
 #include <algorithm>
 #include <cstdlib>
 #include <charconv>
@@ -39,6 +42,39 @@ uint32_t ConfiguredWorldBase()
 	const char *end = value + std::strlen(value);
 	auto parsed = std::from_chars(value, end, base);
 	return parsed.ec == std::errc{} && parsed.ptr == end ? base : UINT32_MAX;
+}
+
+/** Include the unbuilt player join, which must not become a later terminal's rail. */
+std::vector<TileIndex> GeneratedFootprint(const PortalTerminalLayout &layout)
+{
+	std::vector<TileIndex> footprint{layout.gate_tile};
+	for (const auto &part : layout.tiles) footprint.push_back(part.tile);
+	footprint.push_back(TileAddByDiagDir(layout.connection_tile, layout.outward_dir));
+	return footprint;
+}
+
+/** Generation-local claims: never saved or applied to an existing game. */
+void ClaimGeneratedFootprint(std::set<TileIndex> &claimed, const PortalTerminalLayout &layout)
+{
+	for (TileIndex tile : GeneratedFootprint(layout)) claimed.insert(tile);
+}
+
+/** Registry storage is unordered; generation diagnostics and claims use stable IDs. */
+std::vector<const PortalLink *> OrderedGeneratedLinks()
+{
+	std::vector<const PortalLink *> links;
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) links.push_back(&link);
+	std::sort(links.begin(), links.end(), [](const PortalLink *a, const PortalLink *b) { return a->id < b->id; });
+	return links;
+}
+
+/** Bounds precede every terrain read, including the external joining tile. */
+bool ValidGeneratedGround(TileIndex tile, WorldID world, uint height)
+{
+	return tile < Map::Size() && IsValidTile(tile) && IsInnerTile(tile) &&
+		PlanetManager::GetTileWorld(tile) == world &&
+		(IsTileType(tile, TileType::Clear) || IsTileType(tile, TileType::Trees)) &&
+		GetTileSlope(tile) == SLOPE_FLAT && TileHeight(tile) == height;
 }
 
 
@@ -71,18 +107,8 @@ static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex 
 
 					TileIndex tile = TileXY(x, y);
 					if ((claimed && claimed->contains(tile)) || (!IsTileType(tile, TileType::Clear) && !IsTileType(tile, TileType::Trees)) || GetTileSlope(tile) != SLOPE_FLAT) continue;
-					std::optional<PortalTerminalLayout> terminal = PortalTerminal::Plan(tile, candidate_dir, region.id);
-					if (!terminal.has_value()) continue;
-
-					bool suitable = true;
-					for (const PortalTerminalTile &part : terminal->tiles) {
-						if ((claimed && claimed->contains(part.tile)) || (!IsTileType(part.tile, TileType::Clear) && !IsTileType(part.tile, TileType::Trees)) || GetTileSlope(part.tile) != SLOPE_FLAT ||
-								TileHeight(part.tile) != TileHeight(tile)) {
-							suitable = false;
-							break;
-						}
-					}
-					if (!suitable) continue;
+					static const std::set<TileIndex> empty_claims;
+					if (!MultiWorldGen::CanPlaceGeneratedGateway(tile, candidate_dir, region.id, claimed != nullptr ? *claimed : empty_claims)) continue;
 
 					enter_dir = candidate_dir;
 					return tile;
@@ -95,6 +121,63 @@ static TileIndex FindGeneratedGatewaySite(const PlanetRegion &region, TileIndex 
 }
 
 } // namespace
+
+bool MultiWorldGen::CanPlaceGeneratedGateway(TileIndex tile, DiagDirection direction, WorldID world, const std::set<TileIndex> &claimed)
+{
+	auto terminal = PortalTerminal::Plan(tile, direction, world);
+	if (!terminal || tile >= Map::Size() || !IsInnerTile(tile)) return false;
+	uint height = TileHeight(tile);
+	for (TileIndex part : GeneratedFootprint(*terminal)) {
+		if (claimed.contains(part) || !ValidGeneratedGround(part, world, height)) return false;
+	}
+	return true;
+}
+
+bool MultiWorldGen::ValidateGeneratedTerminals(std::string *error)
+{
+	auto fail = [error](TileIndex tile, std::string_view reason) {
+		if (error != nullptr) *error = fmt::format("Generated terminal tile {}: {}", tile.base(), reason);
+		return false;
+	};
+	std::set<TileIndex> claimed;
+	for (const PortalLink *link : OrderedGeneratedLinks()) {
+		for (const auto &endpoint : {link->end_a, link->end_b}) {
+			auto layout = PortalTerminal::Plan(endpoint.tile, endpoint.enter_dir, endpoint.world_id);
+			if (!layout || endpoint.tile >= Map::Size() || !IsInnerTile(endpoint.tile)) return fail(endpoint.tile, "invalid footprint");
+			TileIndex head = endpoint.tile;
+			if (!IsTunnelTile(head) || GetTunnelBridgeTransportType(head) != TransportType::Rail ||
+				GetTunnelBridgeDirection(head) != endpoint.enter_dir || GetTileOwner(head) != OWNER_NONE ||
+				GetRailType(head) != RAILTYPE_BEGIN || GetTileSlope(head) != SLOPE_FLAT) return fail(head, "head geometry or ownership changed");
+			uint height = TileHeight(head);
+			for (TileIndex tile : GeneratedFootprint(*layout)) {
+				if (tile >= Map::Size() || !IsValidTile(tile) || !IsInnerTile(tile) ||
+					PlanetManager::GetTileWorld(tile) != endpoint.world_id || !claimed.insert(tile).second) return fail(tile, "overlapping or invalid footprint");
+			}
+			for (const auto &part : layout->tiles) {
+				if (!IsPlainRailTile(part.tile) || GetTrackBits(part.tile) != part.tracks ||
+					GetTileOwner(part.tile) != OWNER_NONE || GetRailType(part.tile) != RAILTYPE_BEGIN || GetTileSlope(part.tile) != SLOPE_FLAT ||
+					TileHeight(part.tile) != height || GetRailFoundation(GetTileSlope(part.tile), part.tracks) == Foundation::Invalid) return fail(part.tile, "rail geometry or ownership changed");
+			}
+			for (const auto &signal : layout->signals) {
+				if (!HasSignalOnTrack(signal.tile, signal.track) || GetSignalType(signal.tile, signal.track) != SignalType::PathOneWay ||
+					GetSignalVariant(signal.tile, signal.track) != SignalVariant::Electric ||
+					GetPresentSignals(signal.tile) != SignalAlongTrackdir(DiagDirToDiagTrackdir(signal.travel_dir))) return fail(signal.tile, "terminal signal changed");
+			}
+			TileIndex join = TileAddByDiagDir(layout->connection_tile, layout->outward_dir);
+			if (!ValidGeneratedGround(join, endpoint.world_id, height)) return fail(join, "external joining tile obstructed or unlevel");
+		}
+	}
+	for (const auto &[id, zone] : StellarNetwork::Zones()) {
+		auto layout = PortalTerminal::Plan(zone.tile, zone.direction, zone.world);
+		if (!layout || zone.tile >= Map::Size() || !IsInnerTile(zone.tile)) return fail(zone.tile, "invalid arrival-zone footprint");
+		uint height = TileHeight(zone.tile);
+		for (TileIndex tile : GeneratedFootprint(*layout)) {
+			if (!claimed.insert(tile).second) return fail(tile, "arrival zone overlaps a public join or another zone");
+			if (!ValidGeneratedGround(tile, zone.world, height)) return fail(tile, "arrival-zone footprint obstructed or unlevel");
+		}
+	}
+	return true;
+}
 
 bool MultiWorldGen::enabled = true;
 uint32_t MultiWorldGen::default_world_count = 3;
@@ -289,6 +372,7 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 		PortalRegistry::Reset();
 
 		bool split_y = (size_y >= size_x);
+		std::set<TileIndex> claimed;
 
 		for (size_t i = 0; i < (config.cst_sector ? size_t{3} : regions.size() - 1); i++) {
 			const auto &reg_a = regions[config.cst_sector && i == 2 ? 1 : i];
@@ -321,13 +405,18 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 				dir_b = DiagDirection::NE;
 			}
 
-			t_a = FindGeneratedGatewaySite(reg_a, t_a, dir_a);
-			t_b = FindGeneratedGatewaySite(reg_b, t_b, dir_b);
-			if (t_a == INVALID_TILE || t_b == INVALID_TILE) return false;
-
+			t_a = FindGeneratedGatewaySite(reg_a, t_a, dir_a, &claimed);
+			if (t_a == INVALID_TILE) return false;
 			std::optional<PortalTerminalLayout> terminal_a = PortalTerminal::Plan(t_a, dir_a, reg_a.id);
+			if (!terminal_a) return false;
+			std::set<TileIndex> pair_claims = claimed;
+			ClaimGeneratedFootprint(pair_claims, *terminal_a);
+			t_b = FindGeneratedGatewaySite(reg_b, t_b, dir_b, &pair_claims);
+			if (t_b == INVALID_TILE) return false;
 			std::optional<PortalTerminalLayout> terminal_b = PortalTerminal::Plan(t_b, dir_b, reg_b.id);
-			if (!terminal_a.has_value() || !terminal_b.has_value()) return false;
+			if (!terminal_b) return false;
+			ClaimGeneratedFootprint(pair_claims, *terminal_b);
+			claimed = std::move(pair_claims);
 
 			/* Construct gateway portal and high-capacity terminal for world A. */
 			MakeClear(t_a, ClearGround::Grass, 3);
@@ -364,6 +453,13 @@ bool MultiWorldGen::FinalizeStellarZones()
 		const auto &regions = PlanetManager::GetAllRegions();
 		uint32_t zone_id = 1;
 		std::set<TileIndex> claimed;
+		for (const PortalLink *link : OrderedGeneratedLinks()) {
+			for (const auto &endpoint : {link->end_a, link->end_b}) {
+				auto layout = PortalTerminal::Plan(endpoint.tile, endpoint.enter_dir, endpoint.world_id);
+				if (!layout) return false;
+				ClaimGeneratedFootprint(claimed, *layout);
+			}
+		}
 		for (const auto &region : regions) {
 			for (uint32_t slot = 0; slot < 3; ++slot) {
 				DiagDirection dir = DiagDirection::NE;
@@ -374,9 +470,7 @@ bool MultiWorldGen::FinalizeStellarZones()
 				auto layout = PortalTerminal::Plan(tile, dir, region.id);
 				if (!layout) return false;
 				/* Repeated nominal searches must never advertise overlapping arrival zones. */
-				for (const auto &part : layout->tiles) if (claimed.contains(part.tile)) return false;
-				claimed.insert(tile);
-				for (const auto &part : layout->tiles) claimed.insert(part.tile);
+				ClaimGeneratedFootprint(claimed, *layout);
 				StellarNetwork::RegisterZone({zone_id++, region.id, tile, dir});
 			}
 		}
@@ -500,4 +594,3 @@ void MultiWorldGen::ApplyBiomeStyling(const PlanetRegion &region)
 		}
 	}
 }
-
