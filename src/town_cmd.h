@@ -51,8 +51,14 @@ struct IntegratedCoreTownGenerationStats {
 };
 
 /**
- * Retrieve diagnostics from the most recent town generation, without saved-state mutation.
- * @return Nonpersistent diagnostics; loading a save does not regenerate or restore them.
+ * Clear transient town-generation diagnostics when initializing a game or starting town generation.
+ * This does not change native gameplay or persistent save state.
+ */
+void ResetIntegratedCoreTownGenerationStats();
+
+/**
+ * Retrieve town-generation diagnostics for the current initialized game, without saved-state mutation.
+ * @return Nonpersistent diagnostics, reset at game initialization and never restored from a save.
  */
 const IntegratedCoreTownGenerationStats &GetIntegratedCoreTownGenerationStats();
 

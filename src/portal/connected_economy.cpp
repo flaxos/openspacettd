@@ -1,6 +1,7 @@
 /* This file is part of OpenSpaceTTD. Licensed under GPL-2.0. */
 /** @file connected_economy.cpp Reproducible offline connected production and megacity acceptance fixture. */
 #include "../stdafx.h"
+#include "connected_economy.h"
 #include "integrated_economy.h"
 #include "../economy_func.h"
 #include "commonwealth_slice.h"
@@ -906,6 +907,8 @@ Json GenerationTile(TileIndex tile)
 	if (IsPlainRailTile(tile)) {
 		r["tracks"] = GetTrackBits(tile).base(); r["railtype"] = uint(GetRailType(tile));
 	}
+	if (IsTileType(tile, TileType::TunnelBridge) && GetTunnelBridgeTransportType(tile) == TransportType::Rail)
+		r["railtype"] = uint(GetRailType(tile));
 	return r;
 }
 
@@ -977,12 +980,14 @@ Json GenerationSnapshot()
 		const Station *station = Station::Get(StationID{row["id"].get<uint16_t>()});
 		row["town"] = station->town == nullptr ? UINT16_MAX : station->town->index.base();
 		row["warehouse"] = LogisticsHubManager::GetHubForStation(station->index) != nullptr;
-		row["consumer"] = MegacityManager::IsConsumerStation(station);
+		row["consumer"] = !station->catchment_tiles.IsEmpty() && MegacityManager::IsConsumerStation(station);
 		row["catchment_houses"] = Json::array();
-		for (BitmapTileIterator it(station->catchment_tiles); *it != INVALID_TILE; ++it) {
-			TileIndex tile = *it;
-			if (IsTileType(tile, TileType::House)) row["catchment_houses"].push_back({{"tile", tile.base()},
-				{"town", GetTownIndex(tile).base()}, {"world", PlanetManager::GetTileWorld(tile).base()}});
+		if (!station->catchment_tiles.IsEmpty()) {
+			for (BitmapTileIterator it(station->catchment_tiles); *it != INVALID_TILE; ++it) {
+				TileIndex tile = *it;
+				if (IsTileType(tile, TileType::House)) row["catchment_houses"].push_back({{"tile", tile.base()},
+					{"town", GetTownIndex(tile).base()}, {"world", PlanetManager::GetTileWorld(tile).base()}});
+			}
 		}
 	}
 	return r;
@@ -1519,6 +1524,11 @@ bool FirstFreight(std::span<std::string_view> argv)
 }
 
 } // namespace
+
+void ResetConnectedEconomyProof()
+{
+	generation_contract_fresh = false;
+}
 
 bool RepairConnectedEconomyTerrain()
 {

@@ -5,8 +5,8 @@ import json
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
-from test_integrated_economy import first_freight, freight_advance_limit, generation_contract, generation_projection, validate_generation_paid
+from unittest.mock import MagicMock, patch
+from test_integrated_economy import first_freight, freight_advance_limit, generation_contract, generation_projection, rejected_generation_mutation, validate_generation_paid
 
 
 class GenerationEvidenceTests(unittest.TestCase):
@@ -62,6 +62,18 @@ class GenerationEvidenceTests(unittest.TestCase):
                 self.assertTrue(all(row['status'] == 'not_run' and row['passed'] is None for row in report['seeds'][1:]))
                 if runner is generation_contract:
                     self.assertEqual(report['seeds'][0]['repetitions'][1]['status'], 'not_run')
+
+    def test_lifecycle_rejection_requires_unchanged_unowned_state_and_rng(self):
+        unowned = {'rng': [11, 101], 'rail': [[55, 16, 2]], 'towns': [{'id': 0, 'houses': [77]}]}
+        for restored in (unowned, {**unowned, 'rng': [11, 102]}, {**unowned, 'money': 100000, 'loan': 100000}):
+            engine = MagicMock()
+            engine.command.side_effect = [RuntimeError('CONNECTED FAIL requires pristine fresh generation'), json.dumps(restored)]
+            if restored == unowned:
+                self.assertEqual(rejected_generation_mutation(engine, 'generation-contract-start',
+                    'requires pristine fresh generation', unowned), unowned)
+            else:
+                with self.subTest(restored=restored), self.assertRaisesRegex(RuntimeError, 'changed native state/RNG'):
+                    rejected_generation_mutation(engine, 'generation-contract-start', 'requires pristine fresh generation', unowned)
 
 
 if __name__ == '__main__':

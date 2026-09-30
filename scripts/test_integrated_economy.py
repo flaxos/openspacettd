@@ -27,9 +27,9 @@ def freight_advance_limit(requested):
 def acceptance_inputs(binary):
     """Pin the actual binary, working source and published content used by a run."""
     diff = subprocess.check_output(['git', 'diff', 'HEAD', '--', 'src', 'scripts', 'demo'], cwd=ROOT)
-    source_files = ('src/genworld.cpp', 'src/town_cmd.cpp', 'src/town_cmd.h',
+    source_files = ('src/genworld.cpp', 'src/misc.cpp', 'src/town_cmd.cpp', 'src/town_cmd.h',
         'src/portal/world_gen.cpp', 'src/portal/world_gen.h', 'src/portal/portal_terminal.cpp',
-        'src/portal/connected_economy.cpp', 'src/portal/integrated_economy.cpp',
+        'src/portal/connected_economy.cpp', 'src/portal/connected_economy.h', 'src/portal/integrated_economy.cpp',
         'scripts/test_integrated_economy.py', 'scripts/test_wp11_slice.py', 'demo/integrated_economy.cfg')
     return {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
         'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
@@ -51,6 +51,50 @@ def ordinary_config(seed):
 def generation_projection(state):
     """Only native persisted semantics participate in cold equality; search stats are transient."""
     return {key: value for key, value in state.items() if key != 'town_generation'}
+
+
+def console_ack(engine, command, marker):
+    """Acknowledge a synchronous native console command which prints no success line."""
+    engine.process.stdin.write(command + '\n' + f'echo {marker}\n')
+    engine.process.stdin.flush()
+    engine.wait(marker)
+
+
+def same_process_load(engine, save):
+    """Use native FIOS navigation/load and a real load-chunk marker, with no sleeps or load adapter."""
+    save = save.resolve()
+    current = Path('/' + engine.command('pwd', '/')).resolve()
+    target = save.parent
+    moves = 0
+    while current != target and current not in target.parents:
+        require(current.parent != current, 'Native save browser cannot reach proof directory')
+        console_ack(engine, 'cd ".."', 'GENERATION_BROWSER_READY')
+        current = current.parent
+        moves += 1
+        require(moves <= 64, 'Native save browser parent navigation exceeded bound')
+    for part in target.relative_to(current).parts:
+        require('"' not in part and '\n' not in part, 'Proof directory cannot be safely quoted for native console')
+        console_ack(engine, f'cd "{part}"', 'GENERATION_BROWSER_READY')
+        current /= part
+        moves += 1
+        require(moves <= 64, 'Native save browser navigation exceeded bound')
+    require(Path('/' + engine.command('pwd', '/')).resolve() == target, 'Native save browser did not reach proof directory')
+    console_ack(engine, 'debug_level "sl=2"', 'GENERATION_LOAD_DEBUG_READY')
+    require('"' not in str(save) and '\n' not in str(save), 'Proof save cannot be safely quoted for native console')
+    engine.command(f'load "{save}"', 'Loading chunk TRAD')
+
+
+def rejected_generation_mutation(engine, command, expected_error, expected_state):
+    """Require a native lifecycle rejection and exact untouched game/RNG projection."""
+    try:
+        engine.command('connected_economy ' + command, 'CONNECTED generation-')
+    except RuntimeError as exc:
+        require(expected_error in str(exc), f'Unexpected generation guard rejection: {exc}')
+    else:
+        raise RuntimeError(f'Loaded checkpoint authorized {command}')
+    observed = json.loads(engine.command('connected_economy generation-contract-status', 'CONNECTED generation-state '))
+    require(observed == expected_state, f'Rejected {command} changed native state/RNG')
+    return observed
 
 
 def validate_generated_state(state, seed):
@@ -79,7 +123,8 @@ def validate_generated_state(state, seed):
         footprint = [head, *terminal['rails'], join]
         require(all(tile['valid'] and tile['world'] == terminal['world'] and tile['slope'] == 0 and
                     tile['height'] == head['height'] for tile in footprint), 'Generated terminal/join geometry invalid')
-        require(head['owner'] == 16 and head['type'] == 9 and head['dir'] == terminal['dir'], 'Generated gate head differs')
+        require(head['owner'] == 16 and head['type'] == 9 and head['dir'] == terminal['dir'] and head['railtype'] == 0,
+                'Generated gate head/railtype differs')
         require(join['type'] in (0, 4), 'Generated exterior join occupied')
         require(all(tile['owner'] == 16 and tile['type'] == 1 and tile['railtype'] == 0 and
                     tile['tracks'] == tile['expected_tracks'] for tile in terminal['rails']), 'Native neutral terminal rails differ')
@@ -151,6 +196,12 @@ def generation_contract(args):
             try:
                 engine = Engine(binary, config, folder, 'generation', world_count=7, seed=seed)
                 phase_deadline(engine)
+                if repetition == 2:
+                    unowned = json.loads(engine.command('connected_economy generation-contract-status', 'CONNECTED generation-state '))
+                    row['unowned_initial'] = unowned
+                    unowned_save = folder / 'generation-unowned.sav'
+                    engine.save(unowned_save)
+                    row['unowned_sha256'] = hashlib.sha256(unowned_save.read_bytes()).hexdigest()
                 initial = json.loads(engine.command('connected_economy generation-contract-start', 'CONNECTED generation-state '))
                 row['initial'] = initial
                 validate_generated_state(initial, seed)
@@ -185,6 +236,29 @@ def generation_contract(args):
                 loaded.close()
                 loaded = None
                 phase_deadline(engine)
+                if repetition == 2:
+                    # The flag is still true: no paid command ran in this process.
+                    # Loading the marked pristine checkpoint must revoke it.
+                    same_process_load(engine, pristine)
+                    pristine_in_process = json.loads(engine.command('connected_economy generation-contract-status', 'CONNECTED generation-state '))
+                    require(pristine_in_process == generation_projection(initial), 'Same-process pristine load changed native semantics/RNG')
+                    row['same_process_pristine'] = rejected_generation_mutation(engine, 'generation-contract-paid',
+                        'spending requires fresh process', pristine_in_process)
+                    row['same_process_paid_rejected'] = True
+                    # An unowned checkpoint avoids the company-marker rejection and
+                    # tests that old generation diagnostics cannot authorize start.
+                    same_process_load(engine, unowned_save)
+                    unowned_in_process = json.loads(engine.command('connected_economy generation-contract-status', 'CONNECTED generation-state '))
+                    require(unowned_in_process == unowned, 'Same-process unowned load changed native semantics/RNG')
+                    row['same_process_unowned'] = rejected_generation_mutation(engine, 'generation-contract-start',
+                        'requires pristine fresh generation', unowned_in_process)
+                    row['same_process_start_rejected'] = True
+                    row['paid_proof'] = {'status': 'not_run', 'reason':
+                        'Second fresh repetition tests same-process load revocation before spending; paid joins/station/cold follow proved in repetition 1.'}
+                    row['passed'] = True
+                    row['status'] = 'passed'
+                    print(f'Seed {seed} repetition 2: deterministic fresh generation and both same-process lifecycle rejections passed', flush=True)
+                    continue
                 paid = json.loads(engine.command('connected_economy generation-contract-paid', 'CONNECTED generation-paid '))
                 row['paid'] = paid
                 validate_generation_paid(initial, query, paid)

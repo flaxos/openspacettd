@@ -2454,6 +2454,11 @@ static Town *CreateRandomTown(uint attempts, uint32_t townnameparts, TownSize si
 
 static IntegratedCoreTownGenerationStats _integrated_core_town_stats; ///< Generation-local evidence, never saved.
 
+void ResetIntegratedCoreTownGenerationStats()
+{
+	_integrated_core_town_stats = {};
+}
+
 const IntegratedCoreTownGenerationStats &GetIntegratedCoreTownGenerationStats()
 {
 	return _integrated_core_town_stats;
@@ -2648,7 +2653,7 @@ uint GetDefaultTownsForMapSize()
  */
 bool GenerateTowns(TownLayout layout, std::optional<uint> number)
 {
-	_integrated_core_town_stats = {};
+	ResetIntegratedCoreTownGenerationStats();
 	_integrated_core_town_stats.active = _game_mode == GameMode::Normal && _generating_world && IntegratedEconomy::Enabled();
 	uint current_number = 0;
 	uint total;

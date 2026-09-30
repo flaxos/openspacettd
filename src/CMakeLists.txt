@@ -417,6 +417,7 @@ add_files(
     portal/visual_overhaul.h
     portal/commonwealth_slice.cpp
     portal/connected_economy.cpp
+    portal/connected_economy.h
     portal/commonwealth_slice.h
     portal/commonwealth_pack.cpp
     portal/commonwealth_pack.h
