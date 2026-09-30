@@ -1,6 +1,25 @@
 # Human UAT results — recovery / v1.1
 
+## Functional progression replan — 1 October 2026
+
+**Human status: Pending. No new game or human test was run for this docs change.**
+Generation, A1 and optional art retain their scope-specific pending results;
+the historical seed11 financial failure below remains failed economic evidence,
+not a current veto on all functional testing. PR65 is now merged; PR66 owns its
+separate portability follow-up. Check the actual build before testing.
+
+The proposed [six-step mission](../docs/ACTIVE_EXECUTION_PLAN.md#six-step-human-mission)
+covers manual grain/FOOD construction, real Core consumption, paid HQ/Materials I,
+and save/reload. It uses one disclosed £6m cash grant and makes no earned-profit
+claim. The mission is proposed, not a published verified playable checkpoint.
+Record manual versus prebuilt steps, exact build/content/save, assistance/cash/debt,
+time and the first unexpected control/message. A supplied observation checkpoint
+cannot pass manual-build UAT, and timebox expiry is Partial rather than Pass.
+
 ## New integrated-game generation — 1 October 2026
+
+> Historical delivery report. The functional-first replan above supersedes the
+> blanket active-plan block; no human or financial result is rewritten.
 
 **Human graphical status: Pending; active execution plan BLOCKED at revised A1
 finances.** Generation/legal paid join/Core house catchment/repeat/cold proof passes
