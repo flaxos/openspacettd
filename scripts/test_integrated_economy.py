@@ -111,7 +111,9 @@ def functional_campaign(args):
                 target_config.write_text(config.read_text())
             with environment(profile_environment(target)):
                 native = OfflineEngine(args.binary.resolve(), target_config, target, name, save=save, deadline=deadline)
-            require(time.monotonic() < deadline, 'Native startup phase wall limit exhausted')
+            if time.monotonic() >= deadline:
+                native.close()
+                raise RuntimeError('Native startup phase wall limit exhausted')
             return native
 
         def state(native):
