@@ -170,7 +170,9 @@ another world region, bypassing all intermediate tiles.
 
 ## 3. Economy and Production Systems
 
-Multiple overlapping economy systems exist. Their integration is a known architectural concern.
+Historical pre-ruleset snapshot below: the integrated new-game path described in
+the 28 September source update above supersedes its economy-integration concern.
+Legacy saves retain their former systems.
 
 ### Standard OpenTTD economy
 - Cargo delivery revenue, company finances, industry production loops
