@@ -43,6 +43,7 @@ Read the matching `.agents/skills/<name>/SKILL.md` only when needed:
 
 | Task | Skill |
 |---|---|
+| Roadmap assessment or one active execution slice | `ost-plan` |
 | Gameplay bug, UI wiring, deterministic feature | `ost-dev` |
 | Playtest, save authoring/repair, native acceptance | `ost-uat` |
 | Final checks, commit, PR, delivery records | `ost-deliver` |
