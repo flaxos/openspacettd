@@ -44,7 +44,11 @@ uint32_t ConfiguredWorldBase()
 	return parsed.ec == std::errc{} && parsed.ptr == end ? base : UINT32_MAX;
 }
 
-/** Include the unbuilt player join, which must not become a later terminal's rail. */
+/**
+ * Include the unbuilt player join, which must not become a later terminal's rail.
+ * @param layout Planned neutral terminal geometry.
+ * @return Head, internal rail tiles and the outward player joining tile.
+ */
 std::vector<TileIndex> GeneratedFootprint(const PortalTerminalLayout &layout)
 {
 	std::vector<TileIndex> footprint{layout.gate_tile};
@@ -53,13 +57,20 @@ std::vector<TileIndex> GeneratedFootprint(const PortalTerminalLayout &layout)
 	return footprint;
 }
 
-/** Generation-local claims: never saved or applied to an existing game. */
+/**
+ * Generation-local claims: never saved or applied to an existing game.
+ * @param claimed Existing claims extended by this complete footprint.
+ * @param layout Planned neutral terminal geometry to claim.
+ */
 void ClaimGeneratedFootprint(std::set<TileIndex> &claimed, const PortalTerminalLayout &layout)
 {
 	for (TileIndex tile : GeneratedFootprint(layout)) claimed.insert(tile);
 }
 
-/** Registry storage is unordered; generation diagnostics and claims use stable IDs. */
+/**
+ * Registry storage is unordered; generation diagnostics and claims use stable IDs.
+ * @return Native links in ascending portal ID order.
+ */
 std::vector<const PortalLink *> OrderedGeneratedLinks()
 {
 	std::vector<const PortalLink *> links;
@@ -68,7 +79,13 @@ std::vector<const PortalLink *> OrderedGeneratedLinks()
 	return links;
 }
 
-/** Bounds precede every terrain read, including the external joining tile. */
+/**
+ * Bounds precede every terrain read, including the external joining tile.
+ * @param tile Candidate footprint tile.
+ * @param world Required immutable world identity.
+ * @param height Required common flat ground height.
+ * @return True for clear or tree ground satisfying the full geometry contract.
+ */
 bool ValidGeneratedGround(TileIndex tile, WorldID world, uint height)
 {
 	return tile < Map::Size() && IsValidTile(tile) && IsInnerTile(tile) &&

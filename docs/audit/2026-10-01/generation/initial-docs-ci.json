@@ -1,0 +1,32 @@
+{
+  "head": "c8628084b3e158c3a3519589f07c90a54d7325a2",
+  "run": 36777778042,
+  "job": 110099938763,
+  "url": "https://github.com/flaxos/openspacettd/actions/runs/36777778042/job/110099938763",
+  "result": "failed: new missing Doxygen contracts",
+  "new_warnings": [
+    "2026-09-30T21:12:16.9922035Z > /home/runner/work/openspacettd/openspacettd/src/genworld.cpp:$: warning: return type of member ValidateGeneratedNewGame is not documented",
+    "2026-09-30T21:12:16.9923675Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: Member GENERATION_COMPANY (variable) of namespace anonymous_namespace{connected_economy.cpp} is not documented.",
+    "2026-09-30T21:12:16.9925295Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: Member axis (variable) of struct anonymous_namespace{connected_economy.cpp}::GenerationStation is not documented.",
+    "2026-09-30T21:12:16.9926873Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: Member house (variable) of struct anonymous_namespace{connected_economy.cpp}::GenerationStation is not documented.",
+    "2026-09-30T21:12:16.9928429Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: Member tile (variable) of struct anonymous_namespace{connected_economy.cpp}::GenerationStation is not documented.",
+    "2026-09-30T21:12:16.9930305Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: Member town (variable) of struct anonymous_namespace{connected_economy.cpp}::GenerationStation is not documented.",
+    "2026-09-30T21:12:16.9931838Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: parameters of member anonymous_namespace{connected_economy.cpp}::GenerationContract are not documented",
+    "2026-09-30T21:12:16.9933314Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: parameters of member anonymous_namespace{connected_economy.cpp}::GenerationQueries are not documented",
+    "2026-09-30T21:12:16.9934772Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: parameters of member anonymous_namespace{connected_economy.cpp}::GenerationTerminal are not documented",
+    "2026-09-30T21:12:16.9936254Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: parameters of member anonymous_namespace{connected_economy.cpp}::GenerationTile are not documented",
+    "2026-09-30T21:12:16.9937714Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::GenerationContract is not documented",
+    "2026-09-30T21:12:16.9939168Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::GenerationFollow is not documented",
+    "2026-09-30T21:12:16.9940774Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::GenerationQueries is not documented",
+    "2026-09-30T21:12:16.9942160Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::GenerationSnapshot is not documented",
+    "2026-09-30T21:12:16.9943885Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::GenerationTerminal is not documented",
+    "2026-09-30T21:12:16.9945280Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::GenerationTile is not documented",
+    "2026-09-30T21:12:16.9946660Z > /home/runner/work/openspacettd/openspacettd/src/portal/connected_economy.cpp:$: warning: return type of member anonymous_namespace{connected_economy.cpp}::PristineGenerationCompany is not documented",
+    "2026-09-30T21:12:16.9948158Z > /home/runner/work/openspacettd/openspacettd/src/portal/world_gen.cpp:$: warning: parameters of member anonymous_namespace{world_gen.cpp}::ClaimGeneratedFootprint are not documented",
+    "2026-09-30T21:12:16.9949417Z > /home/runner/work/openspacettd/openspacettd/src/portal/world_gen.cpp:$: warning: parameters of member anonymous_namespace{world_gen.cpp}::GeneratedFootprint are not documented",
+    "2026-09-30T21:12:16.9955793Z > /home/runner/work/openspacettd/openspacettd/src/portal/world_gen.cpp:$: warning: parameters of member anonymous_namespace{world_gen.cpp}::ValidGeneratedGround are not documented",
+    "2026-09-30T21:12:16.9958183Z > /home/runner/work/openspacettd/openspacettd/src/portal/world_gen.cpp:$: warning: return type of member anonymous_namespace{world_gen.cpp}::GeneratedFootprint is not documented",
+    "2026-09-30T21:12:16.9960804Z > /home/runner/work/openspacettd/openspacettd/src/portal/world_gen.cpp:$: warning: return type of member anonymous_namespace{world_gen.cpp}::OrderedGeneratedLinks is not documented",
+    "2026-09-30T21:12:16.9963105Z > /home/runner/work/openspacettd/openspacettd/src/portal/world_gen.cpp:$: warning: return type of member anonymous_namespace{world_gen.cpp}::ValidGeneratedGround is not documented"
+  ]
+}

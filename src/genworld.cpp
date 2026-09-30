@@ -63,7 +63,10 @@ void StartupDisasters();
 
 void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settings);
 
-/** Abort an ordinary new game whose generated prerequisites were obstructed. */
+/**
+ * Abort an ordinary new game whose generated prerequisites were obstructed.
+ * @return True when publication is permitted, false after reporting an invalid prerequisite.
+ */
 static bool ValidateGeneratedNewGame()
 {
 	if (_game_mode != GameMode::Normal) return true;

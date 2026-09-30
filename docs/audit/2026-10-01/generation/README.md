@@ -17,7 +17,8 @@ its historical evidence and [blocked food plan](blocked-food-plan.md) are preser
 Final native proof uses clean source
 `85456a5c594fbd2dd6680c6d96b2933c1dd2f55c` and binary SHA256
 `3a7c85d77a708e12cc7b17634ceb9d9ebac1b4976d38a7023b832518419e629d`.
-Native source after this frozen proof is unchanged. Delivery records/evidence and
+Native executable code after this frozen proof is unchanged. Doxygen comment
+corrections, delivery records/evidence and
 normal-history reconciliation with main's independently merged optional art PR64
 are separate: main advanced to `211310a791527c44ce2aa683861fbb537bda73ad`.
 The optional art pack is not enabled in these economic/generation proofs. All three unchanged content
@@ -114,8 +115,11 @@ remain unproven and require a later approved scope.
   the A1 financial failure. Review recomputes accounting and compares native logs,
   hashes, repeated/cold projections and same-process rejection state.
 - FAILED: revised A1 seed 11 cold financial continuation. NOT RUN: revised A1
-  seed101/2026 operation and all FOOD operation. Exact delivery-head CI is recorded
-  in the draft PR/live checks separately from this frozen native archive.
+  seed101/2026 operation and all FOOD operation. Initial delivery head `c8628084` failed the docs CI gate on 23 missing Doxygen
+  contracts; the [retained diagnostic](initial-docs-ci.json) links the full native
+  CI log. A normal follow-up adds only parameter/return/member comments. Exact
+  current delivery-head CI is recorded in the draft PR/live checks separately
+  from this frozen native archive.
 
 The [native archive](native-proof.tar.gz) contains complete generation/cold saves,
 raw logs/JSON, guarded console scripts, read-only retained-save observations,

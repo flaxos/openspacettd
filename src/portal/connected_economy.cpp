@@ -896,7 +896,11 @@ Json FreightSnapshot()
 	return r;
 }
 
-/** Native tile observations shared by generated terminals and advertised arrival zones. */
+/**
+ * Native tile observations shared by generated terminals and advertised arrival zones.
+ * @param tile Native map tile to observe without changing it.
+ * @return Captured bounds, ownership, terrain and rail observations.
+ */
 Json GenerationTile(TileIndex tile)
 {
 	Json r = {{"tile", tile.base()}, {"valid", IsValidTile(tile) && IsInnerTile(tile)}};
@@ -912,7 +916,13 @@ Json GenerationTile(TileIndex tile)
 	return r;
 }
 
-/** Read-only geometry projection; does not impose clear joins on loaded or paid states. */
+/**
+ * Read-only geometry projection; does not impose clear joins on loaded or paid states.
+ * @param head Native terminal head or advertised arrival-zone tile.
+ * @param dir Planned inward terminal direction.
+ * @param world Required immutable world identity.
+ * @return Native geometry and expected rail/signal layout observations.
+ */
 Json GenerationTerminal(TileIndex head, DiagDirection dir, WorldID world)
 {
 	Json r = {{"head", GenerationTile(head)}, {"world", world.base()}, {"dir", uint(dir)},
@@ -942,7 +952,10 @@ Json GenerationTerminal(TileIndex head, DiagDirection dir, WorldID world)
 	return r;
 }
 
-/** Capture generation semantics separately so retained FreightSnapshot equality remains unchanged. */
+/**
+ * Capture generation semantics separately so retained FreightSnapshot equality remains unchanged.
+ * @return Captured native economy, RNG, geometry, town and station observations.
+ */
 Json GenerationSnapshot()
 {
 	Json r = FreightSnapshot();
@@ -995,9 +1008,13 @@ Json GenerationSnapshot()
 
 /** Nonpersistent fresh-process authorization; no load adapter restores it. */
 bool generation_contract_fresh = false;
+/** Disposable company marker used only by the guarded native proof. */
 constexpr std::string_view GENERATION_COMPANY = "Generation contract acceptance";
 
-/** Refuse spending after any player construction, progression, grant or borrowing. */
+/**
+ * Refuse spending after any player construction, progression, grant or borrowing.
+ * @return True when the disposable company still has untouched ordinary starting state.
+ */
 bool PristineGenerationCompany()
 {
 	const Company *company = Company::GetIfValid(CompanyID{0});
@@ -1015,13 +1032,18 @@ bool PristineGenerationCompany()
 
 /** A bounded native two-tile station probe close to an actual own Core house. */
 struct GenerationStation {
-	TileIndex tile = INVALID_TILE;
-	Axis axis = Axis::X;
-	TownID town = TownID::Invalid();
-	TileIndex house = INVALID_TILE;
+	TileIndex tile = INVALID_TILE; ///< First tile of the prospective two-tile station.
+	Axis axis = Axis::X; ///< Native station platform axis.
+	TownID town = TownID::Invalid(); ///< Expected station town under ordinary native assignment.
+	TileIndex house = INVALID_TILE; ///< Own Core house that must be caught after paid construction.
 };
 
-/** Quote all native exterior joins and one ordinary Core station without spending or advancing. */
+/**
+ * Quote all native exterior joins and one ordinary Core station without spending or advancing.
+ * @param[out] report Native quotes, bounded candidates and selected station observations.
+ * @param[out] station Selected legal house-catching station when a candidate succeeds.
+ * @return True when all joins and a bounded station candidate have positive native quotes.
+ */
 bool GenerationQueries(Json &report, GenerationStation &station)
 {
 	report = {{"joins", Json::array()}, {"station_candidates", Json::array()}};
@@ -1081,7 +1103,10 @@ bool GenerationQueries(Json &report, GenerationStation &station)
 	IConsolePrint(CC_ERROR, "CONNECTED FAIL bounded 16-candidate Core station query exhausted"); return false;
 }
 
-/** Exercise the real train follower across every paid neutral/player boundary in both directions. */
+/**
+ * Exercise the real train follower across every paid neutral/player boundary in both directions.
+ * @return Native bidirectional follower results for each public terminal.
+ */
 Json GenerationFollow()
 {
 	Json report = Json::array();
@@ -1106,7 +1131,11 @@ Json GenerationFollow()
 	return report;
 }
 
-/** Guarded ordinary generation proof; spending is confined to the fresh disposable process. */
+/**
+ * Guarded ordinary generation proof; spending is confined to the fresh disposable process.
+ * @param argv Native console command and requested generation proof phase.
+ * @return True after reporting the accepted phase or a guarded rejection.
+ */
 bool GenerationContract(std::span<std::string_view> argv)
 {
 	if (argv.size() != 2 || (argv[1] != "generation-contract-start" && argv[1] != "generation-contract-status" &&
