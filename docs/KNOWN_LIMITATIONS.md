@@ -1,12 +1,35 @@
 # OpenSpaceTTD Known Limitations
 
+## New integrated-game generation and revised A1 — 1 October 2026
+
+Future ordinary integrated games enforce clear/legal public joining geometry and
+one living Core town with its own same-world house. Native terrain, configured
+target, roles and ownership remain unchanged; strict generation can fail after
+10,000 distinct Core probes/20 native creations or an obstructed terminal. Those
+finite failures do not prove universal impossibility. Shared terminal geometry
+can move future non-integrated multi-world sites too. Existing saves receive no
+repair, new town, ownership change or reservation migration.
+
+Generation/cold/ordinary paid proof passes actual seeds 11/101/2026, while revised seed 11
+A1 combined service fails financial continuation after cold reload: −£170 cash,
+unchanged £190k debt, two further loads at 62 advances. Seeds 101/2026 operation are
+NOT RUN. See [the audit](audit/2026-10-01/generation/README.md). This selected sequence
+does not prove every alternative route/seed unviable. Further service investigation
+requires a bounded replan; finance/balance/role/research changes require explicit
+owner decisions. The starter zero-running-cost policy remains unchanged.
+
+No automatic megacity designation or FOOD acceptance is added. Complete FOOD
+topology/affordability, consumed baskets, sustained economy and human desktop
+acceptance remain unproven. Main still excludes PR62's partial designation code;
+generation proof does not silently import it or satisfy the historical food start.
+
 ## Post-A1 dependency review — 30 September 2026
 
-The proposed [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is a
+The proposed [First Paid Core Food Consumption](audit/2026-10-01/generation/blocked-food-plan.md) is a
 bounded A1 follow-up toward A2, not new delivered evidence. Seed11's retained
 operation checkpoint has £78,268 cash/£100,000 debt; £219,780 is its later sampled
 continuation result. The grain-route lead predates A1 construction, and the full
-food-to-Core path/catchment/cost/profit remains unproven. Seeds101/2026 do not yet
+food-to-Core path/catchment/cost/profit remains unproven. Seeds 101/2026 do not yet
 establish this food outcome. A1 and future food graphical acceptance remain Pending.
 
 Early research still requires a Core HQ with £5m cash eligibility and £2.5m

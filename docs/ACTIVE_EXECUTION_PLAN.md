@@ -73,7 +73,7 @@ later terminals can occupy one without overlapping any built rail footprint.
 Arrival-zone claims likewise contain only heads and terminal rail tiles.
 
 This source omission supports a narrow deterministic geometry repair. The
-retained seed2026 coordinates show the resulting interference; the proposal does
+retained seed 2026 coordinates show the resulting interference; the proposal does
 not claim a replay of every RNG/placement step or damage to internal terminal rails.
 Current tests in [test_world_gen.cpp](../src/tests/test_world_gen.cpp) check built
 rail bits/signals, not the external join's native traversability/connectability.
@@ -95,7 +95,7 @@ new guarantee below is an explicit product contract change.
 | T — Every successfully generated public terminal has a legal external join | Its head, full rail/signal footprint and one outward joining tile are valid inner tiles in the same world; terminal rail geometry is intact; the joining tile remains clear/tree, flat at terminal height and ordinarily buildable as compatible rail. No other generated terminal/advertised arrival footprint may consume that join. |
 | C — Every successfully started ordinary integrated new game has at least one valid Core town | A native Town has positive population, its center has saved economic role Core, and it has at least one real house belonging to that town within the same Core world as its center. Use one slot of the existing configured global target, never add a bonus town. |
 | D — Same inputs reproduce the new result | Seed, settings, content, world IDs and algorithm revision produce the same ordered placements, roles, rails, town/house state and RNG state, or the same bounded failure. No wall-clock-dependent choices, unordered iteration or GUI/network-worker bypass of native generation/command authority; preserve existing native generation ownership. |
-| S — Loading existing saves preserves their existing contract | No generation repair runs on load; no new town/track, ownership change, reserve migration or new saved requirement is applied. Existing seed11/101 absence and seed2026 obstruction remain recorded facts. |
+| S — Loading existing saves preserves their existing contract | No generation repair runs on load; no new town/track, ownership change, reserve migration or new saved requirement is applied. Existing seeds 11/101 absence and seed 2026 obstruction remain recorded facts. |
 
 T is a shared generated-gateway bug fix: it may change future non-integrated
 multi-world gateway positions through the existing shared helper. C applies only
@@ -317,6 +317,12 @@ joins/town/service. Record pass/fail/partial, build/content/seed, first unexpect
 message or inaccessible control, cash/debt and elapsed time. Use fast-forward for
 train observation; the timebox is feedback, not a full paid food completion promise.
 
-**Execution status:** implementation and validation in progress. Planning-only
-checks in PR63 are historical; fresh generation, native paid proof, revised A1
-regression and final code gates must be recorded independently for this delivery.
+**Execution status — 1 October 2026:** generation T+C+D and original-save S proof
+pass all three actual seeds; independent source/native review and repository
+gates pass. Revised A1 seed 11 fails cold financial continuation at cash −£170,
+fixed £190,000 debt, after 62 advances and two further complete loads. Seeds 101/2026
+operation are NOT RUN after this material stop. The active plan is **BLOCKED**;
+do not advance, add borrowing, change balance or run FOOD proof. See the
+[delivery audit and bounded owner options](audit/2026-10-01/generation/README.md).
+Planning-only PR63 checks and original A1 evidence remain historical and intact.
+Exact delivery-head CI and human acceptance are separate from native proof.

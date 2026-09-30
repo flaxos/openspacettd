@@ -1,5 +1,18 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## New-game generation prerequisites — 1 October 2026
+
+**T+C+D+S automated proof passes; active plan BLOCKED at revised A1 finances.**
+The owner-approved PR63 implementation gives future integrated games a legal
+public terminal join and one living Core town within the native configured target.
+Actual seeds11/101/2026 repeat, pay ordinary joins/house-catching stations and
+cold-load correctly; all retained original saves remain unchanged. Revised seed 11
+iron service passes three initial paid loads and output relief but reaches cash
+−£170 at fixed £190k debt after 62 cold advances, before its third further load.
+Seeds 101/2026 operation are NOT RUN after that stop. See
+[evidence, options and human mission](audit/2026-10-01/generation/README.md).
+Human UAT remains Pending; no FOOD outcome, A2 or roadmap milestone advances.
+
 ## A1 ordinary-start delivery — 30 September 2026
 
 **Bounded automated proof passes seeds 11/101/2026; human UAT Pending.** The bounded
@@ -14,15 +27,14 @@ output-buffer relief and cold-continuation results govern A1; no A2 is implement
 
 The integrated economy and natural scheduled federation freight exist. A1 now has
 bounded ordinary-start automated proof; graphical acceptance remains Pending.
-[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is the retained
-single execution plan, now **BLOCKED**: authorized seed11 lacks a Core receiver;
-read-only seed2026 preflight finds an incompatible neutral terminal join. Full
-food affordability and operation remain unproven. The owner approved planning the
-[new-game generation proposal](INTEGRATED_GENERATION_PROPOSAL.md), covering legal
-terminal joins and one valid Core town within the configured global count. Its
-new-game contract, bounded failure choices and fresh-start validation require
-explicit approval before implementation. Existing saves/evidence remain intact;
-no roadmap milestone, second gameplay slice or human acceptance is advanced.
+The [active execution plan](ACTIVE_EXECUTION_PLAN.md) now implements the approved
+new-game generation proposal; it is **BLOCKED** at its revised A1 financial
+regression. The [historical food plan](audit/2026-10-01/generation/blocked-food-plan.md)
+retains authorized seed 11's missing receiver and seed 2026's incompatible neutral
+join. Full food affordability and operation remain unproven. New generation proof
+does not repair or change those old acceptance starts. Existing saves/evidence
+remain intact; no roadmap milestone, second gameplay slice or human acceptance
+is advanced.
 The other horizons order dependencies, not approved sprint numbers. Development
 phase and economic role remain separate; review that product model only with an
 explicit decision. Dated delivery records preserve their original evidence.
@@ -61,7 +73,7 @@ player gate commissioning, grants or role changes are prerequisites for A1; A2
 still concerns earned new access. Actual A1 proof supersedes the approximately
 £15–20k diagnostic estimate: startup costs £80,681/£112,267/£83,191 and the paid
 output step £86,432/£87,152/£87,180. Seed101's minimum sampled cash is £6,314;
-cash/loan constraints remain material. The blocked food continuation retains seed11
+cash/loan constraints remain material. The blocked food continuation retains seed 11
 and existing generated assets; it does not promise three-seed food coverage, growth,
 early research, positive CST input running cost or indefinite sustainability.
 Connected economy fixtures and prefab UAT saves with authored track, trains,
