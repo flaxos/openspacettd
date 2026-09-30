@@ -56,6 +56,15 @@ belongs in durable project/sprint/domain/UAT records; replace the active plan
 after the next slice is approved, without collecting competing active backlogs.
 Historical records remain dated; source and tests outrank stale prose.
 
+The [1 October functional-first direction](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026)
+requires five distinct statuses: implemented systems, functional end-to-end proof,
+ordinary-start viability, human UAT and balance/pacing. A disclosed cash-assisted
+functional pass is useful, but it is not ordinary-start economic evidence.
+Command legality, cargo/money accounting, deterministic behavior and save integrity
+stay mandatory. Keep assistance in its own ledger field, preserve failed ordinary
+runs, and stop at the active slice's budget. Extra money never implicitly grants
+tech/cargo, authorizes rule changes or removes a human acceptance gap.
+
 ## Codex effort
 
 [Project config](../.codex/config.toml) defaults to medium reasoning and preserves

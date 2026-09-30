@@ -1,6 +1,79 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Functional-first direction — 1 October 2026
+
+**Current owner-approved priority: prove the functional game loop, then balance
+its ordinary-start economics and pacing.** This section supersedes older active
+blockers/order statements below; their dated evidence remains intact. The owner
+approved building, delivering, processing, meeting town demand, unlocking a next
+step and save/reload before requiring profitable operations. Disclosed cash-only
+test assistance is permitted; technology, cargo and rule exceptions are not implied.
+Command legality, cargo/money conservation, deterministic simulation and save
+integrity remain hard gates on every run.
+
+Live main at this review is `91846666f69929443eab04cea63f9f8cfb3bb0be`.
+PR65 was owner-merged at 2026-09-30 21:22:47 UTC, after PR64's optional platform
+art. A1/PR60 and generation plan/PR63 are also merged. PR62 remains merged only
+to the old A1 branch; it is not part of main. The separate
+[PR66 portability repair](https://github.com/flaxos/openspacettd/pull/66)
+owns the merged Money-comparison compile defect. This planning PR changes no
+source, imports no partial gameplay and neither merges nor edits those PRs.
+[Verified ancestry/source/evidence](audit/2026-10-01/functional-replan/README.md).
+
+### Five independent acceptance questions
+
+| Dimension | What passes it | Current evidence / remaining gap |
+|---|---|---|
+| Implemented systems | Owning source and focused tests exist and agree on behavior. | Native generated worlds/public rail, integrated physical processing, city baskets, HQ/research/material gates and save chunks exist. Designate bypasses replicated commands and research eligibility queries mutate saved state on main; both need narrow integration repairs. PR62 is only a reference. Source presence is not an end-to-end pass. |
+| Functional end-to-end proof | Player-equivalent legal commands connect construction → delivery → processing → actual town consumption → paid next unlock → cold continuation, with accounting/determinism controls. Cash-assisted runs must be labelled. | Generation T+C+D+S passes actual seeds11/101/2026. The full food/research mission is **NOT RUN**. Authored all-chain fixtures and historical A1 freight cover narrower/different starts. |
+| Ordinary-start economic viability | Fresh ordinary cash/loan, no assistance, legal complete startup and measured operating continuation/next-step affordability over a stated horizon. | Original A1 three-seed bounded proof passes at its revision. Revised seed11 loses cash after reload; seed101/2026 revised operation NOT RUN. Food and HQ affordability remain unproven; no indefinite sustainability claim. |
+| Human playable UAT | A human can find controls, build/operate the mission, understand feedback and reload on an identified build. | Generation, A1, food/research and optional art acceptance remain **Pending** for these scopes. Native tests/SDL smoke/prebuilt saves cannot promote them. |
+| Balance and pacing | Owner-chosen costs, rewards, waiting times and progression targets are evaluated across representative ordinary starts. | Deferred separate pass. Preserve every cost/revenue/wait measurement now; do not tune HQ, loans, tolls, running costs, yields or research timing in functional proof. |
+
+### Current Horizon A ordering
+
+This reassesses A2/A3 dependencies under the approved priority; it does not
+implement or complete either milestone. Only one gameplay slice is proposed.
+
+| Order | Named outcome / dependency | Finish and boundary |
+|---|---|---|
+| A0 — Usable generated start | Close generation on T (legal public joins), C (living Core town), D (repeatability), S (existing-save integrity). | Contract is independently proven and merged. Keep portability delivery and human generation UAT open; no economic pass is inferred. |
+| A1 — First Functional Core Supply and Materials I | **Recommended next:** existing generated grain/food assets and a real Core receiver, followed by native HQ/research in the same company. No sustainable-A1 or federation prerequisite. | The sole [active proposal](ACTIVE_EXECUTION_PLAN.md): three food deliveries/consuming months, paid Materials I, Materials II availability and cold continuation. Single disclosed £6m test grant; no tech/cargo grants. Full quote, budget and stop controls apply. |
+| A3 functional continuity, before earned A2 certification | After the recommended slice and review, select one extension through existing physical material/research/growth systems. | Candidate direction, not another active plan or implementation authorization. Demonstrate real custody/consumption; food alone is not city growth. |
+| A2 — First Earned Expansion | Revisit the ordinary-income bridge to HQ/research, real machinery/materials and one commissioned gate/resource opportunity after functional dependencies are exposed. | The word earned still requires ordinary finances and physical prerequisites. Assisted Materials I is not A2 completion; Phase4 access does not waive colonisation. |
+| A4 — Capacity and long-run logistics | After a coherent loop and human feedback, select throughput, congestion/recovery and useful upgrade proof. | Keep performance, usability and economics as scoped claims; no open-ended soak now. |
+
+Ordinary-start economics and balance are a later explicit workstream, not a
+cross-cutting veto on all functional rows. Set its horizon and pacing targets
+before tuning; use the preserved A1 loss, HQ £5m eligibility/£2.5m cost, £1,000/RP,
+native tolls and starter zero running cost as observations, not preapproved fixes.
+Record functional, economic and human statuses on every future delivery.
+
+### Generation disposition and retained failure
+
+Accept T+C+D+S **as generation-contract automated proof**, independently of the
+failed revised A1 economic continuation. This implements the owner's approved
+priority change in current acceptance definitions; it does not relabel the old
+run or alter PR65. It also does not waive platform compilation, command/integrity
+failures or human UAT. PR66 delivery must be checked separately.
+
+The retained seed11 cold phase has £9,752 starting cash, £14,007 real revenue and
+£23,929 charges: net −£9,922, final cash −£170, debt fixed at £190,000, two of three
+required further loads after 62 advances. Cargo/cash audits pass; the ordinary
+economic result remains **FAILED**. Seed101/2026 operation remains **NOT RUN**.
+No repair of old seed11/101 missing towns or seed2026's old obstruction is implied.
+[Original evidence and failure](audit/2026-10-01/generation/README.md).
+
+Horizon B federation lifecycle remains independent; coordinated restart does not
+establish independently recoverable hosts. Horizon C remains strategic. Dynamic
+global markets, true multi-map, narrative/Silfen/crisis, role/phase redesign and
+federation prerequisites are excluded. Preserve immutable regions on one map and
+the current integrated economy architecture. No architecture change is proposed.
+
 ## New-game generation prerequisites — 1 October 2026
+
+> Historical delivery status before the functional-first approval above. Its
+> financial failure is retained; its blanket active-plan block is superseded.
 
 **T+C+D+S automated proof passes; active plan BLOCKED at revised A1 finances.**
 The owner-approved PR63 implementation gives future integrated games a legal
@@ -34,6 +107,9 @@ artifacts remain unchanged. Seed-specific route, cost, consumption, operating ca
 output-buffer relief and cold-continuation results govern A1; no A2 is implemented.
 
 ## Active planning horizons — 30 September 2026
+
+> Historical ordering snapshot. The current Horizon A ordering above supersedes
+> this section's active-blocker/next-slice instructions, not its dated evidence.
 
 The integrated economy and natural scheduled federation freight exist. A1 now has
 bounded ordinary-start automated proof; graphical acceptance remains Pending.

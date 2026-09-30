@@ -1,328 +1,237 @@
-# Connectable public terminals and a Core town in new integrated games
+# First Functional Core Supply and Materials I
 
-**Approved execution plan — 1 October 2026 (Australia/Sydney).** The owner
-approved [PR63](https://github.com/flaxos/openspacettd/pull/63) and instructed
-“approved proceed”. This authorizes the strict T+C new-game contract, bounded
-implementation and fresh validation described below. No merge, existing-save
-migration, food operation or additional gameplay slice is authorized.
+**Single next gameplay slice for reviewed handoff — 1 October 2026 (Australia/Sydney;
+30 September UTC). Planning/docs only in this task.** The owner approved
+functional progression before profitability/pacing: prove player construction,
+delivery, processing, town demand, a next unlock and save/reload; record real
+costs/revenue and label any cash assistance. Command legality, cargo/financial
+accounting, determinism and save integrity remain hard gates.
 
-Implementation starts from main `294e1a947e267778c2404fb6b2e8c3431dc632f9`,
-which includes PR63 and preserves PR58/A1/PR61. The
-[historical blocked food plan](audit/2026-10-01/generation/blocked-food-plan.md)
-retains its original acceptance start and bounds; it no longer authorizes active
-progression. The [reviewed proposal](INTEGRATED_GENERATION_PROPOSAL.md) remains
-a dated planning record, not another active backlog.
+The owner also instructed the parent to start the first bounded slice as soon as
+its reviewed plan is ready. This is that single implementation handoff; no extra
+routine approval is required after review. This task remains planning/docs only
+and authorizes no merge. It replaces the
+[generation plan preserved at its merged revision](https://github.com/flaxos/openspacettd/blob/91846666f69929443eab04cea63f9f8cfb3bb0be/docs/ACTIVE_EXECUTION_PLAN.md).
+The [roadmap](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026)
+sets current acceptance priority; the [reassessment record](audit/2026-10-01/functional-replan/README.md)
+pins ancestry and evidence. Older stops remain facts about their original runs,
+not a veto on this new proposal. Human UAT remains Pending.
 
-The bounded outcome is an ordinary fresh integrated game with public
-terminal joins the player can legally connect to, and one living Core town that
-can supply an existing house receiver. It establishes generation prerequisites,
-not an affordable or profitable food service, city growth, research or complete A2.
+## Outcome and finish line
 
-## Current ancestry and evidence
+In one fresh generated seed11 company, build two paid rail services through the
+existing public backbone: grain farm → food processor → real Core-town houses.
+Observe native payments, processor conversion and three distinct monthly food
+baskets consumed. Buy a Core HQ, research Materials I through its normal cash
+budget and expose Materials II as the next selectable project. Cold-reload,
+retain that unlock, and observe another FOOD delivery and consuming month.
 
-Implementation base main is `294e1a947e267778c2404fb6b2e8c3431dc632f9`,
-including merged PR63. Its earlier `82e7b1ac75bbd198bcd5b2e61996d2fa7a75a826`
-ancestor contains
-[PR58 maintenance](https://github.com/flaxos/openspacettd/pull/58),
-[A1 PR60](https://github.com/flaxos/openspacettd/pull/60) and the reviewed food
-plan from [PR61](https://github.com/flaxos/openspacettd/pull/61). PR61 merged into
-A1 at `5183d2e47904549820b91d227d10f91e857aa33c`; its plan tree equals reviewed
-`6b89358863941e6c902816f3940e9e7d3b001ccc`. A1 subsequently merged into main.
+FOOD does **not** unlock research: the HQ and paid research are a separate action
+in the same company. Cash assistance pays eligibility/costs; it proves neither
+that food funded the HQ nor that expansion is earned. FOOD alone sustains the town
+without growth. Stop before Materials II research, steel production, material
+kits, resource funding, gate commissioning or a second slice.
 
-[PR62](https://github.com/flaxos/openspacettd/pull/62) merged into the old A1
-branch at `10856e709e492168f5c3fccb89ae4a27daf16643`, **not main**. Its tested
-partial designation/harness code and failed food preflights are references, not
-part of this main-based implementation. Parent independently verified exact
-PR62 head `78a30686c3467306b24dc1f0a6cf215f66f484dd` at 18:49 UTC: all eight
-platform jobs plus content pass in
-[run36756654376](https://github.com/flaxos/openspacettd/actions/runs/36756654376);
-docs, file-description, unused-string and script-mode pass. That build is red only
-at the same 18 inherited A1 compiler annotations; no new source/test failure.
-Its preserved non-ASCII commit-history gate still fails, separately from the
-owner merge-subject failure. These are PR62 results, not this proposal's CI, and
-are not rerun here. Main keeps PR58's maintenance. Do not import its full tree, revive
-its obsolete clean-history candidate, rewrite either merge or remove PR58.
-Preserve [PR59](https://github.com/flaxos/openspacettd/pull/59) and all A1 evidence.
+Later delivery needs this bounded functional proof, independent review, applicable
+code/content gates, a scoped PR and the human mission below. Missing functional
+steps remain partial even if unit tests pass. Profitability is measured separately;
+neither automated proof nor a prebuilt observation save establishes human build UAT.
 
-The pinned [food blocker audit](https://github.com/flaxos/openspacettd/tree/78a30686c3467306b24dc1f0a6cf215f66f484dd/docs/audit/2026-09-30/core-food-preflight)
-records zero spending/progression on retained states:
+## Current base and reusable systems
 
-- Seed11's authorized operation save has one Industrial town, no Core town or
-  Core house receiver. Seed101 also has only an Industrial town.
-- Seed2026 has a genuine Core Town0, population 2,366, 55 houses, but its complete
-  grain route fails at the Industrial link2 terminal's only external ground-rail
-  join. Its 34 internal rail tiles are intact and traversable. The neighboring
-  tile is another neutral terminal's incompatible horizontal track.
-- Native track-follow rejects that edge with `NoWay`; native vertical rail
-  construction rejects it with `STR_ERROR_OWNED_BY`. Public compatible rail is
-  already traversable. A planner accepting compatible neutral rail cannot repair
-  this geometry under unchanged construction rights.
-- Complete-chain quotes, affordability, paid FOOD operation and consumed baskets
-  are **unproven**. Neither the retained seed nor its acceptance start may be
-  silently switched. Human A1 and food acceptance remain Pending.
+Fresh main at planning intake is `91846666f69929443eab04cea63f9f8cfb3bb0be`:
+A1 PR60, generation plan PR63, optional art PR64 and generation PR65 are merged.
+PR65 was owner-merged at 2026-09-30 21:22:47 UTC. Native T+C+D+S proof passes;
+platform compilation still needs the separately owned
+[PR66 portability repair](https://github.com/flaxos/openspacettd/pull/66).
+Its published dependency head is `d1bb617664dcbb122aaefc1d4175c34ae1a17e2e`,
+based on `91846666f6`. Its delivery worker owns exact-head CI observation; consume
+that handoff rather than start another poller. Do not duplicate its
+`connected_economy.cpp` edit or call the build fully green prematurely.
 
-## Baseline source diagnosis before implementation
+PR62 merged only into the old A1 dependency branch at
+`10856e709e492168f5c3fccb89ae4a27daf16643`, not main. Its
+[pinned partial work](https://github.com/flaxos/openspacettd/tree/78a30686c3467306b24dc1f0a6cf215f66f484dd)
+is a reference: port only individually reviewed necessary command/harness hunks
+in a later main-based implementation. Do not merge/cherry-pick the full branch or
+import obsolete docs/history. Preserve PR58 maintenance, PR59 history and PR64 art.
 
-[FindGeneratedGatewaySite](../src/portal/world_gen.cpp) checks the head and
-`PortalTerminal::Plan(...).tiles` for clear/tree ground, flatness, common height
-and existing claims. [PortalTerminal::Plan](../src/portal/portal_terminal.cpp)
-ends its main lane at distance 18, `connection_tile`. The external join at
-`TileAddByDiagDir(connection_tile, outward_dir)` (distance 19) is absent from those
-checks. Current pair generation carries no claims for previous clear joins;
-later terminals can occupy one without overlapping any built rail footprint.
-Arrival-zone claims likewise contain only heads and terminal rail tiles.
+- [Integrated economy](UNIFIED_COMMONWEALTH_ECONOMY.md) already processes
+  2 GRAI → 2 FOOD without research, routes physical cargo and consumes Core baskets.
+  Native warehouses have priority; no warehouse may intercept the town receiver.
+- [Megacity GUI](../src/portal/megacity_gui.cpp) still calls registration directly.
+  Route its existing Designate action through a native replicated command before
+  counting player-accessible consumption. Preserve free designation, eligibility,
+  derived town/world/population and duplicate prevention; no new permission policy.
+- [HQ eligibility](../src/portal/corporate_hq.cpp) is £5m current cash; its
+  [command](../src/portal/portal_cmd.cpp) charges £2.5m. Integrated mode waives legacy
+  three-phase presence, not cash or the Core role.
+- [Materials I](../src/portal/tech_tree.cpp) needs an HQ, no prior research and
+  100 RP at £1,000/RP; its integrated kit is empty. Materials II requires I and
+  250 RP. Use native project/budget commands and monthly processing, never direct
+  research-point or unlock restoration calls.
+- `TechTreeManager::CanResearch` currently inserts default company state during
+  eligibility queries, including the failed Materials II check and HQ GUI paint.
+  The default record has an invalid company ID and disappears on load. Make this
+  query read-only before the campaign, preserving all eligibility/cost rules.
+  Focused regressions must show successful queries, rejected prerequisites and
+  GUI inspection preserve both absent and existing research state. Do not hide
+  the defect by pre-seeding state/budget or normalizing away a missing record.
+- Reuse the [runner](../scripts/test_integrated_economy.py), shared
+  [Engine](../scripts/test_wp11_slice.py), native snapshots/audits and
+  [save workflow](SAVEGAME_AUTHORING.md). Authored progression/unit fixtures prove
+  subsystems, not this generated start. No new economy or persistence model is needed.
 
-This source omission supports a narrow deterministic geometry repair. The
-retained seed 2026 coordinates show the resulting interference; the proposal does
-not claim a replay of every RNG/placement step or damage to internal terminal rails.
-Current tests in [test_world_gen.cpp](../src/tests/test_world_gen.cpp) check built
-rail bits/signals, not the external join's native traversability/connectability.
+## Starting state and the only assistance
 
-[GenerateTowns](../src/town_cmd.cpp) runs once globally after layout and
-[IntegratedEconomy::StartNewGame](../src/portal/integrated_economy.cpp), before
-industries and final arrival zones. The [canonical config](../demo/integrated_economy.cfg)
-sets `number_towns=4` (custom selector), `custom_town_number=1`: **one town globally**,
-not four or one per world. It accepts the first successful random legal placement.
-[CheckTownPlacement](../src/portal/planet_manager.cpp) permits Core, Developed and
-Frontier phases, and bars Phase4; it promises no Core town. This is a false
-saved-start assumption, not a proven town-count defect or corrupted save. The
-new guarantee below is an explicit product contract change.
+Use the [canonical profile](../demo/integrated_economy.cfg): native seed11, 1024²,
+seven worlds, temperate/Tgen, 1950, ruleset1/OST01v5, railv3/equipmentv1, ordinary
+£100k cash/£100k loan and £300k maximum. Preserve settings, role/phase distinctions,
+terrain, public ownership and tolls. Pin source/binary/content/config hashes. Keep
+optional art disabled for this comparison. No federation is needed.
 
-## Proposed invariants and scope
+Start a **new** game, prospectively replacing the old missing-Core-town food start.
+Keep a pristine checkpoint before spending; never repair/fund/overwrite the failed
+A1 checkpoint or old food saves. Measure native generated inventory. Do not author
+cargo, trains, track, towns, population, stations, stockpiles or research.
 
-| Proposed invariant | Exact boundary |
+Cash-only test allowance: **one £6,000,000 cash grant before construction**, giving
+£6.1m cash and unchanged £100k debt. This finite test budget follows the approved
+cash-assistance principle; it changes no normal starting-economy setting. Record
+the native transaction and before/after state. Reject repeat grants, grants on
+reload and use on arbitrary saves; keep debt fixed throughout the assisted run.
+
+Use the existing [native MoneyCheat command](../src/misc_cmd.h) in isolated offline
+setup. It is `Offline`: the dedicated-server Engine cannot simply invoke it.
+Minimal offline setup/observation support may create the labelled checkpoint,
+then a separately guarded runner may continue it. Preserve ordinary A1/generation
+guards. Do not remove command flags, assign money directly, enable infinite money,
+change the loan ceiling or introduce a general deity/authority bypass. If this
+path cannot be made reliable within the narrow harness scope, stop and report
+that finding rather than invent another funding mechanism.
+
+The grant is booked by native accounting as Other; retain that ledger and separate
+it from freight income/operating net. Reconcile `ending cash = starting cash +
+assistance + actual receipts - actual debits`, with unchanged debt. Subtracting the
+grant from final cash does not prove an ordinary company could have paid the same
+sequence or met HQ eligibility. No recurring refill is permitted.
+
+No extra exception is assumed. Tech/RP/material/cargo grants, receiver/population
+authoring, role changes, cost/loan/toll/running-cost edits, unauthorized neutral
+construction and save migration require a new explicit owner decision if proposed.
+
+## Bounds and failure handling
+
+These limits govern the reviewed implementation handoff; this docs PR runs no gameplay.
+
+| Work | Hard limit / required result |
 |---|---|
-| T — Every successfully generated public terminal has a legal external join | Its head, full rail/signal footprint and one outward joining tile are valid inner tiles in the same world; terminal rail geometry is intact; the joining tile remains clear/tree, flat at terminal height and ordinarily buildable as compatible rail. No other generated terminal/advertised arrival footprint may consume that join. |
-| C — Every successfully started ordinary integrated new game has at least one valid Core town | A native Town has positive population, its center has saved economic role Core, and it has at least one real house belonging to that town within the same Core world as its center. Use one slot of the existing configured global target, never add a bonus town. |
-| D — Same inputs reproduce the new result | Seed, settings, content, world IDs and algorithm revision produce the same ordered placements, roles, rails, town/house state and RNG state, or the same bounded failure. No wall-clock-dependent choices, unordered iteration or GUI/network-worker bypass of native generation/command authority; preserve existing native generation ownership. |
-| S — Loading existing saves preserves their existing contract | No generation repair runs on load; no new town/track, ownership change, reserve migration or new saved requirement is applied. Existing seeds 11/101 absence and seed 2026 obstruction remain recorded facts. |
+| Preflight | Seed11 only; at most two full-chain candidates in stable ID order, with selection reason. Quote both legs, house receiver, vehicles/refits and costs before spending. Retain planner caps: 16 station candidates, 30,000 predecessor states and 16-tile bridge span per call. Generation/preflight at most 30 minutes. No seed sweep. |
+| Setup/build | One chain, native paid commands and designation. At most £1m gross debits before HQ (including elapsed charges), retaining at least £5.1m from £6.1m before receipts. All-phase gross debits at most £4m, including £2.5m HQ and £100k research. Thirty-minute setup/build wall limit. |
+| Initial proof | At most 240 advances × 2048 native ticks and 30 minutes wall time, whichever comes first. Three separate positive FOOD deliveries/payments, three distinct consumed monthly baskets and research ready for completion; include the negative flow control below. |
+| Cold proof | Two cold loads in fresh processes: first before Materials I completes, second after completion. One shared cap of 240 × 2048 ticks/30 minutes for both loads, paid completion and another FOOD delivery/payment/consuming month. No extra grants/loans or rebuilding. |
+| Repeatability | One independent fresh replay only after a successful primary run, identical cash assistance/commands/tick schedule and phase caps. Compare semantic state/RNG, custody, receipts/debits, consumption and unlocks. Whole native campaign at most four hours wall time. |
+| Failure | First hard defect or exhausted bound stops the campaign. Preserve partials and NOT RUN cases. No automatic alternate seed, rebuild strategy, tuning, full-campaign retry or budget extension. Focused regressions may support a diagnosed repair; another full campaign requires explicit handoff/replan. |
 
-T is a shared generated-gateway bug fix: it may change future non-integrated
-multi-world gateway positions through the existing shared helper. C applies only
-to ordinary **new games with integrated rules actually enabled**, not Classic,
-scenario editor, empty maps, loaded saves or a content configuration that failed
-to activate integrated rules. Do not conflate development phase with economic
-role: filter with the initialized Core role, then retain native phase/placement
-checks. No role reassignment, world resize, climate/terrain relaxation, new town
-founding permission or changed configured count.
+The ordinary-start comparison is a read-only quote/cash/loan feasibility report
+from the pristine state, not another income grind or an economic pass. The revised
+A1 failure remains the operating comparison. Seeds101/2026 retain generation-only
+proof on these layouts; no three-seed food/economic coverage is implied.
 
-Generation need not automatically designate the town, construct a player station,
-grant cargo or ensure an affordable whole-chain route. Main still has the direct
-GUI designation path; PR62's tested command wiring is absent. Importing/reviewing
-that partial code is separate food-follow-up delivery, not generation work.
-“Receiver” below means a potential legal station serving a real own-town Core
-house. A station query alone does not allocate a station or establish its town/
-catchment. Prove that assignment by paid station execution on a disposable fresh
-proof game; actual FOOD acceptance requires separate native authoritative
-designation proof. Do not call the registration manager directly for this proof. The native station/receiver
-and route checks below are representative acceptance tests, not an all-seed food
-profitability guarantee. Permanent protection against later player actions or
-ordinary town growth is outside this initial-generation invariant.
+**Hard functional stops:** illegal/bypassed command, absent real receiver, wrong
+custody/payment, duplicate cargo/cash, research bypass, nondeterminism/desync,
+invalid terrain, lost/crashed train, cold mismatch or unreachable UI action.
+Money cannot waive these. A legal chain not found within the cap is a bounded
+feasibility failure, not proof of universal impossibility.
 
-## Smallest proposed terminal repair
+**Financial stops:** budget exhaustion, unexpected unaffordability/HQ eligibility
+failure or bankruptcy stops that run. Keep functional partials and measured losses.
+Negative operating net alone does not fail a completed functional mission; never
+tune prices or refill cash to complete it. **Time stops:** an exhausted timebox
+is partial evidence and a pacing/usability finding, not permission to grant
+RP/cargo, advance dates directly or mark human acceptance passed.
 
-1. In the generated-site path, calculate a pure geometry footprint containing
-   head, all planned rails and the one outward joining tile. Validate bounds,
-   world, flat/common height and clear/tree ground for the joining tile as well
-   as the existing footprint. Reject an incompatible occupied tile; never rebuild
-   neutral rails, use `AdoptForUAT`, change traversal or relax ownership checks.
-2. Carry generation-local claims for those complete footprints across public
-   pairs. Validate both candidate footprints and their mutual intersections before
-   clearing/materializing either endpoint; reserve both together. Later endpoints
-   must avoid earlier rails **and** clear joins. Keep existing direction/radius/
-   coordinate candidate order and its finite world-extent bound, with no added RNG.
-3. Extend arrival-zone planning claims to complete footprints, including public
-   terminal joins already selected. A zone is advertised space, not a new built
-   terminal or additional free track. Keep existing zone count/access rules.
-4. Audit all built terminal joins after towns, industries, objects/trees and zones,
-   then after the native initialization tile/GameScript loops, before
-   `GenWorldInfo::proc` and game publication in `genworld.cpp`. Later
-   generation can obstruct initially clear joins; initial pair checks alone are
-   insufficient. Reject that start with a precise failure rather than clear an
-   already generated town/industry or silently alter rights. A generation-local
-   collision filter is permissible only if it reuses the same footprint and
-   native placement rules; a broad town/industry placement redesign is a replan.
-5. After company startup, prove an ordinary company can query/build the required
-   joining track on a disposable **fresh proof game** and native track-follow can
-   traverse into/out of the public throat. Compare preview/execute cost and actual
-   owner/track bits. Free native generation of the public backbone stays as before;
-   company connecting track is paid. Geometry checks alone are not command proof.
+## Required controls and evidence
 
-Use no new persistent reservation or load adapter. Do not widen the existing
-freight planner's 16 station candidates, 30,000 predecessor-state cutoff or
-16-tile bridge span. Compatible-neutral-rail planner improvements, new construction
-methods and player-commissioned gate policy are separate work.
+1. **Commands:** query/execute cost parity, failed-command atomicity, role/phase/
+   ownership/house catchment and actual GUI wiring. Separately prove designation
+   server/client replication without relaxing offline-only funding. Manager calls
+   or a headless button test alone do not prove human usability.
+2. **Flow/demand:** identify producer, processor, both services, receiver TownID/
+   own houses, gates, labels and capacities. Reconcile initial inventory,
+   production, all custody, 2:2 conversion, reserves, consumption and explicit
+   loss/discard. No warehouse diversion. In a disposable copy pause FOOD until
+   reserves fall below the current monthly basket and consumption stops (a
+   remainder may remain). Require no consumption or unexplained reserve change
+   while supply is stopped, then restart and observe recovery;
+   this control shares the initial phase's tick/wall budget. If incomplete,
+   report incomplete proof, not invisible stock refill or extended time.
+3. **Money:** record every native receipt/debit, research, interest, fee, return
+   toll and running cost across annual ledger rollover. Show assistance separately,
+   including native Other entries. Keep the inherited zero CST input running cost
+   visible while accounting for other costs; state sampling/tick coverage limits.
+4. **Unlock:** without HQ, research rejects; with HQ but without Materials I,
+   Materials II rejects for its prerequisite. Select I and £100k/month through
+   native commands. Observe its actual debit/100 RP/monthly completion after the
+   first cold load, then Materials II selectable by query/UI only. Turn the budget
+   off and do not start II. No food-to-tech prerequisite is invented.
+   Since £100k buys all 100 RP in one month, the first save is before that first
+   paid month, normally at 0 RP. This proves project/budget persistence and later
+   completion, not nonzero partial-RP persistence.
+5. **Persistence/determinism:** pause clocks before snapshots. Compare captured
+   map/roles, ownership, orders/vehicles, inventory, designation/reserves/consumption,
+   cash/debt/ledger, project/budget/RP before and after each cold load. Complete
+   research normally, save the finished state, reload and prove retained unlock
+   and further food service. Compare replay at identical observation points;
+   normalize only documented serialization differences, not unexplained mismatches.
+6. **Custody/labels:** preserve raw command/query logs, failures, time/tick bounds,
+   save hashes and source/binary/content provenance. Use separate `ordinary-start`,
+   `cash-assisted-functional`, `fixture-regression` and `human-uat` labels. Every
+   automated result is PASS, FAIL, PARTIAL or NOT RUN with scope; human status is
+   independently Pending/Pass/Fail/Partial. Costs/net/waits stay visible on a PASS.
 
-## Smallest proposed Core placement
+## Six-step human mission
 
-1. At the ordinary integrated `GenerateTowns` entry, compute the same native global
-   target, density scaling and pool clamp as today. Preserve custom count 1 as one
-   actual town; native density/count is a requested target, not a promise that all
-   remaining slots will succeed on unsuitable terrain. Preserve that existing
-   behavior and do not make every town Core.
-2. Reserve the first requested slot for a Core town. Enumerate initialized Core
-   regions in stable WorldID order, and aligned candidate tiles in a deterministic
-   seed-derived order using native synchronized RNG. Apply current native edge
-   distance, clear/flat ground, surrounding room, grid, town spacing, names, size,
-   city-frequency and phase checks. Coastal relocation must remain in an eligible
-   Core region; never accept its neighboring Industrial/Frontier landing instead.
-3. Proposed hard budget: at most 10,000 candidate probes across all Core regions,
-   and at most 20 native town-creation attempts. One probe is one distinct aligned
-   final center evaluated for placement: charge it before role/terrain/native
-   validation, including every aligned coastal landing considered by relocation.
-   Those landings share the same visited set and budget; do not hide repeated or
-   uncounted center validations inside the coastal helper. Intermediate coast/
-   water-distance scans retain native finite spiral bounds (40 then 10), not extra
-   town attempts. One creation attempt means one `DoCreateTown` call. Freeze
-   iteration, RNG consumption and counters in tests. Reuse
-   native creation and authoritative `DeleteTown` cleanup for any candidate that
-   fails the positive-population/own-Core-house predicate, including a populated
-   town with no qualifying Core house. A failed candidate consumes an attempt,
-   retains no counted slot/name/town infrastructure and continues only within
-   the same budget; verify native cleanup rather than add a new deletion policy.
-   Keep native RNG consumed by failed creation; do not roll it back. Require the
-   qualifying house to be in the same Core world as the town center.
-   No authored houses/population or repeatedly regenerated landscapes.
-4. Success requires native positive population and an own-town house in Core,
-   then decrements the remaining global target by one. Generate remaining slots
-   through the existing ordinary path, preserving name uniqueness and the same
-   city-frequency offset/slot accounting inside the same `GenerateTowns` call;
-   do not call it again and recompute the offset for remaining slots. The Core
-   town is not automatically a large city, megacity, HQ or research unlock. Check the Core town/house predicate
-   again before starting the game.
-5. No qualifying Core region, exhausted probes, exhausted native attempts or no
-   surviving Core house are explicit failure reasons. Exhausting this finite
-   search means **no valid town found within the budget**, not a mathematical
-   proof that no legal site exists. Do not run the global fallback to accept only
-   a non-Core town under the proposed strict contract.
+Later implementation supplies the verified build/content, seed, construction
+coordinates/quotes and labelled save. Allow 15 minutes for feedback; completion
+time is not promised. Fast-forward changes waiting, not production/research rules.
 
-This bounded approach may reject some terrain seeds with a legal but unfound
-Core site. More extensive scanning, retries or a terrain fallback would need a
-revised approved bound. Exact seeded town/industry/resource layouts may change
-because placement and RNG consumption change; reproducibility means repeated
-runs at the new revision agree, not that old revision save hashes/layouts recur.
+1. Start the specified fresh seed11 profile, inspect Core town/public terminals
+   and £100k cash/debt, then apply and record the single disclosed £6m test grant.
+2. Through normal controls designate the town, build the quoted grain and FOOD
+   services and set refits/orders. Inspect actual costs and own-house catchment.
+3. Follow grain into processing and FOOD to town; see native payments and repeated
+   monthly food use. Inspect missing expansion baskets; food alone promises no growth.
+4. Buy the Core HQ, select Materials I and £100k budget. Save before completion,
+   quit/reload, then see paid research finish and Materials II become available.
+5. Save/quit/reload the completed state; see the retained unlock, another FOOD
+   payment and consuming month with no second grant.
+6. Report Pass/Fail/Partial, exact build/save/content, manual versus prebuilt steps,
+   elapsed time, cash/debt/assistance and first unexpected message/control. An
+   operation save proves observation only; manual construction UAT remains separate.
 
-## Approved decisions and remaining scope boundaries
+## Decisions and implementation handoff
 
-The owner approved the recommended strict contract and bounded fresh validation.
-These choices govern implementation; permissive fallback or save migration would
-require a new explicit owner decision:
+Execute this cash-only mission first in the parent's separate task after review.
+The £6m allowance, £4m spending cap and offline setup bound the approved cash-only
+assistance; they change no game-economy policy. No routine owner reconfirmation is
+needed. No further product/architecture exception is assumed.
+If preflight fails these limits, return the blocker and two bounded choices:
+specifically revise the cash/time limit while retaining the outcome, or deliver
+a smaller FOOD-only partial outcome with research explicitly unproven. Any
+tech/cargo/role/rule exception requires a separate owner decision; silence is not approval.
 
-1. **Strict successful-start contract for enabled integrated games.**
-   Approve T+C and fail generation clearly if the required join or Core town is
-   not found within the fixed bounds. This changes which future seeds/settings
-   successfully start and usually moves the sole custom count 1 town to Core.
-   The alternative is an explicit permissive mode that starts without those
-   prerequisites and reports the missing capability; that does not deliver a
-   Core-receiver guarantee and requires a separate settings/UI contract.
-2. **Approve future fresh-start validation as replacement prospective evidence.**
-   New seed 11/101/2026 games exercise the revised generator and ordinary finances;
-   they do not repair or retroactively validate retained operation saves. Existing
-   saves remain loadable with their old limitations. An opted-in save repair would
-   require a separately reviewed migration, ownership/custody policy and new UAT;
-   it is excluded here.
-3. **Approve the narrow new-game generation implementation scope and bounds.**
-   Approve the budgets above, shared terminal geometry effect, native terrain/
-   count/role rules and failure-before-play behavior. If no legal Core site or
-   terminal footprint is found, the owner may choose another seed/settings later;
-   agents may not silently increase town count, terraform a guaranteed enclave,
-   change roles, relax ownership, increase search budgets or retry alternate seeds.
-
-This is now the single implementation-authoritative plan. Keep the fixed bounds
-and existing-save exclusions. A material stop condition returns evidence for an
-owner replan; it does not authorize permissive fallback, wider search, tuning or
-a subsequent food operating proof.
-
-## Implementation proof and negative cases
-
-Reuse the native [generation tests](../src/tests/test_world_gen.cpp),
-[terminal construction tests](../src/tests/test_portal_construction.cpp),
-ordinary [A1 runner](../scripts/test_integrated_economy.py) and its shared
-[Engine](../scripts/test_wp11_slice.py). Extend only the observations/proof path
-needed for these invariants; never use `prepare-integrated` or scenario authoring.
-Read [SAVEGAME_AUTHORING.md](SAVEGAME_AUTHORING.md) for future save custody.
-
-- Deterministic terminal regression: recreate the observed distance 19 interference
-  with intact distance 1–18 rails, require rejection/alternative in the existing
-  candidate order. Cover all four directions, both map split axes, adjacent public
-  pairs, zone/public-join collisions, bounds/void, unequal corner heights, water,
-  existing foreign/neutral rail and a world with no legal footprint. Verify no
-  map/registry/RNG mutation during failed pure terminal candidate validation and no playable
-  partial start on generator failure. Include native foundation/rendering checks.
-- Town regressions: custom count 1 produces exactly one qualifying Core town;
-  larger custom targets reserve one slot and preserve the remaining native target
-  semantics. Cover density target/clamp, multiple Core regions/nonzero WorldIDs,
-  zero population, no own Core house, insufficient flat room, grid layouts,
-  spacing/name/city-frequency, coastal relocation leaving Core, Phase4 rejection,
-  no Core role, probe/creation exhaustion and ordinary Classic/editor paths.
-  Failure reasons/counters and cleanup must be deterministic, with no fallback
-  to a non-Core-only successful integrated start.
-- Fresh representative proof: actual native seeds 11/101/2026, unchanged canonical
-  1024²/seven-world temperate 1950 integrated_v1(OST01v5)/rail_v3/equipment_v1 profile,
-  initial £100k cash/£100k loan, £300k ceiling and ordinary costs/tolls. Record all
-  public terminal joins, the Core town/house identity and native full-cost station
-  query. On disposable fresh-game copies, pay/build the station and confirm its
-  assigned TownID and own-house catchment, no warehouse diversion and no automatic
-  designation. Keep the pristine fresh checkpoint for A1 proof. Prove all required
-  native joins and this potential house receiver; a query alone, merely allocated
-  Town or valid internal rail is insufficient. No active FOOD consumer is claimed.
-- Repeat each seed's fresh generation twice in separate processes. Compare semantic
-  world/role/terminal/zone/town/house/RNG projections and counts, rather than raw
-  save bytes that may include metadata. Save a new checkpoint, cold-load in a fresh
-  process and compare those projections and native legal join/station queries.
-  Also cold-reload the disposable paid station/join proof and verify its actual
-  town/catchment/owner/rails and unchanged neutral terminal state.
-- Repeat bounded ordinary A1 iron startup and paid/cold-continuation proof on the
-  new layouts: generation/RNG changes can move industries and affect capital or
-  service. Retain old evidence separately. For each seed, use existing paid native
-  construction/loan/orders and public tolls; preserve costs, cargo/cash identities,
-  fixed operating debt, paid output relief and at least three deliveries before
-  and three after cold reload. Each generation/query phase is capped at 30 minutes
-  wall time; each operating phase at 240 advances of 2048 native ticks and 30 minutes.
-  Keep the planner caps above. No cheaper authored fixture or dropped failed seed.
-- Existing-save regression: on copies, hash-verify A1 seed 11/101/2026 checkpoints,
-  cold-load without advances/spending, compare original captured state and the
-  recorded missing-town/blocked-join facts. Original saves and archives are never
-  rewritten. Preserve existing MEGA/ECON/portal formats and role initialization
-  on load; no retroactive contract enforcement.
-
-A failure in ordinary route, station catchment, revised A1 affordability/profit,
-geometry, native command authority, content activation, cleanup or proof budget
-is a stop/replan with retained evidence. Do not widen search, tune economy or
-change the acceptance criterion to make a selected seed pass. A full FOOD chain
-quote/operation remains a **separate later approved preflight**, not a finish
-criterion here; this generation proof cannot establish its affordability.
-
-After final code: focused native tests, affected build, default unit suite,
-isolated sequential CTest, both linters, script-mode and diff checks, independent
-code/evidence review, exact-head CI and relevant SDL drawing smoke. No inherited
-failure waiver; keep owner-history/PR62 commit-checker failures distinct from new
-code regressions. Human graphical acceptance remains Pending until recorded.
-
-## Finish line and practical human mission
-
-Implementation would finish at one independently reviewed draft PR and retained
-fresh/cold evidence for T+C+D+S plus the revised representative A1 regression.
-No merge, existing-save migration, food operating proof, HQ/research pacing,
-positive starter-running-cost policy, role evolution or A2 delivery follows.
-Return exact PR/base/head, passed/failed/not-run checks and any blocked seed.
-
-Later human mission, five-to-ten-minute timebox: launch the approved fresh build
-with canonical settings and seed 11; pause, inspect the one Core town and its real
-houses, confirm ordinary starting cash/loan and neutral terminal ownership. Pay
-for the outward joining rail through normal controls, see a legal house-catching
-station preview, and observe the separately proved A1 train use the public gate
-with normal tolls. Save under a new filename, exit/reload and inspect the same
-joins/town/service. Record pass/fail/partial, build/content/seed, first unexpected
-message or inaccessible control, cash/debt and elapsed time. Use fast-forward for
-train observation; the timebox is feedback, not a full paid food completion promise.
-
-**Execution status — 1 October 2026:** generation T+C+D and original-save S proof
-pass all three actual seeds; independent source/native review and repository
-gates pass. Revised A1 seed 11 fails cold financial continuation at cash −£170,
-fixed £190,000 debt, after 62 advances and two further complete loads. Seeds 101/2026
-operation are NOT RUN after this material stop. The active plan is **BLOCKED**;
-do not advance, add borrowing, change balance or run FOOD proof. See the
-[delivery audit and bounded owner options](audit/2026-10-01/generation/README.md).
-Planning-only PR63 checks and original A1 evidence remain historical and intact.
-Exact delivery-head CI and human acceptance are separate from native proof.
+Refresh main/PR66 once for the implementation handoff and consume its delivery
+worker's checks. If PR66 is still unmerged, create the separate functional branch
+from exact `d1bb617664dcbb122aaefc1d4175c34ae1a17e2e` and target
+`codex/generation-money-comparison`; report that dependency explicitly. If owner-merged,
+start from fresh main after verifying it contains that correction. Do not merge
+PR66, duplicate its source edit or open a main PR carrying its unmerged delta.
+Bring this docs-only plan commit forward normally if needed; preserve public history
+and PR64 art. Review the necessary PR62 hunks individually, then implement only
+this mission's integration/evidence using `ost-dev`, `ost-uat` and `ost-deliver`.
+The only known integration repairs are command-based designation and read-only
+research eligibility, plus the narrow guarded proof/observation support above.
+Do not broaden into earned A2 expansion, federation, dynamic markets, true multi-map,
+narrative/Silfen/crisis work or balance. Reassess after this one delivery and human
+feedback; do not automatically start the next roadmap row.
