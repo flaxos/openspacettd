@@ -17,6 +17,7 @@
 #include "../portal/production_chain.h"
 #include "../portal/prebuilt_trade.h"
 #include "../portal/portal_registry.h"
+#include "../portal/portal_terminal.h"
 #include "../linkgraph/linkgraphschedule.h"
 #include "../core/pool_type.hpp"
 #include "../saveload/saveload.h"
@@ -43,9 +44,11 @@
 #include "../signal_func.h"
 #include "../clear_map.h"
 #include "../rail_map.h"
+#include "../rail.h"
 #include "../landscape.h"
 #include "../core/backup_type.hpp"
 #include <filesystem>
+#include <set>
 
 static constexpr IndustryType IT_STEEL_MILL = 8;
 static constexpr IndustryType IT_IRON_MINE = 18;
@@ -416,11 +419,72 @@ TEST_CASE("Prefab World Saves - Automation & UAT Verification (Sprint 50 Tooling
 		REQUIRE(result.success);
 		std::string error;
 		REQUIRE(PromptScenarioGenerator::ValidateWorldGeometry(&error));
-		/* Exact switch from crash20260929233517, outside the old gate +/-2 mask. */
-		TileIndex switch_tile = TileXY(63, 103);
+		/* crash20260929233517 involved switch (63,103), outside the old gate
+		 * +/-2 mask. Current legal site selection moves that switch, so derive
+		 * the same far-switch/shared-corner defect from the actual neutral plan. */
+		std::vector<const PortalLink *> links;
+		for (const auto &[id, link] : PortalRegistry::GetAllPortals()) links.push_back(&link);
+		std::sort(links.begin(), links.end(), [](const PortalLink *a, const PortalLink *b) { return a->id < b->id; });
+		std::vector<PortalTerminalLayout> layouts;
+		std::set<TileIndex> terminal_tiles;
+		for (const PortalLink *link : links) {
+			for (const auto &end : {link->end_a, link->end_b}) {
+				auto layout = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+				REQUIRE(layout.has_value());
+				terminal_tiles.insert(end.tile);
+				for (const auto &part : layout->tiles) terminal_tiles.insert(part.tile);
+				layouts.push_back(*layout);
+			}
+		}
+		TileIndex switch_tile = INVALID_TILE;
+		TileIndex shared_tile = INVALID_TILE;
+		std::array<TileIndex, 2> raised_corners;
+		auto find_damage = [&] {
+			for (const auto &layout : layouts) {
+				for (const auto &part : layout.tiles) {
+					if (part.tracks.Count() < 2 || DistanceManhattan(part.tile, layout.gate_tile) <= 2) continue;
+					REQUIRE(IsPlainRailTile(part.tile));
+					REQUIRE(GetTileOwner(part.tile) == OWNER_NONE);
+					REQUIRE(GetTrackBits(part.tile) == part.tracks);
+					for (Slope slope : {SLOPE_NW, SLOPE_SW, SLOPE_SE, SLOPE_NE}) {
+						if (GetRailFoundation(slope, part.tracks) != Foundation::Invalid) continue;
+						std::array<std::pair<Slope, TileIndex>, 4> corners{{{SLOPE_N, part.tile}, {SLOPE_W, TileAddXY(part.tile, 1, 0)},
+							{SLOPE_E, TileAddXY(part.tile, 0, 1)}, {SLOPE_S, TileAddXY(part.tile, 1, 1)}}};
+						std::set<TileIndex> affected;
+						uint count = 0;
+						for (const auto &[bit, corner] : corners) {
+							REQUIRE(TileHeight(corner) == 0);
+							if ((slope & bit) == SLOPE_FLAT) continue;
+							raised_corners[count++] = corner;
+							for (int dy = -1; dy <= 0; ++dy) {
+								for (int dx = -1; dx <= 0; ++dx) affected.insert(TileAddXY(corner, dx, dy));
+							}
+						}
+						bool safe = true;
+						TileIndex clear_shared = INVALID_TILE;
+						for (TileIndex tile : affected) {
+							if (terminal_tiles.contains(tile)) continue;
+							TileType type = GetTileType(tile);
+							if (type != TileType::Clear && type != TileType::Trees && type != TileType::Void) safe = false;
+							if (type == TileType::Clear || type == TileType::Trees) clear_shared = tile;
+						}
+						for (const Vehicle *vehicle : Vehicle::Iterate()) {
+							if (affected.contains(vehicle->tile)) safe = false;
+						}
+						if (!safe || clear_shared == INVALID_TILE) continue;
+						switch_tile = part.tile;
+						shared_tile = clear_shared;
+						return true;
+					}
+				}
+			}
+			return false;
+		};
+		REQUIRE(find_damage());
+		INFO("Derived switch (" << TileX(switch_tile) << ',' << TileY(switch_tile) << "), shared tile (" << TileX(shared_tile) << ',' << TileY(shared_tile) << ')');
 		REQUIRE(IsPlainRailTile(switch_tile));
-		SetTileHeight(TileXY(63, 104), 1);
-		SetTileHeight(TileXY(64, 104), 1);
+		for (TileIndex corner : raised_corners) SetTileHeight(corner, 1);
+		REQUIRE(GetRailFoundation(GetTileSlope(switch_tile), GetTrackBits(switch_tile)) == Foundation::Invalid);
 		CHECK_FALSE(PromptScenarioGenerator::ValidateWorldGeometry(&error));
 		CHECK(error.find("Invalid foundation") != std::string::npos);
 		auto heights = [] {
@@ -446,7 +510,9 @@ TEST_CASE("Prefab World Saves - Automation & UAT Verification (Sprint 50 Tooling
 			CHECK(heights() == before);
 		}
 		SECTION("Shared corner supporting new infrastructure refuses atomically") {
-			MakeRailNormal(TileXY(62, 104), CompanyID{0}, TrackBits{Track::X}, RAILTYPE_BEGIN);
+			REQUIRE_FALSE(terminal_tiles.contains(shared_tile));
+			REQUIRE((IsTileType(shared_tile, TileType::Clear) || IsTileType(shared_tile, TileType::Trees)));
+			MakeRailNormal(shared_tile, CompanyID{0}, TrackBits{Track::X}, RAILTYPE_BEGIN);
 			CHECK_FALSE(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
 			CHECK(heights() == before);
 		}

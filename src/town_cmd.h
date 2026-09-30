@@ -21,6 +21,52 @@ using HouseID = uint16_t;
 std::tuple<CommandCost, Money, TownID> CmdFoundTown(DoCommandFlags flags, TileIndex tile, TownSize size, bool city, TownLayout layout, bool random_location, uint32_t townnameparts, const std::string &text);
 CommandCost CheckFrontierTownSite(TileIndex tile, std::string_view name);
 Town *FoundFrontierTownAtSite(TileIndex tile, std::string_view name);
+
+/** Outcome of the bounded first-Core-town search in an ordinary integrated new game. */
+enum class IntegratedCoreTownFailure : uint8_t {
+	None, ///< The search succeeded, or was not applicable.
+	NoCoreRegion, ///< No initialized economic Core region exists.
+	NameUnavailable, ///< Native town-name generation failed.
+	TownPoolFull, ///< The native town pool cannot allocate a candidate.
+	ProbeBudget, ///< All 10,000 distinct aligned center probes were consumed.
+	CreationBudget, ///< All 20 native creation attempts were consumed.
+	SitesExhausted, ///< All aligned centers were visited without a qualifying town.
+	CleanupFailed, ///< Native deletion rejected a failed candidate; generation must stop.
+};
+
+/** Read-only, nonpersistent diagnostics for the most recent GenerateTowns call. */
+struct IntegratedCoreTownGenerationStats {
+	bool active = false; ///< Whether that call used the integrated ordinary-new-game contract.
+	uint target = 0; ///< Native global target after density scaling and pool clamping.
+	uint city_offset = 0; ///< The single native city-frequency offset for the call.
+	uint probes = 0; ///< Distinct aligned final centers charged before validation.
+	uint coastal_probes = 0; ///< Charged centers considered by native-sized coastal relocation.
+	uint creation_attempts = 0; ///< Calls to native DoCreateTown for the reserved Core slot.
+	uint deleted_candidates = 0; ///< Failed candidates removed by native DeleteTown.
+	uint zero_population_candidates = 0; ///< Failed native candidates without positive population.
+	uint no_core_house_candidates = 0; ///< Populated candidates without an own house in their center's Core world.
+	uint64_t probe_hash = 1469598103934665603ULL; ///< Ordered fingerprint of charged tile indices, for deterministic evidence.
+	TownID core_town = TownID::Invalid(); ///< The successful reserved town, if any.
+	IntegratedCoreTownFailure failure = IntegratedCoreTownFailure::None; ///< Bounded search failure reason.
+};
+
+/**
+ * Clear transient town-generation diagnostics when initializing a game or starting town generation.
+ * This does not change native gameplay or persistent save state.
+ */
+void ResetIntegratedCoreTownGenerationStats();
+
+/**
+ * Retrieve town-generation diagnostics for the current initialized game, without saved-state mutation.
+ * @return Nonpersistent diagnostics, reset at game initialization and never restored from a save.
+ */
+const IntegratedCoreTownGenerationStats &GetIntegratedCoreTownGenerationStats();
+
+/**
+ * Check native town/house state against the integrated initial Core-town predicate.
+ * @return true if a positive-population town has a Core center and an own house in that same Core world.
+ */
+bool HasValidIntegratedCoreTown();
 CommandCost CmdRenameTown(DoCommandFlags flags, TownID town_id, const std::string &text);
 CommandCost CmdDoTownAction(DoCommandFlags flags, TownID town_id, TownAction action);
 CommandCost CmdTownGrowthRate(DoCommandFlags flags, TownID town_id, uint16_t growth_rate);

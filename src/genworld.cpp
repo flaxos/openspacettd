@@ -63,6 +63,27 @@ void StartupDisasters();
 
 void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settings);
 
+/**
+ * Abort an ordinary new game whose generated prerequisites were obstructed.
+ * @return True when publication is permitted, false after reporting an invalid prerequisite.
+ */
+static bool ValidateGeneratedNewGame()
+{
+	if (_game_mode != GameMode::Normal) return true;
+	std::string error;
+	if ((MultiWorldGen::IsEnabled() || _settings_game.game_creation.cst_sector) && !MultiWorldGen::ValidateGeneratedTerminals(&error)) {
+		Debug(misc, 0, "New-game terminal validation failed: {}", error);
+		ShowErrorMessage(GetEncodedString(STR_ERROR_GENERATED_TERMINAL_JOIN_INVALID), {}, WarningLevel::Critical);
+		return false;
+	}
+	if (IntegratedEconomy::Enabled() && !HasValidIntegratedCoreTown()) {
+		Debug(misc, 0, "New-game Core town validation failed: no living Core town with its own Core house");
+		ShowErrorMessage(GetEncodedString(STR_ERROR_GENERATED_CORE_TOWN_INVALID), {}, WarningLevel::Critical);
+		return false;
+	}
+	return true;
+}
+
 /** Properties of current genworld process */
 struct GenWorldInfo {
 	static inline bool abort;            ///< Whether to abort the thread ASAP
@@ -152,6 +173,8 @@ static void _GenerateWorld()
 			GenerateClearTile();
 			if (MultiWorldGen::IsEnabled() || _settings_game.game_creation.cst_sector) {
 				if (!MultiWorldGen::GenerateMultiWorldLayout(Map::SizeX(), Map::SizeY())) {
+					Debug(misc, 0, "New-game public terminal/layout placement failed within the deterministic site search");
+					ShowErrorMessage(GetEncodedString(STR_ERROR_GENERATED_TERMINAL_JOIN_INVALID), {}, WarningLevel::Critical);
 					HandleGeneratingWorldAbortion();
 					return;
 				}
@@ -175,6 +198,12 @@ static void _GenerateWorld()
 		}
 
 		if (_settings_game.game_creation.cst_sector && !MultiWorldGen::FinalizeStellarZones()) {
+			Debug(misc, 0, "New-game arrival-zone placement failed within the deterministic site search");
+			ShowErrorMessage(GetEncodedString(STR_ERROR_GENERATED_TERMINAL_JOIN_INVALID), {}, WarningLevel::Critical);
+			HandleGeneratingWorldAbortion();
+			return;
+		}
+		if (GenWorldInfo::mode != GWM_EMPTY && !ValidateGeneratedNewGame()) {
 			HandleGeneratingWorldAbortion();
 			return;
 		}
@@ -215,6 +244,12 @@ static void _GenerateWorld()
 			}
 		}
 
+		/* Initialization tile loops and GameScripts can change an initially clear
+		 * join or town. Validate before the new-game callback can publish a save. */
+		if (GenWorldInfo::mode != GWM_EMPTY && !ValidateGeneratedNewGame()) {
+			HandleGeneratingWorldAbortion();
+			return;
+		}
 		BasePersistentStorageArray::SwitchMode(PSM_LEAVE_GAMELOOP);
 
 		ResetObjectToPlace();

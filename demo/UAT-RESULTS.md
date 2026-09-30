@@ -1,5 +1,19 @@
 # Human UAT results — recovery / v1.1
 
+## New integrated-game generation — 1 October 2026
+
+**Human graphical status: Pending; active execution plan BLOCKED at revised A1
+finances.** Generation/legal paid join/Core house catchment/repeat/cold proof passes
+actual seeds 11/101/2026, with unchanged original saves. SDL/dummy drawing smoke
+passes six focused views; it is not desktop/OpenGL or human acceptance. Revised
+seed 11 A1 service reaches cash −£170 with fixed £190k debt before its third further
+paid load; seeds 101/2026 operation are NOT RUN. No FOOD consumption is claimed.
+
+Use the [generation-only human mission and safe separate-checkout instructions](../docs/audit/2026-10-01/generation/README.md).
+Record exact build/seed/content, visible Core town/own houses, normal paid join/
+station preview, cash/debt, reload, elapsed time and first unexpected control or
+message. Do not use the failed financial checkpoint as accepted economic proof.
+
 ## Commonwealth platform art proof — 1 October 2026
 
 **Human visual status: Pending.** Review the optional four-platform family using

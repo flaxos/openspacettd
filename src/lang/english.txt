@@ -5136,6 +5136,9 @@ STR_WARNING_LOADGAME_REMOVED_TRAMS                              :{WHITE}Game was
 
 # Map generation messages
 STR_ERROR_COULD_NOT_CREATE_TOWN                                 :Map generation aborted...{}{}... no suitable town locations
+STR_ERROR_COULD_NOT_CREATE_CORE_TOWN                            :Map generation aborted: no valid Core town found within the placement limits. Try another seed or settings.
+STR_ERROR_GENERATED_TERMINAL_JOIN_INVALID                       :Map generation aborted: a public terminal connection is obstructed or invalid. Try another seed or settings.
+STR_ERROR_GENERATED_CORE_TOWN_INVALID                           :Map generation aborted: the required Core town or its houses did not survive generation. Try another seed or settings.
 STR_ERROR_NO_TOWN_IN_SCENARIO                                   :there is no town in this scenario
 
 STR_ERROR_PNGMAP                                                :Can't load landscape from PNG...

@@ -1,6 +1,7 @@
 /* This file is part of OpenSpaceTTD. Licensed under GPL-2.0. */
 /** @file connected_economy.cpp Reproducible offline connected production and megacity acceptance fixture. */
 #include "../stdafx.h"
+#include "connected_economy.h"
 #include "integrated_economy.h"
 #include "../economy_func.h"
 #include "commonwealth_slice.h"
@@ -34,6 +35,7 @@
 #include "../train.h"
 #include "../town_cmd.h"
 #include "../town.h"
+#include "../town_map.h"
 #include "../clear_map.h"
 #include "../landscape.h"
 #include "../void_map.h"
@@ -59,6 +61,8 @@
 #include "../bridge_map.h"
 #include "../direction_func.h"
 #include "../core/string_consumer.hpp"
+#include "../core/random_func.hpp"
+#include "../pathfinder/follow_track.hpp"
 
 #include "../safeguards.h"
 
@@ -892,6 +896,326 @@ Json FreightSnapshot()
 	return r;
 }
 
+/**
+ * Native tile observations shared by generated terminals and advertised arrival zones.
+ * @param tile Native map tile to observe without changing it.
+ * @return Captured bounds, ownership, terrain and rail observations.
+ */
+Json GenerationTile(TileIndex tile)
+{
+	Json r = {{"tile", tile.base()}, {"valid", IsValidTile(tile) && IsInnerTile(tile)}};
+	if (!r["valid"].get<bool>()) return r;
+	r["world"] = PlanetManager::GetTileWorld(tile).base();
+	r["type"] = uint(GetTileType(tile)); r["owner"] = GetTileOwner(tile).base();
+	r["slope"] = uint(GetTileSlope(tile)); r["height"] = TileHeight(tile);
+	if (IsPlainRailTile(tile)) {
+		r["tracks"] = GetTrackBits(tile).base(); r["railtype"] = uint(GetRailType(tile));
+	}
+	if (IsTileType(tile, TileType::TunnelBridge) && GetTunnelBridgeTransportType(tile) == TransportType::Rail)
+		r["railtype"] = uint(GetRailType(tile));
+	return r;
+}
+
+/**
+ * Read-only geometry projection; does not impose clear joins on loaded or paid states.
+ * @param head Native terminal head or advertised arrival-zone tile.
+ * @param dir Planned inward terminal direction.
+ * @param world Required immutable world identity.
+ * @return Native geometry and expected rail/signal layout observations.
+ */
+Json GenerationTerminal(TileIndex head, DiagDirection dir, WorldID world)
+{
+	Json r = {{"head", GenerationTile(head)}, {"world", world.base()}, {"dir", uint(dir)},
+		{"rails", Json::array()}, {"signals", Json::array()}};
+	if (IsTileType(head, TileType::TunnelBridge)) r["head"]["dir"] = uint(GetTunnelBridgeDirection(head));
+	auto layout = PortalTerminal::Plan(head, dir, world);
+	r["planned"] = layout.has_value();
+	if (!layout) return r;
+	r["connection"] = layout->connection_tile.base(); r["outward"] = uint(layout->outward_dir);
+	r["join"] = GenerationTile(TileAddByDiagDir(layout->connection_tile, layout->outward_dir));
+	for (const auto &rail : layout->tiles) {
+		Json row = GenerationTile(rail.tile); row["expected_tracks"] = rail.tracks.base(); r["rails"].push_back(row);
+	}
+	for (const auto &signal : layout->signals) {
+		Json row = {{"tile", signal.tile.base()}, {"track", uint(signal.track)}, {"travel", uint(signal.travel_dir)},
+			{"expected_present", SignalAlongTrackdir(DiagDirToDiagTrackdir(signal.travel_dir))},
+			{"expected_type", uint(SignalType::PathOneWay)}, {"expected_variant", uint(SignalVariant::Electric)}};
+		bool present = IsPlainRailTile(signal.tile) && HasSignalOnTrack(signal.tile, signal.track);
+		row["present"] = present;
+		if (present) {
+			row["type"] = uint(GetSignalType(signal.tile, signal.track));
+			row["variant"] = uint(GetSignalVariant(signal.tile, signal.track));
+			row["present_bits"] = GetPresentSignals(signal.tile); row["state_bits"] = GetSignalStates(signal.tile);
+		}
+		r["signals"].push_back(row);
+	}
+	return r;
+}
+
+/**
+ * Capture generation semantics separately so retained FreightSnapshot equality remains unchanged.
+ * @return Captured native economy, RNG, geometry, town and station observations.
+ */
+Json GenerationSnapshot()
+{
+	Json r = FreightSnapshot();
+	r["rng"] = {_random.state[0], _random.state[1]};
+	r["worlds"] = Json::array();
+	for (const auto &world : PlanetManager::GetAllRegions()) r["worlds"].push_back({{"id", world.id.base()},
+		{"name", world.name}, {"phase", uint(world.phase)}, {"biome", uint(world.biome)},
+		{"bounds", {world.min_x, world.min_y, world.max_x, world.max_y}},
+		{"role", IntegratedEconomy::RoleName(world.id)}, {"development", world.development_score}});
+	r["terminals"] = Json::array();
+	std::map<uint32_t, PortalLink> sorted(PortalRegistry::GetAllPortals().begin(), PortalRegistry::GetAllPortals().end());
+	for (const auto &[id, portal] : sorted) for (const auto &end : {portal.end_a, portal.end_b}) {
+		Json row = GenerationTerminal(end.tile, end.enter_dir, end.world_id); row["gate"] = id;
+		r["terminals"].push_back(row);
+	}
+	r["zones"] = Json::array();
+	for (const auto &[id, zone] : StellarNetwork::Zones()) {
+		Json row = GenerationTerminal(zone.tile, zone.direction, zone.world); row["id"] = id;
+		r["zones"].push_back(row);
+	}
+	r["towns"] = Json::array();
+	for (const Town *town : Town::Iterate()) {
+		Json houses = Json::array();
+		for (uint n = 0; n < Map::Size(); ++n) {
+			TileIndex tile{n};
+			if (IsTileType(tile, TileType::House) && GetTownIndex(tile) == town->index)
+				houses.push_back({{"tile", n}, {"world", PlanetManager::GetTileWorld(tile).base()}, {"type", GetHouseType(tile)}});
+		}
+		r["towns"].push_back({{"id", town->index.base()}, {"tile", town->xy.base()},
+			{"world", PlanetManager::GetTileWorld(town->xy).base()}, {"population", town->cache.population},
+			{"house_count", town->cache.num_houses}, {"houses", houses}, {"megacity", MegacityManager::IsMegacity(town->index)}});
+	}
+	r["core_town_valid"] = HasValidIntegratedCoreTown();
+	for (Json &row : r["stations"]) {
+		const Station *station = Station::Get(StationID{row["id"].get<uint16_t>()});
+		row["town"] = station->town == nullptr ? UINT16_MAX : station->town->index.base();
+		row["warehouse"] = LogisticsHubManager::GetHubForStation(station->index) != nullptr;
+		row["consumer"] = !station->catchment_tiles.IsEmpty() && MegacityManager::IsConsumerStation(station);
+		row["catchment_houses"] = Json::array();
+		if (!station->catchment_tiles.IsEmpty()) {
+			for (BitmapTileIterator it(station->catchment_tiles); *it != INVALID_TILE; ++it) {
+				TileIndex tile = *it;
+				if (IsTileType(tile, TileType::House)) row["catchment_houses"].push_back({{"tile", tile.base()},
+					{"town", GetTownIndex(tile).base()}, {"world", PlanetManager::GetTileWorld(tile).base()}});
+			}
+		}
+	}
+	return r;
+}
+
+/** Nonpersistent fresh-process authorization; no load adapter restores it. */
+bool generation_contract_fresh = false;
+/** Disposable company marker used only by the guarded native proof. */
+constexpr std::string_view GENERATION_COMPANY = "Generation contract acceptance";
+
+/**
+ * Refuse spending after any player construction, progression, grant or borrowing.
+ * @return True when the disposable company still has untouched ordinary starting state.
+ */
+bool PristineGenerationCompany()
+{
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (Company::GetNumItems() != 1 || company == nullptr || company->name != GENERATION_COMPANY ||
+		company->money != 100000 || company->current_loan != 100000 || company->GetMaxLoan() != 300000 || _settings_game.difficulty.infinite_money ||
+		Vehicle::GetNumItems() != 0 || Station::GetNumItems() != 0 || !LogisticsHubManager::GetAllHubs().empty() ||
+		!MegacityManager::GetAllMegacities().empty() || !StockpileManager::GetAllStockpiles().empty() ||
+		!TechTreeManager::GetAllCompanyTechStates().empty()) return false;
+	for (uint n = 0; n < Map::Size(); ++n) {
+		TileIndex tile{n};
+		if ((IsPlainRailTile(tile) || IsRailDepotTile(tile)) && GetTileOwner(tile) != OWNER_NONE) return false;
+	}
+	return true;
+}
+
+/** A bounded native two-tile station probe close to an actual own Core house. */
+struct GenerationStation {
+	TileIndex tile = INVALID_TILE; ///< First tile of the prospective two-tile station.
+	Axis axis = Axis::X; ///< Native station platform axis.
+	TownID town = TownID::Invalid(); ///< Expected station town under ordinary native assignment.
+	TileIndex house = INVALID_TILE; ///< Own Core house that must be caught after paid construction.
+};
+
+/**
+ * Quote all native exterior joins and one ordinary Core station without spending or advancing.
+ * @param[out] report Native quotes, bounded candidates and selected station observations.
+ * @param[out] station Selected legal house-catching station when a candidate succeeds.
+ * @return True when all joins and a bounded station candidate have positive native quotes.
+ */
+bool GenerationQueries(Json &report, GenerationStation &station)
+{
+	report = {{"joins", Json::array()}, {"station_candidates", Json::array()}};
+	std::set<TileIndex> claimed;
+	Money total = 0;
+	std::map<uint32_t, PortalLink> sorted(PortalRegistry::GetAllPortals().begin(), PortalRegistry::GetAllPortals().end());
+	for (const auto &[id, portal] : sorted) for (const auto &end : {portal.end_a, portal.end_b}) {
+		auto layout = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+		if (!layout) { IConsolePrint(CC_ERROR, "CONNECTED FAIL generation terminal plan invalid"); return false; }
+		TileIndex join = TileAddByDiagDir(layout->connection_tile, layout->outward_dir);
+		claimed.insert(end.tile); claimed.insert(join);
+		for (const auto &rail : layout->tiles) claimed.insert(rail.tile);
+		auto quote = Command<Commands::BuildRail>::Do({}, join, RAILTYPE_RAIL, DiagDirToDiagTrack(layout->outward_dir), false);
+		if (!Result(quote, "generation exterior join query") || quote.GetCost() <= 0) return false;
+		total += quote.GetCost();
+		report["joins"].push_back({{"gate", id}, {"head", end.tile.base()}, {"connection", layout->connection_tile.base()},
+			{"join", join.base()}, {"outward", uint(layout->outward_dir)}, {"track", uint(DiagDirToDiagTrack(layout->outward_dir))},
+			{"quote", int64_t(quote.GetCost())}});
+	}
+	for (const auto &[id, zone] : StellarNetwork::Zones()) {
+		auto layout = PortalTerminal::Plan(zone.tile, zone.direction, zone.world);
+		if (!layout) continue;
+		claimed.insert(zone.tile); claimed.insert(TileAddByDiagDir(layout->connection_tile, layout->outward_dir));
+		for (const auto &rail : layout->tiles) claimed.insert(rail.tile);
+	}
+	std::vector<std::tuple<uint, TileIndex, Axis, TownID, TileIndex>> candidates;
+	std::set<std::pair<TileIndex, Axis>> seen;
+	for (uint n = 0; n < Map::Size(); ++n) {
+		TileIndex house{n};
+		if (!IsTileType(house, TileType::House)) continue;
+		const Town *town = Town::Get(GetTownIndex(house)); WorldID world = PlanetManager::GetTileWorld(town->xy);
+		if (town->cache.population == 0 || IntegratedEconomy::Role(world) != EconomicRole::Core || PlanetManager::GetTileWorld(house) != world) continue;
+		for (int dy = -4; dy <= 4; ++dy) for (int dx = -4; dx <= 4; ++dx) {
+			int x = int(TileX(house)) + dx, y = int(TileY(house)) + dy;
+			if (x <= 0 || y <= 0 || x + 2 >= int(Map::MaxX()) || y + 2 >= int(Map::MaxY())) continue;
+			for (Axis axis : {Axis::X, Axis::Y}) {
+				TileIndex tile = TileXY(x, y), second = TileAddByDiagDir(tile, axis == Axis::X ? DiagDirection::SW : DiagDirection::SE);
+				if (seen.contains({tile, axis}) || claimed.contains(tile) || claimed.contains(second) ||
+					PlanetManager::GetTileWorld(tile) != world || PlanetManager::GetTileWorld(second) != world ||
+					!IsTileType(tile, TileType::Clear) || !IsTileType(second, TileType::Clear) ||
+					GetTileSlope(tile) != SLOPE_FLAT || GetTileSlope(second) != SLOPE_FLAT || TileHeight(tile) != TileHeight(second) ||
+					ClosestTownFromTile(tile, UINT_MAX) != town) continue;
+				seen.insert({tile, axis}); candidates.emplace_back(DistanceManhattan(tile, house), tile, axis, town->index, house);
+			}
+		}
+	}
+	std::sort(candidates.begin(), candidates.end()); uint attempts = 0;
+	for (const auto &[distance, tile, axis, town, house] : candidates) {
+		if (++attempts > 16) break;
+		auto quote = Command<Commands::BuildRailStation>::Do({}, tile, RAILTYPE_RAIL, axis, 1, 2, STAT_CLASS_DFLT, 0, StationID::Invalid(), false);
+		report["station_candidates"].push_back({{"tile", tile.base()}, {"axis", uint(axis)}, {"legal", quote.Succeeded()}});
+		if (quote.Failed() || quote.GetCost() <= 0) continue;
+		station = {tile, axis, town, house}; total += quote.GetCost();
+		report["station"] = {{"tile", tile.base()}, {"axis", uint(axis)}, {"town", town.base()}, {"house", house.base()}, {"quote", int64_t(quote.GetCost())}};
+		report["total_quote"] = int64_t(total); return true;
+	}
+	IConsolePrint(CC_ERROR, "CONNECTED FAIL bounded 16-candidate Core station query exhausted"); return false;
+}
+
+/**
+ * Exercise the real train follower across every paid neutral/player boundary in both directions.
+ * @return Native bidirectional follower results for each public terminal.
+ */
+Json GenerationFollow()
+{
+	Json report = Json::array();
+	std::map<uint32_t, PortalLink> sorted(PortalRegistry::GetAllPortals().begin(), PortalRegistry::GetAllPortals().end());
+	for (const auto &[id, portal] : sorted) for (const auto &end : {portal.end_a, portal.end_b}) {
+		auto layout = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+		if (!layout) continue;
+		TileIndex join = TileAddByDiagDir(layout->connection_tile, layout->outward_dir);
+		TrackBits needed{DiagDirToDiagTrack(layout->outward_dir)};
+		bool ready = IsPlainRailTile(join) && GetTileOwner(join) == CompanyID{0} && GetTrackBits(join).All(needed) &&
+			IsPlainRailTile(layout->connection_tile) && GetTileOwner(layout->connection_tile) == OWNER_NONE && GetTrackBits(layout->connection_tile).All(needed);
+		Json row = {{"gate", id}, {"head", end.tile.base()}, {"join", join.base()}, {"ready", ready}};
+		if (ready) {
+			CFollowTrackRail entering(CompanyID{0}, RailTypes{RAILTYPE_RAIL}), exiting(CompanyID{0}, RailTypes{RAILTYPE_RAIL});
+			row["enter"] = entering.Follow(join, DiagDirToDiagTrackdir(ReverseDiagDir(layout->outward_dir))) && entering.new_tile == layout->connection_tile;
+			row["exit"] = exiting.Follow(layout->connection_tile, DiagDirToDiagTrackdir(layout->outward_dir)) && exiting.new_tile == join;
+			row["enter_error"] = uint(entering.err); row["exit_error"] = uint(exiting.err);
+			row["enter_tracks"] = entering.new_td_bits.base(); row["exit_tracks"] = exiting.new_td_bits.base();
+		}
+		report.push_back(row);
+	}
+	return report;
+}
+
+/**
+ * Guarded ordinary generation proof; spending is confined to the fresh disposable process.
+ * @param argv Native console command and requested generation proof phase.
+ * @return True after reporting the accepted phase or a guarded rejection.
+ */
+bool GenerationContract(std::span<std::string_view> argv)
+{
+	if (argv.size() != 2 || (argv[1] != "generation-contract-start" && argv[1] != "generation-contract-status" &&
+		argv[1] != "generation-contract-queries" && argv[1] != "generation-contract-paid" && argv[1] != "generation-contract-follow")) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL invalid generation-contract arguments"); return true;
+	}
+	if (_game_mode != GameMode::Normal || (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) ||
+		!IntegratedEconomy::Enabled() || PlanetManager::Count() != 7) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL generation contract requires isolated seven-world integrated game"); return true;
+	}
+	/* Read-only retained-save evidence must not require or write a disposable-company marker. */
+	if (argv[1] == "generation-contract-status") {
+		IConsolePrint(CC_DEFAULT, "CONNECTED generation-state {}", GenerationSnapshot().dump()); return true;
+	}
+	if (argv[1] == "generation-contract-start") {
+		generation_contract_fresh = false;
+		if (Company::GetNumItems() != 0 || Vehicle::GetNumItems() != 0 || Station::GetNumItems() != 0 ||
+			!GetIntegratedCoreTownGenerationStats().active || !HasValidIntegratedCoreTown()) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL generation contract requires pristine fresh generation"); return true;
+		}
+		for (uint n = 0; n < Map::Size(); ++n) if (IsPlainRailTile(TileIndex{n}) && GetTileOwner(TileIndex{n}) != OWNER_NONE) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL generation contract found player assets"); return true;
+		}
+		if (DoStartupNewCompany(false, CompanyID{0}) == nullptr) return true;
+		AutoRestoreBackup owner(_current_company, CompanyID{0});
+		if (!Result(Command<Commands::RenameCompany>::Do(DoCommandFlag::Execute, std::string(GENERATION_COMPANY)), "generation company marker")) return true;
+		_pause_mode.Set(PauseMode::Normal); generation_contract_fresh = true;
+	}
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (company == nullptr || company->name != GENERATION_COMPANY) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL missing isolated generation company marker"); return true;
+	}
+	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	if (argv[1] == "generation-contract-queries" || argv[1] == "generation-contract-paid") {
+		if (!PristineGenerationCompany() || (argv[1] == "generation-contract-paid" && !generation_contract_fresh)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL generation spending/query requires pristine company; spending requires fresh process"); return true;
+		}
+		Json before = GenerationSnapshot(), report; GenerationStation station;
+		if (!GenerationQueries(report, station)) return true;
+		if (GenerationSnapshot() != before) { IConsolePrint(CC_ERROR, "CONNECTED FAIL generation query mutated native state"); return true; }
+		if (argv[1] == "generation-contract-queries") { IConsolePrint(CC_DEFAULT, "CONNECTED generation-query {}", report.dump()); return true; }
+		generation_contract_fresh = false;
+		if (report["total_quote"].get<int64_t>() >= company->money) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL generation proof unaffordable with ordinary starting cash"); return true;
+		}
+		for (Json &join : report["joins"]) {
+			auto result = Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, TileIndex{join["join"].get<uint32_t>()},
+				RAILTYPE_RAIL, Track(join["track"].get<uint>()), false);
+			if (!Result(result, "paid generation exterior join")) return true;
+			join["paid"] = int64_t(result.GetCost());
+		}
+		auto result = Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, station.tile, RAILTYPE_RAIL, station.axis,
+			1, 2, STAT_CLASS_DFLT, 0, StationID::Invalid(), false);
+		if (!Result(result, "paid Core catchment station")) return true;
+		report["station"]["paid"] = int64_t(result.GetCost());
+		const Station *built = Station::Get(GetStationIndex(station.tile));
+		if (built->town == nullptr || built->town->index != station.town || !built->catchment_tiles.HasTile(station.house) ||
+			LogisticsHubManager::GetHubForStation(built->index) != nullptr || MegacityManager::IsMegacity(station.town)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL paid station did not catch its assigned Core town house"); return true;
+		}
+		report["follow"] = GenerationFollow(); report["state"] = GenerationSnapshot();
+		IConsolePrint(CC_DEFAULT, "CONNECTED generation-paid {}", report.dump()); return true;
+	}
+	if (argv[1] == "generation-contract-follow") {
+		Json before = GenerationSnapshot(), report = GenerationFollow();
+		if (GenerationSnapshot() != before) { IConsolePrint(CC_ERROR, "CONNECTED FAIL native generation follower mutated state"); return true; }
+		IConsolePrint(CC_DEFAULT, "CONNECTED generation-follow {}", report.dump()); return true;
+	}
+	Json r = GenerationSnapshot();
+	if (argv[1] == "generation-contract-start") {
+		const auto &stats = GetIntegratedCoreTownGenerationStats();
+		r["town_generation"] = {{"active", stats.active}, {"target", stats.target}, {"city_offset", stats.city_offset},
+			{"probes", stats.probes}, {"coastal_probes", stats.coastal_probes}, {"creation_attempts", stats.creation_attempts},
+			{"deleted_candidates", stats.deleted_candidates}, {"zero_population_candidates", stats.zero_population_candidates},
+			{"no_core_house_candidates", stats.no_core_house_candidates}, {"probe_hash", stats.probe_hash},
+			{"core_town", stats.core_town.base()}, {"failure", uint(stats.failure)}};
+	}
+	IConsolePrint(CC_DEFAULT, "CONNECTED generation-state {}", r.dump()); return true;
+}
+
 /** One prospective player-built station, depot and connection to a generated public throat. */
 struct FreightLeg {
 	TileIndex station = INVALID_TILE; ///< First tile of the prospective two-tile station.
@@ -1230,6 +1554,11 @@ bool FirstFreight(std::span<std::string_view> argv)
 
 } // namespace
 
+void ResetConnectedEconomyProof()
+{
+	generation_contract_fresh = false;
+}
+
 bool RepairConnectedEconomyTerrain()
 {
 	const Company *company = Company::GetIfValid(CompanyID{0});
@@ -1245,6 +1574,7 @@ bool SmoothExposedUATTerrain()
 
 bool ConConnectedEconomy(std::span<std::string_view> argv)
 {
+	if (argv.size() >= 2 && argv[1].starts_with("generation-contract-")) return GenerationContract(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("first-freight-")) return FirstFreight(argv);
 	if (argv.size() != 2) {
 		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-surveys|status|audit|advance|stop-food|start-food|fabricate|research: isolated demo only");

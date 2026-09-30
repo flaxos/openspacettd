@@ -1,5 +1,18 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## New integrated-game generation — 1 October 2026
+
+**TESTED T+C+D+S; BLOCKED revised A1; human UAT Pending.** Approved PR63 scope
+implements complete generation-local terminal/join claims, two pre-publication
+audits, bounded native Core founding/cleanup and transient proof lifecycle guards.
+Six actual fresh starts plus paid native/cold proof and unchanged old-save equality
+pass. Final gates: 487 unit cases/306,025 assertions and 500 sequential CTests;
+six focused SDL views and repository/helper checks pass. Revised seed 11 iron
+service exhausts cash after cold reload; subsequent seed101/2026 operation remain
+NOT RUN. [Full audit, failed proof and bounded options](audit/2026-10-01/generation/README.md).
+Original A1/#59/PR62 evidence stays intact. No merge, migration, FOOD outcome,
+balance change or roadmap advancement is recorded.
+
 ## Parallel Commonwealth platform art proof — 1 October 2026
 
 **TESTED bounded content proof; human visual UAT Pending.** Four original native

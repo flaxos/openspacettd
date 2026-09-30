@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "portal/integrated_economy.h"
+#include "portal/connected_economy.h"
 #include "portal/universe_network.h"
 #include "portal/stellar_network.h"
 #include "portal/production_chain.h"
@@ -18,6 +19,7 @@
 #include "portal/tech_tree.h"
 #include "portal/fabrication_manager.h"
 #include "landscape.h"
+#include "town_cmd.h"
 #include "news_func.h"
 #include "ai/ai.hpp"
 #include "script/script_gui.h"
@@ -148,6 +150,8 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	TechTreeManager::Reset();
 	ResourceSiteManager::Reset();
 	IntegratedEconomy::Reset();
+	ResetConnectedEconomyProof();
+	ResetIntegratedCoreTownGenerationStats();
 	StellarNetwork::Reset();
 	UniverseNetwork::Reset();
 	FabricationManager::Reset();

@@ -12,6 +12,8 @@
 
 #include "planet_type.h"
 #include "../tile_type.h"
+#include "../direction_type.h"
+#include <set>
 #include <vector>
 #include <string>
 
@@ -59,6 +61,23 @@ public:
 	 * @return true if generation succeeded; false if map is too small or invalid.
 	 */
 	static bool FinalizeStellarZones();
+	/**
+	 * Test a generated head, complete terminal and outward joining tile without mutation.
+	 * @param tile Proposed head tile.
+	 * @param direction Direction entering the head.
+	 * @param world Logical world containing the whole footprint.
+	 * @param claimed Footprints already selected during this generation.
+	 * @return Whether every tile is unclaimed, clear/tree, flat and level.
+	 */
+	static bool CanPlaceGeneratedGateway(TileIndex tile, DiagDirection direction, WorldID world, const std::set<TileIndex> &claimed);
+
+	/**
+	 * Audit built public terminal geometry and clear joins before new-game publication.
+	 * This is never an existing-save load requirement or repair.
+	 * @param error Optional precise failure reason.
+	 * @return Whether all generated terminal footprints remain valid.
+	 */
+	static bool ValidateGeneratedTerminals(std::string *error = nullptr);
 	static bool GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y);
 	static bool GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, const Config &config);
 
