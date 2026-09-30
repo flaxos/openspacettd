@@ -95,6 +95,7 @@
 
 /* static */ bool ScriptIndustryType::CanBuildIndustry(IndustryType industry_type)
 {
+	EnforceDeityOrCompanyModeValid(false);
 	if (!IsValidIndustryType(industry_type)) return false;
 
 	const bool deity = ScriptCompanyMode::IsDeity();
@@ -174,6 +175,7 @@
 }
 /* static */ ScriptList *ScriptIndustryType::GetDiscoveredResourceSites(IndustryType industry_type)
 {
+	EnforceCompanyModeValid(nullptr);
 	ScriptList *list = new ScriptList();
 	if (!ResourceSiteManager::Enabled() || !IsValidIndustryType(industry_type)) return list;
 	for (const auto &site : ResourceSiteManager::Sites()) {
