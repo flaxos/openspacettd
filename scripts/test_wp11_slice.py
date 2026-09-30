@@ -129,6 +129,7 @@ class OfflineEngine(Engine):
         (scripts / 'game_start.scr').write_text(
             f'script "{self.console_path}"\n'
             f'echo FUNCTIONAL_OFFLINE_START\n'
+            'script\n'  # Native console logs are buffered; closing flushes the marker.
             f'connected_economy functional-bridge "{self.pipe}"\n')
         self.stdout_log = (output / f'{name}-stdout.log').open('x')
         env = {**os.environ, 'SDL_VIDEODRIVER': 'dummy', 'OPENSPACETTD_WORLD_COUNT': str(world_count)}
@@ -158,21 +159,32 @@ class OfflineEngine(Engine):
             raise
 
     def read_console(self):
+        pending = ''
         with self.console_path.open() as stream:
             while True:
                 line = stream.readline()
                 if line:
-                    self.queue.put(line)
+                    # A growing regular file can return a partial line at EOF.
+                    # Do not expose a JSON marker until its native newline arrives.
+                    pending += line
+                    if pending.endswith('\n'):
+                        self.queue.put(pending)
+                        pending = ''
                 elif self.process.poll() is not None:
+                    if pending:
+                        self.queue.put('CONNECTED FAIL unterminated native console output on exit: ' + pending)
                     self.queue.put(None)
                     return
                 else:
                     time.sleep(0.02)
 
     def command(self, command, marker):
-        self.commands.write(command + '\n')
+        # Native ConScript appends and flushes on close. Frame every command so
+        # short acknowledgements cannot remain buffered while exec waits on FIFO.
+        framed = f'script "{self.console_path}"\n{command}\nscript'
+        self.commands.write(framed + '\n')
         self.commands.flush()
-        return super().command(command, marker)
+        return super().command(framed, marker)
 
     def close(self):
         if getattr(self.process, 'stdin', None) is not None and not self.process.stdin.closed:
