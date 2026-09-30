@@ -1,0 +1,82 @@
+{
+  "source_head": "74f0ea20ed13299445b22c1d0b65d07b23f25736",
+  "binary_sha256": "3b6f31534d575a0e6a8c3ef49740c8fd8d8d258741e698aaf70aaf963e7eaf3f",
+  "gameplay_outcome": "BLOCKED",
+  "build": {
+    "status": "passed"
+  },
+  "unit": {
+    "status": "passed",
+    "cases": 481,
+    "assertions": 67754
+  },
+  "ctest": {
+    "status": "passed",
+    "cases": 495,
+    "sequential": true
+  },
+  "directory_collision_regression": {
+    "status": "passed",
+    "cases": 1,
+    "assertions": 8
+  },
+  "repo_linters": {
+    "status": "passed"
+  },
+  "script_mode": {
+    "status": "passed"
+  },
+  "seed11_preflight": {
+    "status": "failed",
+    "reason": "No generated Core town with actual houses",
+    "a1_cold_equal": true,
+    "unchanged": true,
+    "repository_dirty": "delivery docs only"
+  },
+  "seed2026_chain_preflight": {
+    "status": "failed",
+    "candidates": 2,
+    "reason": "Processor terminal approach has incompatible neutral track",
+    "unchanged": true
+  },
+  "seed2026_native_access_diagnosis": {
+    "status": "passed",
+    "terminal_parts_intact_traversable": 34,
+    "external_join_edges": 1,
+    "native_follow": "NoWay",
+    "native_build_query": "STR_ERROR_OWNED_BY",
+    "unchanged": true,
+    "code_dirty": false
+  },
+  "complete_chain_affordability": {
+    "status": "not-run",
+    "reason": "No legal whole-chain quote"
+  },
+  "food_operation": {
+    "status": "not-run"
+  },
+  "human_acceptance": {
+    "status": "pending"
+  },
+  "published_history_checker": {
+    "status": "failed",
+    "reason": "Original implementation comment non-ASCII; current tree corrected"
+  },
+  "first_ci": {
+    "head": "c8f813127b4a18dd87851a8d7e7a82edaf09ab6c",
+    "platform_content_pass": 8,
+    "platform_content_failed": [
+      "Mac Release tempfile collision, corrected current code"
+    ],
+    "other_failures": [
+      "CmdDesignateMegacity declaration Doxygen, corrected",
+      "Original source comment per-commit checker"
+    ],
+    "annotations": {
+      "count": 19,
+      "inherited_compiler": 18,
+      "new_mac_test_error": 1
+    }
+  },
+  "final_exact_head_ci": "see draft PR; not inferred from earlier head"
+}

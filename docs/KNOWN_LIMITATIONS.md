@@ -2,9 +2,11 @@
 
 ## Post-A1 dependency review — 30 September 2026
 
-The proposed [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is a
-bounded A1 follow-up toward A2, not new delivered evidence. Seed11's retained
-operation checkpoint has £78,268 cash/£100,000 debt; £219,780 is its later sampled
+[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) stopped **BLOCKED**
+before spending: seed11 has only an Industrial Merredin town and no Core town/house
+receiver. The unchanged cold start and negative preflight are retained in the
+[audit](audit/2026-09-30/core-food-preflight/README.md). No food service is delivered.
+Seed11's retained operation checkpoint has £78,268 cash/£100,000 debt; £219,780 is its later sampled
 continuation result. The grain-route lead predates A1 construction, and the full
 food-to-Core path/catchment/cost/profit remains unproven. Seeds101/2026 do not yet
 establish this food outcome. A1 and future food graphical acceptance remain Pending.
@@ -16,10 +18,11 @@ proved by A1 or the £100m authored progression fixture. Changing these prices o
 progression pace requires an owner decision. Opening a Phase4 world alone does
 not authorize industry construction or waive colonisation.
 
-Generated towns are not automatically designated as megacities. The existing
-Designate GUI directly mutates registration; the proposed integration must preserve
-its semantics through native replicated commands. Real Core FOOD consumption needs
-designation and the receiving station's own town houses in catchment. Storage or
+Generated towns are not automatically designated as megacities. This draft routes
+the existing Designate GUI through native replicated commands, preserving free valid-town and
+spectator eligibility. Native invalid/duplicate/catchment/relay/reload tests pass;
+they do not provide the absent ordinary Core receiver. Real Core FOOD consumption
+needs designation and the receiving station's own town houses in catchment. Storage or
 arrival alone is insufficient; FOOD alone sustains the town without growth.
 
 ## First Sustainable Freight boundaries — 30 September 2026

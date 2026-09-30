@@ -1,5 +1,12 @@
 # First Paid Core Food Consumption
 
+**Execution stop — 30 September 2026.** The authorised first follow-up is
+**BLOCKED**: the preserved seed11 A1 checkpoint has no Core town/house receiver.
+Cold equality and native designation tests pass, but no food construction, spending
+or operation occurred. Complete-chain affordability remains unproven.
+[Evidence and owner replan options](audit/2026-09-30/core-food-preflight/README.md).
+The reviewed plan below is retained; no second slice or roadmap advance is selected.
+
 **Next single outcome:** Continuing an ordinary A1 company, the player builds a
 paid grain → food → Core-town service, sees native food payments and repeated
 monthly food consumption, then cold-reloads and sees service resume.

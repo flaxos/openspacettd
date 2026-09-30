@@ -1,0 +1,178 @@
+{
+  "mode": "read-only-retained-A1-receiver-inspection",
+  "code_head": "abeb8f00459f8510a9a4fbf8dfeb4c809dd39277",
+  "binary_sha256": "09eb6676ba5883bf2e689b3b679e8117fd73ac60ea7ae6a4b1d976f33f25e789",
+  "canonical_seed": 11,
+  "canonical_start_switched": false,
+  "native_advances": 0,
+  "spending": 0,
+  "records": [
+    {
+      "seed": 101,
+      "save": "build/a1-full-consist-three-seed/101/operation.sav",
+      "save_sha256": "42f6bdbdc05d0fd99cf729832bc7811e4413be6c87853d3c0e67fd1eacc423af",
+      "captured_A1_cold_equal": true,
+      "state_unchanged": true,
+      "tick": 130304,
+      "money": 14715,
+      "loan": 190000,
+      "towns": [
+        {
+          "consumed": [],
+          "demand": [],
+          "designated": false,
+          "growth": 0.0,
+          "houses": [
+            169848,
+            169850,
+            170872,
+            171898,
+            171899,
+            172919,
+            172920,
+            173943,
+            173944,
+            173946,
+            173948,
+            174968,
+            175992,
+            175994,
+            177016,
+            177018,
+            178040,
+            178042,
+            179064,
+            179066,
+            179067,
+            179068,
+            180088,
+            180092,
+            181112,
+            181114,
+            182138,
+            182140,
+            182141,
+            183160,
+            183162
+          ],
+          "id": 0,
+          "name": "",
+          "passengers": 0.0,
+          "population": 933,
+          "reserves": [],
+          "role": "Industrial",
+          "tile": 177017,
+          "world": 1
+        }
+      ],
+      "core_receivers": []
+    },
+    {
+      "seed": 2026,
+      "save": "build/a1-full-consist-three-seed/2026/operation.sav",
+      "save_sha256": "5ace1f1f3f1627334034a6d2bcff1584282777d91268b7a43f32d2dce519b038",
+      "captured_A1_cold_equal": true,
+      "state_unchanged": true,
+      "tick": 87296,
+      "money": 36473,
+      "loan": 100000,
+      "towns": [
+        {
+          "consumed": [],
+          "demand": [
+            [
+              9,
+              24
+            ],
+            [
+              24,
+              12
+            ],
+            [
+              28,
+              12
+            ],
+            [
+              30,
+              24
+            ],
+            [
+              33,
+              119
+            ]
+          ],
+          "designated": false,
+          "growth": 0.0,
+          "houses": [
+            73451,
+            73454,
+            73455,
+            74479,
+            75501,
+            75503,
+            76519,
+            76520,
+            76525,
+            76527,
+            77546,
+            77551,
+            78561,
+            78564,
+            78565,
+            78567,
+            78568,
+            78570,
+            78571,
+            78572,
+            78573,
+            78575,
+            78576,
+            78577,
+            78578,
+            78580,
+            80612,
+            80614,
+            80615,
+            80616,
+            80617,
+            80618,
+            80620,
+            80621,
+            80623,
+            80625,
+            80627,
+            81642,
+            82666,
+            82667,
+            82669,
+            82671,
+            82672,
+            83690,
+            83691,
+            83693,
+            83695,
+            83696,
+            84717,
+            85736,
+            85737,
+            85738,
+            85739,
+            85741,
+            85743
+          ],
+          "id": 0,
+          "name": "",
+          "passengers": 0.0,
+          "population": 2366,
+          "reserves": [],
+          "role": "Core",
+          "tile": 79597,
+          "world": 0
+        }
+      ],
+      "core_receivers": [
+        0
+      ]
+    }
+  ]
+}

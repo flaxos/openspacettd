@@ -425,6 +425,8 @@ enum class Commands : uint8_t {
 	SetStellarGateAccess, ///< configure player gateway access
 	SetResearchAcceleration, ///< enable optional research feedstock consumption
 	ManageEconomyFactory,    ///< upgrade or retire an owned physical factory
+	DesignateMegacity, ///< register an existing town for ordinary megacity demand
+	DesignateMegacitySpectator, ///< preserve the free designation action for spectators
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

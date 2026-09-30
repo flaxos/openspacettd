@@ -109,4 +109,11 @@ find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
     add_test(NAME Stellar_directory_authentication_and_restart
         COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_stellar_directory.py")
+    if(UNIX)
+        add_test(NAME Megacity_designation_native_relay_and_reload
+            COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_command_authority_network.py"
+                "$<TARGET_FILE:openttd_test>" --megacity-designation)
+        set_tests_properties(Megacity_designation_native_relay_and_reload PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" TIMEOUT 90 LABELS "integration;command-authority")
+    endif()
 endif()

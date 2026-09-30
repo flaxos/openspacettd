@@ -17,6 +17,7 @@
 #include "../settings_type.h"
 #include "../table/strings.h"
 #include "../town.h"
+#include "../timer/timer_game_calendar.h"
 #include "commonwealth_pack.h"
 #include "commonwealth_slice.h"
 #include "corporate_hq.h"
@@ -425,7 +426,10 @@ bool IntegratedEconomy::EvaluateCity(TownID town, float &growth, float &passenge
 			city.reserves[c] -= demand[c];
 			city.consumed[c] = demand[c];
 			Record(EconomyFlow::Consumed, c, demand[c]);
-			if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->consumed[c] += demand[c];
+			if (_commonwealth_slice_audit != nullptr) {
+				_commonwealth_slice_audit->consumed[c] += demand[c];
+				if (c == Cargo("FOOD")) _commonwealth_slice_audit->city_months.push_back({TimerGameCalendar::date.base(), town.base(), demand[c], city.reserves[c]});
+			}
 		}
 		return true;
 	};

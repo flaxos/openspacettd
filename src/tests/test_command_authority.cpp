@@ -174,11 +174,38 @@ std::string CommandAuthorityState()
 	return out.str();
 }
 
+/** Each parallel process must own its save directory, even with a coarse clock. */
+static std::filesystem::path CreateCommandAuthoritySaveDirectory(const std::filesystem::path &prefix)
+{
+	for (uint32_t attempt = 0; attempt < 64; ++attempt) {
+		const std::filesystem::path dir = fmt::format("{}-{}", prefix.string(), attempt);
+		if (std::filesystem::create_directory(dir)) return dir;
+	}
+	FAIL("Could not allocate a unique command-authority save directory after 64 collisions");
+	return {};
+}
+
+TEST_CASE("Command authority save directories retry existing names without sharing files", "[command-authority][save-directory]")
+{
+	const auto prefix = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-collision-test-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	const auto root = CreateCommandAuthoritySaveDirectory(prefix);
+	const auto occupied = root / "parallel-save-0";
+	REQUIRE(std::filesystem::create_directory(occupied));
+	const auto selected = CreateCommandAuthoritySaveDirectory(root / "parallel-save");
+	CHECK(selected == root / "parallel-save-1");
+	CHECK(std::filesystem::is_directory(selected));
+	CHECK(std::filesystem::is_directory(occupied));
+	CHECK(std::filesystem::is_empty(occupied));
+	CHECK(std::filesystem::remove(selected));
+	CHECK(std::filesystem::remove(occupied));
+	CHECK(std::filesystem::remove(root));
+}
+
 void SaveReloadCommandAuthority()
 {
 	UnInitWindowSystem();
-	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-{}", std::chrono::steady_clock::now().time_since_epoch().count());
-	REQUIRE(std::filesystem::create_directory(dir));
+	const auto prefix = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	const auto dir = CreateCommandAuthoritySaveDirectory(prefix);
 	const auto path = (dir / "authority.sav").string();
 	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
 	// Registry is transient: local display must derive from the restored canonical world.

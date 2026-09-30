@@ -1,0 +1,51 @@
+{
+  "source_head": "abeb8f00459f8510a9a4fbf8dfeb4c809dd39277",
+  "outcome": "BLOCKED",
+  "source_build": {
+    "status": "passed",
+    "log": "core-food-final-source-build.log"
+  },
+  "unit": {
+    "status": "passed",
+    "cases": 480,
+    "assertions": 67756,
+    "log": "core-food-final-unit.log"
+  },
+  "ctest": {
+    "status": "passed",
+    "cases": 494,
+    "sequential": true,
+    "log": "core-food-final-ctest.log"
+  },
+  "repo_linters": {
+    "status": "passed"
+  },
+  "script_mode": {
+    "status": "passed"
+  },
+  "python_compile": {
+    "status": "passed"
+  },
+  "seed_regression": {
+    "status": "passed"
+  },
+  "diff_check": {
+    "status": "passed"
+  },
+  "ordinary_food_preflight": {
+    "status": "failed",
+    "reason": "No generated Core town with actual houses",
+    "source_clean": true,
+    "native_a1_cold_equal": true,
+    "unchanged_after_failure": true,
+    "log": "core-food-final-preflight.log"
+  },
+  "food_operation": {
+    "status": "not-run",
+    "reason": "Plan stop before spending: no Core receiver"
+  },
+  "human_acceptance": {
+    "status": "pending"
+  },
+  "binary_sha256": "09eb6676ba5883bf2e689b3b679e8117fd73ac60ea7ae6a4b1d976f33f25e789"
+}

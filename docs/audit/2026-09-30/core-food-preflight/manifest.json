@@ -1,0 +1,203 @@
+{
+  "source_commit": "abeb8f00459f8510a9a4fbf8dfeb4c809dd39277",
+  "binary_sha256": "09eb6676ba5883bf2e689b3b679e8117fd73ac60ea7ae6a4b1d976f33f25e789",
+  "pack_sha256": {
+    "integrated_v1": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+    "rail_v3": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+    "equipment_v1": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+  },
+  "outcome": "BLOCKED",
+  "passed": false,
+  "files": [
+    {
+      "path": "build/agent-logs/core-food-authority-relay-regression.log",
+      "bytes": 1652,
+      "sha256": "83c10d3744fd82c5338dfff469654c73f161a1509fc04391d7b7ef5e833eaa8a"
+    },
+    {
+      "path": "build/agent-logs/core-food-build.log",
+      "bytes": 80034,
+      "sha256": "29f5379d3b4930d66b75c28d6e5885b126f05c5aa4dee775cbf65344537568aa"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-focused-2.log",
+      "bytes": 1113,
+      "sha256": "87ea82daa07a588449b8a875c52711e4dc250788d98c7a43b476970cb8d2b8a2"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-focused-3.log",
+      "bytes": 163,
+      "sha256": "e118b4a78264deef807117a35fd202473527d2b50efa785430f54457cbff2666"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-focused.log",
+      "bytes": 1087,
+      "sha256": "d93ec48dad3083ed3b2dc6f5e2c2b0bc4af385713fca27838d40e928cb22cad5"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-rebuild-2.log",
+      "bytes": 891,
+      "sha256": "564be6ce42da3ebb044f29496e2848c6a6a4f5d04951ba49d904d7180dbaecf7"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-rebuild-3.log",
+      "bytes": 826,
+      "sha256": "d670bf7c74a521b797548b90a0d040f469c047a844e78734c7d7ddabb832a5f7"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-rebuild.log",
+      "bytes": 900,
+      "sha256": "9c2f202609acd258b209795bdf8b2ae2a424a7a345678cdd6717a3025ebe059a"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-relay-2.log",
+      "bytes": 456,
+      "sha256": "60ce5deee473e3d4283b6847c5533c4e0ce24f1be50a596cffc9a67d23d337b0"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-relay-3.log",
+      "bytes": 456,
+      "sha256": "60ce5deee473e3d4283b6847c5533c4e0ce24f1be50a596cffc9a67d23d337b0"
+    },
+    {
+      "path": "build/agent-logs/core-food-designation-relay.log",
+      "bytes": 3945,
+      "sha256": "4f2c7e84ed5f4187b82b316088ac5edfd46ff30738afa576278b49583c854bf0"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-ctest.log",
+      "bytes": 123738,
+      "sha256": "0a376621824fa38cae0b6e38831af3687fd76a05401e0da3eba9b6612810d83c"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-file-descriptions.log",
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-preflight.log",
+      "bytes": 666,
+      "sha256": "209a9e6071064d73e6ed5a79e70b5644d652bba02517b62cf94e70308c26fb8f"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-script-mode.log",
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-source-build.log",
+      "bytes": 812,
+      "sha256": "4d1746e8a1b125e3f3629d0e14dc4d6734314a9d8d3921791c6bbc091e90b596"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-unit.log",
+      "bytes": 5299,
+      "sha256": "6c9fe19eea0a70c803ec4cb09da0c9e00db3afb818b09d8af8b09d50cc5ed051"
+    },
+    {
+      "path": "build/agent-logs/core-food-final-unused-strings.log",
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "path": "build/agent-logs/core-food-preflight-1.log",
+      "bytes": 749,
+      "sha256": "b364cf5b578bf31324f7085d1548aa581ce8c784d61734b17ef0165d5f547dc8"
+    },
+    {
+      "path": "build/agent-logs/core-food-preflight-2.log",
+      "bytes": 666,
+      "sha256": "209a9e6071064d73e6ed5a79e70b5644d652bba02517b62cf94e70308c26fb8f"
+    },
+    {
+      "path": "build/agent-logs/core-food-resource-relay-regression.log",
+      "bytes": 1574,
+      "sha256": "99efa6f8902b3023ab4ce475ab4c40f22477fbc524f42e50f58f08fdf490c5f9"
+    },
+    {
+      "path": "build/agent-logs/core-food-stable-build.log",
+      "bytes": 44217,
+      "sha256": "8425865e36ea43d10953b27e634369498b0f62c2e88ab27598e8e51d006bcb9c"
+    },
+    {
+      "path": "build/agent-logs/core-food-stress-inspection.json",
+      "bytes": 166798,
+      "sha256": "5368a6261f42938a28e03e8be457202ef732a43045873d07ea6754e49f926219"
+    },
+    {
+      "path": "build/core-food-final-preflight/a1-source/build/a1-full-consist-three-seed/11/operation.sav",
+      "bytes": 157716,
+      "sha256": "51ce35b791d419b3b4106a8f63f715bca89ae54f88522997a6295171320b5ce0"
+    },
+    {
+      "path": "build/core-food-final-preflight/continuation.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    },
+    {
+      "path": "build/core-food-final-preflight/continuation.log",
+      "bytes": 54615,
+      "sha256": "cdb7e61a8fb20d9ad7a62008cc91cee124e8f79685112b2e0a445d054c339ab2"
+    },
+    {
+      "path": "build/core-food-final-preflight/evidence.json",
+      "bytes": 179901,
+      "sha256": "5d9557e1b4c111e11f613f0c53aeaa7d9e86d1c5d3136402a642991cf5504dd3"
+    },
+    {
+      "path": "build/core-food-final-preflight/failure.sav",
+      "bytes": 157736,
+      "sha256": "a22c3e78d06da4b6e3739f954d0e5f08ad6415d1f3ba2a54ddeef220d3d251a9"
+    },
+    {
+      "path": "build/core-food-preflight-1/a1-source/build/a1-full-consist-three-seed/11/operation.sav",
+      "bytes": 157716,
+      "sha256": "51ce35b791d419b3b4106a8f63f715bca89ae54f88522997a6295171320b5ce0"
+    },
+    {
+      "path": "build/core-food-preflight-1/continuation.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    },
+    {
+      "path": "build/core-food-preflight-1/continuation.log",
+      "bytes": 32636,
+      "sha256": "0b53cbe346f3011753eebaa908e79635a7d53be1e3f82a42d6999594f0450001"
+    },
+    {
+      "path": "build/core-food-preflight-1/evidence.json",
+      "bytes": 113124,
+      "sha256": "1ae872be932066187c257a8e9f4d3914b6ee53f82d30a2edb3f1585c1c0377a5"
+    },
+    {
+      "path": "build/core-food-preflight-1/failure.sav",
+      "bytes": 157736,
+      "sha256": "1ee897599c451aad114c171ba404710b48d5f728538f0508293a6019028cc63a"
+    },
+    {
+      "path": "build/core-food-preflight-2/a1-source/build/a1-full-consist-three-seed/11/operation.sav",
+      "bytes": 157716,
+      "sha256": "51ce35b791d419b3b4106a8f63f715bca89ae54f88522997a6295171320b5ce0"
+    },
+    {
+      "path": "build/core-food-preflight-2/continuation.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    },
+    {
+      "path": "build/core-food-preflight-2/continuation.log",
+      "bytes": 54611,
+      "sha256": "3d5f618482ba3690f55887cc2c023ad5f009e6145eec84a79314e2ee18785fdf"
+    },
+    {
+      "path": "build/core-food-preflight-2/evidence.json",
+      "bytes": 179900,
+      "sha256": "47a55d7e9a3f90338c60340e040458b61fd25c11846753d8aaefc393b169f686"
+    },
+    {
+      "path": "build/core-food-preflight-2/failure.sav",
+      "bytes": 157740,
+      "sha256": "3f9ce5b1f2aa99445fffe44298c935839c3a0c8e9a585c95145820ceb3d52913"
+    }
+  ]
+}

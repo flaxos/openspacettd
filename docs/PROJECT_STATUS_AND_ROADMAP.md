@@ -14,10 +14,13 @@ output-buffer relief and cold-continuation results govern A1; no A2 is implement
 
 The integrated economy and natural scheduled federation freight exist. A1 now has
 bounded ordinary-start automated proof; graphical acceptance remains Pending.
-[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is the sole proposed
-next execution slice: one bounded A1 follow-up toward A2, for parent review before
-separate implementation. The owner permits up to two supervised sequential slices
-after A1 proof/review before human playtest; this proposes the first, not both.
+[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is the sole current
+execution slice, now **BLOCKED** before spending: the retained seed11 A1 save has
+no existing Core town/house receiver. Native designation wiring is tested; full
+food-chain affordability and paid consumption remain unproven. See the
+[preflight evidence and owner replan options](audit/2026-09-30/core-food-preflight/README.md).
+The owner permits up to two supervised sequential slices after A1 proof/review
+before human playtest; this stopped at the first; no second is started.
 The other horizons order dependencies, not approved sprint numbers. Development
 phase and economic role remain separate; review that product model only with an
 explicit decision. Dated delivery records preserve their original evidence.
@@ -27,7 +30,7 @@ explicit decision. Dated delivery records preserve their original evidence.
 | Order | Outcome and dependency | Evidence boundary |
 |---|---|---|
 | A0 — Canonical new-game contract | **Established below and exercised by A1.** Use normal New Game generation on integrated ruleset 1, industry v1 (OST01 v5), rail v3/equipment v1, at least two logical worlds and ordinary finances. | Actual seeds 11/101/2026 retain startup/provenance evidence; graphical start/usability remain Pending. |
-| A1 — First Sustainable Freight | Bounded native ordinary iron service, paid output relief and cold continuation pass. Proposed follow-up: [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md). | £81–112k startup; warehouse storage is not final demand. New food chain affordability/consumption remains unproven; human acceptance Pending. |
+| A1 — First Sustainable Freight | Bounded native ordinary iron service, paid output relief and cold continuation pass. Blocked follow-up: [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md). | £81–112k startup; warehouse storage is not final demand. Required seed11 Core receiver is absent; new food chain affordability/consumption remains unproven; human acceptance Pending. |
 | A2 — First Earned Expansion | After A1, earn early research, obtain physical materials/machinery through the real economy, and commission an earned gate or resource opportunity without circular prerequisites. | Still the next strategic milestone. HQ requires £5m cash eligibility and costs £2.5m; A1 has not proved this income bridge. No authored assets, grants or changed prices substitute. |
 | A3 — Continuous Progression | In one coherent run, connect bootstrap freight → research → material production → expansion → additional resources → advanced production → city supply/growth. | Track actual consumption and growth, not warehouse arrival alone. |
 | A4 — Capacity and Long-Run Logistics | Once sustainable, test branches, busy terminals, congestion, disruption/recovery, useful upgrades and longer-run performance. | Throughput and human play remain distinct claims. |

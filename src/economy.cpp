@@ -8,6 +8,7 @@
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
+#include "timer/timer_game_tick.h"
 #include "portal/integrated_economy.h"
 #include "portal/stellar_network.h"
 #include "portal/commonwealth_slice.h"
@@ -1247,6 +1248,8 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 
 	/* Apply interplanetary trade premium */
 	profit = PlanetManager::GetInterplanetaryCargoProfit(profit, src_tile, st->xy);
+	if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->payments.push_back({
+		int64_t(TimerGameTick::counter), delivery_vehicle.base(), dest.base(), cargo_type, accepted_total, int64_t(profit)});
 
 	return profit;
 }
@@ -1311,6 +1314,8 @@ CargoPayment::~CargoPayment()
 	AutoRestoreBackup cur_company(_current_company, this->front->owner);
 
 	SubtractMoneyFromCompany(_current_company, CommandCost(this->front->GetExpenseType(true), -this->route_profit));
+	if (_commonwealth_slice_audit != nullptr && this->front->owner == CompanyID{0})
+		_commonwealth_slice_audit->service_income[this->front->index.base()] += int64_t(this->route_profit);
 	this->front->profit_this_year += (this->visual_profit + this->visual_transfer) << 8;
 
 	const Vehicle *moving_front = this->front->GetMovingFront();
