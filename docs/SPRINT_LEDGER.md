@@ -1,5 +1,16 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## A1 First Sustainable Freight — 30 September 2026
+
+**IMPLEMENTED; automated evidence in progress; human UAT Pending.** Native ordinary
+New Game proof extends the existing harness and shared runner, with actual seed
+forwarding, normal commands/loan, physical cargo/payment, toll/cost observers,
+processor buffers and cold-reload continuation. No economy/content/generator policy
+or A2 change. Discovery failures and the unprofitable one-wagon seed101 continuation
+are retained in [the audit](audit/2026-09-30/first-freight/README.md).
+Earlier three-seed labels are superseded by the documented hardcoded-seed correction;
+all historical evidence remains preserved.
+
 ## Organic UAT crash repair — 30 September 2026
 
 | Delivery | Automated evidence | Human UAT | Status |

@@ -33,7 +33,7 @@ def first_freight(args):
               'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
               'pack_sha256': {name: hashlib.sha256((ROOT / 'bin/newgrf' /
                   f'openspacettd_{name}.grf').read_bytes()).hexdigest() for name in packs},
-              'seeds': []}
+              'steps_per_phase_limit': args.steps, 'seeds': []}
     import subprocess
     report['source_commit'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     report['source_dirty'] = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
@@ -99,6 +99,7 @@ def first_freight(args):
                 state = json.loads(engine.command('connected_economy first-freight-advance', 'FREIGHT state '))
                 row['samples'].append(state)
                 require(state['cash_conserved'] and not state['cargo_errors'], 'Native cash or physical cargo conservation failed')
+                require(state['money'] > 0 and state['loan'] == built['loan'], 'Starter operating cash exhausted or debt changed')
                 require(not any(t['crashed'] or t['lost'] for t in state['trains']), 'Train crashed or lost')
                 delivered = sum(units[cargo] for _, units in state['audit']['vehicle_deliveries'])
                 total_delivered += delivered
@@ -125,6 +126,7 @@ def first_freight(args):
                 state = json.loads(engine.command('connected_economy first-freight-advance', 'FREIGHT state '))
                 row['onward_samples'].append(state)
                 require(state['cash_conserved'] and not state['cargo_errors'], 'Output-service conservation failed')
+                require(state['money'] > 0 and state['loan'] == row['onward_built']['loan'], 'Output operating cash exhausted or debt changed')
                 require(not any(t['crashed'] or t['lost'] for t in state['trains']), 'Output service crashed or lost')
                 if any(hub[3] > 0 for hub in state['hubs']):
                     break
@@ -148,6 +150,7 @@ def first_freight(args):
                 state = json.loads(engine.command('connected_economy first-freight-advance', 'FREIGHT state '))
                 row['reload_samples'].append(state)
                 require(state['cash_conserved'] and not state['cargo_errors'], 'Reload conservation failed')
+                require(state['money'] > 0 and state['loan'] == restored['loan'], 'Reload operating cash exhausted or debt changed')
                 require(not any(t['crashed'] or t['lost'] for t in state['trains']), 'Reload train crashed or lost')
                 further_delivered += sum(units[cargo] for _, units in state['audit']['vehicle_deliveries'])
                 further = further_delivered // capacity

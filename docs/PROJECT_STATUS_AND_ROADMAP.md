@@ -1,5 +1,15 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## A1 ordinary-start delivery — 30 September 2026
+
+**Automated verification in progress; human UAT Pending.** The bounded
+[First Sustainable Freight audit](audit/2026-09-30/first-freight/README.md) separates
+native generated starts and normal command construction from older authored fixtures.
+The seed runner now forwards actual seeds; the earlier28September11/101/2026
+coverage claim is superseded because every run used native seed11. Historical
+artifacts remain unchanged. Seed-specific route, cost, consumption, operating cash,
+output-buffer relief and cold-continuation results govern A1; no A2 is implemented.
+
 ## Active planning horizons — 30 September 2026
 
 The integrated economy and natural scheduled federation freight exist. Their

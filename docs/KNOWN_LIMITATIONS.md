@@ -1,5 +1,26 @@
 # OpenSpaceTTD Known Limitations
 
+## First Sustainable Freight boundaries — 30 September 2026
+
+[A1 evidence and human mission](audit/2026-09-30/first-freight/README.md) cover only
+the exact canonical profile and sampled native seeds. Graphical New Game discovery,
+manual construction and controls remain Pending. The bounded route planner is a
+proof aid, not a globally cheapest route finder or all-seed reachability guarantee.
+Output-to-hub transport is affordable buffer relief and storage; it is not final
+steel/food consumption or research/earned A2 access. Indefinite demand is unproven.
+
+The native CST starter train presently incurs zero running cost because railv3
+omits `running_cost_base`; output locomotives, interest, tolls and ordinary other
+charges still apply. A positive CST running-cost balance would need separate owner
+approval and fresh profitability evidence. No such policy change is part of A1.
+The one-wagon seed101 attempt fails combined post-reload finances; it is retained,
+not hidden by additional cash. A normally paid larger consist is being tested.
+
+**Coverage correction:** the historical28September reports labelled11/101/2026
+all used native seed11 due to the shared runner's hardcoded CLI argument. Those
+original files remain retained; they do not establish representative seed coverage.
+Current actual-seed manifests supersede that claim, rather than rewriting history.
+
 ## Organic UAT crash follow-up — 30 September 2026
 
 The earlier headless verification omitted native foundation queries: it accepted

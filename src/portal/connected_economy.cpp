@@ -1186,10 +1186,14 @@ bool FirstFreight(std::span<std::string_view> argv)
 		if (!Result(ExtractCommandCost(engine_quote), "engine quote") || !FreightFunds(ExtractCommandCost(engine_quote).GetCost())) return true;
 		auto [ec, engine, x, y, z] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, depot, EngineLocal(0x20), false, INVALID_CARGO, ClientID::Invalid);
 		if (!Result(ec, "Pioneer steam")) return true;
-		auto wagon_quote = Command<Commands::BuildVehicle>::Do(DoCommandFlag::QueryCost, depot, EngineLocal(0x32), false, cargo, ClientID::Invalid);
-		if (!Result(ExtractCommandCost(wagon_quote), "wagon quote") || !FreightFunds(ExtractCommandCost(wagon_quote).GetCost())) return true;
-		auto [wc, wagon, q, v, w] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, depot, EngineLocal(0x32), false, cargo, ClientID::Invalid);
-		if (!Result(wc, "hopper") || !Result(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, wagon, engine, false), "couple")) return true;
+		/* Pioneer plus three ordinary half-tile hoppers fits the two-tile
+		 * platforms. Capacity amortises the same gate trips and loan interest. */
+		for (uint wagon_index = 0; wagon_index < 3; ++wagon_index) {
+			auto wagon_quote = Command<Commands::BuildVehicle>::Do(DoCommandFlag::QueryCost, depot, EngineLocal(0x32), false, cargo, ClientID::Invalid);
+			if (!Result(ExtractCommandCost(wagon_quote), "wagon quote") || !FreightFunds(ExtractCommandCost(wagon_quote).GetCost())) return true;
+			auto [wc, wagon, q, v, w] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, depot, EngineLocal(0x32), false, cargo, ClientID::Invalid);
+			if (!Result(wc, "hopper") || !Result(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, wagon, engine, false), "couple")) return true;
+		}
 		for (uint8_t index = 0; index < 2; ++index) {
 			Order o; o.MakeGoToStation(GetStationIndex(legs[index].station)); o.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
 			if (index == 0) { o.SetLoadType(OrderLoadType::FullLoad); o.SetUnloadType(OrderUnloadType::NoUnload); } else o.SetLoadType(OrderLoadType::NoLoad);
