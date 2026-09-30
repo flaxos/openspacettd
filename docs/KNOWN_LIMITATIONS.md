@@ -1,5 +1,21 @@
 # OpenSpaceTTD Known Limitations
 
+## First Functional Core Supply execution limit — 1 October 2026
+
+The current draft repairs replicated designation and query-state mutation, but
+the sole ASSISTED FUNCTIONAL campaign failed waiting for offline startup before
+any grant or state capture. All route/flow/financial/control/research/cold/replay
+proof remains NOT RUN; no verified construction coordinates or observation save
+exist. Assistance issued is £0 and ending cash/debt are unobserved. The log-framing
+and split-line repair has focused transport evidence only. The reviewed plan's
+first-stop rule requires a new explicit handoff for another full campaign.
+[Full evidence and bounded choices](audit/2026-10-01/functional-core/README.md).
+
+Fixture GUI rendering and three-process native queue relay do not establish human
+usability or a full multiplayer playtest. Human UAT remains Pending. The inherited
+zero CST input running cost is unchanged; ordinary economics, the revised A1 loss
+and broader pacing/balance remain separate. The draft depends on unmerged PR66.
+
 ## Functional-first acceptance boundaries — 1 October 2026
 
 Current priority follows the owner's [functional-first approval](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026).

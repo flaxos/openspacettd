@@ -1,5 +1,21 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Functional Core Supply and Materials I — 1 October 2026
+
+**Draft prerequisite implementation; ASSISTED FUNCTIONAL FAIL at offline startup;
+human UAT Pending.** Normal/spectator designation uses native replicated commands;
+research queries and actual Tech Tree panel inspection preserve absent/existing
+TECH state. Full native gates and focused fixture/transport records are retained
+in the [execution audit](audit/2026-10-01/functional-core/README.md).
+
+One campaign at `d7a3a12006` stopped before its startup marker: £0 assistance,
+no checkpoint, commands, advances, ending financial observation or mission phase.
+All functional phases and replay are NOT RUN. `7bb7587d59` corrects only log framing
+and complete-line reading, supported by small console/synthetic regressions; no
+full retry followed. The branch starts at exact unmerged PR66 and normally carries
+the reviewed docs-only PR67 commit. Old failures/art/archives remain unchanged.
+No economic claim, human acceptance, balance change, merge or second slice occurs.
+
 ## Functional progression priority revision — 1 October 2026
 
 **PLANNED; documentation only.** Owner-approved functional-first direction is

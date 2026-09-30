@@ -1,5 +1,19 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## First Functional Core Supply execution — 1 October 2026
+
+**Draft implementation; ASSISTED FUNCTIONAL campaign FAIL at offline startup.**
+Replicated town designation and read-only research eligibility have focused native
+GUI/command/save regressions. Guarded cash/flow/research/cold/replay support exists,
+but the first campaign stopped before any grant or native state snapshot. Assistance
+applied is £0; every mission phase and replay are NOT RUN. The diagnosed console
+transport repair has focused evidence; a full retry requires a new explicit handoff.
+[Evidence, boundaries and owner mission](audit/2026-10-01/functional-core/README.md).
+
+Human UAT remains Pending, ordinary economics remain unproven and the prior A1
+loss remains failed evidence. No roadmap milestone, second slice or merge advances.
+The current draft stacks on unmerged PR66; the reviewed PR67 plan remains unchanged.
+
 ## Functional-first direction — 1 October 2026
 
 **Current owner-approved priority: prove the functional game loop, then balance
@@ -24,8 +38,8 @@ source, imports no partial gameplay and neither merges nor edits those PRs.
 
 | Dimension | What passes it | Current evidence / remaining gap |
 |---|---|---|
-| Implemented systems | Owning source and focused tests exist and agree on behavior. | Native generated worlds/public rail, integrated physical processing, city baskets, HQ/research/material gates and save chunks exist. Designate bypasses replicated commands and research eligibility queries mutate saved state on main; both need narrow integration repairs. PR62 is only a reference. Source presence is not an end-to-end pass. |
-| Functional end-to-end proof | Player-equivalent legal commands connect construction → delivery → processing → actual town consumption → paid next unlock → cold continuation, with accounting/determinism controls. Cash-assisted runs must be labelled. | Generation T+C+D+S passes actual seeds11/101/2026. The full food/research mission is **NOT RUN**. Authored all-chain fixtures and historical A1 freight cover narrower/different starts. |
+| Implemented systems | Owning source and focused tests exist and agree on behavior. | Native generation/processing/city/HQ/research/save systems exist. The current draft repairs designation replication and eligibility-state mutation with focused regressions; these changes remain outside main until owner merge. Source presence is not an end-to-end pass. |
+| Functional end-to-end proof | Player-equivalent legal commands connect construction → delivery → processing → actual town consumption → paid next unlock → cold continuation, with accounting/determinism controls. Cash-assisted runs must be labelled. | Generation T+C+D+S passes actual seeds11/101/2026. The first assisted campaign **FAILS at offline startup**; all food/research/control/cold phases and replay are NOT RUN. Narrower fixtures/historical freight do not complete this outcome. |
 | Ordinary-start economic viability | Fresh ordinary cash/loan, no assistance, legal complete startup and measured operating continuation/next-step affordability over a stated horizon. | Original A1 three-seed bounded proof passes at its revision. Revised seed11 loses cash after reload; seed101/2026 revised operation NOT RUN. Food and HQ affordability remain unproven; no indefinite sustainability claim. |
 | Human playable UAT | A human can find controls, build/operate the mission, understand feedback and reload on an identified build. | Generation, A1, food/research and optional art acceptance remain **Pending** for these scopes. Native tests/SDL smoke/prebuilt saves cannot promote them. |
 | Balance and pacing | Owner-chosen costs, rewards, waiting times and progression targets are evaluated across representative ordinary starts. | Deferred separate pass. Preserve every cost/revenue/wait measurement now; do not tune HQ, loans, tolls, running costs, yields or research timing in functional proof. |
@@ -38,7 +52,7 @@ implement or complete either milestone. Only one gameplay slice is proposed.
 | Order | Named outcome / dependency | Finish and boundary |
 |---|---|---|
 | A0 — Usable generated start | Close generation on T (legal public joins), C (living Core town), D (repeatability), S (existing-save integrity). | Contract is independently proven and merged. Keep portability delivery and human generation UAT open; no economic pass is inferred. |
-| A1 — First Functional Core Supply and Materials I | **Recommended next:** existing generated grain/food assets and a real Core receiver, followed by native HQ/research in the same company. No sustainable-A1 or federation prerequisite. | The sole [active proposal](ACTIVE_EXECUTION_PLAN.md): three food deliveries/consuming months, paid Materials I, Materials II availability and cold continuation. Single disclosed £6m test grant; no tech/cargo grants. Full quote, budget and stop controls apply. |
+| A1 — First Functional Core Supply and Materials I | **Draft / blocked at first offline startup.** Prerequisite repairs are tested; the functional sequence remains unproven. No sustainable-A1 or federation prerequisite. | The unchanged [active plan](ACTIVE_EXECUTION_PLAN.md) requires three food deliveries/consuming months, paid I, II availability and cold continuation. £0 of the single disclosed £6m allowance was applied. Another full campaign requires explicit handoff; all bounds remain. |
 | A3 functional continuity, before earned A2 certification | After the recommended slice and review, select one extension through existing physical material/research/growth systems. | Candidate direction, not another active plan or implementation authorization. Demonstrate real custody/consumption; food alone is not city growth. |
 | A2 — First Earned Expansion | Revisit the ordinary-income bridge to HQ/research, real machinery/materials and one commissioned gate/resource opportunity after functional dependencies are exposed. | The word earned still requires ordinary finances and physical prerequisites. Assisted Materials I is not A2 completion; Phase4 access does not waive colonisation. |
 | A4 — Capacity and long-run logistics | After a coherent loop and human feedback, select throughput, congestion/recovery and useful upgrade proof. | Keep performance, usability and economics as scoped claims; no open-ended soak now. |
@@ -358,7 +372,7 @@ with one joined client each, including a run with two graphical clients. Ten car
 units and the global train identity return without a detected desync or duplicate.
 This is a controlled two-car fixture with no station orders; scheduled routes,
 restart recovery and human federation acceptance remain open. See
-[the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+[the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#historical-milestone-live-federation-with-scheduled-freight--completed-27-september-2026).
 
 ## Historical milestone: live federation with scheduled freight — completed 27 September 2026
 

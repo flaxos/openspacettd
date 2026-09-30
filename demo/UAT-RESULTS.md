@@ -1,5 +1,20 @@
 # Human UAT results — recovery / v1.1
 
+## First Functional Core Supply implementation — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL automated campaign: FAIL at startup.**
+The first bounded run stopped before any assistance command or checkpoint; all
+food/control/research/cold/replay phases are NOT RUN. £0 was granted; actual ending
+cash/debt were not observed. Focused designation/query/panel/save/relay tests and
+the diagnosed console transport repair do not establish the playable outcome.
+
+Use the [safe fresh checkout and six-step manual feedback mission](../docs/audit/2026-10-01/functional-core/README.md#safe-fresh-checkout-and-manual-owner-feedback).
+There is no verified observation save or route quote. Record exact build/content,
+manual steps, assistance/cash/debt, elapsed time and first unexpected message;
+15 minutes is a feedback window, not promised completion. The reviewed plan
+requires a new handoff for an automated full-campaign retry. Historical economic
+failures remain failed; no human acceptance, merge or next slice is inferred.
+
 ## Functional progression replan — 1 October 2026
 
 **Human status: Pending. No new game or human test was run for this docs change.**
@@ -121,7 +136,7 @@ with one joined client each, including a run with two graphical clients. Ten car
 units and the global train identity return without a detected desync or duplicate.
 This is a controlled two-car fixture with no station orders; scheduled routes,
 restart recovery and human federation acceptance remain open. See
-[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#historical-milestone-live-federation-with-scheduled-freight--completed-27-september-2026).
 
 
 Suite/fixture ID: ______  Save SHA256/version: ______  Base graphics/version: ______
