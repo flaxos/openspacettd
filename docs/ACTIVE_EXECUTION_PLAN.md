@@ -1,5 +1,16 @@
 # First Paid Core Food Consumption
 
+**Execution status — 30 September 2026: BLOCKED.** The authorized seed11 A1
+checkpoint has no Core receiver; read-only alternate seed2026 preflight finds an
+incompatible neutral terminal join. No FOOD operating proof or full-chain
+affordability passed. See the pinned
+[blocker evidence](https://github.com/flaxos/openspacettd/tree/78a30686c3467306b24dc1f0a6cf215f66f484dd/docs/audit/2026-09-30/core-food-preflight)
+and the [new-game generation proposal](INTEGRATED_GENERATION_PROPOSAL.md). Owner
+approval covers preparing that proposal only. The reviewed plan below retains
+its original start/acceptance bounds and publication-time ancestry; it is not
+permission to continue at a different seed or repair existing saves. Implementation
+remains paused pending a concrete approved replan.
+
 **Next single outcome:** Continuing an ordinary A1 company, the player builds a
 paid grain → food → Core-town service, sees native food payments and repeated
 monthly food consumption, then cold-reloads and sees service resume.
