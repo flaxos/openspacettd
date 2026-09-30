@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "integrated_economy.h"
 #include "stellar_network.h"
+#include "commonwealth_slice.h"
 #include "remote_gate_projects.h"
 #include "planet_manager.h"
 #include "portal_registry.h"
@@ -310,6 +311,10 @@ bool StellarNetwork::AdmitTrain(TileIndex gate, VehicleID train, CompanyID compa
 	if (!payer || payer->money < toll) return false;
 	SubtractMoneyFromCompany(company, CommandCost(ExpensesType::Other, toll));
 	if (Company::IsValidID(p->owner)) SubtractMoneyFromCompany(p->owner, CommandCost(ExpensesType::Other, -toll));
+	if (_commonwealth_slice_audit != nullptr) {
+		auto &observed = _commonwealth_slice_audit->gate_tolls[gate.base()];
+		++observed.first; observed.second += int64_t(toll);
+	}
 	admitted[train] = gate;
 	return true;
 }

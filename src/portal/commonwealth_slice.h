@@ -19,6 +19,7 @@ struct CommonwealthSliceAudit {
 	std::map<uint32_t, std::array<uint64_t, NUM_CARGO>> vehicle_deliveries; ///< Accepted cargo by vehicle.
 	std::array<uint64_t, NUM_CARGO> research_consumed{}; ///< Actual research feedstock withdrawals.
 	std::map<uint32_t, std::array<uint64_t, NUM_CARGO>> deliveries; ///< Accepted cargo by destination station.
+	std::map<uint32_t, std::pair<uint64_t, int64_t>> gate_tolls; ///< Per-gate admissions and actual tolls, observer only.
 	int64_t cash_debits = 0; ///< Actual company cash debits observed during the run.
 };
 /** Active WP11 audit observer, or nullptr outside the harness. */

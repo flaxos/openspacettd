@@ -1,22 +1,34 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## A1 ordinary-start delivery — 30 September 2026
+
+**Bounded automated proof passes seeds 11/101/2026; human UAT Pending.** The bounded
+[First Sustainable Freight audit](audit/2026-09-30/first-freight/README.md) separates
+native generated starts and normal command construction from older authored fixtures.
+The seed runner now forwards actual seeds; the earlier 28 September 11/101/2026
+coverage claim is superseded because every run used native seed 11. Historical
+artifacts remain unchanged. Seed-specific route, cost, consumption, operating cash,
+output-buffer relief and cold-continuation results govern A1; no A2 is implemented.
+
 ## Active planning horizons — 30 September 2026
 
-The integrated economy and natural scheduled federation freight exist. Their
-automated fixtures prove bounded behavior, not a profitable ordinary new game or
-human acceptance. [First Sustainable Freight](ACTIVE_EXECUTION_PLAN.md) is the
-only active implementation slice; the other horizons order dependencies, not
-approved sprint numbers. Development phase and economic role remain separate
-implementation concepts; review that product model later only with an explicit
-decision. The dated delivery records below preserve their original evidence.
+The integrated economy and natural scheduled federation freight exist. A1 now has
+bounded ordinary-start automated proof; graphical acceptance remains Pending.
+[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is the sole proposed
+next execution slice: one bounded A1 follow-up toward A2, for parent review before
+separate implementation. The owner permits up to two supervised sequential slices
+after A1 proof/review before human playtest; this proposes the first, not both.
+The other horizons order dependencies, not approved sprint numbers. Development
+phase and economic role remain separate; review that product model only with an
+explicit decision. Dated delivery records preserve their original evidence.
 
 ### Horizon A — prove the core single-player game loop
 
 | Order | Outcome and dependency | Evidence boundary |
 |---|---|---|
-| A0 — Canonical new-game contract | **Established for planning below.** Use normal New Game generation on an integrated ruleset 1 game, with integrated industry v1 (OST01 v5), rail v3 and equipment v1, at least two logical worlds, and ordinary company finances. | Existing generation/content activation and native initial loan are source-verified; starter route affordability and usability are unproven. |
-| A1 — First Sustainable Freight | From that start, discover and build a legal basic freight service that repeatedly earns enough to continue. [Active plan](ACTIVE_EXECUTION_PLAN.md). | Requires fresh-generation command, cargo, cash, reload and human UAT evidence. |
-| A2 — First Earned Expansion | After A1, earn early research, obtain physical materials/machinery through the real economy, and commission an earned gate or resource opportunity without circular prerequisites. | No authored assets or granted unlocks can substitute for progression. |
+| A0 — Canonical new-game contract | **Established below and exercised by A1.** Use normal New Game generation on integrated ruleset 1, industry v1 (OST01 v5), rail v3/equipment v1, at least two logical worlds and ordinary finances. | Actual seeds 11/101/2026 retain startup/provenance evidence; graphical start/usability remain Pending. |
+| A1 — First Sustainable Freight | Bounded native ordinary iron service, paid output relief and cold continuation pass. Proposed follow-up: [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md). | £81–112k startup; warehouse storage is not final demand. New food chain affordability/consumption remains unproven; human acceptance Pending. |
+| A2 — First Earned Expansion | After A1, earn early research, obtain physical materials/machinery through the real economy, and commission an earned gate or resource opportunity without circular prerequisites. | Still the next strategic milestone. HQ requires £5m cash eligibility and costs £2.5m; A1 has not proved this income bridge. No authored assets, grants or changed prices substitute. |
 | A3 — Continuous Progression | In one coherent run, connect bootstrap freight → research → material production → expansion → additional resources → advanced production → city supply/growth. | Track actual consumption and growth, not warehouse arrival alone. |
 | A4 — Capacity and Long-Run Logistics | Once sustainable, test branches, busy terminals, congestion, disruption/recovery, useful upgrades and longer-run performance. | Throughput and human play remain distinct claims. |
 
@@ -39,12 +51,14 @@ demand; generated mills confer no player research unlocks. The player must build
 connecting rail, stations, depot, train/consist and orders with ordinary capital
 and borrowing. Public access, tolls both ways, other operating costs and processor
 output-buffer limits belong in the continued-play/affordable-modest-next-step proof.
-Keep seeds 11, 101 and 2026 and the existing exact canonical settings. No federation,
+Keep A1's seeds 11, 101 and 2026 and exact canonical settings. No federation,
 player gate commissioning, grants or role changes are prerequisites for A1; A2
-still concerns earned new access. This corrects the plan, not A1's delivery status;
-the reported tile route and approximately £15k build cost remain unverified.
-Resource availability, acceptance, terrain,
-affordability and earned revenue are A1 proof obligations, not assumptions.
+still concerns earned new access. Actual A1 proof supersedes the approximately
+£15–20k diagnostic estimate: startup costs £80,681/£112,267/£83,191 and the paid
+output step £86,432/£87,152/£87,180. Seed101's minimum sampled cash is £6,314;
+cash/loan constraints remain material. The proposed food continuation uses seed11
+and existing generated assets; it does not promise three-seed food coverage, growth,
+early research, positive CST input running cost or indefinite sustainability.
 Connected economy fixtures and prefab UAT saves with authored track, trains,
 capital or cargo are explicitly **not** evidence of ordinary progression.
 
@@ -91,8 +105,8 @@ crisis/Silfen scope remains withdrawn.
 
 The historical “Current Project Milestone” and “Next priorities” paragraphs
 below describe their dated revisions; this active horizon section supersedes
-them for future ordering. Automated implementation evidence, pending human UAT,
-and unproven bootstrap balance remain separate.
+them for future ordering. Bounded automated implementation evidence, Pending human
+UAT and unproven full-progression affordability remain separate.
 
 ## Organic UAT crash recovery — 30 September 2026
 

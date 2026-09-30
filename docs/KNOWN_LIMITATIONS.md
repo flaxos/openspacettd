@@ -1,5 +1,49 @@
 # OpenSpaceTTD Known Limitations
 
+## Post-A1 dependency review — 30 September 2026
+
+The proposed [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is a
+bounded A1 follow-up toward A2, not new delivered evidence. Seed11's retained
+operation checkpoint has £78,268 cash/£100,000 debt; £219,780 is its later sampled
+continuation result. The grain-route lead predates A1 construction, and the full
+food-to-Core path/catchment/cost/profit remains unproven. Seeds101/2026 do not yet
+establish this food outcome. A1 and future food graphical acceptance remain Pending.
+
+Early research still requires a Core HQ with £5m cash eligibility and £2.5m
+placement cost, even though integrated rules waive legacy three-phase presence.
+Materials I/II require 100/250 cash-funded RP; no earned affordability bridge is
+proved by A1 or the £100m authored progression fixture. Changing these prices or
+progression pace requires an owner decision. Opening a Phase4 world alone does
+not authorize industry construction or waive colonisation.
+
+Generated towns are not automatically designated as megacities. The existing
+Designate GUI directly mutates registration; the proposed integration must preserve
+its semantics through native replicated commands. Real Core FOOD consumption needs
+designation and the receiving station's own town houses in catchment. Storage or
+arrival alone is insufficient; FOOD alone sustains the town without growth.
+
+## First Sustainable Freight boundaries — 30 September 2026
+
+[A1 evidence and human mission](audit/2026-09-30/first-freight/README.md) cover only
+the exact canonical profile and sampled native seeds. Graphical New Game discovery,
+manual construction and controls remain Pending. The bounded route planner is a
+proof aid, not a globally cheapest route finder or all-seed reachability guarantee.
+Output-to-hub transport is affordable buffer relief and storage; it is not final
+steel/food consumption or research/earned A2 access. Indefinite demand is unproven.
+
+The native CST starter train presently incurs zero running cost because railv3
+omits `running_cost_base`; output locomotives, interest, tolls and ordinary other
+charges still apply. A positive CST running-cost balance would need separate owner
+approval and fresh profitability evidence. No such policy change is part of A1.
+The one-wagon seed 101 attempt fails combined post-reload finances; it is retained,
+not hidden by additional cash. A normally paid three-wagon consist passes all three representative seeds; its
+post-reload debt is fixed and cash remains positive in captured samples.
+
+**Coverage correction:** the historical 28 September reports labelled 11/101/2026
+all used native seed 11 due to the shared runner's hardcoded CLI argument. Those
+original files remain retained; they do not establish representative seed coverage.
+Current actual-seed manifests supersede that claim, rather than rewriting history.
+
 ## Organic UAT crash follow-up — 30 September 2026
 
 The earlier headless verification omitted native foundation queries: it accepted
