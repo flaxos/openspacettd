@@ -590,7 +590,8 @@ bool IntegratedEconomy::Load(const std::string &data)
 			if (!rows.is_array() || rows.size() > NUM_CARGO) throw std::runtime_error("Invalid economy cargo map");
 			for (const auto &row : rows) {
 				if (!row.is_array() || row.size() != 2) throw std::runtime_error("Invalid economy cargo row");
-				if (!result.emplace(CargoType(number(row.at(0), NUM_CARGO - 1)), number(row.at(1), maximum)).second)
+				/* number() rejects values above the uint32_t maximum before conversion. */
+				if (!result.emplace(CargoType(number(row.at(0), NUM_CARGO - 1)), static_cast<uint32_t>(number(row.at(1), maximum))).second)
 					throw std::runtime_error("Duplicate economy cargo");
 			}
 			return result;

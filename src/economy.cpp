@@ -1068,7 +1068,7 @@ static uint32_t IntegratedDeliverySpace(const Station *st, CompanyID company, Ca
 			return UINT32_MAX;
 	} else if (st->always_accepted.Test(cargo))
 		return UINT32_MAX;
-	return std::min<uint64_t>(space, UINT32_MAX);
+	return ClampTo<uint32_t>(space);
 }
 
 /** Use the same acceptance rule when staging cargo and when unloading it. */
