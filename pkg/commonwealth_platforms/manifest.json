@@ -1,0 +1,60 @@
+{
+  "compiled_actions": [
+    20,
+    8,
+    10
+  ],
+  "engine_content_md5": "7ed37dc2f13ee71e7ec1e1fd68974267",
+  "exporter_sha256": "36324950b7ce54a3f58d6a82ceff049d6b9738f813caed7f6c7932b08fa737e4",
+  "files": {
+    "bin/newgrf/openspacettd_platforms_v1.grf": {
+      "bytes": 9422,
+      "sha256": "0ea503e0667bff7f4dc4733d5053ade456a4f2598f935d7b7efb7ea9bb767202"
+    },
+    "pkg/commonwealth_platforms/commonwealth_platforms.nml": {
+      "bytes": 996,
+      "sha256": "70bfb9d503c33b4cb565f5fed8d023549b4943d6fba5b994eee6d41cf73e1db4"
+    },
+    "pkg/commonwealth_platforms/sprites/platform_2x_32bpp.png": {
+      "bytes": 2138,
+      "sha256": "24099fe8250afad921efe48e0854ab50a1e7fc187bf02f538a6818222215292f"
+    },
+    "pkg/commonwealth_platforms/sprites/platform_2x_mask.png": {
+      "bytes": 942,
+      "sha256": "57c637a785f79b973fa37962ee689db810494d010fe236b75ae74f594f140726"
+    },
+    "pkg/commonwealth_platforms/sprites/platform_32bpp.png": {
+      "bytes": 1189,
+      "sha256": "c9f967061e6c25fd10745c79c87cf6a0e4432bb613ee3c3b6239b82c2bf3b889"
+    },
+    "pkg/commonwealth_platforms/sprites/platform_8bpp.png": {
+      "bytes": 1313,
+      "sha256": "4c6874b29fdb6658e699e7e58da0ef648a5414c4c73ea77202abedc94f22b6a7"
+    },
+    "pkg/commonwealth_platforms/sprites/platform_mask.png": {
+      "bytes": 904,
+      "sha256": "1d1019311cbd17ffd8c0d5c622b90bf16c51d870fd41d0a62ee6a9dd883dba08"
+    }
+  },
+  "grfid_hex": "0654534f",
+  "license": "GPL-2.0-only",
+  "schema_version": 1,
+  "source": "pkg/commonwealth_platforms/platforms.json",
+  "source_sha256": "6331c42b5899aada2a88928c77d83a8b39d814c056e2edf7a66f63c7fb6077dd",
+  "sprite_ids": [
+    1069,
+    1070,
+    1071,
+    1072
+  ],
+  "tools": {
+    "Pillow": "12.3.0",
+    "nmlc": "0.9.0"
+  },
+  "version": 1,
+  "zooms": [
+    "normal-8bpp",
+    "normal-32bpp",
+    "2x-32bpp"
+  ]
+}
