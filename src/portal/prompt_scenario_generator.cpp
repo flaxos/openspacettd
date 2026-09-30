@@ -37,6 +37,7 @@
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../vehicle_base.h"
+#include "../vehicle_func.h"
 #include "../train.h"
 #include "../order_base.h"
 #include "../waypoint_base.h"
@@ -1006,6 +1007,9 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	_cur_tileloop_tile = TileIndex{1};
 	LinkGraphSchedule::Clear();
 	PoolBase::Clean(PoolType::Normal);
+	/* Pool cleanup skips individual vehicle hash removal. Drop references to the
+	 * deleted fleet before construction checks or new vehicles use those hashes. */
+	ResetVehicleHash();
 
 	UpdateSignalsInBuffer();
 	ProductionChainManager::Reset();
