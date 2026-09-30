@@ -903,6 +903,17 @@ Json FreightSnapshot()
 }
 
 /**
+ * Normalize tile types whose native metadata has no ownership field.
+ * @param tile In-range map tile to observe without changing it.
+ * @return Native owner, or OWNER_NONE for Void, House and Industry tiles.
+ */
+Owner ObservedTileOwner(TileIndex tile)
+{
+	if (IsTileType(tile, TileType::Void) || IsTileType(tile, TileType::House) || IsTileType(tile, TileType::Industry)) return OWNER_NONE;
+	return GetTileOwner(tile);
+}
+
+/**
  * Native tile observations shared by generated terminals and advertised arrival zones.
  * @param tile Native map tile to observe without changing it.
  * @return Captured bounds, ownership, terrain and rail observations.
@@ -912,7 +923,7 @@ Json GenerationTile(TileIndex tile)
 	Json r = {{"tile", tile.base()}, {"valid", IsValidTile(tile) && IsInnerTile(tile)}};
 	if (!r["valid"].get<bool>()) return r;
 	r["world"] = PlanetManager::GetTileWorld(tile).base();
-	r["type"] = uint(GetTileType(tile)); r["owner"] = GetTileOwner(tile).base();
+	r["type"] = uint(GetTileType(tile)); r["owner"] = ObservedTileOwner(tile).base();
 	r["slope"] = uint(GetTileSlope(tile)); r["height"] = TileHeight(tile);
 	if (IsPlainRailTile(tile)) {
 		r["tracks"] = GetTrackBits(tile).base(); r["railtype"] = uint(GetRailType(tile));
@@ -1591,12 +1602,7 @@ Json FunctionalSnapshot()
 	for (CargoType c{0}; c < NUM_CARGO; ++c) r["all_held"][c] = r["held"][c].get<uint64_t>() + raw[c];
 	r["calendar_clock"] = {TimerGameCalendar::year.base(), TimerGameCalendar::month, TimerGameCalendar::date_fract, TimerGameCalendar::sub_date_fract};
 	r["economy_clock"] = {TimerGameEconomy::year.base(), TimerGameEconomy::month, TimerGameEconomy::date.base(), TimerGameEconomy::date_fract, TimerGameEconomy::days_since_last_month};
-	uint64_t terrain = 14695981039346656037ULL;
-	for (uint n = 0; n < Map::Size(); ++n) {
-		TileIndex tile{n};
-		for (uint value : {uint(GetTileType(tile)), uint(TileHeight(tile)), uint(GetTileOwner(tile).base())}) { terrain ^= value; terrain *= 1099511628211ULL; }
-	}
-	r["map_type_height_owner_fnv1a64"] = terrain;
+	r["map_type_height_owner_fnv1a64"] = GetConnectedEconomyMapFingerprint();
 	r["company"] = Company::Get(CompanyID{0})->name;
 	r["money_fraction"] = Company::Get(CompanyID{0})->money_fraction;
 	r["hqs"] = Json::array();
@@ -1932,6 +1938,21 @@ bool FunctionalCore(std::span<std::string_view> argv)
 }
 
 } // namespace
+
+/**
+ * Capture every map tile, including the native void border, without mutation.
+ * @return Deterministic FNV-1a projection of tile type, height and meaningful owner.
+ */
+uint64_t GetConnectedEconomyMapFingerprint()
+{
+	uint64_t terrain = 14695981039346656037ULL;
+	for (TileIndex tile : Map::Iterate()) {
+		for (uint value : {uint(GetTileType(tile)), uint(TileHeight(tile)), uint(ObservedTileOwner(tile).base())}) {
+			terrain ^= value; terrain *= 1099511628211ULL;
+		}
+	}
+	return terrain;
+}
 
 void ResetConnectedEconomyProof()
 {

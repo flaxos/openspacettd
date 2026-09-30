@@ -195,7 +195,10 @@ class OfflineEngine(Engine):
                 self.process.stdin.flush()
             except BrokenPipeError:
                 pass
-            self.process.stdin.close()  # EOF releases native exec before exit.
+            try:
+                self.process.stdin.close()  # EOF releases native exec before exit.
+            except BrokenPipeError:
+                pass  # A dead engine must not mask the original native failure.
         if self.process.poll() is None:
             try:
                 self.process.wait(timeout=5)
