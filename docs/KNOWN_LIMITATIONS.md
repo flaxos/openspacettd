@@ -410,3 +410,9 @@ The connected resource fixture proves a funded authored network, not low-budget
 startup balance or random generation. Its town-growth check is separate from the
 original showcase's three-new-houses-within-ten-minutes target.
 [Details and reproduction](PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## Agent workflow tooling — 30 September 2026
+
+Codex CLI skill discovery is verified. Antigravity discovery and interactive
+usefulness remain Pending. Instruction size reduction does not prove quota savings.
+[Verification boundary](AGENT_WORKFLOW.md#delivery-record--30-september-2026).

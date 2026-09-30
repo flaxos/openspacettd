@@ -637,3 +637,8 @@ command replication and the 24-month resource economy acceptance. Human visual
 acceptance and economy balancing remain separate next steps.
 [Evidence](audit/2026-09-28/resource-economy/README.md).
 [Player flow and implementation](PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## Agent workflow tooling — 30 September 2026
+
+Agent workflow tooling now shares compact rules and three skills between Codex and
+Antigravity. Game roadmap priorities are unchanged. [Setup and verification](AGENT_WORKFLOW.md).

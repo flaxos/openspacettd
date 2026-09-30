@@ -337,3 +337,9 @@ Next priorities: (1) human star-map, commissioning and host-visit UAT;
 and freight balance using the new sector. The historical recovery and strategic
 sprint registers remain delivered; removed narrative/Silfen/crisis plans are not
 reactivated by this transport feature.
+
+## Agent workflow tooling — 30 September 2026
+
+Tooling delivery: compact AGENTS.md, shared development/UAT/delivery skills, effort
+profiles and read-only context helper. No new gameplay sprint.
+[Verification and remaining client checks](AGENT_WORKFLOW.md#delivery-record--30-september-2026).
