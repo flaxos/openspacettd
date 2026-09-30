@@ -5,6 +5,7 @@ import json
 import time
 import hashlib
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 from test_wp11_slice import Engine, OfflineEngine, ROOT, require
 from test_commonwealth_platform_art import environment, profile_environment
@@ -26,15 +27,58 @@ def freight_advance_limit(requested):
 
 
 def functional_campaign(args):
-    """One bounded ASSISTED FUNCTIONAL campaign; one replay only after success."""
+    """One bounded ASSISTED FUNCTIONAL primary with one total cash allowance."""
     require(args.seeds == [11], 'ASSISTED FUNCTIONAL is authorized for seed11 only')
+    started = time.monotonic()
+    recovery = None
+    preflight_used = 0
+    whole_remaining = 4 * 3600
+    if args.functional_recovery_from is not None:
+        evidence = args.functional_recovery_from.resolve()
+        previous = json.loads(evidence.read_text())
+        prior = previous['primary']
+        require(previous['label'] == 'ASSISTED FUNCTIONAL' and previous['status'] == 'FAIL' and
+                prior['error'] == 'Timed out waiting for FUNCTIONAL_OFFLINE_START', 'Recovery requires the preserved startup-only failure')
+        require(not prior['assistance'] and not prior['native_transactions'] and not prior['trace'] and
+                not prior['samples'] and prior['advance_counts'] == {'initial': 0, 'cold': 0} and
+                all(value == 'NOT RUN' for value in prior['phases'].values()) and not previous['artifacts'] and
+                not any(key in prior for key in ('pristine', 'partial_state', 'construction', 'final')) and
+                not list(evidence.parent.rglob('*.sav')), 'Recovery cannot reset prior grants, spending, search, ticks or persisted progression')
+        require(args.functional_campaign_start_utc is not None and args.functional_startup_used_seconds is not None,
+                'Recovery must carry the original campaign start and startup wall usage')
+        campaign_start = datetime.fromisoformat(args.functional_campaign_start_utc.replace('Z', '+00:00'))
+        require(campaign_start.tzinfo is not None, 'Original campaign start must include its UTC offset')
+        elapsed = (datetime.now(timezone.utc) - campaign_start).total_seconds()
+        preflight_used = args.functional_startup_used_seconds
+        require(0 < preflight_used < PHASE_SECONDS and elapsed >= preflight_used,
+                'Invalid carried startup time')
+        whole_remaining -= elapsed
+        recovery = {'status': 'NOT RUN', 'authorization': 'Explicit parent recovery handoff: one canonical startup confirmation',
+                    'previous_evidence': str(evidence), 'previous_evidence_sha256': hashlib.sha256(evidence.read_bytes()).hexdigest(),
+                    'original_error': prior['error'], 'original_campaign_start_utc': campaign_start.isoformat(),
+                    'prior_startup_wall_seconds': preflight_used, 'prior_advance_counts': prior['advance_counts'],
+                    'prior_assistance': 0, 'prior_candidates': 0, 'prior_native_gross_debits': 0,
+                    'prior_startup_attempts': 1, 'recovery_startup_attempts': 0,
+                    'whole_wall_seconds_already_elapsed': elapsed}
+        recovery['original_whole_deadline_utc'] = datetime.fromtimestamp(campaign_start.timestamp() + 4 * 3600, timezone.utc).isoformat()
+        recovery['preflight_remaining_seconds'] = PHASE_SECONDS - preflight_used
+        recovery['stopped_interval_scope'] = 'Infrastructure diagnosis/repair; separate from active generation/preflight use; absolute whole deadline retained'
+    else:
+        require(args.functional_campaign_start_utc is None and args.functional_startup_used_seconds is None,
+                'Carried bounds require preserved recovery evidence')
+    require(whole_remaining > 0, 'Whole native campaign exhausted four-hour wall limit before recovery')
     output = args.output.resolve()
     require(not output.exists(), 'Preserve earlier evidence; choose a new output directory')
     output.mkdir(parents=True)
-    whole_deadline = time.monotonic() + 4 * 3600
+    whole_deadline = started + whole_remaining
     report = {'label': 'ASSISTED FUNCTIONAL', 'status': 'NOT RUN', 'human_uat': 'Pending',
               'ordinary_start_economic_proof': 'NOT RUN', 'primary': {}, 'replay': {'status': 'NOT RUN'},
               'inputs': acceptance_inputs(args.binary.resolve())}
+    report['total_cash_allowance'] = 6000000
+    report['repeatability'] = 'NOT RUN'
+    report['replay']['reason'] = 'An independent funded replay would exceed the explicit one-total-GBP6m allowance'
+    if recovery is not None:
+        report['startup_recovery'] = recovery
     changed = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD', '--', 'src', 'scripts'], cwd=ROOT, text=True)
     report['inputs']['changed_source_sha256'] = {
         p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in changed.splitlines()}
@@ -57,15 +101,17 @@ def functional_campaign(args):
         control_debits = 0
         receipts = 0
         phase_used = {'initial': 0, 'cold': 0}
-        preflight_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS)
+        preflight_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS - preflight_used)
 
-        def start(name, save=None, target=folder):
+        def start(name, save=None, target=folder, deadline=whole_deadline):
+            require(time.monotonic() < deadline, 'Native startup phase wall limit exhausted')
             target.mkdir(exist_ok=True)
             target_config = target / 'functional.cfg'
             if target != folder:
                 target_config.write_text(config.read_text())
             with environment(profile_environment(target)):
-                native = OfflineEngine(args.binary.resolve(), target_config, target, name, save=save)
+                native = OfflineEngine(args.binary.resolve(), target_config, target, name, save=save, deadline=deadline)
+            require(time.monotonic() < deadline, 'Native startup phase wall limit exhausted')
             return native
 
         def state(native):
@@ -143,7 +189,12 @@ def functional_campaign(args):
             require(state(native) == expected, 'Rejected grant changed saved semantics')
 
         try:
-            engine = start('fresh')
+            if recovery is not None:
+                recovery['recovery_startup_attempts'] += 1
+                require(recovery['recovery_startup_attempts'] == 1, 'Only one canonical recovery startup is authorized')
+                recovery['status'] = 'PARTIAL'
+                persist()
+            engine = start('fresh', deadline=preflight_deadline)
             engine.deadline = preflight_deadline
             pristine = json.loads(engine.command('connected_economy functional-start', 'CONNECTED functional-state '))
             result['pristine'] = pristine
@@ -152,6 +203,12 @@ def functional_campaign(args):
             require(pristine['money'] == pristine['loan'] == 100000 and pristine['max_loan'] == 300000 and
                     pristine['seed'] == 11 and pristine['core_town_valid'] and not pristine['stations'] and
                     not pristine['trains'] and not pristine['research'] and not pristine['hqs'], 'Noncanonical generated pristine state')
+            if recovery is not None:
+                recovery.update(status='PASS', pristine_verified=True, assistance_before_progression=0,
+                                persisted_progression=False, canonical_config_sha256=result['config_sha256'])
+                persist()
+                print('ASSISTED FUNCTIONAL checkpoint: canonical startup recovered; pristine GBP100k cash/debt, '
+                      'no grant or persisted progression; continuing the same instance within carried bounds', flush=True)
             engine.save(folder / 'pristine.sav')
             grain, food = pristine['cargo_labels']['GRAI'], pristine['cargo_labels']['FOOD']
             roles = {w['id']: w['role'] for w in pristine['worlds']}
@@ -199,6 +256,9 @@ def functional_campaign(args):
             result['assistance'].append({'amount': 6000000, 'currency': 'GBP virtual in-game', 'source': grant['source'],
                 'native_expense_type': 'Other', 'signed_native_debit': -6000000, 'tick': pristine['tick'],
                 'before_cash': 100000, 'after_cash': 6100000, 'before_debt': 100000, 'after_debt': 100000})
+            require(sum(item['amount'] for item in result['assistance']) == report['total_cash_allowance'],
+                    'Explicit total virtual-cash allowance exceeded')
+            persist()
             reject_grant(engine, grant['state'])
             engine.save(folder / 'cash-assisted.sav')
             built = mutate(engine, 'functional-build ' + ' '.join(map(str, selected)), pre_hq=True)
@@ -234,7 +294,7 @@ def functional_campaign(args):
             control = result['negative_control']
             control.update(status='PARTIAL', starting_debits=primary_debits, starting_state=before_control, previous_tick=before_control['tick'], samples=[])
             copy = folder / 'negative-control'
-            controlled = start('control', folder / 'food-control-source.sav', copy)
+            controlled = start('control', folder / 'food-control-source.sav', copy, deadline=initial_deadline)
             try:
                 controlled.deadline = initial_deadline
                 require(state(controlled) == before_control, 'Disposable control cold load changed semantics')
@@ -278,7 +338,7 @@ def functional_campaign(args):
             engine.close()
             engine = None
             cold_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS)
-            engine = start('cold-before', folder / 'materials-i-before.sav')
+            engine = start('cold-before', folder / 'materials-i-before.sav', deadline=cold_deadline)
             engine.deadline = cold_deadline
             require(state(engine) == before_cold, 'First cold load lost project/budget/RP or native semantics')
             reject_grant(engine, before_cold)
@@ -294,7 +354,7 @@ def functional_campaign(args):
             engine.save(folder / 'materials-i-completed.sav')
             engine.close()
             engine = None
-            engine = start('cold-after', folder / 'materials-i-completed.sav')
+            engine = start('cold-after', folder / 'materials-i-completed.sav', deadline=cold_deadline)
             engine.deadline = cold_deadline
             require(state(engine) == completed, 'Second cold load changed retained unlock/custody/cash/orders')
             reject_grant(engine, completed)
@@ -317,6 +377,8 @@ def functional_campaign(args):
             require(result['final']['money'] == 100000 + 6000000 + receipts - primary_debits, 'Complete campaign financial reconciliation failed')
             result['status'] = 'PASS'
         except BaseException as error:
+            if recovery is not None and recovery['status'] != 'PASS':
+                recovery.update(status='FAIL', error=str(error))
             result['error'] = str(error)
             result['status'] = 'PARTIAL' if any(term in str(error) for term in ('bound exhausted', 'cap exhausted', 'wall limit', 'within two candidates')) else 'FAIL'
             result['advance_counts'] = phase_used
@@ -344,18 +406,15 @@ def functional_campaign(args):
 
     try:
         attempt(output / 'primary', report['primary'])
-        attempt(output / 'replay', report['replay'])
-        for key in ('pristine', 'preflight', 'construction', 'trace', 'negative_control', 'cold_before', 'cold_after', 'final', 'advance_counts', 'financial_reconciliation'):
-            require(report['primary'][key] == report['replay'][key], f'Independent identical replay differs in {key}')
-        report['repeatability'] = 'PASS'
-        report['status'] = 'PASS'
+        report['status'] = 'PARTIAL'
     except BaseException as error:
         report['error'] = str(error)
         report['status'] = 'PARTIAL' if report['primary'].get('status') == 'PARTIAL' or report['replay'].get('status') == 'PARTIAL' else 'FAIL'
         raise
     finally:
         persist()
-    print(f'ASSISTED FUNCTIONAL PASS; economics unproven; human UAT Pending. Evidence: {output}', flush=True)
+    print(f'ASSISTED FUNCTIONAL primary PASS; replay NOT RUN under total allowance; '
+          f'economics unproven; human UAT Pending. Evidence: {output}', flush=True)
 
 
 def acceptance_inputs(binary):
@@ -826,10 +885,15 @@ def main():
     modes.add_argument('--first-freight', action='store_true', help='Ordinary generated IRON start; at most 240 advances/30 minutes per phase')
     modes.add_argument('--generation-contract', action='store_true', help='Twice-fresh generation, ordinary paid joins/Core station and cold reloads; no progression')
     modes.add_argument('--functional-core', action='store_true', help='Reviewed seed11 ASSISTED FUNCTIONAL Core supply/Materials I; one GBP6m offline grant')
+    parser.add_argument('--functional-recovery-from', type=Path, help='Preserved startup-only failure; explicit recovery handoff required')
+    parser.add_argument('--functional-campaign-start-utc', help='Original campaign start, including UTC offset; preserves the four-hour deadline')
+    parser.add_argument('--functional-startup-used-seconds', type=float, help='Prior startup wall usage carried into the 30-minute preflight cap')
     parser.add_argument('--seeds', type=int, nargs='+', default=[11, 101, 2026])
     args = parser.parse_args()
     if args.functional_core:
         return functional_campaign(args)
+    require(args.functional_recovery_from is None and args.functional_campaign_start_utc is None and
+            args.functional_startup_used_seconds is None, 'Recovery options require --functional-core')
     if args.generation_contract:
         return generation_contract(args)
     if args.first_freight:

@@ -113,12 +113,13 @@ class OfflineEngine(Engine):
     The existing exec reader blocks between commands, so the simulation cannot
     run ahead. Use only a disposable POSIX profile and retain all console input.
     """
-    def __init__(self, binary, config, output, name, save=None, seed=11, world_count=7):
+    def __init__(self, binary, config, output, name, save=None, seed=11, world_count=7, deadline=None):
+        require(deadline is None or time.monotonic() < deadline, 'Offline startup wall limit exhausted')
         output = output.resolve()
         self.log = (output / f'{name}.log').open('x')
         self.lines = []
         self.queue = queue.Queue()
-        self.deadline = time.monotonic() + 120
+        self.deadline = min(time.monotonic() + 120, deadline if deadline is not None else float('inf'))
         self.console_path = output / f'{name}-native.log'
         self.console_path.touch(exist_ok=False)
         self.commands = (output / f'{name}-commands.scr').open('x')
@@ -181,6 +182,7 @@ class OfflineEngine(Engine):
     def command(self, command, marker):
         # Native ConScript appends and flushes on close. Frame every command so
         # short acknowledgements cannot remain buffered while exec waits on FIFO.
+        require(time.monotonic() < self.deadline, 'Offline command phase wall limit exhausted before dispatch')
         framed = f'script "{self.console_path}"\n{command}\nscript'
         self.commands.write(framed + '\n')
         self.commands.flush()
