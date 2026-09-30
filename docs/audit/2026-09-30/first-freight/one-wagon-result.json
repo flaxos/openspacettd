@@ -1,0 +1,35 @@
+{
+  "acceptance_evidence": false,
+  "source_commit": "3ecc0dfdad13e2877ce52d2e9726089c87ba7109",
+  "binary_sha256": "c1153a763a7c876d4977f7bf7497953607171b8a57f126bbf2dd8efe1769ad07",
+  "actual_seeds": [
+    {
+      "requested_seed": 11,
+      "passed": true,
+      "failure": null,
+      "build_cost": 80565,
+      "onward_cost": 86432,
+      "operating_cash_delta": 45482,
+      "reload_complete_loads": 3
+    },
+    {
+      "requested_seed": 101,
+      "passed": false,
+      "failure": "Profitable reload continuation failed",
+      "build_cost": 112151,
+      "onward_cost": 87152,
+      "operating_cash_delta": 582,
+      "reload_complete_loads": 1
+    },
+    {
+      "requested_seed": 2026,
+      "passed": true,
+      "failure": null,
+      "build_cost": 83075,
+      "onward_cost": 87180,
+      "operating_cash_delta": 31728,
+      "reload_complete_loads": 3
+    }
+  ],
+  "supersession": "Retained one-wagon discovery. Seeds11 and2026 pass; seed101 fails combined post-reload finances. A native paid three-wagon consist will be freshly tested; no cash/economic change."
+}

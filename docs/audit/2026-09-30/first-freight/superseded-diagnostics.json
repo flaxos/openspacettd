@@ -1,0 +1,531 @@
+{
+  "acceptance_evidence": false,
+  "status": "Superseded discovery; changed probe layouts, interrupted fragment-counter run, and actual three-seed run on 925c47e1f4 with seed11 pass and seeds101/2026 bounded-planner failures. The short-bridge river trigger is corrected in 41c23454c1; final fresh coverage will be separate.",
+  "files": [
+    {
+      "path": "build/a1-frozen-three-seed/101/evidence.json",
+      "sha256": "cbc01aa8cfa3c782faea36ad5be0e722a440522b87c1795a0327e065239191ae",
+      "bytes": 52792
+    },
+    {
+      "path": "build/a1-frozen-three-seed/101/failure.sav",
+      "sha256": "bca44f5c86bcbaaf3cbc55c4d841bee389c2ac89dc83e4f3bf40679910939660",
+      "bytes": 131676
+    },
+    {
+      "path": "build/a1-frozen-three-seed/101/generation.log",
+      "sha256": "96e7ece8e41be135d8c15ab6fdcd2bbbc71ec138ae0726c258c518059910fa71",
+      "bytes": 20791
+    },
+    {
+      "path": "build/a1-frozen-three-seed/101/newgame.cfg",
+      "sha256": "040ae9b746051861317a2d99f3d2cfc7bbdf846e54e0b645f1912927f8af20b8",
+      "bytes": 1714
+    },
+    {
+      "path": "build/a1-frozen-three-seed/101/ordinary-start.sav",
+      "sha256": "bca44f5c86bcbaaf3cbc55c4d841bee389c2ac89dc83e4f3bf40679910939660",
+      "bytes": 131676
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/construction.sav",
+      "sha256": "de658d62d6d6605541ab0e28830c23a271e0bc38d0513305593fc65d538132f6",
+      "bytes": 126968
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/evidence.json",
+      "sha256": "11f07df61b3b513d25dcb7e81d9c50a69e82b1124c3aac87633a0ec3052d3349",
+      "bytes": 5609069
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/generation.log",
+      "sha256": "3581720db8769e6e7303509d6f1472756cfc80faf14c4e6a26414c7bf16f8b41",
+      "bytes": 587300
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/newgame.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/operation.sav",
+      "sha256": "e863f51b7d01c6c4f1115f82e853e98c7d120ea1d096003d917a5f6a4376e571",
+      "bytes": 154720
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/ordinary-start.sav",
+      "sha256": "2b60898ceb7bff4a79db4946740c7becc465655c43b010b7260081c1e2359112",
+      "bytes": 126476
+    },
+    {
+      "path": "build/a1-frozen-three-seed/11/reload.log",
+      "sha256": "91bf78d21ce7ce23aa48b4a0cfbc2d7c4ab5065987b7b185eeb6b9595394612a",
+      "bytes": 641093
+    },
+    {
+      "path": "build/a1-frozen-three-seed/2026/evidence.json",
+      "sha256": "61c13df7272b603a25ebf2128299f33782fffb428efe9e786b14ed764bca5aa6",
+      "bytes": 52798
+    },
+    {
+      "path": "build/a1-frozen-three-seed/2026/failure.sav",
+      "sha256": "4b15a590b24e114fdf849cb574b6dd21bbd367aad5b673d8c23a37f6bfc619a8",
+      "bytes": 119100
+    },
+    {
+      "path": "build/a1-frozen-three-seed/2026/generation.log",
+      "sha256": "c6cc96f734ac18a35c712fc9e27462a667ff0b4cf674578b5873a9735d551616",
+      "bytes": 20684
+    },
+    {
+      "path": "build/a1-frozen-three-seed/2026/newgame.cfg",
+      "sha256": "26f3a8977329bc4ec8f27f1794bfb5f0b9be41996f1ed7a552d13c84a961e046",
+      "bytes": 1715
+    },
+    {
+      "path": "build/a1-frozen-three-seed/2026/ordinary-start.sav",
+      "sha256": "4b15a590b24e114fdf849cb574b6dd21bbd367aad5b673d8c23a37f6bfc619a8",
+      "bytes": 119100
+    },
+    {
+      "path": "build/a1-frozen-three-seed/evidence.json",
+      "sha256": "8e1d89daa8076030515d7494cd8c4fcd82716d2ad2b3178c78e8b549b4a5b96a",
+      "bytes": 7371393
+    },
+    {
+      "path": "build/a1-onward-probe/final.json",
+      "sha256": "f0a63c9f380032dc94ba3046fa34ab727ce676939837962cda7cfc6c0a326477",
+      "bytes": 45263
+    },
+    {
+      "path": "build/a1-onward-probe/onward.log",
+      "sha256": "67c6474c85b2a19041712c0de5e0acba4bfdab33705ad659e57b1b447cbcc0b0",
+      "bytes": 177339
+    },
+    {
+      "path": "build/a1-onward-probe/onward.sav",
+      "sha256": "9b214182e4fe100e8c3e2293a0f32c42dbdf8096b69e23f6deca7fa6359a83b4",
+      "bytes": 162152
+    },
+    {
+      "path": "build/a1-onward-probe/reload.log",
+      "sha256": "97f5c3aad308a2e379d300dc8be446920dfc8bbccafdeb8f5d0be54763c3ac46",
+      "bytes": 15753
+    },
+    {
+      "path": "build/a1-onward-probe/samples.json",
+      "sha256": "96503e86d038b29e21c50445de47df8d5c971c269b9e93cbcdcd5433334ca7e8",
+      "bytes": 575915
+    },
+    {
+      "path": "build/a1-probe/built.json",
+      "sha256": "fe992d47cf9394441d97ebd1b4ae2cea837106d292173dd478d7f2c11709396c",
+      "bytes": 47036
+    },
+    {
+      "path": "build/a1-probe/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe/plan.json",
+      "sha256": "303fe14d290fdd760db2aef9e933b8fa75c97fd4ea9b4a67e98d7dc4a2570c5b",
+      "bytes": 31068
+    },
+    {
+      "path": "build/a1-probe/seed11.log",
+      "sha256": "a631f56c793b5b8fe0f232f09a969b20f9a834fecbfd96c9e9f046d9874197e6",
+      "bytes": 457442
+    },
+    {
+      "path": "build/a1-probe/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe10/built.json",
+      "sha256": "6ac93f5a6a533c24948cad8fe515f8158bf05a3187f111e804a3b434ae0e5944",
+      "bytes": 41660
+    },
+    {
+      "path": "build/a1-probe10/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe10/operation.sav",
+      "sha256": "eb026747b76e6f9733705f253b9f3a471410e84a83c8b090820c31cc665cbc4c",
+      "bytes": 155616
+    },
+    {
+      "path": "build/a1-probe10/plan.json",
+      "sha256": "1b9042967774e0c0bbc2816e03b160cf30ff93c2e81b512fbaab308dc24cea42",
+      "bytes": 24052
+    },
+    {
+      "path": "build/a1-probe10/samples.json",
+      "sha256": "f49135a18a04222a7289e9b1deb945261ea40657317f7d9221d55aae8f35fae6",
+      "bytes": 2140564
+    },
+    {
+      "path": "build/a1-probe10/seed11.log",
+      "sha256": "0379fa04a7ce43edb167e98cc6e2687daf58b6d31401c3d3368ffcb02263450b",
+      "bytes": 575607
+    },
+    {
+      "path": "build/a1-probe10/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe2/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe2/seed11.log",
+      "sha256": "787d08361d1729ae5bdf3c47963d51e3a4a532421bb3a77ddd16890d138be71a",
+      "bytes": 9565
+    },
+    {
+      "path": "build/a1-probe2/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe3/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe3/seed11.log",
+      "sha256": "6970495ebd4583d08a828ec5cb25486661f57960aa5bde19301cb6230f8e95ad",
+      "bytes": 9565
+    },
+    {
+      "path": "build/a1-probe3/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe4/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe4/seed11.log",
+      "sha256": "cd9e385e90ba8f5a20546cd8948bb12ab3c0c2fd90c3857c2a6f484570c47c96",
+      "bytes": 12260
+    },
+    {
+      "path": "build/a1-probe4/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe5/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe5/seed11.log",
+      "sha256": "6c4478a399c28697da7f94fe8d645c366d37d4edc3c682b99b630540fc8dbca3",
+      "bytes": 12260
+    },
+    {
+      "path": "build/a1-probe5/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe6/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe6/seed11.log",
+      "sha256": "4b7b67aec0f4e18588f0217f274514d740568463eeca76331bc7563fffbe6c5d",
+      "bytes": 12308
+    },
+    {
+      "path": "build/a1-probe6/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe7/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe7/seed11.log",
+      "sha256": "93bb158774c4bc4670005c7921fa688bdb6171579ef8faeb01743e0411a6bee0",
+      "bytes": 12308
+    },
+    {
+      "path": "build/a1-probe7/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe8/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe8/seed11.log",
+      "sha256": "d32dce4e69c21452ae61a547ff9cf742955392cad247de0aca8c12d1062c7a6b",
+      "bytes": 13556
+    },
+    {
+      "path": "build/a1-probe8/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-probe9/initial.json",
+      "sha256": "ad5812682e5d5fbbe6b1658f2b5ea3341ef10d06efd7e55bddc12a53cde569e2",
+      "bytes": 21678
+    },
+    {
+      "path": "build/a1-probe9/plan.json",
+      "sha256": "5cb4b8ea0d3493235e9e3ad7d56d4a4f7631abb91496b5bbcc35bd251becdf8c",
+      "bytes": 3997
+    },
+    {
+      "path": "build/a1-probe9/seed11.log",
+      "sha256": "fc5feac7a4ea9f045bd4903c66d49eeea240483074e9456b196c5cc3e00cbf1a",
+      "bytes": 10808
+    },
+    {
+      "path": "build/a1-probe9/start.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-terrain-diagnosis/terrain-2.log",
+      "sha256": "1785c2b9290dd4c6ecb0266bb9074e3e0c0d40bd99ee90f8e87f9f671715d95c",
+      "bytes": 1653
+    },
+    {
+      "path": "build/a1-terrain-diagnosis/terrain.log",
+      "sha256": "d75e8ad020a2f3ae99f4a2386722ac6f49a10b864d88edb4a5a52b3d91133752",
+      "bytes": 1653
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/construction.sav",
+      "sha256": "6b6a0751ec015a1024d40b2cb5500518706d9a3698a788fd02f1bf1538917d68",
+      "bytes": 126968
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/evidence.json",
+      "sha256": "36bf94bc7e3fb74b8ae6e0116d9e81a6aaabf7d5b0fac9486fc9909898360098",
+      "bytes": 5314657
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/generation.log",
+      "sha256": "865d9835a766ebf7d67638252627dcc5e7ff2412ba94e8aa51852539b5139703",
+      "bytes": 778890
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/newgame.cfg",
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39",
+      "bytes": 1713
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/operation.sav",
+      "sha256": "941c12dc4eaf22e84631a50be99cc4fd474e5f8684545df836f46541ec42a9d2",
+      "bytes": 164192
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/ordinary-start.sav",
+      "sha256": "abe97ea538bfb39bed8193434e6ea2c408ef409dcf53390df0c6ceadee7e356c",
+      "bytes": 126476
+    },
+    {
+      "path": "build/a1-three-seed-discovery/11/reload.log",
+      "sha256": "ff3cded79e37a094fd610dcc0a1b17ce6d6410e63ec74d8ce0ff5639211e4fec",
+      "bytes": 386447
+    },
+    {
+      "path": "build/a1-three-seed-discovery/evidence.json",
+      "sha256": "93c577e98aa8153777adc343246e8aa6de6d0f2d6a0890002b7002c3b9c92d36",
+      "bytes": 6857224
+    },
+    {
+      "path": "build/agent-logs/a1-bridge-types-build.log",
+      "sha256": "0b3b28a02199d7951b322c3015f491b90c597982b081359a8a908853b37a7bb8",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build-review-fixes.log",
+      "sha256": "2cdfd8f995e581f96b3c9b5d5db57db9b06e4f8616baaea085727ca263892941",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build.log",
+      "sha256": "73041396c1143570f94c11f2975e58cc5499e095e8309400fecbe36286cb571f",
+      "bytes": 25886
+    },
+    {
+      "path": "build/agent-logs/a1-build10.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build11.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build12.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build13.log",
+      "sha256": "a4a2fc9aa0f93e74f65f35df6eba3f1d6f981ae30addd707054243b86685f80d",
+      "bytes": 9842
+    },
+    {
+      "path": "build/agent-logs/a1-build14.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build2.log",
+      "sha256": "42e8140f04932aedf1bcbc6b368bfffb59ae4449228cc271f5e40d530bf29a62",
+      "bytes": 3686
+    },
+    {
+      "path": "build/agent-logs/a1-build3.log",
+      "sha256": "5b47a51fce63774aa94b88fb036873b8e6ad8fb6fba12678d32c4828d30ed72c",
+      "bytes": 1006
+    },
+    {
+      "path": "build/agent-logs/a1-build4.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build5.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build6.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build7.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build8.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-build9.log",
+      "sha256": "ba819e0a94f2e5d3c6406a20cf6d3a73262c15bc6b9672c274c2518944ca0882",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-code-build.log",
+      "sha256": "2cdfd8f995e581f96b3c9b5d5db57db9b06e4f8616baaea085727ca263892941",
+      "bytes": 832
+    },
+    {
+      "path": "build/agent-logs/a1-frozen-build.log",
+      "sha256": "6266461f1ca1140cfd5e416d211c835a892a64ccd6c4a2bc9bd1a8d561980e47",
+      "bytes": 817
+    },
+    {
+      "path": "build/agent-logs/a1-frozen-three-seed.log",
+      "sha256": "3a597b5b94425b95a78404ba3abcf22703b9044ed8c6678db2b8d417f3805bb3",
+      "bytes": 1089
+    },
+    {
+      "path": "build/agent-logs/a1-integrated-main-build.log",
+      "sha256": "f9abf9905a120cae43bb39dbf2de524044fc57a85ec75456baaafb11fbeebc14",
+      "bytes": 1699
+    },
+    {
+      "path": "build/agent-logs/a1-longer-bridge-experiment.patch",
+      "sha256": "fa3d8f2ab417ef59c9d2e9463c2063962b451564904e8e00dfdaf13bbfa649aa",
+      "bytes": 9121
+    },
+    {
+      "path": "build/agent-logs/a1-longer-bridges-build.log",
+      "sha256": "79c4bf154beb452191279f15b764e0ab10bab2a4477aed4c533efb21befce5e7",
+      "bytes": 905
+    },
+    {
+      "path": "build/agent-logs/a1-onward-probe.log",
+      "sha256": "125f3f8c642e64350deeee466cd44a1299c2039cb596bc5808230511cfe96f94",
+      "bytes": 795
+    },
+    {
+      "path": "build/agent-logs/a1-probe.log",
+      "sha256": "d16a956808687c0a467e3d9d06045bede09968f4c9e32aeb57450878dffb8c02",
+      "bytes": 3131
+    },
+    {
+      "path": "build/agent-logs/a1-probe10.log",
+      "sha256": "88dffd3cc92fccd543bda98823a84c7a35118872b986099d5287123610c15544",
+      "bytes": 3932
+    },
+    {
+      "path": "build/agent-logs/a1-probe2.log",
+      "sha256": "bbedc11b335e03ce285ad4d71b6a404a52333061c5b13d84bb04751a3a2f8735",
+      "bytes": 1224
+    },
+    {
+      "path": "build/agent-logs/a1-probe3.log",
+      "sha256": "bbedc11b335e03ce285ad4d71b6a404a52333061c5b13d84bb04751a3a2f8735",
+      "bytes": 1224
+    },
+    {
+      "path": "build/agent-logs/a1-probe4.log",
+      "sha256": "9d4d0940cf9bff8502e5a409e880d7c43e1a01202dba91160c4deb35c4967aef",
+      "bytes": 228
+    },
+    {
+      "path": "build/agent-logs/a1-probe5.log",
+      "sha256": "9d4d0940cf9bff8502e5a409e880d7c43e1a01202dba91160c4deb35c4967aef",
+      "bytes": 228
+    },
+    {
+      "path": "build/agent-logs/a1-probe6.log",
+      "sha256": "9d4d0940cf9bff8502e5a409e880d7c43e1a01202dba91160c4deb35c4967aef",
+      "bytes": 228
+    },
+    {
+      "path": "build/agent-logs/a1-probe7.log",
+      "sha256": "9d4d0940cf9bff8502e5a409e880d7c43e1a01202dba91160c4deb35c4967aef",
+      "bytes": 228
+    },
+    {
+      "path": "build/agent-logs/a1-probe8.log",
+      "sha256": "9d4d0940cf9bff8502e5a409e880d7c43e1a01202dba91160c4deb35c4967aef",
+      "bytes": 228
+    },
+    {
+      "path": "build/agent-logs/a1-probe9.log",
+      "sha256": "f25099e663f469bd65af14c356984866148bf0bb999b6ae7be1647db4cd47750",
+      "bytes": 882
+    },
+    {
+      "path": "build/agent-logs/a1-three-seed-discovery.log",
+      "sha256": "5fa94ccea265499e657f8c75593e2eb8331cae02131c4883f46cce643a73c1c1",
+      "bytes": 1354
+    },
+    {
+      "path": "build/agent-logs/a1-water-crossing-build.log",
+      "sha256": "0b3b28a02199d7951b322c3015f491b90c597982b081359a8a908853b37a7bb8",
+      "bytes": 832
+    }
+  ]
+}

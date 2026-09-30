@@ -22,7 +22,7 @@ def main():
     if args.integrated: text=text.replace('openspacettd_industry_v4.grf', 'openspacettd_integrated_v1.grf')
     if args.legacy_industry_toggle: text=text.replace('player_built_economy = true', 'player_built_economy = false')
     config=output/'stellar.cfg'; config.write_text(text)
-    binary=args.binary.resolve(); engine=Engine(binary,config,output,'generation',world_count=7)
+    binary=args.binary.resolve(); engine=Engine(binary,config,output,'generation',world_count=7,seed=args.seed)
     try:
         initial=json.loads(engine.command('resource_sites','RESOURCE state '))
         require(len(initial['stellar_worlds'])==7,'Wrong stellar catalogue')

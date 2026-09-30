@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class Engine:
-    def __init__(self, binary, config, output, name, save=None, year=1950, world_count=1):
+    def __init__(self, binary, config, output, name, save=None, year=1950, world_count=1, seed=11):
         self.log = (output / f"{name}.log").open("w")
         self.lines = []
         self.deadline = time.monotonic() + 120
@@ -30,7 +30,7 @@ class Engine:
             port = sock.getsockname()[1]
         self.port = port
         args = [str(binary), f"-D127.0.0.1:{port}", "-s", "null", "-m", "null",
-                "-x", "-c", str(config), "-G", "11", "-t", str(year), "-g"]
+                "-x", "-c", str(config), "-G", str(seed), "-t", str(year), "-g"]
         if save:
             args.append(str(save))
         self.process = subprocess.Popen(args, cwd=ROOT, stdin=subprocess.PIPE,
@@ -68,7 +68,7 @@ class Engine:
             self.log.write(line)
             self.log.flush()
             self.lines.append(line.strip())
-            if "WP11 FAIL" in line or "CONNECTED FAIL" in line or "Assertion failed" in line or "Saving map failed" in line:
+            if "WP11 FAIL" in line or "FREIGHT FAIL" in line or "CONNECTED FAIL" in line or "Assertion failed" in line or "Saving map failed" in line:
                 raise RuntimeError(line.strip())
             if marker in line:
                 return line.split(marker, 1)[1].strip()
