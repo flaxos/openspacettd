@@ -1,0 +1,105 @@
+=================================================================
+==1280==ERROR: AddressSanitizer: heap-use-after-free on address 0x517000003960 at pc 0x556ca4427109 bp 0x7fff14645580 sp 0x7fff14645578
+WRITE of size 8 at 0x517000003960 thread T0
+    #0 0x556ca4427108 in UpdateVehicleTileHash /workspace/openspacettd/src/vehicle.cpp:657
+    #1 0x556ca44321b2 in Vehicle::UpdatePosition() /workspace/openspacettd/src/vehicle.cpp:1719
+    #2 0x556ca4433706 in Vehicle::UpdatePositionAndViewport() /workspace/openspacettd/src/vehicle.cpp:1802
+    #3 0x556ca3ff93c1 in PromptScenarioGenerator::SpawnActiveFleets(PromptScenarioSpec const&, ScenarioSynthesisResult&) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:947
+    #4 0x556ca3ffa1f5 in PromptScenarioGenerator::SynthesizeAndSave(PromptScenarioSpec const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:1123
+    #5 0x556ca3ffade9 in PromptScenarioGenerator::GenerateCommonwealthPrefabWorld(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:1223
+    #6 0x556ca48e6702 in C_A_T_C_H_T_E_S_T_0 /workspace/openspacettd/src/tests/test_prefab_world_uat.cpp:130
+    #7 0x556ca45ae401 in Catch::TestInvokerAsFunction::invoke() const /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:14330
+    #8 0x556ca45ad71a in Catch::TestCase::invoke() const /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:14169
+    #9 0x556ca45a8260 in Catch::RunContext::invokeActiveTestCase() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13025
+    #10 0x556ca45a7fe4 in Catch::RunContext::runCurrentTest(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&) /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:12998
+    #11 0x556ca45a6c92 in Catch::RunContext::runTest(Catch::TestCase const&) /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:12759
+    #12 0x556ca45a9991 in execute /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13352
+    #13 0x556ca45aac8d in Catch::Session::runInternal() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13562
+    #14 0x556ca45aa9b9 in Catch::Session::run() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13518
+    #15 0x556ca45e2160 in int Catch::Session::run<char>(int, char const* const*) (/workspace/openspacettd/build/agent-logs/openttd_test-asan+0x2bd4160) (BuildId: 3d904da97ff857a613fe60579c8d80359aa7c476)
+    #16 0x556ca45bf1e2 in main /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:17543
+    #17 0x7f4dcff8aca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+    #18 0x7f4dcff8ad64 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x29d64) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+    #19 0x556ca33437e0 in _start (/workspace/openspacettd/build/agent-logs/openttd_test-asan+0x19357e0) (BuildId: 3d904da97ff857a613fe60579c8d80359aa7c476)
+
+0x517000003960 is located 224 bytes inside of 648-byte region [0x517000003880,0x517000003b08)
+freed by thread T0 here:
+    #0 0x7f4dd11f8678 in operator delete(void*, unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:164
+    #1 0x556ca3352aea in std::__new_allocator<unsigned char>::deallocate(unsigned char*, unsigned long) /usr/include/c++/14/bits/new_allocator.h:172
+    #2 0x556ca4445d58 in std::allocator<unsigned char>::deallocate(unsigned char*, unsigned long) /usr/include/c++/14/bits/allocator.h:208
+    #3 0x556ca4445d58 in Pool<Vehicle, PoolID<unsigned int, VehicleIDTag, 1044480u, 1048575u>, 512ul, (PoolType)0, false>::FreeItem(unsigned long, unsigned long) /workspace/openspacettd/src/core/pool_func.hpp:168
+    #4 0x556ca39fad98 in Pool<Vehicle, PoolID<unsigned int, VehicleIDTag, 1044480u, 1048575u>, 512ul, (PoolType)0, false>::PoolItem<&_vehicle_pool>::operator delete(void*, unsigned long) /workspace/openspacettd/src/tests/../portal/../core/pool_type.hpp:331
+    #5 0x556ca406d6f0 in Train::~Train() /workspace/openspacettd/src/tests/../pathfinder/../train.h:116
+    #6 0x556ca4445fd8 in Pool<Vehicle, PoolID<unsigned int, VehicleIDTag, 1044480u, 1048575u>, 512ul, (PoolType)0, false>::CleanPool() /workspace/openspacettd/src/core/pool_func.hpp:184
+    #7 0x556ca35ff95a in PoolBase::Clean(EnumBitSet<PoolType, unsigned char, (PoolType)8>) /workspace/openspacettd/src/core/pool_func.cpp:33
+    #8 0x556ca3ff9b2a in PromptScenarioGenerator::SynthesizeAndSave(PromptScenarioSpec const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:1008
+    #9 0x556ca3ffade9 in PromptScenarioGenerator::GenerateCommonwealthPrefabWorld(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:1223
+    #10 0x556ca48e6702 in C_A_T_C_H_T_E_S_T_0 /workspace/openspacettd/src/tests/test_prefab_world_uat.cpp:130
+    #11 0x556ca45ae401 in Catch::TestInvokerAsFunction::invoke() const /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:14330
+    #12 0x556ca45ad71a in Catch::TestCase::invoke() const /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:14169
+    #13 0x556ca45a8260 in Catch::RunContext::invokeActiveTestCase() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13025
+    #14 0x556ca45a7fe4 in Catch::RunContext::runCurrentTest(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&) /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:12998
+    #15 0x556ca45a6c92 in Catch::RunContext::runTest(Catch::TestCase const&) /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:12759
+    #16 0x556ca45a9991 in execute /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13352
+    #17 0x556ca45aac8d in Catch::Session::runInternal() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13562
+    #18 0x556ca45aa9b9 in Catch::Session::run() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13518
+    #19 0x556ca45e2160 in int Catch::Session::run<char>(int, char const* const*) (/workspace/openspacettd/build/agent-logs/openttd_test-asan+0x2bd4160) (BuildId: 3d904da97ff857a613fe60579c8d80359aa7c476)
+    #20 0x556ca45bf1e2 in main /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:17543
+    #21 0x7f4dcff8aca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+
+previously allocated by thread T0 here:
+    #0 0x7f4dd11f7778 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95
+    #1 0x556ca335a624 in std::__new_allocator<unsigned char>::allocate(unsigned long, void const*) /usr/include/c++/14/bits/new_allocator.h:151
+    #2 0x556ca444a542 in std::allocator<unsigned char>::allocate(unsigned long) /usr/include/c++/14/bits/allocator.h:196
+    #3 0x556ca444a542 in Pool<Vehicle, PoolID<unsigned int, VehicleIDTag, 1044480u, 1048575u>, 512ul, (PoolType)0, false>::AllocateItem(unsigned long, unsigned long) /workspace/openspacettd/src/core/pool_func.hpp:100
+    #4 0x556ca44458f0 in Pool<Vehicle, PoolID<unsigned int, VehicleIDTag, 1044480u, 1048575u>, 512ul, (PoolType)0, false>::GetNew(unsigned long) /workspace/openspacettd/src/core/pool_func.hpp:127
+    #5 0x556ca3b74805 in Train* Pool<Vehicle, PoolID<unsigned int, VehicleIDTag, 1044480u, 1048575u>, 512ul, (PoolType)0, false>::PoolItem<&_vehicle_pool>::Create<Train>() /workspace/openspacettd/src/tests/../portal/../core/pool_type.hpp:350
+    #6 0x556ca3ff8c90 in PromptScenarioGenerator::SpawnActiveFleets(PromptScenarioSpec const&, ScenarioSynthesisResult&) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:886
+    #7 0x556ca3ffa1f5 in PromptScenarioGenerator::SynthesizeAndSave(PromptScenarioSpec const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:1123
+    #8 0x556ca3ffade9 in PromptScenarioGenerator::GenerateCommonwealthPrefabWorld(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int) /workspace/openspacettd/src/portal/prompt_scenario_generator.cpp:1223
+    #9 0x556ca48e4876 in C_A_T_C_H_T_E_S_T_0 /workspace/openspacettd/src/tests/test_prefab_world_uat.cpp:82
+    #10 0x556ca45ae401 in Catch::TestInvokerAsFunction::invoke() const /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:14330
+    #11 0x556ca45ad71a in Catch::TestCase::invoke() const /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:14169
+    #12 0x556ca45a8260 in Catch::RunContext::invokeActiveTestCase() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13025
+    #13 0x556ca45a7fe4 in Catch::RunContext::runCurrentTest(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&) /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:12998
+    #14 0x556ca45a6c92 in Catch::RunContext::runTest(Catch::TestCase const&) /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:12759
+    #15 0x556ca45a9991 in execute /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13352
+    #16 0x556ca45aac8d in Catch::Session::runInternal() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13562
+    #17 0x556ca45aa9b9 in Catch::Session::run() /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:13518
+    #18 0x556ca45e2160 in int Catch::Session::run<char>(int, char const* const*) (/workspace/openspacettd/build/agent-logs/openttd_test-asan+0x2bd4160) (BuildId: 3d904da97ff857a613fe60579c8d80359aa7c476)
+    #19 0x556ca45bf1e2 in main /workspace/openspacettd/src/tests/../3rdparty/catch2/catch.hpp:17543
+    #20 0x7f4dcff8aca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /workspace/openspacettd/src/vehicle.cpp:657 in UpdateVehicleTileHash
+Shadow bytes around the buggy address:
+  0x517000003680: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x517000003700: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x517000003780: fd fd fd fd fd fd fd fd fd fd fd fd fa fa fa fa
+  0x517000003800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x517000003880: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+=>0x517000003900: fd fd fd fd fd fd fd fd fd fd fd fd[fd]fd fd fd
+  0x517000003980: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x517000003a00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x517000003a80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x517000003b00: fd fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x517000003b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1280==ABORTING

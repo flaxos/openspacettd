@@ -22,6 +22,10 @@
 #include "../widgets/industry_widget.h"
 #include "../core/random_func.hpp"
 #include "../genworld.h"
+#include "../game/game_instance.hpp"
+#include "../script/api/script_industrytype.hpp"
+#include "../script/api/script_error.hpp"
+#include "../core/backup_type.hpp"
 #include "../table/strings.h"
 #include "../safeguards.h"
 
@@ -63,6 +67,70 @@ struct SurveyFixture {
 		return IT_INVALID;
 	}
 };
+
+/** Supply an active script and allocator for calls to the native script API. */
+class ResourceScriptController : public ScriptObject {
+public:
+	GameInstance game{};
+	ActiveInstance active{game};
+	Squirrel engine{"test-industry"};
+	ScriptAllocatorScope scope{&engine};
+	using ScriptObject::SetCompany;
+	using ScriptObject::SetLastError;
+};
+
+TEST_CASE("Industry script mode guards retain deity construction and private discoveries", "[resource-sites][script-industry]")
+{
+	SurveyFixture fixture;
+	AutoRestoreBackup company(_current_company);
+	ResourceScriptController script;
+	const auto type = fixture.Raw();
+	const auto anchor = TileXY(30, 30);
+	REQUIRE(ResourceSiteManager::AddSite(anchor, type, 16, 16) != 0);
+	REQUIRE(ResourceSiteManager::Survey(DoCommandFlag::Execute, CompanyID{0}, anchor).Succeeded());
+
+	for (CompanyID invalid : {OWNER_DEITY, COMPANY_SPECTATOR, CompanyID{14}}) {
+		script.SetCompany(invalid);
+		script.SetLastError(ScriptError::ERR_NONE);
+		CHECK(ScriptIndustryType::GetDiscoveredResourceSites(type) == nullptr);
+		CHECK(ScriptError::GetLastError() == ScriptError::ERR_PRECONDITION_INVALID_COMPANY);
+		script.SetLastError(ScriptError::ERR_NONE);
+		CHECK(ScriptIndustryType::CanBuildIndustry(type) == (invalid == OWNER_DEITY));
+		CHECK(ScriptError::GetLastError() == (invalid == OWNER_DEITY ? ScriptError::ERR_NONE : ScriptError::ERR_PRECONDITION_INVALID_COMPANY));
+	}
+
+	script.SetCompany(CompanyID{0});
+	script.SetLastError(ScriptError::ERR_NONE);
+	CHECK(ScriptIndustryType::CanBuildIndustry(type));
+	CHECK_FALSE(ScriptIndustryType::CanBuildIndustry(IT_INVALID));
+	{
+		std::unique_ptr<ScriptList> sites(ScriptIndustryType::GetDiscoveredResourceSites(type));
+		REQUIRE(sites != nullptr);
+		CHECK(sites->Count() == 1);
+		CHECK(sites->HasItem(anchor.base()));
+		CHECK(sites->GetValue(anchor.base()) == 0);
+	}
+	REQUIRE(Command<Commands::BuildIndustry>::Post(anchor, type, 0, true, 1));
+	{
+		std::unique_ptr<ScriptList> sites(ScriptIndustryType::GetDiscoveredResourceSites(type));
+		REQUIRE(sites != nullptr);
+		CHECK(sites->GetValue(anchor.base()) == 1);
+	}
+	script.SetCompany(CompanyID{1});
+	{
+		std::unique_ptr<ScriptList> sites(ScriptIndustryType::GetDiscoveredResourceSites(type));
+		REQUIRE(sites != nullptr);
+		CHECK(sites->IsEmpty());
+	}
+	script.SetCompany(CompanyID{0});
+	for (bool enabled : {true, false}) {
+		ResourceSiteManager::SetEnabled(enabled);
+		std::unique_ptr<ScriptList> sites(ScriptIndustryType::GetDiscoveredResourceSites(enabled ? IT_INVALID : type));
+		REQUIRE(sites != nullptr);
+		CHECK(sites->IsEmpty());
+		CHECK(ScriptError::GetLastError() == ScriptError::ERR_NONE);
+	}
+}
 
 TEST_CASE("Resource survey is paid once, company-specific, and atomic", "[resource-sites]")
 {

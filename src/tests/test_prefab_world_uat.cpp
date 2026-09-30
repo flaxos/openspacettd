@@ -23,6 +23,7 @@
 #include "../engine_base.h"
 #include "../engine_func.h"
 #include "../train.h"
+#include "../vehicle_func.h"
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../fileio_func.h"
@@ -155,6 +156,37 @@ TEST_CASE("Prefab World Saves - Automation & UAT Verification (Sprint 50 Tooling
 		INFO("Reload UAT Error: " << reload_uat_err);
 		CHECK(reload_verified);
 		CHECK(reload_uat_err.empty());
+	}
+
+	SECTION("Repeated generation discards the previous fleet's spatial hashes")
+	{
+		REQUIRE(PromptScenarioGenerator::GenerateCommonwealthPrefabWorld({}, 4).success);
+		std::vector<TileIndex> previous_tiles;
+		for (const Vehicle *vehicle : Vehicle::Iterate()) previous_tiles.push_back(vehicle->tile);
+		REQUIRE_FALSE(previous_tiles.empty());
+
+		/* Retain the same map dimensions so old hash buckets are still queried,
+		 * but deliberately generate no replacement fleet to mask stale pointers. */
+		PromptScenarioSpec empty_spec;
+		empty_spec.create_active_fleets = false;
+		REQUIRE(PromptScenarioGenerator::SynthesizeAndSave(empty_spec, {}).success);
+		REQUIRE(Vehicle::GetNumItems() == 0);
+		for (TileIndex tile : previous_tiles) CHECK(VehiclesOnTile(tile).begin() == VehiclesOnTile(tile).end());
+
+		for (uint32_t worlds : {3u, 6u, 4u}) {
+			REQUIRE(PromptScenarioGenerator::GenerateCommonwealthPrefabWorld({}, worlds).success);
+			REQUIRE(Vehicle::GetNumItems() == 3);
+			for (const Vehicle *vehicle : Vehicle::Iterate()) {
+				size_t count = 0;
+				bool found = false;
+				for (const Vehicle *nearby : VehiclesOnTile(vehicle->tile)) {
+					REQUIRE(++count <= Vehicle::GetNumItems());
+					CHECK(Vehicle::GetIfValid(nearby->index) == nearby);
+					found |= nearby == vehicle;
+				}
+				CHECK(found);
+			}
+		}
 	}
 
 	SECTION("Autonomous UAT Task 1: CST Prefab Stamping and Stockpile BOM Consumption")
