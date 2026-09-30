@@ -14,10 +14,15 @@ output-buffer relief and cold-continuation results govern A1; no A2 is implement
 
 The integrated economy and natural scheduled federation freight exist. A1 now has
 bounded ordinary-start automated proof; graphical acceptance remains Pending.
-[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is the sole proposed
-next execution slice: one bounded A1 follow-up toward A2, for parent review before
-separate implementation. The owner permits up to two supervised sequential slices
-after A1 proof/review before human playtest; this proposes the first, not both.
+[First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is the retained
+single execution plan, now **BLOCKED**: authorized seed11 lacks a Core receiver;
+read-only seed2026 preflight finds an incompatible neutral terminal join. Full
+food affordability and operation remain unproven. The owner approved planning the
+[new-game generation proposal](INTEGRATED_GENERATION_PROPOSAL.md), covering legal
+terminal joins and one valid Core town within the configured global count. Its
+new-game contract, bounded failure choices and fresh-start validation require
+explicit approval before implementation. Existing saves/evidence remain intact;
+no roadmap milestone, second gameplay slice or human acceptance is advanced.
 The other horizons order dependencies, not approved sprint numbers. Development
 phase and economic role remain separate; review that product model only with an
 explicit decision. Dated delivery records preserve their original evidence.
@@ -56,7 +61,7 @@ player gate commissioning, grants or role changes are prerequisites for A1; A2
 still concerns earned new access. Actual A1 proof supersedes the approximately
 £15–20k diagnostic estimate: startup costs £80,681/£112,267/£83,191 and the paid
 output step £86,432/£87,152/£87,180. Seed101's minimum sampled cash is £6,314;
-cash/loan constraints remain material. The proposed food continuation uses seed11
+cash/loan constraints remain material. The blocked food continuation retains seed11
 and existing generated assets; it does not promise three-seed food coverage, growth,
 early research, positive CST input running cost or indefinite sustainability.
 Connected economy fixtures and prefab UAT saves with authored track, trains,
