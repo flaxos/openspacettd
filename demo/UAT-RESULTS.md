@@ -1,5 +1,14 @@
 # Human UAT results — recovery / v1.1
 
+## First Paid Core Food Consumption — 30 September 2026
+
+**Human graphical status: Pending; automated outcome BLOCKED.** The preserved
+ordinary seed11 save has no Core town/house receiver. Native designation and
+relay/reload tests pass, but no food service or consumption proof ran. Use the
+[short receiver-inspection mission](../docs/audit/2026-09-30/core-food-preflight/README.md#owner-options-and-short-human-mission)
+for useful human feedback; this does not replace A1 fresh-New-Game acceptance.
+No human acceptance, second slice or roadmap advance is inferred.
+
 ## A1 First Sustainable Freight — 30 September 2026
 
 **Human graphical status: Pending.** The owner-approved Codex takeover implements

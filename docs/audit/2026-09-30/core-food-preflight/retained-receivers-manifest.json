@@ -1,0 +1,41 @@
+{
+  "mode": "read-only-retained-A1-receiver-inspection",
+  "code_head": "abeb8f00459f8510a9a4fbf8dfeb4c809dd39277",
+  "files": [
+    {
+      "path": "build/agent-logs/core-food-retained-receivers.py",
+      "bytes": 2377,
+      "sha256": "d51233351bc8b11b3707b4c2a7a7795ce6cbffe361d675adc7dd0fbd0659c96a"
+    },
+    {
+      "path": "build/agent-logs/core-food-retained-receivers.log",
+      "bytes": 574,
+      "sha256": "0eb0921914bb6073db7b88a651044e77f737e03af1acaea2eea43cb2f58a33eb"
+    },
+    {
+      "path": "build/core-food-retained-receivers/101-snapshot.json",
+      "bytes": 60870,
+      "sha256": "b4e8fc0aba1645f5765b434fc0fe56ffc38518c4fa7a4bedcb2844ceaa7d6843"
+    },
+    {
+      "path": "build/core-food-retained-receivers/101.log",
+      "bytes": 59092,
+      "sha256": "8e18fb5597b70290fa67a3fa83890a037d356f6996abf2a302abf092dd1152cf"
+    },
+    {
+      "path": "build/core-food-retained-receivers/2026-snapshot.json",
+      "bytes": 50127,
+      "sha256": "de0751d3eef46a7899e10964305b84fc63e40cf01409ff920f984777376118b4"
+    },
+    {
+      "path": "build/core-food-retained-receivers/2026.log",
+      "bytes": 49382,
+      "sha256": "15bb075b47b914b5262e3cdd69bd0f2047071f028155c7a9b74fcbfc1ae1e6ff"
+    },
+    {
+      "path": "build/core-food-retained-receivers/inspection.json",
+      "bytes": 3814,
+      "sha256": "a7f7b12c8782c54d8407ceb44fe47bb809037bdfd8b339f013ec78a57fd8f4b6"
+    }
+  ]
+}

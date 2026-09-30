@@ -1,5 +1,14 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Paid Core Food Consumption follow-up — 30 September 2026
+
+**BLOCKED:** the hash-verified ordinary seed11 A1 checkpoint has no Core town or
+Core houses. Native designation/negative catchment/relay/reload wiring is tested,
+but no borrowing, spending or advances occurred; food construction, affordability,
+paid delivery, monthly consumption and cold operating continuation remain unproven.
+Human UAT Pending. [Evidence and owner options](audit/2026-09-30/core-food-preflight/README.md).
+No A2, second slice, balance, generation, role or research policy change.
+
 ## A1 First Sustainable Freight — 30 September 2026
 
 **TESTED: bounded native seeds 11/101/2026, cargo/cash, output relief and cold
