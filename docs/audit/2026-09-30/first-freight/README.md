@@ -1,7 +1,7 @@
 # A1 First Sustainable Freight — 30 September 2026
 
 **Human UAT: Pending.** This is bounded ordinary-start automated evidence under
-[the approved Option A plan](../../../ACTIVE_EXECUTION_PLAN.md), not A2, an
+[the approved A1 Option A plan](https://github.com/flaxos/openspacettd/blob/3d6bd575e787fbd9ba1bc108df2ffa979494cb92/docs/ACTIVE_EXECUTION_PLAN.md), not A2, an
 indefinite whole-economy proof or graphical acceptance. All three representative native seeds pass the frozen-build proof below.
 Discovery and economic failures remain retained; exact delivery-head checks are
 recorded separately from this long proof.

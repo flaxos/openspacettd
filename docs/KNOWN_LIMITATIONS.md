@@ -1,5 +1,27 @@
 # OpenSpaceTTD Known Limitations
 
+## Post-A1 dependency review — 30 September 2026
+
+The proposed [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is a
+bounded A1 follow-up toward A2, not new delivered evidence. Seed11's retained
+operation checkpoint has £78,268 cash/£100,000 debt; £219,780 is its later sampled
+continuation result. The grain-route lead predates A1 construction, and the full
+food-to-Core path/catchment/cost/profit remains unproven. Seeds101/2026 do not yet
+establish this food outcome. A1 and future food graphical acceptance remain Pending.
+
+Early research still requires a Core HQ with £5m cash eligibility and £2.5m
+placement cost, even though integrated rules waive legacy three-phase presence.
+Materials I/II require 100/250 cash-funded RP; no earned affordability bridge is
+proved by A1 or the £100m authored progression fixture. Changing these prices or
+progression pace requires an owner decision. Opening a Phase4 world alone does
+not authorize industry construction or waive colonisation.
+
+Generated towns are not automatically designated as megacities. The existing
+Designate GUI directly mutates registration; the proposed integration must preserve
+its semantics through native replicated commands. Real Core FOOD consumption needs
+designation and the receiving station's own town houses in catchment. Storage or
+arrival alone is insufficient; FOOD alone sustains the town without growth.
+
 ## First Sustainable Freight boundaries — 30 September 2026
 
 [A1 evidence and human mission](audit/2026-09-30/first-freight/README.md) cover only
