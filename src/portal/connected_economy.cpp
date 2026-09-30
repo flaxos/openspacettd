@@ -103,7 +103,7 @@ void ConfigureIntegratedNodes()
 	nodes = legacy_nodes;
 	if (!IntegratedEconomy::Enabled()) return;
 	nodes[3] = {"Food works", 450, 404};
-	for (size_t i = 4; i <= 12; ++i)
+	for (uint i = 4; i <= 12; ++i)
 		nodes[i].x = 300 + 15 * (i - 4);
 	nodes.push_back({"Oil wells", 736});
 	nodes.push_back({"Machine assembly", 435, RECIPE_MACHINE_MODULES});
@@ -215,11 +215,12 @@ bool TrainRoute(size_t source, size_t destination, CargoType cargo, uint wagons,
 		}
 		if (row == integrated_corridors.size()) integrated_corridors.emplace_back();
 		integrated_corridors[row].push_back({left - 3, right + 16});
-		y = TOP + 2 + 2 * row;
-		if (y - TOP >= 64) {
+		/* Preserve the 64-tile offset limit before narrowing the row to coordinate arithmetic. */
+		if (row >= (64 - 2) / 2) {
 			IConsolePrint(CC_ERROR, "CONNECTED FAIL too many overlapping freight corridors");
 			return false;
 		}
+		y = TOP + 2 + 2 * static_cast<uint>(row);
 	}
 
 	for (uint x : {220u, 476u, 732u})
@@ -380,7 +381,8 @@ bool FundIntegratedNode(size_t node, IndustryType type)
 	}
 	StringID last_error = INVALID_STRING_ID;
 	for (uint dy = 5; dy <= 12; ++dy)
-		for (size_t layout = 0; layout < GetIndustrySpec(type)->layouts.size(); ++layout) {
+		/* NewGRF layout counts are byte-sized; use the construction command's index type. */
+		for (uint32_t layout = 0; layout < GetIndustrySpec(type)->layouts.size(); ++layout) {
 			TileIndex tile = TileXY(nodes[node].x, TOP - dy);
 			auto quote = Command<Commands::BuildIndustry>::Do({}, tile, type, layout, false, 1);
 			if (quote.Failed()) {

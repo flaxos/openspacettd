@@ -244,6 +244,26 @@ TEST_CASE("Integrated malformed state is rejected without changing the live econ
 	CHECK(IntegratedEconomy::Save() == saved);
 }
 
+TEST_CASE("Integrated cargo map bounds preserve exact values and reject overflow atomically", "[integrated-economy][ci-bounds]")
+{
+	EconomyFixture fixture;
+	auto doc = nlohmann::json::parse(IntegratedEconomy::Save());
+	doc["cities"] = nlohmann::json::array({{0, {{C("FOOD"), UINT32_MAX}}, {{C("FOOD"), UINT32_MAX}}}});
+	REQUIRE(IntegratedEconomy::Load(doc.dump()));
+	const auto saved = IntegratedEconomy::Save();
+	const auto roundtrip = nlohmann::json::parse(saved);
+	CHECK(roundtrip["cities"][0][1][0][1] == UINT32_MAX);
+	CHECK(roundtrip["cities"][0][2][0][1] == UINT32_MAX);
+	for (size_t field : {1u, 2u}) {
+		for (uint64_t overflow : {uint64_t{UINT32_MAX} + 1, UINT64_MAX}) {
+			auto invalid = roundtrip;
+			invalid["cities"][0][field][0][1] = overflow;
+			CHECK_FALSE(IntegratedEconomy::Load(invalid.dump()));
+			CHECK(IntegratedEconomy::Save() == saved);
+		}
+	}
+}
+
 TEST_CASE("Integrated electric construction and conversion have atomic "
 		  "material previews",
 		  "[integrated-economy]")

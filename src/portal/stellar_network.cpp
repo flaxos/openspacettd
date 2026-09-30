@@ -265,7 +265,7 @@ CommandCost StellarNetwork::BuildRemoteLanding(DoCommandFlags flags, uint32_t zo
 	if (cost.Failed() || !flags.Test(DoCommandFlag::Execute)) return cost;
 	auto built = Command<Commands::BuildPortalGate>::Do(flags, z.tile, z.direction, rail);
 	if (built.Failed()) return built;
-	auto gate = PortalRegistry::RegisterInterServerPortal(z.tile, z.direction, z.world, source_world, source_gate, 1, z.tile.base());
+	[[maybe_unused]] auto gate = PortalRegistry::RegisterInterServerPortal(z.tile, z.direction, z.world, source_world, source_gate, 1, z.tile.base());
 	assert(gate != INVALID_PORTAL);
 	/* The source paid the destination's persisted construction quote. Lock transit until it acknowledges the link. */
 	ConfigureRemoteAccess(z.tile, CompanyID::Invalid(), false, 0);
