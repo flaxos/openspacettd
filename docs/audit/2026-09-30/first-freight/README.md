@@ -205,5 +205,7 @@ commit. Exact SHA, build/unit/isolated CTest/linters/seed-regression/SDL/cold-lo
 and remote CI are recorded in the draft PR and recoverable
 `build/agent-logs/a1-final-verification.json` plus its per-command logs. The long proof
 commit remains distinct: intervening changes affect only evidence/docs and the
-separate API documentation/ASan helper; A1 source, runner and gameplay config remain
-byte-identical. No redundant long soak is claimed at a metadata-only delivery SHA.
+separate API documentation/ASan helper. The docs-check follow-up adds Doxygen
+contracts and separates the equivalent station/depot declarations; no executable
+behavior changes. A1 runners and gameplay config remain byte-identical. No redundant
+long soak is claimed at a comment-only delivery SHA.

@@ -794,7 +794,10 @@ Json Snapshot()
 		    {{"id", Stop(i).base()}, {"name", nodes[i].name}, {"consumer", MegacityManager::IsConsumerStation(Station::Get(Stop(i)))}});
 	return r;
 }
-/** Persistent ordinary-start state, independent of the authored showcase nodes. */
+/**
+ * Capture ordinary-start state independently of the authored showcase nodes.
+ * @return Observed native cargo, infrastructure, orders and economy state.
+ */
 Json FreightSnapshot()
 {
 	Json r = {{"seed", _settings_game.game_creation.generation_seed}, {"tick", TimerGameTick::counter},
@@ -889,14 +892,21 @@ Json FreightSnapshot()
 
 /** One prospective player-built station, depot and connection to a generated public throat. */
 struct FreightLeg {
-	TileIndex station = INVALID_TILE, depot = INVALID_TILE;
-	Axis axis = Axis::X;
-	DiagDirection depot_dir = DiagDirection::Invalid;
-	std::vector<std::pair<TileIndex, Track>> rails;
-	std::vector<std::pair<TileIndex, TileIndex>> bridges;
+	TileIndex station = INVALID_TILE; ///< First tile of the prospective two-tile station.
+	TileIndex depot = INVALID_TILE; ///< Prospective depot tile behind the station.
+	Axis axis = Axis::X; ///< Station platform axis.
+	DiagDirection depot_dir = DiagDirection::Invalid; ///< Depot exit toward the station.
+	std::vector<std::pair<TileIndex, Track>> rails; ///< Native track pieces connecting the station to the terminal.
+	std::vector<std::pair<TileIndex, TileIndex>> bridges; ///< Pairs of native bridge endpoint tiles.
 };
 
-/** Find a legal flat-land rail path using command previews, without editing terrain or neutral infrastructure. */
+/**
+ * Find a legal rail path using native previews without editing terrain or neutral infrastructure.
+ * @param industry Generated producer or consumer to serve.
+ * @param gate Public terminal endpoint in the industry's world.
+ * @param[out] leg Feasible station, depot and connecting rail plan when found.
+ * @return Whether the bounded search found a feasible connection.
+ */
 bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, FreightLeg &leg)
 {
 	auto terminal = PortalTerminal::Plan(gate.tile, gate.enter_dir, gate.world_id);
@@ -999,7 +1009,11 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 	return false;
 }
 
-/** Borrow native intervals for the next quote plus one interval of working cash for tolls and monthly costs. */
+/**
+ * Borrow native intervals for a quote plus one interval of working cash for tolls and monthly costs.
+ * @param cost Next ordinary command's quoted cost.
+ * @return Whether normal borrowing provides the required funds within the loan limit.
+ */
 bool FreightFunds(Money cost)
 {
 	const Company *c = Company::Get(CompanyID{0});
@@ -1009,7 +1023,11 @@ bool FreightFunds(Money cost)
 	return true;
 }
 
-/** Build a small local output service on its own track with ordinary commands. */
+/**
+ * Build a small local output service on its own track with ordinary commands.
+ * @param industry Managed processor whose real output the service will transport.
+ * @return Whether a paid output service was built and started successfully.
+ */
 bool FreightOnward(const Industry *industry)
 {
 	if (!IntegratedEconomy::Managed(industry) || industry->produced.empty()) {
@@ -1087,7 +1105,11 @@ bool FreightOnward(const Industry *industry)
 	IConsolePrint(CC_ERROR, "FREIGHT FAIL bounded local output-service search exhausted"); return false;
 }
 
-/** A normal-start extension of the existing acceptance harness; no showcase preparation. */
+/**
+ * Execute the normal-start extension of the existing acceptance harness.
+ * @param argv Console command, ordinary-start operation and its arguments.
+ * @return True after handling the command, including reporting an invalid operation or failed proof step.
+ */
 bool FirstFreight(std::span<std::string_view> argv)
 {
 	bool simple = argv[1] == "first-freight-start" || argv[1] == "first-freight-status" || argv[1] == "first-freight-advance";

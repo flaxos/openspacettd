@@ -40,3 +40,10 @@ the canonical profile except the documented seed, content paths and clock contro
 All three per-phase 405-unit deliveries, captured reload equality, both-direction
 tolls, yearly expense accounting and positive complete-load intervals reconcile.
 Exact committed-head build/tests/CI and human UAT remain separate delivery gates.
+
+The first remote commit-checker run has two distinct failures: the A1 integration
+merge df2bb90263 uses a nonconforming title, and fetch-depth 4 truncates the proof
+commit's parent. Independent inspection of the pinned upstream hook shows that
+its expanded merge log also displays inherited PR54, but the rejected message is
+df2bb90263 itself. CI maintenance is coordinating plumbing; published history and
+proof provenance are preserved. New Doxygen warnings are addressed by A1 comments.
