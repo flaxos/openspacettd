@@ -32,8 +32,18 @@ up to the configured maximum. No custom starting grant or changed maximum is
 established here. Initial research has no granted unlocks or authored inventory;
 basic track, stations, depot, signals, steam/diesel and bootstrap factories are
 cash-buildable under the integrated rules. Generated towns/industries, world
-regions and existing starting gates may be present; the player must build the
-freight railway, consist and orders. Resource availability, acceptance, terrain,
+regions and neutral public CST backbone gates/terminals may be present and used
+within the same global map/server (owner-approved Option A, 30 September 2026).
+Preserve Frontier raw producers, Industrial accepting processors and Core city
+demand; generated mills confer no player research unlocks. The player must build
+connecting rail, stations, depot, train/consist and orders with ordinary capital
+and borrowing. Public access, tolls both ways, other operating costs and processor
+output-buffer limits belong in the continued-play/affordable-modest-next-step proof.
+Keep seeds 11, 101 and 2026 and the existing exact canonical settings. No federation,
+player gate commissioning, grants or role changes are prerequisites for A1; A2
+still concerns earned new access. This corrects the plan, not A1's delivery status;
+the reported tile route and approximately £15k build cost remain unverified.
+Resource availability, acceptance, terrain,
 affordability and earned revenue are A1 proof obligations, not assumptions.
 Connected economy fixtures and prefab UAT saves with authored track, trains,
 capital or cargo are explicitly **not** evidence of ordinary progression.
