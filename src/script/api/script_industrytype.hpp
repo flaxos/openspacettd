@@ -27,6 +27,7 @@ public:
 	static bool SurveyResources(TileIndex tile);
 	/** List this company's discovered sites of a type: anchor tile => occupied (0 or 1).
   * @param industry_type Industry type to list.
+	 * @pre ScriptCompanyMode must select a valid company.
   * @return A list, empty for invalid types or when no discoveries exist.
   */
 	static ScriptList *GetDiscoveredResourceSites(IndustryType industry_type);
@@ -120,6 +121,7 @@ public:
 	/**
 	 * Can you build this type of industry?
 	 * @param industry_type The type of the industry.
+	 * @pre ScriptCompanyMode must select deity mode or a valid company.
 	 * @pre IsValidIndustryType(industry_type).
 	 * @return True if you can build this type of industry at locations of your choice.
 	 * @ai @note Returns false if you can only prospect this type of industry, or not build it at all.
