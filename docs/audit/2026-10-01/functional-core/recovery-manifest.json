@@ -190,9 +190,9 @@
     "diff_check": "PASS; exit0",
     "official_commit_check_through_corrected_source": "PASS; eight commits; exit0",
     "corrected_canonical_campaign": "NOT RUN",
-    "independent_source_review": "Astra maximum CLEAR for draft partial delivery; all37archive members/source/binary/gate provenance and custody verified; no canonical run or human acceptance",
-    "final_exact_head_ci": "Final delivery head and remote CI status tracked on draft PR68; separate from canonical gameplay proof",
-    "local_delivery_links": "PASS;258local links/anchors;exit0"
+    "independent_source_review": "Astra maximum CLEAR for draft partial delivery: corrected source, records and all37regulararchive members; no correction required",
+    "final_exact_head_ci": "See PR68 final exact-head publication/checks; separate from failed canonical gameplay and local gates",
+    "local_delivery_links": "PASS; 258local links/anchors"
   },
   "prior_remote_ci": {
     "514c19fe8fb3e6c4e16a239538631507355c61f6": "PASS after one unchanged Mac Release rerun; first Blueprint directory assertion retained, cause unconfirmed",
@@ -358,14 +358,14 @@
   },
   "recorded_at_utc": "2026-09-30T23:42:46.803275+00:00",
   "independent_final_review": {
-    "model_requested": "Astra",
-    "reasoning_requested": "maximum",
+    "reviewer": "Astra maximum",
     "result": "CLEAR for draft partial delivery",
     "corrected_source_commit": "c99e7a1357af00284526de626676411f61afdb56",
-    "all37regular_archive_members_verified": true,
-    "original_bytes_verified_unchanged": true,
-    "full_gate_log_support_verified": true,
-    "further_canonical_campaign": "NOT RUN;newexplicit handoff required",
-    "human_uat": "Pending"
+    "archive_sha256": "5c2f0ae65ccb561476a92ee14e131723c663511927ff43561604a8383880df0a",
+    "regular_members_verified": 37,
+    "original_custody_verified": true,
+    "head_publication_ci": "Separate delivery checks",
+    "human_acceptance": "Pending",
+    "functional_outcome": "FAIL"
   }
 }
