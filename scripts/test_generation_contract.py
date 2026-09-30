@@ -6,10 +6,33 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
-from test_integrated_economy import first_freight, freight_advance_limit, generation_contract, generation_projection, rejected_generation_mutation, validate_generation_paid
+from test_integrated_economy import console_ack, first_freight, freight_advance_limit, generation_contract, generation_projection, rejected_generation_mutation, validate_generation_paid
 
 
 class GenerationEvidenceTests(unittest.TestCase):
+    def test_console_ack_uses_one_stdin_command_and_retains_each_script(self):
+        # No process/stdin attribute: the old two-line protocol fails this test.
+        with tempfile.TemporaryDirectory() as folder:
+            engine = SimpleNamespace(log=SimpleNamespace(name=str(Path(folder) / 'generation.log')),
+                                     command=MagicMock())
+            expected = [('cd ".."', 'GENERATION_BROWSER_READY'),
+                        ('debug_level "sl=2"', 'GENERATION_LOAD_DEBUG_READY')]
+            for command, marker in expected:
+                console_ack(engine, command, marker)
+            self.assertEqual(engine.command.call_count, 2)
+            scripts = []
+            for call, (command, marker) in zip(engine.command.call_args_list, expected):
+                invocation, observed_marker = call.args
+                self.assertNotIn('\n', invocation)
+                self.assertEqual(observed_marker, marker)
+                self.assertTrue(invocation.startswith('exec "') and invocation.endswith('"'))
+                script = Path(invocation[len('exec "'):-1])
+                self.assertTrue(script.is_absolute())
+                self.assertEqual(script.parent, Path(folder))
+                self.assertEqual(script.read_text(), command + '\n' + f'echo {marker}\n')
+                scripts.append(script)
+            self.assertNotEqual(*scripts)
+
     def test_freight_limit_cannot_expand_approved_tick_budget(self):
         self.assertEqual(freight_advance_limit(500), 240)
         self.assertEqual(freight_advance_limit(240), 240)

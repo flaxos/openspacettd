@@ -54,10 +54,14 @@ def generation_projection(state):
 
 
 def console_ack(engine, command, marker):
-    """Acknowledge a synchronous native console command which prints no success line."""
-    engine.process.stdin.write(command + '\n' + f'echo {marker}\n')
-    engine.process.stdin.flush()
-    engine.wait(marker)
+    """Execute command/ack synchronously from one stdin line; retain the native script."""
+    sequence = getattr(engine, '_generation_ack_number', 0) + 1
+    engine._generation_ack_number = sequence
+    script = (Path(engine.log.name).parent / f'generation-ack-{sequence:03}.scr').resolve()
+    require('"' not in str(script) and '\n' not in str(script), 'Proof acknowledgement script cannot be safely quoted')
+    with script.open('x') as stream:
+        stream.write(command + '\n' + f'echo {marker}\n')
+    engine.command(f'exec "{script}"', marker)
 
 
 def same_process_load(engine, save):

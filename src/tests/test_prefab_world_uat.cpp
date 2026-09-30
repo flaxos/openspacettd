@@ -48,6 +48,7 @@
 #include "../landscape.h"
 #include "../core/backup_type.hpp"
 #include <filesystem>
+#include <set>
 
 static constexpr IndustryType IT_STEEL_MILL = 8;
 static constexpr IndustryType IT_IRON_MINE = 18;
