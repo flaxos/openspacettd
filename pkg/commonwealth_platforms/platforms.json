@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "name": "Commonwealth open freight platform",
+  "license": "GPL-2.0-only",
+  "author": "OpenSpaceTTD Developers",
+  "projection": "screen_x = 2 * (world_y - world_x); screen_y = world_x + world_y - world_z",
+  "length": 16,
+  "width": 5,
+  "height": 2,
+  "materials": {
+    "deck": "#77898d",
+    "panel": "#677a82",
+    "seam": "#283239",
+    "ceramic": "#d7d8ce",
+    "steel_x": "#596b73",
+    "steel_y": "#3b4c54",
+    "cyan": "#55c7d1",
+    "amber": "#d8a34b",
+    "repair": "#9c5841",
+    "company": "#808080"
+  },
+  "modules": [0, 4, 8, 12],
+  "sprites": [
+    {"id": 1069, "name": "Y_FRONT", "axis": "Y", "track_edge": 0},
+    {"id": 1070, "name": "X_REAR", "axis": "X", "track_edge": 5},
+    {"id": 1071, "name": "Y_REAR", "axis": "Y", "track_edge": 5},
+    {"id": 1072, "name": "X_FRONT", "axis": "X", "track_edge": 0}
+  ]
+}

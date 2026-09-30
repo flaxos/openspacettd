@@ -13,6 +13,16 @@ Seeds 101/2026 operation are NOT RUN after that stop. See
 [evidence, options and human mission](audit/2026-10-01/generation/README.md).
 Human UAT remains Pending; no FOOD outcome, A2 or roadmap milestone advances.
 
+## Parallel platform art proof — 1 October 2026
+
+The optional [four-platform art proof](COMMONWEALTH_PLATFORM_ART_PROOF.md) adds
+original normal/2x 32bpp sprites, 8bpp fallback and a reproducible exporter.
+Bounded native freight, cold reload/removal and normal/2x SDL rendering are
+tested; human visual acceptance is **Pending**. Original content remains intact.
+This independent visual track does not advance A1/A2 or replace the active
+Core-food/new-game planning work. Broader fleets, terrain and UI await the
+first family's appearance/pipeline gate.
+
 ## A1 ordinary-start delivery — 30 September 2026
 
 **Bounded automated proof passes seeds 11/101/2026; human UAT Pending.** The bounded

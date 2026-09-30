@@ -1,6 +1,7 @@
 # OpenSpaceTTD Alien World Art Direction
 
-Status: **PROCEDURAL BIOME BEHAVIOUR IMPLEMENTED; BESPOKE ART PENDING**  
+Status: **PROCEDURAL BIOME BEHAVIOUR IMPLEMENTED; OPTIONAL PLATFORM ART PROOF; BROADER BESPOKE ART PENDING**
+
 Original specification: **2026-09-13**  
 Status reconciled: **2026-09-14**
 
@@ -50,7 +51,11 @@ Use Sub-Arctic terrain with modular colony shells, rough ballast, temporary gant
 
 ## Asset delivery rules
 
-These rules remain acceptance criteria for planned Sprint 38. The repository currently has no dedicated OpenSpaceTTD art source/export package.
+These rules remain acceptance criteria for the broader visual work. The first
+optional source/export package is the [four-platform proof](COMMONWEALTH_PLATFORM_ART_PROOF.md),
+with original parametric geometry, normal/2x 32bpp sprites and 8bpp fallback.
+Its human acceptance is Pending; bespoke terrain, flora, fleet and landmarks
+remain unauthored. This does not reopen or renumber historical Sprint 38.
 
 - Author source sheets and export settings live with the packaged assets; generated sprites are reproducible.
 - Each asset records author, licence, source and palette/zoom variants.

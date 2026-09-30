@@ -14,6 +14,16 @@ Record exact build/seed/content, visible Core town/own houses, normal paid join/
 station preview, cash/debt, reload, elapsed time and first unexpected control or
 message. Do not use the failed financial checkpoint as accepted economic proof.
 
+## Commonwealth platform art proof — 1 October 2026
+
+**Human visual status: Pending.** Review the optional four-platform family using
+the [isolated art mission](../docs/COMMONWEALTH_PLATFORM_ART_PROOF.md). Compare
+normal/2x zoom and both orientations beside native shelters, with company colours,
+transparency and a moving train; save, quit and reload. Record exact build,
+base graphics, art hash, UI/display scale, seams/occlusion and observed frame/RSS
+impact. Paired native freight/reload and SDL automation are separate evidence.
+The authored WP11 art scene does not replace A1's ordinary-start human mission.
+
 ## A1 First Sustainable Freight — 30 September 2026
 
 **Human graphical status: Pending.** The owner-approved Codex takeover implements

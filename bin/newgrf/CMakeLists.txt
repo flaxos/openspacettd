@@ -6,6 +6,7 @@ set(COMMONWEALTH_NEWGRF_SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_industry_v4.grf
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_rail_v3.grf
 	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_equipment_v1.grf
+	${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_platforms_v1.grf
 )
 
 foreach(COMMONWEALTH_NEWGRF_SOURCE_FILE IN LISTS COMMONWEALTH_NEWGRF_SOURCE_FILES)

@@ -17,7 +17,10 @@ its historical evidence and [blocked food plan](blocked-food-plan.md) are preser
 Final native proof uses clean source
 `85456a5c594fbd2dd6680c6d96b2933c1dd2f55c` and binary SHA256
 `3a7c85d77a708e12cc7b17634ceb9d9ebac1b4976d38a7023b832518419e629d`.
-Later delivery changes contain records/evidence only. All three unchanged content
+Native source after this frozen proof is unchanged. Delivery records/evidence and
+normal-history reconciliation with main's independently merged optional art PR64
+are separate: main advanced to `211310a791527c44ce2aa683861fbb537bda73ad`.
+The optional art pack is not enabled in these economic/generation proofs. All three unchanged content
 hashes, source-file fingerprints, configuration/save hashes and archive members
 are in [manifest.json](manifest.json). Actual native seeds are 11, 101 and 2026.
 
@@ -177,6 +180,7 @@ case "$(git remote get-url origin)" in
   *) echo 'STOP: unexpected origin'; exit 1 ;;
 esac
 git fetch origin
+test "$(git rev-parse origin/codex/integrated-newgame-generation)" = "$generation_review_head" || { echo 'STOP: unexpected remote head'; exit 1; }
 git merge-base --is-ancestor HEAD origin/codex/integrated-newgame-generation || { echo 'STOP: diverged/ahead tree'; exit 1; }
 git merge --ff-only origin/codex/integrated-newgame-generation
 test "$(git rev-parse HEAD)" = "$generation_review_head" || { echo 'STOP: unexpected delivery head'; exit 1; }

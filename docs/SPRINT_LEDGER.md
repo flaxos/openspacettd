@@ -13,6 +13,15 @@ NOT RUN. [Full audit, failed proof and bounded options](audit/2026-10-01/generat
 Original A1/#59/PR62 evidence stays intact. No merge, migration, FOOD outcome,
 balance change or roadmap advancement is recorded.
 
+## Parallel Commonwealth platform art proof — 1 October 2026
+
+**TESTED bounded content proof; human visual UAT Pending.** Four original native
+platform replacements retain anchors/bounds, with normal 8bpp and normal/2x 32bpp
+variants. Pinned exporter, compiled-action scope, original-content preservation,
+paired freight/cold reload and SDL captures are recorded in
+[the proof](COMMONWEALTH_PLATFORM_ART_PROOF.md). This is an independent art
+delivery, not another gameplay execution slice or a renumbered historical sprint.
+
 ## A1 First Sustainable Freight — 30 September 2026
 
 **TESTED: bounded native seeds 11/101/2026, cargo/cash, output relief and cold

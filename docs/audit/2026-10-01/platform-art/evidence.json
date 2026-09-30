@@ -1,0 +1,104 @@
+{
+  "all_seven_original_newgrfs_byte_identical_to_base": true,
+  "binary_sha256": "93d9e45a0976b6c8f720e0e2f8313e70f742d10fc10c90c7c7f27ae8da43096f",
+  "candidate_sha256": "0ea503e0667bff7f4dc4733d5053ade456a4f2598f935d7b7efb7ea9bb767202",
+  "capture_sha256": {
+    "baseline/sdl-axes-v2/axis-y-2x-transparent.png": "b8f2f77d391b2a4b921d0967478e0523bdd41c286f71b3285c024e392ec9a3a0",
+    "baseline/sdl-axes-v2/axis-y-2x.png": "671aa03ea339965739668088d2ebd2f9816959b4e74207715f69a23a2eae5e2b",
+    "baseline/sdl-axes-v2/axis-y-normal.png": "d71903762fcb260078d4dcd4e4996ac929f5236a442cfe313e2c31fc04637160",
+    "baseline/sdl-axes-v2/mine-2x.png": "8afdfa116a2de088c92a660255c726d9423f6834b5078833cbfcce12cb426199",
+    "baseline/sdl-axes-v2/mine-normal.png": "7420fc74a3acd74d1cb4129ea99cf3525f490b209a7021bbbffb441dfa824a20",
+    "baseline/sdl-axes-v2/refinery-2x.png": "18f1f6fc3b3360ee4dc03056a6758f8878efec62fe5ac0d7b90f7661ce890d1c",
+    "baseline/sdl-axes-v2/refinery-normal.png": "9e7335f9f68b1d238cf34e081c54c62b6533f4f69ad2e9c2af693f6c99a36153",
+    "candidate/sdl-8bpp/axis-y-2x-transparent.png": "d5a899b21b3ee86648206d288a500410d955b74e542cbd4fd5dfc4f13e5db303",
+    "candidate/sdl-8bpp/axis-y-2x.png": "54c18c8df1061fbf55b5b376412447135dd1c7b469458ccfd41890a16a6de719",
+    "candidate/sdl-8bpp/axis-y-normal.png": "9ac23ecbd98e993f7de551ccf9acc193fe37439480b0eda405e73f3ffcbdc0b6",
+    "candidate/sdl-8bpp/mine-2x.png": "9ca7616bd18a94de75d8549c560a204e26aca3241fa5a06430cf8e5d2eab2031",
+    "candidate/sdl-8bpp/mine-normal.png": "8a39b04bd242f369c3b6d8c6354e6b36631d13f8b15a94be46ee65f73b8bd310",
+    "candidate/sdl-8bpp/refinery-2x.png": "4f8e6abb3306c11a19e56b12514388a92d48a00b116bfc86290949b8596c4c34",
+    "candidate/sdl-8bpp/refinery-normal.png": "b584bb5e80268735b481f6631fdf5cd900e8a78bf958f7396384d1ab6a1f44fd",
+    "candidate/sdl-axes-v2/axis-y-2x-transparent.png": "7a4bb1ba5a5000cd4f0bea04558a3159646aa7424ff6d815fab663e72597bab1",
+    "candidate/sdl-axes-v2/axis-y-2x.png": "5aebfadca3cee78d024918bfb876d6b4dfc3f0a0d59a902af1d3e88f4e814de7",
+    "candidate/sdl-axes-v2/axis-y-normal.png": "9c18e26524554748a449261688c26c3c9b3a53157acdb916c81315398454ebb5",
+    "candidate/sdl-axes-v2/mine-2x.png": "9d99166de857a8d1531847adb4631aef88676e458f62e9eca69ed46d812c1b32",
+    "candidate/sdl-axes-v2/mine-normal.png": "4f1017c78a8d121d45413ad9d7e9dbe0d9d3505f645e485b606702a40861e0c6",
+    "candidate/sdl-axes-v2/refinery-2x.png": "7d99bb49cac9ff38a6896fedc048a0a6bd1b3bbdc740675add3ae730b6ec0e1d",
+    "candidate/sdl-axes-v2/refinery-normal.png": "f95985740aa86a74a8853729c6795b22ce50b821b93bc446fd4fd113fbe3ab1e"
+  },
+  "ctest_cases": 488,
+  "fixture": "Authored WP11 freight showcase; graphical-only native AxisY construction; not A1/A2",
+  "graphical_evidence": {
+    "baseline": "baseline/sdl-axes-v2/graphical-evidence.json",
+    "candidate": "candidate/sdl-axes-v2/graphical-evidence.json",
+    "candidate_8bpp": "candidate/sdl-8bpp/graphical-evidence.json"
+  },
+  "gui": {
+    "actual_sdl_xvfb": true,
+    "axes": [
+      "X",
+      "Y"
+    ],
+    "axis_y_native_paid_cost": 990,
+    "axis_y_state_equal": true,
+    "gui_percent": 100,
+    "indexed_8bpp_runtime_capture": true,
+    "language": "english.lng",
+    "native_mixed_shelter_preserved": true,
+    "transparency_capture": true,
+    "window_pixels": [
+      1024,
+      768
+    ],
+    "zoom": [
+      "normal",
+      "2x"
+    ]
+  },
+  "headless": {
+    "cold_reload_equal": true,
+    "date_cargo_cash_route_equal": true,
+    "distinct_deposit_observations": 6,
+    "paired_advances": 39,
+    "post_reload_continuation_equal": true,
+    "static_art_removable": true,
+    "steel_units_deposited": 120,
+    "ticks_per_advance": 1024
+  },
+  "human_uat": "Pending",
+  "limits": [
+    "Authored WP11 \u00a3100m proof; no A1/A2 balance claim",
+    "Human graphical UAT Pending",
+    "No busy-network/performance ceiling established",
+    "Only one company palette tested in-game; multi-company palette variety pending",
+    "No canopy/pillar replacement; mixed native families intentional",
+    "Axis Y clone is disconnected; route service proved on original Axis X WP11 fixture"
+  ],
+  "native_evidence": "evidence.json",
+  "passed": true,
+  "performance": {
+    "baseline_RSS_KiB": [
+      163720,
+      163720,
+      163720,
+      163720
+    ],
+    "candidate_RSS_KiB": [
+      163880,
+      163880,
+      163880,
+      163880
+    ],
+    "method": "Native fps diagnostics after four paused viewport captures; Linux /proc RSS; SDL/Xvfb/32bpp-anim",
+    "note": "Observed 160 KiB RSS difference, about60fps in both; short paused scene and host/cache noise preclude a production budget or regression threshold"
+  },
+  "proof_report_sha256": "3ebecda948980bb38f268da5e9696dc59cedbe4e0886031971048422b4a90b8d",
+  "save_equivalence_scope": "Exposed WP11 state/catalog/date equals at sampled steps; save bytes differ",
+  "save_sha256": {
+    "baseline/sdl-axes-v2/both-axes-review.sav": "75101782bb188caa41c66b0e1180616e0599607d295227906c91fc4f97163684",
+    "candidate/sdl-8bpp/both-axes-review.sav": "3d7460dde0f83c677da4399eae2d5ce2ddf5563978e233031d5308a4c192b2e4",
+    "candidate/sdl-axes-v2/both-axes-review.sav": "6a58de0669130c7152268d9a06a5234facffad8f2ac7efd57a58d1fa83f00cfc"
+  },
+  "source_base": "294e1a947e267778c2404fb6b2e8c3431dc632f9",
+  "unit_assertions": 67647,
+  "unit_cases": 475
+}
