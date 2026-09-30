@@ -49,8 +49,9 @@ def main():
         lines = subprocess.check_output([ninja, "-t", "commands", "openttd_test"],
                                         cwd=build, text=True).splitlines()
         link = next(line for line in reversed(lines) if " -o openttd_test " in line)
-        link = link.removeprefix(": && ").split(" && :", 1)[0]
+        link = link.removeprefix(": && ").split(" && ", 1)[0]
         command = shlex.split(link)
+        command = [part for part in command if not part.startswith("-Wl,--dependency-file=")]
         command = [replacements.get(part, part) for part in command]
         command[command.index("-o") + 1] = str(out / "openttd_test-prefab-asan")
         command += ["-fsanitize=address"]
