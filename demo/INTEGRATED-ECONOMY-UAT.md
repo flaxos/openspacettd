@@ -2,7 +2,15 @@
 
 Status: **Pending**. Automated tests do not establish graphical acceptance.
 Use the binary and content hashes in the evidence manifest. Keep existing saves
-with their original content. Two new saves are supplied:
+with their original content.
+
+> **Full Playthrough Guides & Checklists:**
+> - **[HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md)**: Detailed step-by-step visual playthrough instructions and multi-scale UI audit rules.
+> - **[HUMAN-UAT-CHECKLIST.md](HUMAN-UAT-CHECKLIST.md)**: Printable/fillable testing score sheet for UI scaling and gameplay tracks.
+> - **[CST-STELLAR-UAT.md](CST-STELLAR-UAT.md)**: Companion guide for CST Star Map navigation and gate commissioning.
+> - **[UAT-RESULTS.md](UAT-RESULTS.md)**: Consolidated human UAT results register.
+
+Two verified saves are supplied:
 
 - `OpenSpaceTTD-Integrated-CST-Sector.sav`: fresh seven-world sector, empty city reserves.
 - `OpenSpaceTTD-Integrated-Economy-UAT.sav`: operating all-chain economy after the

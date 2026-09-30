@@ -1,5 +1,20 @@
 # OpenSpaceTTD Current Architecture
 
+## Organic UAT terrain and rendering repair — 30 September 2026
+
+`PromptScenarioGenerator` anchors every shared corner of existing infrastructure
+before assigning organic heights. Two deterministic Manhattan-distance passes
+lower the complete height field, including void vertices, to legal adjacent
+height differences while retaining flat anchors. World rectangles stay unchanged.
+`ValidateWorldGeometry` rejects illegal height fields or foundations before
+native foundation-sprite and pixel-height queries or scenario save publication.
+
+A narrow after-load adapter identifies the original 256×256 four-world UAT by
+company/world names and intact neutral terminal layouts. It preflights every
+changed shared corner and live vehicle before applying any heights. It never
+changes rails, ownership, cash or world bounds; edited infrastructure causes a
+safe load refusal. See [verification](audit/2026-09-30/organic-uat-crash/README.md).
+
 ## Tooltip rendering repair — 29 September 2026
 
 `GuiShowTooltips` closes the prior tooltip, then rejects encoded text whose
@@ -78,9 +93,9 @@ player-facing directory. It does not change the single-map architecture.
 identifiers below apply to their original sections. Human GUI UAT remains pending.
 
 
-**Source-verified snapshot at HEAD `a6cf83e6a6`** (branch `feature/sprint-50-gateway-staging-and-charters`)
-**Date:** 2026-09-22
-**Main branch HEAD:** `e4baa35623` (Sprints 49–50 are on feature branches, not yet merged to `main`)
+**Source-verified snapshot at HEAD `bc18c2c8fc`** (main branch; Unified Commonwealth Economy PR #44)
+**Date:** 2026-09-29
+**Main branch HEAD:** `bc18c2c8fc` (Sprints 1–50 and feature deliveries through Unified Commonwealth Economy are merged)
 
 This document records what the source code actually implements. It is authoritative
 over historical sprint docs and roadmap claims. When this document conflicts with

@@ -4,19 +4,18 @@ Start recovery work with the [master recovery plan](RECOVERY_PLAN_2026-09-15.md)
 It links the baseline/evidence, defect register, updated existing UAT, AI research
 gates, provenance and title milestones. [Checkpoint](../DEVBOX_HANDOFF.md).
 
-Current acceptance entry point: [v1.1 checklist through Sprint 42](../demo/ALL-FEATURES-UAT.md),
-[results sheet](../demo/UAT-RESULTS.md) and [coverage matrix](FEATURE_UI_UAT_COVERAGE.md).
-See the [commit review and verification record](UAT_V1_1_REVIEW_2026-09-15.md).
-Historical sprint completion is not human acceptance. Current blockers include
-full content activation, player production integration and bespoke art.
+Current acceptance entry point: [Unified Commonwealth Economy UAT](../demo/INTEGRATED-ECONOMY-UAT.md) and [CST Star Map UAT](../demo/CST-STELLAR-UAT.md), with [results sheet](../demo/UAT-RESULTS.md) and [coverage matrix](FEATURE_UI_UAT_COVERAGE.md). Historical fixtures include [v1.1 checklist through Sprint 42](../demo/ALL-FEATURES-UAT.md).
+Historical sprint completion is not human acceptance.
 
 Start with [PROJECT_STATUS_AND_ROADMAP.md](PROJECT_STATUS_AND_ROADMAP.md). It is the authoritative source for current completion, evidence boundaries and planned work.
 
 ## Canonical current documents
 
-- [Project status and roadmap](PROJECT_STATUS_AND_ROADMAP.md) — completed spikes and sprints, incomplete goals and planned Sprints 51–52.
-- [Sprint ledger and index](SPRINT_LEDGER.md) — comprehensive 52-sprint index with exact commits, test evidence, UAT status, and strict status classifications.
+- [Project status and roadmap](PROJECT_STATUS_AND_ROADMAP.md) — completed spikes and sprints, incomplete goals and current roadmap.
+- [Sprint ledger and index](SPRINT_LEDGER.md) — comprehensive 52-sprint index and post-sprint 50 deliveries with exact commits, test evidence, UAT status, and strict status classifications.
 - [Current architecture](CURRENT_ARCHITECTURE.md) — source-verified system-level architecture snapshot at HEAD.
+- [Unified Commonwealth economy](UNIFIED_COMMONWEALTH_ECONOMY.md) — specification and contract for integrated 13-recipe physical factories, warehouse priority, research kit escrow, material-gated construction, and city growth baskets.
+- [CST stellar network](CST_STELLAR_NETWORK.md) — specification and contract for the 7-world star map, commissioned gates, and multi-server freight.
 - [Known limitations](KNOWN_LIMITATIONS.md) — documented gaps, architectural constraints and unproven claims.
 - [Source-code architecture map](ARCHITECTURE_NOTES.md) — OpenTTD subsystem mapping for developers.
 - [Game design and technical plan](GAME_DESIGN_AND_TECHNICAL_PLAN.md) — stable gameplay vision and architecture.
@@ -32,8 +31,11 @@ Dedicated sprint records are point-in-time evidence. They retain the test totals
 
 ## UAT documentation
 
-- [Solo UAT overview](../demo/README.md) and [Sprint 28 walkthrough](../demo/SPRINT28-UAT.md) cover the v0.4 single-player fixture through Sprint 27.
-- [Federation UAT](../demo/FEDERATION-UAT.md) covers authority API and cluster-supervisor procedures. Consult the canonical status page for the live game-process limitation.
+- [Human graphical UAT playbook & guide](../demo/HUMAN-GRAPHICAL-UAT-GUIDE.md) — comprehensive step-by-step visual playthrough manual and multi-scale UI audit guidelines for the Unified Commonwealth Economy.
+- [Human graphical UAT checklist](../demo/HUMAN-UAT-CHECKLIST.md) — fillable test score sheet for recording human visual observations and Pass/Fail status.
+- [Integrated Commonwealth economy UAT](../demo/INTEGRATED-ECONOMY-UAT.md) and [CST star map UAT](../demo/CST-STELLAR-UAT.md).
+- [Solo UAT overview](../demo/README.md) and [Sprint 28 walkthrough](../demo/SPRINT28-UAT.md) cover the legacy v0.4 single-player fixture through Sprint 27.
+- [Federation UAT](../demo/FEDERATION-UAT.md) covers authority API and cluster-supervisor procedures.
 - Earlier portal, Sprint 10 and Sprint 11 guides are historical regression fixtures.
 
 ## Historical and upstream references

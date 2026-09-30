@@ -1,0 +1,9 @@
+# Project defaults for trusted Codex sessions; preserve the user's model choice.
+# Explicit session/CLI settings may override these defaults.
+model_reasoning_effort = "medium"
+
+[profiles.ost-quick]
+model_reasoning_effort = "low"
+
+[profiles.ost-deep]
+model_reasoning_effort = "high"

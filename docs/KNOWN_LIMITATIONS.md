@@ -1,5 +1,20 @@
 # OpenSpaceTTD Known Limitations
 
+## Organic UAT crash follow-up — 30 September 2026
+
+The earlier headless verification omitted native foundation queries: it accepted
+sloped terminal switches that crashed rendering. The new complete geometry audit
+and SDL smoke check close that specific gap. Human graphical acceptance remains
+Pending; the smoke test uses SDL's dummy video driver, not the user's NVIDIA
+OpenGL desktop. See [evidence](audit/2026-09-30/organic-uat-crash/README.md).
+
+Automatic recovery is restricted to the recognized 256×256, four-world legacy
+UAT. It refuses to modify edited terminal infrastructure, other structures sharing
+changed corners, or terrain supporting a live vehicle. Other saves are untouched;
+this is not a generic repair for arbitrary corrupt terrain. Existing generated
+corridor reachability, freight profitability and organic startup balance still
+need gameplay acceptance independently of rendering safety.
+
 ## Tooltip crash follow-up — 29 September 2026
 
 The reported zero-width tooltip assertion is repaired and covered by native
@@ -7,6 +22,22 @@ window tests at 100%, 150% and 200% scale. Human hover/right-click retesting of
 the reported desktop layout remains Pending. This repair does not establish
 acceptance of unrelated scenario-generator work or the full economy/star-map UI.
 [Scope and evidence](audit/2026-09-29/tooltip-crash/README.md).
+
+## Organic UAT World Layouts & Prefab Scenario Synthesis — 29 September 2026
+
+- **Corridor Grading Box:** The procedural organic terrain generator flattens a central
+  box of $[-8, 8] \times [-8, 8]$ tiles around world centers to height 0. This ensures
+  that 2-track terminal platforms, station throat scissors crossovers, holding loops,
+  and nearby canonical industries (e.g. Iron Mine, Steel Mill, Factory) sit on coplanar
+  ground without triggering steep slope or tunnel errors during placement.
+- **Slope Invariant Enforcement:** Non-corridor terrain undergoes an iterative neighbor
+  relaxation pass that clamps elevation deltas to $|\Delta h| \le 1$. Slopes adhere to
+  OpenTTD height-field invariants, avoiding sheer drops or corner mismatches.
+- **Dedicated Server Town Founding:** Procedurally founded towns now explicitly initialize
+  `InitializeBuildingCounts()` before house expansion or placement is queried, preventing
+  null pointer dereferences in `TryBuildTownHouse`.
+- **Human Acceptance Pending:** Visual evaluation of landscape naturalness, urban layout
+  readability, and railway throat operation is pending human visual playthrough (Track 9).
 
 ## Integrated economy acceptance boundaries — 28 September 2026
 
@@ -76,8 +107,8 @@ limitations below retain their dates; the 27/28 September evidence supersedes
 older blanket claims that natural scheduled federation is absent.
 
 
-**Date:** 2026-09-22
-**Verified at:** HEAD `a6cf83e6a6`
+**Date:** 2026-09-29
+**Verified at:** HEAD `bc18c2c8fc`
 
 This document records known gaps, architectural limitations, and unproven claims.
 It is derived from source audit, git verification, and comparison of documentation
@@ -99,12 +130,15 @@ These features have passing automated tests but **no recorded human acceptance e
 | Narrative Generator & Balancing Critic | 48 | ✅ Pass | ❌ Not run |
 | Commonwealth Graph Engine | 49 | ✅ Pass | ❌ Not run |
 | Gateway Staging & Charters | 50 | ✅ Pass | ❌ Not run |
-| All-Feature Guided Solo UAT (v1.1) | 36 | ✅ Artifact | ❌ Not run |
+| All-Feature Guided Solo UAT (v1.1) | 36 | ✅ Artifact | ❌ Not run (superseded by v2/integrated saves) |
 | Blueprint Placement (post WP-01 fix) | 25 | ✅ Pass | ⚠️ Graphical retest pending |
-| Cross-process federation transport | 35 | ✅ Protocol | ❌ Natural gate-entry not proven |
+| Cross-process federation transport | 35 | ✅ Protocol / Cluster | ⚠️ Scheduled freight proven (PR #41); graphical multiplayer UAT pending |
+| Scheduled Federation Freight & Recovery | — | ✅ Pass | ❌ Graphical retest pending (PRs #40, #41) |
+| Player-Built Resource Surveys | — | ✅ Pass | ❌ Not run (PR #42) |
+| CST Star Map & Commissioned Gates | — | ✅ Pass | ❌ Not run; [checklist](../demo/CST-STELLAR-UAT.md) (PR #43) |
+| Unified Commonwealth Economy | — | ✅ Pass | ❌ Not run; [checklist](../demo/INTEGRATED-ECONOMY-UAT.md) (PR #44) |
 
-**The v1.1 UAT save (`demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav`) has never been
-played through by a human tester.**
+**The active UAT saves (`demo/OpenSpaceTTD-Integrated-Economy-UAT.sav` and `demo/OpenSpaceTTD-Integrated-CST-Sector.sav`, superseding the legacy v1.1 save) have not been played through by a human tester.**
 
 See `docs/FEATURE_UI_UAT_COVERAGE.md` for the full feature→UAT mapping.
 
@@ -376,3 +410,9 @@ The connected resource fixture proves a funded authored network, not low-budget
 startup balance or random generation. Its town-growth check is separate from the
 original showcase's three-new-houses-within-ten-minutes target.
 [Details and reproduction](PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## Agent workflow tooling — 30 September 2026
+
+Codex CLI skill discovery is verified. Antigravity discovery and interactive
+usefulness remain Pending. Instruction size reduction does not prove quota savings.
+[Verification boundary](AGENT_WORKFLOW.md#delivery-record--30-september-2026).

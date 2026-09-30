@@ -1,14 +1,26 @@
 # OpenSpaceTTD UAT Demo
 
-Current release: **v1.1**, GameScript v9, 15 chapters and 27 checklist goals.
-Start with [ALL-FEATURES-UAT.md](ALL-FEATURES-UAT.md) for Sprints 1–42 and
-record observations in [UAT-RESULTS.md](UAT-RESULTS.md). All ten gate heads and
-complete terminals belong to the first human company. v1.0 and the remaining
-instructions below are historical regression material, not current acceptance.
+### Current Active UAT: Unified Commonwealth Economy (28 September 2026)
 
-> **Legacy Sprint 28 Fixture:** `OpenSpaceTTD-Phase1-2-3-UAT-v0.4.sav` remains preserved for regression testing and covers features through Sprint 27. See [SPRINT28-UAT.md](SPRINT28-UAT.md).
+The active acceptance entry point is the **Unified Commonwealth Economy** and **CST Star Map**.
+Follow the comprehensive **[HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md)** and fill in **[HUMAN-UAT-CHECKLIST.md](HUMAN-UAT-CHECKLIST.md)**.
+Reference specifications in [INTEGRATED-ECONOMY-UAT.md](INTEGRATED-ECONOMY-UAT.md) and [CST-STELLAR-UAT.md](CST-STELLAR-UAT.md), and record observations in [UAT-RESULTS.md](UAT-RESULTS.md).
 
-### Quick Launch: Current UAT (v1.1)
+#### Quick Launch: Unified Commonwealth Economy
+```bash
+./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Integrated-Economy-UAT.sav
+```
+*(Or fresh sector: `./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Integrated-CST-Sector.sav`)*
+
+---
+
+### Historical UAT Fixtures
+
+#### Guided Solo UAT (v1.1 — Sprints 1–42)
+GameScript v9, 15 chapters and 27 checklist goals.
+See [ALL-FEATURES-UAT.md](ALL-FEATURES-UAT.md). All ten gate heads and
+complete terminals belong to the first human company.
+
 ```bash
 ./build/openttd -g demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav
 ```

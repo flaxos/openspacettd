@@ -1,5 +1,20 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Organic UAT crash recovery — 30 September 2026
+
+`codex/fix-organic-uat-crashes` follows organic-layout PR #48 and incorporates
+merged tooltip fix PR #47. The organic generator now protects all shared corners
+of existing portal terminals, rather than only the small gate-head area. Whole-map
+terrain/foundation validation runs before fleets are spawned or a save is written.
+The recognized legacy four-world UAT can safely recover its neutral terminal
+terrain on load; the original published and crash saves are preserved.
+
+**TESTED:** 473 unit cases / 67,547 assertions; 486/486 CTests. Native save recovery,
+3/4/6-world generation, cold reload and SDL rendering smoke evidence are retained
+in [the audit](audit/2026-09-30/organic-uat-crash/README.md). Human graphical UAT is
+still Pending. Next: human retest of the original launch, then real route/delivery
+acceptance and bootstrap balance; this repair does not prove a profitable network.
+
 ## Empty-tooltip crash repair — 29 September 2026
 
 **TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.
@@ -10,6 +25,33 @@ resolves to zero-width text. Tooltip admission now rejects that text before
 multiline sizing. Prompt-generator, HQ, facilities and trade buttons use
 `STR_NULL` for absent help. Simulation and save formats are unchanged.
 [Verification and UAT](audit/2026-09-29/tooltip-crash/README.md).
+
+## Organic UAT World Layouts & Realistic Civil Rail Infrastructure — 29 September 2026
+
+Delivery branch `feature/organic-uat-world-layouts`. Transforms the procedural UAT world
+generator (`PromptScenarioGenerator`) from flat test benches into contoured organic
+landscapes with biomes, multi-block urban street grids, realistic city clusters, and
+engineered rail infrastructure.
+
+- **Organic Contoured Terrain:** Multi-octave procedural elevation per biome with smooth
+  edge fades and a neighbor relaxation pass enforcing OpenTTD's slope invariant
+  ($|\Delta h| \le 1$) across all non-void tiles. The central transport corridor
+  ($[-8, 8] \times [-8, 8]$ around world centers) is cleanly graded for station platforms,
+  scissors throats, and industry catchments.
+- **Engineered Multi-Block Street Grids:** Capital cities founded with orthogonal avenue/cross-street
+  grids, town houses, commercial buildings, corporate headquarters, and megacity registries.
+- **Realistic Rail Infrastructure:** High-capacity 2-track central terminals with covered
+  canopies, station throat scissors double-crossover switches, realistic PBS one-way
+  signalling (`SignalType::PathOneWay`), engine depots, and adjacent holding loop sidings.
+- **Operating Consist Fleets:** Pre-seeded freight consists (e.g. Merredin Iron Ore Express
+  with 100t ore) with active orders traversing gateway portals between worlds.
+- **Headless Save Synthesis Bugfix:** Fixed a null pointer dereference in `TryBuildTownHouse`
+  during dedicated server world generation (`openttd -D`) by ensuring `InitializeBuildingCounts()`
+  is called upon procedural town founding.
+- **Automated Evidence:** 81/81 assertions pass in Catch2 `[prefab_world]`; 485/485 CTests pass;
+  `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` generated, loaded, and verified cleanly.
+- **Human UAT:** Track 9 added to [HUMAN-GRAPHICAL-UAT-GUIDE.md](../demo/HUMAN-GRAPHICAL-UAT-GUIDE.md)
+  and [HUMAN-UAT-CHECKLIST.md](../demo/HUMAN-UAT-CHECKLIST.md). Status: **Pending**.
 
 ## Unified Commonwealth economy — 28 September 2026
 
@@ -67,10 +109,10 @@ sprint registers remain delivered; removed narrative/Silfen/crisis plans are not
 reactivated by this transport feature.
 
 Status: **CANONICAL**<br>
-As of: **2026-09-23**
+As of: **2026-09-29**
 
-Audited main branch HEAD: `e4baa35623` (Sprints 1–48 and WP-01–11 merged via PRs #4–#25)<br>
-Current working HEAD: `a6cf83e6a6` (branch `feature/sprint-50-gateway-staging-and-charters`; Sprints 49–50 **not yet merged to main**)
+Audited main branch HEAD: `bc18c2c8fc` (PR #44; Sprints 1–50 and feature deliveries through Unified Commonwealth Economy merged)<br>
+Current working HEAD: `bc18c2c8fc` (`main`)
 
 This is the authoritative answer to what is implemented, what has been tested, and what remains planned. Sprint specifications preserve the evidence and decisions available when each sprint closed; where they conflict with this page, this page governs current status. For source-level architecture details, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For known gaps and unproven claims, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
 
@@ -80,14 +122,16 @@ OpenSpaceTTD is a railway-heavy interstellar logistics and economic simulation b
 
 ## Current Architecture Reality
 
-OpenSpaceTTD operates on a **single global OpenTTD map** (up to 4096×4096 tiles) partitioned into discrete logical world regions separated by unbuildable void space. It does **not** employ a multi-map engine. World identity is resolved via an $O(1)$ spatial hash grid (`PlanetManager`). Inter-world railway transit adapts OpenTTD's tunnel/bridge wormhole subsystem (`Track::Wormhole`), allowing consists to traverse distant coordinates without intermediate physical track tiles. Custom state is persisted across 20 dedicated save/load chunks in `src/saveload/planet_sl.cpp`. All custom gameplay logic is isolated in `src/portal/` and `src/blueprint/`. At current working HEAD `a6cf83e6a6`, 435+ registered CTests pass cleanly. For complete subsystem details, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For gaps and unproven claims, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md). For the complete 52-sprint ledger, see [SPRINT_LEDGER.md](SPRINT_LEDGER.md).
+OpenSpaceTTD operates on a **single global OpenTTD map** (up to 4096×4096 tiles) partitioned into discrete logical world regions separated by unbuildable void space. It does **not** employ a multi-map engine. World identity is resolved via an $O(1)$ spatial hash grid (`PlanetManager`). Inter-world railway transit adapts OpenTTD's tunnel/bridge wormhole subsystem (`Track::Wormhole`), allowing consists to traverse distant coordinates without intermediate physical track tiles. Custom state is persisted across dedicated save/load chunks in `src/saveload/planet_sl.cpp`. All custom gameplay logic is isolated in `src/portal/` and `src/blueprint/`. At current main HEAD `bc18c2c8fc`, 485 registered CTests and 473 unit cases / 67,508 assertions pass cleanly. For complete subsystem details, see [CURRENT_ARCHITECTURE.md](CURRENT_ARCHITECTURE.md). For gaps and unproven claims, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md). For the complete sprint ledger, see [SPRINT_LEDGER.md](SPRINT_LEDGER.md).
 
 ## Current Project Milestone
 
-- **Main Branch Milestone (`e4baa35623`):** Sprints 1–48, WP-01–11 recovery fixes, WP-F1/F2 federation custody, and Horizon A cluster testbed are fully merged (PRs #4–#25).
-- **Working HEAD Milestone (`a6cf83e6a6`):** Sprints 49 and 50 are implemented on feature branches (`feature/sprint-49-commonwealth-graph-engine`, `feature/sprint-50-gateway-staging-and-charters`) with passing unit tests, but are **not yet merged to `main`**.
-- **Active Acceptance Gap:** Sprints 43–50 have zero recorded human visual UAT evidence. The v1.1 guided solo UAT save (`demo/OpenSpaceTTD-All-Features-UAT-v1.1.sav`) has not been played through by a human tester.
-- **Immediate Milestone Goal:** Merge Sprints 49–50 to `main`, execute human UAT for Sprints 43–50, and commence Sprint 51 (Expeditionary Survey Logistics).
+- **Main Branch Milestone (`bc18c2c8fc`):** Sprints 1–50, WP-01–11 recovery fixes, WP-F1/F2 federation custody, Horizon A cluster testbed, scheduled federation freight & 9-scenario recovery (PRs #40–#41), player-built resource surveys (PR #42), CST star map & player-commissioned gates (PR #43), and Unified Commonwealth Economy (PR #44) are fully merged.
+- **Active Acceptance Gap:** Human graphical UAT for the new Unified Commonwealth Economy and CST star map features is **Pending** ([demo/INTEGRATED-ECONOMY-UAT.md](../demo/INTEGRATED-ECONOMY-UAT.md), [demo/CST-STELLAR-UAT.md](../demo/CST-STELLAR-UAT.md)).
+- **Immediate Milestone Goals:**
+  1. Human graphical UAT for the unified economy and star-map features (`demo/INTEGRATED-ECONOMY-UAT.md`).
+  2. Minimum-loan bootstrap pacing and throughput balance across varied seeds.
+  3. Extended federation company lifecycle, interruption, and orphan-project administration.
 
 ## Current user acceptance and direction — 23 September 2026
 
@@ -105,9 +149,11 @@ This is a controlled two-car fixture with no station orders; scheduled routes,
 restart recovery and human federation acceptance remain open. See
 [the current roadmap](PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
 
-## Next priority: live federation with two clients
+## Historical milestone: live federation with scheduled freight — completed 27 September 2026
 
-1. **Recommended: scheduled-route federation acceptance.** The controlled
+Scheduled federation freight and all 9 recovery scenarios were fully proven and merged to `main` via PRs #40 and #41 (see [FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md](FEDERATION_RELIABILITY_AND_SCHEDULED_FREIGHT.md) and [machine evidence](../demo/FEDERATION-FREIGHT-RECOVERY.evidence.json)). The historical requirement below governed that delivery:
+
+1. **Scheduled-route federation acceptance (Delivered in PR #40/#41):** The controlled
    two-client natural-entry round trip now passes; extend it to station orders,
    loading/unloading, company ownership and money. Run two
    independent dedicated servers and a persistent Universe Authority. Join one
@@ -280,10 +326,14 @@ The earlier blocker-fix record reports **306/306 CTest cases** (2026-09-15), inc
 | 46 | Seamless Multi-Server Federation Universe & Live Cluster | Implemented; automated cluster testbed verified (PR #21) |
 | 47 | Colonial Megaprojects, Corporate Alliances & Arcologies | Implemented; automated verified (PR #18) |
 | 48 | LLM Narrative Scenario Synthesis & Autonomous Balancing Critic | Implemented; automated verified (PR #19, #20) |
-| 49 | Commonwealth Graph Engine & Prebuilt Lore Economies | Implemented; automated verified (feature branch; **not yet on main**) |
-| 50 | High-Capacity Gateway Staging & Corporate Charters | Implemented; automated verified (feature branch; **not yet on main**) |
-| 51 | Expeditionary Survey Logistics & Silfen Intermodal Paths | **Planned** |
-| 52 | Galactic Commonwealth Hegemony & Narrative Lore Scenarios | **Planned** |
+| 49 | Commonwealth Graph Engine & Prebuilt Lore Economies | Implemented; automated verified (Merged to `main` via PR #26) |
+| 50 | High-Capacity Gateway Staging & Corporate Charters | Implemented; automated verified (Merged to `main` via PR #28) |
+| 51 | Expeditionary Survey Logistics & Silfen Intermodal Paths | **Withdrawn from active scope** (23 Sep 2026; retained as design history) |
+| 52 | Galactic Commonwealth Hegemony & Narrative Lore Scenarios | **Withdrawn from active scope** (23 Sep 2026; retained as design history) |
+| — | Scheduled Federation Freight & 9-Scenario Recovery | Implemented; automated verified (Merged to `main` via PRs #40, #41) |
+| — | Player-Built Resource Surveys & Gated Extraction | Implemented; automated verified (Merged to `main` via PR #42) |
+| — | CST Star Map, Commissioned Gates & Remote Schedules | Implemented; automated verified (Merged to `main` via PR #43) |
+| — | Unified Commonwealth Economy & Progression | Implemented; automated verified (Merged to `main` via PR #44) |
 
 Dedicated sprint documents exist for Sprints 11–17, 23–35, 37 and 39–42; Sprint 49–52 are described in `docs/SPRINTS_49_52_COMMONWEALTH_EXPANSION.md`. Sprint 36 is represented by the UAT guide/tests; Sprint 38 remains in the roadmap/art direction. Sprints 1–10 and 18–22 are evidenced by commits, tests, UAT records and grouped plans; missing individual files are a documentation-history gap, not by themselves an implementation gap.
 
@@ -587,3 +637,8 @@ command replication and the 24-month resource economy acceptance. Human visual
 acceptance and economy balancing remain separate next steps.
 [Evidence](audit/2026-09-28/resource-economy/README.md).
 [Player flow and implementation](PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## Agent workflow tooling — 30 September 2026
+
+Agent workflow tooling now shares compact rules and three skills between Codex and
+Antigravity. Game roadmap priorities are unchanged. [Setup and verification](AGENT_WORKFLOW.md).

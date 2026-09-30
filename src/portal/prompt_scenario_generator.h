@@ -54,6 +54,8 @@ struct PromptScenarioSpec {
 
 	bool create_active_fleets = true;
 	bool create_prebuilt_corridors = true;
+	bool organic_terrain = true;
+	uint32_t map_size = 256;
 };
 
 /** Synthesis summary details returned after scenario generation. */
@@ -100,6 +102,21 @@ public:
 	static ScenarioSynthesisResult GenerateFromPrompt(const std::string &prompt_text, const std::string &output_path);
 
 	/**
+	 * Procedurally generate organic, multi-octave contoured terrain and biomes for each world region.
+	 * @param spec Scenario specification.
+	 * @return True on success.
+	 */
+	static bool GenerateOrganicWorldTerrain(const PromptScenarioSpec &spec);
+
+	/**
+	 * Build realistic town centers, road grids, and housing blocks within each world region.
+	 * @param spec Scenario specification.
+	 * @param result Result tracking structure.
+	 * @return True on success.
+	 */
+	static bool BuildOrganicTownsAndCities(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result);
+
+	/**
 	 * Build pre-built railway corridors, portal throats, stations, depots, and waypoints between worlds.
 	 * @param spec Scenario specification.
 	 * @param result Result tracking structure to record corridor counts.
@@ -136,6 +153,12 @@ public:
 	 * @param error_msg Optional pointer to string receiving detailed diagnostics.
 	 * @return True if all UAT invariants pass.
 	 */
+	/** Audit every shared corner and foundation before querying renderer geometry. */
+	static bool ValidateWorldGeometry(std::string *error_msg = nullptr);
+
+	/** Narrow, atomic recovery of the published organic UAT's distorted neutral terminals. */
+	static bool RepairLegacyOrganicUATTerrain();
+
 	static bool VerifyCommonwealthUAT(std::string *error_msg = nullptr);
 };
 

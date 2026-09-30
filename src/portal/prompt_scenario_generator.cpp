@@ -58,7 +58,19 @@
 #include "../depot_base.h"
 #include "../rail_cmd.h"
 #include "../cargotype.h"
+#include "../newgrf_house.h"
 #include "../settings_type.h"
+#include "../road_map.h"
+#include "../road.h"
+#include "../town_map.h"
+#include "../town_cmd.h"
+#include "../water_map.h"
+#include "../tile_map.h"
+#include "../tile_cmd.h"
+#include "../landscape.h"
+#include "../tunnelbridge_map.h"
+#include "../pathfinder/yapf/yapf_cache.h"
+#include <cmath>
 #include <filesystem>
 
 static constexpr IndustryType IT_COAL_MINE     = 0;
@@ -217,6 +229,351 @@ PromptScenarioSpec PromptScenarioGenerator::ParsePrompt(const std::string &promp
 	return spec;
 }
 
+static void BuildPBS(TileIndex tile, Track track, Trackdir dir, bool one_way = true)
+{
+	if (!IsValidTile(tile) || !IsPlainRailTile(tile) || !HasTrack(tile, track)) return;
+	CmdBuildSingleSignal(DoCommandFlag::Execute, tile, track,
+		one_way ? SignalType::PathOneWay : SignalType::Path,
+		SignalVariant::Electric, false, false, false,
+		SignalType::Block, SignalType::Block, 0,
+		SignalAlongTrackdir(dir));
+}
+
+static void PlaceTrack(TileIndex tile, TrackBits bits, CompanyID owner = CompanyID{0})
+{
+	if (!IsValidTile(tile) || IsTileType(tile, TileType::Void) ||
+	    IsTileType(tile, TileType::Station) || IsTileType(tile, TileType::TunnelBridge)) return;
+
+	if (IsPlainRailTile(tile)) {
+		SetTrackBits(tile, GetTrackBits(tile) | bits);
+	} else {
+		MakeClear(tile, ClearGround::Grass, 0);
+		MakeRailNormal(tile, owner, bits, RAILTYPE_BEGIN);
+		Company *c = Company::GetIfValid(owner);
+		if (c != nullptr) c->infrastructure.rail[RAILTYPE_BEGIN]++;
+	}
+}
+
+static Station *CreateMultiTrackStation(TileIndex top_left, uint8_t plat_len, uint8_t num_tracks, CompanyID owner, Town *town, const std::string &name)
+{
+	if (!Station::CanAllocateItem() || town == nullptr) return nullptr;
+
+	Station *st = Station::Create(top_left);
+	if (st == nullptr) return nullptr;
+
+	st->name = name;
+	st->owner = owner;
+	st->town = town;
+	st->facilities.Set(StationFacility::Train);
+	st->train_station = TileArea(top_left, plat_len, num_tracks);
+	st->spread = st->train_station;
+
+	for (uint8_t dy = 0; dy < num_tracks; ++dy) {
+		for (uint8_t dx = 0; dx < plat_len; ++dx) {
+			TileIndex t = TileXY(TileX(top_left) + dx, TileY(top_left) + dy);
+			if (IsValidTile(t) && !IsTileType(t, TileType::Void)) {
+				MakeClear(t, ClearGround::Grass, 0);
+				MakeRailStation(t, owner, st->index, Axis::X, 2, RAILTYPE_BEGIN);
+			}
+		}
+	}
+	st->RecomputeCatchment();
+	return st;
+}
+
+/** Lower a height field to the greatest continuous field below its input.
+ * Two Manhattan-distance passes preserve zero-height anchors and include void corners. */
+static void RelaxScenarioHeights(std::vector<uint8_t> &heights)
+{
+	for (uint y = 0; y < Map::SizeY(); ++y) {
+		for (uint x = 0; x < Map::SizeX(); ++x) {
+			auto &h = heights[TileXY(x, y).base()];
+			if (x > 0) h = std::min<uint>(h, heights[TileXY(x - 1, y).base()] + 1);
+			if (y > 0) h = std::min<uint>(h, heights[TileXY(x, y - 1).base()] + 1);
+		}
+	}
+	for (uint y = Map::SizeY(); y-- > 0;) {
+		for (uint x = Map::SizeX(); x-- > 0;) {
+			auto &h = heights[TileXY(x, y).base()];
+			if (x < Map::MaxX()) h = std::min<uint>(h, heights[TileXY(x + 1, y).base()] + 1);
+			if (y < Map::MaxY()) h = std::min<uint>(h, heights[TileXY(x, y + 1).base()] + 1);
+		}
+	}
+}
+
+bool PromptScenarioGenerator::GenerateOrganicWorldTerrain(const PromptScenarioSpec &spec)
+{
+	std::vector<bool> is_anchor(Map::Size(), false);
+
+	/* Heights are shared tile corners. Protect every corner of existing portal
+	 * infrastructure, including the far switches and 14-tile holding lanes. */
+	for (TileIndex tile : Map::Iterate()) {
+		TileType type = GetTileType(tile);
+		if (!IsInnerTile(tile) || type == TileType::Clear || type == TileType::Trees || type == TileType::Void) continue;
+		for (uint dy = 0; dy <= 1; ++dy) {
+			for (uint dx = 0; dx <= 1; ++dx) is_anchor[TileXY(TileX(tile) + dx, TileY(tile) + dy).base()] = true;
+		}
+	}
+
+	/* 1. Mark portal gates and terminal footprints as anchors */
+	for (const auto &[pid, link] : PortalRegistry::GetAllPortals()) {
+		for (TileIndex g : {link.end_a.tile, link.end_b.tile}) {
+			if (!IsValidTile(g)) continue;
+			int gx = static_cast<int>(TileX(g));
+			int gy = static_cast<int>(TileY(g));
+			for (int dy = -2; dy <= 2; ++dy) {
+				for (int dx = -2; dx <= 2; ++dx) {
+					TileIndex t = TileXY(std::clamp(gx + dx, 0, static_cast<int>(Map::MaxX())),
+					                     std::clamp(gy + dy, 0, static_cast<int>(Map::MaxY())));
+					is_anchor[t.base()] = true;
+				}
+			}
+		}
+	}
+
+	/* 2. Mark station, corridor, and prefab test footprints as anchors */
+	for (size_t i = 0; i < spec.worlds.size(); ++i) {
+		const PlanetRegion *region = PlanetManager::GetRegion(WorldID{static_cast<uint32_t>(i)});
+		if (region == nullptr) continue;
+
+		int cx = static_cast<int>((region->min_x + region->max_x) / 2);
+		int cy = static_cast<int>((region->min_y + region->max_y) / 2);
+
+		/* Station, Towns, and Resource Industry catchment area: keep flat and anchor at height 0 */
+		for (int dy = -8; dy <= 8; ++dy) {
+			for (int dx = -8; dx <= 8; ++dx) {
+				TileIndex t = TileXY(std::clamp(cx + dx, 0, static_cast<int>(Map::MaxX())),
+				                     std::clamp(cy + dy, 0, static_cast<int>(Map::MaxY())));
+				is_anchor[t.base()] = true;
+			}
+		}
+
+		/* Mainline rail corridor from station to portal */
+		TileIndex gate_tile = INVALID_TILE;
+		for (const auto &[pid, link] : PortalRegistry::GetAllPortals()) {
+			if (link.end_a.world_id == region->id) gate_tile = link.end_a.tile;
+			else if (link.end_b.world_id == region->id) gate_tile = link.end_b.tile;
+			if (gate_tile != INVALID_TILE) break;
+		}
+		if (gate_tile != INVALID_TILE) {
+			int gx = static_cast<int>(TileX(gate_tile));
+			int min_cx = std::min(cx - 6, gx - 2);
+			int max_cx = std::max(cx + 6, gx + 2);
+			for (int dy = -2; dy <= 3; ++dy) {
+				for (int x = min_cx; x <= max_cx; ++x) {
+					TileIndex t = TileXY(std::clamp(x, 0, static_cast<int>(Map::MaxX())),
+					                     std::clamp(cy + dy, 0, static_cast<int>(Map::MaxY())));
+					is_anchor[t.base()] = true;
+				}
+			}
+		}
+
+		/* Augusta (World 1) Prefab Stamping Area: must remain completely clear and flat */
+		if (region->id == WorldID{1}) {
+			for (int dy = 6; dy <= 26; ++dy) {
+				for (int dx = 6; dx <= 22; ++dx) {
+					TileIndex t = TileXY(std::clamp(static_cast<int>(region->min_x) + dx, 0, static_cast<int>(Map::MaxX())),
+					                     std::clamp(static_cast<int>(region->min_y) + dy, 0, static_cast<int>(Map::MaxY())));
+					is_anchor[t.base()] = true;
+				}
+			}
+		}
+	}
+
+	/* 3. Compute continuous procedural elevation for each world */
+	std::vector<uint8_t> target_h(Map::Size(), 0);
+
+	for (size_t i = 0; i < spec.worlds.size(); ++i) {
+		const auto &w_spec = spec.worlds[i];
+		const PlanetRegion *region = PlanetManager::GetRegion(WorldID{static_cast<uint32_t>(i)});
+		if (region == nullptr) continue;
+
+		float span_x = static_cast<float>(std::max(1u, region->max_x - region->min_x));
+		float span_y = static_cast<float>(std::max(1u, region->max_y - region->min_y));
+
+		for (uint32_t y = region->min_y; y <= region->max_y; ++y) {
+			for (uint32_t x = region->min_x; x <= region->max_x; ++x) {
+				TileIndex t = TileXY(x, y);
+				if (is_anchor[t.base()]) {
+					target_h[t.base()] = 0;
+					continue;
+				}
+
+				float nx = (static_cast<float>(x) - region->min_x) / span_x;
+				float ny = (static_cast<float>(y) - region->min_y) / span_y;
+
+				/* Fade smoothly near region boundaries to match void buffers at height 0 */
+				int edge_dist = std::min({
+					static_cast<int>(x - region->min_x),
+					static_cast<int>(region->max_x - x),
+					static_cast<int>(y - region->min_y),
+					static_cast<int>(region->max_y - y)
+				});
+				float edge_fade = std::clamp(static_cast<float>(edge_dist) / 4.0f, 0.0f, 1.0f);
+
+				float raw = 1.0f;
+				switch (w_spec.biome) {
+					case WorldBiome::Temperate: {
+						/* Rolling temperate hills and gentle river valley */
+						raw = 1.8f + 1.2f * std::sin(nx * 7.0f) * std::cos(ny * 5.0f) + 0.6f * std::sin(nx * 14.0f + 1.2f);
+						break;
+					}
+					case WorldBiome::SubTropic: {
+						/* Stepped savanna plateaus */
+						raw = 2.0f + 1.5f * std::sin(nx * 5.0f) + 1.0f * std::cos(ny * 6.0f);
+						raw = std::floor(raw);
+						break;
+					}
+					case WorldBiome::AridDesert: {
+						/* Rugged canyons and jagged mineral ridges */
+						raw = 2.6f + 2.4f * std::sin(nx * 8.0f) * std::sin(ny * 8.0f) + 1.2f * std::cos(nx * 12.0f);
+						break;
+					}
+					case WorldBiome::Volcanic: {
+						/* Crater caldera rim and volcanic floor */
+						float r = std::hypot(nx - 0.5f, ny - 0.5f);
+						raw = (r > 0.22f && r < 0.42f) ? 5.2f + 1.4f * std::sin(nx * 10.0f) : 1.5f;
+						break;
+					}
+					default: {
+						raw = 2.0f + 1.0f * std::sin(nx * 6.0f);
+						break;
+					}
+				}
+
+				int h = std::clamp(static_cast<int>(std::round(raw * edge_fade)), 0, 7);
+				target_h[t.base()] = static_cast<uint8_t>(h);
+			}
+		}
+	}
+
+	/* Include void vertices: they are shared with world boundary tiles. */
+	RelaxScenarioHeights(target_h);
+	for (TileIndex tile : Map::Iterate()) SetTileHeight(tile, target_h[tile.base()]);
+
+	return true;
+}
+
+bool PromptScenarioGenerator::BuildOrganicTownsAndCities(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result)
+{
+	AutoRestoreBackup cur_company(_current_company, OWNER_DEITY);
+	AutoRestoreBackup old_game_mode(_game_mode, GameMode::Editor);
+
+	for (size_t i = 0; i < spec.worlds.size(); ++i) {
+		const auto &w_spec = spec.worlds[i];
+		const PlanetRegion *reg = PlanetManager::GetRegion(WorldID{static_cast<uint32_t>(i)});
+		if (reg == nullptr) continue;
+
+		uint32_t center_x = (reg->min_x + reg->max_x) / 2;
+		uint32_t center_y = (reg->min_y + reg->max_y) / 2;
+		TileIndex town_tile = TileXY(center_x, center_y - 4);
+
+		Town *town = ClosestTownFromTile(town_tile, UINT_MAX);
+		if (town == nullptr && Town::CanAllocateItem()) {
+			town = Town::Create(town_tile);
+			if (town != nullptr) {
+				town->townnametype = SPECSTR_TOWNNAME_START;
+				town->name = w_spec.name;
+				town->InitializeLayout(TownLayout::BetterRoads);
+				town->cache.num_houses = 0;
+				town->time_until_rebuild = 10;
+				UpdateTownRadius(town);
+				town->flags.Reset();
+				town->cache.population = 0;
+				InitializeBuildingCounts(town);
+				town->grow_counter = town->index % Ticks::TOWN_GROWTH_TICKS;
+				town->growth_rate = TownTicksToGameTicks(250);
+				town->show_zone = false;
+				RebuildTownKdtree();
+			}
+		}
+		if (town == nullptr) continue;
+		town->name = w_spec.name;
+		InitializeBuildingCounts();
+
+		/* Build an engineered street grid in front of the station */
+		int grid_w = (w_spec.has_megacity) ? 7 : (w_spec.phase == WorldPhase::Phase2_Developed) ? 5 : 4;
+		int grid_h = (w_spec.has_megacity) ? 6 : (w_spec.phase == WorldPhase::Phase2_Developed) ? 4 : 3;
+		int start_x = static_cast<int>(center_x) - grid_w / 2;
+		int start_y = static_cast<int>(center_y) - 2 - grid_h;
+
+		for (int gy = 0; gy <= grid_h; ++gy) {
+			for (int gx = 0; gx <= grid_w; ++gx) {
+				int tx = start_x + gx;
+				int ty = start_y + gy;
+				TileIndex t = TileXY(tx, ty);
+				if (!IsValidTile(t) || IsTileType(t, TileType::Void) || IsTileType(t, TileType::Station) || IsTileType(t, TileType::Railway)) continue;
+
+				/* Avenues on perimeter and center, cross streets */
+				RoadBits bits{};
+				if (gy == 0 || gy == grid_h || gy == grid_h / 2) bits |= ROAD_X;
+				if (gx == 0 || gx == grid_w || gx == grid_w / 2) bits |= ROAD_Y;
+				if (gx == grid_w / 2 && gy == grid_h) bits = ROAD_ALL; // Connect south to station forecourt
+
+				if (bits.Any()) {
+					MakeClear(t, ClearGround::Grass, 0);
+					MakeRoadNormal(t, bits, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, OWNER_TOWN, OWNER_NONE);
+				}
+			}
+		}
+
+		/* Expand town with buildings and houses */
+		uint32_t houses = (w_spec.has_megacity) ? 35 : (w_spec.phase == WorldPhase::Phase2_Developed) ? 18 : 10;
+		CmdExpandTown(DoCommandFlag::Execute, town->index, houses, {TownExpandMode::Buildings, TownExpandMode::Roads});
+
+		/* Core Megacity & Corporate HQ */
+		if (w_spec.has_megacity) {
+			MegacityManager::RegisterMegacity(town->index, reg->id, w_spec.name, w_spec.population);
+			uint32_t alloy_quota = 300;
+			MegacityManager::SetCustomQuotas(town->index, 100, alloy_quota, 50);
+		}
+
+		if (w_spec.has_corporate_hq) {
+			TileIndex hq_tile = TileXY(center_x + 6, center_y + 6);
+			MakeClear(hq_tile, ClearGround::Grass, 0);
+			CorporateHQManager::RegisterHQ(CompanyID{0}, reg->id, hq_tile, "Commonwealth Central HQ");
+			CorporateHQManager::UpgradeHQTier(CompanyID{0});
+		}
+
+		/* Industrial Processing Facilities */
+		if (w_spec.has_industrial_facility) {
+			TileIndex fac_tile = TileXY(center_x - 6, center_y - 6);
+			MakeClear(fac_tile, ClearGround::Grass, 0);
+			ProductionChainManager::RegisterFacility(fac_tile, reg->id, w_spec.industrial_recipe, CompanyID{0}, 200);
+			result.facilities_placed++;
+		}
+
+		/* Planetary Stockpiles & Strike Mechanics */
+		CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+		CargoType steel   = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+		CargoType wiring  = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+		CargoType chips   = StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics);
+		CargoType alloy   = StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy);
+		CargoType comp    = StockpileManager::RoleToDefaultCargo(FabricationRole::Composites);
+
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, ballast, 10000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, steel,   10000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, wiring,  10000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, chips,   5000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, alloy,   5000);
+		StockpileManager::AddCargo(reg->id, CompanyID{0}, comp,    5000);
+
+		if (w_spec.is_striking) {
+			PlanetManager::AddDevelopmentScore(reg->id, 50);
+			TileIndex hub_tile = TileXY(center_x - 4, center_y + 4);
+			uint32_t hub_id = LogisticsHubManager::RegisterHub(hub_tile, reg->id, CompanyID{0}, StationID::Invalid(), "Colony Emergency Relief Stockpile");
+			if (hub_id != 0) {
+				LogisticsHubManager::SetReserveFloor(hub_id, ballast, 500);
+			}
+		} else {
+			PlanetManager::AddDevelopmentScore(reg->id, w_spec.phase == WorldPhase::Phase1_Core ? 25000 : 5000);
+		}
+	}
+
+	RebuildTownKdtree();
+	return true;
+}
+
 bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec &spec, ScenarioSynthesisResult &result)
 {
 	CompanyID human_company{0};
@@ -230,40 +587,20 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 		uint32_t center_x = (region->min_x + region->max_x) / 2;
 		uint32_t center_y = (region->min_y + region->max_y) / 2;
 
-		/* 1. Build a local station platform */
 		TileIndex station_tile = TileXY(center_x, center_y);
-		MakeClear(station_tile, ClearGround::Grass, 0);
-
 		Town *town = ClosestTownFromTile(station_tile, UINT_MAX);
-		if (town == nullptr && Town::CanAllocateItem()) {
-			town = Town::Create(station_tile);
-			if (town != nullptr) {
-				town->name = spec.worlds[i].name;
-				town->townnametype = SPECSTR_TOWNNAME_START;
-				RebuildTownKdtree();
-			}
+
+		/* 1. Build high-capacity 2-track central station */
+		std::string station_name = fmt::format("{} Central Terminal", spec.worlds[i].name);
+		Station *st = CreateMultiTrackStation(TileXY(center_x - 2, center_y), 4, 2, human_company, town, station_name);
+		if (st != nullptr) {
+			result.stations_placed++;
+			/* Attach company logistics hub to station */
+			TileIndex hub_tile = TileXY(center_x - 4, center_y + 4);
+			LogisticsHubManager::RegisterHub(hub_tile, region->id, human_company, st->index, fmt::format("{} Logistics Hub", spec.worlds[i].name));
 		}
 
-		if (Station::CanAllocateItem() && town != nullptr) {
-			Station *st = Station::Create(station_tile);
-			if (st != nullptr) {
-				st->name = fmt::format("{} Central Terminal", spec.worlds[i].name);
-				st->owner = human_company;
-				st->town = town;
-				st->facilities.Set(StationFacility::Train);
-				st->train_station = TileArea(station_tile, 1, 1);
-				st->spread = st->train_station;
-				MakeRailStation(station_tile, human_company, st->index, Axis::X, 0, RAILTYPE_BEGIN);
-				st->RecomputeCatchment();
-				result.stations_placed++;
-
-				/* Attach company logistics hub to station */
-				TileIndex hub_tile = TileXY(center_x - 4, center_y + 4);
-				LogisticsHubManager::RegisterHub(hub_tile, region->id, human_company, st->index, fmt::format("{} Logistics Hub", spec.worlds[i].name));
-			}
-		}
-
-		/* 2. Find the nearest portal terminal in this world */
+		/* 2. Find portal terminal in this world */
 		TileIndex gate_tile = INVALID_TILE;
 		for (const auto &[pid, link] : PortalRegistry::GetAllPortals()) {
 			if (link.end_a.world_id == region->id) {
@@ -276,40 +613,60 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 		}
 
 		if (gate_tile != INVALID_TILE) {
-			/* Connect station to portal terminal with straight track segments */
-			int sx = static_cast<int>(TileX(station_tile));
-			int sy = static_cast<int>(TileY(station_tile));
+			int sx = static_cast<int>(center_x);
+			int sy = static_cast<int>(center_y);
 			int gx = static_cast<int>(TileX(gate_tile));
-			int gy = static_cast<int>(TileY(gate_tile));
-			(void)gy;
 
-			/* Place connecting rail line toward the gate */
-			int step_x = (gx > sx) ? 1 : (gx < sx) ? -1 : 0;
-			int cur_x = sx + step_x;
-			int cur_y = sy;
+			int step_x = (gx >= sx) ? 1 : -1;
 
-			int pieces = 0;
-			while (cur_x != gx && pieces < 20) {
-				TileIndex t = TileXY(cur_x, cur_y);
-				if (IsValidTile(t) && !IsTileType(t, TileType::Void) && !IsTileType(t, TileType::Station) && !IsTileType(t, TileType::TunnelBridge)) {
-					MakeClear(t, ClearGround::Grass, 0);
-					MakeRailNormal(t, human_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
-					pieces++;
+			/* 3. Station Throat: Scissors Crossover outside station */
+			int lead_x = (step_x > 0) ? (sx + 2) : (sx - 3);
+			int x_cross1 = (step_x > 0) ? (sx + 3) : (sx - 4);
+			int x_cross2 = (step_x > 0) ? (sx + 4) : (sx - 5);
+			int post_cross_x = (step_x > 0) ? (sx + 5) : (sx - 6);
+
+			PlaceTrack(TileXY(lead_x, sy), TrackBits{Track::X}, human_company);
+			PlaceTrack(TileXY(lead_x, sy + 1), TrackBits{Track::X}, human_company);
+			BuildPBS(TileXY(lead_x, sy), Track::X, (step_x > 0 ? Trackdir::X_SW : Trackdir::X_NE), true);
+
+			PlaceTrack(TileXY(x_cross1, sy), TrackBits{Track::X, (step_x > 0 ? Track::Right : Track::Left)}, human_company);
+			PlaceTrack(TileXY(x_cross1, sy + 1), TrackBits{Track::X, (step_x > 0 ? Track::Upper : Track::Lower)}, human_company);
+			PlaceTrack(TileXY(x_cross2, sy), TrackBits{Track::X, (step_x > 0 ? Track::Left : Track::Right)}, human_company);
+			PlaceTrack(TileXY(x_cross2, sy + 1), TrackBits{Track::X, (step_x > 0 ? Track::Lower : Track::Upper)}, human_company);
+
+			PlaceTrack(TileXY(post_cross_x, sy), TrackBits{Track::X}, human_company);
+			PlaceTrack(TileXY(post_cross_x, sy + 1), TrackBits{Track::X}, human_company);
+			BuildPBS(TileXY(post_cross_x, sy + 1), Track::X, (step_x > 0 ? Trackdir::X_NE : Trackdir::X_SW), true);
+
+			/* 4. Double-track mainline corridor toward gate */
+			int cur_x = post_cross_x + step_x;
+			int pieces = 1;
+			while (cur_x != gx && pieces < 24) {
+				TileIndex t1 = TileXY(cur_x, sy);
+				TileIndex t2 = TileXY(cur_x, sy + 1);
+				PlaceTrack(t1, TrackBits{Track::X}, human_company);
+				PlaceTrack(t2, TrackBits{Track::X}, human_company);
+
+				if (pieces % 6 == 0 && cur_x != gx) {
+					BuildPBS(t1, Track::X, (step_x > 0 ? Trackdir::X_SW : Trackdir::X_NE), true);
+					BuildPBS(t2, Track::X, (step_x > 0 ? Trackdir::X_NE : Trackdir::X_SW), true);
 				}
+
 				cur_x += step_x;
+				pieces++;
 			}
 
-			/* Place track behind the station for consist tail buffer / siding */
-			for (int b = 1; b <= 3; ++b) {
-				TileIndex bt = TileXY(sx - step_x * b, sy);
-				if (IsValidTile(bt) && !IsTileType(bt, TileType::Void) && !IsTileType(bt, TileType::Station) && !IsTileType(bt, TileType::TunnelBridge)) {
-					MakeClear(bt, ClearGround::Grass, 0);
-					MakeRailNormal(bt, human_company, TrackBits{Track::X}, RAILTYPE_BEGIN);
-				}
-			}
+			/* 5. Consist tail buffer behind station */
+			int rear_x1 = (step_x > 0) ? (sx - 3) : (sx + 2);
+			int rear_x2 = (step_x > 0) ? (sx - 4) : (sx + 3);
+			PlaceTrack(TileXY(rear_x1, sy), TrackBits{Track::X}, human_company);
+			PlaceTrack(TileXY(rear_x1, sy + 1), TrackBits{Track::X}, human_company);
+			PlaceTrack(TileXY(rear_x2, sy), TrackBits{Track::X}, human_company);
+			PlaceTrack(TileXY(rear_x2, sy + 1), TrackBits{Track::X}, human_company);
 
-			/* Place train depot at end of siding */
-			TileIndex depot_tile = TileXY(sx - step_x * 4, sy);
+			/* 6. Train depot at end of lead */
+			int depot_x = (step_x > 0) ? (sx - 5) : (sx + 4);
+			TileIndex depot_tile = TileXY(depot_x, sy);
 			if (IsValidTile(depot_tile) && !IsTileType(depot_tile, TileType::Void) && Depot::CanAllocateItem()) {
 				MakeClear(depot_tile, ClearGround::Grass, 0);
 				DiagDirection depot_dir = (step_x > 0) ? DiagDirection::SW : DiagDirection::NE;
@@ -328,8 +685,8 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 				}
 			}
 
-			/* Place a waypoint along the approach */
-			TileIndex wp_tile = TileXY(sx + step_x * 4, sy);
+			/* 7. Waypoint along portal approach */
+			TileIndex wp_tile = TileXY(post_cross_x + step_x * 2, sy);
 			if (IsValidTile(wp_tile) && Waypoint::CanAllocateItem()) {
 				Waypoint *wp = Waypoint::Create(wp_tile);
 				if (wp != nullptr) {
@@ -340,20 +697,22 @@ bool PromptScenarioGenerator::BuildCorridorsAndStations(const PromptScenarioSpec
 				}
 			}
 
-			/* On Augusta Hub (World 1), create a designated Holding Siding station */
+			/* 8. On Augusta Hub (World 1), create designated Holding Siding loop */
 			if (region->id == WorldID{1} && town != nullptr && Station::CanAllocateItem()) {
-				TileIndex staging_tile = TileXY(sx + step_x * 2, sy + 2);
-				MakeClear(staging_tile, ClearGround::Grass, 0);
-				Station *st_staging = Station::Create(staging_tile);
+				int siding_lead_in = (step_x > 0) ? (sx + 6) : (sx - 7);
+				int siding_start   = (step_x > 0) ? (sx + 7) : (sx - 9);
+				int siding_lead_out = (step_x > 0) ? (sx + 10) : (sx - 10);
+
+				TileIndex staging_tile = TileXY(siding_start, sy + 2);
+				Station *st_staging = CreateMultiTrackStation(staging_tile, 3, 1, human_company, town, "Augusta Gateway Holding Siding");
 				if (st_staging != nullptr) {
-					st_staging->name = "Augusta Gateway Holding Siding";
-					st_staging->owner = human_company;
-					st_staging->town = town;
-					st_staging->facilities.Set(StationFacility::Train);
 					st_staging->facilities.Set(StationFacility::HoldingSiding);
-					st_staging->train_station = TileArea(staging_tile, 1, 1);
-					st_staging->spread = st_staging->train_station;
-					MakeRailStation(staging_tile, human_company, st_staging->index, Axis::X, 0, RAILTYPE_BEGIN);
+
+					/* Turnout connecting mainline track 2 (sy + 1) to holding siding (sy + 2) */
+					PlaceTrack(TileXY(siding_lead_in, sy + 1), TrackBits{Track::X, (step_x > 0 ? Track::Lower : Track::Upper)}, human_company);
+					PlaceTrack(TileXY(siding_lead_in, sy + 2), TrackBits{(step_x > 0 ? Track::Right : Track::Left)}, human_company);
+					PlaceTrack(TileXY(siding_lead_out, sy + 2), TrackBits{(step_x > 0 ? Track::Left : Track::Right)}, human_company);
+					PlaceTrack(TileXY(siding_lead_out, sy + 1), TrackBits{Track::X, (step_x > 0 ? Track::Upper : Track::Lower)}, human_company);
 				}
 			}
 
@@ -381,21 +740,12 @@ bool PromptScenarioGenerator::PlaceCanonicalIndustries(const PromptScenarioSpec 
 		uint32_t center_y = (region->min_y + region->max_y) / 2;
 
 		IndustryType primary_type = IT_INVALID;
-		IndustryType secondary_type = IT_INVALID;
-
 		if (w_spec.phase == WorldPhase::Phase3_Frontier || w_spec.name.find("Mining") != std::string::npos) {
-			/* Mining Frontier: Iron Ore Mine + Coal Mine */
 			primary_type = IT_IRON_MINE;
-			secondary_type = IT_COAL_MINE;
 		} else if (w_spec.phase == WorldPhase::Phase2_Developed || w_spec.name.find("Augusta") != std::string::npos) {
-			/* Industrial Hub: Steel Mill */
 			primary_type = IT_STEEL_MILL;
 		} else if (w_spec.phase == WorldPhase::Phase1_Core || w_spec.name.find("Earth") != std::string::npos) {
-			/* Metropolitan Core: Factory */
 			primary_type = IT_FACTORY;
-		} else if (w_spec.phase == WorldPhase::Phase4_Expansion || w_spec.name.find("Prometheus") != std::string::npos) {
-			/* Energy / Outpost: Power Station */
-			primary_type = IT_POWER_STATION;
 		}
 
 		auto try_build_industry = [&](IndustryType it, int offset_x, int offset_y) -> bool {
@@ -403,16 +753,32 @@ bool PromptScenarioGenerator::PlaceCanonicalIndustries(const PromptScenarioSpec 
 			const IndustrySpec *indspec = GetIndustrySpec(it);
 			if (!indspec->enabled || indspec->layouts.empty()) return false;
 
-			for (int try_dx : {offset_x, offset_x + 2, offset_x - 2, offset_x + 3, offset_x - 3}) {
-				for (int try_dy : {offset_y, -offset_y, offset_y + 1, -offset_y - 1}) {
+			for (int try_dx : {offset_x, offset_x + 1, offset_x - 1, offset_x + 2, offset_x - 2}) {
+				for (int try_dy : {offset_y, offset_y + 1, -offset_y, -offset_y - 1}) {
 					TileIndex ind_tile = TileXY(center_x + try_dx, center_y + try_dy);
 					if (!IsValidTile(ind_tile) || IsTileType(ind_tile, TileType::Void)) continue;
 
-					/* Clear 6x6 footprint around candidate ind_tile */
-					for (int cy = -1; cy <= 4; ++cy) {
-						for (int cx = -1; cx <= 4; ++cx) {
+					/* Verify footprint does not collide with stations, bridges/tunnels, or existing industries */
+					bool blocked = false;
+					for (int cy = 0; cy < 4; ++cy) {
+						for (int cx = 0; cx < 4; ++cx) {
 							TileIndex t = TileXY(center_x + try_dx + cx, center_y + try_dy + cy);
-							if (IsValidTile(t) && !IsTileType(t, TileType::Void) && !IsTileType(t, TileType::Station) && !IsTileType(t, TileType::TunnelBridge)) {
+							if (!IsValidTile(t) || IsTileType(t, TileType::Void) ||
+							    IsTileType(t, TileType::Station) || IsTileType(t, TileType::TunnelBridge) ||
+							    IsTileType(t, TileType::Industry) || IsTileType(t, TileType::House)) {
+								blocked = true;
+								break;
+							}
+						}
+						if (blocked) break;
+					}
+					if (blocked) continue;
+
+					/* Clear surface vegetation without altering ground tiles */
+					for (int cy = 0; cy < 4; ++cy) {
+						for (int cx = 0; cx < 4; ++cx) {
+							TileIndex t = TileXY(center_x + try_dx + cx, center_y + try_dy + cy);
+							if (IsValidTile(t) && IsTileType(t, TileType::Clear)) {
 								MakeClear(t, ClearGround::Grass, 0);
 							}
 						}
@@ -429,10 +795,8 @@ bool PromptScenarioGenerator::PlaceCanonicalIndustries(const PromptScenarioSpec 
 		};
 
 		if (primary_type != IT_INVALID) {
-			try_build_industry(primary_type, 0, 3);
-		}
-		if (secondary_type != IT_INVALID) {
-			try_build_industry(secondary_type, 3, -3);
+			int offset_x = (primary_type == IT_FACTORY) ? 1 : -1;
+			try_build_industry(primary_type, offset_x, 3);
 		}
 	}
 
@@ -631,7 +995,7 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	}
 
 	/* 1. Allocate fresh clean map and reset simulation pools */
-	uint32_t map_size = 256;
+	uint32_t map_size = spec.map_size;
 	Map::Allocate(map_size, map_size);
 	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
 		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 0);
@@ -669,11 +1033,12 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	_settings_game.economy.multiple_industry_per_town = true;
 	SetupCargoForClimate(LandscapeType::Temperate);
 	ResetIndustries();
+	ResetRoadTypes();
 	BlueprintManager::Initialize();
 
 	ProductionChainManager::InitDefaultRecipes();
 
-	/* 2. Generate multi-world spatial partitioning */
+	/* 2. Generate multi-world spatial partitioning and portals */
 	MultiWorldGen::Config gen_cfg;
 	gen_cfg.world_count = spec.world_count;
 	gen_cfg.place_gateways = true;
@@ -683,7 +1048,12 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		return result;
 	}
 
-	/* 3. Configure world metadata and styling */
+	/* 3. Generate organic multi-octave terrain if requested */
+	if (spec.organic_terrain) {
+		GenerateOrganicWorldTerrain(spec);
+	}
+
+	/* 4. Configure world metadata and styling */
 	for (size_t i = 0; i < spec.worlds.size(); ++i) {
 		const auto &w_spec = spec.worlds[i];
 		WorldID wid{static_cast<uint32_t>(i)};
@@ -700,7 +1070,7 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		}
 	}
 
-	/* 4. Setup human Company 0 and rival Company 1 */
+	/* 5. Setup human Company 0 and rival Company 1 */
 	Company *c0 = Company::GetIfValid(CompanyID{0});
 	if (c0 == nullptr) {
 		c0 = Company::CreateAtIndex(CompanyID{0});
@@ -725,102 +1095,35 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 		c1 = Company::CreateAtIndex(CompanyID{1});
 	}
 	if (c1 != nullptr) {
-		c1->name = "Consortium Heavy Industries";
+		c1->name = spec.rival_corporation.empty() ? "Consortium Heavy Industries" : spec.rival_corporation;
 		c1->avail_railtypes.Set(RAILTYPE_BEGIN);
 		c1->avail_railtypes.Set(RAILTYPE_ELECTRIC);
 		c1->avail_railtypes.Set(RAILTYPE_MONO);
 		c1->avail_railtypes.Set(RAILTYPE_MAGLEV);
 	}
 
-	/* 5. Diplomatic Stance */
+	/* 6. Diplomatic Stance */
 	CorporateAllianceManager::SetRelation(CompanyID{0}, CompanyID{1}, spec.rival_relation);
 
-	/* 6. Populate settlements, megacity, and processing facilities */
-	for (size_t i = 0; i < spec.worlds.size(); ++i) {
-		const auto &w_spec = spec.worlds[i];
-		const PlanetRegion *reg = PlanetManager::GetRegion(WorldID{static_cast<uint32_t>(i)});
-		if (reg == nullptr) continue;
+	/* 7. Build organic towns and cities */
+	BuildOrganicTownsAndCities(spec, result);
 
-		uint32_t center_x = (reg->min_x + reg->max_x) / 2;
-		uint32_t center_y = (reg->min_y + reg->max_y) / 2;
-		TileIndex center_tile = TileXY(center_x, center_y);
-
-		Town *town = ClosestTownFromTile(center_tile, UINT_MAX);
-		if (town == nullptr && Town::CanAllocateItem()) {
-			town = Town::Create(center_tile);
-			if (town != nullptr) {
-				town->townnametype = SPECSTR_TOWNNAME_START;
-				RebuildTownKdtree();
-			}
-		}
-		if (town != nullptr) {
-			town->name = w_spec.name;
-		}
-
-		/* Core Megacity & Corporate HQ */
-		if (w_spec.has_megacity && town != nullptr) {
-			MegacityManager::RegisterMegacity(town->index, reg->id, w_spec.name, w_spec.population);
-			uint32_t alloy_quota = 300;
-			MegacityManager::SetCustomQuotas(town->index, 100, alloy_quota, 50);
-		}
-
-		if (w_spec.has_corporate_hq) {
-			TileIndex hq_tile = TileXY(center_x + 6, center_y + 6);
-			MakeClear(hq_tile, ClearGround::Grass, 0);
-			CorporateHQManager::RegisterHQ(CompanyID{0}, reg->id, hq_tile, "Commonwealth Central HQ");
-			CorporateHQManager::UpgradeHQTier(CompanyID{0});
-		}
-
-		/* Industrial Processing Facilities */
-		if (w_spec.has_industrial_facility) {
-			TileIndex fac_tile = TileXY(center_x - 6, center_y - 6);
-			MakeClear(fac_tile, ClearGround::Grass, 0);
-			ProductionChainManager::RegisterFacility(fac_tile, reg->id, w_spec.industrial_recipe, CompanyID{0}, 200);
-			result.facilities_placed++;
-		}
-
-		/* Planetary Stockpiles & Strike Mechanics: seed all 6 fabrication roles in abundance */
-		CargoType ballast = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
-		CargoType steel   = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
-		CargoType wiring  = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
-		CargoType chips   = StockpileManager::RoleToDefaultCargo(FabricationRole::Electronics);
-		CargoType alloy   = StockpileManager::RoleToDefaultCargo(FabricationRole::Superalloy);
-		CargoType comp    = StockpileManager::RoleToDefaultCargo(FabricationRole::Composites);
-
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, ballast, 10000);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, steel,   10000);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, wiring,  10000);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, chips,   5000);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, alloy,   5000);
-		StockpileManager::AddCargo(reg->id, CompanyID{0}, comp,    5000);
-
-		if (w_spec.is_striking) {
-			/* Empty sustenance stockpile and configure urgent relief floor */
-			PlanetManager::AddDevelopmentScore(reg->id, 50);
-			TileIndex hub_tile = TileXY(center_x - 4, center_y + 4);
-			uint32_t hub_id = LogisticsHubManager::RegisterHub(hub_tile, reg->id, CompanyID{0}, StationID::Invalid(), "Colony Emergency Relief Stockpile");
-			if (hub_id != 0) {
-				LogisticsHubManager::SetReserveFloor(hub_id, ballast, 500); // Demands urgent inbound deliveries
-			}
-		} else {
-			PlanetManager::AddDevelopmentScore(reg->id, w_spec.phase == WorldPhase::Phase1_Core ? 25000 : 5000);
-		}
-	}
-
-	/* 7. Build corridors, stations, and waypoints */
+	/* 8. Build corridors, stations, and waypoints */
 	if (spec.create_prebuilt_corridors) {
 		BuildCorridorsAndStations(spec, result);
 	}
 
-	/* 8. Place canonical resource industries within station catchments */
+	/* 9. Place canonical resource industries within station catchments */
 	PlaceCanonicalIndustries(spec, result);
 
-	/* 9. Spawn active fleets */
+	if (!ValidateWorldGeometry(&result.error_message)) return result;
+
+	/* 10. Spawn active fleets */
 	if (spec.create_active_fleets) {
 		SpawnActiveFleets(spec, result);
 	}
 
-	/* 9. Save scenario file */
+	/* 11. Save scenario file */
 	if (!output_path.empty()) {
 		std::error_code ec;
 		std::filesystem::path p(output_path);
@@ -937,12 +1240,118 @@ ScenarioSynthesisResult PromptScenarioGenerator::GenerateCommonwealthPrefabWorld
 	return result;
 }
 
+bool PromptScenarioGenerator::RepairLegacyOrganicUATTerrain()
+{
+	/* This recovery is for the published 256-square four-world UAT only.
+	 * Never reshape arbitrary player maps or change track layouts/ownership. */
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (Map::SizeX() != 256 || Map::SizeY() != 256 || PlanetManager::Count() != 4 ||
+		company == nullptr || company->name != "Commonwealth Interplanetary Transport") return true;
+	static const char *names[]{"Sol Earth Core", "Augusta CST Hub", "Merredin Mining Colony", "Prometheus Caldera Outpost"};
+	for (uint i = 0; i < 4; ++i) {
+		const auto *region = PlanetManager::GetRegion(WorldID{i});
+		if (region == nullptr || region->name != names[i]) return true;
+	}
+	for (uint y = 0; y < Map::SizeY(); ++y) {
+		for (uint x = 0; x < Map::SizeX(); ++x) {
+			int h = TileHeight(TileXY(x, y));
+			if (x < Map::MaxX() && abs(h - static_cast<int>(TileHeight(TileXY(x + 1, y)))) > 1) return false;
+			if (y < Map::MaxY() && abs(h - static_cast<int>(TileHeight(TileXY(x, y + 1)))) > 1) return false;
+		}
+	}
+	bool needs_repair = false;
+	for (TileIndex tile : Map::Iterate()) {
+		if (IsPlainRailTile(tile) && GetRailFoundation(GetTileSlope(tile), GetTrackBits(tile)) == Foundation::Invalid) needs_repair = true;
+	}
+	if (!needs_repair) return true;
+
+	std::vector<uint8_t> heights(Map::Size());
+	std::vector<bool> terminal(Map::Size(), false);
+	for (TileIndex tile : Map::Iterate()) heights[tile.base()] = TileHeight(tile);
+	auto flatten = [&](TileIndex tile) {
+		terminal[tile.base()] = true;
+		for (uint dy = 0; dy <= 1; ++dy) {
+			for (uint dx = 0; dx <= 1; ++dx) heights[TileXY(TileX(tile) + dx, TileY(tile) + dy).base()] = 0;
+		}
+	};
+	if (PortalRegistry::Count() != 3) return false;
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
+		for (const auto &end : {link.end_a, link.end_b}) {
+			auto layout = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+			if (!layout || GetTileOwner(end.tile) != OWNER_NONE || !IsTileType(end.tile, TileType::TunnelBridge)) return false;
+			flatten(end.tile);
+			for (const auto &part : layout->tiles) {
+				if (!IsPlainRailTile(part.tile) || GetTileOwner(part.tile) != OWNER_NONE || GetTrackBits(part.tile) != part.tracks) return false;
+				flatten(part.tile);
+			}
+		}
+	}
+	RelaxScenarioHeights(heights);
+	std::vector<bool> affected(Map::Size(), false);
+	for (TileIndex tile : Map::Iterate()) {
+		if (heights[tile.base()] == TileHeight(tile)) continue;
+		for (int dy = -1; dy <= 0; ++dy) {
+			for (int dx = -1; dx <= 0; ++dx) {
+				int x = static_cast<int>(TileX(tile)) + dx, y = static_cast<int>(TileY(tile)) + dy;
+				if (x < 0 || y < 0) continue;
+				TileIndex shared = TileXY(x, y);
+				affected[shared.base()] = true;
+				TileType type = GetTileType(shared);
+				if (!terminal[shared.base()] && type != TileType::Clear && type != TileType::Trees && type != TileType::Void) return false;
+			}
+		}
+	}
+	/* Do not change the supporting terrain of a live vehicle. */
+	for (const Vehicle *vehicle : Vehicle::Iterate()) {
+		if (vehicle->tile < Map::Size() && affected[vehicle->tile.base()]) return false;
+	}
+	for (TileIndex tile : Map::Iterate()) SetTileHeight(tile, heights[tile.base()]);
+	return true;
+}
+
+bool PromptScenarioGenerator::ValidateWorldGeometry(std::string *error_msg)
+{
+	auto fail = [error_msg](std::string msg) {
+		if (error_msg != nullptr) *error_msg = std::move(msg);
+		return false;
+	};
+
+	for (uint y = 0; y < Map::MaxY(); ++y) {
+		for (uint x = 0; x < Map::MaxX(); ++x) {
+			TileIndex tile = TileXY(x, y);
+			int n = TileHeight(tile), w = TileHeight(TileXY(x + 1, y));
+			int e = TileHeight(TileXY(x, y + 1)), s = TileHeight(TileXY(x + 1, y + 1));
+			if (abs(n - w) > 1 || abs(n - e) > 1 || abs(s - w) > 1 || abs(s - e) > 1)
+				return fail(fmt::format("Invalid terrain at ({}, {}): corners {}, {}, {}, {}", x, y, n, w, e, s));
+			Slope slope = GetTileSlope(tile);
+			Foundation foundation = _tile_type_procs[GetTileType(tile)]->get_foundation_proc(tile, slope);
+			if (foundation == Foundation::Invalid) {
+				const auto *region = PlanetManager::GetRegion(PlanetManager::GetTileWorld(tile));
+				return fail(fmt::format("Invalid foundation at ({}, {}): type {}, slope {}, tracks {}, corners {}/{}/{}/{}, world {} center {}/{}", x, y, GetTileType(tile), slope, IsPlainRailTile(tile) ? GetTrackBits(tile).base() : 0, n, w, e, s, region ? region->name : "none", region ? (region->min_x + region->max_x) / 2 : 0, region ? (region->min_y + region->max_y) / 2 : 0));
+			}
+		}
+	}
+
+	/* Exercise the same foundation and pixel-height queries used during drawing,
+	 * only after validating the complete field (including neighbouring tiles). */
+	for (uint y = 1; y < Map::MaxY(); ++y) {
+		for (uint x = 1; x < Map::MaxX(); ++x) {
+			TileIndex tile = TileXY(x, y);
+			(void)GetFoundationSpriteBlock(tile);
+			(void)GetSlopePixelZ(x * TILE_SIZE + 8, y * TILE_SIZE + 8, true);
+		}
+	}
+
+	return true;
+}
+
 bool PromptScenarioGenerator::VerifyCommonwealthUAT(std::string *error_msg)
 {
 	auto fail = [error_msg](std::string msg) {
 		if (error_msg != nullptr) *error_msg = std::move(msg);
 		return false;
 	};
+	if (!ValidateWorldGeometry(error_msg)) return false;
 
 	if (PlanetManager::Count() < 3) {
 		return fail(fmt::format("Expected >= 3 worlds, found {}", PlanetManager::Count()));
