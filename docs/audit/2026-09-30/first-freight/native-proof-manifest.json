@@ -1,0 +1,134 @@
+{
+  "source_commit": "14bcbcb5e606aea4fc8ccc1c320dff994c0296d6",
+  "source_dirty": false,
+  "binary_sha256": "c5779e75e3e114c161c3304c69409565592a50bfc627185564ccd13f307a6dc7",
+  "pack_sha256": {
+    "integrated_v1": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+    "rail_v3": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+    "equipment_v1": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+  },
+  "passed": true,
+  "human_uat": "Pending",
+  "files": [
+    {
+      "path": "build/a1-full-consist-three-seed/101/construction.sav",
+      "bytes": 132148,
+      "sha256": "a960a76ac85c8de9caac27a527f3918663aa7d259493d6ce5850908b1f421f54"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/101/evidence.json",
+      "bytes": 11962066,
+      "sha256": "5c71e387d8f764ed169e2f4ebad06f38d8608259886c9fc23cc8f285ab00cd42"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/101/generation.log",
+      "bytes": 1218882,
+      "sha256": "1d91082965617b0b398435e45e173013a5a38b1a93fbfd32d28b35f7502c8699"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/101/newgame.cfg",
+      "bytes": 1714,
+      "sha256": "040ae9b746051861317a2d99f3d2cfc7bbdf846e54e0b645f1912927f8af20b8"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/101/operation.sav",
+      "bytes": 177072,
+      "sha256": "42f6bdbdc05d0fd99cf729832bc7811e4413be6c87853d3c0e67fd1eacc423af"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/101/ordinary-start.sav",
+      "bytes": 131672,
+      "sha256": "365417000716e3bc599b914a13f506f542e8789de1c8c853e3bc4daefb11717f"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/101/reload.log",
+      "bytes": 1388835,
+      "sha256": "438d68fcf9ead37c99501b3d57c774d3a33f5ca50ea5582352fc98f12f480cd9"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/construction.sav",
+      "bytes": 126956,
+      "sha256": "f2b1dc9fff3c7b17a41aba093fb0762b307de8306a9fdee3ac1c83839ad332ea"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/evidence.json",
+      "bytes": 6142010,
+      "sha256": "c8b2f1d982637b02a84b1908ae0c90e4d525214d3833b7ac9c7e3ccb81dbdbf5"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/generation.log",
+      "bytes": 643867,
+      "sha256": "d898ce4d555876c1fb6204dadb6269ff6ca4987af064fda715065c0ab887224a"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/newgame.cfg",
+      "bytes": 1713,
+      "sha256": "3e9f2632f47bb843897751eb73d6081d86a53fa1e69494b95ce4c9781809bf39"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/operation.sav",
+      "bytes": 157716,
+      "sha256": "51ce35b791d419b3b4106a8f63f715bca89ae54f88522997a6295171320b5ce0"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/ordinary-start.sav",
+      "bytes": 126476,
+      "sha256": "c9c1d74e4e63492d1077ccbed48397079bf68c41830317db7063e2be331a5423"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/11/reload.log",
+      "bytes": 719065,
+      "sha256": "f923b3a2b80507b9925afc715be314a6872200037240198e3dc7c921ef11f19b"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/construction.sav",
+      "bytes": 119536,
+      "sha256": "9e1e63a3250239dd0ced877723850a7199b8c21b8e9f9131e177d9b390be762a"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/evidence.json",
+      "bytes": 6463560,
+      "sha256": "d828bf5a2bb95ec4feab2618df8ac6fc3e7f3019ddb19a755be2e6573423b9a9"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/generation.log",
+      "bytes": 680273,
+      "sha256": "307f076bc580e0d4e1eec58a8bee4be15468dee15fa92e50a9a941b2f33b7e44"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/newgame.cfg",
+      "bytes": 1715,
+      "sha256": "26f3a8977329bc4ec8f27f1794bfb5f0b9be41996f1ed7a552d13c84a961e046"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/operation.sav",
+      "bytes": 149868,
+      "sha256": "5ace1f1f3f1627334034a6d2bcff1584282777d91268b7a43f32d2dce519b038"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/ordinary-start.sav",
+      "bytes": 119100,
+      "sha256": "e67a1d2de24ed4778153bdbb713947b07fd1aa32da3c95a508ad64e2368670c3"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/2026/reload.log",
+      "bytes": 756194,
+      "sha256": "ae9a80b87bd7e69a8a41485186354014db24cced9292f73f126dc513ea9915e1"
+    },
+    {
+      "path": "build/a1-full-consist-three-seed/evidence.json",
+      "bytes": 31680321,
+      "sha256": "59de795176b1271440c10fbf2d772d648f75b0cfcf29c10248870d8e48db8c47"
+    },
+    {
+      "path": "build/agent-logs/a1-full-consist-build.log",
+      "bytes": 905,
+      "sha256": "a00f885b08b9013f8c069b629146fce48dff9ccfcd5602bf852e21228ba8d51c"
+    },
+    {
+      "path": "build/agent-logs/a1-full-consist-three-seed.log",
+      "bytes": 408,
+      "sha256": "f15de6f86fd91d22e43e14a08ae82e1d954d32c1ed6a8d8f692bfba38fa62443"
+    }
+  ]
+}
