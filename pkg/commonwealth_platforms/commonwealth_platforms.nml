@@ -1,0 +1,28 @@
+/* Original OpenSpaceTTD art, GPL-2.0-only; generated from platforms.json. */
+grf {
+    grfid: "OST\06";
+    name: string(STR_GRF_NAME);
+    desc: string(STR_GRF_DESC);
+    version: 1;
+    min_compatible_version: 1;
+}
+replace platform_set(1069, "sprites/platform_8bpp.png") {
+	[0, 0, 44, 25, -10, -2, NOCROP]
+	[0, 25, 44, 25, -32, -2, NOCROP]
+	[0, 50, 44, 25, -10, -2, NOCROP]
+	[0, 75, 44, 25, -32, -2, NOCROP]
+}
+alternative_sprites(platform_set, ZOOM_LEVEL_NORMAL, BIT_DEPTH_32BPP,
+                    "sprites/platform_32bpp.png", "sprites/platform_mask.png") {
+	[0, 0, 44, 25, -10, -2, NOCROP]
+	[0, 25, 44, 25, -32, -2, NOCROP]
+	[0, 50, 44, 25, -10, -2, NOCROP]
+	[0, 75, 44, 25, -32, -2, NOCROP]
+}
+alternative_sprites(platform_set, ZOOM_LEVEL_IN_2X, BIT_DEPTH_32BPP,
+                    "sprites/platform_2x_32bpp.png", "sprites/platform_2x_mask.png") {
+	[0, 0, 88, 50, -20, -4, NOCROP]
+	[0, 50, 88, 50, -64, -4, NOCROP]
+	[0, 100, 88, 50, -20, -4, NOCROP]
+	[0, 150, 88, 50, -64, -4, NOCROP]
+}

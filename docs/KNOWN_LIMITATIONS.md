@@ -1,5 +1,17 @@
 # OpenSpaceTTD Known Limitations
 
+## Platform art proof boundaries — 1 October 2026
+
+The optional [art proof](COMMONWEALTH_PLATFORM_ART_PROOF.md) changes only native
+platform IDs 1069–1072, globally wherever those IDs are used. Other station sprites,
+terrain, trains and UI retain their current art. Human appearance/usability review,
+all-company-colour/transparency acceptance and large-network performance remain
+Pending. Paused SDL/Xvfb frame/RSS samples do not establish a p95 performance
+budget or desktop GPU result. Save removal is tested for this admitted static pack;
+multiplayer/federation content matching still needs its own exact-session proof.
+The repository preview helper's native profiling is Linux-specific; cross-platform
+desktop acceptance and broader replacement are separate gates.
+
 ## Post-A1 dependency review — 30 September 2026
 
 The proposed [First Paid Core Food Consumption](ACTIVE_EXECUTION_PLAN.md) is a
