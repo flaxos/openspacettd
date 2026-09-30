@@ -962,8 +962,13 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 			Track straight = DiagDirToDiagTrack(travel);
 			Trackdir bridge_dir = DiagDirToDiagTrackdir(travel);
 			TileIndex straight_next = TileAddByDiagDir(tile, travel);
+			/* Native rail quotes may succeed by including river clearance. This
+			 * ground-only search excludes water, so consider a bridge even then. */
+			bool next_is_ground = straight_next < Map::Size() &&
+				(IsTileType(straight_next, TileType::Clear) || IsTileType(straight_next, TileType::Trees) || IsTileType(straight_next, TileType::Road) ||
+					(IsPlainRailTile(straight_next) && GetTileOwner(straight_next) == CompanyID{0}));
 			if (!TrackdirCrossesTrackdirs(previous_dir).Test(bridge_dir) &&
-				!Command<Commands::BuildRail>::Do({}, straight_next, RAILTYPE_RAIL, straight, false).Succeeded()) {
+				(!next_is_ground || !Command<Commands::BuildRail>::Do({}, straight_next, RAILTYPE_RAIL, straight, false).Succeeded())) {
 				TileIndex end = tile;
 				for (uint span = 1; span <= 16; ++span) {
 					end = TileAddByDiagDir(end, travel);
