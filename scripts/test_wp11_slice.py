@@ -107,6 +107,92 @@ class Engine:
         self.log.close()
 
 
+class OfflineEngine(Engine):
+    """Native SDL game with a startup-script FIFO; no server or command bypass.
+
+    The existing exec reader blocks between commands, so the simulation cannot
+    run ahead. Use only a disposable POSIX profile and retain all console input.
+    """
+    def __init__(self, binary, config, output, name, save=None, seed=11, world_count=7):
+        output = output.resolve()
+        self.log = (output / f'{name}.log').open('x')
+        self.lines = []
+        self.queue = queue.Queue()
+        self.deadline = time.monotonic() + 120
+        self.console_path = output / f'{name}-native.log'
+        self.console_path.touch(exist_ok=False)
+        self.commands = (output / f'{name}-commands.scr').open('x')
+        self.pipe = output / f'{name}.fifo'
+        os.mkfifo(self.pipe, 0o600)
+        scripts = output / 'scripts'
+        scripts.mkdir(exist_ok=True)
+        (scripts / 'game_start.scr').write_text(
+            f'script "{self.console_path}"\n'
+            f'echo FUNCTIONAL_OFFLINE_START\n'
+            f'connected_economy functional-bridge "{self.pipe}"\n')
+        self.stdout_log = (output / f'{name}-stdout.log').open('x')
+        env = {**os.environ, 'SDL_VIDEODRIVER': 'dummy', 'OPENSPACETTD_WORLD_COUNT': str(world_count)}
+        args = [str(binary), '-v', 'sdl', '-s', 'null', '-m', 'null', '-x', '-c', str(config),
+                '-G', str(seed), '-t', '1950', '-g']
+        if save:
+            args.append(str(save))
+        self.process = subprocess.Popen(args, cwd=output, stdin=subprocess.DEVNULL,
+                                        stdout=self.stdout_log, stderr=subprocess.STDOUT, env=env)
+        threading.Thread(target=self.read_console, daemon=True).start()
+        try:
+            self.wait('FUNCTIONAL_OFFLINE_START')
+            # Nonblocking open cannot strand the runner if native exec failed.
+            while True:
+                try:
+                    fd = os.open(self.pipe, os.O_WRONLY | os.O_NONBLOCK)
+                    os.set_blocking(fd, True)
+                    self.process.stdin = os.fdopen(fd, 'w', buffering=1)
+                    break
+                except OSError:
+                    require(self.process.poll() is None and time.monotonic() < self.deadline,
+                            'Offline startup FIFO was not opened by the native engine')
+                    time.sleep(0.02)
+            self.command('echo FUNCTIONAL_OFFLINE_READY', 'FUNCTIONAL_OFFLINE_READY')
+        except BaseException:
+            self.close()
+            raise
+
+    def read_console(self):
+        with self.console_path.open() as stream:
+            while True:
+                line = stream.readline()
+                if line:
+                    self.queue.put(line)
+                elif self.process.poll() is not None:
+                    self.queue.put(None)
+                    return
+                else:
+                    time.sleep(0.02)
+
+    def command(self, command, marker):
+        self.commands.write(command + '\n')
+        self.commands.flush()
+        return super().command(command, marker)
+
+    def close(self):
+        if getattr(self.process, 'stdin', None) is not None and not self.process.stdin.closed:
+            try:
+                self.process.stdin.write('quit\n')
+                self.process.stdin.flush()
+            except BrokenPipeError:
+                pass
+            self.process.stdin.close()  # EOF releases native exec before exit.
+        if self.process.poll() is None:
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+                self.process.wait()
+        self.commands.close()
+        self.stdout_log.close()
+        self.log.close()
+
+
 def require(condition, message):
     if not condition:
         raise RuntimeError(message)
