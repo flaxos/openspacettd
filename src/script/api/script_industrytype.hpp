@@ -27,7 +27,7 @@ public:
 	static bool SurveyResources(TileIndex tile);
 	/** List this company's discovered sites of a type: anchor tile => occupied (0 or 1).
   * @param industry_type Industry type to list.
-  * @pre ScriptCompanyMode must select a valid company.
+	 * @pre ScriptCompanyMode must select a valid company.
   * @return A list, empty for invalid types or when no discoveries exist.
   */
 	static ScriptList *GetDiscoveredResourceSites(IndustryType industry_type);
