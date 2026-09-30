@@ -164,6 +164,11 @@ YAPF accounts for portal shortcuts and multi-portal routes. However:
 
 ### 2.3 Economy integration layering
 
+Historical pre-ruleset assessment. The integrated new-game path and its physical
+custody/conversion rules supersede the claim below that integration is absent.
+The current open gap is ordinary-start profitability and human usability, as
+recorded in the 28 September acceptance boundaries above.
+
 Five economy systems operate as loosely-coupled overlays:
 1. Standard OpenTTD industry production/revenue
 2. `ProductionChainManager` monthly conversion
@@ -176,6 +181,12 @@ necessary for player success is a stated design goal but not yet proven by gamep
 The systems coexist without a unified economic pressure model.
 
 ### 2.4 Federation is infrastructure, not gameplay
+
+Historical pre-PR #40/#41 assessment. Natural scheduled cross-server freight and
+coordinated recovery are implemented and automatically tested; the manual-only
+claims below no longer describe current behavior. Company/project/order lifecycle,
+interrupted-operation and human host-visit acceptance remain open. Independent
+always-on crash recovery would require a separate architecture decision.
 
 The federation protocol, identity system, transfer journal, and cluster testbed
 are implemented. However:

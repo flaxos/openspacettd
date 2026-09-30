@@ -24,6 +24,7 @@ usage or a promised percentage saving.
 
 | Skill | Use | Finish line |
 |---|---|---|
+| `ost-plan` | Roadmap assessment or current slice | One approved-slice plan; no implementation |
 | `ost-dev` | Bug or one gameplay slice | Regression passes; repair is runnable |
 | `ost-uat` | Short mission or native scenario | Evidence plus explicit human status |
 | `ost-deliver` | Final checks and publishing | Scoped commit/PR with acceptance gaps |
@@ -34,11 +35,26 @@ Avoid duplicate `GEMINI.md` instructions or copied skill directories. Sources:
 [Antigravity skills](https://antigravity.google/docs/skills/),
 [Antigravity rules](https://antigravity.google/docs/rules/).
 
-Start a fresh session and confirm the three names in the skill selector or
+Start a fresh session and confirm the four names in the skill selector or
 customizations. Invoke `$ost-dev` in Codex or `/ost-dev` in Antigravity 2.0.
 If discovery fails, ask the agent to read `.agents/skills/ost-dev/SKILL.md` directly.
 These local workflows cover this game's needs without installing a large generic
 skill collection. Skill bodies use repo-root-relative paths.
+
+## Planning and execution loop
+
+Codex with `ost-plan` reassesses the one [canonical roadmap](PROJECT_STATUS_AND_ROADMAP.md),
+then writes the one [active execution plan](ACTIVE_EXECUTION_PLAN.md). The owner
+approves that concrete slice. Antigravity uses `ost-dev`, `ost-uat` where needed,
+and `ost-deliver` to implement, prove and publish it. Codex reviews delivery
+evidence and reassesses dependencies before the next plan. Horizon A is detailed
+and ordered, B moderately specified, C strategic. Only the active plan authorizes
+implementation; agents may update evidence/status but must not silently reorder
+the roadmap or change vision/hard architecture. Material findings return to the
+planner. Automated proof and human acceptance are separate. Delivered evidence
+belongs in durable project/sprint/domain/UAT records; replace the active plan
+after the next slice is approved, without collecting competing active backlogs.
+Historical records remain dated; source and tests outrank stale prose.
 
 ## Codex effort
 
@@ -65,6 +81,18 @@ savings. Approvals, sandboxing, network access and account billing are unchanged
 
 Fill in only what you know; natural language is enough. Do not paste the whole
 roadmap or long raw logs into each task.
+
+**Plan/replan (Codex)**
+
+> Reassess the OpenSpaceTTD roadmap after the last delivered slice. Use `ost-plan`
+> to prepare the next `docs/ACTIVE_EXECUTION_PLAN.md` for owner approval. Do not
+> implement it.
+
+**Execute (Antigravity)**
+
+> Implement the current `docs/ACTIVE_EXECUTION_PLAN.md` exactly within scope.
+> Load relevant skills, use `ost-uat` for playable proof and `ost-deliver` for
+> verification and PR. Stop at a listed material replan trigger.
 
 **Fix a play problem**
 

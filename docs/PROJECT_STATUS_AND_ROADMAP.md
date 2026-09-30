@@ -1,5 +1,89 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Active planning horizons — 30 September 2026
+
+The integrated economy and natural scheduled federation freight exist. Their
+automated fixtures prove bounded behavior, not a profitable ordinary new game or
+human acceptance. [First Sustainable Freight](ACTIVE_EXECUTION_PLAN.md) is the
+only active implementation slice; the other horizons order dependencies, not
+approved sprint numbers. Development phase and economic role remain separate
+implementation concepts; review that product model later only with an explicit
+decision. The dated delivery records below preserve their original evidence.
+
+### Horizon A — prove the core single-player game loop
+
+| Order | Outcome and dependency | Evidence boundary |
+|---|---|---|
+| A0 — Canonical new-game contract | **Established for planning below.** Use normal New Game generation on an integrated ruleset 1 game, with integrated industry v1 (OST01 v5), rail v3 and equipment v1, at least two logical worlds, and ordinary company finances. | Existing generation/content activation and native initial loan are source-verified; starter route affordability and usability are unproven. |
+| A1 — First Sustainable Freight | From that start, discover and build a legal basic freight service that repeatedly earns enough to continue. [Active plan](ACTIVE_EXECUTION_PLAN.md). | Requires fresh-generation command, cargo, cash, reload and human UAT evidence. |
+| A2 — First Earned Expansion | After A1, earn early research, obtain physical materials/machinery through the real economy, and commission an earned gate or resource opportunity without circular prerequisites. | No authored assets or granted unlocks can substitute for progression. |
+| A3 — Continuous Progression | In one coherent run, connect bootstrap freight → research → material production → expansion → additional resources → advanced production → city supply/growth. | Track actual consumption and growth, not warehouse arrival alone. |
+| A4 — Capacity and Long-Run Logistics | Once sustainable, test branches, busy terminals, congestion, disruption/recovery, useful upgrades and longer-run performance. | Throughput and human play remain distinct claims. |
+
+**A0 ordinary start contract.** Use the game's normal New Game UI and generator
+(`src/genworld.cpp`, `MultiWorldGen`), not the scenario generator or a loaded UAT
+save. Select the integrated content trio above; generation must create at least
+two worlds for `IntegratedEconomy::StartNewGame` to enable ruleset 1. The existing
+Mito–Merredin seven-world preset is a supported concrete candidate; confirm the
+chosen settings, seed, content hashes and starting year in A1 evidence. Keep
+ordinary initial company money/loan and configured loan ceiling: company creation
+uses OpenTTD's initial loan (`INITIAL_LOAN`), with normal borrowing allowed only
+up to the configured maximum. No custom starting grant or changed maximum is
+established here. Initial research has no granted unlocks or authored inventory;
+basic track, stations, depot, signals, steam/diesel and bootstrap factories are
+cash-buildable under the integrated rules. Generated towns/industries, world
+regions and existing starting gates may be present; the player must build the
+freight railway, consist and orders. Resource availability, acceptance, terrain,
+affordability and earned revenue are A1 proof obligations, not assumptions.
+Connected economy fixtures and prefab UAT saves with authored track, trains,
+capital or cargo are explicitly **not** evidence of ordinary progression.
+
+```text
+Existing deterministic world / rail / integrated economy systems
+  → A0 canonical new-game contract
+  → usable generation and player interaction
+  → A1 sustainable freight
+  → earned research and physical materials
+  → A2 earned expansion
+  → A3 continuous logistics economy
+  → A4 capacity, congestion and long-run game
+
+Existing natural scheduled federation transport
+  → lifecycle/recovery contract
+  → company, project, research-home, link and order lifecycle
+  → interrupted-operation acceptance
+  → accepted federated player experience
+```
+
+The federation track can use proven local transport/economy behavior but does not
+gate A1–A4. Cross-host economy rules must stay compatible when that track advances.
+
+### Horizon B — federation and operational depth
+
+Specify the **coordinated-session federation** lifecycle: company joining,
+acquisition/closure and ownership; remote project custody, cancellation/orphans;
+research-home loss or change; remote link administration/retirement; supported
+remote order behavior; interrupted operation and host-visit usability. Verify
+those against registered hosts and coordinated checkpoints. **Always-on,
+independently recoverable federation** is hypothetical and requires a separate
+architecture decision for crash durability, partial restoration and reconciliation.
+Do not infer it from coordinated restart tests.
+
+### Horizon C — strategic direction
+
+Explore larger Commonwealth logistics networks, stronger economic
+specialisation, more complex inter-world network planning, late-game capacity,
+broader universe operation, competitor integration and deeper development.
+These are product/architecture themes, not committed implementation or numbered
+sprints. Global markets, per-warehouse inventories, narrative systems, art
+expansion and independent maps are not prerequisites for Horizon A. Withdrawn
+crisis/Silfen scope remains withdrawn.
+
+The historical “Current Project Milestone” and “Next priorities” paragraphs
+below describe their dated revisions; this active horizon section supersedes
+them for future ordering. Automated implementation evidence, pending human UAT,
+and unproven bootstrap balance remain separate.
+
 ## Organic UAT crash recovery — 30 September 2026
 
 `codex/fix-organic-uat-crashes` follows organic-layout PR #48 and incorporates
