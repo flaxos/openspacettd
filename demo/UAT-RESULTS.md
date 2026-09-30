@@ -441,3 +441,10 @@ Human graphical UAT: **Pending**, including seamless Visit, camera restoration,
 remote train follow, UI scaling, equipment loading/refits and commissioning during
 an authority interruption. Use [the player checklist](CST-STELLAR-UAT.md). Earlier
 overall user acceptance is preserved but does not imply acceptance of this new UI.
+
+## Agent workflow tooling — 30 September 2026
+
+No game source/content/save changes in this tooling delivery; no new human game
+acceptance is claimed. Codex CLI skill discovery is verified; Antigravity discovery and interactive use
+remain Pending.
+[Setup and verification](../docs/AGENT_WORKFLOW.md).
