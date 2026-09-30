@@ -32,8 +32,11 @@ The stopped campaign and initial full gates used frozen implementation
 `d7a3a12006efb0e890a3020849eccb12be0aeac1`. Its complete source/binary/config/content
 provenance is in the unmodified campaign `evidence.json` in the archive.
 `7bb7587d5922b77de37ae4a4244b7b15905f3d1f` adds only the diagnosed Python console
-transport repair. No engine/test source changed after the failed campaign.
-Delivery documentation is separate from both source commits.
+transport repair. A later Doxygen follow-up adds only allowance/parameter/return
+comments in `connected_economy.cpp`; it changes no executable code. The manifest's
+source hashes and local binaries describe the gated `7bb7587d59` source; the
+follow-up comment hash is recorded separately. No engine/test behavior changed
+after the failed campaign. Delivery documentation is separate from both source commits.
 
 Necessary historical PR62 hunks were reviewed individually, not imported as a
 branch or full tree:
@@ -132,7 +135,10 @@ All 17 tracked optional-art files and the published packs are unchanged:
 | equipment_v1 | `afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21` |
 
 Optional platform art stays disabled in the campaign profile. Exact delivery-head
-remote CI and independent final review are recorded on the draft PR; passing
+remote CI and independent final review are recorded on the draft PR. The
+[initial Doxygen gate](https://github.com/flaxos/openspacettd/actions/runs/36787553350/job/110132491417)
+failed on 13 introduced documentation warnings; the allowance and helper
+parameter/return comments are corrected. Passing
 compiler/unit gates cannot turn the stopped mission into a functional pass.
 
 ## Safe fresh checkout and manual owner feedback

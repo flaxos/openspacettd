@@ -1573,10 +1573,13 @@ bool FirstFreight(std::span<std::string_view> argv)
 
 /** Exact marker and finite cash assistance for the reviewed offline functional proof. */
 constexpr std::string_view FUNCTIONAL_COMPANY = "ASSISTED FUNCTIONAL Core Supply";
-constexpr int64_t FUNCTIONAL_GRANT = 6000000;
+constexpr int64_t FUNCTIONAL_GRANT = 6000000; ///< Single owner-approved virtual cash allowance, in native GBP.
 bool functional_fresh = false; ///< Revoked at every game start/load; never serialized.
 
-/** Full read-only semantics; retain the older ordinary FreightSnapshot contract. */
+/**
+ * Full read-only semantics; retain the older ordinary FreightSnapshot contract.
+ * @return Captured native state for accounting and cold/replay comparisons.
+ */
 Json FunctionalSnapshot()
 {
 	Json r = GenerationSnapshot();
@@ -1643,7 +1646,11 @@ Json FunctionalSnapshot()
 	return r;
 }
 
-/** Serialize observer-only counters, including individual native cash entries. */
+/**
+ * Serialize observer-only counters, including individual native cash entries.
+ * @param a Counters collected while the optional observer was armed.
+ * @return Native cargo, cash and monthly-consumption evidence.
+ */
 Json FunctionalAudit(const CommonwealthSliceAudit &a)
 {
 	return {{"produced", a.produced}, {"raw_produced", a.raw_produced}, {"raw_removed", a.raw_removed}, {"unallocated", a.unallocated}, {"discarded", a.discarded}, {"consumed", a.consumed},
@@ -1653,7 +1660,12 @@ Json FunctionalAudit(const CommonwealthSliceAudit &a)
 		{"cash_transactions", a.cash_transactions}, {"cash_debits", a.cash_debits}};
 }
 
-/** Quote a bounded leg without introducing a depot or modifying the generated map. */
+/**
+ * Quote a bounded leg without introducing a depot or modifying the generated map.
+ * @param leg Planned station, rails, bridges and optional depot.
+ * @param depot Whether to include the leg's depot in the native quote.
+ * @return Leg geometry, native cost and command-query eligibility.
+ */
 Json FunctionalLegQuote(const FreightLeg &leg, bool depot)
 {
 	Money cost = 0; bool legal = true;
@@ -1675,6 +1687,10 @@ Json FunctionalLegQuote(const FreightLeg &leg, bool depot)
  * Read loaded fixed-pack vehicle prices before there is a depot. These three
  * railv3 families have no callbacks/articulated parts. Exact native BuildVehicle
  * queries are still mandatory after paying for the depot, before buying a vehicle.
+ * @param id Loaded fixed-pack engine to inspect.
+ * @param cargo Desired refit cargo, or INVALID_CARGO for the default cargo.
+ * @param world World used for native vehicle-availability checks.
+ * @return Vehicle eligibility, cost, capacity and inherited running cost.
  */
 Json FunctionalVehicleQuote(EngineID id, CargoType cargo, WorldID world)
 {
@@ -1694,7 +1710,11 @@ Json FunctionalVehicleQuote(EngineID id, CargoType cargo, WorldID world)
 		{"refit_factor", e->info.refit_cost}, {"callback_mask", e->info.callback_mask.base()}, {"yearly_running_cost", int64_t(e->GetRunningCost())}};
 }
 
-/** Shared pristine check for both arming and applying the one offline allowance. */
+/**
+ * Shared pristine check for both arming and applying the one offline allowance.
+ * @param company Existing canonical company whose finances are checked.
+ * @return Whether fresh generation and unspent company state remain pristine.
+ */
 bool FunctionalPristine(const Company *company)
 {
 	if (!GetIntegratedCoreTownGenerationStats().active || !HasValidIntegratedCoreTown() || company->money != 100000 ||
@@ -1706,7 +1726,10 @@ bool FunctionalPristine(const Company *company)
 	return true;
 }
 
-/** Wait for native startup completion before freezing the clock in the FIFO reader. */
+/**
+ * Wait for native startup completion before freezing the clock in the FIFO reader.
+ * @param path Console input path to execute once modal generation is complete.
+ */
 void FunctionalBridge(const std::string &path)
 {
 	if (HasModalProgress()) {
@@ -1716,7 +1739,11 @@ void FunctionalBridge(const std::string &path)
 	IConsoleCmdExec(fmt::format("exec \"{}\"", path));
 }
 
-/** Strict offline proof operations; no loan, industry, technology or cargo authoring. */
+/**
+ * Strict offline proof operations; no loan, industry, technology or cargo authoring.
+ * @param argv Console command tokens including the requested proof operation.
+ * @return True when handled, or false for unrecognized operation syntax.
+ */
 bool FunctionalCore(std::span<std::string_view> argv)
 {
 	if (argv.size() < 2 || _game_mode != GameMode::Normal || _networking || _network_dedicated ||

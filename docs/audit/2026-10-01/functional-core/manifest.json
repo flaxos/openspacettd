@@ -56,6 +56,17 @@
     "src/train_cmd.cpp": "37d60805bee9686b28dc37865c157d54e8138aefea225c97c7074cf6b8e86a07",
     "src/vehicle.cpp": "6369eac925381e763ef8d41bfa73694de5ef8ab265d3e9d074dc4fd952384055"
   },
+  "source_sha256_scope": "Frozen source_commit used by the retained local gates and binaries",
+  "documentation_followup": {
+    "first_remote_docs_failure_head": "f3aafa7c09eee0be92268d6a8e7d7ccca6c5617f",
+    "first_remote_docs_failure_url": "https://github.com/flaxos/openspacettd/actions/runs/36787553350/job/110132491417",
+    "introduced_documentation_warnings": 13,
+    "changed_file": "src/portal/connected_economy.cpp",
+    "commented_source_sha256": "5d87e8009ddc269bfa4d28a93e23302da44acf505467dd22835349063bcc982c",
+    "executable_tokens_unchanged": true,
+    "local_engine_rebuild_or_full_suite_repeat": "NOT RUN: comment/documentation-only follow-up",
+    "final_exact_head_remote_ci": "See draft PR68 exact-head delivery report"
+  },
   "ancestry": {
     "checked_before_branch_and_delivery": true,
     "main": "91846666f69929443eab04cea63f9f8cfb3bb0be",
