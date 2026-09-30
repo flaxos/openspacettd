@@ -76,7 +76,12 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
  */
 CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station);
 
-/** Designate a live town using its current world, name and population, at no cost. */
+/**
+ * Designate a live town using its current world, name and population, at no cost.
+ * @param flags Command flags; query mode validates without registering the town.
+ * @param town Existing town to designate as a megacity.
+ * @return Zero command cost on success, or failure for an invalid or already designated town.
+ */
 CommandCost CmdDesignateMegacity(DoCommandFlags flags, TownID town);
 
 /**

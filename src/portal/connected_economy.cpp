@@ -61,6 +61,8 @@
 #include "../bridge_map.h"
 #include "../direction_func.h"
 #include "../core/string_consumer.hpp"
+#include "corporate_alliance.h"
+#include "../pathfinder/follow_track.hpp"
 
 #include "../safeguards.h"
 
@@ -1212,7 +1214,7 @@ bool FoodFreight(std::span<std::string_view> argv)
 		}
 		IConsolePrint(CC_DEFAULT, "FREIGHT food {}", after.dump()); return true;
 	}
-	if ((argv[1] != "first-food-plan" && argv[1] != "first-food-build") || argv.size() != 5) {
+	if ((argv[1] != "first-food-plan" && argv[1] != "first-food-build" && argv[1] != "first-food-access") || argv.size() != 5) {
 		IConsolePrint(CC_ERROR, "FREIGHT FAIL food arguments: plan|build producer town grain-link"); return true;
 	}
 	const Industry *source = Industry::GetIfValid(IndustryID{ParseInteger<uint16_t>(argv[2]).value_or(UINT16_MAX)});
@@ -1242,6 +1244,39 @@ bool FoodFreight(std::span<std::string_view> argv)
 	FreightLeg legs[4]; Json report = {{"legal", false}, {"producer", source->index.base()}, {"processor", processor->index.base()}, {"town", town->index.base()},
 		{"grain_link", grain_link->id.base()}, {"food_link", food_link->id.base()}};
 	Json before = FoodSnapshot();
+	if (argv[1] == "first-food-access") {
+		/* Inspect the actual processor-side terminal using native traversal and
+		 * construction queries; no alternative-target search or track mutation. */
+		auto layout = PortalTerminal::Plan(ends[1].tile, ends[1].enter_dir, ends[1].world_id);
+		if (!layout) { IConsolePrint(CC_ERROR, "FREIGHT FAIL no terminal layout for access probe"); return true; }
+		std::set<TileIndex> terminal_tiles{layout->gate_tile};
+		for (const auto &part : layout->tiles) terminal_tiles.insert(part.tile);
+		report["terminal_parts"] = Json::array(); report["external_edges"] = Json::array();
+		for (const auto &part : layout->tiles) {
+			bool present = IsPlainRailTile(part.tile) && (GetTrackBits(part.tile) & part.tracks) == part.tracks;
+			bool traversable = StellarNetwork::CanTraverseTile(part.tile, CompanyID{0},
+				CorporateAllianceManager::CanTraverseTrack(CompanyID{0}, GetTileOwner(part.tile)));
+			report["terminal_parts"].push_back({{"tile", part.tile.base()}, {"owner", GetTileOwner(part.tile).base()}, {"expected", part.tracks.base()},
+				{"actual", IsPlainRailTile(part.tile) ? GetTrackBits(part.tile).base() : 0}, {"present", present}, {"traversable", traversable}});
+			if (!IsPlainRailTile(part.tile)) continue;
+			for (Trackdir td : GetTileTrackStatus(part.tile, TransportType::Rail, RoadTramType::Invalid).trackdirs) {
+				DiagDirection exit = TrackdirToExitdir(td); TileIndex neighbour = TileAddByDiagDir(part.tile, exit);
+				if (terminal_tiles.contains(neighbour)) continue;
+				CFollowTrackRail follower(CompanyID{0}, RailTypes{RAILTYPE_RAIL});
+				bool followed = follower.Follow(part.tile, td);
+				auto query = Command<Commands::BuildRail>::Do(DoCommandFlag::QueryCost, neighbour, RAILTYPE_RAIL, DiagDirToDiagTrack(exit), false);
+				report["external_edges"].push_back({{"from", part.tile.base()}, {"trackdir", to_underlying(td)}, {"neighbour", neighbour.base()},
+					{"native_follow", followed}, {"native_follow_error", to_underlying(follower.err)},
+					{"rail_query_succeeded", query.Succeeded()}, {"rail_query_error", query.GetErrorMessage().base()}});
+			}
+		}
+		TileIndex target = TileAddByDiagDir(layout->connection_tile, layout->outward_dir);
+		report["connection_tile"] = layout->connection_tile.base(); report["target"] = target.base();
+		report["target_traversable"] = StellarNetwork::CanTraverseTile(target, CompanyID{0},
+			CorporateAllianceManager::CanTraverseTrack(CompanyID{0}, GetTileOwner(target)));
+		report["preview_unchanged"] = before == FoodSnapshot();
+		IConsolePrint(CC_DEFAULT, "FREIGHT food-access {}", report.dump()); return true;
+	}
 	bool legal = ends[1].world_id == industrial && PlanFreightLeg(source, ends[0], legs[0]) && PlanFreightLeg(processor, ends[1], legs[1]) &&
 		PlanFreightLeg(processor, ends[2], legs[2]) && PlanFreightLeg(nullptr, ends[3], legs[3], town);
 	if (!legal) { report["preview_unchanged"] = before == FoodSnapshot(); IConsolePrint(CC_DEFAULT, "FREIGHT food-plan {}", report.dump()); return true; }
@@ -1294,7 +1329,7 @@ bool FoodFreight(std::span<std::string_view> argv)
 	Money yearly_interest = company->GetMaxLoan() * _economy.interest_rate / 100;
 	Money monthly_other = _price[Price::StationValue] >> 2;
 	/* Supply/travel/processing allowance to initial payments, plus 20 public admissions.
-	 * Keep at least £30k even for the inherited zero-cost CST vehicles. */
+	 * Keep at least GBP 30k even for the inherited zero-cost CST vehicles. */
 	uint rate = source->GetCargoProduced(grain)->rate;
 	uint grain_capacity = report["vehicles"][1]["capacity"].get<uint>() * 3;
 	uint64_t nominal_fill_ticks = rate == 0 ? UINT32_MAX : (uint64_t(grain_capacity) * 256 + rate - 1) / rate;
