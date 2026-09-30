@@ -295,7 +295,9 @@ def first_food(args):
         engine.deadline = time.monotonic()+1800
         initial = state()
         report['initial'] = initial
-        require({k:initial[k] for k in original} == original, 'Captured cold A1 checkpoint differs from reviewed before_reload')
+        a1_captured = json.loads(engine.command('connected_economy first-freight-status', 'FREIGHT state '))
+        require(a1_captured == original, 'Captured cold A1 checkpoint differs from reviewed before_reload')
+        report['a1_captured'] = a1_captured
         require(initial['money'] == 78268 and initial['loan'] == 100000 and initial['tick'] == 85248, 'Wrong ordinary starting state')
         report['a1_cold_equal'] = True
         report['audit'] = audit(engine)

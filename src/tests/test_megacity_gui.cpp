@@ -91,7 +91,7 @@ struct MegacityPacketClient : ClientNetworkGameSocketHandler {
 	}
 	CommandPacket ReadCommand()
 	{
-		Packet packet(nullptr, 0);
+		Packet packet(this, size_t{65536});
 		size_t offset = 0;
 		auto transfer = [&](std::span<uint8_t> part) -> ssize_t {
 			REQUIRE(offset + part.size() <= command_packet.size());
@@ -246,6 +246,7 @@ TEST_CASE("Designated town consumer stations require a house belonging to their 
 	CargoSpec::Get(food)->label = CargoLabel{"FOOD"};
 	BuildCargoLabelMap();
 	Town *town = Town::Get(fixture.town);
+	REQUIRE(Station::CanAllocateItem());
 	Station *station = Station::Create(TileXY(12, 10));
 	station->name = "Town receiving station";
 	station->owner = CompanyID{0};
@@ -262,6 +263,7 @@ TEST_CASE("Designated town consumer stations require a house belonging to their 
 	UpdateStationAcceptance(station, false);
 	CHECK_FALSE(station->goods[food].status.Test(GoodsEntry::State::Acceptance));
 
+	REQUIRE(Town::CanAllocateItem());
 	Town *other = Town::Create(TileXY(20, 20));
 	other->name = "Other catchment town";
 	other->townnametype = SPECSTR_TOWNNAME_START;

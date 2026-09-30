@@ -203,6 +203,7 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 	SetupCommandAuthorityWorld(megacity ? WorldPhase::Phase3_Frontier : resources ? WorldPhase::Phase2_Developed : WorldPhase::Phase4_Expansion, 10000);
 	if (megacity) {
 		Town::Get(TownID{0})->cache.population = 1240;
+		REQUIRE(Town::CanAllocateItem());
 		Town *town = Town::Create(TileXY(20, 30));
 		town->name = "Spectator settlement";
 		town->townnametype = SPECSTR_TOWNNAME_START;
