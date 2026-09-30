@@ -74,8 +74,6 @@
 #include <cmath>
 #include <filesystem>
 
-static constexpr IndustryType IT_COAL_MINE     = 0;
-static constexpr IndustryType IT_POWER_STATION = 1;
 static constexpr IndustryType IT_FACTORY       = 6;
 static constexpr IndustryType IT_STEEL_MILL    = 8;
 static constexpr IndustryType IT_IRON_MINE     = 18;
@@ -286,18 +284,19 @@ static Station *CreateMultiTrackStation(TileIndex top_left, uint8_t plat_len, ui
  * Two Manhattan-distance passes preserve zero-height anchors and include void corners. */
 static void RelaxScenarioHeights(std::vector<uint8_t> &heights)
 {
+	/* Each minimum is bounded by the existing uint8_t height, even when a neighbour is 255. */
 	for (uint y = 0; y < Map::SizeY(); ++y) {
 		for (uint x = 0; x < Map::SizeX(); ++x) {
 			auto &h = heights[TileXY(x, y).base()];
-			if (x > 0) h = std::min<uint>(h, heights[TileXY(x - 1, y).base()] + 1);
-			if (y > 0) h = std::min<uint>(h, heights[TileXY(x, y - 1).base()] + 1);
+			if (x > 0) h = static_cast<uint8_t>(std::min<uint>(h, heights[TileXY(x - 1, y).base()] + 1));
+			if (y > 0) h = static_cast<uint8_t>(std::min<uint>(h, heights[TileXY(x, y - 1).base()] + 1));
 		}
 	}
 	for (uint y = Map::SizeY(); y-- > 0;) {
 		for (uint x = Map::SizeX(); x-- > 0;) {
 			auto &h = heights[TileXY(x, y).base()];
-			if (x < Map::MaxX()) h = std::min<uint>(h, heights[TileXY(x + 1, y).base()] + 1);
-			if (y < Map::MaxY()) h = std::min<uint>(h, heights[TileXY(x, y + 1).base()] + 1);
+			if (x < Map::MaxX()) h = static_cast<uint8_t>(std::min<uint>(h, heights[TileXY(x + 1, y).base()] + 1));
+			if (y < Map::MaxY()) h = static_cast<uint8_t>(std::min<uint>(h, heights[TileXY(x, y + 1).base()] + 1));
 		}
 	}
 }
