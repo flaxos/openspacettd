@@ -17,8 +17,8 @@ its historical evidence and [blocked food plan](blocked-food-plan.md) are preser
 Final native proof uses clean source
 `85456a5c594fbd2dd6680c6d96b2933c1dd2f55c` and binary SHA256
 `3a7c85d77a708e12cc7b17634ceb9d9ebac1b4976d38a7023b832518419e629d`.
-Native executable code after this frozen proof is unchanged. Doxygen comment
-corrections, delivery records/evidence and
+Native execution semantics after this frozen proof are unchanged. The narrow
+compiler correction described below, Doxygen comments, delivery records/evidence and
 normal-history reconciliation with main's independently merged optional art PR64
 are separate: main advanced to `211310a791527c44ce2aa683861fbb537bda73ad`.
 The optional art pack is not enabled in these economic/generation proofs. All three unchanged content
@@ -150,6 +150,39 @@ used in this environment are retained exactly under `tools/` in the archive; use
 original input copies from the original A1 archive first. Verify all member hashes
 against the manifest before loading evidence. Do not overwrite original saves.
 
+## Compiler-only follow-up after PR65
+
+The owner merged PR65 into main at
+`91846666f69929443eab04cea63f9f8cfb3bb0be`; this does not change the recorded A1
+failure or pending human acceptance. Its exact-head Mac arm64 Release
+[job](https://github.com/flaxos/openspacettd/actions/runs/36778338253/job/110102045979)
+failed to compile the mixed signed64 JSON quote / native `Money` comparison.
+`OverflowSafeInt` exposes both comparison overloads and an implicit stored-value
+conversion, producing ambiguous `>=` overload resolution on that compiler.
+
+The separate correction explicitly converts company cash to `int64_t` before
+comparison. `Money` stores that same signed64 type, and its native conversion
+returns the stored value without narrowing, scaling, clamping or mutation. Equal
+or greater quotes are still rejected; the intended affordability rule, ordinary
+funds, native commands and all guards remain intact. Independent source review
+confirms the single conversion is the only executable change. The frozen archive,
+manifest, original saves and failed A1 evidence are unchanged.
+
+Local verification passes the affected rebuild, 12 existing focused generation
+regressions, 487 unit cases/306,025 assertions, all 500 isolated CTests, both
+repository linters and script-mode enforcement. An isolated
+GCC `-Werror` compiler probe checks the actual native overflow-safe header and JSON
+quote expression across 242 pairs of signed64 boundary values, including equality,
+negative cash and both extremes, using native `int64_t` and `long long` storage.
+The compiler probe is not a native operating replay or a Mac build; new exact-head
+platform CI is reported separately in the correction PR. Complete original Mac
+diagnostics and local gate logs are retained under `build/agent-logs/generation-money-*`.
+
+The separate docs-only planner owns the approved functional-progression roadmap
+revision and deferred balance pass. No new strategy experiment,
+economic progression, borrowing, plan rewrite, balance change or FOOD proof is
+performed by this compiler correction.
+
 ## Small human mission and safe local handoff
 
 Human generation acceptance remains **Pending**. Use a separate checkout and the
@@ -161,7 +194,7 @@ From a parent folder, choose an absent destination:
 set -eu
 generation_review_head='<full delivery head from handoff>'
 test ! -e openspacettd-generation-review || { echo 'STOP: destination exists'; exit 1; }
-git clone --branch codex/integrated-newgame-generation \
+git clone --branch codex/generation-money-comparison \
   https://github.com/flaxos/openspacettd.git openspacettd-generation-review
 cd openspacettd-generation-review
 test -z "$(git status --porcelain=v1)" || { echo 'STOP: dirty checkout'; exit 1; }
@@ -178,15 +211,15 @@ origin is this repository and its current branch is the draft branch, then:
 set -eu
 generation_review_head='<full delivery head from handoff>'
 test -z "$(git status --porcelain=v1)" || { echo 'STOP: preserve local work'; exit 1; }
-test "$(git branch --show-current)" = codex/integrated-newgame-generation || { echo 'STOP: different branch'; exit 1; }
+test "$(git branch --show-current)" = codex/generation-money-comparison || { echo 'STOP: different branch'; exit 1; }
 case "$(git remote get-url origin)" in
   https://github.com/flaxos/openspacettd.git|git@github.com:flaxos/openspacettd.git) ;;
   *) echo 'STOP: unexpected origin'; exit 1 ;;
 esac
 git fetch origin
-test "$(git rev-parse origin/codex/integrated-newgame-generation)" = "$generation_review_head" || { echo 'STOP: unexpected remote head'; exit 1; }
-git merge-base --is-ancestor HEAD origin/codex/integrated-newgame-generation || { echo 'STOP: diverged/ahead tree'; exit 1; }
-git merge --ff-only origin/codex/integrated-newgame-generation
+test "$(git rev-parse origin/codex/generation-money-comparison)" = "$generation_review_head" || { echo 'STOP: unexpected remote head'; exit 1; }
+git merge-base --is-ancestor HEAD origin/codex/generation-money-comparison || { echo 'STOP: diverged/ahead tree'; exit 1; }
+git merge --ff-only origin/codex/generation-money-comparison
 test "$(git rev-parse HEAD)" = "$generation_review_head" || { echo 'STOP: unexpected delivery head'; exit 1; }
 ninja -C build
 ```
