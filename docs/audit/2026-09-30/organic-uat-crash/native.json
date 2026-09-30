@@ -1,0 +1,66 @@
+{
+  "binary_sha256": "564b95d453c5ba93b70ad41fb36fb6467c882529345d5985269ab10a6b25ee9c",
+  "recovery": [
+    {
+      "source": "OpenSpaceTTD-Commonwealth-UAT-v1.0.sav",
+      "sha256": "e585591317b245b4dea444b7fb414a20d295dd8152399164d485e7463f0f89bc",
+      "audit": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 3.",
+      "before": "1950-01-01",
+      "after": "1950-01-02",
+      "saved_audit": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 16.",
+      "reload": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 16.",
+      "recovered_sha256": "16899b3b46bbabb5a7b9b53b6f9a6eb87ea5b7d8ad41e489809bf4c8a11810ae"
+    },
+    {
+      "source": "crash20260929233517.sav",
+      "sha256": "634abb8fb9c5bc0e918d8dd371cf94302facc8218a20b974cf0793153347e074",
+      "audit": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 10.",
+      "before": "1950-01-02",
+      "after": "1950-01-03",
+      "saved_audit": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 3.",
+      "reload": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 3.",
+      "recovered_sha256": "c0e9c5c3676a96a4b25c403dfc7d15a3faf2c956b4d2054c37b3bc97c35c0f30"
+    }
+  ],
+  "generation": [
+    {
+      "worlds": 3,
+      "audit": "PASS] Worlds: 3, Portals: 2, Gateways: 1, Trains: 3.",
+      "reload": "PASS] Worlds: 3, Portals: 2, Gateways: 1, Trains: 3.",
+      "sha256": "c13c375cd99b8b74bd1e79b662844db2438593cc823e5d772e7414d96724272e"
+    },
+    {
+      "worlds": 4,
+      "audit": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 3.",
+      "reload": "PASS] Worlds: 4, Portals: 3, Gateways: 1, Trains: 3.",
+      "sha256": "08fd21926530354bd3cb51b52c1c9c0ef4c6d97b086166f5d4fbca15a52948dd"
+    },
+    {
+      "worlds": 6,
+      "audit": "PASS] Worlds: 6, Portals: 5, Gateways: 1, Trains: 3.",
+      "reload": "PASS] Worlds: 6, Portals: 5, Gateways: 1, Trains: 3.",
+      "sha256": "53dc27e12def362537838188003ea40b67f4e4ca5332cc91d66dc495a9973d10"
+    }
+  ],
+  "gui": [
+    {
+      "source": "OpenSpaceTTD-Commonwealth-UAT-v1.0.sav",
+      "seconds": 8,
+      "video": "sdl/dummy",
+      "resolution": "2560x1389"
+    },
+    {
+      "source": "crash20260929233517.sav",
+      "seconds": 8,
+      "video": "sdl/dummy",
+      "resolution": "2560x1389"
+    },
+    {
+      "source": "fresh-4.sav",
+      "seconds": 8,
+      "video": "sdl/dummy",
+      "resolution": "2560x1389"
+    }
+  ],
+  "passed": true
+}

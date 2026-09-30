@@ -758,6 +758,11 @@ void GuiShowTooltips(Window *parent, EncodedString &&text, TooltipCloseCondition
 
 	if (text.empty() || !_cursor.in_window) return;
 
+	/* Encoded strings can be nonempty while their rendered text has no width
+	 * (STR_EMPTY, empty parameters, or formatting/newlines only). Such tooltips
+	 * have nothing to show and cannot be passed to GetStringHeight. */
+	if (GetStringBoundingBox(text.GetDecodedString()).width == 0) return;
+
 	new TooltipsWindow(parent, std::move(text), close_tooltip);
 }
 

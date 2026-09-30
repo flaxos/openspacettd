@@ -1,5 +1,26 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Organic UAT crash repair — 30 September 2026
+
+| Delivery | Automated evidence | Human UAT | Status |
+|---|---|---|---|
+| Complete terminal-corner anchors, bounded height relaxation, foundation audit, narrow atomic legacy recovery; merged tooltip fix incorporated | 473 unit cases / 67,547 assertions; 486 CTests; recovery/refusal regressions, original/crash saves, fresh 3/4/6-world reloads, SDL drawing smoke | Pending | TESTED |
+
+[Evidence, hashes and boundaries](audit/2026-09-30/organic-uat-crash/README.md).
+This supersedes the earlier claim that headless organic save verification alone
+proved rendering safety; no broader human acceptance is inferred.
+
+## Empty-tooltip crash repair — 29 September 2026
+
+**TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.
+Human desktop retest remains Pending.
+
+GUI-only correction for `crash20260929060130`: reject zero-width decoded
+help and use `STR_NULL` for absent tooltips. Regression exercises real window
+creation at three UI scales for hover and right-click. No save migration.
+Automated verification and human-UAT status are recorded in the
+[repair evidence](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Organic UAT World Layouts & Realistic Civil Rail Infrastructure — 29 September 2026
 
 | Feature | Source and dependency order | Automated evidence | Human UAT | Base / branch | Status |
@@ -316,3 +337,9 @@ Next priorities: (1) human star-map, commissioning and host-visit UAT;
 and freight balance using the new sector. The historical recovery and strategic
 sprint registers remain delivered; removed narrative/Silfen/crisis plans are not
 reactivated by this transport feature.
+
+## Agent workflow tooling — 30 September 2026
+
+Tooling delivery: compact AGENTS.md, shared development/UAT/delivery skills, effort
+profiles and read-only context helper. No new gameplay sprint.
+[Verification and remaining client checks](AGENT_WORKFLOW.md#delivery-record--30-september-2026).

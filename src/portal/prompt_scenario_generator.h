@@ -153,6 +153,12 @@ public:
 	 * @param error_msg Optional pointer to string receiving detailed diagnostics.
 	 * @return True if all UAT invariants pass.
 	 */
+	/** Audit every shared corner and foundation before querying renderer geometry. */
+	static bool ValidateWorldGeometry(std::string *error_msg = nullptr);
+
+	/** Narrow, atomic recovery of the published organic UAT's distorted neutral terminals. */
+	static bool RepairLegacyOrganicUATTerrain();
+
 	static bool VerifyCommonwealthUAT(std::string *error_msg = nullptr);
 };
 

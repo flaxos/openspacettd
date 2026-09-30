@@ -1,5 +1,28 @@
 # OpenSpaceTTD Known Limitations
 
+## Organic UAT crash follow-up — 30 September 2026
+
+The earlier headless verification omitted native foundation queries: it accepted
+sloped terminal switches that crashed rendering. The new complete geometry audit
+and SDL smoke check close that specific gap. Human graphical acceptance remains
+Pending; the smoke test uses SDL's dummy video driver, not the user's NVIDIA
+OpenGL desktop. See [evidence](audit/2026-09-30/organic-uat-crash/README.md).
+
+Automatic recovery is restricted to the recognized 256×256, four-world legacy
+UAT. It refuses to modify edited terminal infrastructure, other structures sharing
+changed corners, or terrain supporting a live vehicle. Other saves are untouched;
+this is not a generic repair for arbitrary corrupt terrain. Existing generated
+corridor reachability, freight profitability and organic startup balance still
+need gameplay acceptance independently of rendering safety.
+
+## Tooltip crash follow-up — 29 September 2026
+
+The reported zero-width tooltip assertion is repaired and covered by native
+window tests at 100%, 150% and 200% scale. Human hover/right-click retesting of
+the reported desktop layout remains Pending. This repair does not establish
+acceptance of unrelated scenario-generator work or the full economy/star-map UI.
+[Scope and evidence](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Organic UAT World Layouts & Prefab Scenario Synthesis — 29 September 2026
 
 - **Corridor Grading Box:** The procedural organic terrain generator flattens a central
@@ -387,3 +410,9 @@ The connected resource fixture proves a funded authored network, not low-budget
 startup balance or random generation. Its town-growth check is separate from the
 original showcase's three-new-houses-within-ten-minutes target.
 [Details and reproduction](PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## Agent workflow tooling — 30 September 2026
+
+Codex CLI skill discovery is verified. Antigravity discovery and interactive
+usefulness remain Pending. Instruction size reduction does not prove quota savings.
+[Verification boundary](AGENT_WORKFLOW.md#delivery-record--30-september-2026).

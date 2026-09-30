@@ -1,5 +1,36 @@
 # Human UAT results — recovery / v1.1
 
+## Organic UAT crashes — 30 September 2026
+
+**Human graphical retest: Pending.** Both reported failures are addressed on
+`codex/fix-organic-uat-crashes`: merged empty-tooltip fix plus complete terminal
+terrain protection and scoped recovery of the original UAT save. Automated native
+rendering-query and SDL smoke checks pass; see
+[the audit](../docs/audit/2026-09-30/organic-uat-crash/README.md).
+
+Restart the rebuilt game with the original command:
+
+```sh
+./build/openttd -g demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav
+```
+
+Inspect and scroll around Augusta's portal terminal, then hover/right-click the
+prompt-generator, HQ and facility buttons at 150% scale. Use a new save filename
+for your retest; the original scenario and crash saves have not been overwritten.
+
+## Empty-tooltip crash repair — 29 September 2026
+
+**Human graphical retest: Pending.** Automated tooltip windows exercise empty,
+newline-only and normal text at 100%, 150% and 200% scale. The reported crash save
+is preserved; native load, continued simulation and a separate save/reload were
+checked. See [repair evidence](../docs/audit/2026-09-29/tooltip-crash/README.md).
+
+To retest: load the crash save using the fixed build at 150% UI scale, open the
+prompt generator and hover/right-click its presets and Generate button. Repeat
+for HQ tabs, facilities filters and trade tabs. Buttons without help should not
+open a tooltip; title-bar help should still appear. Do not overwrite the original
+crash save while testing.
+
 ## Unified Commonwealth economy — 28 September 2026
 
 **Human graphical status: Pending.** No human pass is inferred from automation.
@@ -410,3 +441,10 @@ Human graphical UAT: **Pending**, including seamless Visit, camera restoration,
 remote train follow, UI scaling, equipment loading/refits and commissioning during
 an authority interruption. Use [the player checklist](CST-STELLAR-UAT.md). Earlier
 overall user acceptance is preserved but does not imply acceptance of this new UI.
+
+## Agent workflow tooling — 30 September 2026
+
+No game source/content/save changes in this tooling delivery; no new human game
+acceptance is claimed. Codex CLI skill discovery is verified; Antigravity discovery and interactive use
+remain Pending.
+[Setup and verification](../docs/AGENT_WORKFLOW.md).

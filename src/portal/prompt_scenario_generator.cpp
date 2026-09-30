@@ -66,6 +66,9 @@
 #include "../town_cmd.h"
 #include "../water_map.h"
 #include "../tile_map.h"
+#include "../tile_cmd.h"
+#include "../landscape.h"
+#include "../tunnelbridge_map.h"
 #include "../pathfinder/yapf/yapf_cache.h"
 #include <cmath>
 #include <filesystem>
@@ -278,9 +281,39 @@ static Station *CreateMultiTrackStation(TileIndex top_left, uint8_t plat_len, ui
 	return st;
 }
 
+/** Lower a height field to the greatest continuous field below its input.
+ * Two Manhattan-distance passes preserve zero-height anchors and include void corners. */
+static void RelaxScenarioHeights(std::vector<uint8_t> &heights)
+{
+	for (uint y = 0; y < Map::SizeY(); ++y) {
+		for (uint x = 0; x < Map::SizeX(); ++x) {
+			auto &h = heights[TileXY(x, y).base()];
+			if (x > 0) h = std::min<uint>(h, heights[TileXY(x - 1, y).base()] + 1);
+			if (y > 0) h = std::min<uint>(h, heights[TileXY(x, y - 1).base()] + 1);
+		}
+	}
+	for (uint y = Map::SizeY(); y-- > 0;) {
+		for (uint x = Map::SizeX(); x-- > 0;) {
+			auto &h = heights[TileXY(x, y).base()];
+			if (x < Map::MaxX()) h = std::min<uint>(h, heights[TileXY(x + 1, y).base()] + 1);
+			if (y < Map::MaxY()) h = std::min<uint>(h, heights[TileXY(x, y + 1).base()] + 1);
+		}
+	}
+}
+
 bool PromptScenarioGenerator::GenerateOrganicWorldTerrain(const PromptScenarioSpec &spec)
 {
 	std::vector<bool> is_anchor(Map::Size(), false);
+
+	/* Heights are shared tile corners. Protect every corner of existing portal
+	 * infrastructure, including the far switches and 14-tile holding lanes. */
+	for (TileIndex tile : Map::Iterate()) {
+		TileType type = GetTileType(tile);
+		if (!IsInnerTile(tile) || type == TileType::Clear || type == TileType::Trees || type == TileType::Void) continue;
+		for (uint dy = 0; dy <= 1; ++dy) {
+			for (uint dx = 0; dx <= 1; ++dx) is_anchor[TileXY(TileX(tile) + dx, TileY(tile) + dy).base()] = true;
+		}
+	}
 
 	/* 1. Mark portal gates and terminal footprints as anchors */
 	for (const auto &[pid, link] : PortalRegistry::GetAllPortals()) {
@@ -414,54 +447,9 @@ bool PromptScenarioGenerator::GenerateOrganicWorldTerrain(const PromptScenarioSp
 		}
 	}
 
-	/* 4. Apply initial heights */
-	for (TileIndex tile : Map::Iterate()) {
-		if (IsValidTile(tile)) {
-			SetTileHeight(tile, target_h[tile.base()]);
-		}
-	}
-
-	/* 5. Iterative slope relaxation ensuring |h1 - h2| <= 1 everywhere */
-	bool changed = true;
-	int passes = 0;
-	while (changed && passes < 60) {
-		changed = false;
-		passes++;
-		for (uint y = 0; y < Map::SizeY(); ++y) {
-			for (uint x = 0; x < Map::SizeX(); ++x) {
-				TileIndex t = TileXY(x, y);
-				int h = TileHeight(t);
-
-				if (x + 1 < Map::SizeX()) {
-					TileIndex te = TileXY(x + 1, y);
-					int he = TileHeight(te);
-					if (h - he > 1) {
-						if (is_anchor[t.base()]) SetTileHeight(te, h - 1);
-						else SetTileHeight(t, he + 1);
-						changed = true;
-					} else if (he - h > 1) {
-						if (is_anchor[te.base()]) SetTileHeight(t, he - 1);
-						else SetTileHeight(te, h + 1);
-						changed = true;
-					}
-				}
-
-				if (y + 1 < Map::SizeY()) {
-					TileIndex ts = TileXY(x, y + 1);
-					int hs = TileHeight(ts);
-					if (h - hs > 1) {
-						if (is_anchor[t.base()]) SetTileHeight(ts, h - 1);
-						else SetTileHeight(t, hs + 1);
-						changed = true;
-					} else if (hs - h > 1) {
-						if (is_anchor[ts.base()]) SetTileHeight(t, hs - 1);
-						else SetTileHeight(ts, h + 1);
-						changed = true;
-					}
-				}
-			}
-		}
-	}
+	/* Include void vertices: they are shared with world boundary tiles. */
+	RelaxScenarioHeights(target_h);
+	for (TileIndex tile : Map::Iterate()) SetTileHeight(tile, target_h[tile.base()]);
 
 	return true;
 }
@@ -1128,6 +1116,8 @@ ScenarioSynthesisResult PromptScenarioGenerator::SynthesizeAndSave(const PromptS
 	/* 9. Place canonical resource industries within station catchments */
 	PlaceCanonicalIndustries(spec, result);
 
+	if (!ValidateWorldGeometry(&result.error_message)) return result;
+
 	/* 10. Spawn active fleets */
 	if (spec.create_active_fleets) {
 		SpawnActiveFleets(spec, result);
@@ -1250,12 +1240,118 @@ ScenarioSynthesisResult PromptScenarioGenerator::GenerateCommonwealthPrefabWorld
 	return result;
 }
 
+bool PromptScenarioGenerator::RepairLegacyOrganicUATTerrain()
+{
+	/* This recovery is for the published 256-square four-world UAT only.
+	 * Never reshape arbitrary player maps or change track layouts/ownership. */
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (Map::SizeX() != 256 || Map::SizeY() != 256 || PlanetManager::Count() != 4 ||
+		company == nullptr || company->name != "Commonwealth Interplanetary Transport") return true;
+	static const char *names[]{"Sol Earth Core", "Augusta CST Hub", "Merredin Mining Colony", "Prometheus Caldera Outpost"};
+	for (uint i = 0; i < 4; ++i) {
+		const auto *region = PlanetManager::GetRegion(WorldID{i});
+		if (region == nullptr || region->name != names[i]) return true;
+	}
+	for (uint y = 0; y < Map::SizeY(); ++y) {
+		for (uint x = 0; x < Map::SizeX(); ++x) {
+			int h = TileHeight(TileXY(x, y));
+			if (x < Map::MaxX() && abs(h - static_cast<int>(TileHeight(TileXY(x + 1, y)))) > 1) return false;
+			if (y < Map::MaxY() && abs(h - static_cast<int>(TileHeight(TileXY(x, y + 1)))) > 1) return false;
+		}
+	}
+	bool needs_repair = false;
+	for (TileIndex tile : Map::Iterate()) {
+		if (IsPlainRailTile(tile) && GetRailFoundation(GetTileSlope(tile), GetTrackBits(tile)) == Foundation::Invalid) needs_repair = true;
+	}
+	if (!needs_repair) return true;
+
+	std::vector<uint8_t> heights(Map::Size());
+	std::vector<bool> terminal(Map::Size(), false);
+	for (TileIndex tile : Map::Iterate()) heights[tile.base()] = TileHeight(tile);
+	auto flatten = [&](TileIndex tile) {
+		terminal[tile.base()] = true;
+		for (uint dy = 0; dy <= 1; ++dy) {
+			for (uint dx = 0; dx <= 1; ++dx) heights[TileXY(TileX(tile) + dx, TileY(tile) + dy).base()] = 0;
+		}
+	};
+	if (PortalRegistry::Count() != 3) return false;
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
+		for (const auto &end : {link.end_a, link.end_b}) {
+			auto layout = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+			if (!layout || GetTileOwner(end.tile) != OWNER_NONE || !IsTileType(end.tile, TileType::TunnelBridge)) return false;
+			flatten(end.tile);
+			for (const auto &part : layout->tiles) {
+				if (!IsPlainRailTile(part.tile) || GetTileOwner(part.tile) != OWNER_NONE || GetTrackBits(part.tile) != part.tracks) return false;
+				flatten(part.tile);
+			}
+		}
+	}
+	RelaxScenarioHeights(heights);
+	std::vector<bool> affected(Map::Size(), false);
+	for (TileIndex tile : Map::Iterate()) {
+		if (heights[tile.base()] == TileHeight(tile)) continue;
+		for (int dy = -1; dy <= 0; ++dy) {
+			for (int dx = -1; dx <= 0; ++dx) {
+				int x = static_cast<int>(TileX(tile)) + dx, y = static_cast<int>(TileY(tile)) + dy;
+				if (x < 0 || y < 0) continue;
+				TileIndex shared = TileXY(x, y);
+				affected[shared.base()] = true;
+				TileType type = GetTileType(shared);
+				if (!terminal[shared.base()] && type != TileType::Clear && type != TileType::Trees && type != TileType::Void) return false;
+			}
+		}
+	}
+	/* Do not change the supporting terrain of a live vehicle. */
+	for (const Vehicle *vehicle : Vehicle::Iterate()) {
+		if (vehicle->tile < Map::Size() && affected[vehicle->tile.base()]) return false;
+	}
+	for (TileIndex tile : Map::Iterate()) SetTileHeight(tile, heights[tile.base()]);
+	return true;
+}
+
+bool PromptScenarioGenerator::ValidateWorldGeometry(std::string *error_msg)
+{
+	auto fail = [error_msg](std::string msg) {
+		if (error_msg != nullptr) *error_msg = std::move(msg);
+		return false;
+	};
+
+	for (uint y = 0; y < Map::MaxY(); ++y) {
+		for (uint x = 0; x < Map::MaxX(); ++x) {
+			TileIndex tile = TileXY(x, y);
+			int n = TileHeight(tile), w = TileHeight(TileXY(x + 1, y));
+			int e = TileHeight(TileXY(x, y + 1)), s = TileHeight(TileXY(x + 1, y + 1));
+			if (abs(n - w) > 1 || abs(n - e) > 1 || abs(s - w) > 1 || abs(s - e) > 1)
+				return fail(fmt::format("Invalid terrain at ({}, {}): corners {}, {}, {}, {}", x, y, n, w, e, s));
+			Slope slope = GetTileSlope(tile);
+			Foundation foundation = _tile_type_procs[GetTileType(tile)]->get_foundation_proc(tile, slope);
+			if (foundation == Foundation::Invalid) {
+				const auto *region = PlanetManager::GetRegion(PlanetManager::GetTileWorld(tile));
+				return fail(fmt::format("Invalid foundation at ({}, {}): type {}, slope {}, tracks {}, corners {}/{}/{}/{}, world {} center {}/{}", x, y, GetTileType(tile), slope, IsPlainRailTile(tile) ? GetTrackBits(tile).base() : 0, n, w, e, s, region ? region->name : "none", region ? (region->min_x + region->max_x) / 2 : 0, region ? (region->min_y + region->max_y) / 2 : 0));
+			}
+		}
+	}
+
+	/* Exercise the same foundation and pixel-height queries used during drawing,
+	 * only after validating the complete field (including neighbouring tiles). */
+	for (uint y = 1; y < Map::MaxY(); ++y) {
+		for (uint x = 1; x < Map::MaxX(); ++x) {
+			TileIndex tile = TileXY(x, y);
+			(void)GetFoundationSpriteBlock(tile);
+			(void)GetSlopePixelZ(x * TILE_SIZE + 8, y * TILE_SIZE + 8, true);
+		}
+	}
+
+	return true;
+}
+
 bool PromptScenarioGenerator::VerifyCommonwealthUAT(std::string *error_msg)
 {
 	auto fail = [error_msg](std::string msg) {
 		if (error_msg != nullptr) *error_msg = std::move(msg);
 		return false;
 	};
+	if (!ValidateWorldGeometry(error_msg)) return false;
 
 	if (PlanetManager::Count() < 3) {
 		return fail(fmt::format("Expected >= 3 worlds, found {}", PlanetManager::Count()));

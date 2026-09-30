@@ -41,6 +41,8 @@
 #include "../portal/portal_cmd.h"
 #include "../signal_func.h"
 #include "../clear_map.h"
+#include "../rail_map.h"
+#include "../landscape.h"
 #include "../core/backup_type.hpp"
 #include <filesystem>
 
@@ -374,6 +376,59 @@ TEST_CASE("Prefab World Saves - Automation & UAT Verification (Sprint 50 Tooling
 		CHECK(charter_mgr.HasCharter(CompanyID{0}, "world_cressat"));
 		GateAccessResult with_charter = charter_mgr.CheckAndProcessAccess(CompanyID{0}, gate_tile, "world_cressat");
 		CHECK(with_charter.allowed);
+	}
+
+	SECTION("Organic terrain protects full terminal support and repairs only the legacy fixture")
+	{
+		auto result = PromptScenarioGenerator::GenerateCommonwealthPrefabWorld({}, 4);
+		REQUIRE(result.success);
+		std::string error;
+		REQUIRE(PromptScenarioGenerator::ValidateWorldGeometry(&error));
+		/* Exact switch from crash20260929233517, outside the old gate +/-2 mask. */
+		TileIndex switch_tile = TileXY(63, 103);
+		REQUIRE(IsPlainRailTile(switch_tile));
+		SetTileHeight(TileXY(63, 104), 1);
+		SetTileHeight(TileXY(64, 104), 1);
+		CHECK_FALSE(PromptScenarioGenerator::ValidateWorldGeometry(&error));
+		CHECK(error.find("Invalid foundation") != std::string::npos);
+		auto heights = [] {
+			std::vector<uint8_t> values;
+			for (TileIndex tile : Map::Iterate()) values.push_back(TileHeight(tile));
+			return values;
+		};
+		auto before = heights();
+		auto tracks = GetTrackBits(switch_tile);
+		auto money = Company::Get(CompanyID{0})->money;
+		SECTION("Recovery is complete and idempotent") {
+			REQUIRE(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
+			CHECK(PromptScenarioGenerator::ValidateWorldGeometry(&error));
+			CHECK(GetTrackBits(switch_tile) == tracks);
+			CHECK(Company::Get(CompanyID{0})->money == money);
+			auto repaired = heights();
+			CHECK(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
+			CHECK(heights() == repaired);
+		}
+		SECTION("Unrelated company is untouched") {
+			Company::Get(CompanyID{0})->name = "Other game";
+			CHECK(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
+			CHECK(heights() == before);
+		}
+		SECTION("Shared corner supporting new infrastructure refuses atomically") {
+			MakeRailNormal(TileXY(62, 104), CompanyID{0}, TrackBits{Track::X}, RAILTYPE_BEGIN);
+			CHECK_FALSE(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
+			CHECK(heights() == before);
+		}
+		SECTION("Live vehicle support refuses atomically") {
+			Train *train = *Train::Iterate().begin();
+			AutoRestoreBackup tile(train->tile, switch_tile);
+			CHECK_FALSE(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
+			CHECK(heights() == before);
+		}
+		SECTION("Edited terminal refuses atomically") {
+			SetTileOwner(switch_tile, CompanyID{0});
+			CHECK_FALSE(PromptScenarioGenerator::RepairLegacyOrganicUATTerrain());
+			CHECK(heights() == before);
+		}
 	}
 
 	std::filesystem::remove(test_save_path);

@@ -1,5 +1,31 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Organic UAT crash recovery — 30 September 2026
+
+`codex/fix-organic-uat-crashes` follows organic-layout PR #48 and incorporates
+merged tooltip fix PR #47. The organic generator now protects all shared corners
+of existing portal terminals, rather than only the small gate-head area. Whole-map
+terrain/foundation validation runs before fleets are spawned or a save is written.
+The recognized legacy four-world UAT can safely recover its neutral terminal
+terrain on load; the original published and crash saves are preserved.
+
+**TESTED:** 473 unit cases / 67,547 assertions; 486/486 CTests. Native save recovery,
+3/4/6-world generation, cold reload and SDL rendering smoke evidence are retained
+in [the audit](audit/2026-09-30/organic-uat-crash/README.md). Human graphical UAT is
+still Pending. Next: human retest of the original launch, then real route/delivery
+acceptance and bootstrap balance; this repair does not prove a profitable network.
+
+## Empty-tooltip crash repair — 29 September 2026
+
+**TESTED:** 473 unit cases / 67,508 assertions; 486/486 CTests.
+Human desktop retest remains Pending.
+
+The reported `crash20260929060130` abort occurs when a nonempty encoded tooltip
+resolves to zero-width text. Tooltip admission now rejects that text before
+multiline sizing. Prompt-generator, HQ, facilities and trade buttons use
+`STR_NULL` for absent help. Simulation and save formats are unchanged.
+[Verification and UAT](audit/2026-09-29/tooltip-crash/README.md).
+
 ## Organic UAT World Layouts & Realistic Civil Rail Infrastructure — 29 September 2026
 
 Delivery branch `feature/organic-uat-world-layouts`. Transforms the procedural UAT world
@@ -611,3 +637,8 @@ command replication and the 24-month resource economy acceptance. Human visual
 acceptance and economy balancing remain separate next steps.
 [Evidence](audit/2026-09-28/resource-economy/README.md).
 [Player flow and implementation](PLAYER_BUILT_RESOURCE_ECONOMY.md).
+
+## Agent workflow tooling — 30 September 2026
+
+Agent workflow tooling now shares compact rules and three skills between Codex and
+Antigravity. Game roadmap priorities are unchanged. [Setup and verification](AGENT_WORKFLOW.md).
