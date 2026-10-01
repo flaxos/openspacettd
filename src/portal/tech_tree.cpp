@@ -267,15 +267,17 @@ bool TechTreeManager::CanResearch(CompanyID company, TechID id, std::string &err
 	}
 
 	std::lock_guard<std::mutex> lock(_tech_mutex);
-	auto &state = _company_techs[company];
+	const auto it = _company_techs.find(company);
+	/* Eligibility and GUI inspection must not create a persistent company record. */
+	const CompanyTechState *state = it == _company_techs.end() ? nullptr : &it->second;
 
-	if (state.unlocked_techs.find(id) != state.unlocked_techs.end()) {
+	if (state != nullptr && state->unlocked_techs.contains(id)) {
 		err_msg = "Technology already researched.";
 		return false;
 	}
 
 	for (TechID prereq : node->prerequisites) {
-		if (state.unlocked_techs.find(prereq) == state.unlocked_techs.end()) {
+		if (state == nullptr || !state->unlocked_techs.contains(prereq)) {
 			const TechProjectNode *pnode = GetNode(prereq);
 			std::string pname = (pnode != nullptr) ? pnode->name : fmt::format("Tech {}", prereq);
 			err_msg = fmt::format("Prerequisite technology '{}' not yet researched.", pname);

@@ -85,6 +85,7 @@ add_test_files(
 # These editbox cases install a null video driver and must run in isolated
 # processes. Catch's default discovery excludes their hidden tag.
 foreach(case IN ITEMS
+    "HQ Tech Tree rendering leaves absent and existing research state unchanged"
     "Tooltips reject empty rendered text and preserve visible help"
     "Blueprint GUI captures a selected map rectangle and saves the chosen name"
     "Blueprint GUI exports the transformed selection and imports a real file"
@@ -96,6 +97,10 @@ foreach(case IN ITEMS
     string(MAKE_C_IDENTIFIER "${case}" case_name)
     add_test(NAME "${case_name}" COMMAND openttd_test "${case}")
     set_tests_properties("${case_name}" PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+    if(case STREQUAL "HQ Tech Tree rendering leaves absent and existing research state unchanged")
+        set_tests_properties("${case_name}" PROPERTIES ENVIRONMENT "OSTTD_TEST_BINARY=$<TARGET_FILE:openttd_test>"
+            LABELS "integration;requires-baseset")
+    endif()
 endforeach()
 
 add_test(NAME WP09_GUI_establishment_and_process_reload
@@ -110,4 +115,11 @@ find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
     add_test(NAME Stellar_directory_authentication_and_restart
         COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_stellar_directory.py")
+    if(UNIX)
+        add_test(NAME Megacity_designation_native_relay_and_reload
+            COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_command_authority_network.py"
+                "$<TARGET_FILE:openttd_test>" --megacity-designation)
+        set_tests_properties(Megacity_designation_native_relay_and_reload PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" TIMEOUT 90 LABELS "integration;command-authority")
+    endif()
 endif()

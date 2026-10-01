@@ -1,0 +1,371 @@
+{
+  "label": "ASSISTED FUNCTIONAL",
+  "status": "FAIL before first canonical state snapshot",
+  "human_uat": "Pending",
+  "ordinary_start_economic_proof": "NOT RUN",
+  "corrected_source_commit": "c99e7a1357af00284526de626676411f61afdb56",
+  "corrected_source_gate_provenance": {
+    "source_commit": "c99e7a1357af00284526de626676411f61afdb56",
+    "source_sha256": {
+      "scripts/test_command_authority_network.py": "b1982963aba357ae44963f5f15ec608a800ddf58e7ce89799910b56bd9eb56f1",
+      "scripts/test_integrated_economy.py": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "scripts/test_wp11_slice.py": "a8551d2514d9049e8bdf1cd40ac43ccbfa1d5a7c0acea70f17fa83a321fcb36c",
+      "src/command_type.h": "0700b747c39e58b521791f52d8d452775c3c6403a79b189d460d0eaf23dabf17",
+      "src/company_cmd.cpp": "2464e241bc3d3ffd22b675d87b4627524b981fb2c8298ab5e37a1a1c1cb698ef",
+      "src/economy.cpp": "678ad66f5ebf6db5f52fc1771fac8e9c58afe404e23d232c971211d66ff7af00",
+      "src/industry_cmd.cpp": "e3bfc53aad08376ffc136df7c082ea5ae760d7ac6b9c8ea09cfd4b8b4dc17b0c",
+      "src/portal/commonwealth_slice.h": "3c68cb04cb4ef3ede052d01d726dcf4d791847292ff05d60a65f5825033057b2",
+      "src/portal/connected_economy.cpp": "a49a0946afbff44f5d308d1d2ae44f472b15d3f70f4c5585cbd8c8106db42a6a",
+      "src/portal/connected_economy.h": "3bda3571fbdc444427d1f4fe02fdc4f261b20fd50d61d31dadf9d4847eeea83d",
+      "src/portal/integrated_economy.cpp": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+      "src/portal/megacity_gui.cpp": "8f53539b3dfc10e3ba0e3f4103b59b507c8d8131df4f6bbddc165984cc066d64",
+      "src/portal/megacity_manager.cpp": "8407fccce49965b46a136013d008a3415f7d262f6a2d10b5f46ebb84a2295f64",
+      "src/portal/portal_cmd.cpp": "bd9ea2564c3b04bd387a465ef337ea16d9a00c649299674f43dedf66bf778876",
+      "src/portal/portal_cmd.h": "9c7d460d7171f038d2e280ed15385dbe9dee0111fe9898109b17fed255a219e7",
+      "src/portal/stellar_network.cpp": "838eef97d726a71e53f2361a96ac91c876c5401c8b261ac8e2cfefac045d1886",
+      "src/portal/tech_tree.cpp": "f56ca6ec0019487b5974e452c4c7afb6f5dfde9d5190da3a80c80e3b25b7ce63",
+      "src/tests/CMakeLists.txt": "7c0374cd1b06eceae314de4aab06412130ab8b9f90758b40e53cc28f4dc72cb7",
+      "src/tests/test_command_authority.cpp": "b45f4c5f1bdded14310577c3e245aba594a3103d646170802b3b05a9bd880604",
+      "src/tests/test_command_authority_network.cpp": "0ea2123a0a873bd2280e4fdb1231b58084fee17fa2f602288804c59f83f9877c",
+      "src/tests/test_integrated_town_generation.cpp": "e3f9bd95964bd1b9b7c14010009267ebfacb73013fa36787b061963a037262c4",
+      "src/tests/test_megacity_gui.cpp": "6cab6a8b9174517e019110e626736e21b0329d1b16b8477d861aa6d9689836fd",
+      "src/train_cmd.cpp": "37d60805bee9686b28dc37865c157d54e8138aefea225c97c7074cf6b8e86a07",
+      "src/vehicle.cpp": "6369eac925381e763ef8d41bfa73694de5ef8ab265d3e9d074dc4fd952384055"
+    },
+    "gated_binary_sha256": "d2367bbdd0c646e11c14bf5df744c4e650be69c82490e88ebbdcdf19f5f6c3b7",
+    "gated_test_binary_sha256": "9b98a20a310e7b3f1e76432cbcd41f76040b747edf6a9942a219837e7b4e0348",
+    "revision_at_full_gates": "modified6e9e09bf1c; executable source content identical to c99e7a1357"
+  },
+  "delivery_binary_sha256": "d01e8a3c6d5ed4cf884d5e96bac3728b4e363a543f282447ffd636d831b2c4de",
+  "delivery_test_binary_sha256": "480c98423110e7f9c5fb891ab60d9e625a5d5eb8cc6f5e175922bd758539bff6",
+  "build_scope": "Full gates on exact corrected executable source; subsequent clean-source build changes revision metadata only. No further native campaign.",
+  "failed_recovery_inputs": {
+    "binary_sha256": "02080e936fa55a19cbce9518d2689e7cc5f8183bd547e8933b8a10f564276e14",
+    "source_commit": "6e9e09bf1c89dce67b7007c5db7be070323c3c9f",
+    "source_dirty": false,
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_files_sha256": {
+      "src/genworld.cpp": "495eba75efeddf1f29518ff3f7327b7622bb71044fabd0842f4aaa45820c89c7",
+      "src/misc.cpp": "8716381a71656ea61979804222efcab160de5d0b11ec163fa4bb73e80d65a115",
+      "src/town_cmd.cpp": "cecdfef71abb2f8801f329543052f639307381300d397c63f63641c39712ce48",
+      "src/town_cmd.h": "d0f22f4dfcc1d8032af2542c5faab98237751e176efbb782c40bb5fe56d0ac3a",
+      "src/portal/world_gen.cpp": "50359a27ee6cf9f5de999b00043c54a0e341c7009663d39e4bd15b798940dbff",
+      "src/portal/world_gen.h": "ea044722b9d51a24523e77ec838dbfd29f3b10f8619d53fae3686ffa6a72fa66",
+      "src/portal/portal_terminal.cpp": "428ada48d763016635c395e5f65907c8df069246f5fb9ce59215e118c94694eb",
+      "src/portal/connected_economy.cpp": "5d87e8009ddc269bfa4d28a93e23302da44acf505467dd22835349063bcc982c",
+      "src/portal/connected_economy.h": "29f1638514786a3654c5cce7ecc15757ba8a5ce43570814d8776f662a0d43aec",
+      "src/portal/integrated_economy.cpp": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+      "scripts/test_integrated_economy.py": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "scripts/test_wp11_slice.py": "f7e344bb63bdb7e224aa62430be480b0d7a02cf082816029c5323de2005c0139",
+      "demo/integrated_economy.cfg": "1cd6e04309b2a49ce8ce20777e20adbbc15d9bebcb54e5528c3ed77d037f7430"
+    },
+    "pack_sha256": {
+      "integrated_v1": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+      "rail_v3": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+      "equipment_v1": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+    },
+    "changed_source_sha256": {}
+  },
+  "original_custody": {
+    "manifest_sha256": "ea3fed3c12992c1e8a39b5b2c39baa6ba919474219980b53ed7efc589c43313e",
+    "archive_sha256": "c7ad60f085c3d8aa83874cd521c43027d699ab3c560b17e9d57d82e434c28c43",
+    "failed_evidence_sha256": "f8b490f7e4de124f46461e2b224a5c338d6e2a90992572825e446ef2102f979a",
+    "generation_archive_sha256": "8447c671a8f567deb60e50d87c171e8dfd25400df32587edf32d9fa69136022c",
+    "original_bytes_preserved": true
+  },
+  "ancestry": {
+    "checked_before_branch_and_delivery": true,
+    "main": "91846666f69929443eab04cea63f9f8cfb3bb0be",
+    "base_branch": "codex/generation-money-comparison",
+    "base_sha": "d1bb617664dcbb122aaefc1d4175c34ae1a17e2e",
+    "pr66_open_unmerged": true,
+    "pr67_reviewed_head": "2c5e27125cd7f2e92171d7c203760c74d258442e",
+    "pr67_normal_cherry_pick": "876f2e855c85fc7e771c3610aaac17442b30d37f",
+    "active_plan_byte_identical": true,
+    "public_history_rewritten": false,
+    "merged_by_task": false,
+    "latest_live_main": "85c423b4a2dd57e5a2c2cf1f6d29bc2e4667845d",
+    "main_at_implementation_branch": "91846666f69929443eab04cea63f9f8cfb3bb0be",
+    "reviewed_pr67_owner_merged": true,
+    "reviewed_pr67_owner_merge_utc": "2026-09-30T23:15:49Z",
+    "latest_main_contains_pr66": false,
+    "latest_main_is_implementation_ancestor": false,
+    "original_main_is_implementation_ancestor": true,
+    "dependency_base_still_pr66": true
+  },
+  "recovery": {
+    "status": "FAIL",
+    "authorization": "Explicit parent recovery handoff: one canonical startup confirmation",
+    "previous_evidence": "/workspace/openspacettd/build/agent-logs/functional-core-primary/evidence.json",
+    "previous_evidence_sha256": "f8b490f7e4de124f46461e2b224a5c338d6e2a90992572825e446ef2102f979a",
+    "original_error": "Timed out waiting for FUNCTIONAL_OFFLINE_START",
+    "original_campaign_start_utc": "2026-09-30T22:24:44+00:00",
+    "prior_startup_wall_seconds": 52.0,
+    "prior_advance_counts": {
+      "initial": 0,
+      "cold": 0
+    },
+    "prior_assistance": 0,
+    "prior_candidates": 0,
+    "prior_native_gross_debits": 0,
+    "prior_startup_attempts": 1,
+    "recovery_startup_attempts": 1,
+    "whole_wall_seconds_already_elapsed": 4067.384585,
+    "original_whole_deadline_utc": "2026-10-01T02:24:44+00:00",
+    "preflight_remaining_seconds": 1748.0,
+    "stopped_interval_scope": "Infrastructure diagnosis/repair; separate from active generation/preflight use; absolute whole deadline retained",
+    "error": "Engine exited while waiting for CONNECTED functional-state ; see log",
+    "console_start_marker": "PASS",
+    "console_ready_marker": "PASS",
+    "first_pristine_snapshot": "FAIL",
+    "raw_primary_error": "Engine exited while waiting for CONNECTED functional-state ; see log",
+    "raw_secondary_teardown_error": "[Errno 32] Broken pipe",
+    "diagnostic_crash_save": "campaign/primary/crash20260930233242.sav",
+    "crash_save_is_proof_checkpoint": false,
+    "active_recovery_startup_seconds_observed": 11.416670560836792,
+    "active_recovery_startup_seconds_carried_conservatively": 12,
+    "total_active_preflight_seconds_for_next_handoff": 64,
+    "total_startup_attempts_consumed": 2,
+    "further_campaign": "NOT RUN; explicit new handoff required"
+  },
+  "assistance": {
+    "approved_total_virtual_gbp": 6000000,
+    "grant_commands_issued": 0,
+    "applied_across_both_attempts_gbp": 0,
+    "remaining_virtual_allowance_gbp": 6000000,
+    "native_transactions": [],
+    "recorded_native_receipts_excluding_assistance": 0,
+    "recorded_native_gross_debits": 0,
+    "observed_ending_cash": null,
+    "observed_ending_debt": null,
+    "complete_financial_reconciliation": "NOT RUN",
+    "real_money_transaction": false
+  },
+  "bounds": {
+    "seed": 11,
+    "full_chain_candidates_cap": 2,
+    "candidates_checked": 0,
+    "station_candidates_per_call": 16,
+    "predecessor_states_per_call": 30000,
+    "bridge_span_per_call": 16,
+    "pre_hq_gross_cap_gbp": 1000000,
+    "reserve_before_receipts_gbp": 5100000,
+    "all_phase_gross_cap_gbp": 4000000,
+    "preflight_setup_initial_cold_phase_wall_seconds": 1800,
+    "advances_per_initial_or_shared_cold_phase": 240,
+    "ticks_per_advance": 2048,
+    "initial_advances_requested": 0,
+    "cold_advances_requested": 0,
+    "whole_campaign_wall_seconds": 14400,
+    "protocol_startup_ack_seconds": 45,
+    "campaign_retry_performed": true,
+    "authorized_startup_recovery_count": 1,
+    "gameplay_campaign_attempts": 0,
+    "whole_deadline_utc": "2026-10-01T02:24:44+00:00",
+    "search_spending_advances_reset": false
+  },
+  "mission": {
+    "canonical_console_handshake": "PASS",
+    "first_state_query": "FAIL",
+    "pristine_audit": "NOT RUN",
+    "preflight": "NOT RUN",
+    "setup": "NOT RUN",
+    "grain_food_core_consumption": "NOT RUN",
+    "negative_control": "NOT RUN",
+    "paid_hq_materials_i_ii_eligibility": "NOT RUN",
+    "cold_before": "NOT RUN",
+    "cold_after_continuation": "NOT RUN",
+    "repeatability": "NOT RUN; second funded replay exceeds explicit one-total allowance"
+  },
+  "gates": {
+    "source_rebuild": "PASS",
+    "native_ownerless_regression": "PASS; 1 case / 10 assertions",
+    "synthetic_broken_pipe_teardown": "PASS",
+    "full_catch": "PASS; 496 cases / 306282 assertions; exit0",
+    "ctest": "PASS; 511/511; exit0",
+    "file_descriptions": "PASS; exit0",
+    "unused_strings": "PASS; exit0",
+    "script_mode": "PASS; exit0",
+    "python_compile": "PASS; exit0",
+    "diff_check": "PASS; exit0",
+    "official_commit_check_through_corrected_source": "PASS; eight commits; exit0",
+    "corrected_canonical_campaign": "NOT RUN",
+    "independent_source_review": "Astra maximum CLEAR for draft partial delivery: corrected source, records and all37regulararchive members; no correction required",
+    "final_exact_head_ci": "See PR68 final exact-head publication/checks; separate from failed canonical gameplay and local gates",
+    "local_delivery_links": "PASS; 258local links/anchors"
+  },
+  "prior_remote_ci": {
+    "514c19fe8fb3e6c4e16a239538631507355c61f6": "PASS after one unchanged Mac Release rerun; first Blueprint directory assertion retained, cause unconfirmed",
+    "initial_docs_failure": "f3aafa7c09:13 comments warnings; retained and corrected",
+    "original_mac_failure_url": "https://github.com/flaxos/openspacettd/actions/runs/36787936957/job/110134123040",
+    "successful_mac_rerun_url": "https://github.com/flaxos/openspacettd/actions/runs/36787936957/job/110140709634"
+  },
+  "recovery_archive": {
+    "path": "recovery-proof.tar.gz",
+    "bytes": 472799,
+    "sha256": "5c2f0ae65ccb561476a92ee14e131723c663511927ff43561604a8383880df0a",
+    "regular_members": 37
+  },
+  "archive_members": {
+    "campaign/evidence.json": {
+      "bytes": 4751,
+      "sha256": "8c52d4ef438fbfeb55846fd01986a4df721e9a37410305c416179435c39a5fb3"
+    },
+    "campaign/primary/crash20260930233242.json.log": {
+      "bytes": 9715,
+      "sha256": "05a7c9143b101861c8a5cf175cf4f71a164acf02d59b15ac59f7cb3b36f5859c"
+    },
+    "campaign/primary/crash20260930233242.png": {
+      "bytes": 45309,
+      "sha256": "6ac975d27bbdcb88f9cc1e0ea151680f32a96e7592c79ee89ce0c6deafa97497"
+    },
+    "campaign/primary/crash20260930233242.sav": {
+      "bytes": 126892,
+      "sha256": "8ac8ff33c0154ab011701b35fa1f5eee1c3ed14b21f453bc9b875e40a56794d5"
+    },
+    "campaign/primary/fresh-commands.scr": {
+      "bytes": 279,
+      "sha256": "b461c935784ed1c10f7457e7ef07c4103134d78a6d239b2845f0157678ddd695"
+    },
+    "campaign/primary/fresh-native.log": {
+      "bytes": 348,
+      "sha256": "e814327fb7776f5549ae63351d255a3590c5cc0ee892e1e501d9f2d7a6fdc9b1"
+    },
+    "campaign/primary/fresh-stdout.log": {
+      "bytes": 4230,
+      "sha256": "b0d7a620a638af958db2253dd5d7db8d4a126fbf18c7eda269c1fad374223e87"
+    },
+    "campaign/primary/fresh.log": {
+      "bytes": 348,
+      "sha256": "e814327fb7776f5549ae63351d255a3590c5cc0ee892e1e501d9f2d7a6fdc9b1"
+    },
+    "campaign/primary/functional.cfg": {
+      "bytes": 1744,
+      "sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009"
+    },
+    "campaign/primary/scripts/game_start.scr": {
+      "bytes": 260,
+      "sha256": "fe01b60925426ffe615419b95691650b21f2959bc8e723aa241c4a8b90ac3567"
+    },
+    "logs/functional-broken-pipe-regression.log": {
+      "bytes": 99,
+      "sha256": "df5f1ac76ce143c8d9f9eeb3f34fdd9b3dc388db7ae0780aa204c3d0e6ed4bb4"
+    },
+    "logs/functional-ci-attempt1.json": {
+      "bytes": 23075,
+      "sha256": "7b0d9dbf229aa62b3d9cbc956f9ca9f9694a94bc5a1723e4972bf006c0d7680e"
+    },
+    "logs/functional-ownerless-committed-rebuild.log": {
+      "bytes": 823,
+      "sha256": "b868296f16f7050076db65c87232a8ec47d77a383156827213c7faaf05d2b282"
+    },
+    "logs/functional-ownerless-corrected-rebuild.log": {
+      "bytes": 852,
+      "sha256": "1a756ba0070e403379bd9ac50ac33769ab90b3bbfa9f4822e5a7f0a9b697ddc3"
+    },
+    "logs/functional-ownerless-corrected-regression.log": {
+      "bytes": 209,
+      "sha256": "76105b5e498402601b1bdc82d596d1313fd1f579c59fd065c04b538e77c489cf"
+    },
+    "logs/functional-ownerless-file-descriptions.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-ownerless-final-catch.log": {
+      "bytes": 7010,
+      "sha256": "41c8c997b9c327e029b17a0705f6e77e5068d18c7c80c121a69cc128161a1491"
+    },
+    "logs/functional-ownerless-final-ctest.log": {
+      "bytes": 128327,
+      "sha256": "45ac55ecad94db17c8c7b43f0a9e3f5266252274b98bf742499268617846e907"
+    },
+    "logs/functional-ownerless-final-rebuild.log": {
+      "bytes": 815,
+      "sha256": "05dcd0f65686db78cbaa0ed150f2d2d65a3c74301c8a61d325ae9b77637f0ecb"
+    },
+    "logs/functional-ownerless-gate-provenance.json": {
+      "bytes": 2878,
+      "sha256": "1535346dce40b1a6c6e1ead25ebef651b557a54bf4dc0e0fce47ae0ad9eb9e82"
+    },
+    "logs/functional-ownerless-rebuild.log": {
+      "bytes": 3933,
+      "sha256": "05b5fd53ec3a48b631b7e01e54215e6a56ef24078f3039de51706e044c1021e9"
+    },
+    "logs/functional-ownerless-regression.log": {
+      "bytes": 927,
+      "sha256": "0f1d56df2cd986754cffb059205f86d87a2dd0f9a778b1a71a168a74df75442a"
+    },
+    "logs/functional-ownerless-script-mode.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-ownerless-unused-strings.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-recovery-campaign.log": {
+      "bytes": 1913,
+      "sha256": "92464ad40b8347cc99fd706a493f50686251ebc9857b5543dc8260bcc1de17a0"
+    },
+    "logs/functional-recovery-commit-check.log": {
+      "bytes": 642,
+      "sha256": "1144c65374566ea98c3616939c3457ff3dab9a74c2618eea6e829c21ccefea4f"
+    },
+    "logs/functional-recovery-exact-rebuild.log": {
+      "bytes": 823,
+      "sha256": "57113a2405fbf55465597c2d14171c7ba8838be325e26348a2d93fcb451ef8af"
+    },
+    "logs/functional-recovery-final-catch.log": {
+      "bytes": 7010,
+      "sha256": "20ac199bfc5ea1de420d94c2ababdb14a43e1b29cef238e85131bc97a45c8dc0"
+    },
+    "logs/functional-recovery-final-ctest.log": {
+      "bytes": 128067,
+      "sha256": "61c2b4c3645511255a3ed2dfe6a39367819ae655322ef2aea7d92b6bfb975a37"
+    },
+    "logs/functional-recovery-frozen-rebuild.log": {
+      "bytes": 823,
+      "sha256": "7ff51d9564888236b9fe87976e7a105a208b060d64ebe0f78865b85b9ace0ce7"
+    },
+    "logs/functional-recovery-independent-source-review.txt": {
+      "bytes": 783,
+      "sha256": "0d91a8880df8aeffc7638c5d7a266f80852e27a7cefd52e123a0fbef15eeb1d3"
+    },
+    "logs/functional-recovery-python-guards.log": {
+      "bytes": 58,
+      "sha256": "e103d083e6601b9fc87acd61a94f6562bfa93abf9ba574dec4ca236a3a85b316"
+    },
+    "logs/functional-recovery-rebuild.log": {
+      "bytes": 911,
+      "sha256": "0616094672568bbf47a92e63c4c255560ac99744fb9b0b8ac721da276ce98b91"
+    },
+    "logs/functional-recovery-root-cause.txt": {
+      "bytes": 1369,
+      "sha256": "73d46b51c10a67a48a479376ae5a731ce4da3f1390fb7aed348774067baf6ade"
+    },
+    "logs/functional-recovery-source-repair.patch": {
+      "bytes": 6851,
+      "sha256": "1631a58fab170a3a3517ff00e388eb6b85f7396e7f059da2a71cfeff36b25ee8"
+    },
+    "logs/functional-remote-docs-failure-f3aafa7c09.log": {
+      "bytes": 1740868,
+      "sha256": "d2dc6478c8b3ca1683149f5167aaee5fd4e81645a25ad84f3a7d3475282b4188"
+    },
+    "logs/functional-remote-mac-release-failure-514c19fe8f.log": {
+      "bytes": 346585,
+      "sha256": "3c89a254c6ce9a87d3a25ea310f0343af7fd78b71600b02903ccaa1fdc3f8ccf"
+    }
+  },
+  "recorded_at_utc": "2026-09-30T23:42:46.803275+00:00",
+  "independent_final_review": {
+    "reviewer": "Astra maximum",
+    "result": "CLEAR for draft partial delivery",
+    "corrected_source_commit": "c99e7a1357af00284526de626676411f61afdb56",
+    "archive_sha256": "5c2f0ae65ccb561476a92ee14e131723c663511927ff43561604a8383880df0a",
+    "regular_members_verified": 37,
+    "original_custody_verified": true,
+    "head_publication_ci": "Separate delivery checks",
+    "human_acceptance": "Pending",
+    "functional_outcome": "FAIL"
+  }
+}

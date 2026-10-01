@@ -1,6 +1,109 @@
 # OpenSpaceTTD Known Limitations
 
+## First Functional Core Supply after repaired continuation — 1 October 2026
+
+The requested ASSISTED FUNCTIONAL outcome now passes across recorded authorized
+handoffs, including exact same-funded cold equality, another paid FOOD visit and
+consuming month. Complete reviewed acceptance remains PARTIAL: fresh repeatability
+NOT RUN, ordinary-start affordability/pacing unproven and human UAT Pending.
+Consumption used carried inventory before the later105FOOD delivery; that delivery's
+subsequent use and uninterrupted supply were not observed. Final reserves120,
+growth0/passengers0.5, latest monthly consumptionempty. Train running charges remain
+the inherited£0 setting. [Exact scope and owner mission](audit/2026-10-01/functional-core/README.md#delivery-and-practical-owner-playtest).
+
+The sole£6m allowance remains exhausted; no new grant/loan/replay occurred. Campaign
+stopped after24/240cold advances at01:34:25UTC before unchanged01:39:59UTC deadline.
+Unused ticks/gross headroom do not authorize another campaign or next slice.
+Corrected source/local gates and Astra review pass; exact-head CI retains the
+published5d `Docs:` commit-format failure, whose repair would rewrite prohibited
+public history. Draft PR68 stays stacked on PR66; no gate waiver, merge, milestone
+acceptance or human build UAT follows. Historical failures/archives below remain.
+
+## First Functional Core Supply second-cold boundary — 1 October 2026
+
+Third handoff passes initial generated FOOD, interruption/recovery and paidHQ/I/II
+eligibility, but FAILS second cold equality solely on integrated growth0→1. The
+existing-state restoration repair passes source review and focused/full gates;
+canonical corrected continuation remains NOT RUN. No complete functional milestone
+or human acceptance is claimed. [Failure, repair and continuation bounds](audit/2026-10-01/functional-core/README.md#prepared-continuation-boundary--not-executed).
+
+The ONE£6m virtual allowance is exhausted. Same-checkpoint confirmation needs a
+new explicit handoff, carries239coldadvances/£1,237,653gross headroom and the original
+cold-phase stop conservatively01:39:59UTC, plus absolute02:24:44UTC; no reset/fresh
+funded campaign is permitted. Prebuilt observation does not establish manual build
+UAT; ordinary-start affordability, inherited zero train running charges, wider seed
+coverage, repeatability and balance remain separate. Historical stops below remain
+preserved with superseded active next actions. Human Pending, draft stacked on PR66.
+
+## First Functional Core Supply recovery boundary — 1 October 2026
+
+Canonical console readiness now has direct evidence, but the sole authorized
+recovery crashed at its first state query on forbidden Void/House/Industry owner
+reads. The narrow map-observer/teardown repair passes native/synthetic regressions
+and full gates; canonical progression after that repair is NOT RUN. £0 assistance
+was applied across both attempts. Ending finances are unobserved and the crash
+save is diagnostic, not a pristine or usable mission save.
+
+The explicit one-recovery handoff is consumed; another canonical startup requires
+a new handoff carrying both failures' usage and the original absolute deadline.
+One total £6m allowance prevents a second funded replay, so repeatability remains
+NOT RUN. No verified coordinates, food consumption, paid HQ/research unlock or
+cold continuation exists. Human acceptance Pending; economics and balance remain
+separate. Executor command/read access succeeds.
+[Preserved evidence and smallest next action](audit/2026-10-01/functional-core/README.md#current-recovery-evidence-and-smallest-next-action).
+The earlier entry below describes the original startup failure.
+
+## First Functional Core Supply execution limit — 1 October 2026
+
+The current draft repairs replicated designation and query-state mutation, but
+the sole ASSISTED FUNCTIONAL campaign failed waiting for offline startup before
+any grant or state capture. All route/flow/financial/control/research/cold/replay
+proof remains NOT RUN; no verified construction coordinates or observation save
+exist. Assistance issued is £0 and ending cash/debt are unobserved. The log-framing
+and split-line repair has focused transport evidence only. The reviewed plan's
+first-stop rule requires a new explicit handoff for another full campaign.
+[Full evidence and bounded choices](audit/2026-10-01/functional-core/README.md).
+
+Fixture GUI rendering and three-process native queue relay do not establish human
+usability or a full multiplayer playtest. Human UAT remains Pending. The inherited
+zero CST input running cost is unchanged; ordinary economics, the revised A1 loss
+and broader pacing/balance remain separate. The draft depends on unmerged PR66.
+
+## Functional-first acceptance boundaries — 1 October 2026
+
+Current priority follows the owner's [functional-first approval](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026).
+Older finance-related active blockers below are historical. Cash losses remain
+economic evidence; they no longer block accepting an independently proven
+generation contract or proposing a labelled functional mission.
+
+- PR65 is merged in main `91846666f6`; its T+C+D+S native proof stands separately
+  from revised A1 finances. Portability is still a delivery issue owned by
+  [PR66](https://github.com/flaxos/openspacettd/pull/66), not waived by this replan.
+- Revised seed11 ends at −£170 cash/£190k debt after two further loads, £14,007
+  revenue and £23,929 charges. Revised seed101/2026 operation remains NOT RUN.
+  Neither assisted cash nor positive final balance can turn that into a pass.
+- The [next functional proposal](ACTIVE_EXECUTION_PLAN.md) is NOT RUN: actual
+  FOOD consumption, player command designation, HQ/research and cold continuation
+  from its fresh start are unproven. PR62 partial code is still outside main.
+- Independent source review also found that `CanResearch` inserts default research
+  state during eligibility queries/GUI inspection; its invalid company ID is
+  dropped on load. The next slice explicitly includes a narrow read-only query
+  repair and atomicity regressions. Cash assistance or pre-seeded state cannot
+  mask this command/save-integrity defect.
+- Its one proposed £6m cash grant preserves costs and native commands; it supplies
+  HQ eligibility rather than proving earned income. FOOD does not cause the tech
+  unlock. No cargo/RP/material/tech grants, authored receiver or rule changes are
+  authorized. MoneyCheat is offline-only; dedicated proof needs labelled offline
+  setup and guarded continuation, never a command-flag bypass.
+- Human manual build/play acceptance remains Pending. Food alone sustains without
+  growth; Materials I availability is not earned A2 expansion. Exact profitability,
+  ordinary HQ affordability, waiting times and broader seed viability await a
+  separate bounded economic/balance pass. No new economic tuning is approved.
+
 ## New integrated-game generation and revised A1 — 1 October 2026
+
+> Historical generation delivery record. Current acceptance boundaries above
+> supersede its requirement for a financial replan before any functional work.
 
 Future ordinary integrated games enforce clear/legal public joining geometry and
 one living Core town with its own same-world house. Native terrain, configured

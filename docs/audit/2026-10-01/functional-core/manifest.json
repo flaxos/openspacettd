@@ -1,0 +1,348 @@
+{
+  "label": "ASSISTED FUNCTIONAL",
+  "status": "FAIL at offline startup",
+  "human_uat": "Pending",
+  "source_commit": "7bb7587d5922b77de37ae4a4244b7b15905f3d1f",
+  "failed_campaign_source": {
+    "binary_sha256": "95af2a86c0ea5adc4979260566fecc37f34209f8e8c074758484531e8ef1347b",
+    "source_commit": "d7a3a12006efb0e890a3020849eccb12be0aeac1",
+    "source_dirty": false,
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_files_sha256": {
+      "src/genworld.cpp": "495eba75efeddf1f29518ff3f7327b7622bb71044fabd0842f4aaa45820c89c7",
+      "src/misc.cpp": "8716381a71656ea61979804222efcab160de5d0b11ec163fa4bb73e80d65a115",
+      "src/town_cmd.cpp": "cecdfef71abb2f8801f329543052f639307381300d397c63f63641c39712ce48",
+      "src/town_cmd.h": "d0f22f4dfcc1d8032af2542c5faab98237751e176efbb782c40bb5fe56d0ac3a",
+      "src/portal/world_gen.cpp": "50359a27ee6cf9f5de999b00043c54a0e341c7009663d39e4bd15b798940dbff",
+      "src/portal/world_gen.h": "ea044722b9d51a24523e77ec838dbfd29f3b10f8619d53fae3686ffa6a72fa66",
+      "src/portal/portal_terminal.cpp": "428ada48d763016635c395e5f65907c8df069246f5fb9ce59215e118c94694eb",
+      "src/portal/connected_economy.cpp": "03c92337bc05c0a11a420f21737e105395a23bb19799b2fe1f8acb002449d1d8",
+      "src/portal/connected_economy.h": "29f1638514786a3654c5cce7ecc15757ba8a5ce43570814d8776f662a0d43aec",
+      "src/portal/integrated_economy.cpp": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+      "scripts/test_integrated_economy.py": "1dc1f0ea7b7050815c743f98e291468db0f04fb64d8385b9f9e195c4d217a648",
+      "scripts/test_wp11_slice.py": "de321d191a82e5a8f8654ea907358619bfeb03596b04d6d7d58fc154cdafb4c1",
+      "demo/integrated_economy.cfg": "1cd6e04309b2a49ce8ce20777e20adbbc15d9bebcb54e5528c3ed77d037f7430"
+    },
+    "pack_sha256": {
+      "integrated_v1": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+      "rail_v3": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+      "equipment_v1": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+    },
+    "changed_source_sha256": {}
+  },
+  "delivery_binary_sha256": "f901197df1195c8613e70e4afec287b4292e7e24d95cffbccec4673bc1d15988",
+  "delivery_test_binary_sha256": "23567788a0905e9da99a0d83a673af82f6f7991c9a64f201ac4e3693212fce8f",
+  "source_sha256": {
+    "scripts/test_command_authority_network.py": "b1982963aba357ae44963f5f15ec608a800ddf58e7ce89799910b56bd9eb56f1",
+    "scripts/test_integrated_economy.py": "1dc1f0ea7b7050815c743f98e291468db0f04fb64d8385b9f9e195c4d217a648",
+    "scripts/test_wp11_slice.py": "9ffcad84fa7f965ba0d141a8389c9b8d2d7fcf2e6e931fd929b334739dfb6c6a",
+    "src/command_type.h": "0700b747c39e58b521791f52d8d452775c3c6403a79b189d460d0eaf23dabf17",
+    "src/company_cmd.cpp": "2464e241bc3d3ffd22b675d87b4627524b981fb2c8298ab5e37a1a1c1cb698ef",
+    "src/economy.cpp": "678ad66f5ebf6db5f52fc1771fac8e9c58afe404e23d232c971211d66ff7af00",
+    "src/industry_cmd.cpp": "e3bfc53aad08376ffc136df7c082ea5ae760d7ac6b9c8ea09cfd4b8b4dc17b0c",
+    "src/portal/commonwealth_slice.h": "3c68cb04cb4ef3ede052d01d726dcf4d791847292ff05d60a65f5825033057b2",
+    "src/portal/connected_economy.cpp": "03c92337bc05c0a11a420f21737e105395a23bb19799b2fe1f8acb002449d1d8",
+    "src/portal/integrated_economy.cpp": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+    "src/portal/megacity_gui.cpp": "8f53539b3dfc10e3ba0e3f4103b59b507c8d8131df4f6bbddc165984cc066d64",
+    "src/portal/megacity_manager.cpp": "8407fccce49965b46a136013d008a3415f7d262f6a2d10b5f46ebb84a2295f64",
+    "src/portal/portal_cmd.cpp": "bd9ea2564c3b04bd387a465ef337ea16d9a00c649299674f43dedf66bf778876",
+    "src/portal/portal_cmd.h": "9c7d460d7171f038d2e280ed15385dbe9dee0111fe9898109b17fed255a219e7",
+    "src/portal/stellar_network.cpp": "838eef97d726a71e53f2361a96ac91c876c5401c8b261ac8e2cfefac045d1886",
+    "src/portal/tech_tree.cpp": "f56ca6ec0019487b5974e452c4c7afb6f5dfde9d5190da3a80c80e3b25b7ce63",
+    "src/tests/CMakeLists.txt": "7c0374cd1b06eceae314de4aab06412130ab8b9f90758b40e53cc28f4dc72cb7",
+    "src/tests/test_command_authority.cpp": "b45f4c5f1bdded14310577c3e245aba594a3103d646170802b3b05a9bd880604",
+    "src/tests/test_command_authority_network.cpp": "0ea2123a0a873bd2280e4fdb1231b58084fee17fa2f602288804c59f83f9877c",
+    "src/tests/test_megacity_gui.cpp": "6cab6a8b9174517e019110e626736e21b0329d1b16b8477d861aa6d9689836fd",
+    "src/train_cmd.cpp": "37d60805bee9686b28dc37865c157d54e8138aefea225c97c7074cf6b8e86a07",
+    "src/vehicle.cpp": "6369eac925381e763ef8d41bfa73694de5ef8ab265d3e9d074dc4fd952384055"
+  },
+  "source_sha256_scope": "Frozen source_commit used by the retained local gates and binaries",
+  "documentation_followup": {
+    "first_remote_docs_failure_head": "f3aafa7c09eee0be92268d6a8e7d7ccca6c5617f",
+    "first_remote_docs_failure_url": "https://github.com/flaxos/openspacettd/actions/runs/36787553350/job/110132491417",
+    "introduced_documentation_warnings": 13,
+    "changed_file": "src/portal/connected_economy.cpp",
+    "commented_source_sha256": "5d87e8009ddc269bfa4d28a93e23302da44acf505467dd22835349063bcc982c",
+    "executable_tokens_unchanged": true,
+    "local_engine_rebuild_or_full_suite_repeat": "NOT RUN: comment/documentation-only follow-up",
+    "final_exact_head_remote_ci": "See draft PR68 exact-head delivery report"
+  },
+  "ancestry": {
+    "checked_before_branch_and_delivery": true,
+    "main": "91846666f69929443eab04cea63f9f8cfb3bb0be",
+    "base_branch": "codex/generation-money-comparison",
+    "base_sha": "d1bb617664dcbb122aaefc1d4175c34ae1a17e2e",
+    "pr66_open_unmerged": true,
+    "pr67_reviewed_head": "2c5e27125cd7f2e92171d7c203760c74d258442e",
+    "pr67_normal_cherry_pick": "876f2e855c85fc7e771c3610aaac17442b30d37f",
+    "active_plan_byte_identical": true,
+    "public_history_rewritten": false,
+    "merged_by_task": false
+  },
+  "assistance": {
+    "approved_virtual_gbp": 6000000,
+    "commands_issued": 0,
+    "applied_virtual_gbp": 0,
+    "real_money_transaction": false,
+    "recorded_native_transactions": [],
+    "observed_ending_cash": null,
+    "observed_ending_debt": null,
+    "complete_financial_reconciliation": "NOT RUN"
+  },
+  "bounds": {
+    "seed": 11,
+    "full_chain_candidates_cap": 2,
+    "candidates_checked": 0,
+    "station_candidates_per_call": 16,
+    "predecessor_states_per_call": 30000,
+    "bridge_span_per_call": 16,
+    "pre_hq_gross_cap_gbp": 1000000,
+    "reserve_before_receipts_gbp": 5100000,
+    "all_phase_gross_cap_gbp": 4000000,
+    "preflight_setup_initial_cold_phase_wall_seconds": 1800,
+    "advances_per_initial_or_shared_cold_phase": 240,
+    "ticks_per_advance": 2048,
+    "initial_advances_requested": 0,
+    "cold_advances_requested": 0,
+    "whole_campaign_wall_seconds": 14400,
+    "protocol_startup_ack_seconds": 45,
+    "campaign_retry_performed": false
+  },
+  "mission": {
+    "preflight": "NOT RUN",
+    "setup": "NOT RUN",
+    "grain_processing_food_consumption": "NOT RUN",
+    "negative_control": "NOT RUN",
+    "hq_research": "NOT RUN",
+    "cold_before": "NOT RUN",
+    "cold_after": "NOT RUN",
+    "independent_replay": "NOT RUN",
+    "ordinary_start_quote": "NOT RUN",
+    "ordinary_start_economic_proof": "NOT RUN"
+  },
+  "gates": {
+    "source_commit": "7bb7587d5922b77de37ae4a4244b7b15905f3d1f",
+    "build": {
+      "result": "PASS",
+      "exit_code": 0
+    },
+    "catch": {
+      "result": "PASS",
+      "exit_code": 0,
+      "cases": 495,
+      "assertions": 306272,
+      "log": "logs/functional-catch-delivery.log"
+    },
+    "ctest": {
+      "result": "PASS",
+      "exit_code": 0,
+      "passed": 510,
+      "total": 510,
+      "sequential": true,
+      "log": "logs/functional-ctest-delivery.log"
+    },
+    "file_descriptions": {
+      "result": "PASS",
+      "exit_code": 0,
+      "warnings": 0
+    },
+    "unused_strings": {
+      "result": "PASS",
+      "exit_code": 0,
+      "warnings": 0
+    },
+    "diff_check": {
+      "result": "PASS",
+      "exit_code": 0
+    },
+    "python_compilation": "PASS",
+    "short_native_console_probe": "PASS",
+    "synthetic_split_reader": "PASS",
+    "remote_exact_delivery_head_ci": "Publication pending; see draft PR exact-head report"
+  },
+  "historical_generation_archive_sha256": "8447c671a8f567deb60e50d87c171e8dfd25400df32587edf32d9fa69136022c",
+  "archive": {
+    "file": "native-proof.tar.gz",
+    "bytes": 57460,
+    "sha256": "c7ad60f085c3d8aa83874cd521c43027d699ab3c560b17e9d57d82e434c28c43"
+  },
+  "members": {
+    "campaign/evidence.json": {
+      "bytes": 3330,
+      "sha256": "f8b490f7e4de124f46461e2b224a5c338d6e2a90992572825e446ef2102f979a"
+    },
+    "campaign/primary/fresh-commands.scr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/fresh-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/fresh-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/fresh.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/functional.cfg": {
+      "bytes": 1744,
+      "sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009"
+    },
+    "campaign/primary/scripts/game_start.scr": {
+      "bytes": 251,
+      "sha256": "848b62cf17bcd9ea635c8c4fb0034aea5db20ad3f23769c20634344bd3e79dd4"
+    },
+    "focused-console/commands.scr": {
+      "bytes": 219,
+      "sha256": "eac7b90f93a8745424e7de4d297aeb4fab44bbd96407271ea5ce894be61bf3c7"
+    },
+    "focused-console/native.log": {
+      "bytes": 449,
+      "sha256": "84141f97dd9d470dbc92579d690a941b3a0e46cf3379e8a7b9421db57cdc15e9"
+    },
+    "focused-console/offline_console_probe.py": {
+      "bytes": 2705,
+      "sha256": "90b4434529a55b3bb1edff90ba0307339310d78307aa90f1cb44c712327147d4"
+    },
+    "focused-console/probe.cfg": {
+      "bytes": 1538,
+      "sha256": "885c6a2b54d481772f4a94252f3e4a06fc470e2b4122f7039a28c0548d4a60f5"
+    },
+    "focused-console/scripts/game_start.scr": {
+      "bytes": 205,
+      "sha256": "0fe54d3dcc134ef13d61d99e8dcff4b7372c487a0b887a663d105c7837cd0fd5"
+    },
+    "focused-console/stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "focused-console/transcript.log": {
+      "bytes": 424,
+      "sha256": "268b43892b60a2f0bf9aec9b4fdcba7b65f2c8b1456918118fd70950be8ad0d2"
+    },
+    "logs/focused-functional-catch-corrected.log": {
+      "bytes": 194,
+      "sha256": "9ee24eadde88435ef68a849007a697279148df2f1b25538889e97ff37430eda7"
+    },
+    "logs/focused-functional-catch.log": {
+      "bytes": 1929,
+      "sha256": "f32d60ce7e1d5ec0caec7ec65946e07c59ce5ca9f677e4a0802633baa6b26d02"
+    },
+    "logs/focused-functional-ctest-corrected.log": {
+      "bytes": 1811,
+      "sha256": "191dd0d8240c720a1dc26ee4bb30dd0430f5f617c8df0c5a0d7d3c7dcba2778e"
+    },
+    "logs/focused-functional-ctest.log": {
+      "bytes": 2120,
+      "sha256": "f85aeb979473aef8f0bda1305ac82c01e3b01a919e063b1683e65052ffdbde77"
+    },
+    "logs/focused-functional-hq-native-reload.log": {
+      "bytes": 514,
+      "sha256": "09c324ce357b902ddc4a4bb4d1293da1a81b74630ff923ba124ec7f73e0b767c"
+    },
+    "logs/focused-functional-hq-panel-corrected.log": {
+      "bytes": 1674,
+      "sha256": "91b5a423b7cb255e133c4f8bef6834877090504eb9177caa359643180cb6e810"
+    },
+    "logs/functional-build-delivery.log": {
+      "bytes": 823,
+      "sha256": "f403e2c03c955c15ee395ef72562adb6fd8317056c62fa2045e7807596b3da16"
+    },
+    "logs/functional-build-final.log": {
+      "bytes": 3250,
+      "sha256": "bd1311c5521e44290d9f12d950d30f25f33d0c9704e776f9e5d2828af05476ac"
+    },
+    "logs/functional-build-fixture-fix.log": {
+      "bytes": 806,
+      "sha256": "bb0692e4da175dc7e18179d6a01f011122513d6b1b4bfb5aa4891314b1c9da53"
+    },
+    "logs/functional-build-frozen.log": {
+      "bytes": 823,
+      "sha256": "dd82485b5568e41959600f2e728ee52e58c4fb4ba0da3f6acfe342b9eab8b046"
+    },
+    "logs/functional-build-panel-fixture.log": {
+      "bytes": 806,
+      "sha256": "bb0692e4da175dc7e18179d6a01f011122513d6b1b4bfb5aa4891314b1c9da53"
+    },
+    "logs/functional-build-panel-reload.log": {
+      "bytes": 2925,
+      "sha256": "d184c9c1e66e99b7d295386ff828b3703b4070fbf94f2f8091236a5af69312a5"
+    },
+    "logs/functional-build.log": {
+      "bytes": 80223,
+      "sha256": "f513249e3a4fee0491f0d57361401e6a868ef147762e485e2ae9c64af3eb1148"
+    },
+    "logs/functional-campaign.log": {
+      "bytes": 1670,
+      "sha256": "d83082a20f3b83964902d286fbfee1d60a97bcce3aca4f1be2fcf99dd32eaf24"
+    },
+    "logs/functional-catch-delivery.log": {
+      "bytes": 7342,
+      "sha256": "e1608cad3229504a011f5e00536833a277d90481d840dec5363b176f9ab4a7cf"
+    },
+    "logs/functional-console-split-reader.log": {
+      "bytes": 125,
+      "sha256": "a70492d358aa71f108966d70089ad6deddff3f274281516e4dd5bf49cb32eb7d"
+    },
+    "logs/functional-ctest-delivery.log": {
+      "bytes": 128429,
+      "sha256": "f411d8982fb4be87e8df2169106b1ff268bcce975ff7d3d50dec17960174b8ff"
+    },
+    "logs/functional-delivery-diff-check.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/functional-delivery-file-descriptions.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-delivery-unused-strings.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-diff-check-delivery.log": {
+      "bytes": 222,
+      "sha256": "253053173bd98709e944fc20f6e56763f59d6bf4deeedb6b9a503d71bfc5f0e3"
+    },
+    "logs/functional-file-descriptions-delivery.log": {
+      "bytes": 242,
+      "sha256": "eb2e2479c70bd8779665065bf5ae8a96c8841943ad35cbb89412d0f1646872fb"
+    },
+    "logs/functional-file-descriptions.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-full-catch.log": {
+      "bytes": 7010,
+      "sha256": "9ebb60ec318467c9e820c6db27e9948168bc7ac17161cb1fea34e77055b3cd6d"
+    },
+    "logs/functional-full-ctest.log": {
+      "bytes": 128067,
+      "sha256": "9886f8fd197910dd7d609ae8e6091df0412df94cbc1bb6d41592f6e926888a88"
+    },
+    "logs/functional-helper-help.log": {
+      "bytes": 936,
+      "sha256": "cde59569dbea73c9952e5cb9c0cf1973ff00aee10b2c6c9c2622365be9abb6e4"
+    },
+    "logs/functional-hq-rendering-backtrace.log": {
+      "bytes": 42,
+      "sha256": "4ac2ebc4219b17fd9400674072be8957de052b272c84124e26a434bfe589a4a8"
+    },
+    "logs/functional-offline-console-focused.log": {
+      "bytes": 170,
+      "sha256": "2fd9581576f65acb7c60ba265838dc94e35bb0da7441dd2e7dca2961ec5ace5a"
+    },
+    "logs/functional-unused-strings-delivery.log": {
+      "bytes": 239,
+      "sha256": "cb3427f3c7a89dacac1f99bbef8e95de4f7afc1b3829b020f72fec2862e4c906"
+    },
+    "logs/functional-unused-strings.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    }
+  },
+  "recorded_at_utc": "2026-09-30T22:39:47.516851+00:00"
+}
