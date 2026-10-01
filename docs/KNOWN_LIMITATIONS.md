@@ -1,5 +1,24 @@
 # OpenSpaceTTD Known Limitations
 
+## First Functional Core Supply after repaired continuation — 1 October 2026
+
+The requested ASSISTED FUNCTIONAL outcome now passes across recorded authorized
+handoffs, including exact same-funded cold equality, another paid FOOD visit and
+consuming month. Complete reviewed acceptance remains PARTIAL: fresh repeatability
+NOT RUN, ordinary-start affordability/pacing unproven and human UAT Pending.
+Consumption used carried inventory before the later105FOOD delivery; that delivery's
+subsequent use and uninterrupted supply were not observed. Final reserves120,
+growth0/passengers0.5, latest monthly consumptionempty. Train running charges remain
+the inherited£0 setting. [Exact scope and owner mission](audit/2026-10-01/functional-core/README.md#delivery-and-practical-owner-playtest).
+
+The sole£6m allowance remains exhausted; no new grant/loan/replay occurred. Campaign
+stopped after24/240cold advances at01:34:25UTC before unchanged01:39:59UTC deadline.
+Unused ticks/gross headroom do not authorize another campaign or next slice.
+Corrected source/local gates and Astra review pass; exact-head CI retains the
+published5d `Docs:` commit-format failure, whose repair would rewrite prohibited
+public history. Draft PR68 stays stacked on PR66; no gate waiver, merge, milestone
+acceptance or human build UAT follows. Historical failures/archives below remain.
+
 ## First Functional Core Supply second-cold boundary — 1 October 2026
 
 Third handoff passes initial generated FOOD, interruption/recovery and paidHQ/I/II

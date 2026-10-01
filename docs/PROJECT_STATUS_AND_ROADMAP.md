@@ -1,5 +1,23 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## First Functional Core Supply repaired continuation — 1 October 2026
+
+**ASSISTED FUNCTIONAL requested outcome PASS across recorded authorized handoffs;
+complete reviewed acceptance PARTIAL, human UAT Pending.** One corrected load of
+the same funded Materials I checkpoint matched full paused state, then another
+paid105FOOD delivery and a consuming60FOOD month passed within unchanged bounds.
+The month used carried inventory before the new arrival; continuous supply and
+consumption of that later load are unproven. Final tick167168/cash£3,705,864/debt£100k
+reconcile; total£6m assistance remains used/£0remaining. Aggregate gross£2,766,772,
+cold24/240. Finished01:34:25UTC before conservative01:39:59UTC stop.
+
+[Frozen continuation, ledger and five-step owner observation](audit/2026-10-01/functional-core/README.md#repaired-same-funded-continuation--1-october-2026).
+Astra maximum native/source review CLEAR; local source gates PASS. Exact-head CI
+retains a commit-format FAIL (`Docs:` in published5d; `Doc:` required); no history
+rewrite or gate waiver. Fresh replay/ordinary economics NOT RUN, human acceptance
+Pending. Campaign stopped; no merge, second slice or new assistance is authorized.
+Earlier failures and archived evidence remain unchanged historical records.
+
 ## First Functional Core Supply third handoff — 1 October 2026
 
 **ASSISTED FUNCTIONAL partial stages passed; campaign FAIL at second cold equality.**

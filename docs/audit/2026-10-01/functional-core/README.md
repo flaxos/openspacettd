@@ -1,4 +1,128 @@
-# First Functional Core Supply and Materials I — second cold-load stop
+# First Functional Core Supply and Materials I — repaired continuation
+
+**ASSISTED FUNCTIONAL requested outcome: PASS across preserved authorized handoffs.**
+Complete reviewed acceptance remains **PARTIAL**: independent fresh replay is
+NOT RUN and exact-head delivery CI has a commit-format failure. Ordinary-start
+economics are unproven; human UAT is Pending. No merge or next slice is authorized.
+
+## Repaired same-funded continuation — 1 October 2026
+
+The explicit continuation handoff loaded exactly the existing completed Materials I
+checkpoint on clean head `5d729abe87500446c43c4a1c5ca68c08c8e323ca`, using reviewed
+source `bc9fb1cf3f0149f05748f57b22584e8db64b78d4` and binary SHA256
+`7713fa03e22bd9d6d5e22b4fa0559fae231356a1e1bc8c13958e25fbf4bbe6b5`.
+Those heads differ only in documentation/evidence. The one confirmation load
+matched the entire paused expected state, hash
+`dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457`,
+without normalization, before any tick advance. No fresh game, grant, loan,
+construction, new research selection or repeated operating proof occurred.
+
+[continuation-manifest.json](continuation-manifest.json) and
+[continuation-proof.tar.gz](continuation-proof.tar.gz) freeze all new native results,
+commands/logs, the guarded runner, source checkpoint/expected state, independent
+reviews and the final owner observation save. The archive has 15 regular members,
+1,750,816 bytes, SHA256
+`43115195bef21ae59dce8c33a607fa01ff070d13a78ced13b170c028e5b1a896`.
+All previous raw reports, saves, manifests and archives remain unchanged. The
+historical third report remains FAIL; this separate repaired continuation is PASS.
+
+| Repaired tail observation | Result |
+|---|---|
+| Full second-load equality | PASS at tick120064; original cash/debt/custody/orders/unlock/growth retained |
+| Native FOOD arrival/payment | Train4/station3 at tick166371; 105 FOOD; actual £81,972 booked tick166652 |
+| Further consuming month | Date713835: town0 consumed60 from carried inventory, leaving15 |
+| Final terrain/text audit | PASS: no invalid slopes, 3,139,587 pixel and 1,046,529 viewport queries; EnglishGB active cargo text; paused state unchanged |
+| Final checkpoint | Tick167168; cash£3,705,864/debt£100,000; Materials I301; project/RP/budget0 |
+| Bounds | 23new×2048ticks; totalcold24/240; finished01:34:25.559407UTC before unchanged01:39:59.143032UTC cutoff |
+| Independent review | Astra maximum source/guard/raw outcome and final packaging CLEAR; Sol maximum cash/cargo/bounds PASS |
+
+The consuming month precedes the new FOOD arrival and uses saved reserves. Both
+occur after the confirmed load, satisfying the approved conjunction. Consumption
+of that later delivery was not observed. Supply is intermittent at the recorded
+cadence: final town FOOD120, latest monthly consumption empty, growth0/passengers0.5.
+This proof does not establish uninterrupted food supply, pacing, ordinary bootstrap
+profitability or human usability. No extra ticks were run to broaden that claim.
+
+## Complete assistance and native reconciliation
+
+The ONE TOTAL £6,000,000 virtual allowance remains fully consumed, £0 remaining.
+Its only accepted grant was the original native offline MoneyCheat at tick1280,
+booked as Other debit−£6m: cash£100k→£6.1m and unchanged£100k debt. Original rejected
+probes2 remain retained. This continuation issued **zero grant commands** and
+received no Other credits. There was no real-money transaction.
+
+`£100,000 + £6,000,000 + £367,827 receipts - £2,761,963 primary debits = £3,705,864`.
+All836primary transaction rows reconcile with zero unexplained difference. Tail
+receipts were grain£7,603 and FOOD£81,972; debits were interest£3,500, company
+fees£525 and tolls£400. Whole-primary debits: infrastructure£110,824,
+vehicles£35,747, HQ£2.5m, research£100k, interest£12,167, company fees£1,825 and
+tolls£1,400. Actual train running charges£0 are inherited and unchanged.
+
+The disposable control remains separate: receipts£89,280/debits£4,809/cash£6,305,377.
+Including its debits, aggregate gross spending is£2,766,772, leaving£1,233,228
+under the original£4m cap. Cumulative FOOD custody balances:
+540produced−89discarded−300consumed=151held. Assistance is separate from freight
+revenue and does not prove ordinary HQ affordability or earned expansion.
+
+Initial shared usage remains82advances. Cold usage is24, leaving216advances /
+442,368ticks. Original cold elapsed1466.416seconds includes repair/handoff delay;
+its unchanged conservative deadline is01:39:59.143032UTC, absolute stop02:24:44UTC.
+The campaign is now stopped. Unused counts, cash headroom or remaining whole-campaign
+time confer no authority for a fresh replay, another grant or the next slice.
+
+## Delivery and practical owner playtest
+
+The corrected source gates remain PASS: focused2cases/144assertions, full
+498cases/306,426assertions and sequential513/513CTest, plus both linters, script
+mode and diff checks. Metadata-only evidence publication does not justify another
+engine rebuild or full suite. Exact5d commit checker FAILS because its published
+`Docs:` prefix is invalid (`Doc:` is required); public-history rewriting is
+prohibited, so the failure is retained. Build and final-head CI status are reported
+on [draft PR68](https://github.com/flaxos/openspacettd/pull/68). No gate is waived.
+
+Prefer a separate checkout to preserve personal games and profiles. The PR still
+targets unmerged PR66 `codex/generation-money-comparison` at
+`d1bb617664dcbb122aaefc1d4175c34ae1a17e2e`. Branch-time main91846666 is an ancestor;
+reviewed PR67 was normally cherry-picked and its plan remains byte-identical.
+Live main85c423b4 contains owner-merged PR67 but lacks PR66. PR65 terminal/Core-town,
+PR64 art, PR58 maintenance and all ordinary-money failures are preserved.
+
+```sh
+git clone https://github.com/flaxos/openspacettd.git OpenSpaceTTD-PR68
+cd OpenSpaceTTD-PR68
+git checkout --detach 5d729abe87500446c43c4a1c5ca68c08c8e323ca
+cmake -B build -G Ninja
+ninja -C build
+```
+
+That is the exact executed head. Obtain the later continuation archive from PR68,
+extract it into a new directory and verify its manifest/save hashes. Use matching
+canonical English profile and published GRFs; optional art stays disabled. The
+build needs the normal repository dependencies/base graphics. For an existing
+checkout inspect `git status --short`, running processes and unsaved games first;
+use the separate checkout if anything belongs to the player. Do not force-reset,
+clean, overwrite a profile/save or pull main expecting this unmerged fix.
+
+Five-step owner observation, with human UAT still Pending:
+
+1. Load a copy of `campaign/owner-observation.sav`, SHA256
+   `206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7`, paused.
+   Confirm£3,705,864 cash/£100k debt, Materials I retained and research budgetoff.
+   Apply no grant; the existing allowance is consumed.
+2. Inspect producer3(178,320), processor9(338,192), Core town0 near(798,69), its
+   receiving house(794,66), gate2then1 and both grain/FOOD train orders.
+3. Inspect FOOD120 in reserves, missing expansion supplies and growth0. Observe
+   further native payments/use if playing; supply gaps and waits are feedback.
+   Fifteen minutes is a feedback window, not promised completion.
+4. Open the HQ/Tech Tree and confirm Materials II eligibility without selecting it.
+   Save under a new name, quit/reload and inspect cash/debt, unlock, budget,
+   reserves/growth and orders. Keep the original supplied save unchanged.
+5. Report Pass/Fail/Partial, exact build/save/content, manual versus supplied
+   actions, elapsed time and first unexpected control/message. This save supports
+   observation; manual construction, human acceptance and ordinary economics
+   remain separate.
+
+## Historical third-handoff second-load stop
 
 **ASSISTED FUNCTIONAL: FAIL at second cold-load equality. Human UAT: Pending.**
 The NEW explicit execution handoff at exact `60bc9536c17ece4cd09ebcaecb35df7c2002f53c`

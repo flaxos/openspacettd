@@ -1,5 +1,23 @@
 # Human UAT results — recovery / v1.1
 
+## First Functional Core Supply repaired observation — 1 October 2026
+
+**Human status Pending. ASSISTED FUNCTIONAL requested outcome PASS across recorded
+authorized handoffs; complete reviewed acceptance PARTIAL.** Repaired second load
+matched the entire existing completed state; another105FOOD paid visit and60FOOD
+consuming month passed, followed by final audit/save. The month used carried
+inventory before that delivery; continuous supply and later-load consumption remain
+unproven. Final cash£3,705,864/debt£100k; Materials I retained/budgetoff/II eligibility
+already proved. Sole£6m allowance fully used, no additional grant or loan.
+
+[Five-step owner playtest and safe checkout](../docs/audit/2026-10-01/functional-core/README.md#delivery-and-practical-owner-playtest)
+uses a copy of the retained owner observation save. Preserve originals; apply no
+grant and do not start II. Record exact build/save/content, manual versus supplied
+actions, time, cash/debt and first unexpected control/message. Observation cannot
+establish manual construction UAT. Independent replay/ordinary economics NOTRUN,
+human acceptancePending; exact-head commit-format CI FAIL remains a delivery gate.
+No merge or next slice. Earlier entries preserve their historical failed attempts.
+
 ## First Functional Core Supply third handoff — 1 October 2026
 
 **Human status: Pending. ASSISTED FUNCTIONAL campaign: FAIL at second cold equality.**

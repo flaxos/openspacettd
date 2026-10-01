@@ -1,5 +1,22 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Functional Core Supply repaired same-funded tail — 1 October 2026
+
+**ASSISTED FUNCTIONAL requested mission PASS; full reviewed acceptance PARTIAL.**
+Explicit continuation at exact5d used reviewedbc9 source/binary7713. One full paused
+load comparison passed, then23advances produced a paid105FOOD visit/£81,972 and
+one60FOOD consuming month from carried inventory. Final audit/save passed at
+01:34:25UTC, with24/240cold advances and unchanged clocks. Later-delivery consumption
+and uninterrupted supply were not observed. [Frozen evidence](audit/2026-10-01/functional-core/continuation-manifest.json).
+
+Whole-primary836transactions reconcile£100k+£6m+£367,827−£2,761,963=£3,705,864,
+debt£100k; control debits£4,809 give gross£2,766,772. No new grant/start/build/project
+or replay; assistance remaining£0. Astra maximum outcome/source CLEAR, Sol maximum
+accounting PASS; existing498-case/513-CTest gates retained. Exact-head commit checker
+FAILS published `Docs:` prefix; rewriting public history is prohibited. HumanPending,
+ordinary economics/replayNOTRUN, no merge or next slice. Earlier failures remain
+unchanged; the stopped third report is still FAIL beside this repairedtailPASS.
+
 ## First Functional Core Supply existing-state load repair — 1 October 2026
 
 **TESTED repair; ASSISTED FUNCTIONAL campaign FAIL at second cold equality.**
