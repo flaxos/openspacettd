@@ -1,5 +1,17 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## PR66 main integration and nightly portability — 1 October 2026
+
+The existing draft PR66 now integrates the reviewed functional delivery and
+current main ancestry, alongside its original Money-comparison fix. The bounded
+nightly repair separates unconditional oversized-file coverage from host symlink
+capability, retaining real rejection checks where supported and failures for
+unexpected errors. The same Intel x64 Mac and MinGW nightly jobs also run on
+affected PR changes. [Integration evidence and delivery status](audit/2026-10-01/pr66-integration/README.md).
+The functional campaign remains stopped, its sole £6m allowance consumed and
+human UAT Pending. This work authorizes no replay, new slice, balance change or
+merge; the dated functional records below remain historical evidence.
+
 ## First Functional Core Supply repaired continuation — 1 October 2026
 
 **ASSISTED FUNCTIONAL requested outcome PASS across recorded authorized handoffs;
