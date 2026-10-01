@@ -1,5 +1,23 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Functional Core Supply existing-state load repair — 1 October 2026
+
+**TESTED repair; ASSISTED FUNCTIONAL campaign FAIL at second cold equality.**
+Third handoff achieved real grain/FOOD/Core flow and consuming months, stopped-flow
+recovery, paidHQ/I after first cold and II selection eligibility. Retained second
+cold defect: integrated FOOD-only growth0 reconstructed as Classic Subsistence1.
+Post-ECON MEGA callback restores existing integrated caches without consuming cargo,
+changing schema/balances/RNG or balance policy. Focused2cases/144assertions, full
+498cases/306426assertions and sequential513CTest PASS. Independent Astra maximum
+source/raw-evidence review CLEAR; corrected canonical continuation NOT RUN.
+[Preserved report, seven saves, ledger and exact handoff](audit/2026-10-01/functional-core/README.md).
+
+Total£6m cash assistance used, £0remaining; final£3,620,714/debt£100k reconciles,
+aggregate gross£2,762,347 and82initial/1cold advances. Only a new explicit handoff
+may confirm the same completed checkpoint within existing deadlines/bounds. All
+prior failures and archives remain. Human Pending; no funded replay, economic pass,
+roadmap completion, merge or second slice. Earlier dated entries retain their scope.
+
 ## First Functional Core Supply recovery stop — 1 October 2026
 
 **ASSISTED FUNCTIONAL FAIL; £0 applied across both attempts; human UAT Pending.**

@@ -1,5 +1,21 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## First Functional Core Supply third handoff — 1 October 2026
+
+**ASSISTED FUNCTIONAL partial stages passed; campaign FAIL at second cold equality.**
+Pristine seed11, three paid grain/FOOD visits, actual2:2conversion, three consuming
+months, interruption/recovery, paidHQ/MaterialsI after first cold and II eligibility
+passed. The second cold changed growth0→1 through Classic restoration of integrated
+Subsistence. The narrow post-chunk existing-state repair and focused/full gates pass;
+repaired canonical continuation is NOT RUN. [Exact evidence and bounds](audit/2026-10-01/functional-core/README.md#third-handoff-outcome-and-exact-assistance).
+
+ONE£6m allowance is fully consumed, remaining£0; stopped cash£3,620,714/debt£100k
+reconciles. A new explicit handoff could confirm only the existing completed save
+with239coldadvances, £1,237,653gross headroom and original conservative cold stop
+01:39:59UTC/absolute02:24:44UTC. No continuation, funded replay, ordinary economics,
+human acceptance, milestone, merge or next slice is inferred. Earlier entries are
+historical stop records; human UAT remains Pending.
+
 ## First Functional Core Supply recovery — 1 October 2026
 
 **Draft remains incomplete; ASSISTED FUNCTIONAL recovery FAIL before its first

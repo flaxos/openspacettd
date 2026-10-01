@@ -1,5 +1,22 @@
 # Human UAT results — recovery / v1.1
 
+## First Functional Core Supply third handoff — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL campaign: FAIL at second cold equality.**
+Initial paid grain/FOOD/Core consumption, stopped/restarted supply control, paidHQ,
+first cold equality, paidMaterialsI and II eligibility pass. The sole second-load
+mismatch is growth0→1; the narrow existing-state repair has focused/full fixture
+gates and independent source review, not a canonical continuation pass.
+[Verified checkpoint, five-step owner observation and exact bounds](../docs/audit/2026-10-01/functional-core/README.md#safe-checkout-and-practical-owner-observation).
+
+Assistance£6m is fully used, no additional grant; cash£3,620,714/debt£100k reconciles.
+The supplied completed checkpoint is partial observation evidence only. A new
+explicit automated continuation handoff must keep the original cold/absolute
+clocks and aggregate counts; none was executed. Record build/save/content, manual
+versus supplied actions, time, assistance and first unexpected event. No human,
+ordinary economic or full functional acceptance, funded replay or next slice follows.
+Earlier entries remain historical failed attempts.
+
 ## First Functional Core Supply recovery — 1 October 2026
 
 **Human status: Pending. ASSISTED FUNCTIONAL single recovery: FAIL before first

@@ -1,0 +1,323 @@
+{
+  "status": "NOT RUN; NEW explicit handoff required",
+  "label": "ASSISTED FUNCTIONAL",
+  "human_uat": "Pending",
+  "checkpoint": {
+    "path": "build/agent-logs/functional-core-handoff-3/primary/materials-i-completed.sav",
+    "sha256": "a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945",
+    "source_head": "60bc9536c17ece4cd09ebcaecb35df7c2002f53c",
+    "binary_sha256": "ccce335e90680679b885a7139d9e2889705866d1dc5d601911c9c17248c8933b",
+    "expected_state_path": "build/agent-logs/functional-handoff-3-completed-state.json",
+    "expected_state_sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457",
+    "tick": 120064,
+    "money": 3620714,
+    "loan": 100000,
+    "calendar_clock": [
+      1954,
+      4,
+      14,
+      0
+    ],
+    "economy_clock": [
+      1954,
+      4,
+      713828,
+      14,
+      24
+    ],
+    "research": [
+      [
+        0,
+        0,
+        0,
+        [
+          301
+        ]
+      ]
+    ],
+    "hqs": [
+      [
+        0,
+        0,
+        71454,
+        1,
+        "Core Supply HQ",
+        713800
+      ]
+    ],
+    "town0": {
+      "consumed": [
+        [
+          33,
+          60
+        ]
+      ],
+      "demand": [
+        [
+          9,
+          20
+        ],
+        [
+          24,
+          10
+        ],
+        [
+          28,
+          10
+        ],
+        [
+          30,
+          20
+        ],
+        [
+          33,
+          60
+        ]
+      ],
+      "house_count": 29,
+      "houses": [
+        {
+          "tile": 68378,
+          "type": 25,
+          "world": 0
+        },
+        {
+          "tile": 68381,
+          "type": 16,
+          "world": 0
+        },
+        {
+          "tile": 68382,
+          "type": 11,
+          "world": 0
+        },
+        {
+          "tile": 68383,
+          "type": 26,
+          "world": 0
+        },
+        {
+          "tile": 69407,
+          "type": 15,
+          "world": 0
+        },
+        {
+          "tile": 70425,
+          "type": 24,
+          "world": 0
+        },
+        {
+          "tile": 70427,
+          "type": 16,
+          "world": 0
+        },
+        {
+          "tile": 70428,
+          "type": 26,
+          "world": 0
+        },
+        {
+          "tile": 70429,
+          "type": 11,
+          "world": 0
+        },
+        {
+          "tile": 70431,
+          "type": 27,
+          "world": 0
+        },
+        {
+          "tile": 70432,
+          "type": 27,
+          "world": 0
+        },
+        {
+          "tile": 70433,
+          "type": 20,
+          "world": 0
+        },
+        {
+          "tile": 70434,
+          "type": 22,
+          "world": 0
+        },
+        {
+          "tile": 71457,
+          "type": 21,
+          "world": 0
+        },
+        {
+          "tile": 71458,
+          "type": 23,
+          "world": 0
+        },
+        {
+          "tile": 71459,
+          "type": 6,
+          "world": 0
+        },
+        {
+          "tile": 71460,
+          "type": 25,
+          "world": 0
+        },
+        {
+          "tile": 72474,
+          "type": 6,
+          "world": 0
+        },
+        {
+          "tile": 72476,
+          "type": 26,
+          "world": 0
+        },
+        {
+          "tile": 72477,
+          "type": 10,
+          "world": 0
+        },
+        {
+          "tile": 72479,
+          "type": 3,
+          "world": 0
+        },
+        {
+          "tile": 72484,
+          "type": 6,
+          "world": 0
+        },
+        {
+          "tile": 73498,
+          "type": 29,
+          "world": 0
+        },
+        {
+          "tile": 73500,
+          "type": 29,
+          "world": 0
+        },
+        {
+          "tile": 73501,
+          "type": 39,
+          "world": 0
+        },
+        {
+          "tile": 73503,
+          "type": 15,
+          "world": 0
+        },
+        {
+          "tile": 73505,
+          "type": 11,
+          "world": 0
+        },
+        {
+          "tile": 73506,
+          "type": 24,
+          "world": 0
+        },
+        {
+          "tile": 74524,
+          "type": 11,
+          "world": 0
+        },
+        {
+          "tile": 74525,
+          "type": 26,
+          "world": 0
+        },
+        {
+          "tile": 75551,
+          "type": 16,
+          "world": 0
+        },
+        {
+          "tile": 76573,
+          "type": 24,
+          "world": 0
+        }
+      ],
+      "id": 0,
+      "megacity": true,
+      "population": 1191,
+      "profile": {
+        "current": [
+          0,
+          0,
+          0
+        ],
+        "growth": 0.0,
+        "last": [
+          0,
+          0,
+          0
+        ],
+        "name": "",
+        "passengers": 1.0,
+        "population": 1191,
+        "quota": [
+          59,
+          30,
+          11
+        ],
+        "world": 0
+      },
+      "reserves": [
+        [
+          9,
+          0
+        ],
+        [
+          33,
+          75
+        ]
+      ],
+      "tile": 71454,
+      "world": 0
+    }
+  },
+  "corrected_source_head": "bc9fb1cf3f0149f05748f57b22584e8db64b78d4",
+  "aggregate": {
+    "fresh_startups_used": 3,
+    "prior_active_preflight_seconds": 64,
+    "initial_advances_used": 82,
+    "initial_advances_remaining": 158,
+    "cold_advances_used": 1,
+    "cold_advances_remaining": 239,
+    "ticks_per_advance": 2048,
+    "cold_ticks_remaining": 489472,
+    "cold_load_processes_attempted": 2,
+    "cash_allowance_total_gbp": 6000000,
+    "cash_allowance_used_gbp": 6000000,
+    "cash_allowance_remaining_gbp": 0,
+    "accepted_grant_commands": 1,
+    "rejected_grant_commands": 2,
+    "primary_receipts_gbp": 278252,
+    "primary_debits_gbp": 2757538,
+    "disposable_control_debits_gbp": 4809,
+    "gross_debits_used_gbp": 2762347,
+    "gross_debits_remaining_gbp": 1237653,
+    "pre_hq_gross_used_gbp": 162155,
+    "pre_hq_gross_remaining_gbp": 837845,
+    "chain_candidates_used": 1,
+    "chain_candidates_unused": 1,
+    "same_chain_required": true
+  },
+  "time": {
+    "absolute_stop_utc": "2026-10-01T02:24:44Z",
+    "conservative_original_cold_start_utc": "2026-10-01T01:09:59.143032+00:00",
+    "conservative_original_cold_stop_utc": "2026-10-01T01:39:59.143032+00:00",
+    "derivation": "The pre-cold save mtime precedes native close and the actual cold-phase start; using it is conservative and grants no extra wall time. Repair/stopped time remains included.",
+    "recorded_at_utc": "2026-10-01T01:17:27.814111+00:00",
+    "cold_seconds_remaining_at_recording": 1351.328918
+  },
+  "permitted_new_handoff_scope": [
+    "Exactly one confirmation load of hash-verified materials-i-completed.sav on corrected reviewed source; preserve both prior failed startups and failed second load.",
+    "No fresh game, grant command, loan, replay, rebuilding, new chain, date jump or research project.",
+    "Require full paused loaded-state equality with the original pre-second-load completed state; restore integrated caches from saved growth state only.",
+    "Same shared cold tick/spend/wall bounds, stopping at the earlier of conservative original cold deadline and absolute stop.",
+    "Observe one further positive paid FOOD visit and consumed month through original native functional-advance commands, audit and retain one observation save.",
+    "Extend the existing primary native ledger; keep assistance and disposable-control cash separate, no reset or silent normalization."
+  ],
+  "no_execution_performed": true
+}

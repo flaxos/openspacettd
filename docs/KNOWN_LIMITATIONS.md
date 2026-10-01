@@ -1,5 +1,21 @@
 # OpenSpaceTTD Known Limitations
 
+## First Functional Core Supply second-cold boundary — 1 October 2026
+
+Third handoff passes initial generated FOOD, interruption/recovery and paidHQ/I/II
+eligibility, but FAILS second cold equality solely on integrated growth0→1. The
+existing-state restoration repair passes source review and focused/full gates;
+canonical corrected continuation remains NOT RUN. No complete functional milestone
+or human acceptance is claimed. [Failure, repair and continuation bounds](audit/2026-10-01/functional-core/README.md#prepared-continuation-boundary--not-executed).
+
+The ONE£6m virtual allowance is exhausted. Same-checkpoint confirmation needs a
+new explicit handoff, carries239coldadvances/£1,237,653gross headroom and the original
+cold-phase stop conservatively01:39:59UTC, plus absolute02:24:44UTC; no reset/fresh
+funded campaign is permitted. Prebuilt observation does not establish manual build
+UAT; ordinary-start affordability, inherited zero train running charges, wider seed
+coverage, repeatability and balance remain separate. Historical stops below remain
+preserved with superseded active next actions. Human Pending, draft stacked on PR66.
+
 ## First Functional Core Supply recovery boundary — 1 October 2026
 
 Canonical console readiness now has direct evidence, but the sole authorized

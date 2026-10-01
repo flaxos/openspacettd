@@ -1,4 +1,153 @@
-# First Functional Core Supply and Materials I — recovery stopped
+# First Functional Core Supply and Materials I — second cold-load stop
+
+**ASSISTED FUNCTIONAL: FAIL at second cold-load equality. Human UAT: Pending.**
+The NEW explicit execution handoff at exact `60bc9536c17ece4cd09ebcaecb35df7c2002f53c`
+passed pristine seed11 startup, paid construction, grain → FOOD → Core consumption,
+stopped/restarted supply control, paid HQ, first cold equality, paid Materials I
+and II eligibility. It stopped at the next hard defect; no further continuation
+or funded replay was performed. Ordinary-start economics remain unproven.
+
+## Third handoff outcome and exact assistance
+
+[handoff-3-manifest.json](handoff-3-manifest.json) and
+[handoff-3-proof.tar.gz](handoff-3-proof.tar.gz) retain all raw command/query logs,
+the unmodified FAIL report, all seven saves, both prior failure hashes, the narrow
+bookkeeping adapter, mismatch/expected-state data, source repair and focused/full
+local gates. The adapter changed only prior-attempt metadata to two, latest
+handoff wording and attached evidence context; native gameplay/limits stayed at
+exact60bc. It carried64seconds, leaving1736seconds active preflight, and the
+original02:24:44UTC absolute stop. Original/recovery archives below remain unchanged.
+
+| Observation | Result |
+|---|---|
+| Chain / native quote and build | First stable `(3,9,0,2,1)` / £146,571; one candidate, no replanning |
+| Paid grain / FOOD | Three visits each; 405 grain / £33,092 and 315 FOOD / £245,160 |
+| Processor / initial town use | 404 grain → 404 FOOD, 202 batches / three distinct consuming months |
+| Disposable supply control | PASS: remainder15 below60basket, stable stopped reserves/no use, then paid delivery/use recovery |
+| HQ / research | Native £2.5m HQ; I selected0RP/£100kbudget; first cold equal; one paid£100k/100RP completion; II query selectable; budgetoff |
+| Second cold load | **Attempted; equality FAIL** solely on Core profile growth0→1 at tick120064 |
+| Post-second-load service / funded replay | NOT RUN / NOT RUN |
+| Ordinary-start economics / human build acceptance | Unproven / Pending |
+
+ONE £6,000,000 virtual offline allowance was accepted through native MoneyCheat
+at tick1280: cash£100,000→£6,100,000, unchanged£100,000 debt, native Other signed
+debit−£6m. Two later grant commands were rejected atomically. Across allthree
+fresh startup attempts, accepted grants1, rejected probes2, assistance used£6m,
+**remaining£0**. No real-money transaction, extra loan, cargo/technology grant,
+policy change or authority bypass occurred.
+
+The stopped primary reconciles exactly:
+`£100,000 + £6,000,000 + £278,252 - £2,757,538 = £3,620,714`, debt£100,000,
+unexplained cash delta£0. Primary debits comprise infrastructure£110,824,
+vehicles£35,747, HQ£2.5m, research£100k, interest£8,667, company fees£1,300 and
+tolls£1,000. Actual train running charges£0 are inherited, unchanged and visible.
+The disposable control separately received£89,280/spent£4,809, ending£6,305,377;
+its cash is excluded from primary reconciliation, its debits included in gross
+cap usage£2,762,347. Cash assistance does not prove ordinary HQ affordability.
+
+## Diagnosed existing-state repair
+
+The raw error remains `Second cold load changed retained unlock/custody/cash/orders`.
+[The exact recursive mismatch](handoff-3-manifest.json) is only
+`towns[0].profile.growth:0.0→1.0`; cash, debt, cargo, orders and I unlock match.
+Integrated monthly FOOD-only consumption gives zero growth/passengers1 and saves
+Subsistence. MEGA loading instead reconstructed Classic Subsistence growth1.
+This affects the existing growth contract, not merely observer presentation.
+
+Corrected source `bc9fb1cf3f0149f05748f57b22584e8db64b78d4` restores the existing
+integrated Core growth/passenger/satisfaction caches in MEGA::FixPointers, after
+all chunks including ECON have loaded. Classic/non-Core behavior and saved enum
+state remain intact. There is no schema/version change, save migration, second
+basket consumption, financial change, RNG/date change or balance tuning.
+
+Focused fixtures PASS **2 cases / 144 assertions**: native MEGA serialization,
+post-ECON native callback, all four states, idempotence, unchanged ECON inventory
+and Classic/non-Core behavior. Their initial invalid disabled-ECON fixture failure
+is retained and corrected by a fixture Reset. They do not reload/resume the failed
+canonical campaign. Corrected-source full Catch PASS **498 cases /306,426assertions**;
+sequential CTest PASS **513/513**, both exit0. Both linters, script mode and diff
+checks pass. Independent Astra maximum raw-outcome/source review is CLEAR;
+Sol maximum independently reconciled all788primary transactions and bounds.
+Astra maximum final archive/record review CLEAR for draft partial delivery; all51
+member hashes/sizes and earlier custody verified. Exact delivery-head CI is reported on
+[draft PR68](https://github.com/flaxos/openspacettd/pull/68); green checks do not
+pass the stopped functional mission.
+
+## Prepared continuation boundary — not executed
+
+[continuation-handoff.json](continuation-handoff.json) pins the only prospective
+source: `campaign/primary/materials-i-completed.sav`, SHA256
+`a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945`.
+Its full pre-second-load expected state is [completed-state.json](completed-state.json):
+tick120064, calendar1954/month4/datefraction14, cash£3,620,714/debt£100,000,
+Materials I301unlocked, project/RP/budget0, Core growth0/passengers1 and both
+services healthy. The post-mismatch stopped-partial and old diagnostic crash save
+are failure evidence, never the pristine/continuation source.
+
+A **NEW explicit handoff** could authorize one corrected confirmation load of this
+same already-funded checkpoint and the remaining paid FOOD visit/consuming month.
+Carry initial82(57primary+25control)/cold1 advances used, **239coldadvances /
+489,472ticks remaining**, gross headroom**£1,237,653**, allowance remaining**£0**.
+Initial158advances unused and one untried chain candidate are not transferable
+budgets or permission to rebuild/restart. Two cold-load processes were already
+attempted; a new confirmation must explicitly account for the failed second load.
+
+Retain the original cold wall clock. Using the pre-cold-save mtime as an earlier,
+conservative start gives fixed cold stop **2026-10-01 01:39:59.143032UTC**;
+repair/stopped time stays included. Absolute stop remains **02:24:44UTC**. At
+handoff creation01:17:27UTC, 1351seconds remained in that conservative cold box;
+the absolute deadlines, not that stale remaining number, govern any later action.
+No reset or extension is authorized. If already exhausted, report NOT RUN.
+The ordinary `--functional-core` CLI starts fresh and grants; it is unsuitable
+for this continuation. A guarded continuation must load only the pinned save,
+require full paused state equality, issue no grant/loan/rebuild/new research,
+extend the existing native ledger and stop at the first defect or bound.
+**No such continuation was performed by this delivery.**
+
+## Safe checkout and practical owner observation
+
+Prefer a fresh checkout; preserve personal profiles, games and saves. PR68 still
+stacks on unmerged PR66 `d1bb617664dcbb122aaefc1d4175c34ae1a17e2e`, targeting
+`codex/generation-money-comparison`. Branch-time main91846666 is an ancestor;
+live main85c423b4 includes owner-merged PR67 but lacks PR66 and is not an ancestor.
+The reviewed plan remains byte-identical; PR65terminal/Core-town, PR64art,
+PR58maintenance and ordinary-money failures remain intact. No merge/rewrite occurred.
+
+```sh
+git clone https://github.com/flaxos/openspacettd.git OpenSpaceTTD-PR68
+cd OpenSpaceTTD-PR68
+git checkout --detach bc9fb1cf3f0149f05748f57b22584e8db64b78d4
+cmake -B build -G Ninja
+ninja -C build
+```
+
+For an existing checkout, first inspect `git status --short`, running processes
+and unsaved games; if anything is owned by the player, use the separate checkout.
+Do not force-reset, clean, overwrite saves or pull main expecting this unmerged
+fix. Verify build/content hashes in the manifest. Extract the proof archive into
+a new directory; use the matching canonical English profile and published GRFs.
+The archive's paths are provenance, not instructions to overwrite a local profile.
+
+Prepared owner mission, after the owner chooses to play; human status remains Pending:
+
+1. Load a copy of `materials-i-completed.sav` on the corrected build, keeping it
+   paused. Confirm£3,620,714 cash/£100k debt, Materials I retained, budgetoff and
+   II selectable. Apply no grant; the existing allowance is consumed.
+2. Inspect grain producer3 at(178,320), food processor9 at(338,192), Core town0
+   near(798,69), receiver's own house(794,66), gate2then1 and both services.
+3. Check Megacity growth0 with FOOD-only baskets and missing expansion supplies.
+   Observe further FOOD payment/monthly use when explicitly proceeding; record
+   waits and first unexpected event. Fifteen minutes is feedback, not promised completion.
+4. Save under a new name, quit/reload and inspect retained unlock, budget, town
+   reserves/growth and train orders. Do not start Materials II or grant funds.
+5. Report Pass/Fail/Partial, exact build/save/content, elapsed time, cash/debt and
+   first failure. This supplied checkpoint supports observation only; manual
+   construction UAT, ordinary economics and human acceptance remain separate.
+
+The historical second-startup and original records below retain their own failures
+and superseded next actions. Their frozen archive bytes are unchanged.
+
+# Historical second-startup recovery stop
 
 **ASSISTED FUNCTIONAL: FAIL before the first state snapshot. Human UAT: Pending.**
 The explicit recovery handoff authorized one repaired canonical startup and
