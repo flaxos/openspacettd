@@ -11,6 +11,8 @@
 #include "megacity_gui.h"
 #include "megacity_manager.h"
 #include "planet_manager.h"
+#include "portal_cmd.h"
+#include "../command_func.h"
 #include "../town.h"
 #include "../window_gui.h"
 #include "../strings_func.h"
@@ -116,7 +118,7 @@ struct MegacityOverviewWindow : Window {
 	void OnPaint() override
 	{
 		bool is_mega = (this->current_town != TownID::Invalid()) && MegacityManager::IsMegacity(this->current_town);
-		this->SetWidgetDisabledState(WID_MCO_DESIGNATE, is_mega || this->current_town == TownID::Invalid());
+		this->SetWidgetDisabledState(WID_MCO_DESIGNATE, is_mega || !Town::IsValidID(this->current_town));
 		this->SetWidgetDisabledState(WID_MCO_LOCATE, this->current_town == TownID::Invalid() || !Town::IsValidID(this->current_town));
 
 		auto all_megas = MegacityManager::GetAllMegacities();
@@ -310,14 +312,11 @@ struct MegacityOverviewWindow : Window {
 
 			case WID_MCO_DESIGNATE: {
 				if (this->current_town != TownID::Invalid() && Town::IsValidID(this->current_town)) {
-					const Town *t = Town::Get(this->current_town);
-					WorldID wid = WorldID{0};
-					if (PlanetManager::Count() > 0) {
-						const PlanetRegion *region = PlanetManager::GetRegionByTile(t->xy);
-						if (region != nullptr) wid = region->id;
+					if (_current_company == COMPANY_SPECTATOR) {
+						Command<Commands::DesignateMegacitySpectator>::Post(this->current_town);
+					} else {
+						Command<Commands::DesignateMegacity>::Post(this->current_town);
 					}
-					MegacityManager::RegisterMegacity(this->current_town, wid, t->name, t->cache.population);
-					this->SetDirty();
 				}
 				break;
 			}
