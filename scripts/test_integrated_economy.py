@@ -5,8 +5,10 @@ import json
 import time
 import hashlib
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
-from test_wp11_slice import Engine, ROOT, require
+from test_wp11_slice import Engine, OfflineEngine, ROOT, require
+from test_commonwealth_platform_art import environment, profile_environment
 
 
 FIRST_FREIGHT_ADVANCES = 240
@@ -22,6 +24,399 @@ def phase_deadline(engine):
 def freight_advance_limit(requested):
     require(requested > 0, 'Advance limit must be positive')
     return min(requested, FIRST_FREIGHT_ADVANCES)
+
+
+def functional_campaign(args):
+    """One bounded ASSISTED FUNCTIONAL primary with one total cash allowance."""
+    require(args.seeds == [11], 'ASSISTED FUNCTIONAL is authorized for seed11 only')
+    started = time.monotonic()
+    recovery = None
+    preflight_used = 0
+    whole_remaining = 4 * 3600
+    if args.functional_recovery_from is not None:
+        evidence = args.functional_recovery_from.resolve()
+        previous = json.loads(evidence.read_text())
+        prior = previous['primary']
+        require(previous['label'] == 'ASSISTED FUNCTIONAL' and previous['status'] == 'FAIL' and
+                prior['error'] == 'Timed out waiting for FUNCTIONAL_OFFLINE_START', 'Recovery requires the preserved startup-only failure')
+        require(not prior['assistance'] and not prior['native_transactions'] and not prior['trace'] and
+                not prior['samples'] and prior['advance_counts'] == {'initial': 0, 'cold': 0} and
+                all(value == 'NOT RUN' for value in prior['phases'].values()) and not previous['artifacts'] and
+                not any(key in prior for key in ('pristine', 'partial_state', 'construction', 'final')) and
+                not list(evidence.parent.rglob('*.sav')), 'Recovery cannot reset prior grants, spending, search, ticks or persisted progression')
+        require(args.functional_campaign_start_utc is not None and args.functional_startup_used_seconds is not None,
+                'Recovery must carry the original campaign start and startup wall usage')
+        campaign_start = datetime.fromisoformat(args.functional_campaign_start_utc.replace('Z', '+00:00'))
+        require(campaign_start.tzinfo is not None, 'Original campaign start must include its UTC offset')
+        elapsed = (datetime.now(timezone.utc) - campaign_start).total_seconds()
+        preflight_used = args.functional_startup_used_seconds
+        require(0 < preflight_used < PHASE_SECONDS and elapsed >= preflight_used,
+                'Invalid carried startup time')
+        whole_remaining -= elapsed
+        recovery = {'status': 'NOT RUN', 'authorization': 'Explicit parent recovery handoff: one canonical startup confirmation',
+                    'previous_evidence': str(evidence), 'previous_evidence_sha256': hashlib.sha256(evidence.read_bytes()).hexdigest(),
+                    'original_error': prior['error'], 'original_campaign_start_utc': campaign_start.isoformat(),
+                    'prior_startup_wall_seconds': preflight_used, 'prior_advance_counts': prior['advance_counts'],
+                    'prior_assistance': 0, 'prior_candidates': 0, 'prior_native_gross_debits': 0,
+                    'prior_startup_attempts': 1, 'recovery_startup_attempts': 0,
+                    'whole_wall_seconds_already_elapsed': elapsed}
+        recovery['original_whole_deadline_utc'] = datetime.fromtimestamp(campaign_start.timestamp() + 4 * 3600, timezone.utc).isoformat()
+        recovery['preflight_remaining_seconds'] = PHASE_SECONDS - preflight_used
+        recovery['stopped_interval_scope'] = 'Infrastructure diagnosis/repair; separate from active generation/preflight use; absolute whole deadline retained'
+    else:
+        require(args.functional_campaign_start_utc is None and args.functional_startup_used_seconds is None,
+                'Carried bounds require preserved recovery evidence')
+    require(whole_remaining > 0, 'Whole native campaign exhausted four-hour wall limit before recovery')
+    output = args.output.resolve()
+    require(not output.exists(), 'Preserve earlier evidence; choose a new output directory')
+    output.mkdir(parents=True)
+    whole_deadline = started + whole_remaining
+    report = {'label': 'ASSISTED FUNCTIONAL', 'status': 'NOT RUN', 'human_uat': 'Pending',
+              'ordinary_start_economic_proof': 'NOT RUN', 'primary': {}, 'replay': {'status': 'NOT RUN'},
+              'inputs': acceptance_inputs(args.binary.resolve())}
+    report['total_cash_allowance'] = 6000000
+    report['repeatability'] = 'NOT RUN'
+    report['replay']['reason'] = 'An independent funded replay would exceed the explicit one-total-GBP6m allowance'
+    if recovery is not None:
+        report['startup_recovery'] = recovery
+    changed = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD', '--', 'src', 'scripts'], cwd=ROOT, text=True)
+    report['inputs']['changed_source_sha256'] = {
+        p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in changed.splitlines()}
+
+    def persist():
+        report['artifacts'] = {str(p.relative_to(output)): hashlib.sha256(p.read_bytes()).hexdigest()
+                               for p in output.rglob('*.sav')}
+        (output / 'evidence.json').write_text(json.dumps(report, indent=2) + '\n')
+
+    def attempt(folder, result):
+        folder.mkdir()
+        config = folder / 'functional.cfg'
+        config.write_text(ordinary_config(11) + '\n[misc]\nlanguage = english.lng\n')
+        result.update(status='PARTIAL', assistance=[], native_transactions=[], samples=[], trace=[],
+                      phases={name: 'NOT RUN' for name in ('preflight', 'setup', 'initial', 'cold')}, negative_control={'status': 'NOT RUN'}, cold_before={'status': 'NOT RUN'},
+                      cold_after={'status': 'NOT RUN'})
+        result['config_sha256'] = hashlib.sha256(config.read_bytes()).hexdigest()
+        engine = None
+        primary_debits = 0
+        control_debits = 0
+        receipts = 0
+        phase_used = {'initial': 0, 'cold': 0}
+        preflight_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS - preflight_used)
+
+        def start(name, save=None, target=folder, deadline=whole_deadline):
+            require(time.monotonic() < deadline, 'Native startup phase wall limit exhausted')
+            target.mkdir(exist_ok=True)
+            target_config = target / 'functional.cfg'
+            if target != folder:
+                target_config.write_text(config.read_text())
+            with environment(profile_environment(target)):
+                native = OfflineEngine(args.binary.resolve(), target_config, target, name, save=save, deadline=deadline)
+            if time.monotonic() >= deadline:
+                native.close()
+                raise RuntimeError('Native startup phase wall limit exhausted')
+            return native
+
+        def state(native):
+            return json.loads(native.command('connected_economy functional-status', 'CONNECTED functional-state '))
+
+        def mutate(native, operation, ledger=result, pre_hq=False):
+            nonlocal primary_debits, control_debits, receipts
+            require(time.monotonic() < whole_deadline, 'Whole native campaign exhausted four-hour wall limit')
+            before = state(native)
+            value = json.loads(native.command('connected_economy ' + operation, 'CONNECTED functional-result '))
+            after = value['state']
+            entries = value['audit']['cash_transactions']
+            # Retain the native result and its ledger even when an invariant stops
+            # this campaign; a failed observation must not erase paid transactions.
+            ledger.setdefault('native_transactions', []).extend(entries)
+            ledger.setdefault('trace', []).append({'operation': operation, 'result': value})
+            if ledger is result:
+                primary_debits += sum(max(row[2], 0) for row in entries)
+                receipts += sum(max(-row[2], 0) for row in entries if operation != 'functional-grant')
+            else:
+                control_debits += sum(max(row[2], 0) for row in entries)
+            require(value['cash_conserved'] and not value['cargo_errors'], f'{operation}: native cash/cargo mismatch')
+            require(after['loan'] == 100000 and after['money'] > 0, f'{operation}: fixed debt/cash contract failed')
+            require(not any(t['lost'] or t['crashed'] for t in after['trains']), f'{operation}: lost or crashed train')
+            require(sum(row[2] for row in entries) == value['audit']['cash_debits'], 'Incomplete native transaction history')
+            require(after['money'] == before['money'] - sum(row[2] for row in entries), 'Financial transaction reconciliation failed')
+            if ledger is result:
+                require(primary_debits + control_debits <= 4000000, 'All-phase GBP4m gross-debit cap exhausted')
+                if pre_hq:
+                    require(primary_debits + control_debits <= 1000000, 'Pre-HQ GBP1m gross-debit cap exhausted')
+            else:
+                require(sum(max(row[2], 0) for row in ledger['native_transactions']) + ledger['starting_debits'] <= 1000000,
+                        'Negative-control pre-HQ gross-debit cap exhausted')
+            return value
+
+        def advance(native, phase, deadline, ledger=result):
+            require(phase_used[phase] < 240 and time.monotonic() < deadline,
+                    f'{phase} shared 240 advances/30-minute bound exhausted')
+            native.deadline = deadline
+            phase_used[phase] += 1
+            value = mutate(native, 'functional-advance', ledger, pre_hq=(phase == 'initial'))
+            require(value['state']['tick'] - ledger['previous_tick'] == 2048, 'Advance differs from 2048 native ticks')
+            ledger['previous_tick'] = value['state']['tick']
+            ledger.setdefault('samples', []).append(value)
+            return value
+
+        def paid_visits(samples, service):
+            arrivals = sorted(row for sample in samples for row in sample['audit']['arrivals']
+                              if row[1] == service['train'] and row[2] == service['drop'])
+            delivered, booked = set(), set()
+            for sample in samples:
+                for row in sample['audit']['payments']:
+                    prior = [a[0] for a in arrivals if a[0] <= row[0]]
+                    if row[1] == service['train'] and row[2] == service['drop'] and row[3] == service['cargo'] and row[4] > 0 and row[5] > 0 and prior:
+                        delivered.add(max(prior))
+                for row in sample['audit']['cash_payments']:
+                    prior = [a[0] for a in arrivals if a[0] <= row[0]]
+                    if row[1] == service['train'] and row[2] == service['drop'] and row[3] > 0 and prior:
+                        booked.add(max(prior))
+            return sorted(delivered & booked)
+
+        def consumed_months(samples, town):
+            return sorted({row[0] for sample in samples for row in sample['audit']['city_months'] if row[1] == town and row[2] > 0})
+
+        def town_state(snapshot, town):
+            return next(t for t in snapshot['towns'] if t['id'] == town)
+
+        def reject_grant(native, expected):
+            try:
+                native.command('connected_economy functional-grant', 'CONNECTED functional-result ')
+            except RuntimeError as error:
+                require('one grant requires fresh pristine offline setup, never reload' in str(error), 'Unexpected grant rejection')
+            else:
+                raise RuntimeError('Repeat or reload grant was accepted')
+            require(state(native) == expected, 'Rejected grant changed saved semantics')
+
+        try:
+            if recovery is not None:
+                recovery['recovery_startup_attempts'] += 1
+                require(recovery['recovery_startup_attempts'] == 1, 'Only one canonical recovery startup is authorized')
+                recovery['status'] = 'PARTIAL'
+                persist()
+            engine = start('fresh', deadline=preflight_deadline)
+            engine.deadline = preflight_deadline
+            pristine = json.loads(engine.command('connected_economy functional-start', 'CONNECTED functional-state '))
+            result['pristine'] = pristine
+            result['pristine_audit'] = audit(engine)
+            require(state(engine) == pristine, 'Pristine terrain/text audit changed state')
+            require(pristine['money'] == pristine['loan'] == 100000 and pristine['max_loan'] == 300000 and
+                    pristine['seed'] == 11 and pristine['core_town_valid'] and not pristine['stations'] and
+                    not pristine['trains'] and not pristine['research'] and not pristine['hqs'], 'Noncanonical generated pristine state')
+            if recovery is not None:
+                recovery.update(status='PASS', pristine_verified=True, assistance_before_progression=0,
+                                persisted_progression=False, canonical_config_sha256=result['config_sha256'])
+                persist()
+                print('ASSISTED FUNCTIONAL checkpoint: canonical startup recovered; pristine GBP100k cash/debt, '
+                      'no grant or persisted progression; continuing the same instance within carried bounds', flush=True)
+            engine.save(folder / 'pristine.sav')
+            grain, food = pristine['cargo_labels']['GRAI'], pristine['cargo_labels']['FOOD']
+            roles = {w['id']: w['role'] for w in pristine['worlds']}
+            candidates = []
+            for producer in pristine['industries']:
+                if roles[producer['world']] != 'Frontier' or not any(c[0] == grain for c in producer['outputs']):
+                    continue
+                for processor in pristine['industries']:
+                    if roles[processor['world']] != 'Industrial' or not any(c[0] == grain for c in processor['inputs']) or not any(c[0] == food for c in processor['outputs']):
+                        continue
+                    for town in pristine['towns']:
+                        if roles[town['world']] != 'Core' or town['population'] == 0:
+                            continue
+                        for a in pristine['gates']:
+                            if {e['world'] for e in a['ends']} != {producer['world'], processor['world']}:
+                                continue
+                            for b in pristine['gates']:
+                                if {e['world'] for e in b['ends']} == {processor['world'], town['world']}:
+                                    candidates.append((producer['id'], processor['id'], town['id'], a['id'], b['id']))
+            result['preflight'] = []
+            selected = None
+            for ids in sorted(candidates)[:2]:
+                require(time.monotonic() < preflight_deadline, 'Generation/preflight 30-minute wall bound exhausted')
+                command = 'functional-plan ' + ' '.join(map(str, ids))
+                plan = json.loads(engine.command('connected_economy ' + command, 'CONNECTED functional-plan '))
+                result['preflight'].append(plan)
+                require(plan['preview_unchanged'] and state(engine) == pristine, 'Preflight mutated native state')
+                if plan['legal'] and plan['total_quote'] <= 1000000:
+                    selected = ids
+                    result['selected_plan'] = plan
+                    result['selection_reason'] = 'First legal whole chain in stable producer/processor/town/gate ID order within two candidates'
+                    break
+            require(selected is not None, 'No legal complete chain within two candidates and GBP1m pre-HQ quote bound')
+            result['ordinary_start'] = {'label': 'ordinary-start', 'status': 'PASS', 'scope': 'read-only feasibility quote only',
+                'cash': 100000, 'loan': 100000, 'max_loan': 300000, 'total_quote': plan['total_quote'],
+                'construction_with_max_native_loan_quote_feasible': plan['total_quote'] <= 300000,
+                'hq_cash_eligibility': 5000000, 'hq_ordinary_feasible': False,
+                'economics': 'Unproven; retained revised A1 financial failure remains the operating comparison'}
+            result['phases']['preflight'] = 'PASS'
+            setup_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS)
+            engine.deadline = setup_deadline
+            grant = mutate(engine, 'functional-grant', pre_hq=True)
+            require(grant['amount'] == 6000000 and grant['state']['money'] == 6100000 and
+                    grant['audit']['cash_transactions'] == [[pristine['tick'], 12, -6000000]], 'Cash allowance/native Other booking differs')
+            result['assistance'].append({'amount': 6000000, 'currency': 'GBP virtual in-game', 'source': grant['source'],
+                'native_expense_type': 'Other', 'signed_native_debit': -6000000, 'tick': pristine['tick'],
+                'before_cash': 100000, 'after_cash': 6100000, 'before_debt': 100000, 'after_debt': 100000})
+            require(sum(item['amount'] for item in result['assistance']) == report['total_cash_allowance'],
+                    'Explicit total virtual-cash allowance exceeded')
+            persist()
+            reject_grant(engine, grant['state'])
+            engine.save(folder / 'cash-assisted.sav')
+            built = mutate(engine, 'functional-build ' + ' '.join(map(str, selected)), pre_hq=True)
+            require(time.monotonic() < setup_deadline, 'Setup/build 30-minute bound exhausted')
+            require(built['state']['money'] >= 5100000, 'Construction failed to retain GBP5.1m before receipts')
+            result['construction'] = built
+            result['construction_audit'] = audit(engine)
+            require(state(engine) == built['state'], 'Paid terrain/text audit changed state')
+            result['phases']['setup'] = 'PASS'
+            food_service = built['services'][1]
+            town = selected[2]
+            receiver = next(s for s in built['state']['stations'] if s['id'] == food_service['drop'])
+            require(receiver['consumer'] and not receiver['warehouse'] and receiver['town'] == town and
+                    any(h['town'] == town and h['tile'] == plan['receiver_house'] for h in receiver['catchment_houses']),
+                    'Native own-house FOOD receiver differs')
+            initial_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS)
+            result['previous_tick'] = built['state']['tick']
+            while len(paid_visits(result['samples'], food_service)) < 3 or len(consumed_months(result['samples'], town)) < 3:
+                advance(engine, 'initial', initial_deadline)
+            result['paid_food_visits'] = paid_visits(result['samples'], food_service)
+            result['consuming_months'] = consumed_months(result['samples'], town)
+            result['paid_grain_visits'] = paid_visits(result['samples'], built['services'][0])
+            conversion = [row for sample in result['samples'] for row in sample['audit']['processor_cargo'] if row[1] == selected[1]]
+            used_grain = -sum(row[3] for row in conversion if row[2] == grain)
+            made_food = sum(row[3] for row in conversion if row[2] == food)
+            batches = next(row[5] for row in state(engine)['economy']['factories'] if row[0] == selected[1]) - next(row[5] for row in pristine['economy']['factories'] if row[0] == selected[1])
+            require(result['paid_grain_visits'] and used_grain == made_food == 2 * batches and batches > 0,
+                    'Selected processor did not convert paid grain at actual 2:2 batch ratio')
+            result['conversion'] = {'grain_consumed': used_grain, 'food_produced': made_food, 'batches': batches}
+            print(f'ASSISTED FUNCTIONAL checkpoint: three paid FOOD visits and consuming months; {folder}', flush=True)
+            before_control = state(engine)
+            engine.save(folder / 'food-control-source.sav')
+            control = result['negative_control']
+            control.update(status='PARTIAL', starting_debits=primary_debits, starting_state=before_control, previous_tick=before_control['tick'], samples=[])
+            copy = folder / 'negative-control'
+            controlled = start('control', folder / 'food-control-source.sav', copy, deadline=initial_deadline)
+            try:
+                controlled.deadline = initial_deadline
+                require(state(controlled) == before_control, 'Disposable control cold load changed semantics')
+                mutate(controlled, 'functional-stop ' + str(food_service['train']), control)
+                zero_month = None
+                while True:
+                    observation = advance(controlled, 'initial', initial_deadline, control)
+                    now = observation['state']
+                    train = next(t for t in now['trains'] if t['id'] == food_service['train'])
+                    city = town_state(now, town)
+                    reserve, demand = dict(city['reserves']).get(food, 0), dict(city['demand'])[food]
+                    month = now['calendar_clock'][:2]
+                    if zero_month is not None:
+                        require(train['stopped'] and train['speed'] == 0 and reserve == zero_month[1] and
+                                not observation['audit']['city_months'] and not dict(city['consumed']).get(food, 0),
+                                'Stopped supply changed reserves or consumed FOOD between observations')
+                    if train['stopped'] and train['speed'] == 0 and reserve < demand and not dict(city['consumed']).get(food, 0):
+                        if zero_month is None:
+                            zero_month = (month, reserve)
+                        elif month != zero_month[0]:
+                            require(reserve == zero_month[1] and not observation['audit']['city_months'], 'Stopped supply changed reserves or consumed FOOD')
+                            control['below_basket_remainder'] = reserve
+                            control['stopped_no_use'] = now
+                            break
+                mutate(controlled, 'functional-restart ' + str(food_service['train']), control)
+                recovery_samples = []
+                while not paid_visits(recovery_samples, food_service) or not consumed_months(recovery_samples, town):
+                    recovery_samples.append(advance(controlled, 'initial', initial_deadline, control))
+                control['status'] = 'PASS'
+                controlled.save(copy / 'recovered.sav')
+            finally:
+                controlled.close()
+            require(state(engine) == before_control, 'Disposable control changed the paused primary')
+            result['phases']['initial'] = 'PASS'
+            engine.deadline = initial_deadline
+            unlock = mutate(engine, 'functional-unlock', pre_hq=False)
+            require(unlock['hq_quote'] == 2500000 and unlock['no_hq_rejected'] and unlock['materials_ii_rejected'], 'HQ/prerequisite proof differs')
+            require(unlock['state']['research'] == [[301, 0, 100000, []]], 'Materials I first checkpoint must be selected at 0 RP')
+            before_cold = state(engine)
+            engine.save(folder / 'materials-i-before.sav')
+            engine.close()
+            engine = None
+            cold_deadline = min(whole_deadline, time.monotonic() + PHASE_SECONDS)
+            engine = start('cold-before', folder / 'materials-i-before.sav', deadline=cold_deadline)
+            engine.deadline = cold_deadline
+            require(state(engine) == before_cold, 'First cold load lost project/budget/RP or native semantics')
+            reject_grant(engine, before_cold)
+            result['cold_before'].update(status='PASS', equal=True, state=before_cold)
+            while 301 not in state(engine)['research'][0][3]:
+                advance(engine, 'cold', cold_deadline)
+            eligible = mutate(engine, 'functional-eligibility')
+            require(eligible['materials_i_unlocked'] and eligible['materials_ii_selectable'], 'Materials II not selectable after paid I')
+            research_entries = [row for row in result['native_transactions'] if row[1] == 12 and row[2] == 100000]
+            require(len(research_entries) == 1, 'Research did not book exactly GBP100k once through native Other')
+            mutate(engine, 'functional-budget-off')
+            completed = state(engine)
+            engine.save(folder / 'materials-i-completed.sav')
+            engine.close()
+            engine = None
+            engine = start('cold-after', folder / 'materials-i-completed.sav', deadline=cold_deadline)
+            engine.deadline = cold_deadline
+            require(state(engine) == completed, 'Second cold load changed retained unlock/custody/cash/orders')
+            reject_grant(engine, completed)
+            result['cold_after'].update(status='PASS', equal=True, state=completed)
+            continued = []
+            while not paid_visits(continued, food_service) or not consumed_months(continued, town):
+                continued.append(advance(engine, 'cold', cold_deadline))
+            result['cold_continuation'] = continued
+            result['phases']['cold'] = 'PASS'
+            result['final'] = state(engine)
+            result['final_audit'] = audit(engine)
+            require(state(engine) == result['final'], 'Final terrain/text audit changed state')
+            engine.save(folder / 'owner-observation.sav')
+            result['advance_counts'] = phase_used
+            result['financial_reconciliation'] = {'starting_cash': 100000, 'assistance': 6000000,
+                'native_receipts_excluding_assistance': receipts, 'native_gross_debits': primary_debits,
+                'disposable_control_gross_debits': control_debits, 'campaign_gross_debit_cap_usage': primary_debits + control_debits,
+                'ending_cash': result['final']['money'], 'debt': 100000,
+                'native_net_excluding_assistance': receipts - primary_debits}
+            require(result['final']['money'] == 100000 + 6000000 + receipts - primary_debits, 'Complete campaign financial reconciliation failed')
+            result['status'] = 'PASS'
+        except BaseException as error:
+            if recovery is not None and recovery['status'] != 'PASS':
+                recovery.update(status='FAIL', error=str(error))
+            result['error'] = str(error)
+            result['status'] = 'PARTIAL' if any(term in str(error) for term in ('bound exhausted', 'cap exhausted', 'wall limit', 'within two candidates')) else 'FAIL'
+            result['advance_counts'] = phase_used
+            if engine is not None and engine.process.poll() is None:
+                try:
+                    result['partial_state'] = state(engine)
+                    engine.save(folder / 'stopped-partial.sav')
+                except Exception as capture_error:
+                    result['partial_capture_error'] = str(capture_error)
+            assistance = sum(-row[2] for row in result['native_transactions'] if row[1] == 12 and row[2] == -6000000)
+            observed = result.get('partial_state', (result.get('trace') or [{}])[-1].get('result', {}).get('state', {}))
+            reconciled_cash = 100000 + assistance + receipts - primary_debits
+            result['financial_reconciliation'] = {'starting_cash': 100000, 'assistance': assistance,
+                'native_receipts_excluding_assistance': receipts, 'native_gross_debits': primary_debits,
+                'disposable_control_gross_debits': control_debits, 'campaign_gross_debit_cap_usage': primary_debits + control_debits,
+                'ending_cash': observed.get('money'), 'debt': observed.get('loan'),
+                'native_net_excluding_assistance': receipts - primary_debits,
+                'recorded_transactions_ending_cash': reconciled_cash,
+                'unobserved_native_cash_delta': None if 'money' not in observed else observed['money'] - reconciled_cash}
+            raise
+        finally:
+            if engine is not None:
+                engine.close()
+            persist()
+
+    try:
+        attempt(output / 'primary', report['primary'])
+        report['status'] = 'PARTIAL'
+    except BaseException as error:
+        report['error'] = str(error)
+        report['status'] = 'PARTIAL' if report['primary'].get('status') == 'PARTIAL' or report['replay'].get('status') == 'PARTIAL' else 'FAIL'
+        raise
+    finally:
+        persist()
+    print(f'ASSISTED FUNCTIONAL primary PASS; replay NOT RUN under total allowance; '
+          f'economics unproven; human UAT Pending. Evidence: {output}', flush=True)
 
 
 def acceptance_inputs(binary):
@@ -491,8 +886,16 @@ def main():
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--first-freight', action='store_true', help='Ordinary generated IRON start; at most 240 advances/30 minutes per phase')
     modes.add_argument('--generation-contract', action='store_true', help='Twice-fresh generation, ordinary paid joins/Core station and cold reloads; no progression')
+    modes.add_argument('--functional-core', action='store_true', help='Reviewed seed11 ASSISTED FUNCTIONAL Core supply/Materials I; one GBP6m offline grant')
+    parser.add_argument('--functional-recovery-from', type=Path, help='Preserved startup-only failure; explicit recovery handoff required')
+    parser.add_argument('--functional-campaign-start-utc', help='Original campaign start, including UTC offset; preserves the four-hour deadline')
+    parser.add_argument('--functional-startup-used-seconds', type=float, help='Prior startup wall usage carried into the 30-minute preflight cap')
     parser.add_argument('--seeds', type=int, nargs='+', default=[11, 101, 2026])
     args = parser.parse_args()
+    if args.functional_core:
+        return functional_campaign(args)
+    require(args.functional_recovery_from is None and args.functional_campaign_start_utc is None and
+            args.functional_startup_used_seconds is None, 'Recovery options require --functional-core')
     if args.generation_contract:
         return generation_contract(args)
     if args.first_freight:

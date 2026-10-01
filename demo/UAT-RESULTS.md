@@ -1,5 +1,71 @@
 # Human UAT results — recovery / v1.1
 
+## First Functional Core Supply repaired observation — 1 October 2026
+
+**Human status Pending. ASSISTED FUNCTIONAL requested outcome PASS across recorded
+authorized handoffs; complete reviewed acceptance PARTIAL.** Repaired second load
+matched the entire existing completed state; another105FOOD paid visit and60FOOD
+consuming month passed, followed by final audit/save. The month used carried
+inventory before that delivery; continuous supply and later-load consumption remain
+unproven. Final cash£3,705,864/debt£100k; Materials I retained/budgetoff/II eligibility
+already proved. Sole£6m allowance fully used, no additional grant or loan.
+
+[Five-step owner playtest and safe checkout](../docs/audit/2026-10-01/functional-core/README.md#delivery-and-practical-owner-playtest)
+uses a copy of the retained owner observation save. Preserve originals; apply no
+grant and do not start II. Record exact build/save/content, manual versus supplied
+actions, time, cash/debt and first unexpected control/message. Observation cannot
+establish manual construction UAT. Independent replay/ordinary economics NOTRUN,
+human acceptancePending; exact-head commit-format CI FAIL remains a delivery gate.
+No merge or next slice. Earlier entries preserve their historical failed attempts.
+
+## First Functional Core Supply third handoff — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL campaign: FAIL at second cold equality.**
+Initial paid grain/FOOD/Core consumption, stopped/restarted supply control, paidHQ,
+first cold equality, paidMaterialsI and II eligibility pass. The sole second-load
+mismatch is growth0→1; the narrow existing-state repair has focused/full fixture
+gates and independent source review, not a canonical continuation pass.
+[Verified checkpoint, five-step owner observation and exact bounds](../docs/audit/2026-10-01/functional-core/README.md#safe-checkout-and-practical-owner-observation).
+
+Assistance£6m is fully used, no additional grant; cash£3,620,714/debt£100k reconciles.
+The supplied completed checkpoint is partial observation evidence only. A new
+explicit automated continuation handoff must keep the original cold/absolute
+clocks and aggregate counts; none was executed. Record build/save/content, manual
+versus supplied actions, time, assistance and first unexpected event. No human,
+ordinary economic or full functional acceptance, funded replay or next slice follows.
+Earlier entries remain historical failed attempts.
+
+## First Functional Core Supply recovery — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL single recovery: FAIL before first
+state snapshot.** START/READY reached; the map fingerprint asserted on an
+ownerless tile. Original and recovery failures are retained. Focused corrected
+map/teardown and full native gates pass, but no flow, paid HQ/I/II or cold mission
+was run. Total assistance applied is £0; ending cash/debt are unobserved. The
+crash save is diagnostic and must not be offered as an observation checkpoint.
+
+The [safe checkout and six-step manual feedback mission](../docs/audit/2026-10-01/functional-core/README.md#safe-fresh-checkout-and-manual-owner-feedback)
+remains unverified. Record exact build/content, manual actions, total assistance,
+cash/debt, elapsed time and first failure. Any further automated campaign needs
+a new explicit handoff carrying the consumed recovery and existing bounds; funded
+replay would exceed the one-total allowance. No human/economic acceptance or
+next slice follows from automated gates. The prior entry below is historical.
+
+## First Functional Core Supply implementation — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL automated campaign: FAIL at startup.**
+The first bounded run stopped before any assistance command or checkpoint; all
+food/control/research/cold/replay phases are NOT RUN. £0 was granted; actual ending
+cash/debt were not observed. Focused designation/query/panel/save/relay tests and
+the diagnosed console transport repair do not establish the playable outcome.
+
+Use the [safe fresh checkout and six-step manual feedback mission](../docs/audit/2026-10-01/functional-core/README.md#safe-fresh-checkout-and-manual-owner-feedback).
+There is no verified observation save or route quote. Record exact build/content,
+manual steps, assistance/cash/debt, elapsed time and first unexpected message;
+15 minutes is a feedback window, not promised completion. The reviewed plan
+requires a new handoff for an automated full-campaign retry. Historical economic
+failures remain failed; no human acceptance, merge or next slice is inferred.
+
 ## Functional progression replan — 1 October 2026
 
 **Human status: Pending. No new game or human test was run for this docs change.**
@@ -121,7 +187,7 @@ with one joined client each, including a run with two graphical clients. Ten car
 units and the global train identity return without a detected desync or duplicate.
 This is a controlled two-car fixture with no station orders; scheduled routes,
 restart recovery and human federation acceptance remain open. See
-[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#historical-milestone-live-federation-with-scheduled-freight--completed-27-september-2026).
 
 
 Suite/fixture ID: ______  Save SHA256/version: ______  Base graphics/version: ______
