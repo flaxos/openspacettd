@@ -800,6 +800,26 @@ struct MEGAChunkHandler : ChunkHandler {
 			MegacityManager::RestoreMegacity(p);
 		}
 	}
+
+	void FixPointers() const override
+	{
+		/* All chunks, including ECON, are loaded before this callback. MEGA::Load
+		 * cannot choose a ruleset because MEGA precedes ECON in the file. These
+		 * are the existing integrated monthly outcomes, not another evaluation:
+		 * EvaluateCity would consume the saved baskets a second time. */
+		if (!IntegratedEconomy::Enabled()) return;
+		for (auto p : MegacityManager::GetAllMegacities()) {
+			if (IntegratedEconomy::Role(p.world_id) != EconomicRole::Core) continue;
+			p.growth_multiplier = p.growth_state == MegacityGrowthState::HyperGrowth ? 2.0f
+								: p.growth_state == MegacityGrowthState::MetropolitanBoom ? 1.0f : 0.0f;
+			p.passenger_multiplier = p.growth_state == MegacityGrowthState::Starvation ? 0.5f
+								   : p.growth_state == MegacityGrowthState::HyperGrowth ? 1.5f : 1.0f;
+			p.satisfaction_pct = {p.passenger_multiplier >= 1 ? 1.0f : 0.0f, p.growth_multiplier >= 1 ? 1.0f : 0.0f,
+								  p.growth_multiplier >= 2 ? 1.0f : 0.0f};
+			p.overall_supply_index = (p.satisfaction_pct[0] + p.satisfaction_pct[1] + p.satisfaction_pct[2]) / 3.0f;
+			MegacityManager::RestoreMegacity(p);
+		}
+	}
 };
 
 /** Temporary storage for Stockpile serialization. */

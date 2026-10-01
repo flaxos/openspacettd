@@ -41,6 +41,8 @@
 #include "../economy_base.h"
 #include "../economy_func.h"
 #include "../gfx_func.h"
+#include "../gfx_layout.h"
+#include "../spritecache.h"
 #include "../language.h"
 #include "../genworld.h"
 #include "../strings_func.h"
@@ -67,6 +69,7 @@
 #include "../portal/company_stockpile.h"
 #include "../portal/production_chain.h"
 #include "../portal/tech_tree.h"
+#include "../portal/integrated_economy.h"
 #include "../portal/fabrication_manager.h"
 #include "../widgets/corporate_hq_widget.h"
 #include "../widgets/universe_directory_widget.h"
@@ -174,11 +177,38 @@ std::string CommandAuthorityState()
 	return out.str();
 }
 
+/** Each parallel process must own its save directory, even with a coarse clock. */
+static std::filesystem::path CreateCommandAuthoritySaveDirectory(const std::filesystem::path &prefix)
+{
+	for (uint32_t attempt = 0; attempt < 64; ++attempt) {
+		const std::filesystem::path dir = fmt::format("{}-{}", prefix.string(), attempt);
+		if (std::filesystem::create_directory(dir)) return dir;
+	}
+	FAIL("Could not allocate a unique command-authority save directory after 64 collisions");
+	return {};
+}
+
+TEST_CASE("Command authority save directories retry existing names without sharing files", "[command-authority][save-directory]")
+{
+	const auto prefix = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-collision-test-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	const auto root = CreateCommandAuthoritySaveDirectory(prefix);
+	const auto occupied = root / "parallel-save-0";
+	REQUIRE(std::filesystem::create_directory(occupied));
+	const auto selected = CreateCommandAuthoritySaveDirectory(root / "parallel-save");
+	CHECK(selected == root / "parallel-save-1");
+	CHECK(std::filesystem::is_directory(selected));
+	CHECK(std::filesystem::is_directory(occupied));
+	CHECK(std::filesystem::is_empty(occupied));
+	CHECK(std::filesystem::remove(selected));
+	CHECK(std::filesystem::remove(occupied));
+	CHECK(std::filesystem::remove(root));
+}
+
 void SaveReloadCommandAuthority()
 {
 	UnInitWindowSystem();
-	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-{}", std::chrono::steady_clock::now().time_since_epoch().count());
-	REQUIRE(std::filesystem::create_directory(dir));
+	const auto prefix = std::filesystem::temp_directory_path() / fmt::format("openspacettd-wp05-{}", std::chrono::steady_clock::now().time_since_epoch().count());
+	const auto dir = CreateCommandAuthoritySaveDirectory(prefix);
 	const auto path = (dir / "authority.sav").string();
 	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
 	// Registry is transient: local display must derive from the restored canonical world.
@@ -186,6 +216,123 @@ void SaveReloadCommandAuthority()
 	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
 	std::filesystem::remove(path);
 	std::filesystem::remove(dir);
+}
+
+TEST_CASE("Research eligibility queries preserve absent and existing persisted company state", "[research-eligibility][command-authority]")
+{
+	(void)MockEnvironment::Instance();
+	IntegratedEconomy::Reset();
+	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
+	const bool integrated_queries = GENERATE(false, true);
+	IntegratedEconomy::SetEnabled(integrated_queries);
+	if (integrated_queries) IntegratedEconomy::RegisterRole(WorldID{0}, EconomicRole::Core);
+	const bool existing = GENERATE(false, true);
+	if (existing) TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_MATERIALS_1, 17, 23000, {TECH_TRACTION_1});
+	auto observe = []() {
+		std::string result;
+		for (const auto &state : TechTreeManager::GetAllCompanyTechStates()) {
+			result += fmt::format("{}:{}:{}:{}:", state.company_id.base(), state.active_project, state.accumulated_rp, state.monthly_budget);
+			for (TechID id : state.unlocked_techs) result += fmt::format("{},", id);
+		}
+		return result;
+	};
+	const auto before = observe();
+	for (int n = 0; n < 3; ++n) {
+		std::string error;
+		CHECK(TechTreeManager::CanResearch(CompanyID{0}, TECH_MATERIALS_1, error));
+		CHECK_FALSE(TechTreeManager::CanResearch(CompanyID{0}, TECH_MATERIALS_2, error));
+		CHECK(error.find("Prerequisite") != std::string::npos);
+		CHECK(Command<Commands::SelectResearchProject>::Do({}, TECH_MATERIALS_1).Succeeded());
+		CHECK(Command<Commands::SelectResearchProject>::Do({}, TECH_MATERIALS_2).Failed());
+		CHECK(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_MATERIALS_2).Failed());
+		if (existing) CHECK_FALSE(TechTreeManager::CanResearch(CompanyID{0}, TECH_TRACTION_1, error));
+		CHECK(observe() == before);
+	}
+	/* This unit fixture has vanilla content. Keep its native save valid; TECH
+	 * serialization is mode-independent. The campaign covers real integrated
+	 * content and all enabled economy state across fresh-process cold loads. */
+	IntegratedEconomy::Reset();
+	CHECK(observe() == before);
+	SaveReloadCommandAuthority();
+	CHECK(observe() == before);
+	CorporateHQManager::Reset();
+	CHECK(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_MATERIALS_1).Failed());
+	CHECK(observe() == before);
+	IntegratedEconomy::Reset();
+	UnInitWindowSystem();
+}
+
+/** Real panel layout needs glyph headers; the normal mock supplies only metrics. */
+class ResearchPanelFontCache final : public MockFontCache {
+	UniquePtrSpriteAllocator storage;
+	const Sprite *glyph;
+public:
+	explicit ResearchPanelFontCache(FontSize fs) : MockFontCache(fs)
+	{
+		Sprite *sprite = this->storage.Allocate<Sprite>(sizeof(Sprite));
+		sprite->width = sprite->height = 1;
+		sprite->x_offs = sprite->y_offs = 0;
+		this->glyph = sprite; // Null blitter never reads encoded pixels.
+	}
+	const Sprite *GetGlyph(GlyphID) override { return this->glyph; }
+	static void Install()
+	{
+		for (FontSize fs : EnumRange(FontSize::End)) {
+			FontCache::Register(std::make_unique<ResearchPanelFontCache>(fs));
+			Layouter::ResetFontCache(fs);
+		}
+	}
+};
+
+static void SelectNativeAuthorityBaseGraphics();
+
+TEST_CASE("HQ Tech Tree rendering leaves absent and existing research state unchanged", "[.][research-eligibility][gui]")
+{
+	(void)MockEnvironment::Instance();
+	DriverFactoryBase::SelectDriver("null", Driver::Type::Video);
+	IntegratedEconomy::Reset();
+	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
+	SelectNativeAuthorityBaseGraphics(); // Native graphics startup also runs on reload.
+	for (bool existing : {false, true}) {
+		TechTreeManager::Reset();
+		if (existing) TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_MATERIALS_1, 17, 23000, {TECH_TRACTION_1});
+		ResearchPanelFontCache::Install();
+		ShowCorporateHQ(CompanyID{0});
+		Window *window = FindWindowById(WindowClass::CorporateHQ, 0);
+		REQUIRE(window != nullptr);
+		window->OnClick({}, WID_CHQ_TAB_TECH_TREE, 1);
+		AutoRestoreBackup dpi(_cur_dpi, &_screen);
+		/* Render the actual query-bearing panel in both modes. Generic frame
+		 * sprites in MockEnvironment are empty and do not represent real art. */
+		for (bool integrated_queries : {false, true}) {
+			IntegratedEconomy::SetEnabled(integrated_queries);
+			if (integrated_queries) IntegratedEconomy::RegisterRole(WorldID{0}, EconomicRole::Core);
+			window->DrawWidget({0, 0, 1000, 700}, WID_CHQ_MAIN_PANEL);
+		}
+		auto states = TechTreeManager::GetAllCompanyTechStates();
+		if (!existing) CHECK(states.empty());
+		else {
+			REQUIRE(states.size() == 1);
+			CHECK(states[0].company_id == CompanyID{0});
+			CHECK(states[0].active_project == TECH_MATERIALS_1);
+			CHECK(states[0].accumulated_rp == 17);
+			CHECK(states[0].monthly_budget == 23000);
+			CHECK(states[0].unlocked_techs == std::set<TechID>{TECH_TRACTION_1});
+		}
+		/* The vanilla fixture's save must not advertise absent integrated GRFs. */
+		IntegratedEconomy::Reset();
+		SaveReloadCommandAuthority();
+		states = TechTreeManager::GetAllCompanyTechStates();
+		CHECK(states.size() == (existing ? 1 : 0));
+		if (existing) {
+			CHECK(states[0].company_id == CompanyID{0}); CHECK(states[0].active_project == TECH_MATERIALS_1);
+			CHECK(states[0].accumulated_rp == 17); CHECK(states[0].monthly_budget == 23000);
+			CHECK(states[0].unlocked_techs == std::set<TechID>{TECH_TRACTION_1});
+		}
+		InitWindowSystem();
+	}
+	IntegratedEconomy::Reset();
+	UnInitWindowSystem();
 }
 
 TEST_CASE("WP08 legacy empty outpost fixture v1 preserves saved identity and infrastructure", "[command-authority][wp08-legacy]")
@@ -595,12 +742,9 @@ TEST_CASE("Corporate HQ GUI lets an eligible player found the first HQ", "[.][co
 	}
 }
 
-/** Load real base graphics and engine data without creating personal directories. */
-static void SetupNativeAuthorityReload()
+/** Select real base graphics without creating personal directories. */
+static void SelectNativeAuthorityBaseGraphics()
 {
-	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 0);
-	UnInitWindowSystem();
-	REQUIRE(VideoDriver::GetInstance() == nullptr);
 	extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
 	/* Discover the same read-only base paths as game startup, including the
 	 * user/shared folders used by CI, without creating personal directories. */
@@ -616,6 +760,15 @@ static void SetupNativeAuthorityReload()
 	BaseGraphics::FindSets();
 	INFO("The process-reload integration test requires base graphics in a normal OpenTTD data folder or build/baseset");
 	REQUIRE(BaseGraphics::SetSet(nullptr));
+}
+
+/** Load real base graphics and engine data without creating personal directories. */
+static void SetupNativeAuthorityReload()
+{
+	SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 0);
+	UnInitWindowSystem();
+	REQUIRE(VideoDriver::GetInstance() == nullptr);
+	SelectNativeAuthorityBaseGraphics();
 	DriverFactoryBase::SelectDriver("null", Driver::Type::Video);
 }
 

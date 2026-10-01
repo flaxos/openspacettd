@@ -1,0 +1,216 @@
+{
+  "label": "ASSISTED FUNCTIONAL; delivery replacement only",
+  "created_at_utc": "2026-10-01T01:49:28.506554+00:00",
+  "authorization": "Parent explicitly authorized ONE clean replacement draft after final evidence, without rewriting public history",
+  "branch": "codex/functional-core-reviewed-delivery",
+  "base_branch": "codex/generation-money-comparison",
+  "base_sha": "d1bb617664dcbb122aaefc1d4175c34ae1a17e2e",
+  "base_pr": 66,
+  "base_pr_state": "open draft, unmerged at intake",
+  "current_main_sha": "85c423b4a2dd57e5a2c2cf1f6d29bc2e4667845d",
+  "shared_main_ancestor": "91846666f69929443eab04cea63f9f8cfb3bb0be",
+  "main_is_ancestor": false,
+  "base_and_shared_main_are_ancestors": true,
+  "current_main_changes": [
+    "demo/UAT-RESULTS.md",
+    "docs/ACTIVE_EXECUTION_PLAN.md",
+    "docs/AGENT_WORKFLOW.md",
+    "docs/KNOWN_LIMITATIONS.md",
+    "docs/PROJECT_STATUS_AND_ROADMAP.md",
+    "docs/SPRINT_LEDGER.md",
+    "docs/audit/2026-10-01/functional-replan/README.md"
+  ],
+  "current_main_integration": "Only reviewedPR67 documentation; exactplan/workflow/replan blobs retained; fourcanonical documents retain records plus already-reviewed functional status/link updates; no maintenance source omission",
+  "implementation_and_evidence_source": {
+    "pr": 68,
+    "head": "a9c163d306999eb163debc8671eddc7ebd610a2d",
+    "tree": "2bf955478d4b43f834aaaa5bdcb3875c7a0de978"
+  },
+  "new_history": "One newly created Doc: commit on current dependency; no obsolete candidate reused",
+  "preserved_original": "PR68 remains open draft; its branch/commits/archives unchanged; no force-push, deletion, closure or merge",
+  "metadata_only_differences_from_source": [
+    "this file",
+    "docs/PROJECT_STATUS_AND_ROADMAP.md",
+    "docs/audit/2026-10-01/functional-core/README.md"
+  ],
+  "identical_changed_blobs": {
+    "demo/UAT-RESULTS.md": {
+      "sha256": "4577b26da4cd3d2f475263ee7beac1572b02a2a97f4b825456c618ee84c7d926",
+      "bytes": 36208
+    },
+    "docs/ACTIVE_EXECUTION_PLAN.md": {
+      "sha256": "fc290c8e89bd0944af5274755f6d811f5f540d771837d35121726ff9183cfe62",
+      "bytes": 17169
+    },
+    "docs/AGENT_WORKFLOW.md": {
+      "sha256": "648580c1f9724c45f2f09f382ec3b4eb85a455b6199618505eee74fc60631afc",
+      "bytes": 9193
+    },
+    "docs/KNOWN_LIMITATIONS.md": {
+      "sha256": "d42ee499e46e6d0411a2949e05a8e3c4e68e5f8b7a151d2e142d894e9cd2a6fb",
+      "bytes": 37352
+    },
+    "docs/SPRINT_LEDGER.md": {
+      "sha256": "eddb2ae2b9ac0a2d04eb8b2b45aa38c519fad94072a1b56ffb526f1d64e869b3",
+      "bytes": 49052
+    },
+    "docs/audit/2026-10-01/functional-core/completed-state.json": {
+      "sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457",
+      "bytes": 302719
+    },
+    "docs/audit/2026-10-01/functional-core/continuation-handoff.json": {
+      "sha256": "dc891f75c2d468d8df660feb8c6830dd1742419bb3317e0e404a9bb96443e3d4",
+      "bytes": 7373
+    },
+    "docs/audit/2026-10-01/functional-core/continuation-manifest.json": {
+      "sha256": "3f2f636dd487a0f45322eb1aee1de9d3d93d529789f9ce357414fc79ab1161fb",
+      "bytes": 12556
+    },
+    "docs/audit/2026-10-01/functional-core/continuation-proof.tar.gz": {
+      "sha256": "43115195bef21ae59dce8c33a607fa01ff070d13a78ced13b170c028e5b1a896",
+      "bytes": 1750816
+    },
+    "docs/audit/2026-10-01/functional-core/handoff-3-manifest.json": {
+      "sha256": "c450e488dfe45b5e280695b938176af6a2c514f3b30db2acde750184dc809540",
+      "bytes": 29056
+    },
+    "docs/audit/2026-10-01/functional-core/handoff-3-proof.tar.gz": {
+      "sha256": "cb8c87792e528ce2f7c5f4100f7a6cc4687237347db2c65a02b01a05dff9c3ab",
+      "bytes": 7644329
+    },
+    "docs/audit/2026-10-01/functional-core/manifest.json": {
+      "sha256": "ea3fed3c12992c1e8a39b5b2c39baa6ba919474219980b53ed7efc589c43313e",
+      "bytes": 15430
+    },
+    "docs/audit/2026-10-01/functional-core/native-proof.tar.gz": {
+      "sha256": "c7ad60f085c3d8aa83874cd521c43027d699ab3c560b17e9d57d82e434c28c43",
+      "bytes": 57460
+    },
+    "docs/audit/2026-10-01/functional-core/recovery-manifest.json": {
+      "sha256": "54b2ed3ed1becf7d15606d4563b654a1e3d49d51dd084ef7a0636798efe6c960",
+      "bytes": 18782
+    },
+    "docs/audit/2026-10-01/functional-core/recovery-proof.tar.gz": {
+      "sha256": "5c2f0ae65ccb561476a92ee14e131723c663511927ff43561604a8383880df0a",
+      "bytes": 472799
+    },
+    "docs/audit/2026-10-01/functional-replan/README.md": {
+      "sha256": "17710a054dfbcd4f74f108cebdc184bf989f4dcaa90b6f9a8ac43efc69e47484",
+      "bytes": 5969
+    },
+    "scripts/test_command_authority_network.py": {
+      "sha256": "b1982963aba357ae44963f5f15ec608a800ddf58e7ce89799910b56bd9eb56f1",
+      "bytes": 9344
+    },
+    "scripts/test_integrated_economy.py": {
+      "sha256": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "bytes": 68155
+    },
+    "scripts/test_wp11_slice.py": {
+      "sha256": "a8551d2514d9049e8bdf1cd40ac43ccbfa1d5a7c0acea70f17fa83a321fcb36c",
+      "bytes": 16264
+    },
+    "src/command_type.h": {
+      "sha256": "0700b747c39e58b521791f52d8d452775c3c6403a79b189d460d0eaf23dabf17",
+      "bytes": 23326
+    },
+    "src/company_cmd.cpp": {
+      "sha256": "2464e241bc3d3ffd22b675d87b4627524b981fb2c8298ab5e37a1a1c1cb698ef",
+      "bytes": 54979
+    },
+    "src/economy.cpp": {
+      "sha256": "678ad66f5ebf6db5f52fc1771fac8e9c58afe404e23d232c971211d66ff7af00",
+      "bytes": 87710
+    },
+    "src/industry_cmd.cpp": {
+      "sha256": "e3bfc53aad08376ffc136df7c082ea5ae760d7ac6b9c8ea09cfd4b8b4dc17b0c",
+      "bytes": 130242
+    },
+    "src/portal/commonwealth_slice.h": {
+      "sha256": "3c68cb04cb4ef3ede052d01d726dcf4d791847292ff05d60a65f5825033057b2",
+      "bytes": 4396
+    },
+    "src/portal/connected_economy.cpp": {
+      "sha256": "a49a0946afbff44f5d308d1d2ae44f472b15d3f70f4c5585cbd8c8106db42a6a",
+      "bytes": 126822
+    },
+    "src/portal/connected_economy.h": {
+      "sha256": "3bda3571fbdc444427d1f4fe02fdc4f261b20fd50d61d31dadf9d4847eeea83d",
+      "bytes": 543
+    },
+    "src/portal/integrated_economy.cpp": {
+      "sha256": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+      "bytes": 31510
+    },
+    "src/portal/megacity_gui.cpp": {
+      "sha256": "8f53539b3dfc10e3ba0e3f4103b59b507c8d8131df4f6bbddc165984cc066d64",
+      "bytes": 12359
+    },
+    "src/portal/megacity_manager.cpp": {
+      "sha256": "8407fccce49965b46a136013d008a3415f7d262f6a2d10b5f46ebb84a2295f64",
+      "bytes": 8371
+    },
+    "src/portal/portal_cmd.cpp": {
+      "sha256": "bd9ea2564c3b04bd387a465ef337ea16d9a00c649299674f43dedf66bf778876",
+      "bytes": 41603
+    },
+    "src/portal/portal_cmd.h": {
+      "sha256": "9c7d460d7171f038d2e280ed15385dbe9dee0111fe9898109b17fed255a219e7",
+      "bytes": 13458
+    },
+    "src/portal/stellar_network.cpp": {
+      "sha256": "838eef97d726a71e53f2361a96ac91c876c5401c8b261ac8e2cfefac045d1886",
+      "bytes": 18616
+    },
+    "src/portal/tech_tree.cpp": {
+      "sha256": "f56ca6ec0019487b5974e452c4c7afb6f5dfde9d5190da3a80c80e3b25b7ce63",
+      "bytes": 14971
+    },
+    "src/saveload/planet_sl.cpp": {
+      "sha256": "96a114c08a92952301252c007b9d6a6bbdf689bc157154eaf69d3334abbdf817",
+      "bytes": 66965
+    },
+    "src/tests/CMakeLists.txt": {
+      "sha256": "7c0374cd1b06eceae314de4aab06412130ab8b9f90758b40e53cc28f4dc72cb7",
+      "bytes": 5057
+    },
+    "src/tests/test_command_authority.cpp": {
+      "sha256": "b45f4c5f1bdded14310577c3e245aba594a3103d646170802b3b05a9bd880604",
+      "bytes": 45888
+    },
+    "src/tests/test_command_authority_network.cpp": {
+      "sha256": "0ea2123a0a873bd2280e4fdb1231b58084fee17fa2f602288804c59f83f9877c",
+      "bytes": 10556
+    },
+    "src/tests/test_integrated_town_generation.cpp": {
+      "sha256": "e3f9bd95964bd1b9b7c14010009267ebfacb73013fa36787b061963a037262c4",
+      "bytes": 16766
+    },
+    "src/tests/test_megacity_gui.cpp": {
+      "sha256": "b4615196f2f735cc760991ee2a9bb2545a0452ab88286ef582903c7f30c69ab1",
+      "bytes": 24861
+    },
+    "src/train_cmd.cpp": {
+      "sha256": "37d60805bee9686b28dc37865c157d54e8138aefea225c97c7074cf6b8e86a07",
+      "bytes": 166473
+    },
+    "src/vehicle.cpp": {
+      "sha256": "6369eac925381e763ef8d41bfa73694de5ef8ab265d3e9d074dc4fd952384055",
+      "bytes": 124475
+    }
+  },
+  "native_proof": "Original raw third report remainsFAIL; repaired separately-authorized same-funded tailPASS; no run relabelled to replacement head",
+  "functional_outcome": "PASS across recorded authorized handoffs",
+  "complete_reviewed_acceptance": "PARTIAL: independent fresh replayNOTRUN; humanPending; replacement exact-headCI separately verified",
+  "cash_allowance": {
+    "total_gbp": 6000000,
+    "used_gbp": 6000000,
+    "remaining_gbp": 0,
+    "new_grant_commands": 0,
+    "new_loans": 0
+  },
+  "campaign": "Stopped01:34:25.559407UTC, before unchanged01:39:59.143032UTC cold deadline; no newsimulation/start/replay/slice",
+  "local_validation": "Original full code gates retained because sourcebyte-identical; replacement metadata checks and blobparity required",
+  "independent_integration_review": "Astra maximum initialsource/base/mainintegrationCLEAR; finalmetadata/exactheadreview pending",
+  "replacement_remote_ci": "Pending first publication; PR records finalhead/results separately from historicalPR68format failure"
+}
