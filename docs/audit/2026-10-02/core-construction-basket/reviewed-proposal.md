@@ -1,30 +1,26 @@
-# Active execution plan: First Core Construction Basket
+# Proposal: First Core Construction Basket
 
-Owner-authorized execution handoff, 2 October 2026. This is the single active
-implementation slice. Use the final already-funded checkpoint; new assistance is
-£0. The prior campaign, grant, deadlines, failures and evidence remain closed and
-unchanged. The owner approved the reviewed recommendation and delegated routine
-bounded implementation choices. No further routine confirmation is required.
-
-The latest timing instruction supersedes the proposal's first-launch clock:
-the NEW 75-minute simulation clock starts at the FIRST native simulation advance,
-after plan/source/preflight preparation. Record actual UTC start and immutable
-start+75-minute stop immediately before that advance. Planning/compiler builds
-and paused preflight preparation do not consume that clock. Never reset it.
+Planning reassessment, 1 October 2026. **PROPOSED ONLY — no execution authority.**
+Prepared with `ost-plan` from the delivered source and frozen native evidence.
+The prior campaign is closed; its £6m allowance is fully used. This local draft
+does not replace `docs/ACTIVE_EXECUTION_PLAN.md`, reopen a timer, authorize a
+grant, change the roadmap, publish a PR or authorize a merge.
 
 ## Live delivery and what is established
 
 Read-only GitHub/ref checks in this reassessment show:
 
 - Main: `85c423b4a2dd57e5a2c2cf1f6d29bc2e4667845d`.
-- PR66 is open/draft, targeting main, exact head
-  `7bc29a60cc1bc60b4d555d7500c2ded79c175eaa`; all seven exact-head workflows passed.
-- That dependency contains main/PR67, original Money compiler fix `d1bb6176`,
-  reviewed PR69 `3630d490` and preserved owner merge `eead18f1`. Main is an ancestor.
-- The isolated implementation branch is `codex/first-core-construction-basket`,
-  based on that refreshed PR66 head and targeting `codex/generation-money-comparison`
-  while it remains unmerged. No merge or public-history rewrite is authorized.
-- Preserve PR68, original worktrees, ordinary-money failures and every old archive.
+- PR66 remains open/draft, targeting main. Its branch now ends at
+  `eead18f1b4cc0f67b2a8aba6c2615f4d8069c175` after PR69 was merged into it.
+- PR69: head `3630d490304916eb16c812b69e0aed92bfdd0f96`, merged into
+  `codex/generation-money-comparison`, not main. Comparing that head with the
+  dependency merge yields no file changes. Main/dependency histories diverge
+  from `91846666f69929443eab04cea63f9f8cfb3bb0be`; copied current-main plan/docs
+  do not make current main an ancestor. Preserve PR68 and every old archive.
+- Implementation intake must refresh these refs. If main then contains PR69 and
+  PR66, use that main; otherwise use the refreshed dependency branch and state
+  the dependency explicitly. No automatic merge or compiler-fix duplication.
 
 | Acceptance dimension | Evidence and limit |
 | --- | --- |
@@ -87,11 +83,11 @@ Use a new working copy of `campaign/owner-observation.sav` from the archive:
 The available £3.7m is inherited assisted cash. Old unused ticks and the numerical
 £1,233,228 gross-spend headroom are historical bookkeeping, not current authority.
 Retain the old counters: 82 initial advances (including25 control advances) and
-24 cold advances. Report new advances separately and as an aggregate
+24 cold advances. Report proposed new advances separately and as an aggregate
 with those106; no historical counter is reset or relabelled.
 No cash, cargo, technology, RP, population or route may be authored. No new loan.
 
-## Authorized implementation scope
+## Smallest implementation scope, if separately approved
 
 One town, the four named industries and at most four new cargo services:
 IRON6→steel7; STEL7→Core0; SILC2→ballast4; BALL4→Core0. Use the existing public
@@ -112,14 +108,14 @@ commands still decide every construction, ownership and payment result.
 Explicitly handle existing owned track, shared/private junction footprints and
 duplicate quotes without replacing neutral infrastructure or hiding failed
 commands. Freeze one complete affordable layout/consist/order plan before spending.
-If legal reuse cannot be established within the binding caps, stop with the
+If legal reuse cannot be established within the proposed caps, stop with the
 failed quote rather than expand into network/pathfinder redesign.
 
 The existing `PlanFreightLeg` predecessor map resets for each station candidate.
 The new adapter must carry one shared 30,000-state counter across all candidates
 within an endpoint-planner invocation, stop before exceeding it, and count failed
 searches too. Reusing the old per-candidate counter unchanged would violate this
-plan. Keep the old helper's caller defaults intact; test the new budget's
+proposal. Keep the old helper's caller defaults intact; test the new budget's
 exhaustion behavior without changing simulation rules.
 
 Add only necessary read-only evidence for SILC/BALL labels, all-cargo custody,
@@ -129,7 +125,7 @@ so coarse tick sampling cannot invent simultaneous consumption. Record the town'
 native growth rate/state as well as the integrated multiplier. Preserve native
 processing, demand, prices, capacities, RNG, dates, save schema and permissions.
 
-## Required finish line and verification
+## Proposed finish line and verification
 
 1. Cold-open the exact observation copy, paused, and compare retained state before
    any mutation. Pin source/binary/content/config/save hashes; record zero new
@@ -172,25 +168,25 @@ cases. After final source changes run repository full gates and exact-head CI,
 then independent source/evidence review. A fresh campaign replay stays NOT RUN;
 do not represent a resumed checkpoint as pristine-start repeatability or human UAT.
 
-## Binding new bounds
+## Proposed new bounds — require an explicit handoff
 
-| Item | Authorized ceiling |
+| Item | Proposed ceiling |
 | --- | --- |
 | Campaign | One copied existing checkpoint, one initial load and one planned cold load; no fresh game, funded replay, seed change or automatic retry. |
 | Topology | Fixed four industries/one Core town; at most four new trains with up to three wagons each; one material-basket outcome. |
 | Search | At most two complete layout candidates in stable order, each with at most eight endpoint-planner invocations. Each invocation has at most 16 station candidates, 30,000 total predecessor states and 16-tile bridge span. Count all search attempts; no hidden cap reset. |
-| Spending | At most £600,000 quoted construction/vehicles/refits; at most £750,000 added gross debits overall, including elapsed charges from all six services and all native diagnostic/control spending. New assistance £0; debt fixed. Historical plus new gross ≤£3,516,772. |
-| Time | Paused native preflight/paid construction has its own 30-minute wall cap; planning and compiler-build preparation precede it. The new 75-minute simulation campaign starts exactly once immediately before the FIRST native advance, after preflight preparation. Persist actual UTC start and immutable start+75-minute stop. Initial operation has a 30-minute wall cap; cold continuation has a 15-minute wall cap; both also obey the new outer stop. Include all stopped/diagnostic time after first advance; never reset or extend the clock. Startup failure consumes the one initial load and requires a new handoff even if the clock never started. Old deadlines remain closed. |
+| Spending | At most £600,000 quoted construction/vehicles/refits; at most £750,000 added gross debits overall, including elapsed charges from all six services and all native diagnostic/control spending. New assistance £0; debt fixed. Historical plus proposed gross ≤£3,516,772. |
+| Time | Bind the new clock once at the first native process launch attempt, including startup/loading. Immediately before that attempt record its UTC start and immutable start+75-minute absolute stop. Phase caps are preflight/build 30, initial operation 30, cold continuation 15 minutes; every phase also obeys the outer stop. Record wall and active time. Owner approval/build preparation do not start this clock; failed startup does not reset it. The old campaign deadline is never reused or extended. |
 | Ticks | Initial operation at most 240×2048; cold at most 120×2048; total 360 advances/737,280 requested native ticks. All controls and diagnosis share those caps; unused phase ticks do not transfer. Paused build has no free background ticking. |
 | Stops | First integrity/command/accounting/save defect, absent receiver, wrong payment/custody, crash/lost train, unaffordable quote or exhausted search/spend/time/tick bound stops with partial evidence. No rerun after a repair without another explicit handoff. |
 
-These approved limits authorize this single slice. A legal but slow supply
+These are proposed limits, not permission to operate. A legal but slow supply
 pattern is measured as pacing; it does not authorize tuning, time extension or
 inventory injection. If these bounds cannot support the four services, return
 the concrete blocker and a smaller follow-up proposal, without silently dropping
 ballast/consumption or claiming the full outcome.
 
-## Short owner mission after delivery
+## Short owner mission after a future delivery
 
 Allow 15 minutes for feedback, with completion time unpromised:
 
@@ -205,22 +201,25 @@ Allow 15 minutes for feedback, with completion time unpromised:
 
 Observation of a supplied network is separate from manual construction acceptance.
 
-## Approved handoff and independent review
+## Decisions before implementation
 
-The owner explicitly approved this one existing-material basket outcome, a new
-ledger from the final verified checkpoint, zero additional assistance, the new
-spending/search/tick limits and the corrected first-advance clock. The original
-proposal received independent Astra maximum CLEAR; implementation and resulting
-native evidence receive a new independent Astra maximum review. No merge, next
-slice, balance-policy change, research/cargo grant, extra loan or campaign retry
-is authorized. Stop at the first hard defect/exhausted bound; preserve partial
-logs and return a concrete blocker plus a bounded next action.
+1. Approve this single existing-material construction-basket outcome, rather than
+   proceeding directly to Materials II resource/factory expansion. Keep all other
+   roadmap work deferred; economics and human status remain separate.
+2. Explicitly authorize one new run from the named already-funded observation
+   checkpoint with the proposed spending/search/tick/time caps and zero additional
+   assistance. Any different assistance or material-policy request returns to the
+   owner separately; no such exception is included here.
+3. After independent proposal review and that decision, replace the sole active
+   plan through the normal planning handoff and resolve its base from live ancestry.
+   This turn does neither. Owner merge authority remains separate.
 
-Before implementation verify the copied source save and frozen state, read the
-source/AGENTS/ost-plan/dev/uat/deliver, and preserve complete old evidence. Update
-functional, economic and human statuses separately. An inherited funded checkpoint
-is ASSISTED FUNCTIONAL; ordinary-start economics/fresh replay remain unproven and
-human UAT Pending until the owner reports an identified playtest.
+Independent proposal review: **CLEAR (Astra maximum)**, subject to owner decisions
+1–2. The final review confirmed the first-launch timer and shared per-invocation
+search budget. This reviews proposal completeness and grants no execution authority.
+Planning validation passed both repository linters, source/doc reference and
+whitespace checks; both tracked worktrees and the active-plan hash are unchanged.
+No native run, source edit or publication occurred in this planning task.
 
 ## Source anchors
 
