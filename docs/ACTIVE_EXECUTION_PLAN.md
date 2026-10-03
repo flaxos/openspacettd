@@ -61,6 +61,16 @@ native snapshot passes the focused check offline. The last safe normal save is
 the advance-014 checkpoint, one advance before the stopped result. No cold
 continuation or further replay is authorized by this repair.
 
+The latest explicit handoff authorizes one guarded continuation from the last
+verified advance-014 paused checkpoint, **not** another source-save build.
+Restore the transient adapter session only after full paused state, physical
+cargo, paid infrastructure, research, services, immutable world identity and
+provenance agree. Retain **15 cumulative requested advances / 28,672 executed
+ticks** across attempts; the checkpoint predates the failed last advance, whose
+command and result remain separate evidence. The unchanged 02:13:49.320471 UTC
+outer stop and advance ceilings remain binding. Financial affordability is
+deferred under the explicit offline development-money mode.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

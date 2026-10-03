@@ -38,9 +38,14 @@ RECOVERY_CLOCK = {'start_utc': '2026-10-03T00:58:49.320471+00:00',
                   'stop_utc': '2026-10-03T02:13:49.320471+00:00',
                   'trigger': 'Retained first failed advance; no clock reset', 'duration_seconds': 4500}
 RECOVERY_INITIAL_STOP = RECOVERY_CLOCK['stop_utc']  # Explicit phase allocation; original outer clock is unchanged.
-PRIOR_GROSS_DEBITS = 729045  # Both preserved paid attempts; no gross cap remains.
-PRIOR_REQUESTED_ADVANCES = 3
-PRIOR_ACTUAL_TICKS = 4096
+PRIOR_GROSS_DEBITS = 1095834  # All preserved paid attempts; no gross cap remains.
+PRIOR_REQUESTED_ADVANCES = 15
+PRIOR_ACTUAL_TICKS = 28672
+CHECKPOINT_TICK = 189696
+CHECKPOINT_SHA256 = 'ae2bbfeb73d24648cfc17bb529dee92b7d17e614ef2f385cd7707554df0b47e2'
+CHECKPOINT_OUTPUT = ROOT / 'build/agent-logs/core-basket-campaign-checkpoint-dbc07c'
+CHECKPOINT_DEBITS = 366598
+CHECKPOINT_QUOTE = 364281
 HISTORICAL_PRIMARY_DEBITS = 2761963
 HISTORICAL_CONTROL_DEBITS = 4809
 HISTORICAL_ADVANCES = {'initial': 82, 'cold': 24, 'initial_controls': 25, 'total': 106}
@@ -221,7 +226,7 @@ def initial_report(inputs):
         'retained_failed_basket_attempts': {'gross_debits': PRIOR_GROSS_DEBITS,
                                             'requested_advances': PRIOR_REQUESTED_ADVANCES,
                                             'actual_ticks': PRIOR_ACTUAL_TICKS,
-                                            'game_loads': 2},
+                                            'game_loads': 3},
         'bounds': {'layout_candidates': 2, 'endpoint_calls_per_layout': 8, 'station_candidates_per_call': 16,
                    'predecessor_states_per_call': 30000, 'bridge_span': 16, 'quoted_debits': QUOTE_CAP,
                    'new_gross_debits': GROSS_CAP, 'advance_caps': ADVANCE_CAPS,
@@ -231,7 +236,7 @@ def initial_report(inputs):
         'load_attempts': {'initial': 0, 'cold': 0}, 'fresh_games_started': 0,
         'advance_counts': {'initial': PRIOR_REQUESTED_ADVANCES, 'cold': 0},
         'simulation_clock': copy.deepcopy(RECOVERY_CLOCK),
-        'native_receipts': 0, 'native_debits': 0, 'native_transactions': [], 'operations': [],
+        'native_receipts': 0, 'native_debits': CHECKPOINT_DEBITS, 'native_transactions': [], 'operations': [],
         'native_ledger_complete': True, 'native_state_current': True, 'accounted_sequences': [],
         'phases': {name: 'NOT RUN' for name in ('admission', 'plan', 'construction', 'missing_ball',
                                               'initial_basket', 'cold_equality', 'cold_basket', 'final_audit', 'final_save')},
@@ -243,6 +248,16 @@ def prepare(binary, output):
     safe_console_path(output)
     require(not output.exists(), 'Preserve earlier evidence; preparation requires a new output directory')
     save, frozen, archived_config, pack_hashes, members = source_payload()
+    checkpoint = CHECKPOINT_OUTPUT / 'checkpoints/advance-014.sav'
+    require(checkpoint.is_file() and sha256(checkpoint) == CHECKPOINT_SHA256,
+            'The verified paused continuation checkpoint differs')
+    resume_state = json.loads((CHECKPOINT_OUTPUT / 'checkpoints/advance-014-state.json').read_text())
+    resume_observation = json.loads((CHECKPOINT_OUTPUT / 'checkpoints/advance-014-observation.json').read_text())
+    prior = json.loads((CHECKPOINT_OUTPUT / 'evidence.json').read_text())
+    require(resume_state['tick'] == CHECKPOINT_TICK and resume_state['money'] == START_CASH - CHECKPOINT_DEBITS and
+            prior['saves']['checkpoints/advance-014.sav'] == CHECKPOINT_SHA256 and
+            prior['selected_quote'] == CHECKPOINT_QUOTE and prior['advance_counts']['initial'] == PRIOR_REQUESTED_ADVANCES,
+            'The checkpoint state or retained failed-attempt ledger differs')
     inputs = pinned_inputs(binary)
     require(inputs['pack_sha256'] == pack_hashes, 'Published content differs from the archived observation save')
     config, changes = relocated_config(archived_config)
@@ -253,12 +268,25 @@ def prepare(binary, output):
         stream.write(save)
         stream.flush()
         os.fsync(stream.fileno())
+    with (output / 'source/resume.sav').open('xb') as stream:
+        stream.write(checkpoint.read_bytes())
+        stream.flush()
+        os.fsync(stream.fileno())
     write_json(output / 'source/frozen-state.json', frozen, exclusive=True)
+    write_json(output / 'source/resume-state.json', resume_state, exclusive=True)
+    write_json(output / 'source/resume-observation.json', resume_observation, exclusive=True)
+    write_json(output / 'source/resume-plan.json', json.loads((CHECKPOINT_OUTPUT / 'frozen-plan.json').read_text()), exclusive=True)
+    write_json(output / 'source/resume-footprint.json', json.loads((CHECKPOINT_OUTPUT / 'paid-footprint.json').read_text()), exclusive=True)
+    write_json(output / 'source/resume-arm.json', {'state': resume_state, 'observation': resume_observation, 'basket': {
+        'source_sha256': SOURCE_SHA256, 'initial_advances': PRIOR_REQUESTED_ADVANCES,
+        'gross_debits': CHECKPOINT_DEBITS, 'quoted_total': CHECKPOINT_QUOTE,
+        'services': prior['services'], 'resume_initial': True}}, exclusive=True)
     write_text_exclusive(output / 'source/archived-functional.cfg', archived_config)
     for name in ('initial', 'cold'):
         write_text_exclusive(output / name / 'functional.cfg', config)
     preparation = {
         'version': 1, 'inputs': inputs, 'source_save_sha256': SOURCE_SHA256,
+        'resume_checkpoint_sha256': CHECKPOINT_SHA256, 'resume_checkpoint_tick': CHECKPOINT_TICK,
         'frozen_state_sha256': FROZEN_STATE_SHA256, 'archive_members_sha256': members,
         'canonical_profile_sha256': SOURCE_CONFIG_SHA256, 'profile_path_changes': changes,
         'prepared_files_sha256': {str(path.relative_to(output)): sha256(path)
@@ -266,6 +294,10 @@ def prepare(binary, output):
     }
     write_json(output / 'preparation.json', preparation, exclusive=True)
     report = initial_report(inputs)
+    report['selected_quote'] = CHECKPOINT_QUOTE
+    report['services'] = prior['services']
+    report['phases']['plan'] = 'PASS at retained checkpoint'
+    report['phases']['construction'] = 'PASS at retained checkpoint'
     report['preparation_sha256'] = sha256(output / 'preparation.json')
     write_json(output / 'evidence.json', report)
     print(f'NOT RUN: prepared exact retained checkpoint and inputs in {output}; no native process launched.', flush=True)
@@ -284,6 +316,7 @@ def validate_execution_admission(report, preparation, current_inputs, output):
         path = output / name
         require(path.is_file() and sha256(path) == expected, f'Prepared artifact changed: {name}')
     require(sha256(output / 'source/owner-observation.sav') == SOURCE_SHA256 and
+            sha256(output / 'source/resume.sav') == CHECKPOINT_SHA256 and
             value_sha256(json.loads((output / 'source/frozen-state.json').read_text())) == FROZEN_STATE_SHA256,
             'Copied source save or full frozen state changed')
 
@@ -642,6 +675,8 @@ class Campaign:
         validate_execution_admission(self.report, preparation, pinned_inputs(self.binary), self.output)
         self.preparation = preparation
         self.frozen = json.loads((output / 'source/frozen-state.json').read_text())
+        self.resume_state = json.loads((output / 'source/resume-state.json').read_text())
+        self.resume_observation = json.loads((output / 'source/resume-observation.json').read_text())
         self.journal_stream = (output / 'operation-journal.jsonl').open('x')
         # Exclusive creation prevents a second launch even after a startup crash.
         write_json(output / 'execution-attempt.json', {'started_at_utc': utc_now().isoformat(),
@@ -650,9 +685,9 @@ class Campaign:
         self.engine = None
         self.current = None
         self.last_mutation_before = None
-        self.services = None
-        self.frozen_plan = None
-        self.built_footprint = None
+        self.services = self.report['services']
+        self.frozen_plan = json.loads((output / 'source/resume-plan.json').read_text())
+        self.built_footprint = json.loads((output / 'source/resume-footprint.json').read_text())
         self.labels = None
         self.phase = 'initial'
         preflight_started = utc_now()
@@ -677,8 +712,8 @@ class Campaign:
         self.report['aggregate_advances_total'] = HISTORICAL_ADVANCES['total'] + sum(new.values())
         self.report['requested_native_ticks'] = TICKS_PER_ADVANCE * sum(new.values())
         self.report['actual_native_ticks'] = (None if tick is None or not self.report['native_state_current'] else tick - START_TICK)
-        self.report['aggregate_basket_actual_ticks'] = (None if self.report['actual_native_ticks'] is None else
-                                                        PRIOR_ACTUAL_TICKS + self.report['actual_native_ticks'])
+        self.report['aggregate_basket_actual_ticks'] = (None if tick is None or not self.report['native_state_current'] else
+                                                        PRIOR_ACTUAL_TICKS + max(0, tick - CHECKPOINT_TICK))
         self.report['aggregate_gross_debits'] = HISTORICAL_PRIMARY_DEBITS + HISTORICAL_CONTROL_DEBITS + PRIOR_GROSS_DEBITS + self.report['native_debits']
         self.report['financial_reconciliation'] = {
             'starting_cash': START_CASH, 'new_native_receipts': self.report['native_receipts'],
@@ -1002,35 +1037,17 @@ class Campaign:
 
     def run(self):
         try:
-            self.start('initial', self.output / 'source/owner-observation.sav')
-            self.status(self.frozen)
-            self.terrain_audit('initial_terrain_cargo_text_audit')
-            self.report['phases']['admission'] = 'PASS'
+            if self.preparation.get('resume_checkpoint_sha256') != CHECKPOINT_SHA256:
+                raise CampaignStop('Pinned checkpoint continuation metadata differs')
+            self.start('initial', self.output / 'source/resume.sav')
+            self.status(self.resume_state, self.resume_observation)
+            self.report['phases']['admission'] = 'PASS; exact paused checkpoint and built network'
             self.persist()
-            money_mode = self.mutate('basket-dev-money')
-            require(money_mode['development_unlimited_money'], 'Offline development money setting did not enable')
-            self.mutate('basket-arm ' + safe_console_path(self.output / 'source/frozen-state.json'))
-            exact_paused_equality(self.current, self.frozen)
-            layout = self.choose_plan()
-            require(pinned_inputs(self.binary) == self.preparation['inputs'], 'Frozen inputs changed before paid construction')
-            built = self.mutate(f'basket-build {layout}')
-            self.services = built['services']
-            require([service['label'] for service in self.services] == list(LABELS), 'Built service ordering differs from the frozen plan')
-            verify_built_services(self.services, self.frozen_plan, built['state'])
-            self.built_footprint = {key: copy.deepcopy(built['state'][key]) for key in ('terminals', 'zones', 'rail', 'structures')}
-            self.built_footprint.update({key: copy.deepcopy(built['observation'][key]) for key in ('private_rail', 'private_structures')})
-            write_json(self.output / 'paid-footprint.json', self.built_footprint, exclusive=True)
-            verify_observation(built['state'], built['observation'], self.frozen, self.services,
-                               self.frozen_plan, self.built_footprint)
-            require(self.report['native_debits'] == self.report['selected_quote'], 'Executed native construction/vehicle/refit debits differ from the frozen whole quote')
-            self.report['services'] = self.services
-            self.report['phases']['construction'] = 'PASS'
-            self.persist()
-            self.terrain_audit('construction_terrain_cargo_text_audit')
-            self.save_paused(self.output / 'checkpoints', 'post-construction')
-            self.mutate(f'basket-stop {self.services[3]["train"]}')
+            self.terrain_audit('resumed_terrain_cargo_text_audit')
+            self.mutate('basket-arm ' + safe_console_path(self.output / 'source/resume-arm.json'))
+            exact_paused_equality(self.current, self.resume_state, self.resume_observation)
             require(next(row for row in self.current['state']['trains'] if row['id'] == self.services[3]['train'])['stopped'],
-                    'The normal BALL stop control did not hold its train')
+                    'Retained missing-BALL control train is not stopped')
             while True:
                 value = self.advance()
                 controls = [event for event in self.months(value) if missing_ball_month(event, self.labels)]
@@ -1431,7 +1448,7 @@ class AdmissionGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'native paid command'):
             Campaign.mutate(campaign, 'basket-build 0')
         self.assertEqual(dispatched, ['basket-build 0'])
-        self.assertEqual(campaign.report['native_debits'], 17)
+        self.assertEqual(campaign.report['native_debits'], CHECKPOINT_DEBITS + 17)
         self.assertEqual(campaign.report['native_transactions'], [[START_TICK, 0, 17]])
         self.assertEqual(campaign.current['state']['money'], START_CASH - 17)
         self.assertTrue(campaign.report['native_ledger_complete'])
