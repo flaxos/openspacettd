@@ -39,6 +39,9 @@
 #include "../portal/universe_authority.h"
 #include "../portal/planet_manager.h"
 #include "../saveload/saveload.h"
+#include "../strings_func.h"
+#include "../table/strings.h"
+#include "../core/format.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -608,4 +611,234 @@ TEST_CASE("Sprint 18 GUI - Universe Directory World Status and Heartbeats")
 TEST_CASE("Sprint 18 GUI - TownView Megacity Status Button Widget")
 {
 	CHECK(WID_TV_MEGACITY_STATUS > WID_TV_GRAPH);
+}
+
+TEST_CASE("Core Megacity basket status and growth outcome GUI formatting", "[megacity-core-basket]")
+{
+	MegacityCommandFixture fixture;
+	Town *town = Town::Get(fixture.town);
+	REQUIRE(town != nullptr);
+	town->cache.population = 1000;
+
+	PlanetManager::Reset();
+	REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{0}, .name = "Core Earth", .phase = WorldPhase::Phase1_Core,
+		.min_x = 0, .min_y = 0, .max_x = 63, .max_y = 63}));
+
+	const char *labels[] = {"SILC", "IRON", "STEL", "COPR", "WIRE", "SAND", "CHIP", "SIGE", "MACH", "RARE",
+		"ALLO", "OIL_", "POLY", "MGLA", "BCRY", "QCRY", "CCRY", "GRAI", "FOOD", "BALL"};
+	for (uint8_t c = 0; c < std::size(labels); ++c) {
+		CargoLabel label;
+		std::copy_n(labels[c], 4, label.begin());
+		CargoSpec::Get(CargoType{c})->label = label;
+		CargoSpec::Get(CargoType{c})->bitnum = c;
+	}
+	BuildCargoLabelMap();
+
+	const CargoType food_cargo = GetCargoTypeByLabel(CargoLabel{"FOOD"});
+	const CargoType stel_cargo = GetCargoTypeByLabel(CargoLabel{"STEL"});
+	const CargoType ball_cargo = GetCargoTypeByLabel(CargoLabel{"BALL"});
+	const CargoType chip_cargo = GetCargoTypeByLabel(CargoLabel{"CHIP"});
+	const CargoType ccry_cargo = GetCargoTypeByLabel(CargoLabel{"CCRY"});
+
+	REQUIRE(IsValidCargoType(food_cargo));
+	REQUIRE(IsValidCargoType(stel_cargo));
+	REQUIRE(IsValidCargoType(ball_cargo));
+	REQUIRE(IsValidCargoType(chip_cargo));
+	REQUIRE(IsValidCargoType(ccry_cargo));
+
+	CargoSpec::Get(food_cargo)->name = STR_CARGO_PLURAL_FOOD;
+	CargoSpec::Get(stel_cargo)->name = STR_CARGO_PLURAL_STEEL;
+	CargoSpec::Get(ball_cargo)->name = STR_CARGO_PLURAL_GOODS;
+	CargoSpec::Get(chip_cargo)->name = STR_CARGO_PLURAL_VALUABLES;
+	CargoSpec::Get(ccry_cargo)->name = STR_CARGO_PLURAL_DIAMONDS;
+
+	const std::string food_name = GetString(CargoSpec::Get(food_cargo)->name);
+	const std::string stel_name = GetString(CargoSpec::Get(stel_cargo)->name);
+	const std::string ball_name = GetString(CargoSpec::Get(ball_cargo)->name);
+	const std::string chip_name = GetString(CargoSpec::Get(chip_cargo)->name);
+	const std::string ccry_name = GetString(CargoSpec::Get(ccry_cargo)->name);
+
+	REQUIRE_FALSE(food_name.empty());
+	REQUIRE_FALSE(stel_name.empty());
+	REQUIRE_FALSE(ball_name.empty());
+	REQUIRE_FALSE(chip_name.empty());
+	REQUIRE_FALSE(ccry_name.empty());
+
+	IntegratedEconomy::SetEnabled(true);
+	IntegratedEconomy::RegisterRole(WorldID{0}, EconomicRole::Core);
+	auto demand = IntegratedEconomy::CityDemand(fixture.town);
+	REQUIRE_FALSE(demand.empty());
+	const uint32_t food_req = demand.at(food_cargo);
+	const uint32_t stel_req = demand.at(stel_cargo);
+	const uint32_t ball_req = demand.at(ball_cargo);
+	const uint32_t chip_req = demand.at(chip_cargo);
+	const uint32_t ccry_req = demand.at(ccry_cargo);
+
+	SECTION("Zero-reserve Core baseline shows full FOOD, STEL, and BALL demand as deficits with exact order")
+	{
+		const auto city = IntegratedEconomy::City(fixture.town);
+		CHECK((city == nullptr || city->reserves.empty()));
+
+		const std::string status = IntegratedEconomy::CityStatus(fixture.town);
+		const std::string expected = fmt::format("Next month needs {} more {}, {} more {}, {} more {}.",
+			food_req, food_name, stel_req, stel_name, ball_req, ball_name);
+		CHECK(status == expected);
+
+		/* Verify status inspection does not mutate reserves */
+		const auto city_after = IntegratedEconomy::City(fixture.town);
+		CHECK((city_after == nullptr || city_after->reserves.empty()));
+		CHECK(IntegratedEconomy::CityStatus(fixture.town) == expected);
+	}
+
+	SECTION("Partial Core construction reserves shows FOOD, STEL, and BALL shortages with exact distinct deficits")
+	{
+		/* Use distinct sentinel reserves: food holds 5, stel holds 3, ball holds 7 */
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, 5, true);
+		IntegratedEconomy::AcceptCity(fixture.town, stel_cargo, 3, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ball_cargo, 7, true);
+		const uint32_t food_deficit = food_req - 5;
+		const uint32_t stel_deficit = stel_req - 3;
+		const uint32_t ball_deficit = ball_req - 7;
+		REQUIRE(food_deficit != stel_deficit);
+		REQUIRE(stel_deficit != ball_deficit);
+
+		const auto city = IntegratedEconomy::City(fixture.town);
+		REQUIRE(city != nullptr);
+		const auto reserves_before = city->reserves;
+
+		const std::string status = IntegratedEconomy::CityStatus(fixture.town);
+		const std::string expected = fmt::format("Next month needs {} more {}, {} more {}, {} more {}.",
+			food_deficit, food_name, stel_deficit, stel_name, ball_deficit, ball_name);
+		CHECK(status == expected);
+
+		/* Verify status inspection does not mutate reserves */
+		CHECK(city->reserves == reserves_before);
+	}
+
+	SECTION("FOOD and STEL sufficient but BALL missing shows only BALL shortage")
+	{
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, food_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, stel_cargo, stel_req, true);
+		const uint32_t ball_held = 6;
+		IntegratedEconomy::AcceptCity(fixture.town, ball_cargo, ball_held, true);
+		const uint32_t ball_deficit = ball_req - ball_held;
+
+		const auto city = IntegratedEconomy::City(fixture.town);
+		REQUIRE(city != nullptr);
+		const auto reserves_before = city->reserves;
+
+		const std::string status = IntegratedEconomy::CityStatus(fixture.town);
+		const std::string expected = fmt::format("Next month needs {} more {}.", ball_deficit, ball_name);
+		CHECK(status == expected);
+
+		CHECK(status.find(food_name) == std::string::npos);
+		CHECK(status.find(stel_name) == std::string::npos);
+		CHECK(status.find(chip_name) == std::string::npos);
+		CHECK(status.find(ccry_name) == std::string::npos);
+
+		CHECK(city->reserves == reserves_before);
+	}
+
+	SECTION("Construction basket complete but prosperity cargo missing shows CHIP and CCRY shortages")
+	{
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, food_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, stel_cargo, stel_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ball_cargo, ball_req, true);
+		/* Prosperity sentinels: chip held 2 (deficit 8), ccry held 4 (deficit 6) */
+		IntegratedEconomy::AcceptCity(fixture.town, chip_cargo, 2, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ccry_cargo, 4, true);
+		const uint32_t chip_deficit = chip_req - 2;
+		const uint32_t ccry_deficit = ccry_req - 4;
+		REQUIRE(chip_deficit != ccry_deficit);
+
+		const auto city = IntegratedEconomy::City(fixture.town);
+		REQUIRE(city != nullptr);
+		const auto reserves_before = city->reserves;
+
+		const std::string status = IntegratedEconomy::CityStatus(fixture.town);
+		const std::string expected = fmt::format("Next month needs {} more {}, {} more {}.",
+			chip_deficit, chip_name, ccry_deficit, ccry_name);
+		CHECK(status == expected);
+
+		CHECK(status.find(food_name) == std::string::npos);
+		CHECK(status.find(stel_name) == std::string::npos);
+		CHECK(status.find(ball_name) == std::string::npos);
+
+		CHECK(city->reserves == reserves_before);
+	}
+
+	SECTION("All five baskets sufficient shows ready status")
+	{
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, food_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, stel_cargo, stel_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ball_cargo, ball_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, chip_cargo, chip_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ccry_cargo, ccry_req, true);
+
+		const auto city = IntegratedEconomy::City(fixture.town);
+		REQUIRE(city != nullptr);
+		const auto reserves_before = city->reserves;
+
+		const std::string status = IntegratedEconomy::CityStatus(fixture.town);
+		CHECK(status == "All city baskets ready for next month.");
+		CHECK(city->reserves == reserves_before);
+	}
+
+	SECTION("Classic and non-Core town preserves original labels and status behavior")
+	{
+		PlanetManager::Reset();
+		REQUIRE(PlanetManager::RegisterRegion({.id = WorldID{3}, .name = "Frontier Outpost", .phase = WorldPhase::Phase3_Frontier,
+			.min_x = 0, .min_y = 0, .max_x = 63, .max_y = 63}));
+		IntegratedEconomy::Reset();
+		IntegratedEconomy::SetEnabled(true);
+		IntegratedEconomy::RegisterRole(WorldID{3}, EconomicRole::Frontier);
+
+		CHECK(IntegratedEconomy::CityDemand(fixture.town).empty());
+		CHECK(IntegratedEconomy::CityStatus(fixture.town).empty());
+
+		CHECK(GetString(STR_MEGACITY_GROWTH_SUBSISTENCE).find("Subsistence (1.0x Growth)") != std::string::npos);
+		CHECK(GetString(STR_MEGACITY_GROWTH_BOOM).find("Metropolitan Boom (1.5x Growth)") != std::string::npos);
+		CHECK(GetString(STR_MEGACITY_GROWTH_STARVATION).find("Starvation (0.0x Growth)") != std::string::npos);
+		CHECK(GetString(STR_MEGACITY_GROWTH_HYPERGROWTH).find("HyperGrowth (2.0x Growth, +50% Traffic)") != std::string::npos);
+	}
+
+	SECTION("Core growth labels agree with simulation-driven growth outcomes")
+	{
+		CHECK(GetString(STR_MEGACITY_GROWTH_STARVATION).find("Starvation (0.0x Growth)") != std::string::npos);
+		CHECK(GetString(STR_MEGACITY_GROWTH_CORE_SUBSISTENCE).find("Subsistence (No Construction-Ready Growth)") != std::string::npos);
+		CHECK(GetString(STR_MEGACITY_GROWTH_CORE_BOOM).find("Metropolitan Boom (1.0x Growth)") != std::string::npos);
+		CHECK(GetString(STR_MEGACITY_GROWTH_HYPERGROWTH).find("HyperGrowth (2.0x Growth, +50% Traffic)") != std::string::npos);
+
+		/* Simulation-driven growth checks via EvaluateCity */
+		float growth = -1.0f, passengers = -1.0f;
+
+		/* 1. Empty reserves -> Starvation: 0.0x growth, 0.5x passengers */
+		CHECK(IntegratedEconomy::EvaluateCity(fixture.town, growth, passengers));
+		CHECK(growth == 0.0f);
+		CHECK(passengers == 0.5f);
+
+		/* 2. FOOD only -> Subsistence: 0.0x growth, 1.0x passengers */
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, food_req, true);
+		CHECK(IntegratedEconomy::EvaluateCity(fixture.town, growth, passengers));
+		CHECK(growth == 0.0f);
+		CHECK(passengers == 1.0f);
+
+		/* 3. FOOD + STEL + BALL -> Metropolitan Boom: 1.0x growth, 1.0x passengers */
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, food_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, stel_cargo, stel_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ball_cargo, ball_req, true);
+		CHECK(IntegratedEconomy::EvaluateCity(fixture.town, growth, passengers));
+		CHECK(growth == 1.0f);
+		CHECK(passengers == 1.0f);
+
+		/* 4. Full basket (FOOD + STEL + BALL + CHIP + CCRY) -> HyperGrowth: 2.0x growth, 1.5x passengers */
+		IntegratedEconomy::AcceptCity(fixture.town, food_cargo, food_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, stel_cargo, stel_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ball_cargo, ball_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, chip_cargo, chip_req, true);
+		IntegratedEconomy::AcceptCity(fixture.town, ccry_cargo, ccry_req, true);
+		CHECK(IntegratedEconomy::EvaluateCity(fixture.town, growth, passengers));
+		CHECK(growth == 2.0f);
+		CHECK(passengers == 1.5f);
+	}
 }

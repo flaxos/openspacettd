@@ -1,5 +1,26 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Core Megacity basket display repair — 3 October 2026
+
+Antigravity implemented a bounded Core Megacity panel repair on a draft branch
+stacked on PR #71. The panel now shows each Core cargo's demand and reserve,
+reports every missing FOOD/STEL/BALL construction item before prosperity cargo,
+and labels Core 0/1/2 growth outcomes without changing Classic labels. The
+status formatter and GUI drawing changed; demand, consumption, save format and
+economy rules did not. Focused regression coverage includes zero and partial
+reserves, BALL alone missing, prosperity shortages, a full basket, non-Core
+behavior and simulation growth outcomes.
+
+Automated tests pass in the isolated worktree: 161 focused assertions, the
+509-case aggregate Catch suite, and all 524 CTest cases across the initial run
+and a five-case rerun after building regression fixtures and allowing the
+loopback test outside the sandbox. Both repository linters pass. The 92px header
+and tier fit check was a static size estimate, not rendered visual UAT; the
+string-selection path is not directly asserted through a GUI render. The active
+material-delivery campaign, full monthly construction basket, cold continuation,
+ordinary-start economics and human UAT remain unproved. No acceptance or merge
+is implied by this display repair.
+
 ## Development-money recovery stopped — 3 October 2026
 
 The guarded checkpoint-continuation load stopped in startup setup, before any

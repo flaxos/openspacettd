@@ -1,5 +1,16 @@
 # OpenSpaceTTD Known Limitations
 
+## Core Megacity panel proof boundary — 3 October 2026
+
+The Core panel now reports each construction shortage and displays Core growth
+labels consistent with 0/1/2 simulated outcomes. Automated status and economy
+tests pass, but the GUI string-selection branch is not directly render-asserted.
+The minimum-width 92px header and longest tier text were checked by static size
+estimate, without rendered UI at each intended scale; clipping remains a human
+visual check. This repair did not run the paused material-basket campaign or
+observe steel/ballast delivery, monthly consumption, cold continuation or human
+play. It does not establish full basket acceptance or ordinary-start balance.
+
 ## Development-money response stop — 3 October 2026
 
 The later checkpointed run reached a paid IRON delivery and native steel

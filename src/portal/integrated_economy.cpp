@@ -391,13 +391,36 @@ std::string IntegratedEconomy::CityStatus(TownID town)
 	auto demand = CityDemand(town);
 	if (demand.empty()) return {};
 	auto city = City(town);
-	for (const char *label : {"FOOD", "STEL", "BALL", "CHIP", "CCRY"}) {
+	std::vector<std::string> missing;
+	auto check_cargo = [&](const char *label) {
 		auto cargo = Cargo(label);
+		if (!IsValidCargoType(cargo)) return true;
 		uint32_t reserve = city && city->reserves.contains(cargo) ? city->reserves.at(cargo) : 0;
-		if (reserve < demand.at(cargo))
-			return fmt::format("Next month needs {} more {}.", demand.at(cargo) - reserve, GetString(CargoSpec::Get(cargo)->name));
+		if (demand.contains(cargo) && reserve < demand.at(cargo)) {
+			missing.push_back(fmt::format("{} more {}", demand.at(cargo) - reserve, GetString(CargoSpec::Get(cargo)->name)));
+			return false;
+		}
+		return true;
+	};
+
+	bool food_ok = check_cargo("FOOD");
+	bool stel_ok = check_cargo("STEL");
+	bool ball_ok = check_cargo("BALL");
+
+	if (food_ok && stel_ok && ball_ok) {
+		check_cargo("CHIP");
+		check_cargo("CCRY");
 	}
-	return "All city baskets ready for next month.";
+
+	if (missing.empty()) return "All city baskets ready for next month.";
+
+	std::string result = "Next month needs ";
+	for (size_t i = 0; i < missing.size(); ++i) {
+		if (i > 0) result += ", ";
+		result += missing[i];
+	}
+	result += ".";
+	return result;
 }
 const EconomyCity *IntegratedEconomy::City(TownID town)
 {

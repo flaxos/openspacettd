@@ -1,5 +1,19 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Core Megacity basket display follow-up — 3 October 2026
+
+Antigravity repaired the Core panel's demand/reserve and construction-first
+missing-cargo display, added Core-specific 0/1/2 growth labels, and preserved
+Classic labels and economy calculations. `test_megacity_gui.cpp` adds zero,
+partial, BALL-only, prosperity, complete and non-Core cases with 161 focused
+assertions; the aggregate 509-case Catch run passed. CTest's first run passed
+519/524; its five environment/setup failures passed on a targeted rerun after
+normal build outputs were made and loopback was permitted. Both linters and
+`git diff --check` passed. Header/tier fit is statically estimated only, with no
+rendered UI or human UAT. Functional material delivery and basket consumption
+remain NOT RUN under this GUI scope; the stopped campaign and its bounds above
+are unchanged.
+
 ## First Core Construction Basket first attempt — 3 October 2026
 
 **ASSISTED FUNCTIONAL FAIL at first advance; human Pending.** Source save206acdd…

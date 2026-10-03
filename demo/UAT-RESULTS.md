@@ -1,5 +1,17 @@
 # Human UAT results — recovery / v1.1
 
+## Core Megacity panel repair — 3 October 2026
+
+**Human UAT Pending.** Antigravity's Core display patch passes focused and
+aggregate automated checks, including construction-shortage and growth cases.
+No player has checked the 92px header or tier/status text at game UI scales;
+the fit assessment was static. A light visual check should open the Core panel
+at minimum width, inspect the FOOD/STEL/BALL demand and reserve rows, observe
+BALL as the sole missing construction item when FOOD and STEL are supplied, and
+confirm the growth label matches the displayed numeric outcome. No material
+delivery, monthly basket completion, cold continuation or economic acceptance
+is claimed from these tests. The active UAT game was not changed.
+
 ## Core construction basket first attempt — 3 October 2026
 
 **Human UAT Pending; ASSISTED FUNCTIONAL basket proof FAIL/incomplete.** The
