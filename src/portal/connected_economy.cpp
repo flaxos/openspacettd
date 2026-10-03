@@ -2310,9 +2310,9 @@ bool PlanBasket(uint layout, BasketLayout &plan)
 		const Station *station = Station::Get(StationID{station_id});
 		TileIndex platform = station->train_station.tile;
 		DiagDirection positive = GetRailStationAxis(platform) == Axis::X ? DiagDirection::SW : DiagDirection::SE;
-		TileIndex far = TileAddByDiagDir(platform, positive);
+		TileIndex opposite_platform_end = TileAddByDiagDir(platform, positive);
 		bool found = false;
-		for (auto [tile, enter] : {std::pair{TileAddByDiagDir(platform, ReverseDiagDir(positive)), ReverseDiagDir(positive)}, std::pair{TileAddByDiagDir(far, positive), positive}}) {
+		for (auto [tile, enter] : {std::pair{TileAddByDiagDir(platform, ReverseDiagDir(positive)), ReverseDiagDir(positive)}, std::pair{TileAddByDiagDir(opposite_platform_end, positive), positive}}) {
 			if (!IsPlainRailTile(tile) || GetTileOwner(tile) != CompanyID{0} || GetTrackBits(tile).Count() != 1) continue;
 			Track track = FindFirstTrack(GetTrackBits(tile)); Trackdir direction = TrackEnterdirToTrackdir(track, enter);
 			if (!IsValidTrackdir(direction)) continue;
