@@ -252,7 +252,15 @@ def prepare(binary, output):
     require(checkpoint.is_file() and sha256(checkpoint) == CHECKPOINT_SHA256,
             'The verified paused continuation checkpoint differs')
     resume_state = json.loads((CHECKPOINT_OUTPUT / 'checkpoints/advance-014-state.json').read_text())
-    resume_observation = json.loads((CHECKPOINT_OUTPUT / 'checkpoints/advance-014-observation.json').read_text())
+    resume_observation_original = json.loads((CHECKPOINT_OUTPUT / 'checkpoints/advance-014-observation.json').read_text())
+    resume_observation = copy.deepcopy(resume_observation_original)
+    # Wagon cached maximum speed is derived on load and zero until the front
+    # recomputes its consist. Only front-engine cached speed guards movement.
+    for row in resume_observation['vehicle_guard']:
+        if row['max_age'] == 0:
+            require(row['speed'] == 0 and row['progress'] == 0 and row['max_speed'] in (0, 160, 249),
+                    'Unexpected persisted wagon motion or cache value')
+            row['max_speed'] = 0
     prior = json.loads((CHECKPOINT_OUTPUT / 'evidence.json').read_text())
     require(resume_state['tick'] == CHECKPOINT_TICK and resume_state['money'] == START_CASH - CHECKPOINT_DEBITS and
             prior['saves']['checkpoints/advance-014.sav'] == CHECKPOINT_SHA256 and
@@ -274,6 +282,7 @@ def prepare(binary, output):
         os.fsync(stream.fileno())
     write_json(output / 'source/frozen-state.json', frozen, exclusive=True)
     write_json(output / 'source/resume-state.json', resume_state, exclusive=True)
+    write_json(output / 'source/resume-observation-original.json', resume_observation_original, exclusive=True)
     write_json(output / 'source/resume-observation.json', resume_observation, exclusive=True)
     write_json(output / 'source/resume-plan.json', json.loads((CHECKPOINT_OUTPUT / 'frozen-plan.json').read_text()), exclusive=True)
     write_json(output / 'source/resume-footprint.json', json.loads((CHECKPOINT_OUTPUT / 'paid-footprint.json').read_text()), exclusive=True)

@@ -77,6 +77,14 @@ development-money setting before its bridge branch. No resumed-state comparison
 or gameplay command ran. A narrow bridge-only guard correction is committed but
 the failed load remains consumed; it is not automatic retry authority.
 
+The one final bridge-corrected load reached paused equality and stopped before
+arming: the persisted state matched, but eight wagon cached maximum-speed
+observer values were zero after reload rather than their prior derived values.
+All six front-engine speed values matched. The observer now reports the stable
+front speed and zero for inert wagon cache fields; the original observation is
+retained separately. This correction is unrun in game and supplies no further
+load authority before the original deadline.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

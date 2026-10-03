@@ -2149,7 +2149,8 @@ Json BasketObservation()
 		{"replacement_rules", company->engine_renew_list != nullptr}, {"ai", company->is_ai}};
 	result["vehicle_guard"] = Json::array();
 	for (const Train *train : Train::Iterate()) result["vehicle_guard"].push_back({{"id", train->index.base()}, {"age", train->age.base()},
-		{"max_age", train->max_age.base()}, {"speed", train->cur_speed}, {"max_speed", train->vcache.cached_max_speed}, {"progress", train->progress}});
+		{"max_age", train->max_age.base()}, {"speed", train->cur_speed},
+		{"max_speed", train->IsFrontEngine() ? train->vcache.cached_max_speed : 0}, {"progress", train->progress}});
 	result["adapter"] = {{"armed", basket.armed}, {"built", basket.built}, {"cold", basket.cold}, {"failed", basket.failed}, {"error", basket.error},
 		{"layout_candidates", basket.layouts}, {"endpoint_invocations", basket.invocations}, {"advances", basket.advances}, {"initial_advances", basket.initial_advances},
 		{"gross_debits", basket.gross}, {"quoted_total", basket.quoted_total}, {"tick_debit_reserve", basket.tick_reserve}, {"development_unlimited_money", _settings_game.difficulty.infinite_money}};
