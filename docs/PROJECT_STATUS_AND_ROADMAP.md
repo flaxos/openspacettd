@@ -1,5 +1,16 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Development-money recovery stopped — 3 October 2026
+
+The owner authorized unlimited virtual money in an explicit offline proof mode,
+deferring financial balance and superseding the basket quote/gross caps. The
+single development-money recovery load enabled that mode but stopped before
+planning or any new game tick because its response omitted a required audit
+field. The response shape is narrowly corrected in source but **not replayed**.
+The original clock, requested advance and first-attempt debit remain counted;
+the next game load needs a new explicit handoff. Material-basket functional
+proof remains incomplete, ordinary-start economics NOT RUN, human UAT Pending.
+
 ## First Core Construction Basket first attempt stopped — 3 October 2026
 
 **ASSISTED FUNCTIONAL requested basket outcome FAIL / incomplete.** The exact

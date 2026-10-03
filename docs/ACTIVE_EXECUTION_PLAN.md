@@ -19,6 +19,12 @@ ceilings, search/topology constraints, first-hard-defect stop, resource
 conservation, recipes, logistics and cold equality remain binding. No clock or
 count reset, automatic second replay, merge or next slice is authorized.
 
+That single recovery load stopped before planning or a new tick: the
+money-setting response omitted the monthly audit field required by the runner.
+The response shape has a narrow source correction, but that correction is not
+authority for another game load. Preserve both stopped attempts. The requested
+functional material-basket outcome is still unproven.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

@@ -2567,6 +2567,7 @@ bool CoreBasket(std::span<std::string_view> argv)
 		report["failed"] = basket.failed; report["reason"] = basket.error;
 		report["state"] = FunctionalSnapshot(); report["observation"] = BasketObservation();
 		report["actual_ticks"] = 0; report["audit"] = FunctionalAudit(audit);
+		report["audit"]["basket_months"] = months;
 		report["cash_conserved"] = report["state"]["money"] == before["money"];
 		report["cargo_errors"] = Json::array();
 		IConsolePrint(CC_DEFAULT, "CONNECTED basket-result {}", report.dump()); return true;

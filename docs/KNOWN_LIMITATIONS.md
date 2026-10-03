@@ -1,5 +1,16 @@
 # OpenSpaceTTD Known Limitations
 
+## Development-money response stop — 3 October 2026
+
+The owner-approved offline unlimited-money mode removes development
+affordability as a basket acceptance gate. Its single recovery load stopped
+before planning or new ticks because the money-setting response lacked the
+runner's monthly-audit field. A narrow source correction is unrun in game;
+the first-hard-defect stop and original clock remain binding. Resource balance,
+physical custody, logistics and save/reload are still unproven for this basket.
+Normal new-game/server money defaults remain unchanged; ordinary economic
+balance and human UAT remain pending.
+
 ## Material basket first-attempt stop — 3 October 2026
 
 The four service routes were legally quoted and paid, but the first requested
