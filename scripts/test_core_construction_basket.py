@@ -226,7 +226,7 @@ def initial_report(inputs):
         'retained_failed_basket_attempts': {'gross_debits': PRIOR_GROSS_DEBITS,
                                             'requested_advances': PRIOR_REQUESTED_ADVANCES,
                                             'actual_ticks': PRIOR_ACTUAL_TICKS,
-                                            'game_loads': 3},
+                                            'game_loads': 4},
         'bounds': {'layout_candidates': 2, 'endpoint_calls_per_layout': 8, 'station_candidates_per_call': 16,
                    'predecessor_states_per_call': 30000, 'bridge_span': 16, 'quoted_debits': QUOTE_CAP,
                    'new_gross_debits': GROSS_CAP, 'advance_caps': ADVANCE_CAPS,
