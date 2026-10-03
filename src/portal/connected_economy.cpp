@@ -2604,7 +2604,7 @@ bool CoreBasket(std::span<std::string_view> argv)
 					int64_t quote = ledger.at("quoted_total").get<int64_t>();
 					Json observation = BasketObservation(); observation.erase("adapter");
 					if (frozen.at("observation") != observation) BasketFail("cold-full-observation-equality");
-					else if (ledger.at("source_sha256") != BASKET_SOURCE || advances < 15 || advances > 240 ||
+					else if (ledger.at("source_sha256") != Json(std::string(BASKET_SOURCE)) || advances < 15 || advances > 240 ||
 						before.at("tick").get<uint64_t>() != 167168 + uint64_t(advances - 4) * 2048 || gross < quote ||
 						quote <= 0 || !BasketServicesValid(ledger.at("services"))) BasketFail("cold-ledger-services");
 					else { basket.cold = !ledger.value("resume_initial", false); basket.built = true; basket.initial_advances = advances; basket.gross = gross;
@@ -2731,7 +2731,7 @@ std::string GetCoreBasketAdmissionError(const nlohmann::json &state, const CoreB
 	if (!context.profile) return "profile-content";
 	if (context.companies != 1) return "company-count";
 	try {
-		if (state.at("company") != FUNCTIONAL_COMPANY || state.at("loan") != 100000 || state.at("max_loan") != 300000) return "company-debt";
+		if (state.at("company") != Json(std::string(FUNCTIONAL_COMPANY)) || state.at("loan") != 100000 || state.at("max_loan") != 300000) return "company-debt";
 		if (state.at("seed") != 11 || (!continuation && state.at("tick") != 167168) ||
 			(continuation && (state.at("tick").get<uint64_t>() <= 167168 || state.at("tick").get<uint64_t>() > 167168 + 240 * 2048))) return "tick-seed";
 		if (!continuation && state.at("money") != 3705864) return "cash";

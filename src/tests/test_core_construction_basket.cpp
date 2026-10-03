@@ -186,7 +186,8 @@ TEST_CASE("Core basket admission rejects checkpoint debt research custody and in
 {
 	struct Denial { const char *path; Json value; const char *reason; };
 	const std::vector<Denial> denials = {
-		{"/company", "Other company", "company-debt"}, {"/loan", 110000, "company-debt"},
+		{"/company", "Other company", "company-debt"}, {"/company", 0, "company-debt"},
+		{"/loan", 110000, "company-debt"},
 		{"/max_loan", 400000, "company-debt"}, {"/money", 3705865, "cash"},
 		{"/tick", 167169, "tick-seed"}, {"/seed", 12, "tick-seed"},
 		{"/research/0/0", 302, "research"}, {"/research/0/1", 1, "research"},
