@@ -1,5 +1,22 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## First Core Construction Basket authorized — 2 October 2026
+
+The owner approved one next functional slice through the existing physical
+materials path: iron→steel and stone/SILC→ballast, joining existing FOOD in the
+Core town's real monthly construction basket. The [sole active plan](ACTIVE_EXECUTION_PLAN.md)
+starts from final funded save206acdd…, with zero new assistance, £750k additional
+gross spending, £600k quote ceiling and360advances. Its NEW75-minute clock begins
+at the first simulation advance after source/preflight preparation; old clocks
+and counters remain closed history. No merge, next slice or balance change.
+
+Plan/ancestry/checkpoint review Astra maximum CLEAR. Implementation and native
+basket proof are in progress/NOT RUN; ordinary-start economics and fresh replay
+remain unproven, human UAT Pending. Neutral processors already exist: this slice
+does not claim Materials I newly enabled them. Prior first-food plans and every
+failure are preserved in [the dated audit](audit/2026-10-02/core-construction-basket/README.md).
+Earlier dated statuses below retain their original scope.
+
 ## PR66 main integration and nightly portability — 1 October 2026
 
 The existing draft PR66 now integrates the reviewed functional delivery and

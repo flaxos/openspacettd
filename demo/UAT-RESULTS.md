@@ -1,5 +1,14 @@
 # Human UAT results — recovery / v1.1
 
+## First Core Construction Basket intake — 2 October 2026
+
+**Human UAT Pending; new ASSISTED FUNCTIONAL proof NOT RUN.** Owner-authorized
+material extension starts from the supplied final funded observation state,
+with zero added assistance. Normal-command iron/steel and stone/ballast transport,
+actual complete monthly basket and cold continuation are the planned automated
+claims. Supplied network observation does not establish manual construction or
+ordinary-start economic acceptance. [Scope and forthcoming owner mission](../docs/audit/2026-10-02/core-construction-basket/README.md).
+
 ## First Functional Core Supply repaired observation — 1 October 2026
 
 **Human status Pending. ASSISTED FUNCTIONAL requested outcome PASS across recorded

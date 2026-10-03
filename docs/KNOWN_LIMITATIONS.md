@@ -1,5 +1,16 @@
 # OpenSpaceTTD Known Limitations
 
+## First Core Construction Basket boundary — 2 October 2026
+
+One new material-basket slice is explicitly authorized from preserved final
+funded state206acdd…. Original£6m assistance remains fully consumed; new assistance
+£0, debt fixed£100k. Its new first-advance clock and spending/tick limits do not
+reopen the old campaign. Physical construction-basket/growth/cold continuation
+proof is initially NOT RUN. Neutral factories' operation cannot establish that
+Materials I newly unlocked them. Ordinary-start economics, independent fresh
+repeatability and human UAT remain separate. [Binding plan](ACTIVE_EXECUTION_PLAN.md)
+and [evidence](audit/2026-10-02/core-construction-basket/README.md).
+
 ## First Functional Core Supply after repaired continuation — 1 October 2026
 
 The requested ASSISTED FUNCTIONAL outcome now passes across recorded authorized

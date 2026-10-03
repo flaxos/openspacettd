@@ -18,6 +18,7 @@
 #include "../table/strings.h"
 #include "../town.h"
 #include "../timer/timer_game_calendar.h"
+#include "../timer/timer_game_tick.h"
 #include "commonwealth_pack.h"
 #include "commonwealth_slice.h"
 #include "corporate_hq.h"
@@ -28,6 +29,7 @@
 #include "resource_sites.h"
 #include "universe_network.h"
 #include "../safeguards.h"
+std::vector<nlohmann::json> *_integrated_city_month_audit = nullptr;
 namespace
 {
 bool enabled = false;
@@ -419,6 +421,8 @@ bool IntegratedEconomy::EvaluateCity(TownID town, float &growth, float &passenge
 	auto demand = CityDemand(town);
 	if (demand.empty()) return false;
 	auto &city = cities[town];
+	/* Observe at the real evaluation, rather than infer an atomic basket from later reserves. */
+	auto before = _integrated_city_month_audit != nullptr ? city.reserves : std::map<CargoType, uint32_t>{};
 	city.consumed.clear();
 	growth = 0;
 	passengers = 0.5f;
@@ -439,15 +443,45 @@ bool IntegratedEconomy::EvaluateCity(TownID town, float &growth, float &passenge
 		}
 		return true;
 	};
-	if (!consume({"FOOD"})) return true;
-	passengers = 1;
-	if (!consume({"STEL", "BALL"})) return true;
-	growth = 1;
-	if (consume({"CHIP", "CCRY"})) {
-		growth = 2;
-		passengers = 1.5f;
+	bool food = consume({"FOOD"});
+	bool construction = false;
+	if (food) {
+		passengers = 1;
+		construction = consume({"STEL", "BALL"});
+		if (construction) {
+			growth = 1;
+			if (consume({"CHIP", "CCRY"})) {
+				growth = 2;
+				passengers = 1.5f;
+			}
+		}
+	}
+	if (_integrated_city_month_audit != nullptr) {
+		const Town *native = Town::Get(town);
+		_integrated_city_month_audit->push_back({{"tick", TimerGameTick::counter}, {"date", TimerGameCalendar::date.base()},
+			{"town", town.base()}, {"population", native->cache.population}, {"house_count", native->cache.num_houses},
+			{"demand", demand}, {"before", before}, {"after", city.reserves}, {"consumed", city.consumed},
+			{"food_sufficient", food}, {"construction_complete", construction}, {"growth", growth}, {"passengers", passengers},
+			{"native_growth_observed", false}});
 	}
 	return true;
+}
+void IntegratedEconomy::ObserveMonthlyGrowth(TownID town)
+{
+	if (_integrated_city_month_audit == nullptr) return;
+	const Town *native = Town::GetIfValid(town);
+	if (native == nullptr) return;
+	for (auto it = _integrated_city_month_audit->rbegin(); it != _integrated_city_month_audit->rend(); ++it) {
+		if ((*it)["tick"] != TimerGameTick::counter) break;
+		if ((*it)["town"] != town.base()) continue;
+		(*it)["native_growth_observed"] = true;
+		(*it)["native_growth_rate"] = native->growth_rate;
+		(*it)["native_grow_counter"] = native->grow_counter;
+		(*it)["native_growth_enabled"] = native->flags.Test(TownFlag::IsGrowing) && native->growth_rate != TOWN_GROWTH_RATE_NONE;
+		(*it)["native_growth_hook_enabled"] = !native->flags.Test(TownFlag::CustomGrowth) && native->growth_rate != TOWN_GROWTH_RATE_NONE;
+		(*it)["native_flags"] = native->flags.base();
+		break;
+	}
 }
 std::map<CargoType, uint32_t> IntegratedEconomy::ResearchKit(TechID tech)
 {

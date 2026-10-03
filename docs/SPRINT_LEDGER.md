@@ -1,5 +1,14 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Core Construction Basket intake — 2 October 2026
+
+Owner-authorized one-slice execution from the final already-funded checkpoint.
+Authoritative plan committed before source edits; independent Astra maximum
+plan review CLEAR. Live main85c423b4 and PR66head7bc29a60/required compiler and
+reviewed-delivery ancestry verified. Isolated codex/first-core-construction-basket
+stacks on the unmerged dependency. No native campaign or new assistance yet;
+implementation/native proof NOT RUN, human Pending. [Current audit](audit/2026-10-02/core-construction-basket/README.md).
+
 ## First Functional Core Supply repaired same-funded tail — 1 October 2026
 
 **ASSISTED FUNCTIONAL requested mission PASS; full reviewed acceptance PARTIAL.**
