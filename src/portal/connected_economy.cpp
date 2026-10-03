@@ -1842,9 +1842,12 @@ void FunctionalBridge(const std::string &path)
  */
 bool FunctionalCore(std::span<std::string_view> argv)
 {
+	/* A saved offline basket checkpoint retains development infinite money.
+	 * Only its startup FIFO bridge may cross this earlier functional-proof gate. */
+	bool basket_startup_bridge = argv.size() == 3 && argv[1] == "functional-bridge";
 	if (argv.size() < 2 || _game_mode != GameMode::Normal || _networking || _network_dedicated ||
 		!IntegratedEconomy::Enabled() || PlanetManager::Count() != 7 || Map::SizeX() != 1024 || Map::SizeY() != 1024 ||
-		_settings_game.game_creation.generation_seed != 11 || _settings_game.difficulty.infinite_money) {
+		_settings_game.game_creation.generation_seed != 11 || (_settings_game.difficulty.infinite_money && !basket_startup_bridge)) {
 		IConsolePrint(CC_ERROR, "CONNECTED FAIL functional proof requires isolated offline canonical seed11"); return true;
 	}
 	if (argv[1] == "functional-bridge" && argv.size() == 3) {

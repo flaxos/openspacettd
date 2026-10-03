@@ -71,6 +71,12 @@ command and result remain separate evidence. The unchanged 02:13:49.320471 UTC
 outer stop and advance ceilings remain binding. Financial affordability is
 deferred under the explicit offline development-money mode.
 
+The authorized checkpoint load emitted its startup marker but could not open
+the native FIFO: the older functional adapter rejected the checkpoint's saved
+development-money setting before its bridge branch. No resumed-state comparison
+or gameplay command ran. A narrow bridge-only guard correction is committed but
+the failed load remains consumed; it is not automatic retry authority.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

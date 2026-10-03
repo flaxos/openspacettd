@@ -2,6 +2,13 @@
 
 ## Development-money recovery stopped — 3 October 2026
 
+The guarded checkpoint-continuation load stopped in startup setup, before any
+gameplay command: the legacy functional adapter's bridge gate rejected the
+saved offline development-money setting. The bridge-only guard is corrected in
+source, but the load has not been repeated. The previous safe checkpoint and
+partial paid IRON-to-steel evidence remain intact; full basket/cold proof is
+still incomplete.
+
 The checkpointed follow-up reached a paid IRON delivery and native steel
 conversion. It then stopped on a wrapper check that incorrectly froze the
 Industrial world's live development counter. Role, phase and geometry did not
