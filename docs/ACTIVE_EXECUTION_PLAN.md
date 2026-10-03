@@ -52,6 +52,15 @@ independent native cash/cargo and full route-state verification; never save an
 unsafe state or treat a diagnostic file as continuation authority. Stop at the
 first real gameplay defect or the original outer deadline.
 
+That checkpointed replay stopped after multiple native advances at a
+wrapper-only world equality check: Industrial world development increased after
+a paid IRON delivery and normal steel conversion, while role, phase, geometry
+and ownership remained fixed. The revised observer compares immutable world
+fields and records development as a live resource outcome; the retained final
+native snapshot passes the focused check offline. The last safe normal save is
+the advance-014 checkpoint, one advance before the stopped result. No cold
+continuation or further replay is authorized by this repair.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

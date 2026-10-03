@@ -316,8 +316,12 @@ def normalize_unbuilt_vegetation(original, current):
 
 def verify_protected_topology(state, frozen, plan=None, built_footprint=None):
     """Protect public infrastructure while validating the declared private joins."""
-    for key in ('worlds', 'gates', 'stocks'):
+    for key in ('gates', 'stocks'):
         require(state[key] == frozen[key], f'Protected {key} changed')
+    require([{key: value for key, value in world.items() if key != 'development'} for world in state['worlds']] ==
+            [{key: value for key, value in world.items() if key != 'development'} for world in frozen['worlds']] and
+            all(isinstance(world['development'], int) and world['development'] >= 0 for world in state['worlds']),
+            'Protected world identity, role, phase or geometry changed')
     old_stellar, stellar = frozen['stellar'], state['stellar']
     require({key: value for key, value in stellar.items() if key != 'admitted'} ==
             {key: value for key, value in old_stellar.items() if key != 'admitted'},
@@ -1185,6 +1189,14 @@ class AdmissionGuardTests(unittest.TestCase):
         verify_protected_topology(state, self.frozen)
         state['zones'][6]['head']['owner'] = 0
         with self.assertRaisesRegex(RuntimeError, 'zone identity'):
+            verify_protected_topology(state, self.frozen)
+
+    def test_world_development_can_progress_without_changing_role_or_phase(self):
+        state = copy.deepcopy(self.frozen)
+        state['worlds'][1]['development'] += 81
+        verify_protected_topology(state, self.frozen)
+        state['worlds'][1]['phase'] += 1
+        with self.assertRaisesRegex(RuntimeError, 'world identity'):
             verify_protected_topology(state, self.frozen)
 
     def test_full_snapshot_rejects_unrelated_rng_difference(self):

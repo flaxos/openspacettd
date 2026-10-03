@@ -2,6 +2,15 @@
 
 ## Development-money recovery stopped — 3 October 2026
 
+The checkpointed follow-up reached a paid IRON delivery and native steel
+conversion. It then stopped on a wrapper check that incorrectly froze the
+Industrial world's live development counter. Role, phase and geometry did not
+change, and native cargo/cash reconciliation passed. The corrected observer
+passes the retained result offline, but the functional basket and cold reload
+have not been run beyond this stop. A verified paused save from the preceding
+advance is retained privately; it is not automatically authorized as a
+continuation source.
+
 The one further authorized replay passed source equality, route planning,
 normal four-service construction and two full simulation advances. Native
 resource production began, but no material consignment had arrived or been

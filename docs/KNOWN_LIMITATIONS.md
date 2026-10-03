@@ -2,6 +2,14 @@
 
 ## Development-money response stop — 3 October 2026
 
+The later checkpointed run reached a paid IRON delivery and native steel
+conversion, then stopped because the wrapper froze a world-development value
+that should change with resource activity. Immutable world identity and route
+infrastructure remained intact. The observer correction is checked against the
+retained snapshot but not replayed. The latest verified normal save predates
+that delivery; material city service, full consumption and cold continuation
+remain unproven.
+
 The subsequent single replay reached two full advances and recorded raw iron
 and silica production with conserved physical custody. No material delivery,
 payment, processing or complete Core basket was yet observed. It stopped when
