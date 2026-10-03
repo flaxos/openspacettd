@@ -1,3 +1,24 @@
+# Owner decision, 2026-10-03: unlimited offline development money
+
+For the current First Core Construction Basket development proof, the owner
+explicitly deferred financial balance and authorized unlimited virtual money.
+The former £600,000 quote, £750,000 aggregate gross-spend and cash-reserve
+ceilings below are superseded as acceptance gates. Preserve their historical
+failed evidence and count all actual native receipts/debits separately from the
+earlier £6,000,000 assistance. Enable the game's explicit `infinite_money`
+setting only in this offline proof after loading the pinned save; record the
+setting in evidence. It changes affordability, not physical cargo or receipts.
+Do not change normal new-game or server defaults, inject cargo or research, or
+claim ordinary-start economic proof.
+
+The one bounded recovery starts from the pinned final source save and retains
+the failed first attempt's one requested advance, 0 actual ticks, search and
+spending history. The immutable outer stop is **2026-10-03 02:13:49.320471 UTC**;
+the original initial-phase stop is 01:28:49.320471 UTC. Initial/cold advance
+ceilings, search/topology constraints, first-hard-defect stop, resource
+conservation, recipes, logistics and cold equality remain binding. No clock or
+count reset, automatic second replay, merge or next slice is authorized.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

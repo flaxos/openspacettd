@@ -32,8 +32,13 @@ START_CASH = 3705864
 DEBT = 100000
 START_TICK = 167168
 TICKS_PER_ADVANCE = 2048
-QUOTE_CAP = 600000
-GROSS_CAP = 750000
+QUOTE_CAP = None
+GROSS_CAP = None
+RECOVERY_CLOCK = {'start_utc': '2026-10-03T00:58:49.320471+00:00',
+                  'stop_utc': '2026-10-03T02:13:49.320471+00:00',
+                  'trigger': 'Retained first failed advance; no clock reset', 'duration_seconds': 4500}
+RECOVERY_INITIAL_STOP = '2026-10-03T01:28:49.320471+00:00'
+PRIOR_GROSS_DEBITS = 364281
 HISTORICAL_PRIMARY_DEBITS = 2761963
 HISTORICAL_CONTROL_DEBITS = 4809
 HISTORICAL_ADVANCES = {'initial': 82, 'cold': 24, 'initial_controls': 25, 'total': 106}
@@ -98,7 +103,8 @@ def safe_console_path(path):
 def authorized_command(command):
     """A closed command set cannot reach a grant, loan, fresh game or research."""
     if command in ('echo FUNCTIONAL_OFFLINE_READY', 'connected_economy audit',
-                   'connected_economy basket-status', 'connected_economy basket-advance'):
+                   'connected_economy basket-status', 'connected_economy basket-advance',
+                   'connected_economy basket-dev-money'):
         return True
     patterns = (r'connected_economy basket-(?:plan|build) [01]',
                 r'connected_economy basket-(?:stop|restart) [0-9]+',
@@ -206,7 +212,8 @@ def initial_report(inputs):
         'ordinary_economics_note': 'Prior revised A1 failure retained; inherited cash is assisted.',
         'processor_scope': 'Physical use of existing neutral processors; Materials I is retained and did not newly enable them.',
         'assistance': {'historical_allowance': 6000000, 'historical_used': 6000000,
-                       'historical_remaining': 0, 'new_authorized': 0, 'new_used': 0},
+                       'historical_remaining': 0, 'development_unlimited_money': True,
+                       'new_grant_commands': 0, 'new_grant_amount': 0},
         'historical_debits': {'primary': HISTORICAL_PRIMARY_DEBITS, 'disposable_control': HISTORICAL_CONTROL_DEBITS},
         'historical_advances': copy.deepcopy(HISTORICAL_ADVANCES),
         'bounds': {'layout_candidates': 2, 'endpoint_calls_per_layout': 8, 'station_candidates_per_call': 16,
@@ -215,7 +222,7 @@ def initial_report(inputs):
                    'ticks_per_advance': TICKS_PER_ADVANCE, 'outer_wall_seconds': OUTER_SECONDS,
                    'phase_wall_seconds': PHASE_SECONDS},
         'load_attempts': {'initial': 0, 'cold': 0}, 'fresh_games_started': 0,
-        'advance_counts': {'initial': 0, 'cold': 0}, 'simulation_clock': None,
+        'advance_counts': {'initial': 1, 'cold': 0}, 'simulation_clock': copy.deepcopy(RECOVERY_CLOCK),
         'native_receipts': 0, 'native_debits': 0, 'native_transactions': [], 'operations': [],
         'native_ledger_complete': True, 'native_state_current': True, 'accounted_sequences': [],
         'phases': {name: 'NOT RUN' for name in ('admission', 'plan', 'construction', 'missing_ball',
@@ -259,7 +266,7 @@ def prepare(binary, output):
 def validate_execution_admission(report, preparation, current_inputs, output):
     require(report['status'] == 'NOT RUN' and report['stage'] == 'prepared' and
             report['load_attempts'] == {'initial': 0, 'cold': 0} and
-            report['advance_counts'] == {'initial': 0, 'cold': 0} and report['simulation_clock'] is None,
+            report['advance_counts'] == {'initial': 1, 'cold': 0} and report['simulation_clock'] == RECOVERY_CLOCK,
             'This campaign was already attempted; a retry requires another explicit owner handoff')
     require(preparation['version'] == 1 and current_inputs == preparation['inputs'] == report['inputs'],
             'Pinned binary/source/content inputs changed after preparation')
@@ -339,7 +346,7 @@ def verify_protected_topology(state, frozen, plan=None, built_footprint=None):
 def verify_observation(state, observation, frozen, services=None, plan=None, built_footprint=None):
     adapter = observation['adapter']
     require(observation['paused'] and not adapter['failed'], 'Native pause or integrity guard failed')
-    require(adapter['quote_cap'] == QUOTE_CAP and adapter['gross_cap'] == GROSS_CAP and
+    require((not adapter['armed'] or adapter['development_unlimited_money']) and
             0 <= adapter['layout_candidates'] <= 2 and
             0 <= adapter['endpoint_invocations'] <= 8 * adapter['layout_candidates'] and
             0 <= adapter['advances'] <= (120 if adapter['cold'] else 240) and
@@ -364,7 +371,7 @@ def verify_observation(state, observation, frozen, services=None, plan=None, bui
             static = [{key: value for key, value in row.items() if key not in live_fields} for row in observation[name]]
             expected = [{key: value for key, value in row.items() if key not in live_fields} for row in built_footprint[name]]
             require(static == expected, 'Paid private signal/rail/depot/bridge topology changed')
-    require(state['loan'] == DEBT and state['money'] > 0 and state['seed'] == 11 and
+    require(state['loan'] == DEBT and state['seed'] == 11 and
             state['research'] == frozen['research'] and state['hqs'] == frozen['hqs'] and
             state['economy']['research'] == frozen['economy']['research'],
             'Debt, retained HQ/unlock or research-off contract changed')
@@ -433,13 +440,11 @@ def verify_plan(plan, layout, labels):
                 0 <= search['candidates'] <= 16, 'Endpoint search exceeded a binding shared budget')
         if search['exhausted']:
             raise CampaignStop('Native endpoint search exhausted its shared 30000-state/16-candidate budget')
-    if 'total_quote' in plan and plan['total_quote'] > QUOTE_CAP:
-        raise CampaignStop(f'Complete material quote GBP{plan["total_quote"]} exceeds the authorized GBP600000 ceiling')
     if not plan['legal']:
         return False
     require(plan['frozen'] and plan['total_quote'] == plan['construction_quote'] + plan['vehicle_quote'] and
             plan['total_quote'] >= 0, 'Complete legal frozen quote is inconsistent')
-    require(len(plan['services']) == 4, 'Frozen quote does not contain all four material services')
+    require(len(plan.get('services', [])) == 4, 'Frozen quote does not contain all four material services')
     for service, label in zip(plan['services'], LABELS):
         require(service['label'] == label and service['cargo'] == labels[label] and 1 <= service['wagons'] <= 3,
                 'Frozen service cargo/order/consist scope differs')
@@ -594,13 +599,14 @@ class Campaign:
         self.frozen_plan = None
         self.built_footprint = None
         self.labels = None
-        self.phase = 'preflight'
+        self.phase = 'initial'
         preflight_started = utc_now()
-        self.active_deadline = time.monotonic() + PHASE_SECONDS['preflight']
-        self.outer_deadline = None
+        self.active_deadline = time.monotonic() + max(0, (datetime.fromisoformat(RECOVERY_INITIAL_STOP) - preflight_started).total_seconds())
+        self.outer_deadline = time.monotonic() + max(0, (datetime.fromisoformat(RECOVERY_CLOCK['stop_utc']) - preflight_started).total_seconds())
         self.audits = {'initial': [], 'cold': []}
         self.report.update(status='PARTIAL', stage='preflight', preflight_start_utc=preflight_started.isoformat(),
-                           preflight_stop_utc=(preflight_started + timedelta(seconds=PHASE_SECONDS['preflight'])).isoformat())
+                           preflight_stop_utc=RECOVERY_INITIAL_STOP, initial_stop_utc=RECOVERY_INITIAL_STOP,
+                           prior_failed_attempt={'gross_debits': PRIOR_GROSS_DEBITS, 'requested_advance': 1, 'actual_ticks': 0})
         self.persist()
 
     def persist(self):
@@ -614,7 +620,7 @@ class Campaign:
         self.report['aggregate_advances_total'] = HISTORICAL_ADVANCES['total'] + sum(new.values())
         self.report['requested_native_ticks'] = TICKS_PER_ADVANCE * sum(new.values())
         self.report['actual_native_ticks'] = (None if tick is None or not self.report['native_state_current'] else tick - START_TICK)
-        self.report['aggregate_gross_debits'] = HISTORICAL_PRIMARY_DEBITS + HISTORICAL_CONTROL_DEBITS + self.report['native_debits']
+        self.report['aggregate_gross_debits'] = HISTORICAL_PRIMARY_DEBITS + HISTORICAL_CONTROL_DEBITS + PRIOR_GROSS_DEBITS + self.report['native_debits']
         self.report['financial_reconciliation'] = {
             'starting_cash': START_CASH, 'new_native_receipts': self.report['native_receipts'],
             'new_native_debits': self.report['native_debits'], 'new_assistance': 0, 'debt': DEBT,
@@ -729,9 +735,6 @@ class Campaign:
         self.report['native_ledger_complete'] = True
         self.persist()
         require(not value['failed'], f'{operation}: native paid command or integrity guard failed: ' + value.get('reason', 'unknown native reason'))
-        require(self.report['native_debits'] <= GROSS_CAP and
-                self.report['aggregate_gross_debits'] <= 3516772,
-                'New/all-history authorized gross-debit ceiling exceeded')
         require(value['state']['money'] == START_CASH + self.report['native_receipts'] - self.report['native_debits'],
                 'Cumulative retained-checkpoint cash equation failed')
         require(value['observation']['adapter']['gross_debits'] == self.report['native_debits'],
@@ -844,12 +847,11 @@ class Campaign:
 
     def advance(self):
         self.check_wall()
-        if self.report['simulation_clock'] is None:
-            self.start_simulation_clock()
+        require(self.report['simulation_clock'] == RECOVERY_CLOCK, 'Retained simulation clock changed')
         if self.report['advance_counts'][self.phase] >= ADVANCE_CAPS[self.phase]:
             raise CampaignStop(f'{self.phase} phase advance ceiling exhausted; unused phase ticks cannot transfer')
-        if sum(self.report['advance_counts'].values()) >= 360 or self.report['native_debits'] >= GROSS_CAP:
-            raise CampaignStop('Aggregate new advance or gross-spending bound exhausted')
+        if sum(self.report['advance_counts'].values()) >= 360:
+            raise CampaignStop('Aggregate advance bound exhausted')
         self.report['advance_counts'][self.phase] += 1
         self.report['stage'] = f'{self.phase}_operation'
         self.persist()  # Requested advances count even if dispatch/result fails.
@@ -923,6 +925,8 @@ class Campaign:
             self.terrain_audit('initial_terrain_cargo_text_audit')
             self.report['phases']['admission'] = 'PASS'
             self.persist()
+            money_mode = self.mutate('basket-dev-money')
+            require(money_mode['development_unlimited_money'], 'Offline development money setting did not enable')
             self.mutate('basket-arm ' + safe_console_path(self.output / 'source/frozen-state.json'))
             exact_paused_equality(self.current, self.frozen)
             layout = self.choose_plan()
@@ -1239,7 +1243,7 @@ class AdmissionGuardTests(unittest.TestCase):
     def bounded_campaign(self, initial, cold, phase):
         campaign = object.__new__(Campaign)
         campaign.report = initial_report({})
-        campaign.report['simulation_clock'] = {'start_utc': 'retained'}
+        campaign.report['simulation_clock'] = copy.deepcopy(RECOVERY_CLOCK)
         campaign.report['advance_counts'] = {'initial': initial, 'cold': cold}
         campaign.phase = phase
         campaign.check_wall = lambda: None
@@ -1290,11 +1294,11 @@ class AdmissionGuardTests(unittest.TestCase):
         self.assertEqual(campaign.current['state']['money'], START_CASH - 17)
         self.assertTrue(campaign.report['native_ledger_complete'])
 
-    def test_unaffordable_whole_quote_stops_before_service_or_build(self):
+    def test_development_money_does_not_waive_four_service_scope(self):
         plan = {'version': 1, 'layout': 0, 'preview_unchanged': True, 'search': [],
                 'legal': True, 'frozen': True, 'total_quote': 600001,
                 'construction_quote': 600000, 'vehicle_quote': 1}
-        with self.assertRaisesRegex(CampaignStop, '600000 ceiling'):
+        with self.assertRaisesRegex(RuntimeError, 'all four material services'):
             verify_plan(plan, 0, {})
 
 

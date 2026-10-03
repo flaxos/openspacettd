@@ -632,3 +632,13 @@ original showcase's three-new-houses-within-ten-minutes target.
 Codex CLI skill discovery is verified. Antigravity discovery and interactive
 usefulness remain Pending. Instruction size reduction does not prove quota savings.
 [Verification boundary](AGENT_WORKFLOW.md#delivery-record--30-september-2026).
+# Current basket development-money limitation, 3 October 2026
+
+The owner authorized an offline `difficulty.infinite_money` mode for the active
+material-basket functional proof. Financial affordability and the earlier
+gross-spending ceilings are no longer acceptance gates. Native debits and
+receipts must still be recorded; this mode cannot establish ordinary-start
+economics or balance. The prior stopped guard failure and its paid transactions
+remain historical evidence. Cargo identity, quantities, recipes, capacity,
+consumption, authority, save equality, fixed clock and advance bounds remain
+binding.

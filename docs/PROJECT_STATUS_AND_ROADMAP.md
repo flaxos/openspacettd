@@ -962,3 +962,12 @@ acceptance and economy balancing remain separate next steps.
 
 Agent workflow tooling now shares compact rules and three skills between Codex and
 Antigravity. Game roadmap priorities are unchanged. [Setup and verification](AGENT_WORKFLOW.md).
+# 3 October 2026 owner decision: development money
+
+For the active First Core Construction Basket proof, the owner authorized
+unlimited virtual money in an explicit offline development mode and deferred
+financial game balance. The former £750,000 gross cap and £600,000 quote cap
+no longer gate functional acceptance. Native cargo production, recipes,
+transport, consumption and save/reload remain the proof. The first stopped
+attempt and its financial ledger remain preserved; the fixed clock and advance
+limits remain. Ordinary-start economics and human UAT are still unproven.

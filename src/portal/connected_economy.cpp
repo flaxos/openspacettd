@@ -14,6 +14,7 @@
 #include "corporate_hq.h"
 #include "logistics_hub.h"
 #include "../command_func.h"
+#include "../settings_cmd.h"
 #include "../console_func.h"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -2028,8 +2029,6 @@ bool FunctionalCore(std::span<std::string_view> argv)
 
 /** @cond CoreBasketProofInternals */
 constexpr std::string_view BASKET_SOURCE = "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7";
-constexpr int64_t BASKET_QUOTE_CAP = 600000;
-constexpr int64_t BASKET_GROSS_CAP = 750000;
 
 /** Frozen native construction operation, retaining reused pieces as explicit zero quotes. */
 struct BasketCommand {
@@ -2069,7 +2068,7 @@ bool BasketFail(std::string_view error)
 bool BasketProfile()
 {
 	if (!IntegratedEconomy::ContentReady() || PlanetManager::Count() != 7 || Map::SizeX() != 1024 || Map::SizeY() != 1024 ||
-		_settings_game.game_creation.generation_seed != 11 || _settings_game.difficulty.infinite_money ||
+		_settings_game.game_creation.generation_seed != 11 || !_settings_game.difficulty.infinite_money ||
 		!_settings_game.game_creation.player_built_economy || FabricationManager::IsFabricateFromStockpileEnabled(CompanyID{0}) ||
 		!_settings_game.game_creation.cst_sector || _settings_game.game_creation.landscape != LandscapeType::Temperate ||
 		_settings_game.difficulty.disasters || to_underlying(_settings_game.difficulty.vehicle_breakdowns) != 0 ||
@@ -2143,13 +2142,14 @@ Json BasketObservation()
 	result["finance_guard"] = {{"interest_rate", _economy.interest_rate}, {"station_value", int64_t(_price[Price::StationValue])},
 		{"infrastructure_maintenance", _settings_game.economy.infrastructure_maintenance}, {"autorenew", company->settings.engine_renew},
 		{"autorenew_months", company->settings.engine_renew_months}, {"autorenew_money", company->settings.engine_renew_money},
+		{"development_unlimited_money", _settings_game.difficulty.infinite_money},
 		{"replacement_rules", company->engine_renew_list != nullptr}, {"ai", company->is_ai}};
 	result["vehicle_guard"] = Json::array();
 	for (const Train *train : Train::Iterate()) result["vehicle_guard"].push_back({{"id", train->index.base()}, {"age", train->age.base()},
 		{"max_age", train->max_age.base()}, {"speed", train->cur_speed}, {"max_speed", train->vcache.cached_max_speed}, {"progress", train->progress}});
 	result["adapter"] = {{"armed", basket.armed}, {"built", basket.built}, {"cold", basket.cold}, {"failed", basket.failed}, {"error", basket.error},
 		{"layout_candidates", basket.layouts}, {"endpoint_invocations", basket.invocations}, {"advances", basket.advances}, {"initial_advances", basket.initial_advances},
-		{"gross_debits", basket.gross}, {"quoted_total", basket.quoted_total}, {"tick_debit_reserve", basket.tick_reserve}, {"quote_cap", BASKET_QUOTE_CAP}, {"gross_cap", BASKET_GROSS_CAP}};
+		{"gross_debits", basket.gross}, {"quoted_total", basket.quoted_total}, {"tick_debit_reserve", basket.tick_reserve}, {"development_unlimited_money", _settings_game.difficulty.infinite_money}};
 	return result;
 }
 
@@ -2372,10 +2372,9 @@ bool PlanBasket(uint layout, BasketLayout &plan)
 	plan.report["construction_quote"] = int64_t(construction); plan.report["vehicle_quote"] = int64_t(vehicles); plan.report["total_quote"] = int64_t(construction + vehicles);
 	plan.report["preview_unchanged"] = FunctionalSnapshot() == plan.state;
 	int64_t total = int64_t(construction + vehicles);
-	bool legal = plan.report["preview_unchanged"].get<bool>() && total > 0 && total <= BASKET_QUOTE_CAP &&
-		Company::Get(CompanyID{0})->money >= construction + vehicles && BasketChain();
+	bool legal = plan.report["preview_unchanged"].get<bool>() && total > 0 && BasketChain();
 	plan.report["reason"] = legal ? "" : !plan.report["preview_unchanged"].get<bool>() ? "query-mutated-state" :
-		total > BASKET_QUOTE_CAP || Company::Get(CompanyID{0})->money < construction + vehicles ? "unaffordable-complete-quote" : "chain-integrity";
+		"chain-integrity";
 	plan.report["legal"] = legal; plan.report["frozen"] = legal;
 	return legal;
 }
@@ -2499,7 +2498,7 @@ bool BasketIntegrity()
 bool BasketTickReserve(int64_t &reserve)
 {
 	const Company *company = Company::Get(CompanyID{0});
-	if (company->is_ai || company->engine_renew_list != nullptr || company->money < 0 ||
+	if (company->is_ai || company->engine_renew_list != nullptr ||
 		company->infrastructure.GetRoadTotal() != 0 || company->infrastructure.GetTramTotal() != 0 || company->infrastructure.water != 0 || company->infrastructure.airport != 0)
 		return BasketFail("unbounded-company-automatic-debits");
 	int64_t yearly_interest = int64_t(company->current_loan) * _economy.interest_rate / 100;
@@ -2558,6 +2557,20 @@ bool CoreBasket(std::span<std::string_view> argv)
 	AutoRestoreBackup observer(_commonwealth_slice_audit, &audit);
 	AutoRestoreBackup monthly(_integrated_city_month_audit, &months);
 	Json before = FunctionalSnapshot(), report = {{"version", 1}, {"operation", argv[1]}};
+	if (argv[1] == "basket-dev-money" && argv.size() == 2) {
+		if (basket.armed || basket.failed || !_pause_mode.Test(PauseMode::Normal) ||
+			before.at("tick") != 167168 || before.at("money") != 3705864 || _settings_game.difficulty.infinite_money ||
+			!BasketChain()) BasketFail("development-money-source-boundary");
+		else if (Command<Commands::ChangeSetting>::Do(DoCommandFlag::Execute, "difficulty.infinite_money", 1).Failed() ||
+			!_settings_game.difficulty.infinite_money) BasketFail("development-money-setting");
+		report["development_unlimited_money"] = _settings_game.difficulty.infinite_money;
+		report["failed"] = basket.failed; report["reason"] = basket.error;
+		report["state"] = FunctionalSnapshot(); report["observation"] = BasketObservation();
+		report["actual_ticks"] = 0; report["audit"] = FunctionalAudit(audit);
+		report["cash_conserved"] = report["state"]["money"] == before["money"];
+		report["cargo_errors"] = Json::array();
+		IConsolePrint(CC_DEFAULT, "CONNECTED basket-result {}", report.dump()); return true;
+	}
 	if (argv[1] == "basket-status" && argv.size() == 2) {
 		report["state"] = before; report["observation"] = BasketObservation(); report["services"] = basket.services;
 		IConsolePrint(CC_DEFAULT, "CONNECTED basket-state {}", report.dump()); return true;
@@ -2586,8 +2599,8 @@ bool CoreBasket(std::span<std::string_view> argv)
 					Json observation = BasketObservation(); observation.erase("adapter");
 					if (frozen.at("observation") != observation) BasketFail("cold-full-observation-equality");
 					else if (ledger.at("source_sha256") != BASKET_SOURCE || advances == 0 || advances > 240 ||
-						before.at("tick").get<uint64_t>() != 167168 + uint64_t(advances) * 2048 || gross < quote || gross > BASKET_GROSS_CAP ||
-						quote <= 0 || quote > BASKET_QUOTE_CAP || !BasketServicesValid(ledger.at("services"))) BasketFail("cold-ledger-services");
+						before.at("tick").get<uint64_t>() != 167168 + uint64_t(advances - 1) * 2048 || gross < quote ||
+						quote <= 0 || !BasketServicesValid(ledger.at("services"))) BasketFail("cold-ledger-services");
 					else { basket.cold = true; basket.built = true; basket.initial_advances = advances; basket.gross = gross;
 						basket.quoted_total = quote; basket.services = ledger.at("services"); basket.armed = true; }
 				} else basket.armed = true;
@@ -2633,10 +2646,8 @@ bool CoreBasket(std::span<std::string_view> argv)
 				int64_t reserve = 0;
 				if (!BasketTickReserve(reserve)) break;
 				basket.tick_reserve = reserve;
-				if (gross > BASKET_GROSS_CAP - reserve) { BasketFail("next-tick-gross-debit-reserve"); break; }
 				StateGameLoop();
 				while (transactions < audit.cash_transactions.size()) gross += std::max<int64_t>(0, audit.cash_transactions[transactions++][2]);
-				if (gross > BASKET_GROSS_CAP) { BasketFail("gross-debit-bound"); break; }
 			}
 		}
 	} else if ((argv[1] == "basket-stop" || argv[1] == "basket-restart") && argv.size() == 3) {
@@ -2651,7 +2662,6 @@ bool CoreBasket(std::span<std::string_view> argv)
 	Json after = FunctionalSnapshot();
 	report["actual_ticks"] = after["tick"].get<uint64_t>() - before["tick"].get<uint64_t>();
 	for (const auto &transaction : audit.cash_transactions) basket.gross += std::max<int64_t>(0, transaction[2]);
-	if (basket.gross > BASKET_GROSS_CAP) BasketFail("gross-debit-bound");
 	report["cash_conserved"] = after["money"].get<int64_t>() == before["money"].get<int64_t>() - audit.cash_debits;
 	report["cargo_errors"] = Json::array();
 	for (CargoType cargo{0}; cargo < NUM_CARGO; ++cargo) {
