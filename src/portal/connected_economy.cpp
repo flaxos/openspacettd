@@ -2491,7 +2491,8 @@ bool BasketIntegrity()
  * Native train ticks run two movement handlers. Each handler advances at most
  * (3*max_speed/4 + byte progress)/192 steps; charging the maximum public toll at
  * every step overcounts admissions safely. Monthly interest/property/rail fees
- * are reserved on every tick. Running costs are zero for the pinned fleet.
+ * are reserved on every tick. The native train day charge includes a fractional
+ * company carry, so reserve its next possible whole-pound debit for each front.
  * Any approaching automatic renewal stops before its temporary GBP 100k debit;
  * an ordinary inward depot entry also reserves the native temporary renewal fee.
  */
@@ -2520,7 +2521,15 @@ bool BasketTickReserve(int64_t &reserve)
 	for (const Vehicle *vehicle : Vehicle::Iterate()) if (vehicle->type != VehicleType::Train && vehicle->type != VehicleType::Effect) return BasketFail("non-train-automatic-debits");
 	for (const Train *front : Train::Iterate()) if (front->IsFrontEngine()) {
 		++fronts;
-		if (front->GetRunningCost() != 0 || front->vcache.cached_max_speed > 128 || front->cur_speed > 128) return BasketFail("unbounded-fleet-running-or-speed");
+		if (front->vcache.cached_max_speed > 128 || front->cur_speed > 128) return BasketFail("unbounded-fleet-speed");
+		/* Train::OnNewEconomyDay charges a 1/256-pound annual cost scaled by
+		 * running ticks / (365 * 74); one tick can add at most one running tick.
+		 * SubtractMoneyFromCompanyFract may round up through its existing carry. */
+		constexpr int64_t denominator = int64_t(CalendarTime::DAYS_IN_YEAR) * Ticks::DAY_TICKS * 256;
+		int64_t yearly_running = int64_t(front->GetRunningCost());
+		uint running_ticks = uint(front->running_ticks) + 1;
+		if (yearly_running < 0 || yearly_running > (INT64_MAX - denominator) / running_ticks) return BasketFail("unbounded-fleet-running-cost");
+		reserve += (yearly_running * running_ticks + denominator - 1) / denominator;
 		if (company->settings.engine_renew && int64_t(front->age.base()) + 1 - front->max_age.base() >= int64_t(company->settings.engine_renew_months) * 30)
 			return BasketFail("approaching-automatic-renewal-bound");
 		uint speed = std::max<uint>(front->cur_speed, front->vcache.cached_max_speed);
