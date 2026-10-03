@@ -2646,14 +2646,13 @@ bool CoreBasket(std::span<std::string_view> argv)
 		else {
 			++basket.advances;
 			AutoRestoreBackup pause(_pause_mode); AutoRestoreBackup tick_owner(_current_company, _local_company);
-			UpdateSignalsInBuffer(); _pause_mode.Reset(); size_t transactions = 0; int64_t gross = basket.gross;
+			UpdateSignalsInBuffer(); _pause_mode.Reset();
 			for (uint i = 0; i < 2048; ++i) {
 				if (!BasketIntegrity()) break;
 				int64_t reserve = 0;
 				if (!BasketTickReserve(reserve)) break;
 				basket.tick_reserve = reserve;
 				StateGameLoop();
-				while (transactions < audit.cash_transactions.size()) gross += std::max<int64_t>(0, audit.cash_transactions[transactions++][2]);
 			}
 		}
 	} else if ((argv[1] == "basket-stop" || argv[1] == "basket-restart") && argv.size() == 3) {
