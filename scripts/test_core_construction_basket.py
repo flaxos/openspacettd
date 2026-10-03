@@ -38,7 +38,9 @@ RECOVERY_CLOCK = {'start_utc': '2026-10-03T00:58:49.320471+00:00',
                   'stop_utc': '2026-10-03T02:13:49.320471+00:00',
                   'trigger': 'Retained first failed advance; no clock reset', 'duration_seconds': 4500}
 RECOVERY_INITIAL_STOP = RECOVERY_CLOCK['stop_utc']  # Explicit phase allocation; original outer clock is unchanged.
-PRIOR_GROSS_DEBITS = 364281
+PRIOR_GROSS_DEBITS = 729045  # Both preserved paid attempts; no gross cap remains.
+PRIOR_REQUESTED_ADVANCES = 3
+PRIOR_ACTUAL_TICKS = 4096
 HISTORICAL_PRIMARY_DEBITS = 2761963
 HISTORICAL_CONTROL_DEBITS = 4809
 HISTORICAL_ADVANCES = {'initial': 82, 'cold': 24, 'initial_controls': 25, 'total': 106}
@@ -216,13 +218,19 @@ def initial_report(inputs):
                        'new_grant_commands': 0, 'new_grant_amount': 0},
         'historical_debits': {'primary': HISTORICAL_PRIMARY_DEBITS, 'disposable_control': HISTORICAL_CONTROL_DEBITS},
         'historical_advances': copy.deepcopy(HISTORICAL_ADVANCES),
+        'retained_failed_basket_attempts': {'gross_debits': PRIOR_GROSS_DEBITS,
+                                            'requested_advances': PRIOR_REQUESTED_ADVANCES,
+                                            'actual_ticks': PRIOR_ACTUAL_TICKS,
+                                            'game_loads': 2},
         'bounds': {'layout_candidates': 2, 'endpoint_calls_per_layout': 8, 'station_candidates_per_call': 16,
                    'predecessor_states_per_call': 30000, 'bridge_span': 16, 'quoted_debits': QUOTE_CAP,
                    'new_gross_debits': GROSS_CAP, 'advance_caps': ADVANCE_CAPS,
                    'ticks_per_advance': TICKS_PER_ADVANCE, 'outer_wall_seconds': OUTER_SECONDS,
-                   'phase_wall_seconds': PHASE_SECONDS},
+                   'phase_wall_seconds': PHASE_SECONDS,
+                   'initial_phase_override_stop_utc': RECOVERY_INITIAL_STOP},
         'load_attempts': {'initial': 0, 'cold': 0}, 'fresh_games_started': 0,
-        'advance_counts': {'initial': 1, 'cold': 0}, 'simulation_clock': copy.deepcopy(RECOVERY_CLOCK),
+        'advance_counts': {'initial': PRIOR_REQUESTED_ADVANCES, 'cold': 0},
+        'simulation_clock': copy.deepcopy(RECOVERY_CLOCK),
         'native_receipts': 0, 'native_debits': 0, 'native_transactions': [], 'operations': [],
         'native_ledger_complete': True, 'native_state_current': True, 'accounted_sequences': [],
         'phases': {name: 'NOT RUN' for name in ('admission', 'plan', 'construction', 'missing_ball',
@@ -239,7 +247,7 @@ def prepare(binary, output):
     require(inputs['pack_sha256'] == pack_hashes, 'Published content differs from the archived observation save')
     config, changes = relocated_config(archived_config)
     output.mkdir(parents=True)
-    for name in ('source', 'initial', 'cold', 'operations'):
+    for name in ('source', 'initial', 'cold', 'operations', 'checkpoints', 'diagnostic'):
         (output / name).mkdir()
     with (output / 'source/owner-observation.sav').open('xb') as stream:
         stream.write(save)
@@ -266,7 +274,8 @@ def prepare(binary, output):
 def validate_execution_admission(report, preparation, current_inputs, output):
     require(report['status'] == 'NOT RUN' and report['stage'] == 'prepared' and
             report['load_attempts'] == {'initial': 0, 'cold': 0} and
-            report['advance_counts'] == {'initial': 1, 'cold': 0} and report['simulation_clock'] == RECOVERY_CLOCK,
+            report['advance_counts'] == {'initial': PRIOR_REQUESTED_ADVANCES, 'cold': 0} and
+            report['simulation_clock'] == RECOVERY_CLOCK,
             'This campaign was already attempted; a retry requires another explicit owner handoff')
     require(preparation['version'] == 1 and current_inputs == preparation['inputs'] == report['inputs'],
             'Pinned binary/source/content inputs changed after preparation')
@@ -326,6 +335,17 @@ def verify_protected_topology(state, frozen, plan=None, built_footprint=None):
     for key in ('terminals', 'zones'):
         require(len(state[key]) == len(frozen[key]), 'A public terminal or arrival zone was added or removed')
         for index, (old, current) in enumerate(zip(frozen[key], state[key])):
+            if key == 'zones':
+                # Arrival zones advertise future candidates. Their unbuilt rails,
+                # signals and planning projection can change as trees grow; the
+                # actual selected network is checked against paid footprint below.
+                require(all(current.get(name) == old.get(name) for name in ('world', 'dir')) and
+                        all(current['head'].get(name) == old['head'].get(name)
+                            for name in ('tile', 'valid', 'world', 'owner', 'height', 'slope')),
+                        'Advertised zone identity, ownership or terrain changed')
+                if old['head'].get('type') not in (0, 4):
+                    require(current['head'] == old['head'], 'Built arrival-zone head changed')
+                continue
             require({name: value for name, value in normalize_unbuilt_vegetation(old, current).items() if name not in ('join', 'signals')} ==
                     {name: value for name, value in old.items() if name not in ('join', 'signals')},
                     'Neutral terminal head/rails or static metadata changed')
@@ -625,6 +645,7 @@ class Campaign:
         self.sequence = 0
         self.engine = None
         self.current = None
+        self.last_mutation_before = None
         self.services = None
         self.frozen_plan = None
         self.built_footprint = None
@@ -636,7 +657,9 @@ class Campaign:
         self.audits = {'initial': [], 'cold': []}
         self.report.update(status='PARTIAL', stage='preflight', preflight_start_utc=preflight_started.isoformat(),
                            preflight_stop_utc=RECOVERY_INITIAL_STOP, initial_stop_utc=RECOVERY_INITIAL_STOP,
-                           prior_failed_attempt={'gross_debits': PRIOR_GROSS_DEBITS, 'requested_advance': 1, 'actual_ticks': 0})
+                           prior_failed_attempts={'gross_debits': PRIOR_GROSS_DEBITS,
+                                                  'requested_advances': PRIOR_REQUESTED_ADVANCES,
+                                                  'actual_ticks': PRIOR_ACTUAL_TICKS})
         self.persist()
 
     def persist(self):
@@ -650,6 +673,8 @@ class Campaign:
         self.report['aggregate_advances_total'] = HISTORICAL_ADVANCES['total'] + sum(new.values())
         self.report['requested_native_ticks'] = TICKS_PER_ADVANCE * sum(new.values())
         self.report['actual_native_ticks'] = (None if tick is None or not self.report['native_state_current'] else tick - START_TICK)
+        self.report['aggregate_basket_actual_ticks'] = (None if self.report['actual_native_ticks'] is None else
+                                                        PRIOR_ACTUAL_TICKS + self.report['actual_native_ticks'])
         self.report['aggregate_gross_debits'] = HISTORICAL_PRIMARY_DEBITS + HISTORICAL_CONTROL_DEBITS + PRIOR_GROSS_DEBITS + self.report['native_debits']
         self.report['financial_reconciliation'] = {
             'starting_cash': START_CASH, 'new_native_receipts': self.report['native_receipts'],
@@ -730,6 +755,7 @@ class Campaign:
         verify_observation(value['state'], value['observation'], self.frozen, self.services,
                            self.frozen_plan, self.built_footprint)
         self.current = value
+        self.last_mutation_before = None
         self.report['native_state_current'] = True
         if expected_state is not None:
             require(value['state']['money'] == START_CASH + self.report['native_receipts'] - self.report['native_debits'],
@@ -744,6 +770,7 @@ class Campaign:
     def mutate(self, operation):
         self.check_wall()
         before = self.current['state']
+        self.last_mutation_before = before
         self.report['native_ledger_complete'] = False
         self.report['native_state_current'] = False
         self.persist()
@@ -780,6 +807,24 @@ class Campaign:
         verify_conversions(self.audits['initial'] + self.audits['cold'], value['state'], self.labels)
         self.check_wall()
         return value
+
+    def diagnostic_checkpoint_if_safe(self, error):
+        """Save only a verified paused result after a wrapper assertion, never native corruption."""
+        if isinstance(error, CampaignStop) or self.engine is None or self.last_mutation_before is None:
+            return
+        try:
+            value = self.current
+            require(isinstance(value, dict) and not value.get('failed') and
+                    value.get('observation', {}).get('paused'), 'Native result is not a safe paused state')
+            verify_adapter_response_contract(value)
+            verify_native_accounting(self.last_mutation_before, value)
+            verify_observation(value['state'], value['observation'], self.frozen,
+                               self.services, self.frozen_plan, self.built_footprint)
+            self.save_paused(self.output / 'diagnostic', 'wrapper-stop')
+            self.report['diagnostic_checkpoint'] = 'SAVED; diagnostic only, not an authorized continuation source'
+        except Exception as diagnostic_error:
+            self.report['diagnostic_checkpoint'] = 'NOT SAVED; safety check: ' + str(diagnostic_error)
+        self.persist()
 
     def start(self, name, save):
         self.check_wall()
@@ -886,7 +931,9 @@ class Campaign:
         self.report['advance_counts'][self.phase] += 1
         self.report['stage'] = f'{self.phase}_operation'
         self.persist()  # Requested advances count even if dispatch/result fails.
-        return self.mutate('basket-advance')
+        value = self.mutate('basket-advance')
+        self.save_paused(self.output / 'checkpoints', f'advance-{sum(self.report["advance_counts"].values()):03d}')
+        return value
 
     def months(self, value):
         return [event for event in value['audit']['basket_months'] if event['town'] == 0]
@@ -976,6 +1023,7 @@ class Campaign:
             self.report['phases']['construction'] = 'PASS'
             self.persist()
             self.terrain_audit('construction_terrain_cargo_text_audit')
+            self.save_paused(self.output / 'checkpoints', 'post-construction')
             self.mutate(f'basket-stop {self.services[3]["train"]}')
             require(next(row for row in self.current['state']['trains'] if row['id'] == self.services[3]['train'])['stopped'],
                     'The normal BALL stop control did not hold its train')
@@ -1057,6 +1105,7 @@ class Campaign:
             self.report.update(status='PARTIAL' if isinstance(error, CampaignStop) else 'FAIL', stage='stopped',
                                error=str(error), error_type=type(error).__name__)
             self.journal('campaign_stopped', error=str(error), error_type=type(error).__name__)
+            self.diagnostic_checkpoint_if_safe(error)
         finally:
             self.close()
             self.recover_flushed_failed_result()
@@ -1129,6 +1178,14 @@ class AdmissionGuardTests(unittest.TestCase):
         removed = copy.deepcopy(rail)
         removed['rails'][0].update(type=4)
         self.assertNotEqual(normalize_unbuilt_vegetation(rail, removed), rail)
+
+    def test_unused_zone_vegetation_does_not_replace_route_checks(self):
+        state = copy.deepcopy(self.frozen)
+        state['zones'][6]['rails'][10]['type'] = 4
+        verify_protected_topology(state, self.frozen)
+        state['zones'][6]['head']['owner'] = 0
+        with self.assertRaisesRegex(RuntimeError, 'zone identity'):
+            verify_protected_topology(state, self.frozen)
 
     def test_full_snapshot_rejects_unrelated_rng_difference(self):
         value = {'version': 1, 'state': copy.deepcopy(self.frozen), 'observation': {'paused': True}}
@@ -1313,9 +1370,11 @@ class AdmissionGuardTests(unittest.TestCase):
         campaign.report['simulation_clock'] = copy.deepcopy(RECOVERY_CLOCK)
         campaign.report['advance_counts'] = {'initial': initial, 'cold': cold}
         campaign.phase = phase
+        campaign.output = Path('/tmp/unused-basket-test-output')
         campaign.check_wall = lambda: None
         campaign.persist = lambda: None
         campaign.mutate = lambda operation: operation
+        campaign.save_paused = lambda folder, stem: None
         return campaign
 
     def test_phase_advance_caps_cannot_transfer_unused_ticks(self):

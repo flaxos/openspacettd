@@ -41,6 +41,17 @@ rejects altered rail, signals, ownership or terrain. The captured observations
 pass the repaired guard offline, but gameplay after the stop and cold proof are
 **NOT RUN**. No additional replay follows from this repair.
 
+The next explicit handoff authorizes one more replay from the pinned source save
+with the unused-candidate vegetation guard tightened and proven against both
+retained snapshots. Retain all **3 requested advances / 4,096 actual ticks**
+and both earlier paid attempts in aggregate evidence. The initial phase now
+shares the original 02:13:49.320471 UTC outer stop; the total advance cap is
+unchanged. Save a normal paused checkpoint after construction and at each safe
+advance boundary. On a wrapper assertion, attempt a diagnostic save only after
+independent native cash/cargo and full route-state verification; never save an
+unsafe state or treat a diagnostic file as continuation authority. Stop at the
+first real gameplay defect or the original outer deadline.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

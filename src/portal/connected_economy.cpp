@@ -2600,8 +2600,8 @@ bool CoreBasket(std::span<std::string_view> argv)
 					int64_t quote = ledger.at("quoted_total").get<int64_t>();
 					Json observation = BasketObservation(); observation.erase("adapter");
 					if (frozen.at("observation") != observation) BasketFail("cold-full-observation-equality");
-					else if (ledger.at("source_sha256") != BASKET_SOURCE || advances == 0 || advances > 240 ||
-						before.at("tick").get<uint64_t>() != 167168 + uint64_t(advances - 1) * 2048 || gross < quote ||
+					else if (ledger.at("source_sha256") != BASKET_SOURCE || advances < 3 || advances > 240 ||
+						before.at("tick").get<uint64_t>() != 167168 + uint64_t(advances - 3) * 2048 || gross < quote ||
 						quote <= 0 || !BasketServicesValid(ledger.at("services"))) BasketFail("cold-ledger-services");
 					else { basket.cold = true; basket.built = true; basket.initial_advances = advances; basket.gross = gross;
 						basket.quoted_total = quote; basket.services = ledger.at("services"); basket.armed = true; }
