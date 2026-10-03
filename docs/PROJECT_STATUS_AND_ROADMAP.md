@@ -2,6 +2,14 @@
 
 ## Development-money recovery stopped — 3 October 2026
 
+The one further authorized replay passed source equality, route planning,
+normal four-service construction and two full simulation advances. Native
+resource production began, but no material consignment had arrived or been
+paid when a wrapper check stopped on natural tree growth at a neutral unbuilt
+candidate tile. Cash and physical cargo reconciled. The narrow observation
+guard repair passes the retained snapshots offline; it has not been replayed
+in game. Basket consumption and cold continuation remain NOT RUN.
+
 The owner authorized unlimited virtual money in an explicit offline proof mode,
 deferring financial balance and superseding the basket quote/gross caps. The
 single development-money recovery load enabled that mode but stopped before

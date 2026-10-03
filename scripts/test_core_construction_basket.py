@@ -293,6 +293,18 @@ def exact_paused_equality(value, expected_state, expected_observation=None):
                 'Full paused extended basket/custody/native growth equality failed')
 
 
+def normalize_unbuilt_vegetation(original, current):
+    """Treat ordinary tree growth on clear, neutral, unbuilt candidate tiles as terrain life."""
+    projected = copy.deepcopy(current)
+    for before, after in zip(original.get('rails', ()), projected.get('rails', ())):
+        if (before.get('type') == 0 and after.get('type') == 4 and
+                before.get('owner') == after.get('owner') == 16 and
+                'tracks' not in before and 'tracks' not in after and
+                'railtype' not in before and 'railtype' not in after):
+            after['type'] = 0
+    return projected
+
+
 def verify_protected_topology(state, frozen, plan=None, built_footprint=None):
     """Protect public infrastructure while validating the declared private joins."""
     for key in ('worlds', 'gates', 'stocks'):
@@ -314,7 +326,7 @@ def verify_protected_topology(state, frozen, plan=None, built_footprint=None):
     for key in ('terminals', 'zones'):
         require(len(state[key]) == len(frozen[key]), 'A public terminal or arrival zone was added or removed')
         for index, (old, current) in enumerate(zip(frozen[key], state[key])):
-            require({name: value for name, value in current.items() if name not in ('join', 'signals')} ==
+            require({name: value for name, value in normalize_unbuilt_vegetation(old, current).items() if name not in ('join', 'signals')} ==
                     {name: value for name, value in old.items() if name not in ('join', 'signals')},
                     'Neutral terminal head/rails or static metadata changed')
             require(len(current['signals']) == len(old['signals']), 'Neutral signal topology changed')
@@ -1101,6 +1113,22 @@ class AdmissionGuardTests(unittest.TestCase):
             del broken['audit'][key]
             with self.subTest(audit=key), self.assertRaisesRegex(RuntimeError, 'Incomplete native basket audit'):
                 verify_adapter_response_contract(broken)
+
+    def test_unbuilt_neutral_tree_growth_preserves_rail_integrity_guard(self):
+        before = {'rails': [{'tile': 10, 'type': 0, 'owner': 16, 'world': 2, 'height': 3,
+                             'slope': 0, 'expected_tracks': 1}]}
+        tree = copy.deepcopy(before)
+        tree['rails'][0]['type'] = 4
+        self.assertEqual(normalize_unbuilt_vegetation(before, tree), before)
+        for field, value in (('owner', 0), ('height', 4), ('type', 6)):
+            changed = copy.deepcopy(tree)
+            changed['rails'][0][field] = value
+            self.assertNotEqual(normalize_unbuilt_vegetation(before, changed), before)
+        rail = copy.deepcopy(before)
+        rail['rails'][0].update(type=1, tracks=1, railtype=0)
+        removed = copy.deepcopy(rail)
+        removed['rails'][0].update(type=4)
+        self.assertNotEqual(normalize_unbuilt_vegetation(rail, removed), rail)
 
     def test_full_snapshot_rejects_unrelated_rng_difference(self):
         value = {'version': 1, 'state': copy.deepcopy(self.frozen), 'observation': {'paused': True}}

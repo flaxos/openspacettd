@@ -2,6 +2,14 @@
 
 ## Development-money response stop — 3 October 2026
 
+The subsequent single replay reached two full advances and recorded raw iron
+and silica production with conserved physical custody. No material delivery,
+payment, processing or complete Core basket was yet observed. It stopped when
+the wrapper compared a naturally grown tree on an unbuilt neutral tile against
+the original clear-tile snapshot. The guard is corrected and passes those
+retained snapshots offline, but further native progression and cold reload
+remain unrun under the first-hard-defect stop.
+
 The owner-approved offline unlimited-money mode removes development
 affordability as a basket acceptance gate. Its single recovery load stopped
 before planning or new ticks because the money-setting response lacked the

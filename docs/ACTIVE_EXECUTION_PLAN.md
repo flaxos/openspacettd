@@ -33,6 +33,14 @@ stop only. Retain the original requested advance and all earlier attempts.
 No fresh grant, extra tick, silent replay after gameplay starts, or change to
 the resource and authority rules follows from this timing allocation.
 
+That one further replay ran two full advances and stopped at its first wrapper
+integrity assertion. A neutral unbuilt candidate tile naturally changed from
+clear to trees; native command, cash and all-cargo conservation remained sound.
+The observation guard now accepts only that scoped vegetation change and still
+rejects altered rail, signals, ownership or terrain. The captured observations
+pass the repaired guard offline, but gameplay after the stop and cold proof are
+**NOT RUN**. No additional replay follows from this repair.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active
