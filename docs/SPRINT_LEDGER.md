@@ -1,5 +1,18 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## First Core Construction Basket first attempt — 3 October 2026
+
+**ASSISTED FUNCTIONAL FAIL at first advance; human Pending.** Source save206acdd…
+matched; layout0 met all search/quote caps and four normal material services were
+built for£364,281. A false zero-annual-running-cost assumption in the per-tick
+spending guard stopped before any of the requested2,048ticks ran. One initial
+load and one advance request are consumed; cold0, new assistance£0, debt£100k.
+Native cash£3,705,864−£364,281=£3,341,583. Raw logs, 1,811 debit rows, failed
+result and fixed source are [retained](audit/2026-10-03/core-construction-basket/README.md).
+The corrected guard has not received a native continuation or fresh attempt;
+another run needs explicit owner handoff and aggregate-budget treatment. Core
+steel/ballast receipt, missing-BALL control and growth remain NOT RUN.
+
 ## First Core Construction Basket intake — 2 October 2026
 
 Owner-authorized one-slice execution from the final already-funded checkpoint.

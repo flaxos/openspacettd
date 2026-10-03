@@ -1,5 +1,17 @@
 # OpenSpaceTTD Known Limitations
 
+## Material basket first-attempt stop — 3 October 2026
+
+The four service routes were legally quoted and paid, but the first requested
+advance stopped before native ticks because the guard treated a positive annual
+train running cost as forbidden. The native engine can book a fractional daily
+running charge. A source correction reserves its possible next whole-pound debit;
+it is locally testable but **native basket progression remains NOT RUN** on the
+corrected code. No post-build save exists, and a full retry requires a new
+explicit handoff; the previous£364,281 debit and immutable clock cannot be
+silently erased. [Attempt evidence](audit/2026-10-03/core-construction-basket/README.md).
+Ordinary economics, repeatability, sustained growth and human UAT remain open.
+
 ## First Core Construction Basket boundary — 2 October 2026
 
 One new material-basket slice is explicitly authorized from preserved final

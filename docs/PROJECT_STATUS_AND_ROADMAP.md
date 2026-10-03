@@ -1,5 +1,20 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## First Core Construction Basket first attempt stopped — 3 October 2026
+
+**ASSISTED FUNCTIONAL requested basket outcome FAIL / incomplete.** The exact
+retained Materials I save loaded, terrain/text and eight-leg legal plan passed,
+and four native services were paid for£364,281. The first requested advance
+stopped in a too-strict running-cost reserve guard before any game tick: no
+material arrival, Core basket consumption or cold continuation is proved.
+Cash£3,341,583/debt£100,000 and zero added assistance reconcile. The guard has
+a narrow source correction; in-game correction validation requires a new explicit
+handoff because the one attempt stopped at a hard defect. [Raw first-attempt
+evidence and bounds](audit/2026-10-03/core-construction-basket/README.md).
+The 2 October authorization below remains the active slice description, not a
+claim of completed proof. Ordinary-start economics/fresh replay NOT RUN; human
+UAT Pending. No new slice, balance change or merge follows from partial build.
+
 ## First Core Construction Basket authorized — 2 October 2026
 
 The owner approved one next functional slice through the existing physical
