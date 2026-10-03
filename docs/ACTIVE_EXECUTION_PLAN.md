@@ -25,6 +25,14 @@ The response shape has a narrow source correction, but that correction is not
 authority for another game load. Preserve both stopped attempts. The requested
 functional material-basket outcome is still unproven.
 
+The subsequent explicit handoff authorizes **one** further source-save load
+after focused full response-contract checks. It assigns the initial phase the
+remaining time through the unchanged outer stop
+**2026-10-03 02:13:49.320471 UTC**; this supersedes the earlier initial-phase
+stop only. Retain the original requested advance and all earlier attempts.
+No fresh grant, extra tick, silent replay after gameplay starts, or change to
+the resource and authority rules follows from this timing allocation.
+
 # Active execution plan: First Core Construction Basket
 
 Owner-authorized execution handoff, 2 October 2026. This is the single active

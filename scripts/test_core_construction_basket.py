@@ -37,7 +37,7 @@ GROSS_CAP = None
 RECOVERY_CLOCK = {'start_utc': '2026-10-03T00:58:49.320471+00:00',
                   'stop_utc': '2026-10-03T02:13:49.320471+00:00',
                   'trigger': 'Retained first failed advance; no clock reset', 'duration_seconds': 4500}
-RECOVERY_INITIAL_STOP = '2026-10-03T01:28:49.320471+00:00'
+RECOVERY_INITIAL_STOP = RECOVERY_CLOCK['stop_utc']  # Explicit phase allocation; original outer clock is unchanged.
 PRIOR_GROSS_DEBITS = 364281
 HISTORICAL_PRIMARY_DEBITS = 2761963
 HISTORICAL_CONTROL_DEBITS = 4809
@@ -478,6 +478,24 @@ def verify_native_accounting(before, result):
         require(expected == after['all_held'][cargo], f'Physical cargo {cargo} custody does not reconcile')
 
 
+def verify_adapter_response_contract(value):
+    """Reject missing native response fields before treating an operation as progress."""
+    fields = ('version', 'operation', 'actual_ticks', 'state', 'observation', 'audit',
+              'cash_conserved', 'cargo_errors', 'services', 'failed', 'reason')
+    require(isinstance(value, dict) and all(key in value for key in fields),
+            'Incomplete native basket response envelope')
+    audit_fields = ('cash_transactions', 'cash_debits', 'produced', 'raw_produced',
+                    'raw_removed', 'unallocated', 'discarded', 'consumed',
+                    'deliveries', 'payments', 'cash_payments', 'arrivals',
+                    'processor_cargo', 'basket_months')
+    require(isinstance(value['audit'], dict) and all(key in value['audit'] for key in audit_fields) and
+            isinstance(value['audit']['basket_months'], list), 'Incomplete native basket audit response')
+    require(isinstance(value['state'], dict) and isinstance(value['observation'], dict) and
+            isinstance(value['services'], list) and isinstance(value['cargo_errors'], list) and
+            isinstance(value['actual_ticks'], int) and isinstance(value['failed'], bool),
+            'Malformed native basket response types')
+
+
 def paid_visits(audits, service, context=(), before_tick=None):
     """The existing functional runner's arrival/packet/cash proof, with tick ordering."""
     arrivals = sorted(row for data in (*context, *audits) for row in data['arrivals']
@@ -718,6 +736,7 @@ class Campaign:
         self.report['native_state_current'] = False
         self.persist()
         value = self.json_command(operation, 'CONNECTED basket-result ')
+        verify_adapter_response_contract(value)
         require(value['version'] == 1 and value['operation'] == operation.split()[0],
                 'Unsupported basket result protocol or operation identity')
         entries = value['audit']['cash_transactions']
@@ -1063,6 +1082,26 @@ class AdmissionGuardTests(unittest.TestCase):
     def setUpClass(cls):
         _, cls.frozen, _, _, _ = source_payload()
 
+    def test_all_response_fields_are_required_before_accounting(self):
+        audit = {key: [] for key in ('cash_transactions', 'produced', 'raw_produced',
+                 'raw_removed', 'unallocated', 'discarded', 'consumed', 'deliveries',
+                 'payments', 'cash_payments', 'arrivals', 'processor_cargo', 'basket_months')}
+        audit['cash_debits'] = 0
+        response = {'version': 1, 'operation': 'basket-dev-money', 'actual_ticks': 0,
+                    'state': {}, 'observation': {}, 'audit': audit, 'cash_conserved': True,
+                    'cargo_errors': [], 'services': [], 'failed': False, 'reason': ''}
+        verify_adapter_response_contract(response)
+        for key in tuple(response):
+            broken = copy.deepcopy(response)
+            del broken[key]
+            with self.subTest(envelope=key), self.assertRaisesRegex(RuntimeError, 'Incomplete native basket response'):
+                verify_adapter_response_contract(broken)
+        for key in tuple(audit):
+            broken = copy.deepcopy(response)
+            del broken['audit'][key]
+            with self.subTest(audit=key), self.assertRaisesRegex(RuntimeError, 'Incomplete native basket audit'):
+                verify_adapter_response_contract(broken)
+
     def test_full_snapshot_rejects_unrelated_rng_difference(self):
         value = {'version': 1, 'state': copy.deepcopy(self.frozen), 'observation': {'paused': True}}
         value['state']['rng'][0] += 1
@@ -1276,11 +1315,15 @@ class AdmissionGuardTests(unittest.TestCase):
         campaign.report['operations'] = [{'result': 'partial-native-result.json'}]
         campaign.audits = {'initial': [], 'cold': []}
         result = {'version': 1, 'operation': 'basket-build', 'failed': True,
+                  'reason': 'native-command-failed', 'actual_ticks': 0,
+                  'observation': {}, 'services': [],
                   'state': {'money': START_CASH - 17, 'all_held': [0] * CARGO_COUNT},
                   'cash_conserved': True, 'cargo_errors': [],
                   'audit': {name: [0] * CARGO_COUNT for name in
                             ('produced', 'raw_produced', 'raw_removed', 'unallocated', 'discarded', 'consumed')}}
         result['audit'].update(cash_transactions=[[START_TICK, 0, 17]], cash_debits=17)
+        result['audit'].update({key: [] for key in ('deliveries', 'payments', 'cash_payments',
+                               'arrivals', 'processor_cargo', 'basket_months')})
         dispatched = []
         def command(operation, marker):
             dispatched.append(operation)
