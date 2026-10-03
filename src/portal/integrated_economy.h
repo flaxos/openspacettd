@@ -70,7 +70,10 @@ class IntegratedEconomy
 	static const EconomyCity *City(TownID town);
 	static uint32_t AcceptCity(TownID town, CargoType cargo, uint32_t amount, bool execute);
 	static bool EvaluateCity(TownID town, float &growth, float &passengers);
-	/** Finish an observed monthly evaluation after the native town growth hook runs. */
+	/**
+	 * Finish an observed monthly evaluation after the native town growth hook runs.
+	 * @param town Town whose native monthly growth state was just updated.
+	 */
 	static void ObserveMonthlyGrowth(TownID town);
 	static std::map<CargoType, uint32_t> ResearchKit(TechID tech);
 	static bool PrepareResearch(CompanyID company, TechID project);

@@ -1249,6 +1249,7 @@ struct FreightLeg {
 	std::vector<std::pair<TileIndex, TileIndex>> bridges; ///< Pairs of native bridge endpoint tiles.
 };
 
+/** @cond CoreBasketPrivatePlanner */
 /** Extra constraints used only by the loaded construction-basket adapter. */
 struct BasketLegOptions {
 	CoreBasketSearchBudget *budget = nullptr;
@@ -1259,6 +1260,7 @@ struct BasketLegOptions {
 	bool depot = true;
 	uint layout = 0;
 };
+/** @endcond */
 
 /**
  * Find a legal rail path using native previews without editing terrain or neutral infrastructure.
@@ -1266,6 +1268,7 @@ struct BasketLegOptions {
  * @param gate Public terminal endpoint in the industry's world.
  * @param[out] leg Feasible station, depot and connecting rail plan when found.
  * @param town Optional live town to serve instead of an industry.
+ * @param options Optional bounded loaded-checkpoint planner constraints.
  * @return Whether the bounded search found a feasible connection.
  */
 bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, FreightLeg &leg, const Town *town = nullptr,
@@ -2023,6 +2026,7 @@ bool FunctionalCore(std::span<std::string_view> argv)
 	IConsolePrint(CC_DEFAULT, "CONNECTED functional-result {}", report.dump()); return true;
 }
 
+/** @cond CoreBasketProofInternals */
 constexpr std::string_view BASKET_SOURCE = "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7";
 constexpr int64_t BASKET_QUOTE_CAP = 600000;
 constexpr int64_t BASKET_GROSS_CAP = 750000;
@@ -2654,6 +2658,7 @@ bool CoreBasket(std::span<std::string_view> argv)
 	IConsolePrint(CC_DEFAULT, "CONNECTED basket-result {}", report.dump());
 	return true;
 }
+/** @endcond */
 
 } // namespace
 
