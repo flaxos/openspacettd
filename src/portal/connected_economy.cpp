@@ -14,6 +14,7 @@
 #include "corporate_hq.h"
 #include "logistics_hub.h"
 #include "../command_func.h"
+#include "../settings_cmd.h"
 #include "../console_func.h"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -25,10 +26,13 @@
 #include "../newgrf_industries.h"
 #include "../rail_cmd.h"
 #include "../rail_map.h"
+#include "../road_map.h"
 #include "../rail.h"
 #include "../station_cmd.h"
 #include "../station_map.h"
 #include "../station_base.h"
+#include "../station_func.h"
+#include "../depot_base.h"
 #include "../train_cmd.h"
 #include "../vehicle_cmd.h"
 #include "../order_cmd.h"
@@ -57,6 +61,8 @@
 #include "../core/backup_type.hpp"
 #include "../3rdparty/nlohmann/json.hpp"
 #include <queue>
+#include <fstream>
+#include "../newgrf_config.h"
 #include "resource_sites.h"
 #include "stellar_network.h"
 #include "portal_terminal.h"
@@ -69,6 +75,7 @@
 #include "../core/string_consumer.hpp"
 #include "../core/random_func.hpp"
 #include "../pathfinder/follow_track.hpp"
+#include "../game/game.hpp"
 
 #include "../safeguards.h"
 
@@ -1243,15 +1250,30 @@ struct FreightLeg {
 	std::vector<std::pair<TileIndex, TileIndex>> bridges; ///< Pairs of native bridge endpoint tiles.
 };
 
+/** @cond CoreBasketPrivatePlanner */
+/** Extra constraints used only by the loaded construction-basket adapter. */
+struct BasketLegOptions {
+	CoreBasketSearchBudget *budget = nullptr;
+	const std::map<TileIndex, TrackBits> *planned_rails = nullptr;
+	const std::set<TileIndex> *blocked = nullptr;
+	TileIndex fixed_station = INVALID_TILE;
+	Axis fixed_axis = Axis::X;
+	bool depot = true;
+	uint layout = 0;
+};
+/** @endcond */
+
 /**
  * Find a legal rail path using native previews without editing terrain or neutral infrastructure.
  * @param industry Generated producer or consumer to serve.
  * @param gate Public terminal endpoint in the industry's world.
  * @param[out] leg Feasible station, depot and connecting rail plan when found.
  * @param town Optional live town to serve instead of an industry.
+ * @param options Optional bounded loaded-checkpoint planner constraints.
  * @return Whether the bounded search found a feasible connection.
  */
-bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, FreightLeg &leg, const Town *town = nullptr)
+bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, FreightLeg &leg, const Town *town = nullptr,
+	const BasketLegOptions *options = nullptr)
 {
 	auto terminal = PortalTerminal::Plan(gate.tile, gate.enter_dir, gate.world_id);
 	if (!terminal) return false;
@@ -1261,11 +1283,24 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 	auto candidate = [&](int x, int y, Axis axis) {
 		if (x <= 0 || y <= 0 || x + 2 >= int(Map::MaxX()) || y + 2 >= int(Map::MaxY())) return;
 		TileIndex tile = TileXY(x, y);
+		if (options != nullptr) {
+			TileIndex second = TileAddByDiagDir(tile, axis == Axis::X ? DiagDirection::SW : DiagDirection::SE);
+			for (TileIndex part : {tile, second}) {
+				if (options->blocked->contains(part) || options->planned_rails->contains(part) ||
+					(!IsTileType(part, TileType::Clear) && !IsTileType(part, TileType::Trees))) return;
+			}
+		}
 		if (town != nullptr && ClosestTownFromTile(tile, UINT_MAX) != town) return;
+		if (options != nullptr) {
+			candidates.emplace_back(DistanceManhattan(tile, target), tile, axis);
+			return;
+		}
 		if (Command<Commands::BuildRailStation>::Do(DoCommandFlag::QueryCost, tile, RAILTYPE_RAIL, axis, 1, 2, STAT_CLASS_DFLT, 0, StationID::Invalid(), false).Succeeded())
 			candidates.emplace_back(DistanceManhattan(tile, target), tile, axis);
 	};
-	if (town == nullptr) {
+	if (options != nullptr && options->fixed_station != INVALID_TILE) {
+		candidates.emplace_back(0, options->fixed_station, options->fixed_axis);
+	} else if (town == nullptr) {
 		for (int dy = -4; dy <= int(industry->location.h) + 3; ++dy) for (int dx = -4; dx <= int(industry->location.w) + 3; ++dx)
 			for (Axis axis : {Axis::X, Axis::Y}) candidate(int(TileX(industry->location.tile)) + dx, int(TileY(industry->location.tile)) + dy, axis);
 	} else {
@@ -1278,23 +1313,40 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 	}
 	std::sort(candidates.begin(), candidates.end());
 	candidates.erase(std::unique(candidates.begin(), candidates.end()), candidates.end());
+	if (options != nullptr && options->layout == 1) {
+		std::stable_sort(candidates.begin(), candidates.end(), [](const auto &a, const auto &b) {
+			return std::tuple{std::get<2>(a) != Axis::Y, std::get<0>(a), std::get<1>(a)} <
+				std::tuple{std::get<2>(b) != Axis::Y, std::get<0>(b), std::get<1>(b)};
+		});
+	}
 	std::vector<int8_t> preview(Map::Size() * 6, -1);
 	uint attempts = 0;
 	for (auto [distance, station, axis] : candidates) {
 		if (++attempts > 16) break;
+		if (options != nullptr) ++options->budget->candidates;
+		if (options != nullptr && options->fixed_station == INVALID_TILE &&
+			Command<Commands::BuildRailStation>::Do(DoCommandFlag::QueryCost, station, RAILTYPE_RAIL, axis, 1, 2,
+				STAT_CLASS_DFLT, 0, NEW_STATION, true).Failed()) continue;
 		DiagDirection positive = axis == Axis::X ? DiagDirection::SW : DiagDirection::SE;
 		DiagDirection dir = axis == Axis::X ? (TileX(target) > TileX(station) ? positive : ReverseDiagDir(positive)) :
 			(TileY(target) > TileY(station) ? positive : ReverseDiagDir(positive));
 		TileIndex station_near = dir == positive ? TileAddByDiagDir(station, positive) : station;
 		TileIndex station_far = dir == positive ? station : TileAddByDiagDir(station, positive);
 		TileIndex start = TileAddByDiagDir(station_near, dir), depot = TileAddByDiagDir(station_far, ReverseDiagDir(dir));
-		if (!Command<Commands::BuildRailDepot>::Do(DoCommandFlag::QueryCost, depot, RAILTYPE_RAIL, dir).Succeeded()) continue;
+		if (options != nullptr && ((!IsTileType(start, TileType::Clear) && !IsTileType(start, TileType::Trees) &&
+			!IsPlainRailTile(start)) || (IsPlainRailTile(start) && TracksOverlap(GetTrackBits(start))))) continue;
+		if (options == nullptr || options->depot) {
+			if (options != nullptr && (options->blocked->contains(depot) || options->planned_rails->contains(depot) ||
+				(!IsTileType(depot, TileType::Clear) && !IsTileType(depot, TileType::Trees)))) continue;
+			if (!Command<Commands::BuildRailDepot>::Do(DoCommandFlag::QueryCost, depot, RAILTYPE_RAIL, dir).Succeeded()) continue;
+		}
 		/* Weighted A* is a bounded feasible-route search, not a minimum-cost claim. State retains native track direction; ties are stable. */
 		using Q = std::tuple<uint, int, uint>;
 		std::priority_queue<Q, std::vector<Q>, std::greater<Q>> queue;
 		std::map<uint, std::tuple<uint, Track, TileIndex>> previous;
 		std::map<uint, uint> costs;
 		uint first = start.base() * 16 + uint(DiagDirToDiagTrackdir(dir));
+		if (options != nullptr && !options->budget->TryState()) return false;
 		queue.emplace(3 * DistanceManhattan(start, target), 0, first); costs[first] = 0;
 		uint last = UINT_MAX, closest = UINT_MAX;
 		while (!queue.empty() && previous.size() < 30000) {
@@ -1304,7 +1356,25 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 			TileIndex tile{key / 16}; Trackdir previous_dir = Trackdir(key % 16);
 			DiagDirection enter = ReverseDiagDir(TrackdirToExitdir(previous_dir));
 			closest = std::min(closest, DistanceManhattan(tile, target));
-			if (PlanetManager::GetTileWorld(tile) != gate.world_id || tile == depot || tile == station || tile == TileAddByDiagDir(station, positive)) continue;
+			if (PlanetManager::GetTileWorld(tile) != gate.world_id || ((options == nullptr || options->depot) && tile == depot) || tile == station || tile == TileAddByDiagDir(station, positive)) continue;
+			if (options != nullptr && options->blocked->contains(tile)) continue;
+			/* Reuse a legal owned bridge as a directed edge; never modify its ramp or neutral portals. */
+			if (options != nullptr && IsBridgeTile(tile) && GetTileOwner(tile) == CompanyID{0} &&
+				GetTunnelBridgeTransportType(tile) == TransportType::Rail && GetRailType(tile) == RAILTYPE_RAIL &&
+				GetTunnelBridgeDirection(tile) == TrackdirToExitdir(previous_dir)) {
+				TileIndex end = GetOtherBridgeEnd(tile);
+				DiagDirection travel = GetTunnelBridgeDirection(tile);
+				TileIndex next = TileAddByDiagDir(end, travel);
+				if (next < Map::Size() && GetTileOwner(end) == CompanyID{0} && PlanetManager::GetTileWorld(end) == gate.world_id) {
+					uint nk = next.base() * 16 + uint(DiagDirToDiagTrackdir(travel)), nc = cost + DistanceManhattan(tile, end);
+					if (!costs.contains(nk) || costs[nk] > nc) {
+						if (!previous.contains(nk) && !options->budget->TryState()) return false;
+						costs[nk] = nc; previous[nk] = {key, DiagDirToDiagTrack(travel), end};
+						queue.emplace(nc + 3 * DistanceManhattan(next, target), -int(nc), nk);
+					}
+				}
+				continue;
+			}
 			if (!IsTileType(tile, TileType::Clear) && !IsTileType(tile, TileType::Trees) && !IsTileType(tile, TileType::Road) && !(IsPlainRailTile(tile) && GetTileOwner(tile) == CompanyID{0})) continue;
 			for (DiagDirection exit : {DiagDirection::NE, DiagDirection::SE, DiagDirection::SW, DiagDirection::NW}) {
 				Track track = Corner(enter, exit);
@@ -1312,14 +1382,23 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 				Trackdir next_dir = TrackExitdirToTrackdir(track, exit);
 				if (IsValidTrackdir(next_dir) && TrackdirCrossesTrackdirs(previous_dir).Test(next_dir)) continue;
 				auto &legal = preview[tile.base() * 6 + uint(track)];
-				if (legal == -1) legal = Command<Commands::BuildRail>::Do(DoCommandFlag::QueryCost, tile, RAILTYPE_RAIL, track, false).Succeeded();
+				if (legal == -1) {
+					TrackBits prospective{};
+					if (options != nullptr && options->planned_rails->contains(tile)) prospective = options->planned_rails->at(tile);
+					legal = options == nullptr ? Command<Commands::BuildRail>::Do(DoCommandFlag::QueryCost, tile, RAILTYPE_RAIL, track, false).Succeeded() :
+						QueryCoreBasketRail(tile, track, prospective).Succeeded();
+				}
 				if (!legal) continue;
-				if (tile == target && exit == ReverseDiagDir(outward)) { previous[UINT_MAX] = {key, track, INVALID_TILE}; last = key; break; }
+				if (tile == target && exit == ReverseDiagDir(outward)) {
+					if (options != nullptr && !options->budget->TryState()) return false;
+					previous[UINT_MAX] = {key, track, INVALID_TILE}; last = key; break;
+				}
 				TileIndex next = TileAddByDiagDir(tile, exit);
 				if (next >= Map::Size()) continue;
 				uint nk = next.base() * 16 + uint(next_dir);
 				if (costs.contains(nk) && costs[nk] <= cost + 1) continue;
 				if (!previous.contains(nk) && previous.size() >= 29999) continue; // Reserve one terminal sentinel within the hard 30,000 cap.
+				if (options != nullptr && !previous.contains(nk) && !options->budget->TryState()) return false;
 				costs[nk] = cost + 1; previous[nk] = {key, track, INVALID_TILE}; queue.emplace(cost + 1 + 3 * DistanceManhattan(next, target), -int(cost + 1), nk);
 			}
 			/* Bounded ordinary bridges cross terrain/river barriers; preview native foundations and cost. */
@@ -1332,7 +1411,7 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 			bool next_is_ground = straight_next < Map::Size() &&
 				(IsTileType(straight_next, TileType::Clear) || IsTileType(straight_next, TileType::Trees) || IsTileType(straight_next, TileType::Road) ||
 					(IsPlainRailTile(straight_next) && GetTileOwner(straight_next) == CompanyID{0}));
-			if (!TrackdirCrossesTrackdirs(previous_dir).Test(bridge_dir) &&
+			if ((options == nullptr || (tile != start && !IsPlainRailTile(tile))) && !TrackdirCrossesTrackdirs(previous_dir).Test(bridge_dir) &&
 				(!next_is_ground || !Command<Commands::BuildRail>::Do({}, straight_next, RAILTYPE_RAIL, straight, false).Succeeded())) {
 				TileIndex end = tile;
 				for (uint span = 1; span <= 16; ++span) {
@@ -1340,12 +1419,23 @@ bool PlanFreightLeg(const Industry *industry, const PortalEndpoint &gate, Freigh
 					if (end >= Map::Size() || PlanetManager::GetTileWorld(end) != gate.world_id) break;
 					if (span < 2 || end == depot || end == station || end == TileAddByDiagDir(station, positive) || end == target) continue;
 					if (!IsTileType(end, TileType::Clear) && !IsTileType(end, TileType::Trees)) continue;
+					if (options != nullptr) {
+						bool conflict = false;
+						for (TileIndex part = tile;; part = TileAddByDiagDir(part, travel)) {
+							conflict |= options->blocked->contains(part) || options->planned_rails->contains(part) ||
+								PortalRegistry::IsPortalTile(part) || (IsPlainRailTile(part) && GetTileOwner(part) == OWNER_NONE);
+							if (part == end) break;
+							if (conflict) break;
+						}
+						if (conflict) continue;
+					}
 					if (!Command<Commands::BuildBridge>::Do({}, end, tile, TransportType::Rail, 0, RAILTYPE_RAIL, INVALID_ROADTYPE).Succeeded()) continue;
 					TileIndex next = TileAddByDiagDir(end, travel);
 					if (next >= Map::Size()) continue;
 					uint nk = next.base() * 16 + uint(bridge_dir), nc = cost + span + 12;
 					if (costs.contains(nk) && costs[nk] <= nc) continue;
 					if (!previous.contains(nk) && previous.size() >= 29999) continue;
+					if (options != nullptr && !previous.contains(nk) && !options->budget->TryState()) return false;
 					costs[nk] = nc; previous[nk] = {key, straight, end}; queue.emplace(nc + 3 * DistanceManhattan(next, target), -int(nc), nk);
 				}
 			}
@@ -1752,9 +1842,12 @@ void FunctionalBridge(const std::string &path)
  */
 bool FunctionalCore(std::span<std::string_view> argv)
 {
+	/* A saved offline basket checkpoint retains development infinite money.
+	 * Only its startup FIFO bridge may cross this earlier functional-proof gate. */
+	bool basket_startup_bridge = argv.size() == 3 && argv[1] == "functional-bridge";
 	if (argv.size() < 2 || _game_mode != GameMode::Normal || _networking || _network_dedicated ||
 		!IntegratedEconomy::Enabled() || PlanetManager::Count() != 7 || Map::SizeX() != 1024 || Map::SizeY() != 1024 ||
-		_settings_game.game_creation.generation_seed != 11 || _settings_game.difficulty.infinite_money) {
+		_settings_game.game_creation.generation_seed != 11 || (_settings_game.difficulty.infinite_money && !basket_startup_bridge)) {
 		IConsolePrint(CC_ERROR, "CONNECTED FAIL functional proof requires isolated offline canonical seed11"); return true;
 	}
 	if (argv[1] == "functional-bridge" && argv.size() == 3) {
@@ -1937,7 +2030,745 @@ bool FunctionalCore(std::span<std::string_view> argv)
 	IConsolePrint(CC_DEFAULT, "CONNECTED functional-result {}", report.dump()); return true;
 }
 
+/** @cond CoreBasketProofInternals */
+constexpr std::string_view BASKET_SOURCE = "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7";
+
+/** Frozen native construction operation, retaining reused pieces as explicit zero quotes. */
+struct BasketCommand {
+	enum class Kind { Station, Depot, Rail, Bridge, Signal } kind;
+	TileIndex tile = INVALID_TILE, end = INVALID_TILE;
+	Track track = Track::Invalid;
+	Axis axis = Axis::X;
+	DiagDirection direction = DiagDirection::Invalid;
+	uint8_t signal = 0;
+	int64_t cost = 0;
+	bool reuse = false;
+};
+struct BasketLayout {
+	std::array<FreightLeg, 8> legs;
+	std::vector<BasketCommand> commands;
+	Json report;
+	Json state;
+};
+/** Deliberately transient: loading never restores initial spending authorization. */
+struct BasketSession {
+	bool armed = false, built = false, cold = false, failed = false;
+	uint layouts = 0, invocations = 0, advances = 0, initial_advances = 0;
+	int64_t gross = 0, quoted_total = 0, tick_reserve = 0;
+	std::string error;
+	Json expected, services = Json::array();
+	std::array<std::optional<BasketLayout>, 2> plans;
+} basket;
+
+bool BasketFail(std::string_view error)
+{
+	if (!basket.failed) basket.error = error;
+	basket.failed = true;
+	return false;
+}
+
+/** Exact published content and fixed canonical native profile; no compatible substitution. */
+bool BasketProfile()
+{
+	if (!IntegratedEconomy::ContentReady() || PlanetManager::Count() != 7 || Map::SizeX() != 1024 || Map::SizeY() != 1024 ||
+		_settings_game.game_creation.generation_seed != 11 || !_settings_game.difficulty.infinite_money ||
+		!_settings_game.game_creation.player_built_economy || FabricationManager::IsFabricateFromStockpileEnabled(CompanyID{0}) ||
+		!_settings_game.game_creation.cst_sector || _settings_game.game_creation.landscape != LandscapeType::Temperate ||
+		_settings_game.difficulty.disasters || to_underlying(_settings_game.difficulty.vehicle_breakdowns) != 0 ||
+		_settings_game.difficulty.vehicle_costs != 0 || _settings_game.difficulty.construction_cost != 0 || _settings_game.economy.inflation ||
+		to_underlying(_settings_game.economy.timekeeping_units) != 0 || to_underlying(_settings_game.vehicle.train_acceleration_model) != 1 ||
+		!_settings_game.pf.forbid_90_deg || !_settings_game.order.improved_load || !_settings_game.order.gradual_loading || !_settings_game.order.no_servicing_if_no_breakdowns ||
+		!_settings_game.station.modified_catchment || _grfconfig.size() != 3) return false;
+	/* Native NGRF identity hashes cover the GRF data section, not the whole file.
+	 * Whole-file SHA256 pins remain in the wrapper's immutable source manifest. */
+	const std::array<uint8_t, 16> industry_md5 = {0x3c, 0x8d, 0x54, 0xab, 0x58, 0x86, 0xb2, 0xa5, 0x6a, 0xab, 0x10, 0x83, 0xc5, 0x2b, 0x24, 0xbb};
+	const std::array<uint8_t, 16> rail_md5 = {0x6a, 0xb2, 0x37, 0x72, 0xe9, 0x34, 0x26, 0x06, 0x59, 0xdf, 0x68, 0x36, 0x68, 0x63, 0x17, 0xb9};
+	const std::array<uint8_t, 16> equipment_md5 = {0x6c, 0x02, 0xe7, 0xb5, 0xf8, 0x98, 0xef, 0x6b, 0x16, 0xfe, 0x70, 0xb3, 0x3d, 0x11, 0x22, 0xb0};
+	const auto *industry = GetGRFConfig(COMMONWEALTH_INDUSTRY_GRFID), *rail = GetGRFConfig(COMMONWEALTH_RAIL_GRFID);
+	const auto *equipment = GetGRFConfig(GrfID{"OST\x05"});
+	return industry != nullptr && rail != nullptr && equipment != nullptr && industry->version == 5 && rail->version == 3 && equipment->version == 1 &&
+		industry->ident.md5sum == industry_md5 && rail->ident.md5sum == rail_md5 && equipment->ident.md5sum == equipment_md5 &&
+		equipment->status == GRFStatus::Activated && !equipment->flags.Any({GRFConfigFlag::Invalid, GRFConfigFlag::Compatible}) && Game::GetInstance() == nullptr;
+}
+
+/** Read-only evidence kept outside the unchanged historical FunctionalSnapshot. */
+Json BasketObservation()
+{
+	Json result = {{"paused", _pause_mode.Test(PauseMode::Normal)}, {"pause_mode", _pause_mode.base()},
+		{"cargo_labels", Json::object()}, {"towns", Json::array()}, {"private_rail", Json::array()}, {"private_structures", Json::array()}};
+	for (TileIndex tile : Map::Iterate()) {
+		if (IsPlainRailTile(tile) && GetTileOwner(tile) == CompanyID{0}) {
+			Json signals = Json::array();
+			if (HasSignals(tile)) for (Track track : GetTrackBits(tile)) if (HasSignalOnTrack(tile, track))
+				signals.push_back({uint(track), uint(GetSignalType(tile, track)), uint(GetSignalVariant(tile, track))});
+			result["private_rail"].push_back({{"tile", tile.base()}, {"railtype", uint(GetRailType(tile))}, {"tracks", GetTrackBits(tile).base()},
+				{"signal_present", HasSignals(tile) ? GetPresentSignals(tile) : 0}, {"signal_state", HasSignals(tile) ? GetSignalStates(tile) : 0},
+				{"reservation", GetRailReservationTrackBits(tile).base()}, {"signals", signals}});
+		}
+		if (IsRailDepotTile(tile) && GetTileOwner(tile) == CompanyID{0}) result["private_structures"].push_back({{"tile", tile.base()}, {"type", "depot"},
+			{"railtype", uint(GetRailType(tile))}, {"dir", uint(GetRailDepotDirection(tile))}, {"reservation", HasDepotReservation(tile)}});
+		if (IsLevelCrossingTile(tile) && GetTileOwner(tile) == CompanyID{0}) result["private_structures"].push_back({{"tile", tile.base()}, {"type", "crossing"},
+			{"railtype", uint(GetRailType(tile))}, {"track", uint(GetCrossingRailTrack(tile))}, {"reservation", HasCrossingReservation(tile)}});
+		if (IsBridgeTile(tile) && GetTileOwner(tile) == CompanyID{0} && GetTunnelBridgeTransportType(tile) == TransportType::Rail)
+			result["private_structures"].push_back({{"tile", tile.base()}, {"type", "bridge"}, {"railtype", uint(GetRailType(tile))},
+				{"dir", uint(GetTunnelBridgeDirection(tile))}, {"other_end", GetOtherBridgeEnd(tile).base()}, {"reservation", HasTunnelBridgeReservation(tile)}});
+	}
+	for (const CargoSpec *cargo : CargoSpec::Iterate()) result["cargo_labels"][cargo->label.AsString()] = cargo->Index();
+	for (const Town *town : Town::Iterate()) {
+		const auto *profile = MegacityManager::GetProfile(town->index);
+		const auto *city = IntegratedEconomy::City(town->index);
+		result["towns"].push_back({{"id", town->index.base()}, {"population", town->cache.population}, {"house_count", town->cache.num_houses},
+			{"native_growth_rate", town->growth_rate}, {"native_grow_counter", town->grow_counter}, {"native_flags", town->flags.base()},
+			{"native_growth_enabled", town->flags.Test(TownFlag::IsGrowing) && town->growth_rate != TOWN_GROWTH_RATE_NONE},
+			{"native_growth_hook_enabled", !town->flags.Test(TownFlag::CustomGrowth) && town->growth_rate != TOWN_GROWTH_RATE_NONE},
+			{"growth_state", profile == nullptr ? UINT8_MAX : uint(profile->growth_state)},
+			{"growth", profile == nullptr ? 0.0f : profile->growth_multiplier}, {"passengers", profile == nullptr ? 0.0f : profile->passenger_multiplier},
+			{"demand", IntegratedEconomy::CityDemand(town->index)}, {"reserves", city == nullptr ? std::map<CargoType, uint32_t>{} : city->reserves},
+			{"consumed", city == nullptr ? std::map<CargoType, uint32_t>{} : city->consumed}});
+	}
+	using Custody = std::array<uint64_t, NUM_CARGO>;
+	std::map<std::string, Custody> custody;
+	for (const char *name : {"industry_inputs", "industry_outputs", "stations", "trains", "cities", "stocks", "research", "total"}) custody[name] = {};
+	for (const Industry *industry : Industry::Iterate()) {
+		for (const auto &cargo : industry->accepted) if (IsValidCargoType(cargo.cargo)) custody["industry_inputs"][cargo.cargo] += cargo.waiting;
+		for (const auto &cargo : industry->produced) if (IsValidCargoType(cargo.cargo)) custody["industry_outputs"][cargo.cargo] += cargo.waiting;
+	}
+	for (const Station *station : Station::Iterate()) for (CargoType cargo{0}; cargo < NUM_CARGO; ++cargo) custody["stations"][cargo] += station->goods[cargo].TotalCount();
+	for (const Train *train : Train::Iterate()) if (IsValidCargoType(train->cargo_type)) custody["trains"][train->cargo_type] += train->cargo.StoredCount();
+	for (const Town *town : Town::Iterate()) if (auto city = IntegratedEconomy::City(town->index)) for (auto [cargo, units] : city->reserves) custody["cities"][cargo] += units;
+	for (const auto &stock : StockpileManager::GetAllStockpiles()) for (auto [cargo, units] : stock.inventory) custody["stocks"][cargo] += units;
+	for (const auto &tech : TechTreeManager::GetAllCompanyTechStates()) if (auto research = IntegratedEconomy::Research(tech.company_id))
+		for (auto [cargo, units] : research->reserved) custody["research"][cargo] += units;
+	for (const auto &[name, units] : custody) if (name != "total") for (CargoType cargo{0}; cargo < NUM_CARGO; ++cargo) custody["total"][cargo] += units[cargo];
+	result["custody"] = custody;
+	const Company *company = Company::Get(CompanyID{0});
+	result["finance_guard"] = {{"interest_rate", _economy.interest_rate}, {"station_value", int64_t(_price[Price::StationValue])},
+		{"infrastructure_maintenance", _settings_game.economy.infrastructure_maintenance}, {"autorenew", company->settings.engine_renew},
+		{"autorenew_months", company->settings.engine_renew_months}, {"autorenew_money", company->settings.engine_renew_money},
+		{"development_unlimited_money", _settings_game.difficulty.infinite_money},
+		{"replacement_rules", company->engine_renew_list != nullptr}, {"ai", company->is_ai}};
+	result["vehicle_guard"] = Json::array();
+	for (const Train *train : Train::Iterate()) result["vehicle_guard"].push_back({{"id", train->index.base()}, {"age", train->age.base()},
+		{"max_age", train->max_age.base()}, {"speed", train->cur_speed},
+		{"max_speed", train->IsFrontEngine() ? train->vcache.cached_max_speed : 0}, {"progress", train->progress}});
+	result["adapter"] = {{"armed", basket.armed}, {"built", basket.built}, {"cold", basket.cold}, {"failed", basket.failed}, {"error", basket.error},
+		{"layout_candidates", basket.layouts}, {"endpoint_invocations", basket.invocations}, {"advances", basket.advances}, {"initial_advances", basket.initial_advances},
+		{"gross_debits", basket.gross}, {"quoted_total", basket.quoted_total}, {"tick_debit_reserve", basket.tick_reserve}, {"development_unlimited_money", _settings_game.difficulty.infinite_money}};
+	return result;
+}
+
+bool BasketReceiver()
+{
+	const Station *station = Station::GetIfValid(StationID{3});
+	const Town *town = Town::GetIfValid(TownID{0});
+	if (town == nullptr || station == nullptr || station->owner != CompanyID{0} || station->town != town ||
+		LogisticsHubManager::GetHubForStation(station->index) != nullptr || !MegacityManager::IsConsumerStation(station) || station->train_station.IsEmpty()) return false;
+	for (BitmapTileIterator it(station->catchment_tiles); *it != INVALID_TILE; ++it)
+		if (IsTileType(*it, TileType::House) && GetTownIndex(*it) == TownID{0} && PlanetManager::GetTileWorld(*it) == WorldID{0}) return true;
+	return false;
+}
+
+bool BasketChain()
+{
+	const std::array<uint16_t, 4> ids = {6, 7, 2, 4};
+	const std::array<TileIndex, 4> tiles = {TileXY(600, 335), TileXY(597, 222), TileXY(816, 518), TileXY(819, 237)};
+	const std::array<WorldID, 4> worlds = {WorldID{2}, WorldID{1}, WorldID{3}, WorldID{1}};
+	const std::array<const char *, 4> labels = {"IRON", "STEL", "SILC", "BALL"};
+	for (uint i = 0; i < ids.size(); ++i) {
+		const Industry *industry = Industry::GetIfValid(IndustryID{ids[i]});
+		CargoLabel label; std::copy_n(labels[i], 4, label.begin()); CargoType cargo = GetCargoTypeByLabel(label);
+		if (industry == nullptr || industry->location.tile != tiles[i] || PlanetManager::GetTileWorld(tiles[i]) != worlds[i] ||
+			industry->GetCargoProduced(cargo) == industry->produced.end() || Company::IsValidID(industry->founder)) return false;
+		if (i % 2 == 1 && (!IntegratedEconomy::Managed(industry) || !industry->IsCargoAccepted(GetCargoTypeByLabel(CargoLabel{i == 1 ? "IRON" : "SILC"})))) return false;
+	}
+	for (uint gate : {1, 2, 3}) {
+		const auto *link = PortalRegistry::GetPortalLinkByID(PortalID{gate});
+		if (link == nullptr) return false;
+		for (const auto &end : {link->end_a, link->end_b}) {
+			const auto *policy = StellarNetwork::Policy(end.tile);
+			auto terminal = PortalTerminal::Plan(end.tile, end.enter_dir, end.world_id);
+			if (policy == nullptr || !policy->public_access || Company::IsValidID(policy->owner) || !terminal || GetTileOwner(end.tile) != OWNER_NONE) return false;
+			for (const auto &part : terminal->tiles) if (!IsPlainRailTile(part.tile) || GetTileOwner(part.tile) != OWNER_NONE || !GetTrackBits(part.tile).All(part.tracks)) return false;
+			for (const auto &signal : terminal->signals) if (!HasSignalOnTrack(signal.tile, signal.track) ||
+				GetSignalType(signal.tile, signal.track) != SignalType::PathOneWay || GetSignalVariant(signal.tile, signal.track) != SignalVariant::Electric ||
+				GetPresentSignals(signal.tile) != SignalAlongTrackdir(DiagDirToDiagTrackdir(signal.travel_dir))) return false;
+		}
+	}
+	return BasketReceiver();
+}
+
+CommandCost BasketNativeCommand(const BasketCommand &command, DoCommandFlags flags)
+{
+	switch (command.kind) {
+		case BasketCommand::Kind::Station: return Command<Commands::BuildRailStation>::Do(flags, command.tile, RAILTYPE_RAIL, command.axis, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+		case BasketCommand::Kind::Depot: return Command<Commands::BuildRailDepot>::Do(flags, command.tile, RAILTYPE_RAIL, command.direction);
+		case BasketCommand::Kind::Rail: return Command<Commands::BuildRail>::Do(flags, command.tile, RAILTYPE_RAIL, command.track, false);
+		case BasketCommand::Kind::Bridge: return Command<Commands::BuildBridge>::Do(flags, command.end, command.tile, TransportType::Rail, 0, RAILTYPE_RAIL, INVALID_ROADTYPE);
+		case BasketCommand::Kind::Signal: return Command<Commands::BuildSignal>::Do(flags, command.tile, command.track, SignalType::Path, SignalVariant::Electric,
+			false, false, false, SignalType::Path, SignalType::Path, 0, command.signal);
+	}
+	return CMD_ERROR;
+}
+
+/** Freeze every future footprint and incremental native quote, including shared junctions. */
+bool PlanBasket(uint layout, BasketLayout &plan)
+{
+	plan.state = FunctionalSnapshot();
+	plan.report = {{"version", 1}, {"layout", layout}, {"legal", false}, {"frozen", false}, {"legs", Json::array()},
+		{"search", Json::array()}, {"services", Json::array()}, {"commands", Json::array()}, {"reason", "future-footprint-geometry"},
+		{"construction_quote", 0}, {"vehicle_quote", 0}, {"total_quote", 0}};
+	std::map<TileIndex, TrackBits> rails;
+	std::set<TileIndex> blocked;
+	std::map<TileIndex, std::pair<Track, uint8_t>> signals;
+	Money construction = 0, vehicles = 0;
+	auto add = [&](BasketCommand command, const CommandCost &quote) {
+		if (quote.Failed()) {
+			plan.report["failed_quote"] = {{"kind", uint(command.kind)}, {"tile", command.tile.base()}, {"track", uint(command.track)},
+				{"error", quote.GetErrorMessage() == INVALID_STRING_ID ? "native command failure" : GetString(quote.GetErrorMessage())}};
+			plan.report["reason"] = "native-construction-quote";
+			return false;
+		}
+		command.cost = int64_t(quote.GetCost()); construction += quote.GetCost();
+		plan.report["construction_quote"] = int64_t(construction); plan.report["total_quote"] = int64_t(construction + vehicles);
+		plan.commands.push_back(command);
+		plan.report["commands"].push_back({{"kind", uint(command.kind)}, {"tile", command.tile.base()}, {"end", command.end.base()},
+			{"track", uint(command.track)}, {"axis", uint(command.axis)}, {"direction", uint(command.direction)}, {"signal", command.signal},
+			{"cost", command.cost}, {"reuse", command.reuse}});
+		return true;
+	};
+	const std::array<uint16_t, 8> industries = {6, 7, 7, UINT16_MAX, 2, 4, 4, UINT16_MAX};
+	const std::array<uint, 8> gates = {2, 2, 1, 1, 3, 3, 1, 1};
+	const std::array<WorldID, 8> worlds = {WorldID{2}, WorldID{1}, WorldID{1}, WorldID{0}, WorldID{3}, WorldID{1}, WorldID{1}, WorldID{0}};
+	const Station *receiver = Station::Get(StationID{3});
+	for (uint i = 0; i < 8; ++i) {
+		++basket.invocations;
+		const PortalLink *link = PortalRegistry::GetPortalLinkByID(PortalID{gates[i]});
+		const PortalEndpoint &end = link->end_a.world_id == worlds[i] ? link->end_a : link->end_b;
+		if (end.world_id != worlds[i]) return false;
+		CoreBasketSearchBudget budget;
+		BasketLegOptions options{&budget, &rails, &blocked, i % 4 == 3 ? receiver->train_station.tile : INVALID_TILE,
+			i % 4 == 3 ? GetRailStationAxis(receiver->train_station.tile) : Axis::X, i % 2 == 0, layout};
+		bool found = PlanFreightLeg(Industry::GetIfValid(IndustryID{industries[i]}), end, plan.legs[i], i % 4 == 3 ? Town::Get(TownID{0}) : nullptr, &options);
+		plan.report["search"].push_back({{"endpoint", i}, {"candidates", budget.candidates}, {"states", budget.states}, {"cap", CoreBasketSearchBudget::LIMIT},
+			{"exhausted", budget.exhausted}, {"found", found}});
+		if (!found) { plan.report["reason"] = budget.exhausted ? "endpoint-state-budget" : "bounded-endpoint-no-route"; return false; }
+		const FreightLeg &leg = plan.legs[i];
+		if (i % 4 != 3) {
+			const Industry *industry = Industry::Get(IndustryID{industries[i]});
+			TileIndex second = TileAddByDiagDir(leg.station, leg.axis == Axis::X ? DiagDirection::SW : DiagDirection::SE);
+			bool catches = false;
+			for (TileIndex tile : industry->location) if (IsTileType(tile, TileType::Industry) && GetIndustryIndex(tile) == industry->index)
+				catches |= std::min(DistanceMax(tile, leg.station), DistanceMax(tile, second)) <= CA_TRAIN;
+			if (!catches) return false;
+			for (TileIndex part : {leg.station, TileAddByDiagDir(leg.station, leg.axis == Axis::X ? DiagDirection::SW : DiagDirection::SE)})
+				if (blocked.contains(part) || rails.contains(part) || PlanetManager::GetTileWorld(part) != worlds[i] || !blocked.insert(part).second) return false;
+			BasketCommand station{BasketCommand::Kind::Station, leg.station}; station.axis = leg.axis;
+			if (!add(station, BasketNativeCommand(station, {}))) return false;
+			if (i % 2 == 0) {
+				if (blocked.contains(leg.depot) || rails.contains(leg.depot) || PlanetManager::GetTileWorld(leg.depot) != worlds[i] || !blocked.insert(leg.depot).second) return false;
+				BasketCommand depot{BasketCommand::Kind::Depot, leg.depot}; depot.direction = leg.depot_dir;
+				for (const auto &[gate, portal] : PortalRegistry::GetAllPortals()) for (const auto &head : {portal.end_a, portal.end_b})
+					if (DistanceMax(depot.tile, head.tile) <= 2) return false;
+				if (!add(depot, BasketNativeCommand(depot, {}))) return false;
+			}
+		}
+		for (auto [start, finish] : leg.bridges) {
+			bool reuse = IsBridgeTile(start) && GetTileOwner(start) == CompanyID{0} && GetOtherBridgeEnd(start) == finish &&
+				GetTileOwner(finish) == CompanyID{0} && GetTunnelBridgeTransportType(start) == TransportType::Rail && GetRailType(start) == RAILTYPE_RAIL;
+			if (!reuse) {
+				if (IsPlainRailTile(start) || IsPlainRailTile(finish)) return false;
+				DiagDirection direction = TileX(finish) > TileX(start) ? DiagDirection::SW : TileX(finish) < TileX(start) ? DiagDirection::NE : TileY(finish) > TileY(start) ? DiagDirection::SE : DiagDirection::NW;
+				if (DistanceManhattan(start, finish) > 16) return false;
+				for (TileIndex part = start;; part = TileAddByDiagDir(part, direction)) {
+					if (blocked.contains(part) || rails.contains(part) || PortalRegistry::IsPortalTile(part) ||
+						(IsPlainRailTile(part) && GetTileOwner(part) == OWNER_NONE)) return false;
+					blocked.insert(part); if (part == finish) break;
+				}
+			}
+			BasketCommand bridge{BasketCommand::Kind::Bridge, start, finish}; bridge.reuse = reuse;
+			if (!add(bridge, reuse ? CommandCost() : BasketNativeCommand(bridge, {}))) return false;
+		}
+		for (auto [tile, track] : leg.rails) {
+			if (blocked.contains(tile)) return false;
+			TrackBits previous = rails[tile];
+			bool reuse = previous.Test(track) || (IsPlainRailTile(tile) && GetTileOwner(tile) == CompanyID{0} && GetTrackBits(tile).Test(track)) ||
+				(IsLevelCrossingTile(tile) && GetTileOwner(tile) == CompanyID{0} && GetCrossingRailTrack(tile) == track);
+			BasketCommand rail{BasketCommand::Kind::Rail, tile}; rail.track = track; rail.reuse = reuse;
+			if (!add(rail, QueryCoreBasketRail(tile, track, previous))) return false;
+			rails[tile].Set(track);
+		}
+		plan.report["legs"].push_back({{"station", leg.station.base()}, {"axis", uint(leg.axis)}, {"depot", leg.depot.base()},
+			{"depot_dir", uint(leg.depot_dir)}, {"existing_station", i % 4 == 3}, {"depot_required", i % 2 == 0}, {"industry", industries[i]}});
+		/* A back-passable outbound path signal protects each private station exit.
+		 * No opposing/interior signal can admit a train into a blocked single-track stub. */
+		if (leg.rails.empty()) return false;
+		auto [tile, track] = leg.rails.front();
+		Trackdir travel = TrackEnterdirToTrackdir(track, leg.depot_dir);
+		if (!IsValidTrackdir(travel)) return false;
+		uint8_t present = SignalAlongTrackdir(travel);
+		if (signals.contains(tile) && signals.at(tile) != std::pair{track, present}) return false;
+		signals[tile] = {track, present};
+	}
+	/* Existing grain/FOOD platforms use the same protected shared junctions. */
+	for (uint16_t station_id = 0; station_id < 4; ++station_id) {
+		const Station *station = Station::Get(StationID{station_id});
+		TileIndex platform = station->train_station.tile;
+		DiagDirection positive = GetRailStationAxis(platform) == Axis::X ? DiagDirection::SW : DiagDirection::SE;
+		TileIndex opposite_platform_end = TileAddByDiagDir(platform, positive);
+		bool found = false;
+		for (auto [tile, enter] : {std::pair{TileAddByDiagDir(platform, ReverseDiagDir(positive)), ReverseDiagDir(positive)}, std::pair{TileAddByDiagDir(opposite_platform_end, positive), positive}}) {
+			if (!IsPlainRailTile(tile) || GetTileOwner(tile) != CompanyID{0} || GetTrackBits(tile).Count() != 1) continue;
+			Track track = FindFirstTrack(GetTrackBits(tile)); Trackdir direction = TrackEnterdirToTrackdir(track, enter);
+			if (!IsValidTrackdir(direction)) continue;
+			uint8_t present = SignalAlongTrackdir(direction);
+			if (signals.contains(tile) && signals.at(tile) != std::pair{track, present}) return false;
+			signals[tile] = {track, present}; found = true;
+		}
+		if (!found) return false;
+	}
+	for (auto [tile, signal] : signals) {
+		auto [track, present] = signal;
+		TrackBits bits = rails.contains(tile) ? rails.at(tile) : TrackBits{};
+		if (IsPlainRailTile(tile)) bits |= GetTrackBits(tile);
+		if (!bits.Test(track) || TracksOverlap(bits)) return false;
+		BasketCommand command{BasketCommand::Kind::Signal, tile}; command.track = track; command.signal = present;
+		bool existing = IsPlainRailTile(tile) && HasSignalOnTrack(tile, track);
+		if (existing && (GetSignalType(tile, track) != SignalType::Path || GetSignalVariant(tile, track) != SignalVariant::Electric || GetPresentSignals(tile) != present)) return false;
+		command.reuse = existing;
+		CommandCost quote = existing ? CommandCost() : IsPlainRailTile(tile) ? BasketNativeCommand(command, {}) :
+			CommandCost(ExpensesType::Construction, GetNewRailSignalCost(PlanetManager::GetTileWorld(tile), CompanyID{0}));
+		if (!add(command, quote)) return false;
+	}
+	plan.report["receiver_capacity"] = Json::array();
+	for (auto label : {CargoLabel{"STEL"}, CargoLabel{"BALL"}}) {
+		CargoType cargo = GetCargoTypeByLabel(label);
+		uint32_t capacity = IntegratedEconomy::AcceptCity(TownID{0}, cargo, UINT32_MAX, false);
+		plan.report["receiver_capacity"].push_back({cargo, capacity});
+		if (capacity == 0) { plan.report["reason"] = "receiver-capacity"; return false; }
+	}
+	const std::array<const char *, 4> labels = {"IRON", "STEL", "SILC", "BALL"};
+	const std::array<uint, 4> locals = {0x32, 0x33, 0x32, 0x38};
+	const std::array<uint, 4> wagons = {3, 1, 3, 1};
+	TileIndex query_depot = TileXY(336, 199);
+	for (uint service = 0; service < 4; ++service) {
+		CargoLabel label; std::copy_n(labels[service], 4, label.begin()); CargoType cargo = GetCargoTypeByLabel(label);
+		EngineID locomotive = EngineLocal(0x20), wagon = EngineID::Invalid();
+		for (const Engine *engine : Engine::Iterate()) if (engine->type == VehicleType::Train && engine->grf_prop.local_id == locals[service] &&
+			engine->grf_prop.grfid == (service == 3 ? COMMONWEALTH_INDUSTRY_GRFID : COMMONWEALTH_RAIL_GRFID)) { wagon = engine->index; break; }
+		if (locomotive == EngineID::Invalid() || wagon == EngineID::Invalid()) return false;
+		Json quotes = Json::array();
+		for (auto [engine, requested] : {std::pair{locomotive, INVALID_CARGO}, std::pair{wagon, cargo}}) {
+			if (CommonwealthPackManager::GetVehicleAvailabilityError(CompanyID{0}, engine, worlds[service * 2]) != StringID{}) return false;
+			auto query = Command<Commands::BuildVehicle>::Do(DoCommandFlag::QueryCost, query_depot, engine, false, requested, ClientID::Invalid);
+			if (ExtractCommandCost(query).Failed()) return false;
+			quotes.push_back({{"id", engine.base()}, {"cargo", requested}, {"cost", int64_t(ExtractCommandCost(query).GetCost())},
+				{"capacity", std::get<2>(query)}, {"query_depot", query_depot.base()}});
+		}
+		if (quotes[1]["capacity"].get<uint>() == 0) return false;
+		int64_t cost = quotes[0]["cost"].get<int64_t>() + wagons[service] * quotes[1]["cost"].get<int64_t>(); vehicles += cost;
+		plan.report["vehicle_quote"] = int64_t(vehicles); plan.report["total_quote"] = int64_t(construction + vehicles);
+		plan.report["services"].push_back({{"name", fmt::format("{} construction basket", labels[service])}, {"label", labels[service]}, {"cargo", cargo},
+			{"pickup_leg", service * 2}, {"drop_leg", service * 2 + 1}, {"wagons", wagons[service]}, {"locomotive", quotes[0]}, {"wagon", quotes[1]},
+			{"vehicle_quote", cost}, {"pickup_tile", plan.legs[service * 2].station.base()}, {"drop_tile", plan.legs[service * 2 + 1].station.base()},
+			{"orders", Json::array({Json::array({1, plan.legs[service * 2].station.base(), 2, 4, 1, 0}),
+				Json::array({1, plan.legs[service * 2 + 1].station.base(), 4, 0, 1, 0})})}});
+	}
+	plan.report["construction_quote"] = int64_t(construction); plan.report["vehicle_quote"] = int64_t(vehicles); plan.report["total_quote"] = int64_t(construction + vehicles);
+	plan.report["preview_unchanged"] = FunctionalSnapshot() == plan.state;
+	int64_t total = int64_t(construction + vehicles);
+	bool legal = plan.report["preview_unchanged"].get<bool>() && total > 0 && BasketChain();
+	plan.report["reason"] = legal ? "" : !plan.report["preview_unchanged"].get<bool>() ? "query-mutated-state" :
+		"chain-integrity";
+	plan.report["legal"] = legal; plan.report["frozen"] = legal;
+	return legal;
+}
+
+bool BuildBasket(BasketLayout &plan)
+{
+	if (FunctionalSnapshot() != plan.state || !plan.report.value("frozen", false) || !BasketChain()) return BasketFail("frozen-plan-state");
+	for (const auto &command : plan.commands) {
+		if (command.reuse) continue;
+		CommandCost quote = command.kind == BasketCommand::Kind::Rail ? QueryCoreBasketRail(command.tile, command.track) : BasketNativeCommand(command, {});
+		if (quote.Failed() || int64_t(quote.GetCost()) != command.cost) return BasketFail(fmt::format("construction-query-parity kind={} tile={}", uint(command.kind), command.tile.base()));
+		auto paid = BasketNativeCommand(command, DoCommandFlag::Execute);
+		if (paid.Failed() || int64_t(paid.GetCost()) != command.cost) return BasketFail(fmt::format("construction-execute-parity kind={} tile={}", uint(command.kind), command.tile.base()));
+	}
+	if (!BasketReceiver()) return BasketFail("receiver-custody-after-build");
+	/* Verify actual industry catchment and distinct native station identities. */
+	std::set<StationID> stations;
+	const std::array<uint16_t, 8> ids = {6, 7, 7, UINT16_MAX, 2, 4, 4, UINT16_MAX};
+	for (uint i = 0; i < 8; ++i) {
+		const Station *station = Station::Get(GetStationIndex(plan.legs[i].station));
+		if (station->owner != CompanyID{0} || LogisticsHubManager::GetHubForStation(station->index) != nullptr) return BasketFail("station-custody");
+		if (i % 4 == 3) { if (station->index != StationID{3}) return BasketFail("core-receiver-identity"); continue; }
+		if (station->index.base() < 4 || !stations.insert(station->index).second) return BasketFail("processor-station-identity");
+		const Industry *industry = Industry::Get(IndustryID{ids[i]});
+		bool catches = false;
+		for (TileIndex tile : industry->location) catches |= station->catchment_tiles.HasTile(tile);
+		if (!catches) return BasketFail("industry-catchment");
+	}
+	basket.services = plan.report["services"];
+	for (uint service = 0; service < 4; ++service) {
+		Json &record = basket.services[service];
+		TileIndex depot = plan.legs[service * 2].depot; VehicleID front = VehicleID::Invalid();
+		for (uint n = 0; n <= record["wagons"].get<uint>(); ++n) {
+			const Json &expected = record[n == 0 ? "locomotive" : "wagon"];
+			EngineID id{expected["id"].get<uint16_t>()}; CargoType cargo = expected["cargo"].get<CargoType>();
+			auto query = Command<Commands::BuildVehicle>::Do(DoCommandFlag::QueryCost, depot, id, false, cargo, ClientID::Invalid);
+			if (ExtractCommandCost(query).Failed() || int64_t(ExtractCommandCost(query).GetCost()) != expected["cost"].get<int64_t>() ||
+				std::get<2>(query) != expected["capacity"].get<uint>()) return BasketFail("vehicle-native-depot-query-parity");
+			auto [cost, vehicle, capacity, mail, cargos] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, depot, id, false, cargo, ClientID::Invalid);
+			if (cost.Failed() || int64_t(cost.GetCost()) != expected["cost"].get<int64_t>() || capacity != expected["capacity"].get<uint>()) return BasketFail("vehicle-native-execute-parity");
+			if (n == 0) { front = vehicle; record["train"] = front.base(); }
+			else {
+				if (Command<Commands::MoveRailVehicle>::Do({}, vehicle, front, false).Failed() ||
+					Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, vehicle, front, false).Failed()) return BasketFail("vehicle-coupling");
+			}
+		}
+		for (uint8_t n = 0; n < 2; ++n) {
+			StationID station = GetStationIndex(plan.legs[service * 2 + n].station);
+			Order order; order.MakeGoToStation(station); order.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
+			if (n == 0) { order.SetLoadType(OrderLoadType::FullLoad); order.SetUnloadType(OrderUnloadType::NoUnload); } else order.SetLoadType(OrderLoadType::NoLoad);
+			if (Command<Commands::InsertOrder>::Do({}, front, VehicleOrderID{n}, order).Failed() ||
+				Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, front, VehicleOrderID{n}, order).Failed()) return BasketFail("vehicle-orders");
+			record[n == 0 ? "pickup" : "drop"] = station.base();
+		}
+		if (Command<Commands::StartStopVehicle>::Do({}, front, true).Failed() ||
+			Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, front, true).Failed()) return BasketFail("vehicle-start");
+	}
+	basket.quoted_total = plan.report["total_quote"].get<int64_t>(); basket.built = true;
+	return true;
+}
+
+/** Check frozen cold service identities, consists and ordinary orders without repairs. */
+bool BasketServicesValid(const Json &services)
+{
+	try {
+		if (!services.is_array() || services.size() != 4) return false;
+		const std::array<const char *, 4> labels = {"IRON", "STEL", "SILC", "BALL"};
+		const std::array<uint, 4> wagons = {3, 1, 3, 1}; std::set<VehicleID> fronts;
+		for (uint i = 0; i < 4; ++i) {
+			const auto &service = services[i]; CargoLabel label; std::copy_n(labels[i], 4, label.begin());
+			CargoType cargo = GetCargoTypeByLabel(label);
+			if (service.at("label") != labels[i] || service.at("cargo") != cargo || service.at("wagons") != wagons[i]) return false;
+			VehicleID id{service.at("train").get<uint32_t>()}; const Train *front = Train::GetIfValid(id);
+			if (front == nullptr || id.base() < 8 || !front->IsFrontEngine() || front->owner != CompanyID{0} || !fronts.insert(id).second) return false;
+			const Train *vehicle = front;
+			for (uint n = 0; n <= wagons[i]; ++n) {
+				const Json &expected = service.at(n == 0 ? "locomotive" : "wagon");
+				if (vehicle == nullptr || vehicle->owner != CompanyID{0} || vehicle->engine_type.base() != expected.at("id") ||
+					(n != 0 && (vehicle->cargo_type != cargo || vehicle->cargo_cap != expected.at("capacity")))) return false;
+				vehicle = vehicle->Next();
+			}
+			if (vehicle != nullptr) return false;
+			uint n = 0;
+			for (const Order &order : front->Orders()) {
+				if (n > 1 || order.GetType() != OT_GOTO_STATION || order.GetDestination().base() != service.at(n == 0 ? "pickup" : "drop") ||
+					order.GetNonStopType() != OrderNonStopFlags{OrderNonStopFlag::NonStop} ||
+					order.GetLoadType() != (n == 0 ? OrderLoadType::FullLoad : OrderLoadType::NoLoad) ||
+					order.GetUnloadType() != (n == 0 ? OrderUnloadType::NoUnload : OrderUnloadType::UnloadIfPossible)) return false;
+				++n;
+			}
+			if (n != 2 || (i % 2 == 1 && service.at("drop") != 3)) return false;
+		}
+		return true;
+	} catch (const Json::exception &) { return false; }
+}
+
+bool BasketIntegrity()
+{
+	const Company *company = Company::GetIfValid(CompanyID{0});
+	if (company == nullptr || company->current_loan != 100000 || TechTreeManager::GetActiveProject(CompanyID{0}) != TECH_NONE ||
+		TechTreeManager::GetAccumulatedRP(CompanyID{0}) != 0 || TechTreeManager::GetMonthlyBudget(CompanyID{0}) != 0) return BasketFail("debt-research-integrity");
+	uint units = 0;
+	for (const Train *train : Train::Iterate()) {
+		++units;
+		if (train->vehstatus.Test(VehState::Crashed) || train->vehicle_flags.Test(VehicleFlag::PathfinderLost)) return BasketFail("crashed-or-lost-train");
+	}
+	if (basket.built && (units != 20 || !BasketServicesValid(basket.services) || !BasketReceiver())) return BasketFail("fleet-orders-custody-integrity");
+	return true;
+}
+
+/**
+ * Conservative next-tick debit bound using the ordinary native fee primitives.
+ * Native train ticks run two movement handlers. Each handler advances at most
+ * (3*max_speed/4 + byte progress)/192 steps; charging the maximum public toll at
+ * every step overcounts admissions safely. Monthly interest/property/rail fees
+ * are reserved on every tick. The native train day charge includes a fractional
+ * company carry, so reserve its next possible whole-pound debit for each front.
+ * Any approaching automatic renewal stops before its temporary GBP 100k debit;
+ * an ordinary inward depot entry also reserves the native temporary renewal fee.
+ */
+bool BasketTickReserve(int64_t &reserve)
+{
+	const Company *company = Company::Get(CompanyID{0});
+	if (company->is_ai || company->engine_renew_list != nullptr ||
+		company->infrastructure.GetRoadTotal() != 0 || company->infrastructure.GetTramTotal() != 0 || company->infrastructure.water != 0 || company->infrastructure.airport != 0)
+		return BasketFail("unbounded-company-automatic-debits");
+	int64_t yearly_interest = int64_t(company->current_loan) * _economy.interest_rate / 100;
+	reserve = (yearly_interest + 11) / 12 + std::max<int64_t>(0, int64_t(_price[Price::StationValue] >> 2));
+	if (_settings_game.economy.infrastructure_maintenance) {
+		uint32_t total = company->infrastructure.GetRailTotal();
+		for (RailType type : EnumRange(RAILTYPE_END)) if (company->infrastructure.rail[type] != 0)
+			reserve += std::max<int64_t>(0, int64_t(RailMaintenanceCost(type, company->infrastructure.rail[type], total)));
+		reserve += std::max<int64_t>(0, int64_t(SignalMaintenanceCost(company->infrastructure.signal))) +
+			std::max<int64_t>(0, int64_t(StationMaintenanceCost(company->infrastructure.station))) +
+			std::max<int64_t>(0, int64_t(PortalRegistry::GetCompanyPortalMaintenanceCost(CompanyID{0})));
+	}
+	int64_t toll = 0;
+	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) for (const auto &end : {link.end_a, link.end_b})
+		if (auto policy = StellarNetwork::Policy(end.tile)) toll = std::max(toll, int64_t(policy->toll));
+	std::vector<TileIndex> depots;
+	for (const Depot *depot : Depot::Iterate()) if (IsRailDepotTile(depot->xy) && GetTileOwner(depot->xy) == CompanyID{0}) depots.push_back(depot->xy);
+	uint fronts = 0;
+	for (const Vehicle *vehicle : Vehicle::Iterate()) if (vehicle->type != VehicleType::Train && vehicle->type != VehicleType::Effect) return BasketFail("non-train-automatic-debits");
+	for (const Train *front : Train::Iterate()) if (front->IsFrontEngine()) {
+		++fronts;
+		if (front->vcache.cached_max_speed > 128 || front->cur_speed > 128) return BasketFail("unbounded-fleet-speed");
+		/* Train::OnNewEconomyDay charges a 1/256-pound annual cost scaled by
+		 * running ticks / (365 * 74); one tick can add at most one running tick.
+		 * SubtractMoneyFromCompanyFract may round up through its existing carry. */
+		constexpr int64_t denominator = int64_t(CalendarTime::DAYS_IN_YEAR) * Ticks::DAY_TICKS * 256;
+		int64_t yearly_running = int64_t(front->GetRunningCost());
+		uint running_ticks = uint(front->running_ticks) + 1;
+		if (yearly_running < 0 || yearly_running > (INT64_MAX - denominator) / running_ticks) return BasketFail("unbounded-fleet-running-cost");
+		reserve += (yearly_running * running_ticks + denominator - 1) / denominator;
+		if (company->settings.engine_renew && int64_t(front->age.base()) + 1 - front->max_age.base() >= int64_t(company->settings.engine_renew_months) * 30)
+			return BasketFail("approaching-automatic-renewal-bound");
+		uint speed = std::max<uint>(front->cur_speed, front->vcache.cached_max_speed);
+		reserve += 2 * ((3 * speed / 4 + UINT8_MAX) / TILE_AXIAL_DISTANCE + 1) * toll;
+		bool entry = front->current_order.IsType(OT_GOTO_DEPOT);
+		if (!front->IsChainInDepot()) for (const Train *part = front; part != nullptr; part = part->Next()) for (TileIndex depot : depots) {
+			if (DistanceMax(part->tile, depot) > 1) continue;
+			/* Outward departure cannot trigger VehicleEnterDepot. Curves and any
+			 * other nearby movement conservatively reserve a possible entry. */
+			entry |= DirToDiagDir(part->GetMovingDirection()) != GetRailDepotDirection(depot);
+		}
+		if (entry) reserve += company->settings.engine_renew_money;
+	}
+	if (fronts != 6) return BasketFail("six-service-debit-bound");
+	return true;
+}
+
+/** Loaded-checkpoint console adapter with no grant, borrowing, research or authoring operation. */
+bool CoreBasket(std::span<std::string_view> argv)
+{
+	if (_game_mode != GameMode::Normal || _networking || _network_dedicated || Company::GetIfValid(CompanyID{0}) == nullptr) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL basket requires an offline loaded company"); return true;
+	}
+	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	CommonwealthSliceAudit audit; std::vector<Json> months;
+	AutoRestoreBackup observer(_commonwealth_slice_audit, &audit);
+	AutoRestoreBackup monthly(_integrated_city_month_audit, &months);
+	Json before = FunctionalSnapshot(), report = {{"version", 1}, {"operation", argv[1]}};
+	if (argv[1] == "basket-dev-money" && argv.size() == 2) {
+		if (basket.armed || basket.failed || !_pause_mode.Test(PauseMode::Normal) ||
+			before.at("tick") != 167168 || before.at("money") != 3705864 || _settings_game.difficulty.infinite_money ||
+			!BasketChain()) BasketFail("development-money-source-boundary");
+		else if (Command<Commands::ChangeSetting>::Do(DoCommandFlag::Execute, "difficulty.infinite_money", 1).Failed() ||
+			!_settings_game.difficulty.infinite_money) BasketFail("development-money-setting");
+		report["development_unlimited_money"] = _settings_game.difficulty.infinite_money;
+		report["failed"] = basket.failed; report["reason"] = basket.error;
+		report["state"] = FunctionalSnapshot(); report["observation"] = BasketObservation();
+		report["actual_ticks"] = 0; report["audit"] = FunctionalAudit(audit);
+		report["audit"]["basket_months"] = months;
+		report["services"] = basket.services;
+		report["cash_conserved"] = report["state"]["money"] == before["money"];
+		report["cargo_errors"] = Json::array();
+		IConsolePrint(CC_DEFAULT, "CONNECTED basket-result {}", report.dump()); return true;
+	}
+	if (argv[1] == "basket-status" && argv.size() == 2) {
+		report["state"] = before; report["observation"] = BasketObservation(); report["services"] = basket.services;
+		IConsolePrint(CC_DEFAULT, "CONNECTED basket-state {}", report.dump()); return true;
+	}
+	if (argv[1] == "basket-arm" && argv.size() == 3) {
+		if (basket.armed || basket.failed) BasketFail("already-armed-or-stopped");
+		else {
+			try {
+				std::ifstream file(std::string(argv[2]), std::ios::binary);
+				if (!file) throw std::runtime_error("frozen-state-file");
+				file.seekg(0, std::ios::end); auto length = file.tellg();
+				if (length <= 0 || length > 16 * 1024 * 1024) throw std::runtime_error("frozen-state-size");
+				file.seekg(0); Json frozen = Json::parse(file);
+				bool cold = frozen.is_object() && frozen.contains("basket");
+				const Json &state = cold ? frozen.at("state") : frozen;
+				CoreBasketAdmissionContext context{true, true, _pause_mode.Test(PauseMode::Normal), BasketProfile(),
+					!GetIntegratedCoreTownGenerationStats().active && !generation_contract_fresh && !functional_fresh, uint32_t(Company::GetNumItems())};
+				std::string error = GetCoreBasketAdmissionError(before, context, cold);
+				if (!error.empty()) BasketFail(error);
+				else if (state != before) BasketFail("frozen-state-equality");
+				else if (!BasketChain()) BasketFail("fixed-chain-public-gates-receiver");
+				else if (cold) {
+					const auto &ledger = frozen.at("basket");
+					uint advances = ledger.at("initial_advances").get<uint>(); int64_t gross = ledger.at("gross_debits").get<int64_t>();
+					int64_t quote = ledger.at("quoted_total").get<int64_t>();
+					Json observation = BasketObservation(); observation.erase("adapter");
+					if (frozen.at("observation") != observation) BasketFail("cold-full-observation-equality");
+					else if (ledger.at("source_sha256") != Json(std::string(BASKET_SOURCE)) || advances < 15 || advances > 240 ||
+						before.at("tick").get<uint64_t>() != 167168 + uint64_t(advances - 4) * 2048 || gross < quote ||
+						quote <= 0 || !BasketServicesValid(ledger.at("services"))) BasketFail("cold-ledger-services");
+					else { basket.cold = !ledger.value("resume_initial", false); basket.built = true; basket.initial_advances = advances; basket.gross = gross;
+						basket.quoted_total = quote; basket.services = ledger.at("services"); basket.armed = true; }
+				} else basket.armed = true;
+			} catch (const std::exception &) { BasketFail("invalid-frozen-state-file-or-json"); }
+		}
+		basket.expected = before;
+	} else if (!basket.armed || basket.failed || !_pause_mode.Test(PauseMode::Normal) || !BasketProfile()) {
+		BasketFail("unarmed-stopped-or-profile");
+	} else if (before != basket.expected) {
+		BasketFail("unexpected-paused-state-change");
+	} else if ((argv[1] == "basket-plan" || argv[1] == "basket-build") && argv.size() == 3) {
+		auto layout = ParseInteger<uint>(argv[2]);
+		if (!layout || *layout > 1 || basket.built || basket.cold) BasketFail("layout-or-built-contract");
+		else if (argv[1] == "basket-plan") {
+			if (basket.plans[*layout] || basket.layouts >= 2 || (*layout == 1 && !basket.plans[0])) BasketFail("stable-layout-attempt-bound");
+			else {
+				++basket.layouts; BasketLayout plan; bool legal = PlanBasket(*layout, plan);
+				plan.report["preview_unchanged"] = FunctionalSnapshot() == before;
+				std::string reason = plan.report.value("reason", "complete-layout-legality-affordability");
+				bool geometry_miss = reason == "bounded-endpoint-no-route" || reason == "future-footprint-geometry";
+				if (!plan.report["preview_unchanged"].get<bool>()) BasketFail("query-mutated-state");
+				else if (!legal && (!geometry_miss || basket.layouts == 2)) BasketFail(reason);
+				plan.report["failed"] = basket.failed;
+				if (basket.failed) plan.report["reason"] = basket.error;
+				plan.report["observation"] = BasketObservation();
+				Json output = plan.report;
+				if (!basket.failed) basket.plans[*layout] = std::move(plan);
+				IConsolePrint(CC_DEFAULT, "CONNECTED basket-plan {}", output.dump()); return true;
+			}
+		} else if (!basket.plans[*layout]) BasketFail("missing-frozen-layout");
+		else {
+			BasketLayout &plan = *basket.plans[*layout]; report["plan"] = plan.report;
+			if (BuildBasket(plan) && audit.cash_debits != plan.report["total_quote"].get<int64_t>()) BasketFail("construction-total-query-execute-parity");
+		}
+	} else if (argv[1] == "basket-advance" && argv.size() == 2) {
+		if (!basket.built || basket.advances >= (basket.cold ? 120u : 240u) || basket.initial_advances + basket.advances >= 360) BasketFail("advance-bound-or-unbuilt");
+		else {
+			++basket.advances;
+			AutoRestoreBackup pause(_pause_mode); AutoRestoreBackup tick_owner(_current_company, _local_company);
+			UpdateSignalsInBuffer(); _pause_mode.Reset();
+			for (uint i = 0; i < 2048; ++i) {
+				if (!BasketIntegrity()) break;
+				int64_t reserve = 0;
+				if (!BasketTickReserve(reserve)) break;
+				basket.tick_reserve = reserve;
+				StateGameLoop();
+			}
+		}
+	} else if ((argv[1] == "basket-stop" || argv[1] == "basket-restart") && argv.size() == 3) {
+		VehicleID id{ParseInteger<uint32_t>(argv[2]).value_or(UINT32_MAX)}; Train *train = Train::GetIfValid(id);
+		bool authorized = id == VehicleID{4};
+		for (const auto &service : basket.services) authorized |= service.value("train", UINT32_MAX) == id.base();
+		if (!basket.built || train == nullptr || !train->IsFrontEngine() || train->owner != CompanyID{0} || !authorized) BasketFail("control-train-contract");
+		else if (train->vehstatus.Test(VehState::Stopped) != (argv[1] == "basket-stop")) {
+			if (Command<Commands::StartStopVehicle>::Do({}, id, true).Failed() || Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, id, true).Failed()) BasketFail("normal-vehicle-control");
+		}
+	} else BasketFail("invalid-operation");
+	Json after = FunctionalSnapshot();
+	report["actual_ticks"] = after["tick"].get<uint64_t>() - before["tick"].get<uint64_t>();
+	for (const auto &transaction : audit.cash_transactions) basket.gross += std::max<int64_t>(0, transaction[2]);
+	report["cash_conserved"] = after["money"].get<int64_t>() == before["money"].get<int64_t>() - audit.cash_debits;
+	report["cargo_errors"] = Json::array();
+	for (CargoType cargo{0}; cargo < NUM_CARGO; ++cargo) {
+		int64_t expected = before["all_held"][cargo].get<int64_t>() + audit.produced[cargo] + audit.raw_produced[cargo] - audit.raw_removed[cargo] - audit.unallocated[cargo] - audit.discarded[cargo] - audit.consumed[cargo];
+		if (expected != after["all_held"][cargo].get<int64_t>()) report["cargo_errors"].push_back({cargo, expected, after["all_held"][cargo]});
+	}
+	if (!report["cash_conserved"].get<bool>() || !report["cargo_errors"].empty()) BasketFail("cash-or-cargo-conservation");
+	if (basket.armed && !basket.failed) BasketIntegrity();
+	if (BasketObservation()["custody"]["total"] != after["all_held"]) BasketFail("all-cargo-custody-projection");
+	report["state"] = after; report["observation"] = BasketObservation(); report["audit"] = FunctionalAudit(audit);
+	report["audit"]["basket_months"] = months; report["services"] = basket.services; report["failed"] = basket.failed; report["reason"] = basket.error;
+	basket.expected = after;
+	IConsolePrint(CC_DEFAULT, "CONNECTED basket-result {}", report.dump());
+	return true;
+}
+/** @endcond */
+
 } // namespace
+
+nlohmann::json GetCoreBasketObservation()
+{
+	return Company::GetIfValid(CompanyID{0}) == nullptr ? Json::object() : BasketObservation();
+}
+
+CommandCost QueryCoreBasketRail(TileIndex tile, Track track, TrackBits prospective)
+{
+	if (!IsValidTile(tile) || !IsInnerTile(tile) || !IsValidTrack(track) || _current_company != CompanyID{0}) return CMD_ERROR;
+	TrackBits existing{};
+	if (IsPlainRailTile(tile)) {
+		/* Reuse means retaining an owned compatible piece, never adopting public rail. */
+		if (GetTileOwner(tile) != CompanyID{0} || GetRailType(tile) != RAILTYPE_RAIL) return CMD_ERROR;
+		existing = GetTrackBits(tile);
+	} else if (IsLevelCrossingTile(tile)) {
+		if (GetTileOwner(tile) != CompanyID{0} || GetRailType(tile) != RAILTYPE_RAIL) return CMD_ERROR;
+		existing = TrackBits{GetCrossingRailTrack(tile)};
+	} else if (prospective.Any() && !IsTileType(tile, TileType::Clear) && !IsTileType(tile, TileType::Trees)) {
+		return CMD_ERROR;
+	}
+	if ((existing | prospective).Test(track)) return CommandCost();
+	/* Every new piece must also pass the unmodified native placement, ownership
+	 * and train-occupancy checks against the paused map. Future costing must not
+	 * bypass those guards merely because another piece is already planned. */
+	auto native = Command<Commands::BuildRail>::Do(DoCommandFlag::QueryCost, tile, RAILTYPE_RAIL, track, false);
+	if (native.Failed() || prospective.None()) return native;
+	/* Later pieces on a future owned junction pay incremental foundation/track costs.
+	 * The first piece already owns the native clearing quote. These are the same
+	 * primitives as CmdBuildSingleRail and the ordinary blueprint preflight. */
+	if (IsPlainRailTile(tile) && HasSignals(tile) && TracksOverlap(existing | prospective | track)) return CMD_ERROR;
+	auto slope = CheckRailSlope(GetTileSlope(tile), TrackBits{track}, existing | prospective, tile);
+	if (slope.Failed()) return slope;
+	slope.AddCost(GetNewRailTrackCost(RAILTYPE_RAIL, PlanetManager::GetTileWorld(tile), CompanyID{0}));
+	return slope;
+}
+
+std::string GetCoreBasketAdmissionError(const nlohmann::json &state, const CoreBasketAdmissionContext &context, bool continuation)
+{
+	if (!context.normal) return "game-mode";
+	if (!context.offline) return "network-offline";
+	if (!context.loaded) return "fresh-generation";
+	if (!context.paused) return "pause";
+	if (!context.profile) return "profile-content";
+	if (context.companies != 1) return "company-count";
+	try {
+		if (state.at("company") != Json(std::string(FUNCTIONAL_COMPANY)) || state.at("loan") != 100000 || state.at("max_loan") != 300000) return "company-debt";
+		if (state.at("seed") != 11 || (!continuation && state.at("tick") != 167168) ||
+			(continuation && (state.at("tick").get<uint64_t>() <= 167168 || state.at("tick").get<uint64_t>() > 167168 + 240 * 2048))) return "tick-seed";
+		if (!continuation && state.at("money") != 3705864) return "cash";
+		if (state.at("research") != Json::array({Json::array({0, 0, 0, Json::array({TECH_MATERIALS_1})})}) ||
+			state.at("tech_company_ids") != Json::array({0})) return "research";
+		const auto &worlds = state.at("worlds");
+		const std::array<const char *, 7> roles = {"Core", "Industrial", "Frontier", "Frontier", "Frontier", "Industrial", "Frontier"};
+		const std::array<uint, 7> phases = {1, 2, 3, 3, 4, 4, 4};
+		if (worlds.size() != roles.size()) return "roles";
+		for (uint i = 0; i < roles.size(); ++i) if (worlds[i].at("id") != i || worlds[i].at("role") != roles[i] || worlds[i].at("phase") != phases[i]) return "roles";
+		const auto &towns = state.at("towns");
+		auto town = std::find_if(towns.begin(), towns.end(), [](const auto &row) { return row.at("id") == 0; });
+		if (town == towns.end() || (*town).at("world") != 0 || !(*town).at("megacity").template get<bool>() ||
+			(*town).at("population").template get<uint32_t>() == 0 || !(*town).at("profile").is_object()) return "core-profile";
+		const auto &stations = state.at("stations");
+		auto receiver = std::find_if(stations.begin(), stations.end(), [](const auto &row) { return row.at("id") == 3; });
+		if (receiver == stations.end() || (*receiver).at("town") != 0 || (*receiver).at("owner") != 0 ||
+			(*receiver).at("warehouse") != false || (*receiver).at("consumer") != true) return "receiver";
+		bool house = false;
+		for (const auto &row : (*receiver).at("catchment_houses")) house |= row.at("town") == 0 && row.at("world") == 0;
+		if (!house) return "receiver-house";
+		if (!state.at("hubs").empty() || !state.at("stocks").empty()) return "cargo-custody";
+		const auto &trains = state.at("trains");
+		if ((!continuation && trains.size() != 8) || (continuation && trains.size() != 20)) return "fleet";
+		for (uint i = 0; i < 8; ++i) {
+			auto train = std::find_if(trains.begin(), trains.end(), [i](const auto &row) { return row.at("id") == i; });
+			if (train == trains.end() || (*train).at("owner") != 0 || (*train).at("crashed") != false || (*train).at("lost") != false ||
+				(*train).at("engine") != (i % 4 == 0 ? 32 : i < 4 ? 50 : 52)) return "inherited-fleet";
+			if (i == 0 || i == 4) {
+				Json orders = Json::array({Json::array({1, i == 0 ? 0 : 2, 2, 4, 1, 0}), Json::array({1, i == 0 ? 1 : 3, 4, 0, 1, 0})});
+				if ((*train).at("orders") != orders) return "inherited-orders";
+			}
+		}
+		return {};
+	} catch (const nlohmann::json::exception &) {
+		return "checkpoint-json";
+	}
+}
 
 /**
  * Capture every map tile, including the native void border, without mutation.
@@ -1958,6 +2789,7 @@ void ResetConnectedEconomyProof()
 {
 	generation_contract_fresh = false;
 	functional_fresh = false;
+	basket = BasketSession{};
 }
 
 bool RepairConnectedEconomyTerrain()
@@ -1975,6 +2807,7 @@ bool SmoothExposedUATTerrain()
 
 bool ConConnectedEconomy(std::span<std::string_view> argv)
 {
+	if (argv.size() >= 2 && argv[1].starts_with("basket-")) return CoreBasket(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("functional-")) return FunctionalCore(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("generation-contract-")) return GenerationContract(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("first-freight-")) return FirstFreight(argv);

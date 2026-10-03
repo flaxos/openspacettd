@@ -1,0 +1,224 @@
+{
+  "archive_bytes": 1204287,
+  "archive_sha256": "44e5478562e9da75125c3320a2289b20c56fbb1b017615af1296aa050434d961",
+  "binary_sha256": "5ed099724b59f9ad363d323003389636d22f0ddb07265a845b89edc42666e33b",
+  "corrected_source_head": "1d6781761be6e6657cb8eb54d1361e9d31585a00",
+  "corrected_source_native_replay": "NOT RUN; requires explicit new handoff",
+  "human_uat": "Pending",
+  "label": "ASSISTED FUNCTIONAL",
+  "members": {
+    "artifacts.json": {
+      "bytes": 5599,
+      "sha256": "8358e4dbc01b96f807ef8dbc55eb531b11640378873672b73bf285546408da4c"
+    },
+    "cold/functional.cfg": {
+      "bytes": 1780,
+      "sha256": "2e2b75fc4d0b1ed16502ccc573f4e208d740f6e9512e69716a493709505f2401"
+    },
+    "driver.stdout.log": {
+      "bytes": 384,
+      "sha256": "3645be756f123de7e2d5aa82e2e58d9a7f70a0c2412142e4b5cc7d851f4d69d5"
+    },
+    "evidence.json": {
+      "bytes": 288659,
+      "sha256": "e8f713b884f6d1369a56bace9d659e8efed9e5d43d9e5b949384c25963ad4d05"
+    },
+    "evidence.sha256": {
+      "bytes": 80,
+      "sha256": "b6e3ba8380805fec82851ecb2c988365d9f244dabe47d60cd786030a4bb6c5fc"
+    },
+    "execution-attempt.json": {
+      "bytes": 151,
+      "sha256": "001137d40184dea6bcc620fb5b7fdf815c4f04582ad4c9f2096c3e9dce91ba6e"
+    },
+    "frozen-plan.json": {
+      "bytes": 542087,
+      "sha256": "5c8a8a651388809d605440497a4292128210ae257d9cdda86194f8e813707b2a"
+    },
+    "initial/functional.cfg": {
+      "bytes": 1780,
+      "sha256": "2e2b75fc4d0b1ed16502ccc573f4e208d740f6e9512e69716a493709505f2401"
+    },
+    "initial/initial-commands.scr": {
+      "bytes": 1975,
+      "sha256": "fa4dbf55277d7912eff26c8a7932a736b180856ff8eccddc959593ca943a2e96"
+    },
+    "initial/initial-native.log": {
+      "bytes": 3197405,
+      "sha256": "1641ce58779e50db818e4d198ff1dd331db26d822848e6c2d847e4fd45f79057"
+    },
+    "initial/initial-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "initial/initial.log": {
+      "bytes": 3197380,
+      "sha256": "d671b675c64f7beab1997914ac7a69ff2107059b87d4dba9c0b46f0ccb4d0134"
+    },
+    "initial/scripts/game_start.scr": {
+      "bytes": 296,
+      "sha256": "f3a1ebe613c3a5749c085ed338827d8a88efbf2db7d7086bf8d3ce88b376be1b"
+    },
+    "operation-journal.jsonl": {
+      "bytes": 6600,
+      "sha256": "527eeb59f04473f75219d6651e60c621e1bcb03d38edaf205801180904ddda67"
+    },
+    "operations/0001-response.txt": {
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    "operations/0002-response.txt": {
+      "bytes": 205952,
+      "sha256": "f552df53a9c4d3a3c8d0534a4f64d1db3099493609990045e36b4cb81dc1321f"
+    },
+    "operations/0002-result.json": {
+      "bytes": 471306,
+      "sha256": "5411a5fa388dff91e0ee6c01611e6649ee502d9cebcce62d014e98bdf026d3a3"
+    },
+    "operations/0003-response.txt": {
+      "bytes": 7742,
+      "sha256": "f039560ac25a120625ceb93bf2965fb6b62edfc6755030259230418df46d328d"
+    },
+    "operations/0003-terrain-audit.json": {
+      "bytes": 11868,
+      "sha256": "1c92e2632ad7bc8b1de79da543cd7047a9a86fa35fb2d0f2fdd703f7b4a27074"
+    },
+    "operations/0004-response.txt": {
+      "bytes": 205952,
+      "sha256": "f552df53a9c4d3a3c8d0534a4f64d1db3099493609990045e36b4cb81dc1321f"
+    },
+    "operations/0004-result.json": {
+      "bytes": 471306,
+      "sha256": "5411a5fa388dff91e0ee6c01611e6649ee502d9cebcce62d014e98bdf026d3a3"
+    },
+    "operations/0005-response.txt": {
+      "bytes": 207172,
+      "sha256": "0f609e3b874db259d41fd392778bf92ed59e20842d74c58ea90b50d4cb4d6a50"
+    },
+    "operations/0005-result.json": {
+      "bytes": 475397,
+      "sha256": "248b8ba60beda2033db9efa23ec2ef9c643f16e07fe63ecc9a8e8560e3d35ac7"
+    },
+    "operations/0006-response.txt": {
+      "bytes": 307774,
+      "sha256": "342aed7024e57e566405cb217163853fbe716e29292943951d2b2fef5cbf6303"
+    },
+    "operations/0006-result.json": {
+      "bytes": 542087,
+      "sha256": "5c8a8a651388809d605440497a4292128210ae257d9cdda86194f8e813707b2a"
+    },
+    "operations/0007-response.txt": {
+      "bytes": 205951,
+      "sha256": "f187ddc0fbefc6c707999f80e295547974655970526eeed4337f52bf08fe94b0"
+    },
+    "operations/0007-result.json": {
+      "bytes": 471305,
+      "sha256": "e77d31e3ea2456c20db8c3e8609545970a4dd7d1100ddefa3845b8c494fe1ca7"
+    },
+    "operations/0008-response.txt": {
+      "bytes": 762583,
+      "sha256": "d0bf7bc859398faf7570a8d8e35e07c20a8733817a0eaf7e5d1c955ccd50c978"
+    },
+    "operations/0008-result.json": {
+      "bytes": 1637742,
+      "sha256": "c0227ad79005991ce6874794f6946080a857e36b14501d4f7e7ed73246b1e745"
+    },
+    "operations/0009-response.txt": {
+      "bytes": 7742,
+      "sha256": "f039560ac25a120625ceb93bf2965fb6b62edfc6755030259230418df46d328d"
+    },
+    "operations/0009-terrain-audit.json": {
+      "bytes": 11868,
+      "sha256": "1c92e2632ad7bc8b1de79da543cd7047a9a86fa35fb2d0f2fdd703f7b4a27074"
+    },
+    "operations/0010-response.txt": {
+      "bytes": 427189,
+      "sha256": "1f2d60fe6dbdf37cb33354dfe5cf6fd9a42e40d43e5a23c2be3af7eb2c102b4f"
+    },
+    "operations/0010-result.json": {
+      "bytes": 931279,
+      "sha256": "79a229df1650f077a022436be64c174e515240f8766024ff8a2dc29e91815b6a"
+    },
+    "operations/0011-response.txt": {
+      "bytes": 428410,
+      "sha256": "635b87f73c659b58f2163c81548cc0f80904289e9741a0201a2a5a2ed659d6cd"
+    },
+    "operations/0011-result.json": {
+      "bytes": 935371,
+      "sha256": "fbc2ab75775dd6e110cd7658ebf235bad00a436fa995a18c57ec2a56b1bb57ad"
+    },
+    "operations/0012-response.txt": {
+      "bytes": 428475,
+      "sha256": "3f438cbbca19d58928c89511a7e1b4d597e143f885294f2bd0effa577c75deab"
+    },
+    "operations/0012-result.json": {
+      "bytes": 935436,
+      "sha256": "9d39545b3cbe3df7d759101bcf75f0a55b91d0a9f7f5b4695a6a396b5f3c9d6f"
+    },
+    "paid-footprint.json": {
+      "bytes": 771508,
+      "sha256": "abbcc12a7163ee365ee680a9aaba75c0b5d5d2cf99cea888f9248f982810e042"
+    },
+    "preparation.json": {
+      "bytes": 198027,
+      "sha256": "2a2cf29d289186529800893e978458c1bb2b130b449bf6dede8346c2d6fae2b5"
+    },
+    "simulation-clock.json": {
+      "bytes": 208,
+      "sha256": "d0df0c5c96d7d1ea27a27ce8487f00c273c79389ead1127c1a08b18407635a18"
+    },
+    "source/archived-functional.cfg": {
+      "bytes": 1744,
+      "sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009"
+    },
+    "source/frozen-state.json": {
+      "bytes": 302858,
+      "sha256": "36323d91a0e7979cd9e14d563ca588266f0043c920e4fce67cbe0072062b69d4"
+    },
+    "source/owner-observation.sav": {
+      "bytes": 184704,
+      "sha256": "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7"
+    }
+  },
+  "omitted_profile_symlinks": {
+    "initial/profile/data/openttd/baseset": "/workspace/cloud-setup/data/openttd/baseset",
+    "initial/profile/data/openttd/newgrf/openspacettd_equipment_v1.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_equipment_v1.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_industry.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_industry.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_industry_v3.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_industry_v3.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_industry_v4.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_industry_v4.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_integrated_v1.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_integrated_v1.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_platforms_v1.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_platforms_v1.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_rail.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_rail.grf",
+    "initial/profile/data/openttd/newgrf/openspacettd_rail_v3.grf": "/workspace/openspacettd-core-basket/bin/newgrf/openspacettd_rail_v3.grf"
+  },
+  "ordinary_start_economics": "NOT RUN",
+  "original_save_sha256": "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7",
+  "run": {
+    "actual_native_ticks": 0,
+    "advance_counts": {
+      "cold": 0,
+      "initial": 1
+    },
+    "cash_gbp": 3341583,
+    "clock": {
+      "duration_seconds": 4500,
+      "start_utc": "2026-10-03T00:58:49.320471+00:00",
+      "stop_utc": "2026-10-03T02:13:49.320471+00:00",
+      "trigger": "Immediately before the first native basket-advance dispatch"
+    },
+    "debt_gbp": 100000,
+    "error": "basket-advance: native paid command or integrity guard failed: unbounded-fleet-running-or-speed",
+    "finished_at_utc": "2026-10-03T00:58:50.502831+00:00",
+    "load_attempts": {
+      "cold": 0,
+      "initial": 1
+    },
+    "new_assistance_gbp": 0,
+    "new_native_debits_gbp": 364281,
+    "new_native_receipts_gbp": 0,
+    "quote_gbp": 364281,
+    "requested_native_ticks": 2048
+  },
+  "source_head": "dcd0328d98c9bb9cf2e94cb56de7d70f861d23f1",
+  "status": "FAIL at first advance before any tick"
+}

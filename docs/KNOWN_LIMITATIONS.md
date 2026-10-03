@@ -1,5 +1,66 @@
 # OpenSpaceTTD Known Limitations
 
+## Core Megacity panel proof boundary — 3 October 2026
+
+The Core panel now reports each construction shortage and displays Core growth
+labels consistent with 0/1/2 simulated outcomes. Automated status and economy
+tests pass, but the GUI string-selection branch is not directly render-asserted.
+The minimum-width 92px header and longest tier text were checked by static size
+estimate, without rendered UI at each intended scale; clipping remains a human
+visual check. This repair did not run the paused material-basket campaign or
+observe steel/ballast delivery, monthly consumption, cold continuation or human
+play. It does not establish full basket acceptance or ordinary-start balance.
+
+## Development-money response stop — 3 October 2026
+
+The later checkpointed run reached a paid IRON delivery and native steel
+conversion, then stopped because the wrapper froze a world-development value
+that should change with resource activity. Immutable world identity and route
+infrastructure remained intact. The observer correction is checked against the
+retained snapshot but not replayed. The latest verified normal save predates
+that delivery; material city service, full consumption and cold continuation
+remain unproven.
+
+The subsequent single replay reached two full advances and recorded raw iron
+and silica production with conserved physical custody. No material delivery,
+payment, processing or complete Core basket was yet observed. It stopped when
+the wrapper compared a naturally grown tree on an unbuilt neutral tile against
+the original clear-tile snapshot. The guard is corrected and passes those
+retained snapshots offline, but further native progression and cold reload
+remain unrun under the first-hard-defect stop.
+
+The owner-approved offline unlimited-money mode removes development
+affordability as a basket acceptance gate. Its single recovery load stopped
+before planning or new ticks because the money-setting response lacked the
+runner's monthly-audit field. A narrow source correction is unrun in game;
+the first-hard-defect stop and original clock remain binding. Resource balance,
+physical custody, logistics and save/reload are still unproven for this basket.
+Normal new-game/server money defaults remain unchanged; ordinary economic
+balance and human UAT remain pending.
+
+## Material basket first-attempt stop — 3 October 2026
+
+The four service routes were legally quoted and paid, but the first requested
+advance stopped before native ticks because the guard treated a positive annual
+train running cost as forbidden. The native engine can book a fractional daily
+running charge. A source correction reserves its possible next whole-pound debit;
+it is locally testable but **native basket progression remains NOT RUN** on the
+corrected code. No post-build save exists, and a full retry requires a new
+explicit handoff; the previous£364,281 debit and immutable clock cannot be
+silently erased. [Attempt evidence](audit/2026-10-03/core-construction-basket/README.md).
+Ordinary economics, repeatability, sustained growth and human UAT remain open.
+
+## First Core Construction Basket boundary — 2 October 2026
+
+One new material-basket slice is explicitly authorized from preserved final
+funded state206acdd…. Original£6m assistance remains fully consumed; new assistance
+£0, debt fixed£100k. Its new first-advance clock and spending/tick limits do not
+reopen the old campaign. Physical construction-basket/growth/cold continuation
+proof is initially NOT RUN. Neutral factories' operation cannot establish that
+Materials I newly unlocked them. Ordinary-start economics, independent fresh
+repeatability and human UAT remain separate. [Binding plan](ACTIVE_EXECUTION_PLAN.md)
+and [evidence](audit/2026-10-02/core-construction-basket/README.md).
+
 ## First Functional Core Supply after repaired continuation — 1 October 2026
 
 The requested ASSISTED FUNCTIONAL outcome now passes across recorded authorized
@@ -609,3 +670,13 @@ original showcase's three-new-houses-within-ten-minutes target.
 Codex CLI skill discovery is verified. Antigravity discovery and interactive
 usefulness remain Pending. Instruction size reduction does not prove quota savings.
 [Verification boundary](AGENT_WORKFLOW.md#delivery-record--30-september-2026).
+# Current basket development-money limitation, 3 October 2026
+
+The owner authorized an offline `difficulty.infinite_money` mode for the active
+material-basket functional proof. Financial affordability and the earlier
+gross-spending ceilings are no longer acceptance gates. Native debits and
+receipts must still be recorded; this mode cannot establish ordinary-start
+economics or balance. The prior stopped guard failure and its paid transactions
+remain historical evidence. Cargo identity, quantities, recipes, capacity,
+consumption, authority, save equality, fixed clock and advance bounds remain
+binding.

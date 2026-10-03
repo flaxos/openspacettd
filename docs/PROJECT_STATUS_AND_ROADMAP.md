@@ -1,5 +1,93 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Core Megacity basket display repair — 3 October 2026
+
+Antigravity implemented a bounded Core Megacity panel repair on a draft branch
+stacked on PR #71. The panel now shows each Core cargo's demand and reserve,
+reports every missing FOOD/STEL/BALL construction item before prosperity cargo,
+and labels Core 0/1/2 growth outcomes without changing Classic labels. The
+status formatter and GUI drawing changed; demand, consumption, save format and
+economy rules did not. Focused regression coverage includes zero and partial
+reserves, BALL alone missing, prosperity shortages, a full basket, non-Core
+behavior and simulation growth outcomes.
+
+Automated tests pass in the isolated worktree: 161 focused assertions, the
+509-case aggregate Catch suite, and all 524 CTest cases across the initial run
+and a five-case rerun after building regression fixtures and allowing the
+loopback test outside the sandbox. Both repository linters pass. The 92px header
+and tier fit check was a static size estimate, not rendered visual UAT; the
+string-selection path is not directly asserted through a GUI render. The active
+material-delivery campaign, full monthly construction basket, cold continuation,
+ordinary-start economics and human UAT remain unproved. No acceptance or merge
+is implied by this display repair.
+
+## Development-money recovery stopped — 3 October 2026
+
+The guarded checkpoint-continuation load stopped in startup setup, before any
+gameplay command: the legacy functional adapter's bridge gate rejected the
+saved offline development-money setting. The bridge-only guard is corrected in
+source, but the load has not been repeated. The previous safe checkpoint and
+partial paid IRON-to-steel evidence remain intact; full basket/cold proof is
+still incomplete.
+
+The checkpointed follow-up reached a paid IRON delivery and native steel
+conversion. It then stopped on a wrapper check that incorrectly froze the
+Industrial world's live development counter. Role, phase and geometry did not
+change, and native cargo/cash reconciliation passed. The corrected observer
+passes the retained result offline, but the functional basket and cold reload
+have not been run beyond this stop. A verified paused save from the preceding
+advance is retained privately; it is not automatically authorized as a
+continuation source.
+
+The one further authorized replay passed source equality, route planning,
+normal four-service construction and two full simulation advances. Native
+resource production began, but no material consignment had arrived or been
+paid when a wrapper check stopped on natural tree growth at a neutral unbuilt
+candidate tile. Cash and physical cargo reconciled. The narrow observation
+guard repair passes the retained snapshots offline; it has not been replayed
+in game. Basket consumption and cold continuation remain NOT RUN.
+
+The owner authorized unlimited virtual money in an explicit offline proof mode,
+deferring financial balance and superseding the basket quote/gross caps. The
+single development-money recovery load enabled that mode but stopped before
+planning or any new game tick because its response omitted a required audit
+field. The response shape is narrowly corrected in source but **not replayed**.
+The original clock, requested advance and first-attempt debit remain counted;
+the next game load needs a new explicit handoff. Material-basket functional
+proof remains incomplete, ordinary-start economics NOT RUN, human UAT Pending.
+
+## First Core Construction Basket first attempt stopped — 3 October 2026
+
+**ASSISTED FUNCTIONAL requested basket outcome FAIL / incomplete.** The exact
+retained Materials I save loaded, terrain/text and eight-leg legal plan passed,
+and four native services were paid for£364,281. The first requested advance
+stopped in a too-strict running-cost reserve guard before any game tick: no
+material arrival, Core basket consumption or cold continuation is proved.
+Cash£3,341,583/debt£100,000 and zero added assistance reconcile. The guard has
+a narrow source correction; in-game correction validation requires a new explicit
+handoff because the one attempt stopped at a hard defect. [Raw first-attempt
+evidence and bounds](audit/2026-10-03/core-construction-basket/README.md).
+The 2 October authorization below remains the active slice description, not a
+claim of completed proof. Ordinary-start economics/fresh replay NOT RUN; human
+UAT Pending. No new slice, balance change or merge follows from partial build.
+
+## First Core Construction Basket authorized — 2 October 2026
+
+The owner approved one next functional slice through the existing physical
+materials path: iron→steel and stone/SILC→ballast, joining existing FOOD in the
+Core town's real monthly construction basket. The [sole active plan](ACTIVE_EXECUTION_PLAN.md)
+starts from final funded save206acdd…, with zero new assistance, £750k additional
+gross spending, £600k quote ceiling and360advances. Its NEW75-minute clock begins
+at the first simulation advance after source/preflight preparation; old clocks
+and counters remain closed history. No merge, next slice or balance change.
+
+Plan/ancestry/checkpoint review Astra maximum CLEAR. Implementation and native
+basket proof are in progress/NOT RUN; ordinary-start economics and fresh replay
+remain unproven, human UAT Pending. Neutral processors already exist: this slice
+does not claim Materials I newly enabled them. Prior first-food plans and every
+failure are preserved in [the dated audit](audit/2026-10-02/core-construction-basket/README.md).
+Earlier dated statuses below retain their original scope.
+
 ## PR66 main integration and nightly portability — 1 October 2026
 
 The existing draft PR66 now integrates the reviewed functional delivery and
@@ -930,3 +1018,12 @@ acceptance and economy balancing remain separate next steps.
 
 Agent workflow tooling now shares compact rules and three skills between Codex and
 Antigravity. Game roadmap priorities are unchanged. [Setup and verification](AGENT_WORKFLOW.md).
+# 3 October 2026 owner decision: development money
+
+For the active First Core Construction Basket proof, the owner authorized
+unlimited virtual money in an explicit offline development mode and deferred
+financial game balance. The former £750,000 gross cap and £600,000 quote cap
+no longer gate functional acceptance. Native cargo production, recipes,
+transport, consumption and save/reload remain the proof. The first stopped
+attempt and its financial ledger remain preserved; the fixed clock and advance
+limits remain. Ordinary-start economics and human UAT are still unproven.

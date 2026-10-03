@@ -1,4 +1,5 @@
 add_test_files(
+    test_core_construction_basket.cpp
     test_integrated_economy.cpp
     test_integrated_town_generation.cpp
     test_stellar_network.cpp
