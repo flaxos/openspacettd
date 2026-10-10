@@ -1,5 +1,27 @@
 # Core town station adapter — bounded implementation handoff
 
+## Resume position — 10 October 2026
+
+The owner's checkpoint synchronization is published on
+`codex/reconcile-checkpoints-20261010` (draft PR73, stacked on PR71).
+The primary Antigravity workspace `/home/flax/games/openspacettd` now carries
+those reconciled documents. That checkout does not contain the unfinished helper
+implementation. Continue source review in the existing isolated checkout
+`/home/flax/Documents/Codex/2026-10-05/task/ost-core-town-helper`, branch
+`codex/dev-core-town-station-adapter`, base `9b971a1b2f1eec2208e64422e8b28aca21e18d2e`.
+Read the synchronized roadmap/limitations and this handoff from the primary
+checkout before working there; its four-file dirty diff is preserved at SHA256
+`1c880b0904354e1538abf87fa8be5932111edba36702e399a45df84060e04ac1`.
+Inspect status and the actual diff again; preserve any later owner edits.
+
+The next bounded source task is exact-final native review/verification of that
+existing patch, including native pickup `OT_LOADING` safety and staged paid
+station/order failure paths. Do not recreate it in the primary checkout or claim
+its unpublished code is covered by PR71 CI. This synchronization dispatches no
+worker or gameplay campaign. The expired source-save proposal is superseded by
+verified October 5 consuming-basket evidence; repeat/cold proof follows a new
+finite owner-approved execution handoff after the helper is verified.
+
 Prepared 6 October 2026. **Planning only; not dispatched or implemented.**
 This helper supports the existing Core proof, not a new sprint or replacement
 for [ACTIVE_EXECUTION_PLAN.md](../ACTIVE_EXECUTION_PLAN.md). Preserve that plan,

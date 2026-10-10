@@ -103,11 +103,13 @@ Art authority remains `ost-gate-art` on
 optional resolver/gate-only renderer work. Fleet production follows acceptance,
 not merely checkpoint preparation.
 
-Use this alignment checkout for canonical documentation. The primary Antigravity
-checkout is intentionally not switched or fast-forwarded while its session owns
-it. No active implementation tree is rebased, reset, stashed or cleaned. When the
-owner-controlled session is ready to hand over, select the agreed published
-source, confirm clean or checkpointed status, and update only that checkout.
+Use this alignment checkout for canonical documentation. After explicit owner authorization, the clean primary Antigravity checkout was
+switched to `codex/reconcile-checkpoints-20261010`, matching published commit
+`09a0a8a7a6dea1419ea10e75160c0819035a4937` before this status follow-up. Its old
+PR71 branch is retained. Local main was fast-forwarded to verified GitHub main
+`85c423b4`. The existing conversation remained at completed step 184 and no
+source, content or save changed. No implementation tree was rebased, reset,
+stashed or cleaned. Helper/art dirty work remains separate and preserved.
 The unhealthy planning checkout is not a source for future edits.
 
 The owner retains merge and material design/human acceptance decisions. Review
