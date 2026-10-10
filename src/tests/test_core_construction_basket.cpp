@@ -8,6 +8,7 @@
 #include "../company_base.h"
 #include "../core/random_func.hpp"
 #include "../economy_func.h"
+#include "../engine_func.h"
 #include "../map_func.h"
 #include "../portal/commonwealth_slice.h"
 #include "../portal/connected_economy.h"
@@ -16,9 +17,16 @@
 #include "../rail.h"
 #include "../rail_cmd.h"
 #include "../rail_map.h"
+#include "../road_map.h"
+#include "../order_cmd.h"
+#include "../pbs.h"
+#include "../station_cmd.h"
+#include "../station_map.h"
+#include "../station_base.h"
 #include "../signal_func.h"
 #include "../town.h"
 #include "../train.h"
+#include "../vehicle_cmd.h"
 #include "../timer/timer_game_calendar.h"
 #include "../timer/timer_game_tick.h"
 #include "../vehicle_func.h"
@@ -77,6 +85,7 @@ struct BasketFixture {
 		ResetRailTypes();
 		Company::Get(CompanyID{0})->avail_railtypes.Set(RAILTYPE_RAIL);
 		Company::Get(CompanyID{0})->clear_limit = 1000 << 16;
+		_settings_game.station.station_spread = 12;
 	}
 	~BasketFixture()
 	{
@@ -222,6 +231,240 @@ TEST_CASE("Core basket admission rejects checkpoint debt research custody and in
 	const auto before = malformed.dump();
 	CHECK(GetCoreBasketAdmissionError(malformed, LoadedContext(), false) == "checkpoint-json");
 	CHECK(malformed.dump() == before);
+}
+
+TEST_CASE("Core town station admission accepts an unaffected loading pickup and rejects changed authority or orders", "[core-town-station][admission]")
+{
+	Json state = FrozenAdmissionProjection();
+	state["tick"] = 304384;
+	state["trains"][4]["front"] = true;
+	state["trains"][4]["order_index"] = 0;
+	state["trains"][4]["current_order"] = 2;
+	state["trains"][4]["current_order_flags"] = {OT_LOADING, 2, 4, 3, 0};
+	const Json unchanged = state;
+	CoreTownStationAdmissionContext context{true, true, true, true, true, false, false, 1};
+	CHECK(GetCoreTownStationAdmissionError(state, context).empty());
+	CHECK(state == unchanged);
+	auto denied = [&](const char *reason, CoreTownStationAdmissionContext altered) {
+		CHECK(GetCoreTownStationAdmissionError(state, altered) == reason);
+		CHECK(state == unchanged);
+	};
+	auto altered = context; altered.offline = false; denied("network-offline", altered);
+	altered = context; altered.loaded = false; denied("fresh-generation", altered);
+	altered = context; altered.paused = false; denied("pause", altered);
+	altered = context; altered.companies = 2; denied("company-count", altered);
+	altered = context; altered.competing_basket = true; denied("competing-basket-session", altered);
+	altered = context; altered.shared_orders = true; denied("shared-orders", altered);
+	state["trains"][4]["order_index"] = 1;
+	CHECK(GetCoreTownStationAdmissionError(state, context) == "active-delivery-or-index");
+	state = unchanged; state["trains"][4]["orders"][1][1] = 9;
+	CHECK(GetCoreTownStationAdmissionError(state, context) == "food-orders");
+	state = unchanged; state["trains"][4]["current_order_flags"][0] = OT_GOTO_DEPOT;
+	CHECK(GetCoreTownStationAdmissionError(state, context) == "unsafe-current-order");
+	state = unchanged; state["trains"][4]["crashed"] = true;
+	CHECK(GetCoreTownStationAdmissionError(state, context) == "food-train");
+}
+
+TEST_CASE("Core town station two-tile independent native quote is repeatable and paid once", "[core-town-station][quote]")
+{
+	BasketFixture fixture;
+	StationClass::Reset();
+	const TileIndex tile = TileXY(30, 30);
+	const Json before = NativeEvidence();
+	const auto native = Command<Commands::BuildRailStation>::Do(DoCommandFlag::QueryCost,
+		tile, RAILTYPE_RAIL, Axis::X, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+	const auto first = QueryCoreTownStation(tile);
+	const auto again = QueryCoreTownStation(tile);
+	INFO("native station quote error=" << native.GetErrorMessage().base() << " adapted=" << first.GetErrorMessage().base());
+	REQUIRE(native.Succeeded());
+	REQUIRE(first.Succeeded());
+	CHECK(first.GetCost() == native.GetCost());
+	CHECK(again.Succeeded());
+	CHECK(again.GetCost() == first.GetCost());
+	CHECK(NativeEvidence() == before);
+	CHECK(QueryCoreTownStation(INVALID_TILE).Failed());
+	CHECK(QueryCoreTownStation(TileXY(63, 30)).Failed());
+	CHECK(NativeEvidence() == before);
+	Randomizer native_rng = _random;
+	native_rng.Next(); native_rng.Next(); native_rng.Next();
+	const auto built = Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute,
+		tile, RAILTYPE_RAIL, Axis::X, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+	REQUIRE(built.Succeeded());
+	CHECK(built.GetCost() == first.GetCost());
+	REQUIRE(IsRailStationTile(tile));
+	CHECK(GetStationIndex(tile) == GetStationIndex(TileXY(31, 30)));
+	CHECK(Station::Get(GetStationIndex(tile))->xy == tile);
+	CHECK(_random.state[0] == native_rng.state[0]);
+	CHECK(_random.state[1] == native_rng.state[1]);
+}
+
+TEST_CASE("Core town station quote excludes reserved, occupied, and foreign footprint rail", "[core-town-station][quote]")
+{
+	BasketFixture fixture;
+	StationClass::Reset();
+	TileIndex tile = TileXY(30, 30);
+	MakeRailNormal(tile, CompanyID{0}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	const Json before = NativeEvidence();
+	REQUIRE(TryReserveRailTrack(tile, Track::X, false));
+	CHECK(QueryCoreTownStation(tile).Failed());
+	CHECK(NativeEvidence() == before);
+	UnreserveTrack(tile, Track::X);
+	auto unreserved_quote = QueryCoreTownStation(tile);
+	INFO("unreserved station quote error=" << unreserved_quote.GetErrorMessage().base());
+	CHECK(unreserved_quote.Succeeded());
+	MakeRailNormal(tile, CompanyID{1}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	CHECK(QueryCoreTownStation(tile).Failed());
+	MakeRailNormal(tile, CompanyID{0}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	REQUIRE(Train::CanAllocateItem());
+	Train *occupant = Train::Create();
+	occupant->owner = CompanyID{0}; occupant->tile = tile; occupant->track = TrackBits{Track::X};
+	occupant->UpdatePosition();
+	CHECK(QueryCoreTownStation(tile).Failed());
+}
+
+TEST_CASE("Core town link retains its native frozen price and exact paid debit", "[core-town-station][quote]")
+{
+	BasketFixture fixture;
+	StationClass::Reset();
+	AutoRestoreBackup rail_price(_price[Price::BuildRail], Money{100});
+	TileIndex platform = TileXY(30, 30), connector = TileXY(29, 30);
+	auto frozen_link = QueryCoreBasketRail(connector, Track::X);
+	REQUIRE(frozen_link.Succeeded());
+	REQUIRE(frozen_link.GetCost() > 0);
+	Money quoted_link = frozen_link.GetCost();
+	Json frozen_quote;
+	Json first_components = {{"link_cost", int64_t(quoted_link)}};
+	CHECK(TryFreezeCoreTownStationQuote(frozen_quote, first_components));
+	CHECK(TryFreezeCoreTownStationQuote(frozen_quote, first_components));
+	_price[Price::BuildRail] = Money{200};
+	auto changed_link = QueryCoreBasketRail(connector, Track::X);
+	REQUIRE(changed_link.Succeeded());
+	CHECK(changed_link.GetCost() != quoted_link);
+	CHECK_FALSE(TryFreezeCoreTownStationQuote(frozen_quote, Json{{"link_cost", int64_t(changed_link.GetCost())}}));
+	CHECK(frozen_quote == first_components);
+	CHECK(GetCoreTownStationLinkQuoteError(changed_link, quoted_link, 0, 1000000) == "native-link-query-changed");
+	_price[Price::BuildRail] = Money{100};
+	const auto station = Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute,
+		platform, RAILTYPE_RAIL, Axis::X, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+	INFO("paid station error=" << station.GetErrorMessage().base());
+	REQUIRE(station.Succeeded());
+	auto live_link = QueryCoreBasketRail(connector, Track::X);
+	REQUIRE(live_link.Succeeded());
+	CHECK(GetCoreTownStationLinkQuoteError(live_link, quoted_link, station.GetCost(), 1000000).empty());
+	CHECK(GetCoreTownStationLinkQuoteError(live_link, quoted_link, station.GetCost(), station.GetCost()).size() > 0);
+	Money cash_before = Company::Get(CompanyID{0})->money;
+	const auto built_link = Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, connector, RAILTYPE_RAIL, Track::X, false);
+	REQUIRE(built_link.Succeeded());
+	CHECK(built_link.GetCost() == quoted_link);
+	CHECK(Company::Get(CompanyID{0})->money == cash_before - quoted_link);
+}
+
+TEST_CASE("Core town connector rejects demolition and incompatible rail", "[core-town-station][quote]")
+{
+	BasketFixture fixture;
+	TileIndex connector = TileXY(29, 30);
+	CHECK(IsCoreTownStationConnectorTileAllowed(connector, Track::X));
+	CHECK_FALSE(IsCoreTownStationConnectorTileAllowed(INVALID_TILE, Track::X));
+	CHECK_FALSE(IsCoreTownStationConnectorTileAllowed(connector, Track::Y));
+	MakeRailNormal(connector, CompanyID{0}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	CHECK(IsCoreTownStationConnectorTileAllowed(connector, Track::X));
+	MakeRailNormal(connector, CompanyID{1}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	CHECK_FALSE(IsCoreTownStationConnectorTileAllowed(connector, Track::X));
+	MakeRoadNormal(connector, ROAD_X, ROADTYPE_ROAD, INVALID_ROADTYPE, TownID{0}, CompanyID{0}, OWNER_NONE);
+	CHECK_FALSE(IsCoreTownStationConnectorTileAllowed(connector, Track::X));
+}
+
+TEST_CASE("Core town station token stays spent after load reset within a process", "[core-town-station][admission]")
+{
+	CHECK(TryReserveCoreTownStationToken("corestationtoken01"));
+	ResetConnectedEconomyProof();
+	CHECK_FALSE(TryReserveCoreTownStationToken("corestationtoken01"));
+	CHECK_FALSE(TryReserveCoreTownStationToken("corestationtoken02"));
+}
+
+TEST_CASE("Core town FOOD retarget leaves a currently loading pickup intact through native order commands", "[core-town-station][orders]")
+{
+	BasketFixture fixture;
+	StationClass::Reset();
+	fixture.Core();
+	_settings_game.vehicle.max_trains = 10;
+	_settings_game.vehicle.max_train_length = 10;
+	for (Engine *engine : Engine::Iterate()) engine->info.cargo_type = C("FOOD");
+	StartupEngines();
+	EngineID locomotive = EngineID::Invalid();
+	for (const Engine *engine : Engine::Iterate()) {
+		if (engine->type != VehicleType::Train || !IsEngineBuildable(engine->index, VehicleType::Train, CompanyID{0})) continue;
+		const auto &info = engine->VehInfo<RailVehicleInfo>();
+		if (info.railveh_type == RailVehicleType::Singlehead && HasPowerOnRail(info.railtypes, RAILTYPE_RAIL)) {
+			locomotive = engine->index; break;
+		}
+	}
+	REQUIRE(locomotive != EngineID::Invalid());
+	std::array<StationID, 5> stations;
+	for (uint i = 0; i < stations.size(); ++i) {
+		const TileIndex tile = TileXY(18 + i * 8, 30);
+		auto station_build = Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute,
+			tile, RAILTYPE_RAIL, Axis::X, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+		INFO("order station error=" << station_build.GetErrorMessage().base() << " tile=" << tile.base());
+		REQUIRE(station_build.Succeeded());
+		stations[i] = GetStationIndex(tile);
+	}
+	const TileIndex depot = TileXY(25, 35);
+	REQUIRE(Command<Commands::BuildRailDepot>::Do(DoCommandFlag::Execute, depot, RAILTYPE_RAIL, DiagDirection::SW).Succeeded());
+	auto [build, id, capacity, mail, cargos] = Command<Commands::BuildVehicle>::Do(
+		DoCommandFlag::Execute, depot, locomotive, false, INVALID_CARGO, ClientID::Invalid);
+	INFO("locomotive=" << locomotive.base() << " build error=" << build.GetErrorMessage().base());
+	REQUIRE(build.Succeeded());
+	Train *train = Train::Get(id);
+	Order pickup; pickup.MakeGoToStation(stations[2]);
+	pickup.SetLoadType(OrderLoadType::FullLoad); pickup.SetUnloadType(OrderUnloadType::NoUnload);
+	pickup.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
+	Order old_delivery; old_delivery.MakeGoToStation(stations[3]);
+	old_delivery.SetLoadType(OrderLoadType::NoLoad);
+	old_delivery.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
+	REQUIRE(Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, id, VehicleOrderID{0}, pickup).Succeeded());
+	REQUIRE(Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, id, VehicleOrderID{1}, old_delivery).Succeeded());
+	train->current_order = pickup;
+	train->current_order.MakeLoading(true); // Test fixture for retained train 4's pickup state.
+	train->current_order.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop, OrderNonStopFlag::GoVia});
+	REQUIRE(train->cur_real_order_index == 0);
+	CHECK(GetCoreTownStationNativeTrainError(train).empty());
+	train->GetOrder(1)->SetWaitTime(7);
+	CHECK(GetCoreTownStationNativeTrainError(train) == "unsupported-delivery-order");
+	train->GetOrder(1)->SetWaitTime(0);
+	train->cur_implicit_order_index = 1;
+	CHECK(GetCoreTownStationNativeTrainError(train) == "unsafe-implicit-order");
+	train->cur_implicit_order_index = 0;
+	const Order loading = train->current_order;
+	const auto before = NativeEvidence();
+	Order replacement = *train->GetOrder(1);
+	replacement.SetDestination(stations[4]);
+	REQUIRE(Command<Commands::InsertOrder>::Do(DoCommandFlag::QueryCost, id, VehicleOrderID{1}, replacement).Succeeded());
+	CHECK(NativeEvidence() == before);
+	REQUIRE(Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, id, VehicleOrderID{1}, replacement).Succeeded());
+	REQUIRE(train->GetNumOrders() == 3);
+	CHECK(train->GetOrder(2)->GetDestination() == stations[3]);
+	CHECK(train->cur_real_order_index == 0);
+	CHECK(train->cur_implicit_order_index == 0);
+	CHECK(train->current_order.IsType(OT_LOADING));
+	CHECK(train->current_order.GetDestination() == loading.GetDestination());
+	CHECK(train->current_order.GetLoadType() == loading.GetLoadType());
+	CHECK(train->current_order.GetNonStopType() == loading.GetNonStopType());
+	REQUIRE(Command<Commands::DeleteOrder>::Do(DoCommandFlag::QueryCost, id, VehicleOrderID{2}).Succeeded());
+	REQUIRE(Command<Commands::DeleteOrder>::Do(DoCommandFlag::Execute, id, VehicleOrderID{2}).Succeeded());
+	REQUIRE(train->GetNumOrders() == 2);
+	CHECK(train->cur_real_order_index == 0);
+	CHECK(train->cur_implicit_order_index == 0);
+	CHECK(train->current_order.IsType(OT_LOADING));
+	CHECK(train->current_order.GetDestination() == loading.GetDestination());
+	CHECK(train->current_order.GetLoadType() == loading.GetLoadType());
+	CHECK(train->current_order.GetNonStopType() == loading.GetNonStopType());
+	CHECK(train->GetOrder(0)->GetDestination() == stations[2]);
+	CHECK(train->GetOrder(0)->GetLoadType() == pickup.GetLoadType());
+	CHECK(train->GetOrder(1)->GetDestination() == stations[4]);
+	CHECK(train->GetOrder(1)->GetLoadType() == old_delivery.GetLoadType());
+	CHECK(train->GetOrder(1)->GetNonStopType() == old_delivery.GetNonStopType());
+	CHECK(NativeEvidence() == before);
 }
 
 TEST_CASE("Core basket cold admission stays within the initial phase tick and fleet bounds", "[core-construction-basket][basket-admission]")
