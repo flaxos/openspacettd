@@ -1,0 +1,121 @@
+{
+  "baseline_save": {
+    "path": "/home/flax/games/openspacettd/build/core-basket-repeat/basket-consumed.sav",
+    "sha256": "957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f",
+    "tick": 378112
+  },
+  "corporate_hq": {
+    "company_id": 0,
+    "campus_name": "Core Supply HQ",
+    "world_id": 0,
+    "tile": 71454,
+    "tier": 1
+  },
+  "tech_tree": {
+    "baseline_unlocked": [
+      301
+    ],
+    "project_id": 302,
+    "project_name": "TECH_MATERIALS_2 (Copper & Silicon Electronics Fabs)",
+    "cost_rp": 250,
+    "funding_cash_gbp": 250000,
+    "company_cash_before": 3678305,
+    "company_cash_after": 3428305
+  },
+  "resource_sites": {
+    "world_id": 1,
+    "world_name": "Merredin Refining & Industry",
+    "phase": "Phase2_Developed",
+    "survey_resolution": "16x16 grid",
+    "resources_mapped": [
+      {
+        "cargo_id": 4,
+        "label": "COPR",
+        "name": "Copper Ore",
+        "type": "Extractive Deposit"
+      },
+      {
+        "cargo_id": 6,
+        "label": "SAND",
+        "name": "Silica Sand",
+        "type": "Primary Quarry"
+      }
+    ]
+  },
+  "pipeline_b": {
+    "recipes": [
+      {
+        "id": 201,
+        "name": "RECIPE_COPPER_SMELTING",
+        "inputs": [
+          [
+            "COPR",
+            2
+          ]
+        ],
+        "outputs": [
+          [
+            "WIRE",
+            2
+          ]
+        ],
+        "conversion_ratio": "1:1",
+        "batches_processed": 40,
+        "input_consumed": 80,
+        "output_produced": 80,
+        "conservation_delta": 0
+      },
+      {
+        "id": 202,
+        "name": "RECIPE_SILICON_ARC",
+        "inputs": [
+          [
+            "SAND",
+            2
+          ]
+        ],
+        "outputs": [
+          [
+            "CHIP",
+            1
+          ]
+        ],
+        "conversion_ratio": "2:1",
+        "batches_processed": 20,
+        "input_consumed": 40,
+        "output_produced": 20,
+        "conservation_delta": 0
+      }
+    ],
+    "material_conservation": "Exact: 0 phantom units, 100% input/output balance"
+  },
+  "megacity_prosperity": {
+    "town_id": 0,
+    "quotas": {
+      "tier1_sustenance": 60,
+      "tier2_expansion": 40,
+      "tier3_prosperity": 20
+    },
+    "deliveries_recorded": {
+      "tier1_sustenance": 60,
+      "tier2_expansion_wire": 40,
+      "tier3_prosperity_chip": 20
+    },
+    "satisfaction_pct": {
+      "tier1": 1.0,
+      "tier2": 1.0,
+      "tier3": 1.0
+    },
+    "evaluated_growth_state": "HyperGrowth",
+    "evaluated_growth_multiplier": 2.0,
+    "evaluated_passenger_multiplier": 1.5,
+    "overall_supply_index": 1.0
+  },
+  "summary": {
+    "status": "PASS",
+    "scope": "Player-Funded Electronics Loop (Horizon A, Milestone A3)",
+    "all_assertions_passed": true,
+    "test_assertions": 84,
+    "test_cases": 5
+  }
+}

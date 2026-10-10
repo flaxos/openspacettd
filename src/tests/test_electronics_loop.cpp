@@ -243,4 +243,112 @@ TEST_CASE("Player-Funded Electronics Loop - Core Megacity Tier 2 and Tier 3 Acce
 	/* Deliver Tier 1 sustenance to achieve full prosperity conditions */
 	MegacityManager::RecordDelivery(t1, MegacityDemandTier::Tier1_Sustenance, 60);
 	CHECK(profile->delivered_current[0] == 60);
+
+	/* Evaluate monthly supply: full Tier 1 + Tier 2 + Tier 3 triggers HyperGrowth */
+	MegacityManager::EvaluateMonthlySupply();
+	CHECK(profile->growth_state == MegacityGrowthState::HyperGrowth);
+	CHECK(profile->growth_multiplier == 2.0f);
+	CHECK(profile->passenger_multiplier == 1.5f);
+	CHECK(profile->overall_supply_index == 1.0f);
+}
+
+TEST_CASE("Player-Funded Electronics Loop - Full End-to-End Progression Lifecycle", "[electronics-loop][e2e]")
+{
+	(void)MockEnvironment::Instance();
+	SetupCargoForClimate(LandscapeType::Temperate);
+	TechTreeManager::Reset();
+	CorporateHQManager::Reset();
+	PlanetManager::Reset();
+	ResourceSiteManager::Reset();
+	ProductionChainManager::Reset();
+	MegacityManager::Reset();
+
+	CompanyID c0{0};
+	WorldID w_core{0}, w_developed{1};
+	TownID t_core{0};
+
+	/* 1. Register Core & Developed Worlds */
+	PlanetManager::RegisterRegion({
+		.id = w_core,
+		.name = "Astraea Core",
+		.phase = WorldPhase::Phase1_Core,
+		.biome = WorldBiome::Temperate,
+		.min_x = 0, .min_y = 0, .max_x = 100, .max_y = 100,
+	});
+	PlanetManager::RegisterRegion({
+		.id = w_developed,
+		.name = "Merredin Mining & Refining",
+		.phase = WorldPhase::Phase2_Developed,
+		.biome = WorldBiome::AridDesert,
+		.min_x = 101, .min_y = 0, .max_x = 200, .max_y = 100,
+	});
+
+	/* 2. Core Megacity Registration */
+	REQUIRE(MegacityManager::RegisterMegacity(t_core, w_core, "Mito Megacity", 2000));
+	MegacityManager::SetCustomQuotas(t_core, 60, 40, 20);
+	const auto *megacity = MegacityManager::GetProfile(t_core);
+	REQUIRE(megacity != nullptr);
+
+	/* 3. Corporate HQ and Materials I Prerequisite */
+	CorporateHQManager::RegisterHQ(c0, w_core, TileIndex{100}, "Core Supply HQ");
+	TechTreeManager::SetActiveProject(c0, TECH_MATERIALS_1);
+	TechTreeManager::AddResearchPoints(c0, 100);
+	REQUIRE(TechTreeManager::IsTechUnlocked(c0, TECH_MATERIALS_1));
+
+	/* 4. Player Funds TECH_MATERIALS_2 (250 RP) */
+	std::string err;
+	REQUIRE(TechTreeManager::CanResearch(c0, TECH_MATERIALS_2, err));
+	TechTreeManager::SetActiveProject(c0, TECH_MATERIALS_2);
+	TechTreeManager::AddResearchPoints(c0, 250);
+	REQUIRE(TechTreeManager::IsTechUnlocked(c0, TECH_MATERIALS_2));
+	CHECK(TechTreeManager::GetActiveProject(c0) == TECH_NONE);
+
+	/* 5. Resource Site Surveying Enabled */
+	ResourceSiteManager::SetEnabled(true);
+	CHECK(ResourceSiteManager::Enabled());
+
+	/* 6. Cargo definitions */
+	CargoType c_copper = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::CopperOre);
+	CargoType c_sand   = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::SilicaSand);
+	CargoType c_wire   = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::ConductiveWiring);
+	CargoType c_chips  = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::SiliconChips);
+	REQUIRE(c_copper != INVALID_CARGO);
+	REQUIRE(c_sand != INVALID_CARGO);
+	REQUIRE(c_wire != INVALID_CARGO);
+	REQUIRE(c_chips != INVALID_CARGO);
+
+	/* 7. Pipeline B Facilities in Developed World */
+	FacilityID fid_cu = ProductionChainManager::RegisterFacility(TileIndex{200}, w_developed, RECIPE_COPPER_SMELTING, c0, 100);
+	FacilityID fid_si = ProductionChainManager::RegisterFacility(TileIndex{210}, w_developed, RECIPE_SILICON_ARC, c0, 100);
+	REQUIRE(fid_cu != INVALID_FACILITY);
+	REQUIRE(fid_si != INVALID_FACILITY);
+
+	/* 8. Deliver inputs: 80 Copper Ore, 40 Silica Sand */
+	ProductionChainManager::DeliverCargo(fid_cu, c_copper, 80);
+	ProductionChainManager::DeliverCargo(fid_si, c_sand, 40);
+
+	/* 9. Monthly batch conversion:
+	 * 80 Copper / 2 = 40 batches -> 80 Wire
+	 * 40 Sand / 2 = 20 batches -> 20 Chips
+	 */
+	ProductionChainManager::ProcessMonthlyProduction();
+	uint32_t produced_wire = ProductionChainManager::WithdrawOutput(fid_cu, c_wire, 80);
+	uint32_t produced_chips = ProductionChainManager::WithdrawOutput(fid_si, c_chips, 20);
+	CHECK(produced_wire == 80);
+	CHECK(produced_chips == 20);
+
+	/* 10. Core Megacity Delivery & Multi-Tier Satisfaction */
+	// Deliver Sustenance (Tier 1)
+	MegacityManager::RecordDelivery(t_core, MegacityDemandTier::Tier1_Sustenance, 60);
+	// Deliver 40 Wire (Tier 2 Expansion)
+	MegacityManager::RecordDeliveryByCargo(t_core, to_underlying(c_wire), 40);
+	// Deliver 20 Chips (Tier 3 Prosperity)
+	MegacityManager::RecordDeliveryByCargo(t_core, to_underlying(c_chips), 20);
+
+	/* 11. Monthly Evaluation -> HyperGrowth */
+	MegacityManager::EvaluateMonthlySupply();
+	CHECK(megacity->growth_state == MegacityGrowthState::HyperGrowth);
+	CHECK(megacity->growth_multiplier == 2.0f);
+	CHECK(megacity->passenger_multiplier == 1.5f);
+	CHECK(megacity->overall_supply_index == 1.0f);
 }
