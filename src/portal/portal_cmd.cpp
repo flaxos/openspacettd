@@ -445,6 +445,22 @@ CommandCost CmdDestroyPortalGate(DoCommandFlags flags, TileIndex tile, bool demo
 	return cost;
 }
 
+CommandCost CmdDesignateMegacity(DoCommandFlags flags, TownID town_id)
+{
+	const Town *town = Town::GetIfValid(town_id);
+	if (town == nullptr || MegacityManager::IsMegacity(town_id)) return CMD_ERROR;
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		/* Preserve the existing action's world-0 fallback outside registered regions. */
+		const PlanetRegion *region = PlanetManager::GetRegionByTile(town->xy);
+		const WorldID world = region != nullptr ? region->id : WorldID{0};
+		MegacityManager::RegisterMegacity(town_id, world, town->name, town->cache.population);
+		SetWindowClassesDirty(WindowClass::MegacityOverview);
+		SetWindowDirty(WindowClass::TownView, town_id.base());
+	}
+	return CommandCost();
+}
+
 CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
 {
 	if (!Station::IsValidID(station)) return CMD_ERROR;

@@ -319,7 +319,11 @@ static void SubtractMoneyFromCompany(Company *c, const CommandCost &cost)
 	if (cost.GetCost() == 0) return;
 	assert(cost.GetExpensesType() != ExpensesType::Invalid);
 
-	if (_commonwealth_slice_audit != nullptr && c->index == CompanyID{0}) _commonwealth_slice_audit->cash_debits += static_cast<int64_t>(cost.GetCost());
+	if (_commonwealth_slice_audit != nullptr && c->index == CompanyID{0}) {
+		_commonwealth_slice_audit->cash_debits += static_cast<int64_t>(cost.GetCost());
+		_commonwealth_slice_audit->expenses[to_underlying(cost.GetExpensesType())] += static_cast<int64_t>(cost.GetCost());
+		_commonwealth_slice_audit->cash_transactions.push_back({int64_t(TimerGameTick::counter), to_underlying(cost.GetExpensesType()), int64_t(cost.GetCost())});
+	}
 	c->money -= cost.GetCost();
 	c->yearly_expenses[0][cost.GetExpensesType()] += cost.GetCost();
 

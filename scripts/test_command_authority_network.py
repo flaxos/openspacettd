@@ -48,7 +48,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("test_binary", help="built openttd_test executable")
     parser.add_argument("--resource-surveys", action="store_true", help="Exercise private surveys and competing industry construction")
+    parser.add_argument("--megacity-designation", action="store_true", help="Exercise free live-town designation, invalid and duplicate denial, and MEGA reload")
     args = parser.parse_args()
+    if args.resource_surveys and args.megacity_designation:
+        parser.error("choose one scoped command fixture")
     workers = []
     sockets = []
     try:
@@ -66,6 +69,8 @@ def main():
             env["OSTTD_AUTHORITY_LOOPBACK_ROLE"] = role
             if args.resource_surveys:
                 env["OSTTD_RESOURCE_LOOPBACK"] = "1"
+            if args.megacity_designation:
+                env["OSTTD_MEGACITY_LOOPBACK"] = "1"
             process = subprocess.Popen(
                 [args.test_binary, CASE],
                 env=env,
@@ -97,6 +102,9 @@ def main():
         if args.resource_surveys:
             operations = ((1, "N", False), (1, "Q", True), (2, "N", False),
                           (2, "J", True), (1, "M", True), (2, "N", False))
+        if args.megacity_designation:
+            operations = ((1, "F", False), (1, "G", True), (2, "G", False),
+                          (2, "X", False), (2, "E", True), (1, "E", False))
         for origin, command, success in operations:
             if command == "C" and not success and states[0] != baseline and changed == 1:
                 # Set the same low cash balance in all independent fixtures.
@@ -145,14 +153,17 @@ def main():
                     "U": ("hq:0:2:Authority HQ;", "company:0:10000000;"),
                     "C": ("world:0:3:10100:Relay Outpost:", "company:0:9995000;"),
                     "P": ("world:0:2:10350:Relay Outpost:", "company:0:9987000;"),
+                    "G": (";megacity:0:0:Authority settlement:1240:62:31:12", "company:0:10000000;"),
+                    "E": (";megacity:1:0:Spectator settlement:1000:50:30:10", "company:0:10000000;"),
                 }[command]
                 if any(value not in state for value in required):
                     raise AssertionError(f"{command} did not apply exactly one expected change: {state}")
             changed += int(states[0] != before)
             print(f"{command}: {'accepted' if success else 'denied'}; frame state {states[0].decode('utf-8', 'replace')}")
 
-        if changed != 3 or states[0] == baseline:
-            raise AssertionError("expected exactly three accepted state changes")
+        expected_changes = 2 if args.megacity_designation else 3
+        if changed != expected_changes or states[0] == baseline:
+            raise AssertionError(f"expected exactly {expected_changes} accepted state changes")
 
         for sock in sockets:
             send(sock, "R")

@@ -8,6 +8,132 @@ and asset tests (`test_commonwealth_gate_art.py`) verify runtime loading and sta
 Human visual acceptance (verifying train transit clearance, sprite sorting, catenary wire overlay,
 and visual aesthetics across zoom levels in desktop GUI) remains **Pending**.
 
+## Core basket repeat and town station delivery — 10 October 2026
+
+**Human UAT Passed (Transport & Station Unloading) with Operational Starvation Finding.**
+Human desktop playtest executed using staged scenario `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`
+and advanced over 24 in-game years (tick 378,112 to tick 668,053, saved to
+`demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`).
+Confirmed: Train 4 reliably departs Station 2, transits to Station 10, unloads FOOD into
+Core Megacity (Town 0) reserves, and generates valid transport revenue (£18,484,224 over 13 trips).
+Operational finding: Because the city storage buffer is hard-capped at 3 months (150–165 units)
+by `IntegratedEconomy::AcceptCity`, Train 4's single-consist 105-unit delivery sustains the city for
+only ~1.9 months against a 17-month round-trip journey. The city spends >90% of simulation time in
+starvation, resulting in net population decline (1,096 -> 870) and near-zero house growth (29 -> 30).
+Automated proof: `./build/openttd_test` (522 cases), `ctest` (537/537 passed).
+See [audit evidence](../docs/audit/2026-10-10/sustained-food-growth/README.md).
+
+## Recovered full-basket evidence — 10 October 2026
+
+**Human UAT Pending.** Historical automated evidence from October 5 records one
+atomic FOOD/STEL/BALL consuming month and native growth-hook observation.
+Population 1,191 and 29 houses did not increase; a hook observation is not house
+growth acceptance. Sustained supply, a second basket and safe post-helper cold
+continuation remain open. The October 10 Antigravity primary-checkout tests do
+not establish gameplay acceptance or verify the unpublished station adapter.
+
+[Exact checkpoint alignment and proof boundaries](../docs/audit/2026-10-10/checkpoint-alignment/README.md).
+No owner save was loaded or advanced for this synchronization delivery.
+
+## Core Megacity panel repair — 3 October 2026
+
+**Human UAT Pending.** Antigravity's Core display patch passes focused and
+aggregate automated checks, including construction-shortage and growth cases.
+No player has checked the 92px header or tier/status text at game UI scales;
+the fit assessment was static. A light visual check should open the Core panel
+at minimum width, inspect the FOOD/STEL/BALL demand and reserve rows, observe
+BALL as the sole missing construction item when FOOD and STEL are supplied, and
+confirm the growth label matches the displayed numeric outcome. No material
+delivery, monthly basket completion, cold continuation or economic acceptance
+is claimed from these tests. The active UAT game was not changed.
+
+## Core construction basket first attempt — 3 October 2026
+
+**Human UAT Pending; ASSISTED FUNCTIONAL basket proof FAIL/incomplete.** The
+automated attempt loaded the funded Core save, quoted and paid four normal
+material trains/routes, then stopped at the first pre-tick running-cost guard.
+There was no material delivery, monthly basket, growth change or cold proof.
+The owner has not played this build; the old supplied observation save remains
+the only delivered Core save. Cash, failure and corrected-but-unrun source are
+[recorded](../docs/audit/2026-10-03/core-construction-basket/README.md).
+Do not mark construction, economics or the owner mission accepted from the
+passing planner and local gates.
+
+## First Core Construction Basket intake — 2 October 2026
+
+**Human UAT Pending; new ASSISTED FUNCTIONAL proof NOT RUN.** Owner-authorized
+material extension starts from the supplied final funded observation state,
+with zero added assistance. Normal-command iron/steel and stone/ballast transport,
+actual complete monthly basket and cold continuation are the planned automated
+claims. Supplied network observation does not establish manual construction or
+ordinary-start economic acceptance. [Scope and forthcoming owner mission](../docs/audit/2026-10-02/core-construction-basket/README.md).
+
+## First Functional Core Supply repaired observation — 1 October 2026
+
+**Human status Pending. ASSISTED FUNCTIONAL requested outcome PASS across recorded
+authorized handoffs; complete reviewed acceptance PARTIAL.** Repaired second load
+matched the entire existing completed state; another105FOOD paid visit and60FOOD
+consuming month passed, followed by final audit/save. The month used carried
+inventory before that delivery; continuous supply and later-load consumption remain
+unproven. Final cash£3,705,864/debt£100k; Materials I retained/budgetoff/II eligibility
+already proved. Sole£6m allowance fully used, no additional grant or loan.
+
+[Five-step owner playtest and safe checkout](../docs/audit/2026-10-01/functional-core/README.md#delivery-and-practical-owner-playtest)
+uses a copy of the retained owner observation save. Preserve originals; apply no
+grant and do not start II. Record exact build/save/content, manual versus supplied
+actions, time, cash/debt and first unexpected control/message. Observation cannot
+establish manual construction UAT. Independent replay/ordinary economics NOTRUN,
+human acceptancePending; exact-head commit-format CI FAIL remains a delivery gate.
+No merge or next slice. Earlier entries preserve their historical failed attempts.
+
+## First Functional Core Supply third handoff — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL campaign: FAIL at second cold equality.**
+Initial paid grain/FOOD/Core consumption, stopped/restarted supply control, paidHQ,
+first cold equality, paidMaterialsI and II eligibility pass. The sole second-load
+mismatch is growth0→1; the narrow existing-state repair has focused/full fixture
+gates and independent source review, not a canonical continuation pass.
+[Verified checkpoint, five-step owner observation and exact bounds](../docs/audit/2026-10-01/functional-core/README.md#safe-checkout-and-practical-owner-observation).
+
+Assistance£6m is fully used, no additional grant; cash£3,620,714/debt£100k reconciles.
+The supplied completed checkpoint is partial observation evidence only. A new
+explicit automated continuation handoff must keep the original cold/absolute
+clocks and aggregate counts; none was executed. Record build/save/content, manual
+versus supplied actions, time, assistance and first unexpected event. No human,
+ordinary economic or full functional acceptance, funded replay or next slice follows.
+Earlier entries remain historical failed attempts.
+
+## First Functional Core Supply recovery — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL single recovery: FAIL before first
+state snapshot.** START/READY reached; the map fingerprint asserted on an
+ownerless tile. Original and recovery failures are retained. Focused corrected
+map/teardown and full native gates pass, but no flow, paid HQ/I/II or cold mission
+was run. Total assistance applied is £0; ending cash/debt are unobserved. The
+crash save is diagnostic and must not be offered as an observation checkpoint.
+
+The [safe checkout and six-step manual feedback mission](../docs/audit/2026-10-01/functional-core/README.md#safe-fresh-checkout-and-manual-owner-feedback)
+remains unverified. Record exact build/content, manual actions, total assistance,
+cash/debt, elapsed time and first failure. Any further automated campaign needs
+a new explicit handoff carrying the consumed recovery and existing bounds; funded
+replay would exceed the one-total allowance. No human/economic acceptance or
+next slice follows from automated gates. The prior entry below is historical.
+
+## First Functional Core Supply implementation — 1 October 2026
+
+**Human status: Pending. ASSISTED FUNCTIONAL automated campaign: FAIL at startup.**
+The first bounded run stopped before any assistance command or checkpoint; all
+food/control/research/cold/replay phases are NOT RUN. £0 was granted; actual ending
+cash/debt were not observed. Focused designation/query/panel/save/relay tests and
+the diagnosed console transport repair do not establish the playable outcome.
+
+Use the [safe fresh checkout and six-step manual feedback mission](../docs/audit/2026-10-01/functional-core/README.md#safe-fresh-checkout-and-manual-owner-feedback).
+There is no verified observation save or route quote. Record exact build/content,
+manual steps, assistance/cash/debt, elapsed time and first unexpected message;
+15 minutes is a feedback window, not promised completion. The reviewed plan
+requires a new handoff for an automated full-campaign retry. Historical economic
+failures remain failed; no human acceptance, merge or next slice is inferred.
+
 ## Functional progression replan — 1 October 2026
 
 **Human status: Pending. No new game or human test was run for this docs change.**
@@ -129,7 +255,7 @@ with one joined client each, including a run with two graphical clients. Ten car
 units and the global train identity return without a detected desync or duplicate.
 This is a controlled two-car fixture with no station orders; scheduled routes,
 restart recovery and human federation acceptance remain open. See
-[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#next-priority-live-federation-with-two-clients).
+[the current roadmap](../docs/PROJECT_STATUS_AND_ROADMAP.md#historical-milestone-live-federation-with-scheduled-freight--completed-27-september-2026).
 
 
 Suite/fixture ID: ______  Save SHA256/version: ______  Base graphics/version: ______

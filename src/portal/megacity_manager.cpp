@@ -160,7 +160,7 @@ MegacityDemandTier MegacityManager::ClassifyCargo(uint8_t cargo_type)
 
 bool MegacityManager::IsConsumerStation(const Station *station)
 {
-	if (station == nullptr || station->town == nullptr || !IsMegacity(station->town->index)) return false;
+	if (station == nullptr || station->town == nullptr || !IsMegacity(station->town->index) || station->catchment_tiles.IsEmpty()) return false;
 	BitmapTileIterator it(station->catchment_tiles);
 	for (TileIndex tile = it; tile != INVALID_TILE; tile = ++it) {
 		if (IsTileType(tile, TileType::House) && GetTownIndex(tile) == station->town->index) return true;

@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "portal/stellar_network.h"
+#include "portal/commonwealth_slice.h"
 #include "error.h"
 #include "roadveh.h"
 #include "ship.h"
@@ -2246,6 +2247,8 @@ void Vehicle::BeginLoading()
 {
 	assert(IsTileType(this->GetMovingFront()->tile, TileType::Station) || this->type == VehicleType::Ship);
 
+	if (_commonwealth_slice_audit != nullptr && this->owner == CompanyID{0})
+		_commonwealth_slice_audit->arrivals.push_back({int64_t(TimerGameTick::counter), this->index.base(), this->last_station_visited.base()});
 	TimerGameTick::Ticks travel_time = TimerGameTick::counter - this->last_loading_tick;
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {

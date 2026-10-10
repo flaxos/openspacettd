@@ -173,24 +173,52 @@ TEST_CASE("Blueprint failed commit and missing backing file do not mutate memory
 	CHECK_FALSE(old_bytes.empty());
 }
 
-TEST_CASE("Blueprint symlinks and oversized files are skipped without changing real files", "[blueprint][storage]")
+TEST_CASE("Blueprint symlinks are skipped without changing real files where supported", "[blueprint][storage]")
 {
 	PrivateBlueprintLibrary fixture;
 	auto real = fixture.root / "external.json";
 	auto bp = StorageBlueprint("External");
 	{ std::ofstream out(real, std::ios::binary); out << bp.ToJson(); }
+	REQUIRE(FileBytes(real) == bp.ToJson());
 	auto link_path = fixture.dir() / "linked.json";
-	std::filesystem::create_symlink(real, link_path);
+	std::error_code ec;
+	std::filesystem::create_symlink(real, link_path, ec);
+	if (ec) {
+		INFO("create_symlink: " << ec.message() << " (" << ec.category().name() << ":" << ec.value() << ")");
+		REQUIRE((ec == std::errc::function_not_supported || ec == std::errc::operation_not_supported ||
+				ec == std::errc::permission_denied || ec == std::errc::operation_not_permitted));
+		WARN("Symlink rejection coverage NOT RUN: host cannot create a symlink: " << ec.message());
+		CHECK_FALSE(std::filesystem::exists(link_path));
+		CHECK(FileBytes(real) == bp.ToJson());
+		return;
+	}
+	REQUIRE(std::filesystem::is_symlink(std::filesystem::symlink_status(link_path)));
 	std::string error;
 	CHECK_FALSE(BlueprintManager::RescanLibrary(&error));
 	CHECK(error.find("linked.json") != std::string::npos);
 	CHECK(BlueprintManager::GetBlueprints().size() == BlueprintManager::GetBuiltinCount());
 	CHECK_FALSE(BlueprintManager::ImportFromFile(link_path.string(), &error));
 	CHECK(FileBytes(real) == bp.ToJson());
+	CHECK(std::filesystem::is_symlink(std::filesystem::symlink_status(link_path)));
+}
+
+TEST_CASE("Blueprint oversized files are skipped without changing real files", "[blueprint][storage]")
+{
+	PrivateBlueprintLibrary fixture;
+	auto real = fixture.root / "external.json";
+	auto bp = StorageBlueprint("External");
+	{ std::ofstream out(real, std::ios::binary); out << bp.ToJson(); }
+	REQUIRE(FileBytes(real) == bp.ToJson());
 	{ std::ofstream out(fixture.dir() / "large.json", std::ios::binary); out.seekp(Blueprint::MAX_JSON_BYTES); out.put('x'); }
+	REQUIRE(std::filesystem::file_size(fixture.dir() / "large.json") == Blueprint::MAX_JSON_BYTES + 1);
+	std::string error;
 	CHECK_FALSE(BlueprintManager::RescanLibrary(&error));
 	CHECK(error.find("large.json") != std::string::npos);
 	CHECK(BlueprintManager::GetBlueprints().size() == BlueprintManager::GetBuiltinCount());
+	CHECK_FALSE(BlueprintManager::ImportFromFile((fixture.dir() / "large.json").string(), &error));
+	CHECK_FALSE(error.empty());
+	CHECK(FileBytes(real) == bp.ToJson());
+	CHECK(std::filesystem::file_size(fixture.dir() / "large.json") == Blueprint::MAX_JSON_BYTES + 1);
 }
 
 TEST_CASE("Blueprint long names use bounded filenames and NUL paths are rejected", "[blueprint][storage]")

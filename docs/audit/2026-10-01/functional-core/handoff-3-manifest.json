@@ -1,0 +1,805 @@
+{
+  "label": "ASSISTED FUNCTIONAL",
+  "status": "FAIL at second cold-load equality; repaired-source canonical continuation NOT RUN",
+  "human_uat": "Pending",
+  "ordinary_start_economic_proof": "NOT RUN",
+  "native_campaign_inputs": {
+    "binary_sha256": "ccce335e90680679b885a7139d9e2889705866d1dc5d601911c9c17248c8933b",
+    "source_commit": "60bc9536c17ece4cd09ebcaecb35df7c2002f53c",
+    "source_dirty": false,
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_files_sha256": {
+      "src/genworld.cpp": "495eba75efeddf1f29518ff3f7327b7622bb71044fabd0842f4aaa45820c89c7",
+      "src/misc.cpp": "8716381a71656ea61979804222efcab160de5d0b11ec163fa4bb73e80d65a115",
+      "src/town_cmd.cpp": "cecdfef71abb2f8801f329543052f639307381300d397c63f63641c39712ce48",
+      "src/town_cmd.h": "d0f22f4dfcc1d8032af2542c5faab98237751e176efbb782c40bb5fe56d0ac3a",
+      "src/portal/world_gen.cpp": "50359a27ee6cf9f5de999b00043c54a0e341c7009663d39e4bd15b798940dbff",
+      "src/portal/world_gen.h": "ea044722b9d51a24523e77ec838dbfd29f3b10f8619d53fae3686ffa6a72fa66",
+      "src/portal/portal_terminal.cpp": "428ada48d763016635c395e5f65907c8df069246f5fb9ce59215e118c94694eb",
+      "src/portal/connected_economy.cpp": "a49a0946afbff44f5d308d1d2ae44f472b15d3f70f4c5585cbd8c8106db42a6a",
+      "src/portal/connected_economy.h": "3bda3571fbdc444427d1f4fe02fdc4f261b20fd50d61d31dadf9d4847eeea83d",
+      "src/portal/integrated_economy.cpp": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+      "scripts/test_integrated_economy.py": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "scripts/test_wp11_slice.py": "a8551d2514d9049e8bdf1cd40ac43ccbfa1d5a7c0acea70f17fa83a321fcb36c",
+      "demo/integrated_economy.cfg": "1cd6e04309b2a49ce8ce20777e20adbbc15d9bebcb54e5528c3ed77d037f7430"
+    },
+    "pack_sha256": {
+      "integrated_v1": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+      "rail_v3": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+      "equipment_v1": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+    },
+    "changed_source_sha256": {}
+  },
+  "execution_handoff": {
+    "label": "ASSISTED FUNCTIONAL",
+    "authorization": "NEW explicit parent execution handoff after diagnosed startup/snapshot repairs",
+    "native_source_head": "60bc9536c17ece4cd09ebcaecb35df7c2002f53c",
+    "prior_startup_attempts": 2,
+    "new_startups_authorized": 1,
+    "prior_active_preflight_seconds": 64,
+    "remaining_active_preflight_seconds": 1736,
+    "absolute_stop_utc": "2026-10-01T02:24:44Z",
+    "prior_assistance_gbp": 0,
+    "total_allowance_gbp": 6000000,
+    "prior_gameplay_advances": {
+      "initial": 0,
+      "cold": 0
+    },
+    "prior_search_candidates": 0,
+    "prior_gross_debits_gbp": 0,
+    "prior_evidence_sha256": [
+      "f8b490f7e4de124f46461e2b224a5c338d6e2a90992572825e446ef2102f979a",
+      "8c52d4ef438fbfeb55846fd01986a4df721e9a37410305c416179435c39a5fb3"
+    ],
+    "recovery_manifest_sha256": "54b2ed3ed1becf7d15606d4563b654a1e3d49d51dd084ef7a0636798efe6c960",
+    "runner_source_sha256": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+    "executed_runner_sha256": "7665d9cfc79afd7db7d2f70f7c00efbcea201221d472c71aa743abebcd8731d4",
+    "adapter_sha256": "3a76cbb22af3c5edb4012282a8ac26454e95838447d23b0c7c0f7a4b0ac847d6",
+    "metadata_replacements": {
+      "'prior_startup_attempts': 1, 'recovery_startup_attempts': 0": "'prior_startup_attempts': 2, 'recovery_startup_attempts': 0",
+      "'authorization': 'Explicit parent recovery handoff: one canonical startup confirmation'": "'authorization': 'NEW explicit execution handoff: one canonical seed11 startup after two preserved failures'",
+      "report['total_cash_allowance'] = 6000000": "report['execution_handoff'] = EXECUTION_HANDOFF_CONTEXT\n    report['total_cash_allowance'] = 6000000"
+    },
+    "binary_sha256": "ccce335e90680679b885a7139d9e2889705866d1dc5d601911c9c17248c8933b",
+    "verified_at_utc": "2026-10-01T01:04:40.805848+00:00",
+    "crash_save_loaded": false,
+    "gameplay_or_limit_changes": false
+  },
+  "startup_recovery": {
+    "status": "PASS",
+    "authorization": "NEW explicit execution handoff: one canonical seed11 startup after two preserved failures",
+    "previous_evidence": "/workspace/openspacettd/build/agent-logs/functional-core-primary/evidence.json",
+    "previous_evidence_sha256": "f8b490f7e4de124f46461e2b224a5c338d6e2a90992572825e446ef2102f979a",
+    "original_error": "Timed out waiting for FUNCTIONAL_OFFLINE_START",
+    "original_campaign_start_utc": "2026-09-30T22:24:44+00:00",
+    "prior_startup_wall_seconds": 64.0,
+    "prior_advance_counts": {
+      "initial": 0,
+      "cold": 0
+    },
+    "prior_assistance": 0,
+    "prior_candidates": 0,
+    "prior_native_gross_debits": 0,
+    "prior_startup_attempts": 2,
+    "recovery_startup_attempts": 1,
+    "whole_wall_seconds_already_elapsed": 9596.838844,
+    "original_whole_deadline_utc": "2026-10-01T02:24:44+00:00",
+    "preflight_remaining_seconds": 1736.0,
+    "stopped_interval_scope": "Infrastructure diagnosis/repair; separate from active generation/preflight use; absolute whole deadline retained",
+    "pristine_verified": true,
+    "assistance_before_progression": 0,
+    "persisted_progression": false,
+    "canonical_config_sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009"
+  },
+  "corrected_source_commit": "bc9fb1cf3f0149f05748f57b22584e8db64b78d4",
+  "corrected_source_gates": {
+    "corrected_source_head": "bc9fb1cf3f0149f05748f57b22584e8db64b78d4",
+    "source_files_sha256": {
+      "src/saveload/planet_sl.cpp": "96a114c08a92952301252c007b9d6a6bbdf689bc157154eaf69d3334abbdf817",
+      "src/tests/test_megacity_gui.cpp": "b4615196f2f735cc760991ee2a9bb2545a0452ab88286ef582903c7f30c69ab1",
+      "scripts/test_integrated_economy.py": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "scripts/test_wp11_slice.py": "a8551d2514d9049e8bdf1cd40ac43ccbfa1d5a7c0acea70f17fa83a321fcb36c"
+    },
+    "binary_sha256": "7713fa03e22bd9d6d5e22b4fa0559fae231356a1e1bc8c13958e25fbf4bbe6b5",
+    "test_binary_sha256": "019e11d3649b89556102a85888d0b851d860efc8c674e0a5ddec6c16ceef901a",
+    "source_rebuild": "PASS; clean bc9fb1cf3f source/revision",
+    "focused": "PASS; 2 cases / 144 assertions; exit0",
+    "first_fixture_regression": "FAIL; disabled ECON retained nonempty state; preserved then corrected with fixture Reset",
+    "full_catch": "PASS; 498 cases / 306426 assertions; exit0",
+    "ctest": "PASS; 513/513; exit0",
+    "file_descriptions": "PASS; exit0",
+    "unused_strings": "PASS; exit0",
+    "script_mode": "PASS; exit0",
+    "diff_check": "PASS; exit0",
+    "canonical_second_load_after_repair": "NOT RUN; campaign hard stop retained",
+    "independent_source_review": "Astra maximum CLEAR; mappings, load ordering, authority, accounting, old-mode guards and fixture scope"
+  },
+  "failure": {
+    "error": "Second cold load changed retained unlock/custody/cash/orders",
+    "diagnosis": "MEGA load applies Classic Subsistence growth1 to integrated FOOD-only saved state whose correct growth is0; no other observed semantic difference",
+    "mismatch": {
+      "before_tick": 120064,
+      "after_tick": 120064,
+      "before_research": [
+        [
+          0,
+          0,
+          0,
+          [
+            301
+          ]
+        ]
+      ],
+      "after_research": [
+        [
+          0,
+          0,
+          0,
+          [
+            301
+          ]
+        ]
+      ],
+      "differences": [
+        [
+          "$.towns[0].profile.growth",
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "second_cold_load_attempted": true,
+    "raw_cold_after_placeholder": "NOT RUN because its assignment follows the failing equality assertion",
+    "curated_second_load_equality": "FAIL",
+    "post_second_load_continuation": "NOT RUN",
+    "automatic_retry": false
+  },
+  "assistance": {
+    "approved_total_virtual_gbp": 6000000,
+    "accepted_grants": 1,
+    "rejected_grants": 2,
+    "commands_issued_total": 3,
+    "applied_total_gbp": 6000000,
+    "remaining_total_gbp": 0,
+    "ledger": [
+      {
+        "amount": 6000000,
+        "currency": "GBP virtual in-game",
+        "source": "native offline MoneyCheat; virtual in-game GBP; owner-approved once",
+        "native_expense_type": "Other",
+        "signed_native_debit": -6000000,
+        "tick": 1280,
+        "before_cash": 100000,
+        "after_cash": 6100000,
+        "before_debt": 100000,
+        "after_debt": 100000
+      }
+    ],
+    "real_money_transaction": false
+  },
+  "financial_reconciliation": {
+    "starting_cash": 100000,
+    "assistance": 6000000,
+    "native_receipts_excluding_assistance": 278252,
+    "native_gross_debits": 2757538,
+    "disposable_control_gross_debits": 4809,
+    "campaign_gross_debit_cap_usage": 2762347,
+    "ending_cash": 3620714,
+    "debt": 100000,
+    "native_net_excluding_assistance": -2479286,
+    "recorded_transactions_ending_cash": 3620714,
+    "unobserved_native_cash_delta": 0
+  },
+  "primary_debit_categories_gbp": {
+    "infrastructure": 110824,
+    "vehicles": 35747,
+    "hq": 2500000,
+    "research": 100000,
+    "interest": 8667,
+    "native_company_fees": 1300,
+    "gate_tolls": 1000,
+    "train_running_charges": 0
+  },
+  "control_financial_reconciliation": {
+    "starting_cash": 6220906,
+    "receipts": 89280,
+    "gross_debits": 4809,
+    "ending_cash": 6305377,
+    "debt": 100000,
+    "separate_from_primary_cash": true,
+    "included_in_aggregate_gross_cap": true
+  },
+  "mission": {
+    "pristine_startup_audit": "PASS",
+    "preflight": "PASS; one first stable candidate [3,9,0,2,1]",
+    "build": "PASS; quote/debit146571, cash5953429 before receipts",
+    "paid_grain_visits": [
+      26162,
+      64823,
+      107284
+    ],
+    "paid_food_visits": [
+      35746,
+      74021,
+      116856
+    ],
+    "initial_consuming_months": [
+      712708,
+      713227,
+      713258
+    ],
+    "conversion": {
+      "grain_consumed": 404,
+      "food_produced": 404,
+      "batches": 202
+    },
+    "negative_control": "PASS; 15FOOD remainder below60 basket, stopped no-use then delivery/consumption recovery",
+    "hq": "PASS; normal command2500000",
+    "materials_i": "PASS; selected0RP/100000budget, firstcold equality, one100000debit/100RP completion",
+    "materials_ii_eligibility": "PASS; read-only, II never started, budgetoff",
+    "first_cold_equality": "PASS",
+    "second_cold_equality": "FAIL",
+    "post_second_load_continuation": "NOT RUN",
+    "funded_replay": "NOT RUN; one-total allowance exhausted",
+    "human_build_acceptance": "Pending"
+  },
+  "bounds_and_continuation": {
+    "status": "NOT RUN; NEW explicit handoff required",
+    "label": "ASSISTED FUNCTIONAL",
+    "human_uat": "Pending",
+    "checkpoint": {
+      "path": "build/agent-logs/functional-core-handoff-3/primary/materials-i-completed.sav",
+      "sha256": "a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945",
+      "source_head": "60bc9536c17ece4cd09ebcaecb35df7c2002f53c",
+      "binary_sha256": "ccce335e90680679b885a7139d9e2889705866d1dc5d601911c9c17248c8933b",
+      "expected_state_path": "build/agent-logs/functional-handoff-3-completed-state.json",
+      "expected_state_sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457",
+      "tick": 120064,
+      "money": 3620714,
+      "loan": 100000,
+      "calendar_clock": [
+        1954,
+        4,
+        14,
+        0
+      ],
+      "economy_clock": [
+        1954,
+        4,
+        713828,
+        14,
+        24
+      ],
+      "research": [
+        [
+          0,
+          0,
+          0,
+          [
+            301
+          ]
+        ]
+      ],
+      "hqs": [
+        [
+          0,
+          0,
+          71454,
+          1,
+          "Core Supply HQ",
+          713800
+        ]
+      ],
+      "town0": {
+        "consumed": [
+          [
+            33,
+            60
+          ]
+        ],
+        "demand": [
+          [
+            9,
+            20
+          ],
+          [
+            24,
+            10
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            30,
+            20
+          ],
+          [
+            33,
+            60
+          ]
+        ],
+        "house_count": 29,
+        "houses": [
+          {
+            "tile": 68378,
+            "type": 25,
+            "world": 0
+          },
+          {
+            "tile": 68381,
+            "type": 16,
+            "world": 0
+          },
+          {
+            "tile": 68382,
+            "type": 11,
+            "world": 0
+          },
+          {
+            "tile": 68383,
+            "type": 26,
+            "world": 0
+          },
+          {
+            "tile": 69407,
+            "type": 15,
+            "world": 0
+          },
+          {
+            "tile": 70425,
+            "type": 24,
+            "world": 0
+          },
+          {
+            "tile": 70427,
+            "type": 16,
+            "world": 0
+          },
+          {
+            "tile": 70428,
+            "type": 26,
+            "world": 0
+          },
+          {
+            "tile": 70429,
+            "type": 11,
+            "world": 0
+          },
+          {
+            "tile": 70431,
+            "type": 27,
+            "world": 0
+          },
+          {
+            "tile": 70432,
+            "type": 27,
+            "world": 0
+          },
+          {
+            "tile": 70433,
+            "type": 20,
+            "world": 0
+          },
+          {
+            "tile": 70434,
+            "type": 22,
+            "world": 0
+          },
+          {
+            "tile": 71457,
+            "type": 21,
+            "world": 0
+          },
+          {
+            "tile": 71458,
+            "type": 23,
+            "world": 0
+          },
+          {
+            "tile": 71459,
+            "type": 6,
+            "world": 0
+          },
+          {
+            "tile": 71460,
+            "type": 25,
+            "world": 0
+          },
+          {
+            "tile": 72474,
+            "type": 6,
+            "world": 0
+          },
+          {
+            "tile": 72476,
+            "type": 26,
+            "world": 0
+          },
+          {
+            "tile": 72477,
+            "type": 10,
+            "world": 0
+          },
+          {
+            "tile": 72479,
+            "type": 3,
+            "world": 0
+          },
+          {
+            "tile": 72484,
+            "type": 6,
+            "world": 0
+          },
+          {
+            "tile": 73498,
+            "type": 29,
+            "world": 0
+          },
+          {
+            "tile": 73500,
+            "type": 29,
+            "world": 0
+          },
+          {
+            "tile": 73501,
+            "type": 39,
+            "world": 0
+          },
+          {
+            "tile": 73503,
+            "type": 15,
+            "world": 0
+          },
+          {
+            "tile": 73505,
+            "type": 11,
+            "world": 0
+          },
+          {
+            "tile": 73506,
+            "type": 24,
+            "world": 0
+          },
+          {
+            "tile": 74524,
+            "type": 11,
+            "world": 0
+          },
+          {
+            "tile": 74525,
+            "type": 26,
+            "world": 0
+          },
+          {
+            "tile": 75551,
+            "type": 16,
+            "world": 0
+          },
+          {
+            "tile": 76573,
+            "type": 24,
+            "world": 0
+          }
+        ],
+        "id": 0,
+        "megacity": true,
+        "population": 1191,
+        "profile": {
+          "current": [
+            0,
+            0,
+            0
+          ],
+          "growth": 0.0,
+          "last": [
+            0,
+            0,
+            0
+          ],
+          "name": "",
+          "passengers": 1.0,
+          "population": 1191,
+          "quota": [
+            59,
+            30,
+            11
+          ],
+          "world": 0
+        },
+        "reserves": [
+          [
+            9,
+            0
+          ],
+          [
+            33,
+            75
+          ]
+        ],
+        "tile": 71454,
+        "world": 0
+      }
+    },
+    "corrected_source_head": "bc9fb1cf3f0149f05748f57b22584e8db64b78d4",
+    "aggregate": {
+      "fresh_startups_used": 3,
+      "prior_active_preflight_seconds": 64,
+      "initial_advances_used": 82,
+      "initial_advances_remaining": 158,
+      "cold_advances_used": 1,
+      "cold_advances_remaining": 239,
+      "ticks_per_advance": 2048,
+      "cold_ticks_remaining": 489472,
+      "cold_load_processes_attempted": 2,
+      "cash_allowance_total_gbp": 6000000,
+      "cash_allowance_used_gbp": 6000000,
+      "cash_allowance_remaining_gbp": 0,
+      "accepted_grant_commands": 1,
+      "rejected_grant_commands": 2,
+      "primary_receipts_gbp": 278252,
+      "primary_debits_gbp": 2757538,
+      "disposable_control_debits_gbp": 4809,
+      "gross_debits_used_gbp": 2762347,
+      "gross_debits_remaining_gbp": 1237653,
+      "pre_hq_gross_used_gbp": 162155,
+      "pre_hq_gross_remaining_gbp": 837845,
+      "chain_candidates_used": 1,
+      "chain_candidates_unused": 1,
+      "same_chain_required": true
+    },
+    "time": {
+      "absolute_stop_utc": "2026-10-01T02:24:44Z",
+      "conservative_original_cold_start_utc": "2026-10-01T01:09:59.143032+00:00",
+      "conservative_original_cold_stop_utc": "2026-10-01T01:39:59.143032+00:00",
+      "derivation": "The pre-cold save mtime precedes native close and the actual cold-phase start; using it is conservative and grants no extra wall time. Repair/stopped time remains included.",
+      "recorded_at_utc": "2026-10-01T01:17:27.814111+00:00",
+      "cold_seconds_remaining_at_recording": 1351.328918
+    },
+    "permitted_new_handoff_scope": [
+      "Exactly one confirmation load of hash-verified materials-i-completed.sav on corrected reviewed source; preserve both prior failed startups and failed second load.",
+      "No fresh game, grant command, loan, replay, rebuilding, new chain, date jump or research project.",
+      "Require full paused loaded-state equality with the original pre-second-load completed state; restore integrated caches from saved growth state only.",
+      "Same shared cold tick/spend/wall bounds, stopping at the earlier of conservative original cold deadline and absolute stop.",
+      "Observe one further positive paid FOOD visit and consumed month through original native functional-advance commands, audit and retain one observation save.",
+      "Extend the existing primary native ledger; keep assistance and disposable-control cash separate, no reset or silent normalization."
+    ],
+    "no_execution_performed": true
+  },
+  "artifacts": {
+    "primary/food-control-source.sav": "da6c90e54f3d9cd9be004e4f8c943bcc74894023288ecdf5be9452ed1d6fae5a",
+    "primary/pristine.sav": "f587529b4e776738e9dfa7ed526e774c4f991dfba9759b4d6fae29cc8e5117f0",
+    "primary/materials-i-before.sav": "086c361de09bd5ec5fe97570f61e97585dca21a8be20894868914aa39aca249c",
+    "primary/stopped-partial.sav": "2248ad3e1d8261676cf1eeffbd0d0d0dc5d8c3eb40dda90e45412ae3ef0ff2f4",
+    "primary/materials-i-completed.sav": "a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945",
+    "primary/cash-assisted.sav": "9fcc567cede5c8688efd7f377a5ea6af55a9b72b9b4d15617e3a5efb821f5335",
+    "primary/negative-control/recovered.sav": "e585bc6e2e2a78112d975943bc3170df4a889e8e4c9364c9d50ff8e33f22339b"
+  },
+  "prior_custody": {
+    "original_archive_sha256": "c7ad60f085c3d8aa83874cd521c43027d699ab3c560b17e9d57d82e434c28c43",
+    "recovery_archive_sha256": "5c2f0ae65ccb561476a92ee14e131723c663511927ff43561604a8383880df0a",
+    "recovery_manifest_sha256": "54b2ed3ed1becf7d15606d4563b654a1e3d49d51dd084ef7a0636798efe6c960",
+    "ordinary_money_failure_archives": "Preserved unchanged; not superseded by assistance"
+  },
+  "archive": {
+    "path": "handoff-3-proof.tar.gz",
+    "bytes": 7644329,
+    "sha256": "cb8c87792e528ce2f7c5f4100f7a6cc4687237347db2c65a02b01a05dff9c3ab",
+    "regular_members": 51
+  },
+  "archive_members": {
+    "campaign/evidence.json": {
+      "bytes": 86125402,
+      "sha256": "400ebab58092d88fcf38291be84f987e5f01305caacead8ff133404f8364a57d"
+    },
+    "campaign/primary/cash-assisted.sav": {
+      "bytes": 126896,
+      "sha256": "9fcc567cede5c8688efd7f377a5ea6af55a9b72b9b4d15617e3a5efb821f5335"
+    },
+    "campaign/primary/cold-after-commands.scr": {
+      "bytes": 652,
+      "sha256": "7407344118ac112eae1b5f12de830768a427ab93adb2e13ccc3a42e6e45433df"
+    },
+    "campaign/primary/cold-after-native.log": {
+      "bytes": 269241,
+      "sha256": "b029f508b10b5bb38fe23e5d8d2d2cc6d8e4d9fa668cd2a2b2ed7ad26f12e6b8"
+    },
+    "campaign/primary/cold-after-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/cold-after.log": {
+      "bytes": 269216,
+      "sha256": "3fa679316be5af13d0e910617ea0b7443796ecc92dcd4cec4c4c2bd21ce19059"
+    },
+    "campaign/primary/cold-before-commands.scr": {
+      "bytes": 2171,
+      "sha256": "1b514ef609dc2bd5a05e670bc8b6e85f2f8ea4fd49b9023a2a1a6f693c04d390"
+    },
+    "campaign/primary/cold-before-native.log": {
+      "bytes": 1481762,
+      "sha256": "5a70eac759cbe43088e1b1745e1b151db37026e68376f05c7d9322c4231b63b0"
+    },
+    "campaign/primary/cold-before-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/cold-before.log": {
+      "bytes": 1481737,
+      "sha256": "c06485252fd3cae10e69047c65e7ad3faf488d9d3445a93843d5bbbee93bb9c7"
+    },
+    "campaign/primary/food-control-source.sav": {
+      "bytes": 167776,
+      "sha256": "da6c90e54f3d9cd9be004e4f8c943bcc74894023288ecdf5be9452ed1d6fae5a"
+    },
+    "campaign/primary/fresh-commands.scr": {
+      "bytes": 20159,
+      "sha256": "60fc4733173c3a6462e6b51d3b12683e07743da07dab87f6a3de21b0f1fe8ebe"
+    },
+    "campaign/primary/fresh-native.log": {
+      "bytes": 17369716,
+      "sha256": "cdb343da328debdd8410eaa066453b8485bc3e4d854d02646fb072b12528118a"
+    },
+    "campaign/primary/fresh-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/fresh.log": {
+      "bytes": 17369691,
+      "sha256": "9e330dc13452a3c0fe58828b586b41d2db887dd5b24bb2af196a72cc2e2eab4c"
+    },
+    "campaign/primary/functional.cfg": {
+      "bytes": 1744,
+      "sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009"
+    },
+    "campaign/primary/materials-i-before.sav": {
+      "bytes": 167804,
+      "sha256": "086c361de09bd5ec5fe97570f61e97585dca21a8be20894868914aa39aca249c"
+    },
+    "campaign/primary/materials-i-completed.sav": {
+      "bytes": 168216,
+      "sha256": "a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945"
+    },
+    "campaign/primary/negative-control/control-commands.scr": {
+      "bytes": 9386,
+      "sha256": "ccec87d33a7f115f4f6f05bc988b395bca9b77a6167743fdbab543b4b3cadb40"
+    },
+    "campaign/primary/negative-control/control-native.log": {
+      "bytes": 7454754,
+      "sha256": "48e63b08deab62143c1ca113cdb41e8cc395fcfe4897ec46ab27c89beb5ca11c"
+    },
+    "campaign/primary/negative-control/control-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "campaign/primary/negative-control/control.log": {
+      "bytes": 7454729,
+      "sha256": "34ddf80366c1cfe03e8f5458a53bd26ec257bf8aaff81cca940f44495092b8e2"
+    },
+    "campaign/primary/negative-control/functional.cfg": {
+      "bytes": 1744,
+      "sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009"
+    },
+    "campaign/primary/negative-control/recovered.sav": {
+      "bytes": 184996,
+      "sha256": "e585bc6e2e2a78112d975943bc3170df4a889e8e4c9364c9d50ff8e33f22339b"
+    },
+    "campaign/primary/negative-control/scripts/game_start.scr": {
+      "bytes": 300,
+      "sha256": "21604ac1699ac9d1fd3ffee8b5d6e03981e97ed8d5830d049d30955935553599"
+    },
+    "campaign/primary/pristine.sav": {
+      "bytes": 126880,
+      "sha256": "f587529b4e776738e9dfa7ed526e774c4f991dfba9759b4d6fae29cc8e5117f0"
+    },
+    "campaign/primary/scripts/game_start.scr": {
+      "bytes": 272,
+      "sha256": "318e94c332e1d4c05d31eb984788b1c967b0728f4262d4a5f491abc759e114c4"
+    },
+    "campaign/primary/stopped-partial.sav": {
+      "bytes": 168220,
+      "sha256": "2248ad3e1d8261676cf1eeffbd0d0d0dc5d8c3eb40dda90e45412ae3ef0ff2f4"
+    },
+    "logs/functional-handoff-3-adapter.py": {
+      "bytes": 6566,
+      "sha256": "3a76cbb22af3c5edb4012282a8ac26454e95838447d23b0c7c0f7a4b0ac847d6"
+    },
+    "logs/functional-handoff-3-check.json": {
+      "bytes": 1884,
+      "sha256": "d616eec0e1f60aad2f72ad512561feaff2cd5f90a470967eca1eee1d6abaaa5c"
+    },
+    "logs/functional-handoff-3-context.json": {
+      "bytes": 1884,
+      "sha256": "2bc08010489556686175298f10c1d2eb92180a1e14e2ffcdf469fbf10373d3d9"
+    },
+    "logs/functional-handoff-3-campaign.log": {
+      "bytes": 1362,
+      "sha256": "705f75faf3063dd6406f9a610130d420b1a77a8fb3515337b309b930af038166"
+    },
+    "logs/functional-handoff-3-cold-mismatch.json": {
+      "bytes": 333,
+      "sha256": "419f4bf117840734c67b47155d701d137f2ae9460ed15c703c0ae6f4d83b1b32"
+    },
+    "logs/functional-handoff-3-completed-state.json": {
+      "bytes": 302719,
+      "sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457"
+    },
+    "logs/functional-handoff-3-continuation-handoff.json": {
+      "bytes": 7373,
+      "sha256": "dc891f75c2d468d8df660feb8c6830dd1742419bb3317e0e404a9bb96443e3d4"
+    },
+    "logs/functional-handoff-3-independent-review.txt": {
+      "bytes": 758,
+      "sha256": "abe60ee8f8c1314eec8f5315d2d6c27c0c663eb860a4748b8b5971315fde5c2b"
+    },
+    "logs/functional-head60-build.log": {
+      "bytes": 823,
+      "sha256": "bcd726f1d3ee144796675934f08afd7dcf4c8204001a0bfb7ac5d922a34ecea7"
+    },
+    "logs/functional-growth-source-repair.patch": {
+      "bytes": 7520,
+      "sha256": "20699022b90a009e2010243eb68ff51fb5821308cb9d3bc6c1f95e516e05f69c"
+    },
+    "logs/functional-growth-gates.json": {
+      "bytes": 1393,
+      "sha256": "fba12ac36cf3fcb011d8b86dd7c2acb563fcc545b82349bf69314e46c57357b7"
+    },
+    "logs/functional-growth-rebuild.log": {
+      "bytes": 993,
+      "sha256": "21fe66c1654180343fde6f25e4aa1ea75a85179641585b8d0d2df11c634eb2e1"
+    },
+    "logs/functional-growth-rebuild-final.log": {
+      "bytes": 801,
+      "sha256": "2b1fe2ad7ac7e229d848224d000eb48fd38582f2f4ec563bca56137e2bd872f2"
+    },
+    "logs/functional-growth-rebuild-corrected.log": {
+      "bytes": 801,
+      "sha256": "2b1fe2ad7ac7e229d848224d000eb48fd38582f2f4ec563bca56137e2bd872f2"
+    },
+    "logs/functional-growth-clean-build.log": {
+      "bytes": 823,
+      "sha256": "0e9ec746c25f3f1605793a900a679a294bf7d3d46b4731da7b840e61b4ecbb42"
+    },
+    "logs/functional-growth-focused.log": {
+      "bytes": 3258,
+      "sha256": "01b9c2beecd33b5f7876c862504f051626ba529e8feb7d2c096d0c9628e014de"
+    },
+    "logs/functional-growth-focused-corrected.log": {
+      "bytes": 163,
+      "sha256": "3895953b2a03be89deb1c3a2afeadc8fb5a961b59e41414dcbf4b6888faba7dd"
+    },
+    "logs/functional-growth-full-catch.log": {
+      "bytes": 7010,
+      "sha256": "c0699891c94de11469035282e7802f0ce473458137ad924bd1eaead14e2ed0b6"
+    },
+    "logs/functional-growth-full-ctest.log": {
+      "bytes": 128876,
+      "sha256": "edebe591d6406bf30725f49e6a7884e8c7b072e5d403eddb2ec8c7c69f88268b"
+    },
+    "logs/functional-growth-file-descriptions.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-growth-unused-strings.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "logs/functional-growth-script-mode.log": {
+      "bytes": 119,
+      "sha256": "9f8c5d4d05acf8dab5383aa94938b0be7aa5ea461b12295eab533d325141b590"
+    },
+    "logs/functional-growth-script-mode-corrected.log": {
+      "bytes": 3,
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    }
+  },
+  "independent_review": {
+    "reviewer": "Astra maximum",
+    "raw_native_outcome": "CLEAR as stopped partial proof; canonical outcome FAIL",
+    "source_repair": "CLEAR",
+    "final_archive_review": "Astra maximum CLEAR for draft partial delivery; all51regular member hashes/sizes, original custody, source/records/checkpoint/accounting/bounds verified",
+    "financial_bounds_reviewer": "Sol maximum CLEAR through stopped state",
+    "continuation_proposal": "CLEAR only under NEW explicit handoff; same funded completed checkpoint, no grants, 239cold advances, original conservative01:39:59.143032UTC stop; not executed"
+  },
+  "recorded_at_utc": "2026-10-01T01:20:23.604403+00:00"
+}

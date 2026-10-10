@@ -314,6 +314,7 @@ bool StellarNetwork::AdmitTrain(TileIndex gate, VehicleID train, CompanyID compa
 	if (_commonwealth_slice_audit != nullptr) {
 		auto &observed = _commonwealth_slice_audit->gate_tolls[gate.base()];
 		++observed.first; observed.second += int64_t(toll);
+		_commonwealth_slice_audit->vehicle_tolls[train.base()] += int64_t(toll);
 	}
 	admitted[train] = gate;
 	return true;

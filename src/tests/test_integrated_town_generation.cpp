@@ -9,12 +9,15 @@
 #include "../core/random_func.hpp"
 #include "../genworld.h"
 #include "../house.h"
+#include "../industry_map.h"
 #include "../openttd.h"
+#include "../portal/connected_economy.h"
 #include "../portal/corporate_hq.h"
 #include "../portal/integrated_economy.h"
 #include "../portal/megacity_manager.h"
 #include "../portal/planet_manager.h"
 #include "../portal/stellar_network.h"
+#include "../rail_map.h"
 #include "../settings_type.h"
 #include "../town_cmd.h"
 #include "../town_kdtree.h"
@@ -353,4 +356,32 @@ TEST_CASE("Integrated Core town requirement leaves Classic and editor generation
 	CHECK_FALSE(GetIntegratedCoreTownGenerationStats().active);
 	CHECK(GetIntegratedCoreTownGenerationStats().creation_attempts == 0);
 	CHECK_FALSE(HasValidIntegratedCoreTown());
+}
+
+TEST_CASE("Connected proof map fingerprint includes ownerless native tiles safely", "[connected-proof][integrated-town-generation]")
+{
+	IntegratedTownFixture fixture;
+	fixture.Reset(11, 64);
+	const TileIndex house = TileXY(10, 10), industry = TileXY(12, 10), rail = TileXY(14, 10);
+	const TileIndex void_border = TileXY(Map::MaxX(), Map::MaxY());
+	MakeHouseTile(house, TownID{0}, 0, TOWN_HOUSE_COMPLETED, 0, 0, false);
+	MakeIndustry(industry, IndustryID{0}, 0, 0, WaterClass::Invalid);
+	MakeRailNormal(rail, CompanyID{0}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	REQUIRE(IsTileType(void_border, TileType::Void));
+	const auto rng = _random;
+	const std::string before = IntegratedTownProjection();
+	const uint64_t fingerprint = GetConnectedEconomyMapFingerprint();
+	CHECK(GetConnectedEconomyMapFingerprint() == fingerprint);
+	CHECK(IntegratedTownProjection() == before);
+	CHECK(_random.state[0] == rng.state[0]);
+	CHECK(_random.state[1] == rng.state[1]);
+	/* These fields encode house/industry metadata, never ownership. */
+	Tile{house}.m1() ^= 0x1F;
+	Tile{industry}.m1() ^= 0x1F;
+	CHECK(GetConnectedEconomyMapFingerprint() == fingerprint);
+	SetTileOwner(rail, CompanyID{1});
+	CHECK(GetConnectedEconomyMapFingerprint() != fingerprint);
+	SetTileOwner(rail, CompanyID{0});
+	SetTileHeight(void_border, 2);
+	CHECK(GetConnectedEconomyMapFingerprint() != fingerprint);
 }

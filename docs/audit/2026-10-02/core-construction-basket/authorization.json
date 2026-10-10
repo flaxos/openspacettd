@@ -1,0 +1,17 @@
+{
+  "slice": "First Core Construction Basket",
+  "approved_date": "2026-10-02",
+  "base_head": "7bc29a60cc1bc60b4d555d7500c2ded79c175eaa",
+  "main": "85c423b4a2dd57e5a2c2cf1f6d29bc2e4667845d",
+  "checkpoint_sha256": "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7",
+  "new_assistance_gbp": 0,
+  "new_gross_cap_gbp": 750000,
+  "quote_cap_gbp": 600000,
+  "new_advance_cap": 360,
+  "clock_trigger": "first native simulation advance after plan/source/preflight preparation",
+  "clock_minutes": 75,
+  "prior_active_plan_sha256": "fc290c8e89bd0944af5274755f6d811f5f540d771837d35121726ff9183cfe62",
+  "reviewed_proposal_sha256": "ffe2c05aedcb10c1fb62d94e07823e94adf5a2cc50bbbdaa8df3b1b234a6e279",
+  "active_plan_sha256": "b77864d9a888b4cdbab0d4eb47531c45d1e28339ee70d327426aa3560b5931cc",
+  "simulation_started": false
+}

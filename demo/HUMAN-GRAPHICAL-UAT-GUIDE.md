@@ -25,6 +25,7 @@ The repository contains three verified test fixtures in `demo/`:
 | `demo/OpenSpaceTTD-Integrated-Economy-UAT.sav` | **Running, fully-connected Commonwealth economy.** Contains 40 operating trains, 13 physical factories, Megacity delivery networks, and an active commissioned gate. | Testing steady-state factory buffers, starvation/recovery, research escrow, warehouse priority, and gate transit. |
 | `demo/OpenSpaceTTD-Integrated-CST-Sector.sav` | **Clean-slate 7-world Mito–Merredin sector.** Initial capital, zero trains, empty city reserves, and unprospected frontier sites. | Testing cold-start world roles, paid prospecting/surveying, initial Fund Industry placement, and baseline startup ergonomics. |
 | `demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav` | **Organic contoured 4-world Commonwealth gateway testbed.** Features multi-octave biome landscapes, multi-block city grids, double-track terminals with scissors crossovers, PBS signalling, holding sidings, and pre-seeded freight consist. | Visual evaluation of natural terrain contours, civil rail engineering, city planning, and cross-world freight operations. |
+| `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` | **Core Megacity repeat basket & town station checkpoint.** Station 10 built at Mito (Core), Train 4 retargeted, repeat construction basket consumed (STEL+BALL+FOOD). | Testing Train 4 FOOD delivery, near Core station catchment, Core Megacity panel basket metrics, and monthly consumption. |
 
 ### 1.3 Launching the Game
 Launch the graphical client with the integrated configuration:
@@ -38,6 +39,9 @@ Launch the graphical client with the integrated configuration:
 
 # Launch the organic Commonwealth prefab world:
 ./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Commonwealth-UAT-v1.0.sav
+
+# Launch the Core Megacity repeat basket playthrough:
+./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav
 ```
 
 ---
@@ -329,6 +333,29 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
      * Train departs Merredin Central Terminal, routes through the scissors throat, enters the Gateway Portal, emerges at Augusta, and delivers ore to the Factory/Steel Mill.
    * **Expected:**
      * Seamless traversal, zero derailments, and valid revenue earned upon delivery.
+
+---
+
+### Track 9: Core Megacity Basket Repeat & Town Station Unloading
+
+**Objective:** Verify the nearer Core town station (Station 10), Train 4 retargeted delivery, Core Megacity panel basket metrics, and monthly consumption.
+
+1. **Launch Scenario:**
+   * `./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`
+2. **Inspect Core Infrastructure & Viewport:**
+   * Viewport automatically centers on **Station 10** (tiles 795,62–796,62) and **Town 0 (Mito)** (tile 71454).
+   * Verify Station 10 has a 2-tile passenger/cargo platform connected via a 3-tile rail connector (792..794,62) to the mainline approach.
+   * Verify Station 10 catchment covers Town 0 residential houses (tiles 68378, 68381, 68382, 68383).
+3. **Inspect Core Megacity Panel:**
+   * Click on **Mito** town nameplate → click **Core Megacity Management** panel.
+   * **Expected:**
+     * Construction basket section displays FOOD, STEL, and BALL metrics.
+     * Consumed row reports atomic monthly consumption: 20 STEL, 20 BALL, and 55 FOOD.
+     * Growth state displays positive growth (`growth_multiplier: 1.0`, `passenger_multiplier: 1.0`).
+4. **Follow Train 4 Delivery:**
+   * Open the train list for Company 0 ("ASSISTED FUNCTIONAL Core Supply") and select **Train 4** (FOOD Express).
+   * Verify Train 4 orders: Order 0 (Pickup at Station 2) and Order 1 (Delivery at Station 10).
+   * Unpause (`F8`) and observe Train 4 traversing the Gateway Portal and delivering FOOD to Station 10 without pathfinder loss or signal deadlock.
 
 ---
 

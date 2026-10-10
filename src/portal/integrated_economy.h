@@ -34,6 +34,8 @@ struct EconomyResearch {
 	std::map<CargoType, uint32_t> reserved;
 	bool acceleration = false;
 };
+/** Transient read-only monthly basket evidence; never serialized or used by simulation. */
+extern std::vector<nlohmann::json> *_integrated_city_month_audit;
 class IntegratedEconomy
 {
   public:
@@ -68,6 +70,11 @@ class IntegratedEconomy
 	static const EconomyCity *City(TownID town);
 	static uint32_t AcceptCity(TownID town, CargoType cargo, uint32_t amount, bool execute);
 	static bool EvaluateCity(TownID town, float &growth, float &passengers);
+	/**
+	 * Finish an observed monthly evaluation after the native town growth hook runs.
+	 * @param town Town whose native monthly growth state was just updated.
+	 */
+	static void ObserveMonthlyGrowth(TownID town);
 	static std::map<CargoType, uint32_t> ResearchKit(TechID tech);
 	static bool PrepareResearch(CompanyID company, TechID project);
 	static void FinishResearch(CompanyID company);

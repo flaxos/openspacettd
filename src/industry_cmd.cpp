@@ -599,7 +599,10 @@ static bool TransportIndustryGoods(TileIndex tile)
 	for (auto &p : i->produced) {
 		uint cw = ClampTo<uint8_t>(p.waiting);
 		if (cw > indspec->minimal_cargo && IsValidCargoType(p.cargo)) {
-			if (!IntegratedEconomy::Managed(i)) p.waiting -= cw;
+			if (!IntegratedEconomy::Managed(i)) {
+				if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->raw_removed[p.cargo] += cw;
+				p.waiting -= cw;
+			}
 
 			/* fluctuating economy? */
 			if (!IntegratedEconomy::Managed(i) && EconomyIsInRecession()) cw = (cw + 1) / 2;
@@ -1212,7 +1215,9 @@ static void ChopLumberMillTrees(Industry *i)
 		Command<Commands::LandscapeClear>::Do(DoCommandFlag::Execute, tile);
 
 		/* Add according value to waiting cargo. */
+		uint16_t before = itp->waiting;
 		itp->waiting = ClampTo<uint16_t>(itp->waiting + ScaleByCargoScale(45, false));
+		if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->raw_produced[itp->cargo] += itp->waiting - before;
 		break;
 	}
 }
@@ -1230,7 +1235,9 @@ static void ProduceIndustryGoodsHelper(Industry *i, bool scale)
 		uint16_t amount = p.rate;
 		if (scale) amount = ScaleByCargoScale(amount, false);
 
+		uint16_t before = p.waiting;
 		p.waiting = ClampTo<uint16_t>(p.waiting + amount);
+		if (_commonwealth_slice_audit != nullptr) _commonwealth_slice_audit->raw_produced[p.cargo] += p.waiting - before;
 	}
 }
 

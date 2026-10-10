@@ -85,4 +85,6 @@ jobs:
       shell: msys2 {0}
       run: |
         cd build
+        # Keep capability skips visible independently of the unconditional size checks.
+        ctest --timeout 120 --verbose -R '^Blueprint (symlinks|oversized)'
         ctest --timeout 120

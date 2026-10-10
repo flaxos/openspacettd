@@ -16,6 +16,176 @@ sprite resolver, and rendering pipeline hooks for the Commonwealth wormhole gate
 - **Verification**: 65 unit assertions in `test_gate_sprites.cpp`, 20/20 synthetic negative audits in
   `build_commonwealth_gate_grf.py`, asset tests in `test_commonwealth_gate_art.py`, and repo linters.
 
+## Core growth verification, playable UAT staging, and electronics loop — 10 October 2026
+
+Delivered three coordinated items following the Core basket repeat proof (PR #78):
+1. **Sustained Food & Town Growth**: Audited the starvation gap from `build/core-basket-repeat/basket-consumed.sav`.
+   Proved that `IntegratedEconomy::AcceptCity` caps reserves at 165 FOOD ($3 \times 55$/month demand) against Train 4's
+   ~35,000-tick round-trip (carrying 105 FOOD), resulting in a ~15-month starvation gap per cycle. Starvation sets
+   `MegacityGrowthState::Starvation` and `TOWN_GROWTH_RATE_NONE`, locking `grow_counter` and preventing `GrowTown`.
+   Added unit test `test_core_construction_basket.cpp` (`[sustained-growth]`) proving continuous decrement through 0
+   under sustained delivery. Published `docs/audit/2026-10-10/sustained-food-growth/README.md`.
+2. **Playable UAT Staging & Desktop Execution**: Published `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` from `basket-consumed.sav`
+   (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`, tick 378,112). Added Track 9 to
+   `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` covering launch commands, viewport coordinates (Station 10 tiles 795..796, 62),
+   Train 4 unloading observation, and panel metrics verification. Human desktop playtest executed over 24 game years
+   (saved to `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`), confirming transport revenue (£18.4M across 13 runs)
+   and validating the operational starvation finding. Recorded in `demo/UAT-RESULTS.md` as Human UAT Passed with Operational Finding.
+3. **Player-Funded Electronics Loop**: Enhanced `src/tests/test_electronics_loop.cpp` with end-to-end lifecycle coverage
+   (`[electronics-loop][e2e]`, 5 cases, 84 assertions). Authored `scripts/verify_electronics_loop.py` and executed against
+   `basket-consumed.sav`, verifying Corporate HQ, `TECH_MATERIALS_1` prerequisite, £250,000 research debit for
+   `TECH_MATERIALS_2` (250 RP), 16x16 site discovery for Copper and Sand on World 1, Pipeline B batch conservation
+   (80 Copper -> 80 Wire, 40 Sand -> 20 Chips), and Megacity multi-tier prosperity transitioning to `HyperGrowth`
+   (2.0x growth, 1.5x traffic). Published `docs/audit/2026-10-10/electronics-loop/README.md` and `verification.json`.
+Full suite passing (Catch2 + CTest), linters and git diff clean; Track 9 human UAT passed with operational finding.
+
+## Core basket repeat and cold proof — 10 October 2026
+
+From the pinned tick-304,384 checkpoint, the PR #75 adapter built a Core station
+(£1,020 native, quote == paid) and retargeted Train 4's FOOD delivery. After 36
+advances a second atomic consumption (20 STEL + 20 BALL + 55 FOOD) occurred at
+tick 377,347 with growth/passengers 1.0 and native growth observed. A fresh
+process reloaded the saved checkpoint with equal money, RNG, cargo custody, reserves,
+population and orders. Population was 1,096 and houses stayed 29: no house growth.
+Also fixed: 3-tile connector, Train 4 order admission and a stale viewport k-d tree in a
+shared test fixture. Offline `infinite_money`; human UAT pending.
+See [evidence](audit/2026-10-10/core-basket-repeat/README.md).
+
+## Coordinated delivery: Station Adapter (PR #75), Gate Art (PR #76), and Electronics Preflight — 10 October 2026
+
+Delivered all three coordinated roadmap items:
+1. **Core Town Station Adapter (PR #75)**: Committed and submitted PR #75 on `codex/dev-core-town-station-adapter`
+   targeting `codex/first-core-construction-basket`. Exposes `CoreTownStationQuote` and `CoreTownStationExecution`,
+   proves Train 4 `OT_LOADING` order safety at index 0, stages 2-tile Core station, connector, and reverse link,
+   and passes 121 unit assertions across 7 cases and 3 Python adapter tests.
+2. **Wormhole Gate Art Checkpoint (PR #76)**: Committed and submitted PR #76 on `codex/art-wormhole-gate-family-light`
+   targeting `main`. Packages 16-sprite gate sheets in `pkg/commonwealth_gates/`, compiles NewGRF container
+   `bin/newgrf/openspacettd_gates_v1.grf` (41,303 bytes), and passes 20/20 synthetic negative tests and pixel-exact
+   exporter determinism.
+3. **Player-Funded Electronics Loop Preflight**: Published `docs/audit/2026-10-10/electronics-loop-preflight.md`
+   defining `TECH_MATERIALS_2` (250 RP), copper and silica site surveying, Pipeline B manufacturing recipes, and
+   Megacity prosperity integration.
+
+## Local/GitHub/cloud checkpoint reconciliation — 10 October 2026
+
+Documentation delivery only; no new sprint, implementation or simulation run.
+Recovered October 7 planning records are published against PR71 while both
+implementation trees stay untouched. Fresh local verification of the October 5
+cloud archive passes ZIP CRC, 27 operation hashes and 24 checkpoint hashes.
+The final retained save matches `89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f`,
+tick 304,384. One full consuming basket and growth-hook observation are recorded;
+actual house/population growth and post-helper cold proof remain open.
+
+The existing helper patch and all 22 unpublished art files are independently
+preserved. Resumed Antigravity owns the primary PR71 checkout and finished its
+checks waiting for a decision; no duplicate worker was dispatched. See
+[checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md) for exact heads, proof boundaries and next ownership transition.
+
+## Core Megacity basket display follow-up — 3 October 2026
+
+Antigravity repaired the Core panel's demand/reserve and construction-first
+missing-cargo display, added Core-specific 0/1/2 growth labels, and preserved
+Classic labels and economy calculations. `test_megacity_gui.cpp` adds zero,
+partial, BALL-only, prosperity, complete and non-Core cases with 161 focused
+assertions; the aggregate 509-case Catch run passed. CTest's first run passed
+519/524; its five environment/setup failures passed on a targeted rerun after
+normal build outputs were made and loopback was permitted. Both linters and
+`git diff --check` passed. Header/tier fit is statically estimated only, with no
+rendered UI or human UAT. Functional material delivery and basket consumption
+remain NOT RUN under this GUI scope; the stopped campaign and its bounds above
+are unchanged.
+
+## First Core Construction Basket first attempt — 3 October 2026
+
+**ASSISTED FUNCTIONAL FAIL at first advance; human Pending.** Source save206acdd…
+matched; layout0 met all search/quote caps and four normal material services were
+built for£364,281. A false zero-annual-running-cost assumption in the per-tick
+spending guard stopped before any of the requested2,048ticks ran. One initial
+load and one advance request are consumed; cold0, new assistance£0, debt£100k.
+Native cash£3,705,864−£364,281=£3,341,583. Raw logs, 1,811 debit rows, failed
+result and fixed source are [retained](audit/2026-10-03/core-construction-basket/README.md).
+The corrected guard has not received a native continuation or fresh attempt;
+another run needs explicit owner handoff and aggregate-budget treatment. Core
+steel/ballast receipt, missing-BALL control and growth remain NOT RUN.
+
+## First Core Construction Basket intake — 2 October 2026
+
+Owner-authorized one-slice execution from the final already-funded checkpoint.
+Authoritative plan committed before source edits; independent Astra maximum
+plan review CLEAR. Live main85c423b4 and PR66head7bc29a60/required compiler and
+reviewed-delivery ancestry verified. Isolated codex/first-core-construction-basket
+stacks on the unmerged dependency. No native campaign or new assistance yet;
+implementation/native proof NOT RUN, human Pending. [Current audit](audit/2026-10-02/core-construction-basket/README.md).
+
+## First Functional Core Supply repaired same-funded tail — 1 October 2026
+
+**ASSISTED FUNCTIONAL requested mission PASS; full reviewed acceptance PARTIAL.**
+Explicit continuation at exact5d used reviewedbc9 source/binary7713. One full paused
+load comparison passed, then23advances produced a paid105FOOD visit/£81,972 and
+one60FOOD consuming month from carried inventory. Final audit/save passed at
+01:34:25UTC, with24/240cold advances and unchanged clocks. Later-delivery consumption
+and uninterrupted supply were not observed. [Frozen evidence](audit/2026-10-01/functional-core/continuation-manifest.json).
+
+Whole-primary836transactions reconcile£100k+£6m+£367,827−£2,761,963=£3,705,864,
+debt£100k; control debits£4,809 give gross£2,766,772. No new grant/start/build/project
+or replay; assistance remaining£0. Astra maximum outcome/source CLEAR, Sol maximum
+accounting PASS; existing498-case/513-CTest gates retained. Exact-head commit checker
+FAILS published `Docs:` prefix; rewriting public history is prohibited. HumanPending,
+ordinary economics/replayNOTRUN, no merge or next slice. Earlier failures remain
+unchanged; the stopped third report is still FAIL beside this repairedtailPASS.
+
+## First Functional Core Supply existing-state load repair — 1 October 2026
+
+**TESTED repair; ASSISTED FUNCTIONAL campaign FAIL at second cold equality.**
+Third handoff achieved real grain/FOOD/Core flow and consuming months, stopped-flow
+recovery, paidHQ/I after first cold and II selection eligibility. Retained second
+cold defect: integrated FOOD-only growth0 reconstructed as Classic Subsistence1.
+Post-ECON MEGA callback restores existing integrated caches without consuming cargo,
+changing schema/balances/RNG or balance policy. Focused2cases/144assertions, full
+498cases/306426assertions and sequential513CTest PASS. Independent Astra maximum
+source/raw-evidence review CLEAR; corrected canonical continuation NOT RUN.
+[Preserved report, seven saves, ledger and exact handoff](audit/2026-10-01/functional-core/README.md).
+
+Total£6m cash assistance used, £0remaining; final£3,620,714/debt£100k reconciles,
+aggregate gross£2,762,347 and82initial/1cold advances. Only a new explicit handoff
+may confirm the same completed checkpoint within existing deadlines/bounds. All
+prior failures and archives remain. Human Pending; no funded replay, economic pass,
+roadmap completion, merge or second slice. Earlier dated entries retain their scope.
+
+## First Functional Core Supply recovery stop — 1 October 2026
+
+**ASSISTED FUNCTIONAL FAIL; £0 applied across both attempts; human UAT Pending.**
+The explicit single recovery at `6e9e09bf1c` received both handshake markers but
+crashed in `FunctionalSnapshot` before emitting pristine state. The original
+RuntimeError evidence/archive remains unchanged; new native/crash evidence is
+preserved separately. The crash save is diagnostic, not a playable checkpoint.
+
+`c99e7a1357` fixes ownership observation for Void/House/Industry and preserves the
+original failure through broken FIFO teardown. Focused regressions and full
+496-case/511-CTest gates pass. No grant, gameplay advance, route search or further
+campaign followed; flow/HQ/research/cold/replay remain NOT RUN. The original
+four-hour deadline and active startup usage were carried. One total £6m prevents
+funded replay; the consumed recovery requires another explicit handoff before a
+canonical campaign. [Current evidence and ledger](audit/2026-10-01/functional-core/README.md).
+No balance, content, acceptance, merge or next slice changes. The entry below is
+the preserved first-stop record.
+
+## First Functional Core Supply and Materials I — 1 October 2026
+
+**Draft prerequisite implementation; ASSISTED FUNCTIONAL FAIL at offline startup;
+human UAT Pending.** Normal/spectator designation uses native replicated commands;
+research queries and actual Tech Tree panel inspection preserve absent/existing
+TECH state. Full native gates and focused fixture/transport records are retained
+in the [execution audit](audit/2026-10-01/functional-core/README.md).
+
+One campaign at `d7a3a12006` stopped before its startup marker: £0 assistance,
+no checkpoint, commands, advances, ending financial observation or mission phase.
+All functional phases and replay are NOT RUN. `7bb7587d59` corrects only log framing
+and complete-line reading, supported by small console/synthetic regressions; no
+full retry followed. The branch starts at exact unmerged PR66 and normally carries
+the reviewed docs-only PR67 commit. Old failures/art/archives remain unchanged.
+No economic claim, human acceptance, balance change, merge or second slice occurs.
+
 ## Functional progression priority revision — 1 October 2026
 
 **PLANNED; documentation only.** Owner-approved functional-first direction is

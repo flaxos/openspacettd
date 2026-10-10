@@ -1,0 +1,305 @@
+{
+  "label": "ASSISTED FUNCTIONAL",
+  "functional_outcome": "PASS across preserved authorized handoffs; repaired same-funded tail PASS",
+  "complete_reviewed_acceptance": "PARTIAL: independent fresh replay NOT RUN; exact-head CI has a commit-format failure",
+  "human_uat": "Pending",
+  "ordinary_start_economic_proof": "NOT RUN",
+  "repeatability": "NOT RUN",
+  "historical_primary_report": "FAIL at second cold equality; unchanged",
+  "executed_source_head": "5d729abe87500446c43c4a1c5ca68c08c8e323ca",
+  "compiled_source_head": "bc9fb1cf3f0149f05748f57b22584e8db64b78d4",
+  "binary_sha256": "7713fa03e22bd9d6d5e22b4fa0559fae231356a1e1bc8c13958e25fbf4bbe6b5",
+  "source_relation": "5d729abe changes only documentation/evidence after reviewed sourcebc9; no executable change",
+  "inputs": {
+    "binary_sha256": "7713fa03e22bd9d6d5e22b4fa0559fae231356a1e1bc8c13958e25fbf4bbe6b5",
+    "source_commit": "5d729abe87500446c43c4a1c5ca68c08c8e323ca",
+    "source_dirty": false,
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_files_sha256": {
+      "src/genworld.cpp": "495eba75efeddf1f29518ff3f7327b7622bb71044fabd0842f4aaa45820c89c7",
+      "src/misc.cpp": "8716381a71656ea61979804222efcab160de5d0b11ec163fa4bb73e80d65a115",
+      "src/town_cmd.cpp": "cecdfef71abb2f8801f329543052f639307381300d397c63f63641c39712ce48",
+      "src/town_cmd.h": "d0f22f4dfcc1d8032af2542c5faab98237751e176efbb782c40bb5fe56d0ac3a",
+      "src/portal/world_gen.cpp": "50359a27ee6cf9f5de999b00043c54a0e341c7009663d39e4bd15b798940dbff",
+      "src/portal/world_gen.h": "ea044722b9d51a24523e77ec838dbfd29f3b10f8619d53fae3686ffa6a72fa66",
+      "src/portal/portal_terminal.cpp": "428ada48d763016635c395e5f65907c8df069246f5fb9ce59215e118c94694eb",
+      "src/portal/connected_economy.cpp": "a49a0946afbff44f5d308d1d2ae44f472b15d3f70f4c5585cbd8c8106db42a6a",
+      "src/portal/connected_economy.h": "3bda3571fbdc444427d1f4fe02fdc4f261b20fd50d61d31dadf9d4847eeea83d",
+      "src/portal/integrated_economy.cpp": "22fcefcbffd7944e65a6a270f24b638f19229d6aa00d6c2c0da204177698ee67",
+      "scripts/test_integrated_economy.py": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "scripts/test_wp11_slice.py": "a8551d2514d9049e8bdf1cd40ac43ccbfa1d5a7c0acea70f17fa83a321fcb36c",
+      "demo/integrated_economy.cfg": "1cd6e04309b2a49ce8ce20777e20adbbc15d9bebcb54e5528c3ed77d037f7430"
+    },
+    "pack_sha256": {
+      "integrated_v1": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+      "rail_v3": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea",
+      "equipment_v1": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+    }
+  },
+  "configuration_sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009",
+  "authorized_checkpoint_sha256": "a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945",
+  "expected_state_sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457",
+  "raw_evidence_sha256": "c3a5d37c0b9e85bed98cb055df4024ae50c4f3094bdc8f6d65053d8c92c7d738",
+  "confirmation_loads": 1,
+  "full_paused_equality": "PASS; no normalization",
+  "new_grant_commands": 0,
+  "new_games": 0,
+  "new_build_or_research_commands": 0,
+  "paid_food": {
+    "arrival_tick": 166371,
+    "cash_booking_tick": 166652,
+    "units": 105,
+    "actual_receipt_gbp": 81972
+  },
+  "consuming_month": {
+    "date": 713835,
+    "town": 0,
+    "units": 60,
+    "reserve_after": 15,
+    "source": "carried checkpoint inventory; before the new FOOD arrival"
+  },
+  "limits_of_flow_proof": "New delivery itself was not subsequently consumed in this observation; uninterrupted monthly supply is unproven.",
+  "final_audit": {
+    "status": "PASS",
+    "language": "en_GB",
+    "invalid_slopes": 0,
+    "pixel_queries": 3139587,
+    "viewport_queries": 1046529,
+    "all_active_cargo_text": "PASS",
+    "paused_state_unchanged": true
+  },
+  "final_checkpoint": {
+    "archive_path": "campaign/owner-observation.sav",
+    "sha256": "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7",
+    "tick": 167168,
+    "cash_gbp": 3705864,
+    "loan_gbp": 100000,
+    "research": [
+      [
+        0,
+        0,
+        0,
+        [
+          301
+        ]
+      ]
+    ],
+    "food_reserves": 120,
+    "growth": 0,
+    "passengers": 0.5,
+    "latest_monthly_consumed": []
+  },
+  "assistance": {
+    "total_gbp": 6000000,
+    "used_gbp": 6000000,
+    "remaining_gbp": 0,
+    "source": "original accepted native offline MoneyCheat; Other debit -6000000 at tick1280",
+    "accepted_grants_all_attempts": 1,
+    "rejected_original_probes": 2,
+    "additional_grants_or_loans": 0,
+    "real_money": false
+  },
+  "financial_reconciliation": {
+    "starting_cash": 100000,
+    "assistance": 6000000,
+    "prior_primary_receipts": 278252,
+    "new_receipts": 89575,
+    "total_primary_receipts": 367827,
+    "prior_primary_debits": 2757538,
+    "new_debits": 4425,
+    "total_primary_debits": 2761963,
+    "disposable_control_debits": 4809,
+    "aggregate_gross_debit_usage": 2766772,
+    "ending_cash": 3705864,
+    "debt": 100000,
+    "expected_ending_cash": 3705864,
+    "remaining_gross_headroom": 1233228
+  },
+  "tail_debits_gbp": {
+    "interest": 3500,
+    "company_fees": 525,
+    "tolls": 400
+  },
+  "tail_receipts_gbp": {
+    "grain": 7603,
+    "food": 81972
+  },
+  "primary_debits_gbp": {
+    "infrastructure": 110824,
+    "vehicles": 35747,
+    "hq": 2500000,
+    "research": 100000,
+    "interest": 12167,
+    "company_fees": 1825,
+    "tolls": 1400,
+    "train_running_charges": 0
+  },
+  "native_transaction_rows": {
+    "historical_primary": 788,
+    "continuation": 48,
+    "combined": 836
+  },
+  "food_custody": {
+    "produced": 540,
+    "discarded": 89,
+    "consumed": 300,
+    "held": 151
+  },
+  "bounds": {
+    "initial_shared_advances_used": 82,
+    "cold_advances_before": 1,
+    "new_advances": 23,
+    "cold_advances_used": 24,
+    "cold_cap": 240,
+    "cold_advances_remaining": 216,
+    "cold_ticks_remaining": 442368,
+    "ticks_per_advance": 2048,
+    "cold_start_utc": "2026-10-01T01:09:59.143032+00:00",
+    "unchanged_cold_stop_utc": "2026-10-01T01:39:59.143032+00:00",
+    "absolute_stop_utc": "2026-10-01T02:24:44Z",
+    "finished_at_utc": "2026-10-01T01:34:25.559407+00:00",
+    "elapsed_original_cold_seconds": 1466.416375,
+    "phase_wall_cap_seconds": 1800,
+    "campaign_now_stopped": true,
+    "unused_counts_or_headroom_are_not_new_execution_authority": true
+  },
+  "local_source_gates": {
+    "corrected_source_head": "bc9fb1cf3f0149f05748f57b22584e8db64b78d4",
+    "source_files_sha256": {
+      "src/saveload/planet_sl.cpp": "96a114c08a92952301252c007b9d6a6bbdf689bc157154eaf69d3334abbdf817",
+      "src/tests/test_megacity_gui.cpp": "b4615196f2f735cc760991ee2a9bb2545a0452ab88286ef582903c7f30c69ab1",
+      "scripts/test_integrated_economy.py": "7c1d95f11b869072bb7feb3ca3147a08d27c4151b12ad0043d62810eb6b376bb",
+      "scripts/test_wp11_slice.py": "a8551d2514d9049e8bdf1cd40ac43ccbfa1d5a7c0acea70f17fa83a321fcb36c"
+    },
+    "binary_sha256": "7713fa03e22bd9d6d5e22b4fa0559fae231356a1e1bc8c13958e25fbf4bbe6b5",
+    "test_binary_sha256": "019e11d3649b89556102a85888d0b851d860efc8c674e0a5ddec6c16ceef901a",
+    "source_rebuild": "PASS; clean bc9fb1cf3f source/revision",
+    "focused": "PASS; 2 cases / 144 assertions; exit0",
+    "first_fixture_regression": "FAIL; disabled ECON retained nonempty state; preserved then corrected with fixture Reset",
+    "full_catch": "PASS; 498 cases / 306426 assertions; exit0",
+    "ctest": "PASS; 513/513; exit0",
+    "file_descriptions": "PASS; exit0",
+    "unused_strings": "PASS; exit0",
+    "script_mode": "PASS; exit0",
+    "diff_check": "PASS; exit0",
+    "canonical_second_load_after_repair": "NOT RUN at the bc9 local-gate snapshot; subsequently PASS in the separately authorized 5d same-funded continuation",
+    "independent_source_review": "Astra maximum CLEAR; mappings, load ordering, authority, accounting, old-mode guards and fixture scope"
+  },
+  "independent_review": {
+    "source_and_tail": "Astra maximum CLEAR",
+    "native_financial_bounds": "Sol maximum PASS",
+    "packaging": "Astra maximum CLEAR after historical gate-snapshot label correction; all15 members and historical custody verified"
+  },
+  "remote_ci": {
+    "scope": "Observed executed-head state before final evidence publication; latest final-head results are reported on PR68",
+    "head": "5d729abe87500446c43c4a1c5ca68c08c8e323ca",
+    "commit_checker": "FAIL",
+    "cause": "Published5d729abe commit prefix Docs: is not accepted; required prefix Doc:",
+    "history_rewrite": "Prohibited; preserved",
+    "build": "IN PROGRESS at last observation",
+    "other_repository_checks": "4/4 PASS",
+    "final_delivery_head": "Pending publication"
+  },
+  "preserved_custody": {
+    "manifest.json": {
+      "sha256": "ea3fed3c12992c1e8a39b5b2c39baa6ba919474219980b53ed7efc589c43313e",
+      "bytes": 15430
+    },
+    "native-proof.tar.gz": {
+      "sha256": "c7ad60f085c3d8aa83874cd521c43027d699ab3c560b17e9d57d82e434c28c43",
+      "bytes": 57460
+    },
+    "recovery-manifest.json": {
+      "sha256": "54b2ed3ed1becf7d15606d4563b654a1e3d49d51dd084ef7a0636798efe6c960",
+      "bytes": 18782
+    },
+    "recovery-proof.tar.gz": {
+      "sha256": "5c2f0ae65ccb561476a92ee14e131723c663511927ff43561604a8383880df0a",
+      "bytes": 472799
+    },
+    "handoff-3-manifest.json": {
+      "sha256": "c450e488dfe45b5e280695b938176af6a2c514f3b30db2acde750184dc809540",
+      "bytes": 29056
+    },
+    "handoff-3-proof.tar.gz": {
+      "sha256": "cb8c87792e528ce2f7c5f4100f7a6cc4687237347db2c65a02b01a05dff9c3ab",
+      "bytes": 7644329
+    },
+    "completed-state.json": {
+      "sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457",
+      "bytes": 302719
+    },
+    "continuation-handoff.json": {
+      "sha256": "dc891f75c2d468d8df660feb8c6830dd1742419bb3317e0e404a9bb96443e3d4",
+      "bytes": 7373
+    }
+  },
+  "archive": {
+    "path": "docs/audit/2026-10-01/functional-core/continuation-proof.tar.gz",
+    "sha256": "43115195bef21ae59dce8c33a607fa01ff070d13a78ced13b170c028e5b1a896",
+    "bytes": 1750816,
+    "regular_members": 15
+  },
+  "archive_members": {
+    "campaign/evidence.json": {
+      "sha256": "c3a5d37c0b9e85bed98cb055df4024ae50c4f3094bdc8f6d65053d8c92c7d738",
+      "bytes": 11167978
+    },
+    "campaign/functional.cfg": {
+      "sha256": "b8e43582d002dbe239aa8a0037c64d97e529a24f342b80c9b5033c69c8834009",
+      "bytes": 1744
+    },
+    "campaign/owner-observation.sav": {
+      "sha256": "206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7",
+      "bytes": 184704
+    },
+    "campaign/repaired-second-commands.scr": {
+      "sha256": "7919a1b0db44d878318f4dad593902574bece8a483c145d75a4be404c22c7f31",
+      "bytes": 7812
+    },
+    "campaign/repaired-second-native.log": {
+      "sha256": "1feb4df5b8e783c57b55559ed0de9a50633875acacf21f9a5f6a0fc21f8130b0",
+      "bytes": 6652802
+    },
+    "campaign/repaired-second-stdout.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "campaign/repaired-second.log": {
+      "sha256": "23c9f596df1d9e0fff50101f8534b54df2587291d44de85242b16620f3164f23",
+      "bytes": 6652777
+    },
+    "campaign/runner.log": {
+      "sha256": "301141c77c7203d2137a9d4ec4e11985f3b1b8ff692de42915a22fcc6c530422",
+      "bytes": 239
+    },
+    "handoff/completed-state.json": {
+      "sha256": "dd550e24f3d83336edc38bf2e8fae72283d611d42d7380e04fded1240a882457",
+      "bytes": 302719
+    },
+    "handoff/continuation-handoff.json": {
+      "sha256": "dc891f75c2d468d8df660feb8c6830dd1742419bb3317e0e404a9bb96443e3d4",
+      "bytes": 7373
+    },
+    "handoff/functional-continuation-runner.py": {
+      "sha256": "f17e318b9d7a6a44764338ddcd2871a4748ed4de6b30948c8d230e0226b7935c",
+      "bytes": 10374
+    },
+    "handoff/materials-i-completed.sav": {
+      "sha256": "a5fe2b1e85f4ca5c3cb1be0352af253dfa7ffa04b94df5cf768e5230a14a7945",
+      "bytes": 168216
+    },
+    "provenance/archive-custody.json": {
+      "sha256": "44b321c1ab5dee8a702bf2ee833b91c430329fdc55276865581792815388bf52",
+      "bytes": 1083
+    },
+    "reviews/financial-bounds-review.txt": {
+      "sha256": "64f958c53a52a8b202af263a1e76251a76edb4b3272c0e3bc99efeab23441276",
+      "bytes": 921
+    },
+    "reviews/independent-review.txt": {
+      "sha256": "504d9d858a5ccc6781ae5d823c928798015771afbd8aefd14f76da7220336729",
+      "bytes": 1255
+    }
+  }
+}

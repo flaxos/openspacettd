@@ -1,0 +1,380 @@
+{
+  "source_save": {
+    "path": "/home/flax/Documents/Codex/2026-10-05/task/core-helper-evidence/retained-final-checkpoint.sav",
+    "sha256": "89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f",
+    "tick": 304384
+  },
+  "adapter_staging": {
+    "quote": {
+      "candidate_distance_squared": 58,
+      "connector_tile": 64282,
+      "connector_track": 0,
+      "food_acceptance": "provisional-until-native-build",
+      "link_cost_provisional": 270,
+      "radius_squared": 64,
+      "station_cost": 750,
+      "station_tile": 64283,
+      "town_tile": 71454
+    },
+    "station_applied": {
+      "paid": 750,
+      "station_id": null
+    },
+    "link_applied": {
+      "paid": 1020
+    },
+    "orders_applied": {
+      "paid": 1020,
+      "train_orders": [
+        [
+          1,
+          2,
+          2,
+          4,
+          1,
+          0
+        ],
+        [
+          1,
+          10,
+          4,
+          0,
+          1,
+          0
+        ]
+      ]
+    }
+  },
+  "simulation_milestones": [
+    {
+      "advance": 2,
+      "tick": 308480,
+      "type": "arrival",
+      "detail": [
+        308145,
+        18,
+        4
+      ]
+    },
+    {
+      "advance": 5,
+      "tick": 314624,
+      "type": "arrival",
+      "detail": [
+        312843,
+        0,
+        1
+      ]
+    },
+    {
+      "advance": 7,
+      "tick": 318720,
+      "type": "arrival",
+      "detail": [
+        317531,
+        24,
+        7
+      ]
+    },
+    {
+      "advance": 7,
+      "tick": 318720,
+      "type": "arrival",
+      "detail": [
+        318003,
+        22,
+        6
+      ]
+    },
+    {
+      "advance": 9,
+      "tick": 322816,
+      "type": "arrival",
+      "detail": [
+        321926,
+        4,
+        10
+      ]
+    },
+    {
+      "advance": 13,
+      "tick": 331008,
+      "type": "arrival",
+      "detail": [
+        329388,
+        4,
+        2
+      ]
+    },
+    {
+      "advance": 14,
+      "tick": 333056,
+      "type": "arrival",
+      "detail": [
+        332011,
+        0,
+        0
+      ]
+    },
+    {
+      "advance": 15,
+      "tick": 335104,
+      "type": "arrival",
+      "detail": [
+        333612,
+        18,
+        5
+      ]
+    },
+    {
+      "advance": 20,
+      "tick": 345344,
+      "type": "arrival",
+      "detail": [
+        344155,
+        24,
+        8
+      ]
+    },
+    {
+      "advance": 23,
+      "tick": 351488,
+      "type": "arrival",
+      "detail": [
+        349861,
+        22,
+        3
+      ]
+    },
+    {
+      "advance": 26,
+      "tick": 357632,
+      "type": "arrival",
+      "detail": [
+        356020,
+        18,
+        4
+      ]
+    },
+    {
+      "advance": 28,
+      "tick": 361728,
+      "type": "arrival",
+      "detail": [
+        360726,
+        0,
+        1
+      ]
+    },
+    {
+      "advance": 32,
+      "tick": 369920,
+      "type": "arrival",
+      "detail": [
+        368483,
+        24,
+        7
+      ]
+    },
+    {
+      "advance": 33,
+      "tick": 371968,
+      "type": "arrival",
+      "detail": [
+        370372,
+        28,
+        3
+      ]
+    },
+    {
+      "advance": 36,
+      "tick": 378112,
+      "type": "arrival",
+      "detail": [
+        376083,
+        4,
+        10
+      ]
+    }
+  ],
+  "basket_consumption_event": {
+    "advance": 36,
+    "tick": 378112,
+    "month": {
+      "after": [
+        [
+          9,
+          0
+        ],
+        [
+          24,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          33,
+          70
+        ]
+      ],
+      "before": [
+        [
+          9,
+          20
+        ],
+        [
+          24,
+          0
+        ],
+        [
+          30,
+          20
+        ],
+        [
+          33,
+          125
+        ]
+      ],
+      "construction_complete": true,
+      "consumed": [
+        [
+          9,
+          20
+        ],
+        [
+          30,
+          20
+        ],
+        [
+          33,
+          55
+        ]
+      ],
+      "date": 717305,
+      "demand": [
+        [
+          9,
+          20
+        ],
+        [
+          24,
+          10
+        ],
+        [
+          28,
+          10
+        ],
+        [
+          30,
+          20
+        ],
+        [
+          33,
+          55
+        ]
+      ],
+      "food_sufficient": true,
+      "growth": 1.0,
+      "house_count": 29,
+      "native_flags": 7,
+      "native_grow_counter": 7419,
+      "native_growth_enabled": true,
+      "native_growth_hook_enabled": true,
+      "native_growth_observed": true,
+      "native_growth_rate": 7419,
+      "passengers": 1.0,
+      "population": 1096,
+      "tick": 377347,
+      "town": 0
+    },
+    "town_reserves_after": [
+      [
+        9,
+        0
+      ],
+      [
+        24,
+        0
+      ],
+      [
+        30,
+        0
+      ],
+      [
+        33,
+        70
+      ]
+    ]
+  },
+  "saved_checkpoint": {
+    "path": "/home/flax/games/openspacettd/build/core-basket-repeat/basket-consumed.sav",
+    "sha256": "957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f",
+    "tick": 378112,
+    "money": 3678305,
+    "reserves": [
+      [
+        9,
+        0
+      ],
+      [
+        24,
+        0
+      ],
+      [
+        30,
+        0
+      ],
+      [
+        33,
+        70
+      ]
+    ],
+    "population": 1096,
+    "houses": 29
+  },
+  "cold_reload": {
+    "verified": true,
+    "tick": 378112,
+    "money": 3678305,
+    "reserves": [
+      [
+        9,
+        0
+      ],
+      [
+        24,
+        0
+      ],
+      [
+        30,
+        0
+      ],
+      [
+        33,
+        70
+      ]
+    ],
+    "population": 1096,
+    "train4_orders": [
+      [
+        1,
+        2,
+        2,
+        4,
+        1,
+        0
+      ],
+      [
+        1,
+        10,
+        4,
+        0,
+        1,
+        0
+      ]
+    ],
+    "advance_after_reload": "not attempted: basket session is intentionally not persisted"
+  }
+}

@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "portal/stellar_network.h"
+#include "portal/commonwealth_slice.h"
 #include "portal/universe_network.h"
 #include "error.h"
 #include "articulated_vehicles.h"
@@ -4398,7 +4399,10 @@ void Train::OnNewEconomyDay()
 			this->profit_this_year -= cost.GetCost();
 			this->running_ticks = 0;
 
+			Money cash_before = Company::Get(this->owner)->money;
 			SubtractMoneyFromCompanyFract(this->owner, cost);
+			if (_commonwealth_slice_audit != nullptr && this->owner == CompanyID{0})
+				_commonwealth_slice_audit->service_running[this->index.base()] += int64_t(cash_before - Company::Get(this->owner)->money);
 
 			SetWindowDirty(WindowClass::VehicleDetails, this->index);
 			SetWindowClassesDirty(WindowClass::TrainList);

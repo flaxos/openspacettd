@@ -10,6 +10,183 @@
   catenary retention, and sorting bounds. Human visual acceptance (evaluating aesthetic clearance with
   multi-unit trains in desktop GUI) remains **Pending**.
 
+## Core basket repeat and electronics loop boundaries — 10 October 2026
+
+A second basket was consumed and reloaded cleanly in automated offline proof
+([evidence](audit/2026-10-10/core-basket-repeat/README.md)), and the food starvation mechanism
+(single consist carrying 105 FOOD vs $3 \times \text{demand} = 165$ buffer ceiling over a 17-month journey)
+has been audited and mathematically proven with unit test coverage (`[sustained-growth]`).
+Human desktop playtest (Track 9, `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` -> `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`)
+confirmed mechanical transport and Station 10 unloading (£18,484,224 profit across 13 runs over 24 years),
+while verifying the operational starvation finding: continuous town growth requires multiple staggered consists
+($\le 2$ months interval) or nearby buffering rather than a single train.
+
+The Player-Funded Electronics Loop (`TECH_MATERIALS_2`, Pipeline B, HyperGrowth) is verified via unit test
+(`test_electronics_loop.cpp`) and authoritative script against the consumed basket save; in-world railway construction
+connecting the copper and silica sites to factories and the Megacity in an active live campaign remains open.
+
+## Station Adapter and Gate Art delivery boundaries — 10 October 2026
+
+The station adapter is committed and submitted as PR #75 on `codex/dev-core-town-station-adapter`,
+verifying Train 4 `OT_LOADING` safety and passing 121 unit assertions across 7 cases and 3 Python adapter tests.
+The wormhole gate art is committed and submitted as PR #76 on `codex/art-wormhole-gate-family-light`,
+verifying NewGRF compilation (41,303 bytes) and 20/20 synthetic tests.
+
+Remaining boundaries:
+1. **Core Growth & Basket Repeat**: Native growth enablement, town population/house count rise,
+   and cold-reload persistence after Train 4 delivery to the nearer station remain pending execution
+   under the new active handoff in `docs/ACTIVE_EXECUTION_PLAN.md`.
+2. **Gate Runtime Selection**: The gate NewGRF is compiled and verified, but C++ engine loader/resolver
+   wiring and `DrawTile_TunnelBridge` integration remain in the subsequent Sprint 2 Art track.
+3. **Electronics Chain**: Preflight is established in `docs/audit/2026-10-10/electronics-loop-preflight.md`;
+   concrete in-game survey execution and facility placement remain queued for Horizon A progression.
+
+## Retained basket evidence and unpublished adapter — 10 October 2026
+
+The October 5 archive establishes one atomic 60 FOOD + 20 STEL + 20 BALL
+consumption at tick 284,995. The recorded native growth hook was observed, but
+native growth remained disabled and town population/house count did not rise.
+Full-basket consumption supersedes older blanket NOT RUN claims for that
+outcome only. Repeated baskets, sustained receiver service, post-adapter cold
+continuation, ordinary economics and human acceptance remain unproved.
+
+The four-file station adapter patch remains uncommitted. Exact-final native
+checks were not run in this alignment task; October 10 primary-checkout tests
+cover published PR71, not this patch. Art assets compile to the retained GRF
+hash but have no proved gate runtime draw hook or human clearance result.
+Historical temporary native outputs are absent; the durable archive/checkpoint
+remain verified. See [checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md).
+
+## Core Megacity panel proof boundary — 3 October 2026
+
+The Core panel now reports each construction shortage and displays Core growth
+labels consistent with 0/1/2 simulated outcomes. Automated status and economy
+tests pass, but the GUI string-selection branch is not directly render-asserted.
+The minimum-width 92px header and longest tier text were checked by static size
+estimate, without rendered UI at each intended scale; clipping remains a human
+visual check. This repair did not run the paused material-basket campaign or
+observe steel/ballast delivery, monthly consumption, cold continuation or human
+play. It does not establish full basket acceptance or ordinary-start balance.
+
+## Development-money response stop — 3 October 2026
+
+The later checkpointed run reached a paid IRON delivery and native steel
+conversion, then stopped because the wrapper froze a world-development value
+that should change with resource activity. Immutable world identity and route
+infrastructure remained intact. The observer correction is checked against the
+retained snapshot but not replayed. The latest verified normal save predates
+that delivery; material city service, full consumption and cold continuation
+remain unproven.
+
+The subsequent single replay reached two full advances and recorded raw iron
+and silica production with conserved physical custody. No material delivery,
+payment, processing or complete Core basket was yet observed. It stopped when
+the wrapper compared a naturally grown tree on an unbuilt neutral tile against
+the original clear-tile snapshot. The guard is corrected and passes those
+retained snapshots offline, but further native progression and cold reload
+remain unrun under the first-hard-defect stop.
+
+The owner-approved offline unlimited-money mode removes development
+affordability as a basket acceptance gate. Its single recovery load stopped
+before planning or new ticks because the money-setting response lacked the
+runner's monthly-audit field. A narrow source correction is unrun in game;
+the first-hard-defect stop and original clock remain binding. Resource balance,
+physical custody, logistics and save/reload are still unproven for this basket.
+Normal new-game/server money defaults remain unchanged; ordinary economic
+balance and human UAT remain pending.
+
+## Material basket first-attempt stop — 3 October 2026
+
+The four service routes were legally quoted and paid, but the first requested
+advance stopped before native ticks because the guard treated a positive annual
+train running cost as forbidden. The native engine can book a fractional daily
+running charge. A source correction reserves its possible next whole-pound debit;
+it is locally testable but **native basket progression remains NOT RUN** on the
+corrected code. No post-build save exists, and a full retry requires a new
+explicit handoff; the previous£364,281 debit and immutable clock cannot be
+silently erased. [Attempt evidence](audit/2026-10-03/core-construction-basket/README.md).
+Ordinary economics, repeatability, sustained growth and human UAT remain open.
+
+## First Core Construction Basket boundary — 2 October 2026
+
+One new material-basket slice is explicitly authorized from preserved final
+funded state206acdd…. Original£6m assistance remains fully consumed; new assistance
+£0, debt fixed£100k. Its new first-advance clock and spending/tick limits do not
+reopen the old campaign. Physical construction-basket/growth/cold continuation
+proof is initially NOT RUN. Neutral factories' operation cannot establish that
+Materials I newly unlocked them. Ordinary-start economics, independent fresh
+repeatability and human UAT remain separate. [Binding plan](ACTIVE_EXECUTION_PLAN.md)
+and [evidence](audit/2026-10-02/core-construction-basket/README.md).
+
+## First Functional Core Supply after repaired continuation — 1 October 2026
+
+The requested ASSISTED FUNCTIONAL outcome now passes across recorded authorized
+handoffs, including exact same-funded cold equality, another paid FOOD visit and
+consuming month. Complete reviewed acceptance remains PARTIAL: fresh repeatability
+NOT RUN, ordinary-start affordability/pacing unproven and human UAT Pending.
+Consumption used carried inventory before the later105FOOD delivery; that delivery's
+subsequent use and uninterrupted supply were not observed. Final reserves120,
+growth0/passengers0.5, latest monthly consumptionempty. Train running charges remain
+the inherited£0 setting. [Exact scope and owner mission](audit/2026-10-01/functional-core/README.md#delivery-and-practical-owner-playtest).
+
+The sole£6m allowance remains exhausted; no new grant/loan/replay occurred. Campaign
+stopped after24/240cold advances at01:34:25UTC before unchanged01:39:59UTC deadline.
+Unused ticks/gross headroom do not authorize another campaign or next slice.
+Corrected source/local gates and Astra review pass; exact-head CI retains the
+published5d `Docs:` commit-format failure, whose repair would rewrite prohibited
+public history. Draft PR68 stays stacked on PR66; no gate waiver, merge, milestone
+acceptance or human build UAT follows. Historical failures/archives below remain.
+
+## First Functional Core Supply second-cold boundary — 1 October 2026
+
+Third handoff passes initial generated FOOD, interruption/recovery and paidHQ/I/II
+eligibility, but FAILS second cold equality solely on integrated growth0→1. The
+existing-state restoration repair passes source review and focused/full gates;
+canonical corrected continuation remains NOT RUN. No complete functional milestone
+or human acceptance is claimed. [Failure, repair and continuation bounds](audit/2026-10-01/functional-core/README.md#prepared-continuation-boundary--not-executed).
+
+The ONE£6m virtual allowance is exhausted. Same-checkpoint confirmation needs a
+new explicit handoff, carries239coldadvances/£1,237,653gross headroom and the original
+cold-phase stop conservatively01:39:59UTC, plus absolute02:24:44UTC; no reset/fresh
+funded campaign is permitted. Prebuilt observation does not establish manual build
+UAT; ordinary-start affordability, inherited zero train running charges, wider seed
+coverage, repeatability and balance remain separate. Historical stops below remain
+preserved with superseded active next actions. Human Pending, draft stacked on PR66.
+
+## First Functional Core Supply recovery boundary — 1 October 2026
+
+Canonical console readiness now has direct evidence, but the sole authorized
+recovery crashed at its first state query on forbidden Void/House/Industry owner
+reads. The narrow map-observer/teardown repair passes native/synthetic regressions
+and full gates; canonical progression after that repair is NOT RUN. £0 assistance
+was applied across both attempts. Ending finances are unobserved and the crash
+save is diagnostic, not a pristine or usable mission save.
+
+The explicit one-recovery handoff is consumed; another canonical startup requires
+a new handoff carrying both failures' usage and the original absolute deadline.
+One total £6m allowance prevents a second funded replay, so repeatability remains
+NOT RUN. No verified coordinates, food consumption, paid HQ/research unlock or
+cold continuation exists. Human acceptance Pending; economics and balance remain
+separate. Executor command/read access succeeds.
+[Preserved evidence and smallest next action](audit/2026-10-01/functional-core/README.md#current-recovery-evidence-and-smallest-next-action).
+The earlier entry below describes the original startup failure.
+
+## First Functional Core Supply execution limit — 1 October 2026
+
+The current draft repairs replicated designation and query-state mutation, but
+the sole ASSISTED FUNCTIONAL campaign failed waiting for offline startup before
+any grant or state capture. All route/flow/financial/control/research/cold/replay
+proof remains NOT RUN; no verified construction coordinates or observation save
+exist. Assistance issued is £0 and ending cash/debt are unobserved. The log-framing
+and split-line repair has focused transport evidence only. The reviewed plan's
+first-stop rule requires a new explicit handoff for another full campaign.
+[Full evidence and bounded choices](audit/2026-10-01/functional-core/README.md).
+
+Fixture GUI rendering and three-process native queue relay do not establish human
+usability or a full multiplayer playtest. Human UAT remains Pending. The inherited
+zero CST input running cost is unchanged; ordinary economics, the revised A1 loss
+and broader pacing/balance remain separate. The draft depends on unmerged PR66.
+
 ## Functional-first acceptance boundaries — 1 October 2026
 
 Current priority follows the owner's [functional-first approval](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026).
@@ -550,3 +727,13 @@ original showcase's three-new-houses-within-ten-minutes target.
 Codex CLI skill discovery is verified. Antigravity discovery and interactive
 usefulness remain Pending. Instruction size reduction does not prove quota savings.
 [Verification boundary](AGENT_WORKFLOW.md#delivery-record--30-september-2026).
+# Current basket development-money limitation, 3 October 2026
+
+The owner authorized an offline `difficulty.infinite_money` mode for the active
+material-basket functional proof. Financial affordability and the earlier
+gross-spending ceilings are no longer acceptance gates. Native debits and
+receipts must still be recorded; this mode cannot establish ordinary-start
+economics or balance. The prior stopped guard failure and its paid transactions
+remain historical evidence. Cargo identity, quantities, recipes, capacity,
+consumption, authority, save equality, fixed clock and advance bounds remain
+binding.
