@@ -24,6 +24,8 @@
 
 #include "table/sprites.h"
 
+#include "portal/gate_sprites.h"
+
 #include "safeguards.h"
 
 #include "table/landscape_sprite.h"
@@ -340,6 +342,7 @@ void GfxLoadSprites()
 	SwitchNewGRFBlitter();
 	VideoDriver::GetInstance()->ClearSystemSprites();
 	FontCache::ClearFontCaches(FONTSIZES_ALL);
+	PortalGateSprites::Reset();
 	GfxInitSpriteMem();
 	LoadSpriteTables();
 	GfxInitPalettes();

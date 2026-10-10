@@ -50,6 +50,7 @@
 #include "portal/portal_registry.h"
 #include "portal/edge_conduit.h"
 #include "portal/visual_overhaul.h"
+#include "portal/gate_sprites.h"
 
 #include "safeguards.h"
 
@@ -1378,10 +1379,22 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 			}
 		}
 
-		if (HasTunnelBridgeSnowOrDesert(ti->tile)) image += railtype_overlay != 0 ? 8 : 32;
+		SpriteID custom_gate_rear = 0;
+		SpriteID custom_gate_front = 0;
+		if (is_portal_gate && PortalGateSprites::IsActive()) {
+			WormholeVisualState state = VisualOverhaulManager::GetEventHorizonVisualState(ti->tile);
+			custom_gate_rear = PortalGateSprites::GetSprite(tunnelbridge_direction, state, false);
+			custom_gate_front = PortalGateSprites::GetSprite(tunnelbridge_direction, state, true);
+		}
 
+		if (HasTunnelBridgeSnowOrDesert(ti->tile)) image += railtype_overlay != 0 ? 8 : 32;
 		image += to_underlying(tunnelbridge_direction) * 2;
-		DrawGroundSprite(image, portal_pal);
+
+		if (custom_gate_rear != 0) {
+			DrawGroundSprite(custom_gate_rear, PAL_NONE);
+		} else {
+			DrawGroundSprite(image, portal_pal);
+		}
 
 		if (transport_type == TransportType::Road) {
 			RoadType road_rt = GetRoadTypeRoad(ti->tile);
@@ -1463,13 +1476,18 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 			}
 		}
 
-		if (railtype_overlay != 0 && !catenary) StartSpriteCombine();
+		bool combine = catenary || (railtype_overlay != 0 && custom_gate_front == 0);
+		if (combine && !catenary) StartSpriteCombine();
 
-		AddSortableSpriteToDraw(image + 1, portal_pal, *ti, roof_bounds[tunnelbridge_direction], false);
-		/* Draw railtype tunnel portal overlay if defined. */
-		if (railtype_overlay != 0) AddSortableSpriteToDraw(railtype_overlay + to_underlying(tunnelbridge_direction), PAL_NONE, *ti, roof_bounds[tunnelbridge_direction], false);
+		if (custom_gate_front != 0) {
+			AddSortableSpriteToDraw(custom_gate_front, PAL_NONE, *ti, roof_bounds[tunnelbridge_direction], false);
+		} else {
+			AddSortableSpriteToDraw(image + 1, portal_pal, *ti, roof_bounds[tunnelbridge_direction], false);
+			/* Draw railtype tunnel portal overlay if defined. */
+			if (railtype_overlay != 0) AddSortableSpriteToDraw(railtype_overlay + to_underlying(tunnelbridge_direction), PAL_NONE, *ti, roof_bounds[tunnelbridge_direction], false);
+		}
 
-		if (catenary || railtype_overlay != 0) EndSpriteCombine();
+		if (combine) EndSpriteCombine();
 
 		/* Add helper BB for sprite sorting that separates the tunnel from things beside of it. */
 		AddSortableSpriteToDraw(SPR_EMPTY_BOUNDING_BOX, PAL_NONE, *ti, rear_sep[tunnelbridge_direction]);
