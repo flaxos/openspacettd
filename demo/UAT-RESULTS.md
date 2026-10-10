@@ -3,10 +3,13 @@
 ## Core basket repeat — 10 October 2026
 
 **Human UAT Pending.** Automated offline evidence shows a second atomic basket
-and a clean fresh-process reload, with no house growth. Player-visible check:
-load the saved checkpoint, confirm Train 4 delivers FOOD to the new Core station
-and the Core panel shows the basket consumed. See
-[the evidence](../docs/audit/2026-10-10/core-basket-repeat/README.md).
+and a clean fresh-process reload, with no house growth. Playable scenario staged
+at `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` with step-by-step human guidance
+in [Track 9 of HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md#track-9-core-megacity-basket-repeat--town-station-unloading).
+Player-visible check: launch `./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`,
+confirm Train 4 delivers FOOD to the new Core station (Station 10), and verify
+the Core Megacity panel reports atomic monthly consumption (20 STEL + 20 BALL + 55 FOOD).
+See [the evidence](../docs/audit/2026-10-10/core-basket-repeat/README.md).
 
 ## Recovered full-basket evidence — 10 October 2026
 

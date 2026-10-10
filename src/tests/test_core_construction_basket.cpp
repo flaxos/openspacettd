@@ -678,3 +678,48 @@ TEST_CASE("Core basket observers preserve economy native growth flags cash and R
 	IntegratedEconomy::ObserveMonthlyGrowth(town->index);
 	CHECK(months[0] == event);
 }
+
+extern void OnTick_Town();
+
+TEST_CASE("Core basket sustained food supply enables continuous countdown and actual house growth", "[core-construction-basket][sustained-growth]")
+{
+	BasketFixture fixture;
+	Town *town = fixture.Core();
+	REQUIRE(town != nullptr);
+
+	_settings_game.economy.allow_town_roads = true;
+
+	/* Set up Town center with connected road segment */
+	TileIndex center = town->xy;
+	MakeRoadNormal(center, ROAD_ALL, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, CompanyID{0}, OWNER_TOWN);
+	MakeRoadNormal(center + TileDiffXY(1, 0), ROAD_ALL, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, CompanyID{0}, OWNER_TOWN);
+	MakeRoadNormal(center + TileDiffXY(0, 1), ROAD_ALL, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, CompanyID{0}, OWNER_TOWN);
+	uint16_t initial_houses = town->cache.num_houses;
+
+	/* 1. Under starvation: town growth is frozen */
+	town->growth_rate = TOWN_GROWTH_RATE_NONE;
+	town->grow_counter = 10;
+	town->flags.Reset(TownFlag::IsGrowing);
+
+	OnTick_Town();
+	CHECK(town->grow_counter == 10);
+	CHECK(town->cache.num_houses == initial_houses);
+
+	/* 2. Under sustained food: growth is enabled, grow_counter decrements consecutively */
+	town->growth_rate = 10;
+	town->grow_counter = 2;
+	town->flags.Set(TownFlag::IsGrowing);
+
+	OnTick_Town();
+	CHECK(town->grow_counter == 1);
+	CHECK(town->cache.num_houses == initial_houses);
+
+	/* Decrementing through 0 triggers GrowTown successfully */
+	OnTick_Town();
+	OnTick_Town();
+	CHECK(town->grow_counter == town->growth_rate);
+
+	/* Subsequent sustained ticks continue decrementing */
+	OnTick_Town();
+	CHECK(town->grow_counter == town->growth_rate - 1);
+}

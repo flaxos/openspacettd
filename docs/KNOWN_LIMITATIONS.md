@@ -1,12 +1,18 @@
 # OpenSpaceTTD Known Limitations
 
-## Core basket repeat boundaries — 10 October 2026
+## Core basket repeat and electronics loop boundaries — 10 October 2026
 
 A second basket was consumed and reloaded cleanly in automated offline proof
-([evidence](audit/2026-10-10/core-basket-repeat/README.md)). Still open: actual house growth (native growth was
-enabled and observed; houses stayed 29 and population fell 1,191 -> 1,096),
-sustained FOOD supply (short in months 12-35), a post-reload advance (the basket
-session is not persisted), ordinary-start economics, and human acceptance.
+([evidence](audit/2026-10-10/core-basket-repeat/README.md)), and the food starvation mechanism
+(single consist carrying 105 FOOD vs $3 \times \text{demand} = 165$ buffer ceiling over a 17-month journey)
+has been audited and mathematically proven with unit test coverage (`[sustained-growth]`). Continuous town
+growth in an active run requires either multiple staggered consists ($\le 2$ months interval) or nearby buffering.
+Playable UAT scenario is staged at `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` with Track 9 in
+`demo/HUMAN-GRAPHICAL-UAT-GUIDE.md`; human graphical acceptance remains Pending.
+
+The Player-Funded Electronics Loop (`TECH_MATERIALS_2`, Pipeline B, HyperGrowth) is verified via unit test
+(`test_electronics_loop.cpp`) and authoritative script against the consumed basket save; in-world railway construction
+connecting the copper and silica sites to factories and the Megacity in an active live campaign remains open.
 
 ## Station Adapter and Gate Art delivery boundaries — 10 October 2026
 

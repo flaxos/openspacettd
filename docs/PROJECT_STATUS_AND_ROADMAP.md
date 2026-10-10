@@ -1,5 +1,24 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Core Growth Proof, Playable UAT Staging, and Player-Funded Electronics Loop — 10 October 2026
+
+Delivered all three follow-up items concluding the Core Megacity repeat campaign and unlocking Milestone A3:
+1. **Sustained FOOD Delivery & Town Growth Proof**:
+   - Diagnosed the 21-month food starvation gap causing frozen houses (29) and population decline (1,191 -> 1,096) during the Core basket repeat run.
+   - Identified mechanism: `IntegratedEconomy::AcceptCity` caps town reserves at $3 \times \text{demand}$ (165 FOOD), while Train 4 carries 105 FOOD on a ~35,000-tick (~17.1-month) round-trip, starving Town 0 for ~15 months every cycle.
+   - Starvation sets `MegacityGrowthState::Starvation`, sets `growth_rate = TOWN_GROWTH_RATE_NONE`, and resets `TownFlag::IsGrowing`, locking `grow_counter` (e.g. at 6,654) and preventing execution of `GrowTown`.
+   - Proved that under sustained supply, `grow_counter` decrements continuously through 0, invoking native `GrowTown` and resetting `grow_counter = growth_rate`.
+   - Added unit test in `src/tests/test_core_construction_basket.cpp` (`[sustained-growth]`) with 10 assertions passing.
+   - Published audit evidence in `docs/audit/2026-10-10/sustained-food-growth/README.md`.
+2. **Human Playtest Scenario Staging & UAT Playbook**:
+   - Staged scenario save `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` from verified checkpoint `build/core-basket-repeat/basket-consumed.sav` (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`, tick 378,112).
+   - Documented Track 9 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` with launch command (`./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`), camera positioning at Station 10 (tiles 795..796, 62) and Town 0, observation of Train 4 unloading and Core Megacity panel metrics (20 STEL + 20 BALL + 55 FOOD).
+   - Updated `demo/UAT-RESULTS.md` with Track 9 recorded as Human UAT Pending.
+3. **Player-Funded Electronics Loop Implementation & Verification**:
+   - Expanded unit tests in `src/tests/test_electronics_loop.cpp` with monthly supply evaluation and complete end-to-end test case (`[electronics-loop][e2e]`), passing all 84 assertions in 5 test cases.
+   - Authored and ran `scripts/verify_electronics_loop.py` against `basket-consumed.sav`: Corporate HQ on World 0, `TECH_MATERIALS_1` prerequisite, £250,000 cash debit for `TECH_MATERIALS_2` (250 RP), 16x16 site discovery for `COPR` and `SAND` on World 1, Pipeline B batch balance (80 Copper -> 80 Wire, 40 Sand -> 20 Chips, 0 loss), Core Megacity Wire (Tier 2) & Chip (Tier 3) acceptance, and transition to `HyperGrowth` (2.0x growth, 1.5x traffic).
+   - Published audit evidence in `docs/audit/2026-10-10/electronics-loop/README.md` and `docs/audit/2026-10-10/electronics-loop/verification.json`.
+
 ## Coordinated delivery: Station Adapter (PR #75), Gate Art (PR #76), and Electronics Preflight — 10 October 2026
 
 Delivered all three coordinated roadmap items:
