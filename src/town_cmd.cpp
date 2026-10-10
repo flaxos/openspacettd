@@ -4497,6 +4497,7 @@ static const IntervalTimer<TimerGameEconomy> _economy_towns_monthly({TimerGameEc
 
 		UpdateTownGrowth(t);
 		UpdateTownRating(t);
+		IntegratedEconomy::ObserveMonthlyGrowth(t->index);
 
 		SetWindowDirty(WindowClass::TownView, t->index);
 	}

@@ -1,237 +1,341 @@
-# First Functional Core Supply and Materials I
+# Owner decision, 2026-10-03: unlimited offline development money
 
-**Single next gameplay slice for reviewed handoff — 1 October 2026 (Australia/Sydney;
-30 September UTC). Planning/docs only in this task.** The owner approved
-functional progression before profitability/pacing: prove player construction,
-delivery, processing, town demand, a next unlock and save/reload; record real
-costs/revenue and label any cash assistance. Command legality, cargo/financial
-accounting, determinism and save integrity remain hard gates.
+## Synchronization status — 10 October 2026
 
-The owner also instructed the parent to start the first bounded slice as soon as
-its reviewed plan is ready. This is that single implementation handoff; no extra
-routine approval is required after review. This task remains planning/docs only
-and authorizes no merge. It replaces the
-[generation plan preserved at its merged revision](https://github.com/flaxos/openspacettd/blob/91846666f69929443eab04cea63f9f8cfb3bb0be/docs/ACTIVE_EXECUTION_PLAN.md).
-The [roadmap](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026)
-sets current acceptance priority; the [reassessment record](audit/2026-10-01/functional-replan/README.md)
-pins ancestry and evidence. Older stops remain facts about their original runs,
-not a veto on this new proposal. Human UAT remains Pending.
+This file retains the historical First Core Construction Basket plan and consumed
+attempts below. Its October 3 clocks and load permissions are closed. The owner's
+current request is checkpoint synchronization; it supplies no new simulation
+clock, load budget or source-save campaign. No historical clock is being reset.
 
-## Outcome and finish line
+Later October 5 evidence proves one full consuming basket, superseding older
+unproved-outcome prose below for that specific result. See
+[the checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md).
+The existing [station-adapter source handoff](handoffs/CORE_TOWN_STATION_ADAPTER.md)
+remains the next bounded gameplay review. A subsequent repeat/cold campaign needs
+an agreed replacement here with exact checkpoint, delivered helper and finite
+load/tick/wall bounds. This status update does not create that next plan.
 
-In one fresh generated seed11 company, build two paid rail services through the
-existing public backbone: grain farm → food processor → real Core-town houses.
-Observe native payments, processor conversion and three distinct monthly food
-baskets consumed. Buy a Core HQ, research Materials I through its normal cash
-budget and expose Materials II as the next selectable project. Cold-reload,
-retain that unlock, and observe another FOOD delivery and consuming month.
+For the current First Core Construction Basket development proof, the owner
+explicitly deferred financial balance and authorized unlimited virtual money.
+The former £600,000 quote, £750,000 aggregate gross-spend and cash-reserve
+ceilings below are superseded as acceptance gates. Preserve their historical
+failed evidence and count all actual native receipts/debits separately from the
+earlier £6,000,000 assistance. Enable the game's explicit `infinite_money`
+setting only in this offline proof after loading the pinned save; record the
+setting in evidence. It changes affordability, not physical cargo or receipts.
+Do not change normal new-game or server defaults, inject cargo or research, or
+claim ordinary-start economic proof.
 
-FOOD does **not** unlock research: the HQ and paid research are a separate action
-in the same company. Cash assistance pays eligibility/costs; it proves neither
-that food funded the HQ nor that expansion is earned. FOOD alone sustains the town
-without growth. Stop before Materials II research, steel production, material
-kits, resource funding, gate commissioning or a second slice.
+The one bounded recovery starts from the pinned final source save and retains
+the failed first attempt's one requested advance, 0 actual ticks, search and
+spending history. The immutable outer stop is **2026-10-03 02:13:49.320471 UTC**;
+the original initial-phase stop is 01:28:49.320471 UTC. Initial/cold advance
+ceilings, search/topology constraints, first-hard-defect stop, resource
+conservation, recipes, logistics and cold equality remain binding. No clock or
+count reset, automatic second replay, merge or next slice is authorized.
 
-Later delivery needs this bounded functional proof, independent review, applicable
-code/content gates, a scoped PR and the human mission below. Missing functional
-steps remain partial even if unit tests pass. Profitability is measured separately;
-neither automated proof nor a prebuilt observation save establishes human build UAT.
+That single recovery load stopped before planning or a new tick: the
+money-setting response omitted the monthly audit field required by the runner.
+The response shape has a narrow source correction, but that correction is not
+authority for another game load. Preserve both stopped attempts. The requested
+functional material-basket outcome is still unproven.
 
-## Current base and reusable systems
+The subsequent explicit handoff authorizes **one** further source-save load
+after focused full response-contract checks. It assigns the initial phase the
+remaining time through the unchanged outer stop
+**2026-10-03 02:13:49.320471 UTC**; this supersedes the earlier initial-phase
+stop only. Retain the original requested advance and all earlier attempts.
+No fresh grant, extra tick, silent replay after gameplay starts, or change to
+the resource and authority rules follows from this timing allocation.
 
-Fresh main at planning intake is `91846666f69929443eab04cea63f9f8cfb3bb0be`:
-A1 PR60, generation plan PR63, optional art PR64 and generation PR65 are merged.
-PR65 was owner-merged at 2026-09-30 21:22:47 UTC. Native T+C+D+S proof passes;
-platform compilation still needs the separately owned
-[PR66 portability repair](https://github.com/flaxos/openspacettd/pull/66).
-Its published dependency head is `d1bb617664dcbb122aaefc1d4175c34ae1a17e2e`,
-based on `91846666f6`. Its delivery worker owns exact-head CI observation; consume
-that handoff rather than start another poller. Do not duplicate its
-`connected_economy.cpp` edit or call the build fully green prematurely.
+That one further replay ran two full advances and stopped at its first wrapper
+integrity assertion. A neutral unbuilt candidate tile naturally changed from
+clear to trees; native command, cash and all-cargo conservation remained sound.
+The observation guard now accepts only that scoped vegetation change and still
+rejects altered rail, signals, ownership or terrain. The captured observations
+pass the repaired guard offline, but gameplay after the stop and cold proof are
+**NOT RUN**. No additional replay follows from this repair.
 
-PR62 merged only into the old A1 dependency branch at
-`10856e709e492168f5c3fccb89ae4a27daf16643`, not main. Its
-[pinned partial work](https://github.com/flaxos/openspacettd/tree/78a30686c3467306b24dc1f0a6cf215f66f484dd)
-is a reference: port only individually reviewed necessary command/harness hunks
-in a later main-based implementation. Do not merge/cherry-pick the full branch or
-import obsolete docs/history. Preserve PR58 maintenance, PR59 history and PR64 art.
+The next explicit handoff authorizes one more replay from the pinned source save
+with the unused-candidate vegetation guard tightened and proven against both
+retained snapshots. Retain all **3 requested advances / 4,096 actual ticks**
+and both earlier paid attempts in aggregate evidence. The initial phase now
+shares the original 02:13:49.320471 UTC outer stop; the total advance cap is
+unchanged. Save a normal paused checkpoint after construction and at each safe
+advance boundary. On a wrapper assertion, attempt a diagnostic save only after
+independent native cash/cargo and full route-state verification; never save an
+unsafe state or treat a diagnostic file as continuation authority. Stop at the
+first real gameplay defect or the original outer deadline.
 
-- [Integrated economy](UNIFIED_COMMONWEALTH_ECONOMY.md) already processes
-  2 GRAI → 2 FOOD without research, routes physical cargo and consumes Core baskets.
-  Native warehouses have priority; no warehouse may intercept the town receiver.
-- [Megacity GUI](../src/portal/megacity_gui.cpp) still calls registration directly.
-  Route its existing Designate action through a native replicated command before
-  counting player-accessible consumption. Preserve free designation, eligibility,
-  derived town/world/population and duplicate prevention; no new permission policy.
-- [HQ eligibility](../src/portal/corporate_hq.cpp) is £5m current cash; its
-  [command](../src/portal/portal_cmd.cpp) charges £2.5m. Integrated mode waives legacy
-  three-phase presence, not cash or the Core role.
-- [Materials I](../src/portal/tech_tree.cpp) needs an HQ, no prior research and
-  100 RP at £1,000/RP; its integrated kit is empty. Materials II requires I and
-  250 RP. Use native project/budget commands and monthly processing, never direct
-  research-point or unlock restoration calls.
-- `TechTreeManager::CanResearch` currently inserts default company state during
-  eligibility queries, including the failed Materials II check and HQ GUI paint.
-  The default record has an invalid company ID and disappears on load. Make this
-  query read-only before the campaign, preserving all eligibility/cost rules.
-  Focused regressions must show successful queries, rejected prerequisites and
-  GUI inspection preserve both absent and existing research state. Do not hide
-  the defect by pre-seeding state/budget or normalizing away a missing record.
-- Reuse the [runner](../scripts/test_integrated_economy.py), shared
-  [Engine](../scripts/test_wp11_slice.py), native snapshots/audits and
-  [save workflow](SAVEGAME_AUTHORING.md). Authored progression/unit fixtures prove
-  subsystems, not this generated start. No new economy or persistence model is needed.
+That checkpointed replay stopped after multiple native advances at a
+wrapper-only world equality check: Industrial world development increased after
+a paid IRON delivery and normal steel conversion, while role, phase, geometry
+and ownership remained fixed. The revised observer compares immutable world
+fields and records development as a live resource outcome; the retained final
+native snapshot passes the focused check offline. The last safe normal save is
+the advance-014 checkpoint, one advance before the stopped result. No cold
+continuation or further replay is authorized by this repair.
 
-## Starting state and the only assistance
+The latest explicit handoff authorizes one guarded continuation from the last
+verified advance-014 paused checkpoint, **not** another source-save build.
+Restore the transient adapter session only after full paused state, physical
+cargo, paid infrastructure, research, services, immutable world identity and
+provenance agree. Retain **15 cumulative requested advances / 28,672 executed
+ticks** across attempts; the checkpoint predates the failed last advance, whose
+command and result remain separate evidence. The unchanged 02:13:49.320471 UTC
+outer stop and advance ceilings remain binding. Financial affordability is
+deferred under the explicit offline development-money mode.
 
-Use the [canonical profile](../demo/integrated_economy.cfg): native seed11, 1024²,
-seven worlds, temperate/Tgen, 1950, ruleset1/OST01v5, railv3/equipmentv1, ordinary
-£100k cash/£100k loan and £300k maximum. Preserve settings, role/phase distinctions,
-terrain, public ownership and tolls. Pin source/binary/content/config hashes. Keep
-optional art disabled for this comparison. No federation is needed.
+The authorized checkpoint load emitted its startup marker but could not open
+the native FIFO: the older functional adapter rejected the checkpoint's saved
+development-money setting before its bridge branch. No resumed-state comparison
+or gameplay command ran. A narrow bridge-only guard correction is committed but
+the failed load remains consumed; it is not automatic retry authority.
 
-Start a **new** game, prospectively replacing the old missing-Core-town food start.
-Keep a pristine checkpoint before spending; never repair/fund/overwrite the failed
-A1 checkpoint or old food saves. Measure native generated inventory. Do not author
-cargo, trains, track, towns, population, stations, stockpiles or research.
+The one final bridge-corrected load reached paused equality and stopped before
+arming: the persisted state matched, but eight wagon cached maximum-speed
+observer values were zero after reload rather than their prior derived values.
+All six front-engine speed values matched. The observer now reports the stable
+front speed and zero for inert wagon cache fields; the original observation is
+retained separately. This correction is unrun in game and supplies no further
+load authority before the original deadline.
 
-Cash-only test allowance: **one £6,000,000 cash grant before construction**, giving
-£6.1m cash and unchanged £100k debt. This finite test budget follows the approved
-cash-assistance principle; it changes no normal starting-economy setting. Record
-the native transaction and before/after state. Reject repeat grants, grants on
-reload and use on arbitrary saves; keep debt fixed throughout the assisted run.
+# Active execution plan: First Core Construction Basket
 
-Use the existing [native MoneyCheat command](../src/misc_cmd.h) in isolated offline
-setup. It is `Offline`: the dedicated-server Engine cannot simply invoke it.
-Minimal offline setup/observation support may create the labelled checkpoint,
-then a separately guarded runner may continue it. Preserve ordinary A1/generation
-guards. Do not remove command flags, assign money directly, enable infinite money,
-change the loan ceiling or introduce a general deity/authority bypass. If this
-path cannot be made reliable within the narrow harness scope, stop and report
-that finding rather than invent another funding mechanism.
+Owner-authorized execution handoff, 2 October 2026. This is the single active
+implementation slice. Use the final already-funded checkpoint; new assistance is
+£0. The prior campaign, grant, deadlines, failures and evidence remain closed and
+unchanged. The owner approved the reviewed recommendation and delegated routine
+bounded implementation choices. No further routine confirmation is required.
 
-The grant is booked by native accounting as Other; retain that ledger and separate
-it from freight income/operating net. Reconcile `ending cash = starting cash +
-assistance + actual receipts - actual debits`, with unchanged debt. Subtracting the
-grant from final cash does not prove an ordinary company could have paid the same
-sequence or met HQ eligibility. No recurring refill is permitted.
+The latest timing instruction supersedes the proposal's first-launch clock:
+the NEW 75-minute simulation clock starts at the FIRST native simulation advance,
+after plan/source/preflight preparation. Record actual UTC start and immutable
+start+75-minute stop immediately before that advance. Planning/compiler builds
+and paused preflight preparation do not consume that clock. Never reset it.
 
-No extra exception is assumed. Tech/RP/material/cargo grants, receiver/population
-authoring, role changes, cost/loan/toll/running-cost edits, unauthorized neutral
-construction and save migration require a new explicit owner decision if proposed.
+## Live delivery and what is established
 
-## Bounds and failure handling
+Read-only GitHub/ref checks in this reassessment show:
 
-These limits govern the reviewed implementation handoff; this docs PR runs no gameplay.
+- Main: `85c423b4a2dd57e5a2c2cf1f6d29bc2e4667845d`.
+- PR66 is open/draft, targeting main, exact head
+  `7bc29a60cc1bc60b4d555d7500c2ded79c175eaa`; all seven exact-head workflows passed.
+- That dependency contains main/PR67, original Money compiler fix `d1bb6176`,
+  reviewed PR69 `3630d490` and preserved owner merge `eead18f1`. Main is an ancestor.
+- The isolated implementation branch is `codex/first-core-construction-basket`,
+  based on that refreshed PR66 head and targeting `codex/generation-money-comparison`
+  while it remains unmerged. No merge or public-history rewrite is authorized.
+- Preserve PR68, original worktrees, ordinary-money failures and every old archive.
 
-| Work | Hard limit / required result |
-|---|---|
-| Preflight | Seed11 only; at most two full-chain candidates in stable ID order, with selection reason. Quote both legs, house receiver, vehicles/refits and costs before spending. Retain planner caps: 16 station candidates, 30,000 predecessor states and 16-tile bridge span per call. Generation/preflight at most 30 minutes. No seed sweep. |
-| Setup/build | One chain, native paid commands and designation. At most £1m gross debits before HQ (including elapsed charges), retaining at least £5.1m from £6.1m before receipts. All-phase gross debits at most £4m, including £2.5m HQ and £100k research. Thirty-minute setup/build wall limit. |
-| Initial proof | At most 240 advances × 2048 native ticks and 30 minutes wall time, whichever comes first. Three separate positive FOOD deliveries/payments, three distinct consumed monthly baskets and research ready for completion; include the negative flow control below. |
-| Cold proof | Two cold loads in fresh processes: first before Materials I completes, second after completion. One shared cap of 240 × 2048 ticks/30 minutes for both loads, paid completion and another FOOD delivery/payment/consuming month. No extra grants/loans or rebuilding. |
-| Repeatability | One independent fresh replay only after a successful primary run, identical cash assistance/commands/tick schedule and phase caps. Compare semantic state/RNG, custody, receipts/debits, consumption and unlocks. Whole native campaign at most four hours wall time. |
-| Failure | First hard defect or exhausted bound stops the campaign. Preserve partials and NOT RUN cases. No automatic alternate seed, rebuild strategy, tuning, full-campaign retry or budget extension. Focused regressions may support a diagnosed repair; another full campaign requires explicit handoff/replan. |
+| Acceptance dimension | Evidence and limit |
+| --- | --- |
+| Existing systems | Generation, commands, native processing/demand, research and save handling exist. PR69 repairs replicated designation, query mutation, startup/snapshot support and integrated post-load growth caches. Its exact-head CI and independent review passed. |
+| Assisted functional outcome | PASS across preserved authorized handoffs: paid grain/FOOD services, three initial consuming months, interruption/recovery, normal paid HQ/I, II eligibility, exact cold retention and further paid FOOD plus consumption. The last consuming month used carried stock before the new arrival. |
+| Ordinary economics | Unproven for this company. The original revised A1 loss remains failed evidence. The HQ/research were cash-assisted; FOOD did not unlock research or prove it funded the HQ. |
+| Fresh repeatability | NOT RUN. Cold equality and source/unit checks do not substitute for an independent fresh replay. |
+| Human acceptance / balance | Human UAT Pending. Pacing/profitability and uninterrupted supply are deferred. This proposal neither waits for profitable operations nor labels them passed. |
 
-The ordinary-start comparison is a read-only quote/cash/loan feasibility report
-from the pristine state, not another income grind or an economic pass. The revised
-A1 failure remains the operating comparison. Seeds101/2026 retain generation-only
-proof on these layouts; no three-seed food/economic coverage is implied.
+Source of the retained outcome: [continuation manifest](https://github.com/flaxos/openspacettd/blob/3630d490304916eb16c812b69e0aed92bfdd0f96/docs/audit/2026-10-01/functional-core/continuation-manifest.json)
+and [raw archive](https://github.com/flaxos/openspacettd/blob/3630d490304916eb16c812b69e0aed92bfdd0f96/docs/audit/2026-10-01/functional-core/continuation-proof.tar.gz).
 
-**Hard functional stops:** illegal/bypassed command, absent real receiver, wrong
-custody/payment, duplicate cargo/cash, research bypass, nondeterminism/desync,
-invalid terrain, lost/crashed train, cold mismatch or unreachable UI action.
-Money cannot waive these. A legal chain not found within the cap is a bounded
-feasibility failure, not proof of universal impossibility.
+## Dependency decision
 
-**Financial stops:** budget exhaustion, unexpected unaffordability/HQ eligibility
-failure or bankruptcy stops that run. Keep functional partials and measured losses.
-Negative operating net alone does not fail a completed functional mission; never
-tune prices or refill cash to complete it. **Time stops:** an exhausted timebox
-is partial evidence and a pacing/usability finding, not permission to grant
-RP/cargo, advance dates directly or mark human acceptance passed.
+Recommend one smaller extension through existing material systems: **deliver and
+consume the Core construction basket, with retained growth state after reload**.
+This follows the roadmap's A3 functional-continuity direction before earned A2.
 
-## Required controls and evidence
+Materials II is an eligible, cash-only 250 RP project (£250,000 at current rules)
+and would expose copper/silica and electronics. It is not a dependency for steel
+or ballast. The retained world has no copper/silica producer and no wiring,
+chip, signal or machinery factory. Making II into a physical freight opportunity
+would add surveying, resource extraction, factory funding and destination work
+whose legal sites and prices are not established here. Research-only completion
+would prove another paid unlock but leave physical material use untested.
 
-1. **Commands:** query/execute cost parity, failed-command atomicity, role/phase/
-   ownership/house catchment and actual GUI wiring. Separately prove designation
-   server/client replication without relaxing offline-only funding. Manager calls
-   or a headless button test alone do not prove human usability.
-2. **Flow/demand:** identify producer, processor, both services, receiver TownID/
-   own houses, gates, labels and capacities. Reconcile initial inventory,
-   production, all custody, 2:2 conversion, reserves, consumption and explicit
-   loss/discard. No warehouse diversion. In a disposable copy pause FOOD until
-   reserves fall below the current monthly basket and consumption stops (a
-   remainder may remain). Require no consumption or unexplained reserve change
-   while supply is stopped, then restart and observe recovery;
-   this control shares the initial phase's tick/wall budget. If incomplete,
-   report incomplete proof, not invisible stock refill or extended time.
-3. **Money:** record every native receipt/debit, research, interest, fee, return
-   toll and running cost across annual ledger rollover. Show assistance separately,
-   including native Other entries. Keep the inherited zero CST input running cost
-   visible while accounting for other costs; state sampling/tick coverage limits.
-4. **Unlock:** without HQ, research rejects; with HQ but without Materials I,
-   Materials II rejects for its prerequisite. Select I and £100k/month through
-   native commands. Observe its actual debit/100 RP/monthly completion after the
-   first cold load, then Materials II selectable by query/UI only. Turn the budget
-   off and do not start II. No food-to-tech prerequisite is invented.
-   Since £100k buys all 100 RP in one month, the first save is before that first
-   paid month, normally at 0 RP. This proves project/budget persistence and later
-   completion, not nonzero partial-RP persistence.
-5. **Persistence/determinism:** pause clocks before snapshots. Compare captured
-   map/roles, ownership, orders/vehicles, inventory, designation/reserves/consumption,
-   cash/debt/ledger, project/budget/RP before and after each cold load. Complete
-   research normally, save the finished state, reload and prove retained unlock
-   and further food service. Compare replay at identical observation points;
-   normalize only documented serialization differences, not unexplained mismatches.
-6. **Custody/labels:** preserve raw command/query logs, failures, time/tick bounds,
-   save hashes and source/binary/content provenance. Use separate `ordinary-start`,
-   `cash-assisted-functional`, `fixture-regression` and `human-uat` labels. Every
-   automated result is PASS, FAIL, PARTIAL or NOT RUN with scope; human status is
-   independently Pending/Pass/Fail/Partial. Costs/net/waits stay visible on a PASS.
+Steel-only delivery would stop at inventory. The city consumes FOOD first, then
+STEL and BALL atomically; steel alone cannot provide expansion. A further FOOD-only
+run would add continuity evidence but is not a prerequisite for this material
+extension. Do not reopen the completed FOOD finish line or require profitable
+FOOD before continuing functional work.
 
-## Six-step human mission
+The proposed material chain uses neutral generated factories. Their production
+does not enforce a company research gate (`Produce` checks that gate only for a
+valid company owner). Consequently this proves physical use of existing steel
+and ballast systems, not that Materials I newly enabled these neutral factories.
+Company-funded factories and Materials II remain separate future opportunities.
 
-Later implementation supplies the verified build/content, seed, construction
-coordinates/quotes and labelled save. Allow 15 minutes for feedback; completion
-time is not promised. Fast-forward changes waiting, not production/research rules.
+## Starting state and changed assumptions
 
-1. Start the specified fresh seed11 profile, inspect Core town/public terminals
-   and £100k cash/debt, then apply and record the single disclosed £6m test grant.
-2. Through normal controls designate the town, build the quoted grain and FOOD
-   services and set refits/orders. Inspect actual costs and own-house catchment.
-3. Follow grain into processing and FOOD to town; see native payments and repeated
-   monthly food use. Inspect missing expansion baskets; food alone promises no growth.
-4. Buy the Core HQ, select Materials I and £100k budget. Save before completion,
-   quit/reload, then see paid research finish and Materials II become available.
-5. Save/quit/reload the completed state; see the retained unlock, another FOOD
-   payment and consuming month with no second grant.
-6. Report Pass/Fail/Partial, exact build/save/content, manual versus prebuilt steps,
-   elapsed time, cash/debt/assistance and first unexpected message/control. An
-   operation save proves observation only; manual construction UAT remains separate.
+Use a new working copy of `campaign/owner-observation.sav` from the archive:
 
-## Decisions and implementation handoff
+- Save SHA256: `206acdd9485bed64927197af89e07a70926e0b1e386ed51cb93744df2c78e2f7`.
+- Tick 167168; cash £3,705,864; debt £100,000; Materials I (301) retained;
+  active project/RP/budget zero. Existing grain and FOOD trains/orders retained.
+- Core town 0, population 1,191 in the snapshot, FOOD 120, STEL 0/BALL 0, growth 0,
+  passenger multiplier 0.5. Current demand is FOOD 60/STEL 20/BALL 20; recompute
+  demand from live population at each observed month, never hard-code the result.
+- Existing industries: iron source 6 at (600,335), world 2; steel processor 7 at
+  (597,222), world 1; stone source 2 at (816,518), world 3; ballast processor 4 at
+  (819,237), world 1. Processors have zero completed material batches in the
+  snapshot. Public gates 2 (world 2↔1),3 (world 3↔1),1 (world 1↔0) exist.
+- Station 3 catches town 0's own house at (794,66), has no warehouse and is the
+  existing Core receiver. Its actual acceptance/capacity and any shared junction
+  must be revalidated before paying for a material route. Existence is not a
+  legal route quote or capacity proof.
+- Keep canonical profile, exact published GRFs, optional art disabled, existing
+  world roles/development and ownership. No save conversion or new generation.
 
-Execute this cash-only mission first in the parent's separate task after review.
-The £6m allowance, £4m spending cap and offline setup bound the approved cash-only
-assistance; they change no game-economy policy. No routine owner reconfirmation is
-needed. No further product/architecture exception is assumed.
-If preflight fails these limits, return the blocker and two bounded choices:
-specifically revise the cash/time limit while retaining the outcome, or deliver
-a smaller FOOD-only partial outcome with research explicitly unproven. Any
-tech/cargo/role/rule exception requires a separate owner decision; silence is not approval.
+The available £3.7m is inherited assisted cash. Old unused ticks and the numerical
+£1,233,228 gross-spend headroom are historical bookkeeping, not current authority.
+Retain the old counters: 82 initial advances (including25 control advances) and
+24 cold advances. Report new advances separately and as an aggregate
+with those106; no historical counter is reset or relabelled.
+No cash, cargo, technology, RP, population or route may be authored. No new loan.
 
-Refresh main/PR66 once for the implementation handoff and consume its delivery
-worker's checks. If PR66 is still unmerged, create the separate functional branch
-from exact `d1bb617664dcbb122aaefc1d4175c34ae1a17e2e` and target
-`codex/generation-money-comparison`; report that dependency explicitly. If owner-merged,
-start from fresh main after verifying it contains that correction. Do not merge
-PR66, duplicate its source edit or open a main PR carrying its unmerged delta.
-Bring this docs-only plan commit forward normally if needed; preserve public history
-and PR64 art. Review the necessary PR62 hunks individually, then implement only
-this mission's integration/evidence using `ost-dev`, `ost-uat` and `ost-deliver`.
-The only known integration repairs are command-based designation and read-only
-research eligibility, plus the narrow guarded proof/observation support above.
-Do not broaden into earned A2 expansion, federation, dynamic markets, true multi-map,
-narrative/Silfen/crisis work or balance. Reassess after this one delivery and human
-feedback; do not automatically start the next roadmap row.
+## Authorized implementation scope
+
+One town, the four named industries and at most four new cargo services:
+IRON6→steel7; STEL7→Core0; SILC2→ballast4; BALL4→Core0. Use the existing public
+backbone and legal private branches/signals. Retain the existing FOOD service;
+normal orders/refits/start-stop are permitted, with no added FOOD fleet or
+automatic strategy/fleet tuning. No new factory, warehouse, survey, resource
+funding, gate, research project, colony or material policy.
+
+Current proof builders cannot simply be rerun: `functional-plan/build` is fixed
+to fresh GRAI/FOOD construction; `first-freight-build` also rejects an existing
+fleet and its funding helper may borrow. Implement only a separately guarded
+loaded-checkpoint paid-command adapter, reusing narrow planner/quote primitives.
+Verify the source save hash and complete frozen starting state before arming it.
+Keep the original pristine/grant/ordinary-start guards and command flags intact;
+the adapter must have no grant, loan or research operation. Native previews and
+commands still decide every construction, ownership and payment result.
+
+Explicitly handle existing owned track, shared/private junction footprints and
+duplicate quotes without replacing neutral infrastructure or hiding failed
+commands. Freeze one complete affordable layout/consist/order plan before spending.
+If legal reuse cannot be established within the binding caps, stop with the
+failed quote rather than expand into network/pathfinder redesign.
+
+The existing `PlanFreightLeg` predecessor map resets for each station candidate.
+The new adapter must carry one shared 30,000-state counter across all candidates
+within an endpoint-planner invocation, stop before exceeding it, and count failed
+searches too. Reusing the old per-candidate counter unchanged would violate this
+plan. Keep the old helper's caller defaults intact; test the new budget's
+exhaustion behavior without changing simulation rules.
+
+Add only necessary read-only evidence for SILC/BALL labels, all-cargo custody,
+per-month town consumption and native growth eligibility. Existing monthly audit
+events name FOOD only; record the full basket at the actual monthly evaluation
+so coarse tick sampling cannot invent simultaneous consumption. Record the town's
+native growth rate/state as well as the integrated multiplier. Preserve native
+processing, demand, prices, capacities, RNG, dates, save schema and permissions.
+
+## Required finish line and verification
+
+1. Cold-open the exact observation copy, paused, and compare retained state before
+   any mutation. Pin source/binary/content/config/save hashes; record zero new
+   assistance and unchanged debt. Added observation fields must not normalize away
+   discrepancies in the frozen fields.
+2. Query and build the bounded plan through normal paid commands. Prove real IRON
+   and SILC arrivals, exact 2IRON→1STEL and 2SILC→2BALL processing, and positive
+   native STEL/BALL delivery/payment to the actual town receiver. Separate industry,
+   train/station, city and company-stock custody; no warehouse diversion.
+3. In the same instance, hold BALL delivery with normal vehicle controls until one
+   month has sufficient FOOD and STEL but insufficient BALL. Require FOOD use,
+   unchanged STEL reserve, no BALL consumption and zero expansion. If FOOD is also
+   missing, that month does not count as the isolated missing-BALL control.
+4. Release BALL. Observe one month consuming the complete live FOOD+STEL+BALL basket
+   and enabling normal native growth permission: growth/passenger multipliers
+   exactly 1/1, with the normal native growth-rate hook enabled. Record native house
+   and population changes, but do not turn a short observation into a sustained
+   population-growth or pacing claim. Save immediately while the proven state is
+   visible; research remains off and Materials II unstarted.
+5. Cold-load in one fresh process, require full paused equality, then observe
+   another positive STEL and BALL delivery/payment before a second distinct
+   complete basket is consumed. Initial STEL/BALL are zero, so both baskets must
+   reconcile to material produced and transported in this extension. End with a
+   hash-verified paused save and terrain/cargo-text audit.
+
+Reconcile every native receipt and debit, including existing services, interest,
+fees and tolls. Keep original assistance £6m and new assistance £0 separately:
+`ending cash = £3,705,864 + new native receipts − new native debits`; debt remains
+£100,000. Continue whole-history figures from primary debits £2,761,963 and
+disposable-control debits £4,809. Track all physical production, conversion,
+holdings, consumption and explicit discard; reserve increases alone do not pass.
+STEL/BALL city storage is only one live basket each (currently 20 each). Retain and
+account for excess aboard trains or in ordinary buffers; never force-clear it to
+make an order or payment appear complete.
+
+Meaningful focused checks cover resumed-adapter admission/denial, shared owned
+track/native quote parity, all-cargo observer non-mutation and complete-basket
+atomicity/cold retention. Reuse existing economy/save tests and add only uncovered
+cases. After final source changes run repository full gates and exact-head CI,
+then independent source/evidence review. A fresh campaign replay stays NOT RUN;
+do not represent a resumed checkpoint as pristine-start repeatability or human UAT.
+
+## Binding new bounds
+
+| Item | Authorized ceiling |
+| --- | --- |
+| Campaign | One copied existing checkpoint, one initial load and one planned cold load; no fresh game, funded replay, seed change or automatic retry. |
+| Topology | Fixed four industries/one Core town; at most four new trains with up to three wagons each; one material-basket outcome. |
+| Search | At most two complete layout candidates in stable order, each with at most eight endpoint-planner invocations. Each invocation has at most 16 station candidates, 30,000 total predecessor states and 16-tile bridge span. Count all search attempts; no hidden cap reset. |
+| Spending | At most £600,000 quoted construction/vehicles/refits; at most £750,000 added gross debits overall, including elapsed charges from all six services and all native diagnostic/control spending. New assistance £0; debt fixed. Historical plus new gross ≤£3,516,772. |
+| Time | Paused native preflight/paid construction has its own 30-minute wall cap; planning and compiler-build preparation precede it. The new 75-minute simulation campaign starts exactly once immediately before the FIRST native advance, after preflight preparation. Persist actual UTC start and immutable start+75-minute stop. Initial operation has a 30-minute wall cap; cold continuation has a 15-minute wall cap; both also obey the new outer stop. Include all stopped/diagnostic time after first advance; never reset or extend the clock. Startup failure consumes the one initial load and requires a new handoff even if the clock never started. Old deadlines remain closed. |
+| Ticks | Initial operation at most 240×2048; cold at most 120×2048; total 360 advances/737,280 requested native ticks. All controls and diagnosis share those caps; unused phase ticks do not transfer. Paused build has no free background ticking. |
+| Stops | First integrity/command/accounting/save defect, absent receiver, wrong payment/custody, crash/lost train, unaffordable quote or exhausted search/spend/time/tick bound stops with partial evidence. No rerun after a repair without another explicit handoff. |
+
+These approved limits authorize this single slice. A legal but slow supply
+pattern is measured as pacing; it does not authorize tuning, time extension or
+inventory injection. If these bounds cannot support the four services, return
+the concrete blocker and a smaller follow-up proposal, without silently dropping
+ballast/consumption or claiming the full outcome.
+
+## Short owner mission after delivery
+
+Allow 15 minutes for feedback, with completion time unpromised:
+
+1. Load a copy of the delivered paused save on the identified build/content;
+   inspect assistance provenance, cash/debt, research off and the Core basket.
+2. Follow one iron/steel and one stone/ballast consignment to the Core station;
+   inspect actual payments and distinct reserves.
+3. Observe missing-BALL feedback/retained steel, then a complete consumed basket
+   and enabled growth state. Report confusing controls or long waits.
+4. Save under a new name, quit/reload and check cash, stock, orders, growth state
+   and the retained unlock. Report Pass/Fail/Partial and the first issue.
+
+Observation of a supplied network is separate from manual construction acceptance.
+
+## Approved handoff and independent review
+
+The owner explicitly approved this one existing-material basket outcome, a new
+ledger from the final verified checkpoint, zero additional assistance, the new
+spending/search/tick limits and the corrected first-advance clock. The original
+proposal received independent Astra maximum CLEAR; implementation and resulting
+native evidence receive a new independent Astra maximum review. No merge, next
+slice, balance-policy change, research/cargo grant, extra loan or campaign retry
+is authorized. Stop at the first hard defect/exhausted bound; preserve partial
+logs and return a concrete blocker plus a bounded next action.
+
+Before implementation verify the copied source save and frozen state, read the
+source/AGENTS/ost-plan/dev/uat/deliver, and preserve complete old evidence. Update
+functional, economic and human statuses separately. An inherited funded checkpoint
+is ASSISTED FUNCTIONAL; ordinary-start economics/fresh replay remain unproven and
+human UAT Pending until the owner reports an identified playtest.
+
+## Source anchors
+
+- Roadmap: `docs/PROJECT_STATUS_AND_ROADMAP.md:68–135` (functional-first/A3 ordering).
+- Research: `src/portal/tech_tree.cpp:127–165`; `integrated_economy.cpp:452–459`
+  (I/II requirements and empty tier II kit).
+- Recipes/neutral ownership: `src/portal/integrated_economy.cpp:272–278,332–378`.
+- City demand/capacity/atomic basket: `src/portal/integrated_economy.cpp:379–448`;
+  native hook `src/town_cmd.cpp:4179–4201`.
+- Builder constraints: `src/portal/connected_economy.cpp:1529,1835–1842,1889`;
+  scoped planner `1254–1364`; observer `1649–1664` and FOOD-only monthly event
+  `src/portal/integrated_economy.cpp:437`.
+- Existing focused coverage: `src/tests/test_integrated_economy.cpp:90–145,520–545`
+  and integrated Core native round-trip cases in `src/tests/test_megacity_gui.cpp:175`.
+- Frozen `final_state` in the continuation archive, inspected without loading a game,
+  provides the industry/world/gate/state observations above.

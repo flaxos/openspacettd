@@ -1,5 +1,56 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Local/GitHub/cloud checkpoint reconciliation — 10 October 2026
+
+Documentation delivery only; no new sprint, implementation or simulation run.
+Recovered October 7 planning records are published against PR71 while both
+implementation trees stay untouched. Fresh local verification of the October 5
+cloud archive passes ZIP CRC, 27 operation hashes and 24 checkpoint hashes.
+The final retained save matches `89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f`,
+tick 304,384. One full consuming basket and growth-hook observation are recorded;
+actual house/population growth and post-helper cold proof remain open.
+
+The existing helper patch and all 22 unpublished art files are independently
+preserved. Resumed Antigravity owns the primary PR71 checkout and finished its
+checks waiting for a decision; no duplicate worker was dispatched. See
+[checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md) for exact heads, proof boundaries and next ownership transition.
+
+## Core Megacity basket display follow-up — 3 October 2026
+
+Antigravity repaired the Core panel's demand/reserve and construction-first
+missing-cargo display, added Core-specific 0/1/2 growth labels, and preserved
+Classic labels and economy calculations. `test_megacity_gui.cpp` adds zero,
+partial, BALL-only, prosperity, complete and non-Core cases with 161 focused
+assertions; the aggregate 509-case Catch run passed. CTest's first run passed
+519/524; its five environment/setup failures passed on a targeted rerun after
+normal build outputs were made and loopback was permitted. Both linters and
+`git diff --check` passed. Header/tier fit is statically estimated only, with no
+rendered UI or human UAT. Functional material delivery and basket consumption
+remain NOT RUN under this GUI scope; the stopped campaign and its bounds above
+are unchanged.
+
+## First Core Construction Basket first attempt — 3 October 2026
+
+**ASSISTED FUNCTIONAL FAIL at first advance; human Pending.** Source save206acdd…
+matched; layout0 met all search/quote caps and four normal material services were
+built for£364,281. A false zero-annual-running-cost assumption in the per-tick
+spending guard stopped before any of the requested2,048ticks ran. One initial
+load and one advance request are consumed; cold0, new assistance£0, debt£100k.
+Native cash£3,705,864−£364,281=£3,341,583. Raw logs, 1,811 debit rows, failed
+result and fixed source are [retained](audit/2026-10-03/core-construction-basket/README.md).
+The corrected guard has not received a native continuation or fresh attempt;
+another run needs explicit owner handoff and aggregate-budget treatment. Core
+steel/ballast receipt, missing-BALL control and growth remain NOT RUN.
+
+## First Core Construction Basket intake — 2 October 2026
+
+Owner-authorized one-slice execution from the final already-funded checkpoint.
+Authoritative plan committed before source edits; independent Astra maximum
+plan review CLEAR. Live main85c423b4 and PR66head7bc29a60/required compiler and
+reviewed-delivery ancestry verified. Isolated codex/first-core-construction-basket
+stacks on the unmerged dependency. No native campaign or new assistance yet;
+implementation/native proof NOT RUN, human Pending. [Current audit](audit/2026-10-02/core-construction-basket/README.md).
+
 ## First Functional Core Supply repaired same-funded tail — 1 October 2026
 
 **ASSISTED FUNCTIONAL requested mission PASS; full reviewed acceptance PARTIAL.**

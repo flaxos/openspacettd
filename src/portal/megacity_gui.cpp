@@ -190,13 +190,24 @@ struct MegacityOverviewWindow : Window {
 				tr.top += GetCharacterHeight(FontSize::Normal);
 
 				if (profile != nullptr) {
+					bool is_core = IntegratedEconomy::Enabled() && (IntegratedEconomy::Role(profile->world_id) == EconomicRole::Core || (town != nullptr && IntegratedEconomy::Role(PlanetManager::GetTileWorld(town->xy)) == EconomicRole::Core));
 					StringID growth_str;
-					switch (profile->growth_state) {
-						case MegacityGrowthState::Starvation:       growth_str = STR_MEGACITY_GROWTH_STARVATION; break;
-						case MegacityGrowthState::Subsistence:      growth_str = STR_MEGACITY_GROWTH_SUBSISTENCE; break;
-						case MegacityGrowthState::MetropolitanBoom: growth_str = STR_MEGACITY_GROWTH_BOOM; break;
-						case MegacityGrowthState::HyperGrowth:      growth_str = STR_MEGACITY_GROWTH_HYPERGROWTH; break;
-						default:                                    growth_str = STR_MEGACITY_GROWTH_SUBSISTENCE; break;
+					if (is_core) {
+						switch (profile->growth_state) {
+							case MegacityGrowthState::Starvation:       growth_str = STR_MEGACITY_GROWTH_STARVATION; break;
+							case MegacityGrowthState::Subsistence:      growth_str = STR_MEGACITY_GROWTH_CORE_SUBSISTENCE; break;
+							case MegacityGrowthState::MetropolitanBoom: growth_str = STR_MEGACITY_GROWTH_CORE_BOOM; break;
+							case MegacityGrowthState::HyperGrowth:      growth_str = STR_MEGACITY_GROWTH_HYPERGROWTH; break;
+							default:                                    growth_str = STR_MEGACITY_GROWTH_CORE_SUBSISTENCE; break;
+						}
+					} else {
+						switch (profile->growth_state) {
+							case MegacityGrowthState::Starvation:       growth_str = STR_MEGACITY_GROWTH_STARVATION; break;
+							case MegacityGrowthState::Subsistence:      growth_str = STR_MEGACITY_GROWTH_SUBSISTENCE; break;
+							case MegacityGrowthState::MetropolitanBoom: growth_str = STR_MEGACITY_GROWTH_BOOM; break;
+							case MegacityGrowthState::HyperGrowth:      growth_str = STR_MEGACITY_GROWTH_HYPERGROWTH; break;
+							default:                                    growth_str = STR_MEGACITY_GROWTH_SUBSISTENCE; break;
+						}
 					}
 					DrawString(tr, growth_str);
 					tr.top += GetCharacterHeight(FontSize::Normal);
@@ -205,7 +216,7 @@ struct MegacityOverviewWindow : Window {
 						profile->overall_supply_index * 100.0f, profile->growth_multiplier, profile->passenger_multiplier);
 					DrawString(tr, supply_str, TextColour::White);
 					tr.top += GetCharacterHeight(FontSize::Normal);
-					if (IntegratedEconomy::Enabled()) DrawString(tr, IntegratedEconomy::CityStatus(town->index), TextColour::White);
+					if (IntegratedEconomy::Enabled() && town != nullptr) DrawStringMultiLine(tr, IntegratedEconomy::CityStatus(town->index), TextColour::White);
 				} else {
 					DrawString(tr, "Status: Not registered as Megacity. Click 'Designate Megacity' to activate quotas.", TextColour::Silver);
 				}
@@ -244,7 +255,7 @@ struct MegacityOverviewWindow : Window {
 						}
 						tr.top = DrawStringMultiLine(
 									 tr,
-									 fmt::format("{}: reserve {} / {}; used {} last month{}", GetString(CargoSpec::Get(cargo)->name), stock,
+									 fmt::format("{}: demand {}, reserve {} / {}; used {} last month{}", GetString(CargoSpec::Get(cargo)->name), required, stock,
 												 required * (tier == 0 ? 3 : 1), consumed, stock < required ? " - delivery needed" : ""),
 									 TextColour::White) +
 								 2;
