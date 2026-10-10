@@ -1,5 +1,20 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Coordinated delivery: Station Adapter (PR #75), Gate Art (PR #76), and Electronics Preflight — 10 October 2026
+
+Delivered all three coordinated roadmap items:
+1. **Core Town Station Adapter (PR #75)**: Committed and submitted PR #75 on `codex/dev-core-town-station-adapter`
+   targeting `codex/first-core-construction-basket`. Exposes `CoreTownStationQuote` and `CoreTownStationExecution`,
+   proves Train 4 `OT_LOADING` order safety at index 0, stages 2-tile Core station, connector, and reverse link,
+   and passes 121 unit assertions across 7 cases and 3 Python adapter tests.
+2. **Wormhole Gate Art Checkpoint (PR #76)**: Committed and submitted PR #76 on `codex/art-wormhole-gate-family-light`
+   targeting `main`. Packages 16-sprite gate sheets in `pkg/commonwealth_gates/`, compiles NewGRF container
+   `bin/newgrf/openspacettd_gates_v1.grf` (41,303 bytes), and passes 20/20 synthetic negative tests and pixel-exact
+   exporter determinism.
+3. **Player-Funded Electronics Loop Preflight**: Published `docs/audit/2026-10-10/electronics-loop-preflight.md`
+   defining `TECH_MATERIALS_2` (250 RP), copper and silica site surveying, Pipeline B manufacturing recipes, and
+   Megacity prosperity integration.
+
 ## Local/GitHub/cloud checkpoint reconciliation — 10 October 2026
 
 Documentation delivery only; no new sprint, implementation or simulation run.
