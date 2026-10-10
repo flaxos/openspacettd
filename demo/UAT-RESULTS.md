@@ -1,5 +1,20 @@
 # Human UAT results — recovery / v1.1
 
+## Core basket repeat and town station delivery — 10 October 2026
+
+**Human UAT Passed (Transport & Station Unloading) with Operational Starvation Finding.**
+Human desktop playtest executed using staged scenario `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`
+and advanced over 24 in-game years (tick 378,112 to tick 668,053, saved to
+`demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`).
+Confirmed: Train 4 reliably departs Station 2, transits to Station 10, unloads FOOD into
+Core Megacity (Town 0) reserves, and generates valid transport revenue (£18,484,224 over 13 trips).
+Operational finding: Because the city storage buffer is hard-capped at 3 months (150–165 units)
+by `IntegratedEconomy::AcceptCity`, Train 4's single-consist 105-unit delivery sustains the city for
+only ~1.9 months against a 17-month round-trip journey. The city spends >90% of simulation time in
+starvation, resulting in net population decline (1,096 -> 870) and near-zero house growth (29 -> 30).
+Automated proof: `./build/openttd_test` (522 cases), `ctest` (537/537 passed).
+See [audit evidence](../docs/audit/2026-10-10/sustained-food-growth/README.md).
+
 ## Recovered full-basket evidence — 10 October 2026
 
 **Human UAT Pending.** Historical automated evidence from October 5 records one

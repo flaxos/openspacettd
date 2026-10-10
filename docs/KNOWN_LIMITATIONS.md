@@ -1,5 +1,36 @@
 # OpenSpaceTTD Known Limitations
 
+## Core basket repeat and electronics loop boundaries — 10 October 2026
+
+A second basket was consumed and reloaded cleanly in automated offline proof
+([evidence](audit/2026-10-10/core-basket-repeat/README.md)), and the food starvation mechanism
+(single consist carrying 105 FOOD vs $3 \times \text{demand} = 165$ buffer ceiling over a 17-month journey)
+has been audited and mathematically proven with unit test coverage (`[sustained-growth]`).
+Human desktop playtest (Track 9, `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` -> `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`)
+confirmed mechanical transport and Station 10 unloading (£18,484,224 profit across 13 runs over 24 years),
+while verifying the operational starvation finding: continuous town growth requires multiple staggered consists
+($\le 2$ months interval) or nearby buffering rather than a single train.
+
+The Player-Funded Electronics Loop (`TECH_MATERIALS_2`, Pipeline B, HyperGrowth) is verified via unit test
+(`test_electronics_loop.cpp`) and authoritative script against the consumed basket save; in-world railway construction
+connecting the copper and silica sites to factories and the Megacity in an active live campaign remains open.
+
+## Station Adapter and Gate Art delivery boundaries — 10 October 2026
+
+The station adapter is committed and submitted as PR #75 on `codex/dev-core-town-station-adapter`,
+verifying Train 4 `OT_LOADING` safety and passing 121 unit assertions across 7 cases and 3 Python adapter tests.
+The wormhole gate art is committed and submitted as PR #76 on `codex/art-wormhole-gate-family-light`,
+verifying NewGRF compilation (41,303 bytes) and 20/20 synthetic tests.
+
+Remaining boundaries:
+1. **Core Growth & Basket Repeat**: Native growth enablement, town population/house count rise,
+   and cold-reload persistence after Train 4 delivery to the nearer station remain pending execution
+   under the new active handoff in `docs/ACTIVE_EXECUTION_PLAN.md`.
+2. **Gate Runtime Selection**: The gate NewGRF is compiled and verified, but C++ engine loader/resolver
+   wiring and `DrawTile_TunnelBridge` integration remain in the subsequent Sprint 2 Art track.
+3. **Electronics Chain**: Preflight is established in `docs/audit/2026-10-10/electronics-loop-preflight.md`;
+   concrete in-game survey execution and facility placement remain queued for Horizon A progression.
+
 ## Retained basket evidence and unpublished adapter — 10 October 2026
 
 The October 5 archive establishes one atomic 60 FOOD + 20 STEL + 20 BALL

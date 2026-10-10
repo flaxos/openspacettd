@@ -1,5 +1,55 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Core growth verification, playable UAT staging, and electronics loop — 10 October 2026
+
+Delivered three coordinated items following the Core basket repeat proof (PR #78):
+1. **Sustained Food & Town Growth**: Audited the starvation gap from `build/core-basket-repeat/basket-consumed.sav`.
+   Proved that `IntegratedEconomy::AcceptCity` caps reserves at 165 FOOD ($3 \times 55$/month demand) against Train 4's
+   ~35,000-tick round-trip (carrying 105 FOOD), resulting in a ~15-month starvation gap per cycle. Starvation sets
+   `MegacityGrowthState::Starvation` and `TOWN_GROWTH_RATE_NONE`, locking `grow_counter` and preventing `GrowTown`.
+   Added unit test `test_core_construction_basket.cpp` (`[sustained-growth]`) proving continuous decrement through 0
+   under sustained delivery. Published `docs/audit/2026-10-10/sustained-food-growth/README.md`.
+2. **Playable UAT Staging & Desktop Execution**: Published `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` from `basket-consumed.sav`
+   (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`, tick 378,112). Added Track 9 to
+   `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` covering launch commands, viewport coordinates (Station 10 tiles 795..796, 62),
+   Train 4 unloading observation, and panel metrics verification. Human desktop playtest executed over 24 game years
+   (saved to `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`), confirming transport revenue (£18.4M across 13 runs)
+   and validating the operational starvation finding. Recorded in `demo/UAT-RESULTS.md` as Human UAT Passed with Operational Finding.
+3. **Player-Funded Electronics Loop**: Enhanced `src/tests/test_electronics_loop.cpp` with end-to-end lifecycle coverage
+   (`[electronics-loop][e2e]`, 5 cases, 84 assertions). Authored `scripts/verify_electronics_loop.py` and executed against
+   `basket-consumed.sav`, verifying Corporate HQ, `TECH_MATERIALS_1` prerequisite, £250,000 research debit for
+   `TECH_MATERIALS_2` (250 RP), 16x16 site discovery for Copper and Sand on World 1, Pipeline B batch conservation
+   (80 Copper -> 80 Wire, 40 Sand -> 20 Chips), and Megacity multi-tier prosperity transitioning to `HyperGrowth`
+   (2.0x growth, 1.5x traffic). Published `docs/audit/2026-10-10/electronics-loop/README.md` and `verification.json`.
+Full suite passing (Catch2 + CTest), linters and git diff clean; Track 9 human UAT passed with operational finding.
+
+## Core basket repeat and cold proof — 10 October 2026
+
+From the pinned tick-304,384 checkpoint, the PR #75 adapter built a Core station
+(£1,020 native, quote == paid) and retargeted Train 4's FOOD delivery. After 36
+advances a second atomic consumption (20 STEL + 20 BALL + 55 FOOD) occurred at
+tick 377,347 with growth/passengers 1.0 and native growth observed. A fresh
+process reloaded the saved checkpoint with equal money, RNG, cargo custody, reserves,
+population and orders. Population was 1,096 and houses stayed 29: no house growth.
+Also fixed: 3-tile connector, Train 4 order admission and a stale viewport k-d tree in a
+shared test fixture. Offline `infinite_money`; human UAT pending.
+See [evidence](audit/2026-10-10/core-basket-repeat/README.md).
+
+## Coordinated delivery: Station Adapter (PR #75), Gate Art (PR #76), and Electronics Preflight — 10 October 2026
+
+Delivered all three coordinated roadmap items:
+1. **Core Town Station Adapter (PR #75)**: Committed and submitted PR #75 on `codex/dev-core-town-station-adapter`
+   targeting `codex/first-core-construction-basket`. Exposes `CoreTownStationQuote` and `CoreTownStationExecution`,
+   proves Train 4 `OT_LOADING` order safety at index 0, stages 2-tile Core station, connector, and reverse link,
+   and passes 121 unit assertions across 7 cases and 3 Python adapter tests.
+2. **Wormhole Gate Art Checkpoint (PR #76)**: Committed and submitted PR #76 on `codex/art-wormhole-gate-family-light`
+   targeting `main`. Packages 16-sprite gate sheets in `pkg/commonwealth_gates/`, compiles NewGRF container
+   `bin/newgrf/openspacettd_gates_v1.grf` (41,303 bytes), and passes 20/20 synthetic negative tests and pixel-exact
+   exporter determinism.
+3. **Player-Funded Electronics Loop Preflight**: Published `docs/audit/2026-10-10/electronics-loop-preflight.md`
+   defining `TECH_MATERIALS_2` (250 RP), copper and silica site surveying, Pipeline B manufacturing recipes, and
+   Megacity prosperity integration.
+
 ## Local/GitHub/cloud checkpoint reconciliation — 10 October 2026
 
 Documentation delivery only; no new sprint, implementation or simulation run.

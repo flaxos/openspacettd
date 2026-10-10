@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "connected_economy.h"
 #include "integrated_economy.h"
+#include "fabrication_manager.h"
 #include "../economy_func.h"
 #include "../economy_base.h"
 #include "commonwealth_slice.h"
@@ -35,6 +36,7 @@
 #include "../depot_base.h"
 #include "../train_cmd.h"
 #include "../vehicle_cmd.h"
+#include "../vehicle_func.h"
 #include "../order_cmd.h"
 #include "../signs_cmd.h"
 #include "../blueprint/blueprint_manager.h"
@@ -2060,6 +2062,22 @@ struct BasketSession {
 	std::array<std::optional<BasketLayout>, 2> plans;
 } basket;
 
+/** One transient, single-candidate repair. A load revokes this authority. */
+struct TownStationSession {
+	bool planned = false, stopped = false;
+	uint8_t stage = 0; ///< 0 quoted, 1 paid station, 2 link, 3 retargeted.
+	std::string token;
+	Json envelope, expected, guard, quote, expected_rng;
+	Json material_quote = Json::array(); ///< Expected physical stockpile use in the last command.
+	Json secondary_errors = Json::array();
+	StationID station = StationID::Invalid();
+	int64_t paid = 0, maximum = 0;
+	std::string reason;
+} town_station;
+
+/* A load revokes the active plan but not tokens already submitted in this process. */
+std::set<std::string> town_station_seen_tokens;
+
 bool BasketFail(std::string_view error)
 {
 	if (!basket.failed) basket.error = error;
@@ -2682,9 +2700,450 @@ bool CoreBasket(std::span<std::string_view> argv)
 	IConsolePrint(CC_DEFAULT, "CONNECTED basket-result {}", report.dump());
 	return true;
 }
+
+/** Refuse a train whose ordinary delivery cannot be copied by InsertOrder. */
+std::string TownStationTrainError(const Train *train)
+{
+	if (train == nullptr || !train->IsFrontEngine() || train->owner != CompanyID{0} ||
+		train->vehstatus.Test(VehState::Crashed) || train->vehicle_flags.Test(VehicleFlag::PathfinderLost)) return "food-train";
+	if (train->IsOrderListShared() || train->GetNumOrders() != 2) return "shared-or-special-orders";
+	const Order *pickup = train->GetOrder(0), *delivery = train->GetOrder(1);
+	if (pickup == nullptr || delivery == nullptr || !pickup->IsType(OT_GOTO_STATION) || !delivery->IsType(OT_GOTO_STATION) ||
+		pickup->GetDestination().base() != 2 || delivery->GetDestination().base() != 3 ||
+		train->cur_real_order_index != 0 || train->current_order.GetDestination().base() != 2 ||
+		(!train->current_order.IsType(OT_GOTO_STATION) && !train->current_order.IsType(OT_LOADING))) return "unsafe-current-order";
+	/* An implicit index elsewhere can be rewritten by the insert/delete pair. */
+	if (train->cur_implicit_order_index != 0) return "unsafe-implicit-order";
+	if (delivery->GetRefitCargo() != CARGO_NO_REFIT || delivery->GetMaxSpeed() != UINT16_MAX ||
+		delivery->IsWaitTimetabled() || delivery->IsTravelTimetabled()) return "unsupported-delivery-order";
+	return {};
+}
+
+/** Freeze native state omitted by the historical basket snapshot. */
+Json TownStationGuardSnapshot()
+{
+	Json state = FunctionalSnapshot();
+	Json observation = BasketObservation();
+	observation.erase("adapter");
+	state["native_observation"] = std::move(observation);
+	const Train *train = Train::GetIfValid(VehicleID{4});
+	if (train != nullptr) {
+		Json orders = Json::array(), consist = Json::array();
+		for (const Order &order : train->Orders()) orders.push_back({order.GetRefitCargo(), order.GetWaitTime(), order.GetTravelTime(),
+			order.GetMaxSpeed(), order.IsWaitTimetabled(), order.IsTravelTimetabled()});
+		for (const Train *unit = train; unit != nullptr; unit = unit->Next()) consist.push_back({unit->index.base(), unit->owner.base(),
+			unit->cargo_type, unit->cargo.StoredCount(), unit->cargo_cap, unit->tile.base()});
+		state["native_train_guard"] = {{"shared", train->IsOrderListShared()}, {"implicit_index", train->cur_implicit_order_index},
+			{"orders", orders}, {"consist", consist}};
+	}
+	const Town *town = Town::GetIfValid(TownID{0});
+	state["town_radius_squared"] = town == nullptr ? 0 : town->cache.squared_town_zone_radius[to_underlying(HouseZone::TownEdge)];
+	state["station_cache_guard"] = Json::array();
+	CargoType food = GetCargoTypeByLabel(CargoLabel{"FOOD"});
+	for (const Station *station : Station::Iterate()) state["station_cache_guard"].push_back({station->index.base(), station->xy.base(),
+		station->owner.base(), station->town == nullptr ? UINT16_MAX : station->town->index.base(),
+		station->time_since_load, station->time_since_unload,
+		IsValidCargoType(food) && GetAcceptanceMask(station).Test(food)});
+	for (auto [x, y] : {std::pair{792u, 62u}, {793u, 62u}, {794u, 62u}, {795u, 62u}, {796u, 62u}}) {
+		TileIndex tile = TileXY(x, y);
+		Json part = GenerationTile(tile);
+		if (IsPlainRailTile(tile)) part["reservation"] = GetRailReservationTrackBits(tile).base();
+		state["site_tiles"].push_back(std::move(part));
+	}
+	return state;
+}
+
+/** Native station initialization plus two default tiles consume three values. */
+Json TownStationExpectedBuiltRng()
+{
+	Randomizer expected = _random;
+	expected.Next(); expected.Next(); expected.Next();
+	return {expected.state[0], expected.state[1]};
+}
+
+bool ReserveTownStationToken(std::string_view token)
+{
+	/* This process admits only one candidate, even after a game reload. */
+	if (!town_station_seen_tokens.empty()) return false;
+	return town_station_seen_tokens.insert(std::string(token)).second;
+}
+
+/** Construction must not dislodge an occupied or reserved train route. */
+bool TownStationFootprintSafe(TileIndex tile)
+{
+	if (!IsValidTile(tile) || !IsInnerTile(tile) || TileX(tile) + 1 >= Map::SizeX() ||
+		!IsInnerTile(tile + TileDiffXY(1, 0))) return false;
+	for (TileIndex part : {tile, tile + TileDiffXY(1, 0)}) {
+		if (EnsureNoVehicleOnGround(part).Failed()) return false;
+		if (IsPlainRailTile(part)) {
+			if (GetTileOwner(part) != CompanyID{0} || GetRailType(part) != RAILTYPE_RAIL ||
+				GetTrackBits(part) != Track::X || GetRailReservationTrackBits(part).Any() || HasSignals(part)) return false;
+		} else if (!IsTileType(part, TileType::Clear) && !IsTileType(part, TileType::Trees)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/** The operator's file freezes the exact loaded projection and one bounded site. */
+std::string TownStationEnvelopeError(const Json &plan, const Json &state)
+{
+	try {
+		if (!plan.is_object() || plan.at("version") != 1 || plan.at("state") != state ||
+			plan.at("town") != 0 || plan.at("train") != 4 || plan.at("pickup") != 2 || plan.at("delivery") != 3 ||
+			plan.at("x") != 795 || plan.at("y") != 62 || plan.at("connector_x") != 794 || plan.at("connector_y") != 62)
+			return "frozen-envelope-or-candidate";
+		const std::string token = plan.at("token").get<std::string>();
+		if (token.size() < 16 || token.size() > 128 || !std::all_of(token.begin(), token.end(), [](unsigned char c) {
+			return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+		}))
+			return "invalid-token";
+		int64_t maximum = plan.at("maximum_native_cost").get<int64_t>();
+		if (maximum <= 0 || maximum > 1000000) return "invalid-cost-ceiling";
+		uint track = plan.at("connector_track").get<uint>();
+		if (track >= to_underlying(Track::End) || !IsValidTrack(static_cast<Track>(track))) return "invalid-connector-track";
+		return {};
+	} catch (const Json::exception &) { return "invalid-envelope-json"; }
+}
+
+/** Read-only native site checks supplement, rather than replace, the native quote. */
+std::string TownStationSiteError(TileIndex tile, TileIndex connector, Track track)
+{
+	const Town *town = Town::GetIfValid(TownID{0});
+	if (town == nullptr || !IsValidTile(tile) || !IsInnerTile(tile) || !IsValidTile(connector) || !IsInnerTile(connector) ||
+		TileX(tile) + 1 >= Map::SizeX() || !IsInnerTile(tile + TileDiffXY(1, 0)) ||
+		PlanetManager::GetTileWorld(tile) != WorldID{0} || PlanetManager::GetTileWorld(tile + TileDiffXY(1, 0)) != WorldID{0} ||
+		PlanetManager::GetTileWorld(connector) != WorldID{0}) return "candidate-world-or-footprint";
+	if (!TownStationFootprintSafe(tile)) return "occupied-reserved-or-foreign-footprint";
+	if (DistanceSquare(tile, town->xy) > town->cache.squared_town_zone_radius[to_underlying(HouseZone::TownEdge)]) return "candidate-outside-town-radius";
+	/* This bounded straight approach follows the station's Axis::X rail; a
+	 * curve, junction or different topology needs its own reviewed plan. */
+	if (track != Track::X) return "unsupported-connector-topology";
+	if (TileX(connector) != 794 || TileY(connector) != 62) return "connector-demolition-or-incompatible";
+	for (uint x = 792; x <= 794; ++x) {
+		TileIndex part = TileXY(x, 62);
+		if (!IsInnerTile(part) || PlanetManager::GetTileWorld(part) != WorldID{0} ||
+			!IsCoreTownStationConnectorTileAllowed(part, track)) return "connector-demolition-or-incompatible";
+	}
+	const TileIndex approach = TileXY(791, 62);
+	if (!IsInnerTile(approach) || PlanetManager::GetTileWorld(approach) != WorldID{0} ||
+		GetTileOwner(approach) != CompanyID{0} || GetRailType(approach) != RAILTYPE_RAIL)
+		return "missing-owned-straight-approach";
+	if (IsPlainRailTile(approach)) {
+		if (!GetTrackBits(approach).Test(Track::X)) return "missing-owned-straight-approach";
+	} else if (IsRailStationTile(approach)) {
+		if (GetRailStationAxis(approach) != Axis::X) return "missing-owned-straight-approach";
+	} else {
+		return "missing-owned-straight-approach";
+	}
+	return {};
+}
+
+/** Produce a truthful record after each non-atomic native stage. */
+Json TownStationReport(const Json &before, const Json &after, std::string_view operation, const CommonwealthSliceAudit &audit)
+{
+	Json result = {{"version", 1}, {"operation", operation}, {"stage", town_station.stage},
+		{"stopped", town_station.stopped}, {"reason", town_station.reason}, {"secondary_errors", town_station.secondary_errors}, {"token", town_station.token},
+		{"station", town_station.station != StationID::Invalid() ? town_station.station.base() : UINT16_MAX},
+		{"native_paid", town_station.paid}, {"maximum_native_cost", town_station.maximum},
+		{"actual_ticks", after.at("tick").get<uint64_t>() - before.at("tick").get<uint64_t>()},
+		{"cash_debits", audit.cash_debits}, {"state", after}, {"observation", BasketObservation()},
+		{"rng_expected", town_station.expected_rng.is_null() ? before.at("rng") : town_station.expected_rng}};
+	result["materials_used"] = Json::array();
+	for (CargoType cargo{0}; cargo < NUM_CARGO; ++cargo) {
+		int64_t used = before.at("all_held")[cargo].get<int64_t>() - after.at("all_held")[cargo].get<int64_t>();
+		if (used != 0) result["materials_used"].push_back({cargo, used});
+	}
+	result["materials_expected"] = town_station.material_quote;
+	result["cargo_accounted"] = result["materials_used"] == town_station.material_quote;
+	result["rng_unchanged"] = before.at("rng") == after.at("rng");
+	result["rng_accounted"] = after.at("rng") == result["rng_expected"];
+	result["cash_conserved"] = after.at("money").get<int64_t>() == before.at("money").get<int64_t>() - audit.cash_debits;
+	if (const Station *station = Station::GetIfValid(town_station.station); station != nullptr) {
+		const Town *town = Town::GetIfValid(TownID{0});
+		CargoType food = GetCargoTypeByLabel(CargoLabel{"FOOD"});
+		result["station_actual"] = {{"anchor", station->xy.base()}, {"owner", station->owner.base()},
+			{"town", station->town == nullptr ? UINT16_MAX : station->town->index.base()},
+			{"distance_squared", town == nullptr ? UINT32_MAX : DistanceSquare(station->xy, town->xy)},
+			{"radius_squared", town == nullptr ? 0 : town->cache.squared_town_zone_radius[to_underlying(HouseZone::TownEdge)]},
+			{"food_acceptance", IsValidCargoType(food) && GetAcceptanceMask(station).Test(food)},
+			{"consumer", MegacityManager::IsConsumerStation(station)},
+			{"time_since_load", station->time_since_load}, {"time_since_unload", station->time_since_unload}};
+	}
+	return result;
+}
+
+/** Two deliberately separate console operations; no owner-save load or tick. */
+bool CoreTownStation(std::span<std::string_view> argv)
+{
+	/* Confirm the target's actual native owner before assuming command company 0. */
+	const Train *owned_train = Train::GetIfValid(VehicleID{4});
+	if (owned_train == nullptr || owned_train->owner != CompanyID{0}) {
+		IConsolePrint(CC_ERROR, "CONNECTED town-station {}", Json{{"stopped", true}, {"reason", "food-train-owner"}}.dump());
+		return true;
+	}
+	Json before = Company::GetIfValid(CompanyID{0}) == nullptr ? Json::object() : FunctionalSnapshot();
+	/* Expectations describe this invocation, not the previous paid stage. */
+	town_station.material_quote = Json::array();
+	town_station.expected_rng = before.empty() ? Json{} : before.at("rng");
+	Json guard_before;
+	CommonwealthSliceAudit audit;
+	AutoRestoreBackup observer(_commonwealth_slice_audit, &audit);
+	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	auto finish = [&](std::string_view op) {
+		Json after = Company::GetIfValid(CompanyID{0}) == nullptr ? Json::object() : FunctionalSnapshot();
+		Json report = before.empty() ? Json{{"stopped", true}, {"reason", town_station.reason}} : TownStationReport(before, after, op, audit);
+		IConsolePrint(CC_DEFAULT, "CONNECTED town-station {}", report.dump());
+		return true;
+	};
+	auto stop = [&](std::string reason) {
+		if (town_station.stopped) town_station.secondary_errors.push_back(reason);
+		else town_station.reason = std::move(reason);
+		town_station.stopped = true;
+	};
+	auto environment = [&] {
+		return _game_mode == GameMode::Normal && !_networking && !_network_dedicated &&
+			Company::GetNumItems() == 1 && Company::GetIfValid(CompanyID{0}) != nullptr &&
+			_pause_mode.Test(PauseMode::Normal) && BasketProfile() && !basket.armed && !basket.built && !basket.failed &&
+			!GetIntegratedCoreTownGenerationStats().active && !generation_contract_fresh && !functional_fresh;
+	};
+	if (argv[1] == "town-station-quote" && argv.size() == 3) {
+			if (!environment()) {
+				stop("offline-paused-loaded-admission"); return finish(argv[1]);
+			}
+			guard_before = TownStationGuardSnapshot();
+		try {
+			std::ifstream file(std::string(argv[2]), std::ios::binary);
+			if (!file) { stop("envelope-file"); return finish(argv[1]); }
+			file.seekg(0, std::ios::end); auto length = file.tellg();
+			if (length <= 0 || length > 16 * 1024 * 1024) { stop("envelope-size"); return finish(argv[1]); }
+			file.seekg(0); Json plan = Json::parse(file);
+			std::string error = TownStationEnvelopeError(plan, before);
+			if (!error.empty()) { stop(error); return finish(argv[1]); }
+			const Train *train = Train::GetIfValid(VehicleID{4});
+			CoreTownStationAdmissionContext context{true, true, true, true, true, false,
+				train != nullptr && train->IsOrderListShared(), uint32_t(Company::GetNumItems())};
+			error = GetCoreTownStationAdmissionError(before, context);
+			if (error.empty()) error = TownStationTrainError(train);
+			if (!error.empty()) { stop(error); return finish(argv[1]); }
+			TileIndex tile = TileXY(795, 62), connector = TileXY(794, 62);
+			Track track = static_cast<Track>(plan.at("connector_track").get<uint>());
+			error = TownStationSiteError(tile, connector, track);
+			if (!error.empty()) { stop(error); return finish(argv[1]); }
+			if (town_station.planned) {
+				if (town_station.stage != 0 || town_station.stopped || town_station.envelope != plan ||
+					town_station.expected != before || town_station.guard != guard_before) {
+					stop("existing-or-stale-plan"); return finish(argv[1]);
+				}
+			} else {
+				if (!ReserveTownStationToken(plan.at("token").get<std::string>())) { stop("reused-process-token"); return finish(argv[1]); }
+				town_station = TownStationSession{};
+				town_station.planned = true; town_station.token = plan.at("token").get<std::string>();
+				town_station.envelope = plan; town_station.expected = before; town_station.guard = guard_before;
+				town_station.expected_rng = before.at("rng");
+				town_station.maximum = plan.at("maximum_native_cost").get<int64_t>();
+			}
+			auto station_quote = QueryCoreTownStation(tile);
+			CommandCost link_quote;
+			for (uint x = 792; x <= 794; ++x) {
+				auto q = QueryCoreBasketRail(TileXY(x, 62), track);
+				if (q.Failed()) { stop("native-station-or-link-quote"); return finish(argv[1]); }
+				link_quote.AddCost(q.GetCost());
+			}
+			if (station_quote.Failed()) { stop("native-station-or-link-quote"); return finish(argv[1]); }
+			int64_t total = int64_t(station_quote.GetCost()) + int64_t(link_quote.GetCost());
+			if (total <= 0 || total > town_station.maximum) { stop("native-cost-ceiling"); return finish(argv[1]); }
+			Json live_quote = {{"station_cost", int64_t(station_quote.GetCost())}, {"link_cost_provisional", int64_t(link_quote.GetCost())},
+				{"station_tile", tile.base()}, {"connector_tile", connector.base()}, {"connector_track", uint(track)},
+				{"town_tile", Town::Get(TownID{0})->xy.base()}, {"candidate_distance_squared", DistanceSquare(tile, Town::Get(TownID{0})->xy)},
+				{"radius_squared", Town::Get(TownID{0})->cache.squared_town_zone_radius[to_underlying(HouseZone::TownEdge)]},
+				{"food_acceptance", "provisional-until-native-build"}};
+			if (!TryFreezeCoreTownStationQuote(town_station.quote, live_quote)) stop("native-quote-changed-on-repeat");
+			if (TownStationGuardSnapshot() != guard_before) stop("native-query-mutated-state");
+		} catch (const std::exception &) { stop("invalid-envelope-file-or-json"); }
+		Json after = FunctionalSnapshot(); Json report = TownStationReport(before, after, argv[1], audit);
+		report["quote"] = town_station.quote; IConsolePrint(CC_DEFAULT, "CONNECTED town-station {}", report.dump()); return true;
+	}
+	if (argv[1] != "town-station-apply" || argv.size() != 4 || !town_station.planned || town_station.stopped ||
+		std::string(argv[2]) != town_station.token || !environment() || before != town_station.expected) {
+		stop("unplanned-used-or-stale-apply"); return finish(argv[1]);
+	}
+	guard_before = TownStationGuardSnapshot();
+	TileIndex planned_tile = TileXY(795, 62);
+	const Station *built_site = Station::GetIfValid(town_station.station);
+	bool connectors_allowed = true;
+	for (uint x = 792; x <= 794; ++x) {
+		if (!IsCoreTownStationConnectorTileAllowed(TileXY(x, 62), static_cast<Track>(town_station.envelope.at("connector_track").get<uint>()))) {
+			connectors_allowed = false;
+			break;
+		}
+	}
+	bool site_ok = town_station.stage == 0 ?
+		TownStationSiteError(planned_tile, TileXY(794, 62), static_cast<Track>(town_station.envelope.at("connector_track").get<uint>())).empty() :
+		built_site != nullptr && built_site->owner == CompanyID{0} && IsRailStationTile(planned_tile) &&
+		IsRailStationTile(planned_tile + TileDiffXY(1, 0)) && GetStationIndex(planned_tile) == town_station.station &&
+		GetStationIndex(planned_tile + TileDiffXY(1, 0)) == town_station.station &&
+		connectors_allowed;
+	if (guard_before != town_station.guard || !TownStationTrainError(Train::GetIfValid(VehicleID{4})).empty() || !site_ok) {
+		stop("changed-native-train-or-site-before-spend"); return finish(argv[1]);
+	}
+	const std::string_view step = argv[3];
+	const int64_t paid_before = town_station.paid;
+	TileIndex tile = TileXY(795, 62);
+	Track track = static_cast<Track>(town_station.envelope.at("connector_track").get<uint>());
+	if (step == "station" && town_station.stage == 0) {
+		auto quote = QueryCoreTownStation(tile);
+		if (quote.Failed() || int64_t(quote.GetCost()) != town_station.quote.at("station_cost")) stop("station-query-parity");
+		else if (TownStationGuardSnapshot() != guard_before) stop("station-query-mutated-state");
+		else {
+			BillOfMaterials bill;
+			if (FabricationManager::QuoteRailStructure(tile, RAILTYPE_RAIL, 2, bill).Failed()) {
+				stop("station-material-quote"); return finish(argv[1]);
+			}
+			for (auto [cargo, units] : bill.materials) town_station.material_quote.push_back({cargo, units});
+			town_station.expected_rng = TownStationExpectedBuiltRng();
+			auto result = Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, tile, RAILTYPE_RAIL,
+				Axis::X, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+			if (result.Failed()) { town_station.material_quote = Json::array(); town_station.expected_rng = before.at("rng"); stop("partial-station-execution"); }
+			else {
+				town_station.paid += int64_t(result.GetCost()); town_station.stage = 1;
+				if (result.GetCost() != quote.GetCost()) stop("partial-station-cost-parity");
+				if (!IsRailStationTile(tile)) stop("partial-construction-no-station");
+				else {
+					town_station.station = GetStationIndex(tile);
+					const Station *built = Station::GetIfValid(town_station.station);
+					const Town *town = Town::GetIfValid(TownID{0});
+					if (built == nullptr || town == nullptr || built->owner != CompanyID{0} || built->town != town ||
+						built->train_station.IsEmpty() || !MegacityManager::IsConsumerStation(built) ||
+						!GetAcceptanceMask(built).Test(GetCargoTypeByLabel(CargoLabel{"FOOD"})) ||
+						DistanceSquare(built->xy, town->xy) > town->cache.squared_town_zone_radius[to_underlying(HouseZone::TownEdge)])
+						stop("partial-construction-receiver-or-radius");
+				}
+			}
+		}
+	} else if (step == "link" && town_station.stage == 1) {
+		CommandCost quote_total;
+		for (uint x = 792; x <= 794; ++x) {
+			auto q = QueryCoreBasketRail(TileXY(x, 62), track);
+			if (q.Failed()) { quote_total = q; break; }
+			quote_total.AddCost(q.GetCost());
+		}
+		std::string link_error = GetCoreTownStationLinkQuoteError(quote_total, town_station.quote.at("link_cost_provisional").get<int64_t>(),
+			town_station.paid, town_station.maximum);
+		if (!link_error.empty()) stop("partial-construction-" + link_error);
+		else if (TownStationGuardSnapshot() != guard_before) stop("link-query-mutated-state");
+		else if (quote_total.GetCost() == 0) town_station.stage = 2;
+		else {
+			Money total_built_cost = Money{0};
+			bool build_failed = false;
+			for (uint x = 792; x <= 794; ++x) {
+				TileIndex part = TileXY(x, 62);
+				if (IsPlainRailTile(part) && GetTrackBits(part).Test(track)) continue;
+				if (FabricationManager::UseForRail(CompanyID{0}, RAILTYPE_RAIL))
+					for (auto [cargo, units] : FabricationManager::GetTrackBOM(RAILTYPE_RAIL).materials) town_station.material_quote.push_back({cargo, units});
+				auto result = Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, part, RAILTYPE_RAIL, track, false);
+				if (result.Failed()) { build_failed = true; break; }
+				total_built_cost += result.GetCost();
+			}
+			if (build_failed) {
+				town_station.material_quote = Json::array();
+				stop("partial-construction-link-execute");
+			} else {
+				town_station.paid += int64_t(total_built_cost);
+				town_station.stage = 2;
+				if (total_built_cost != quote_total.GetCost()) stop("partial-construction-link-cost-parity");
+			}
+		}
+	} else if (step == "orders" && town_station.stage == 2) {
+		Train *train = Train::GetIfValid(VehicleID{4});
+			std::string error = TownStationTrainError(train);
+		const Station *built = Station::GetIfValid(town_station.station);
+		if (!error.empty() || built == nullptr || built->owner != CompanyID{0} || !CanVehicleUseStation(train, built)) stop("partial-construction-order-preflight");
+		else {
+			Order replacement = *train->GetOrder(1);
+			replacement.SetDestination(built->index);
+			replacement.SetWaitTime(0);
+			replacement.SetTravelTime(0);
+			replacement.SetWaitTimetabled(false);
+			replacement.SetTravelTimetabled(false);
+			if (Command<Commands::InsertOrder>::Do(DoCommandFlag::QueryCost, VehicleID{4}, VehicleOrderID{1}, replacement).Failed())
+				stop("partial-construction-insert-quote");
+			else if (TownStationGuardSnapshot() != guard_before) stop("insert-query-mutated-state");
+			else if (Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, VehicleID{4}, VehicleOrderID{1}, replacement).Failed())
+				stop("partial-order-insert-execute");
+			else {
+				Json inserted = TownStationGuardSnapshot();
+				bool delete_ok = Command<Commands::DeleteOrder>::Do(DoCommandFlag::QueryCost, VehicleID{4}, VehicleOrderID{2}).Succeeded();
+				if (delete_ok && TownStationGuardSnapshot() != inserted) { stop("partial-order-delete-query-mutated-state"); delete_ok = false; }
+				if (delete_ok) delete_ok = Command<Commands::DeleteOrder>::Do(DoCommandFlag::Execute, VehicleID{4}, VehicleOrderID{2}).Succeeded();
+				if (!delete_ok) {
+					if (!town_station.stopped) stop("partial-order-delete");
+					if (!train->vehstatus.Test(VehState::Stopped)) {
+					Json before_control = TownStationGuardSnapshot();
+						auto control = Command<Commands::StartStopVehicle>::Do(DoCommandFlag::QueryCost, VehicleID{4}, true);
+					if (control.Succeeded() && TownStationGuardSnapshot() == before_control &&
+							Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, VehicleID{4}, true).Succeeded()) {
+							/* The native train stop is included in the partial state below. */
+						} else stop("partial-order-train-stop-failed");
+					}
+				} else {
+					town_station.stage = 3;
+					if (train->GetNumOrders() != 2 || train->GetOrder(0)->GetDestination().base() != 2 ||
+						train->GetOrder(1)->GetDestination().base() != built->index.base() || train->cur_real_order_index != 0)
+						stop("partial-order-postcondition");
+				}
+			}
+		}
+	} else stop("wrong-or-repeated-stage");
+	Json after = FunctionalSnapshot();
+	Json outcome = TownStationReport(before, after, argv[1], audit);
+	if (town_station.stage == 3 && !town_station.stopped) {
+		Json expected_trains = before.at("trains");
+		for (Json &row : expected_trains) if (row.at("id") == 4) row["orders"][1][1] = town_station.station.base();
+		if (after.at("trains") != expected_trains) stop("partial-order-train-state-diff");
+	}
+	if (after.at("tick") != before.at("tick") || !outcome.at("rng_accounted").get<bool>() || !outcome.at("cargo_accounted").get<bool>() ||
+		audit.cash_debits != town_station.paid - paid_before ||
+		after.at("money").get<int64_t>() != before.at("money").get<int64_t>() - audit.cash_debits) stop("native-conservation-failure");
+	town_station.expected = after;
+	town_station.guard = TownStationGuardSnapshot();
+	return finish(argv[1]);
+}
 /** @endcond */
 
 } // namespace
+
+std::string GetCoreTownStationNativeTrainError(const Train *train)
+{
+	return TownStationTrainError(train);
+}
+
+bool TryReserveCoreTownStationToken(std::string_view token)
+{
+	return ReserveTownStationToken(token);
+}
+
+std::string GetCoreTownStationLinkQuoteError(const CommandCost &quote, int64_t frozen_cost, int64_t paid, int64_t maximum)
+{
+	if (quote.Failed()) return "native-link-query-failed";
+	int64_t cost = quote.GetCost();
+	if (cost < 0 || cost != frozen_cost) return "native-link-query-changed";
+	if (paid < 0 || paid > maximum || cost > maximum - paid) return "native-link-cost-ceiling";
+	return {};
+}
+
+bool TryFreezeCoreTownStationQuote(nlohmann::json &frozen, const nlohmann::json &live)
+{
+	if (frozen.is_null()) frozen = live;
+	return frozen == live;
+}
+
+bool IsCoreTownStationConnectorTileAllowed(TileIndex tile, Track track)
+{
+	if (!IsValidTile(tile) || !IsInnerTile(tile) || track != Track::X || PlanetManager::GetTileWorld(tile) != WorldID{0}) return false;
+	if (IsPlainRailTile(tile)) return GetTileOwner(tile) == CompanyID{0} && GetRailType(tile) == RAILTYPE_RAIL && GetTrackBits(tile).Test(track);
+	return (IsTileType(tile, TileType::Clear) || IsTileType(tile, TileType::Trees)) && EnsureNoVehicleOnGround(tile).Succeeded();
+}
 
 nlohmann::json GetCoreBasketObservation()
 {
@@ -2719,6 +3178,16 @@ CommandCost QueryCoreBasketRail(TileIndex tile, Track track, TrackBits prospecti
 	if (slope.Failed()) return slope;
 	slope.AddCost(GetNewRailTrackCost(RAILTYPE_RAIL, PlanetManager::GetTileWorld(tile), CompanyID{0}));
 	return slope;
+}
+
+CommandCost QueryCoreTownStation(TileIndex tile)
+{
+	if (!IsValidTile(tile) || !IsInnerTile(tile) || TileX(tile) + 1 >= Map::SizeX() ||
+		!IsInnerTile(tile + TileDiffXY(1, 0)) || _current_company != CompanyID{0} ||
+		PlanetManager::GetTileWorld(tile) != WorldID{0} || PlanetManager::GetTileWorld(tile + TileDiffXY(1, 0)) != WorldID{0} ||
+		!TownStationFootprintSafe(tile)) return CMD_ERROR;
+	return Command<Commands::BuildRailStation>::Do(DoCommandFlag::QueryCost, tile, RAILTYPE_RAIL,
+		Axis::X, 1, 2, STAT_CLASS_DFLT, 0, NEW_STATION, true);
 }
 
 std::string GetCoreBasketAdmissionError(const nlohmann::json &state, const CoreBasketAdmissionContext &context, bool continuation)
@@ -2761,12 +3230,56 @@ std::string GetCoreBasketAdmissionError(const nlohmann::json &state, const CoreB
 				(*train).at("engine") != (i % 4 == 0 ? 32 : i < 4 ? 50 : 52)) return "inherited-fleet";
 			if (i == 0 || i == 4) {
 				Json orders = Json::array({Json::array({1, i == 0 ? 0 : 2, 2, 4, 1, 0}), Json::array({1, i == 0 ? 1 : 3, 4, 0, 1, 0})});
+				if (i == 4 && (*train).at("orders") != orders) {
+					if ((*train).at("orders").size() == 2 && (*train).at("orders")[0] == Json::array({1, 2, 2, 4, 1, 0})) {
+						StationID dest{(*train).at("orders")[1][1].get<uint16_t>()};
+						const Station *st = Station::GetIfValid(dest);
+						if (st != nullptr && st->owner == CompanyID{0} && MegacityManager::IsConsumerStation(st)) {
+							orders[1][1] = dest.base();
+						}
+					}
+				}
 				if ((*train).at("orders") != orders) return "inherited-orders";
 			}
 		}
 		return {};
 	} catch (const nlohmann::json::exception &) {
 		return "checkpoint-json";
+	}
+}
+
+std::string GetCoreTownStationAdmissionError(const nlohmann::json &state, const CoreTownStationAdmissionContext &context)
+{
+	if (!context.normal) return "game-mode";
+	if (!context.offline) return "network-offline";
+	if (!context.loaded) return "fresh-generation";
+	if (!context.paused) return "pause";
+	if (!context.profile) return "profile-content";
+	if (context.companies != 1) return "company-count";
+	if (context.competing_basket) return "competing-basket-session";
+	if (context.shared_orders) return "shared-orders";
+	try {
+		if (state.at("company") != Json(std::string(FUNCTIONAL_COMPANY)) || state.at("loan") != 100000 ||
+			state.at("seed") != 11 || state.at("tick").get<uint64_t>() <= 167168) return "source-identity";
+		const auto &towns = state.at("towns");
+		auto town = std::find_if(towns.begin(), towns.end(), [](const Json &row) { return row.at("id") == 0; });
+		if (town == towns.end() || town->at("world") != 0 || town->at("megacity") != true) return "core-town";
+		const auto &trains = state.at("trains");
+		auto train = std::find_if(trains.begin(), trains.end(), [](const Json &row) { return row.at("id") == 4; });
+		if (train == trains.end() || train->at("owner") != 0 || train->at("front") != true ||
+			train->at("crashed") != false || train->at("lost") != false) return "food-train";
+		if (train->at("orders") != Json::array({Json::array({1, 2, 2, 4, 1, 0}), Json::array({1, 3, 4, 0, 1, 0})}))
+			return "food-orders";
+		/* In the retained save the train is loading at the unaffected pickup.
+		 * Native insertion at delivery index 1 and deletion at 2 leave index 0
+		 * and its current loading order untouched. An active delivery is unsafe. */
+		if (train->at("order_index") != 0 || train->at("current_order") != 2) return "active-delivery-or-index";
+		const Json &current = train->at("current_order_flags");
+		if (!current.is_array() || current.size() != 5 || (current[0] != OT_GOTO_STATION && current[0] != OT_LOADING))
+			return "unsafe-current-order";
+		return {};
+	} catch (const Json::exception &) {
+		return "station-admission-json";
 	}
 }
 
@@ -2790,6 +3303,7 @@ void ResetConnectedEconomyProof()
 	generation_contract_fresh = false;
 	functional_fresh = false;
 	basket = BasketSession{};
+	town_station = TownStationSession{};
 }
 
 bool RepairConnectedEconomyTerrain()
@@ -2807,6 +3321,7 @@ bool SmoothExposedUATTerrain()
 
 bool ConConnectedEconomy(std::span<std::string_view> argv)
 {
+	if (argv.size() >= 2 && argv[1].starts_with("town-station-")) return CoreTownStation(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("basket-")) return CoreBasket(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("functional-")) return FunctionalCore(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("generation-contract-")) return GenerationContract(argv);

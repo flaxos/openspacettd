@@ -1,5 +1,31 @@
 # OpenSpaceTTD Current Architecture
 
+## Pipeline B electronics and megacity prosperity architecture — 10 October 2026
+
+`test_electronics_loop.cpp` and `verify_electronics_loop.py` establish the authoritative specification and
+lifecycle for Horizon A Phase 2 materials:
+
+- **Research and Corporate HQ**: Unlocking `TECH_MATERIALS_2` (250 Research Points) requires a registered Corporate HQ
+  on a Phase 1 Core world (e.g. World 0) and completed `TECH_MATERIALS_1`. Development fund debits (£1,000 per RP =
+  £250,000) are enforced under standard treasury accounting without phantom capital injection.
+- **Resource Site Surveying**: Once `TECH_MATERIALS_2` is unlocked, `ResourceSiteManager` enables 16x16 footprint site
+  discovery on resource worlds (Phase 2 Developed, e.g. World 1) for Copper Ore (`COPR`) and Silica Sand (`SAND`).
+- **Pipeline B Manufacturing Recipes**:
+  - `RECIPE_COPPER_SMELTING`: Converts Copper Ore into Conductive Wiring (`WIRE`) at a 1:1 ratio (e.g. 80 Ore -> 80 Wire).
+  - `RECIPE_SILICON_ARC`: Converts Silica Sand into Silicon Chips (`CHIP`) at a 2:1 ratio (e.g. 40 Sand -> 20 Chips).
+  Both recipes strictly enforce batch mass conservation with zero phantom loss or creation.
+- **Megacity Multi-Tier Prosperity and HyperGrowth**:
+  - Tier 1: Sustenance (Food + Steel + Ballast construction basket).
+  - Tier 2: Expansion (Conductive Wiring / `WIRE`).
+  - Tier 3: Prosperity (Silicon Microchips / `CHIP`).
+  When monthly deliveries fulfill 100% of quotas across all three tiers simultaneously, `MegacityManager::EvaluateMonthlySupply`
+  transitions the city profile to `MegacityGrowthState::HyperGrowth`, granting a 2.0x growth rate multiplier and a 1.5x
+  passenger generation multiplier.
+- **Town Growth Mechanics**: Town growth countdown requires both `TownFlag::IsGrowing` and `growth_rate != TOWN_GROWTH_RATE_NONE`.
+  Town reserves are clamped to $3 \times \text{monthly demand}$ (165 units) by `IntegratedEconomy::AcceptCity`. If long-distance
+  haulage cycles exceed 3 months without staggered deliveries, starvation halts the countdown; continuous growth requires
+  delivery intervals $\le 2$ months.
+
 ## Organic UAT terrain and rendering repair — 30 September 2026
 
 `PromptScenarioGenerator` anchors every shared corner of existing infrastructure
