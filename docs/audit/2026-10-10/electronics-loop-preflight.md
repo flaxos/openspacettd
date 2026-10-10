@@ -68,3 +68,19 @@ which queues immediately after Core Construction Basket closure (PR #71 / PR #75
 - **Resource Conservation**: Input cargo units must strictly equal output cargo plus documented slag loss; zero phantom cargo injection.
 - **Server Authority**: All facility placements, surveys, and research selections must use replicated server-authoritative commands.
 - **Deterministic Simulation**: All batch transformations occur on monthly ticks without floating-point arithmetic or desync-prone RNG calls.
+
+---
+
+## 7. Execution & Test Verification
+
+The test harness and integration suite were implemented and verified in `src/tests/test_electronics_loop.cpp`:
+- **`TECH_MATERIALS_2` Unlock Lifecycle**: Corporate HQ establishment, prerequisite gating, £250k / 250 RP incremental funding, and unlocked tech protection.
+- **Resource Site Discovery & Mapping**: Primary extraction validation for `COPR` and `SAND`.
+- **Pipeline B Batch Conservation**: Exact material balance across `RECIPE_COPPER_SMELTING` (2 Copper -> 2 Wire), `RECIPE_SILICON_ARC` (2 Sand -> 1 Chips), and `RECIPE_SIGNALLING_ASSEMBLY` (1 Wire + 1 Chips -> 2 Relays).
+- **Core Megacity Acceptance**: Classification of `WIRE` (Tier 2 Expansion) and `CHIP` (Tier 3 Prosperity) and verification of multi-tier delivery satisfaction.
+
+**Results**:
+- Catch2 test suite: 4/4 test cases passed (61 assertions).
+- CTest suite: 528/528 passed (100%).
+- Repository linters: `.github/file-descriptions.py` and `.github/unused-strings.py` passed (OK).
+- `git diff --check`: 0 errors.
