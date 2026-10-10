@@ -1,5 +1,21 @@
 # OpenSpaceTTD Known Limitations
 
+## Station Adapter and Gate Art delivery boundaries — 10 October 2026
+
+The station adapter is committed and submitted as PR #75 on `codex/dev-core-town-station-adapter`,
+verifying Train 4 `OT_LOADING` safety and passing 121 unit assertions across 7 cases and 3 Python adapter tests.
+The wormhole gate art is committed and submitted as PR #76 on `codex/art-wormhole-gate-family-light`,
+verifying NewGRF compilation (41,303 bytes) and 20/20 synthetic tests.
+
+Remaining boundaries:
+1. **Core Growth & Basket Repeat**: Native growth enablement, town population/house count rise,
+   and cold-reload persistence after Train 4 delivery to the nearer station remain pending execution
+   under the new active handoff in `docs/ACTIVE_EXECUTION_PLAN.md`.
+2. **Gate Runtime Selection**: The gate NewGRF is compiled and verified, but C++ engine loader/resolver
+   wiring and `DrawTile_TunnelBridge` integration remain in the subsequent Sprint 2 Art track.
+3. **Electronics Chain**: Preflight is established in `docs/audit/2026-10-10/electronics-loop-preflight.md`;
+   concrete in-game survey execution and facility placement remain queued for Horizon A progression.
+
 ## Retained basket evidence and unpublished adapter — 10 October 2026
 
 The October 5 archive establishes one atomic 60 FOOD + 20 STEL + 20 BALL

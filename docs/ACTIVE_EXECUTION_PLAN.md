@@ -1,5 +1,19 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Active execution handoff — Core Basket Repeat and Cold Proof (10 October 2026)
+
+This replaces the expired campaign permissions with an owner-authorized finite continuation:
+- **Objective**: Execute the Core Town Station Adapter delivered in PR #75 (`dddd49f18d`)
+  to retarget Train 4 FOOD delivery to the nearer Core station (tiles 795,62–796,62 via connector 794,62).
+  Prove second atomic monthly basket consumption (60 FOOD + 20 STEL + 20 BALL), observe native town growth hook
+  and evaluate actual house/population response, and prove cold-reload persistence without state corruption.
+- **Starting Point**: Copied paused checkpoint save at tick 304,384, SHA256
+  `89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f`.
+- **Bounds**: Exactly 1 simulation advance (up to next monthly tick boundary ~307,200).
+  Immediate stop at first command or integrity failure.
+- **Economic Mode**: Preserves offline `infinite_money` mode for functional validation;
+  financial profitability and ordinary-start balancing remain deferred.
+
 ## Synchronization status — 10 October 2026
 
 This file retains the historical First Core Construction Basket plan and consumed
