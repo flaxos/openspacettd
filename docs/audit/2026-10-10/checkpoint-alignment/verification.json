@@ -1,0 +1,105 @@
+{
+  "checked_operation_hashes": 27,
+  "checked_checkpoint_hashes": 24,
+  "mismatches": [],
+  "complete_basket_events": [
+    {
+      "operation": "operations/018-initial-advance-15.json",
+      "month": {
+        "after": [
+          [
+            9,
+            0
+          ],
+          [
+            24,
+            0
+          ],
+          [
+            30,
+            0
+          ],
+          [
+            33,
+            15
+          ]
+        ],
+        "before": [
+          [
+            9,
+            20
+          ],
+          [
+            30,
+            20
+          ],
+          [
+            33,
+            75
+          ]
+        ],
+        "construction_complete": true,
+        "consumed": [
+          [
+            9,
+            20
+          ],
+          [
+            30,
+            20
+          ],
+          [
+            33,
+            60
+          ]
+        ],
+        "date": 716057,
+        "demand": [
+          [
+            9,
+            20
+          ],
+          [
+            24,
+            10
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            30,
+            20
+          ],
+          [
+            33,
+            60
+          ]
+        ],
+        "food_sufficient": true,
+        "growth": 1.0,
+        "house_count": 29,
+        "native_flags": 6,
+        "native_grow_counter": 0,
+        "native_growth_enabled": false,
+        "native_growth_hook_enabled": true,
+        "native_growth_observed": true,
+        "native_growth_rate": 5669,
+        "passengers": 1.0,
+        "population": 1191,
+        "tick": 284995,
+        "town": 0
+      }
+    }
+  ],
+  "final_checkpoint": {
+    "money": 3520926,
+    "path": "checkpoints/initial-advance-24.sav",
+    "sha256": "89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f",
+    "tick": 304384
+  },
+  "archive_sha256": "0d12e707bfe3d9f43578a97d5ad1efa779ea7d38941267f8ace86531557a98d4",
+  "verification_date_utc": "2026-10-10",
+  "zip_crc_error": null,
+  "fresh_checked_ledger_hashes": 51
+}
