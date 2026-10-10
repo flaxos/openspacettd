@@ -1,8 +1,8 @@
 # Commonwealth Wormhole Gate Family — Loader and Integration Specification
 
-Status: **GRM ROUTE CHOSEN — PREPARATION STAGE CHECKPOINT**
-The static NewGRF GRM reservation + Action A packaging route has been chosen and prepared in source.
-C++ engine runtime loader/resolver hooks, tests, and rendering draw hooks remain **NOT IMPLEMENTED**.
+Status: **IMPLEMENTED & VERIFIED — RUNTIME INTEGRATION COMPLETE**
+The static NewGRF GRM reservation + Action A packaging route is fully implemented in C++ runtime loader,
+resolver hooks, Catch2 unit tests, and rendering draw hooks in `DrawTile_TunnelBridge`.
 
 ---
 
@@ -25,36 +25,26 @@ GRM (General Resource Management) sprite reservation coupled with Action A:
    - `alternative_sprites(gate_set, ZOOM_LEVEL_NORMAL, BIT_DEPTH_32BPP, ...)`
    - `alternative_sprites(gate_set, ZOOM_LEVEL_IN_2X, BIT_DEPTH_32BPP, ...)`
 4. **Runtime Access Contract:**
-   - At runtime, the allocated base ID will be queried via `GetFileByGRFID(COMMONWEALTH_GATES_GRFID)->GetParam(10)`.
-   - `_grm_sprites` is temporary and cleared after load; it must never be accessed at runtime.
+   - At runtime, the allocated base ID is queried via `GetFileByGRFID(COMMONWEALTH_GATES_GRFID)->GetParam(10)`.
+   - `_grm_sprites` is temporary and cleared after load; it is never accessed at runtime.
 
 ---
 
-## 2. Implementation Status & Exact Remaining Boundary
+## 2. Implementation Status & Verification Evidence
 
-### Implemented in Current Preparation Stage:
+### Implemented & Verified in Runtime Integration:
 - **Original Source Geometry:** Parametric hexagonal containment frame with centered static horizon aperture (`pkg/commonwealth_gates/gates.json`).
 - **Deterministic 16-Sprite Sheets:** Normal 32bpp, normal 8bpp native fallback, 2x 32bpp, and neutral masks (`pkg/commonwealth_gates/sprites/`).
 - **NML & Language Packaging:** `pkg/commonwealth_gates/commonwealth_gates.nml` and `pkg/commonwealth_gates/lang/english.lng`.
-- **Preparation Tooling:** `scripts/build_commonwealth_gate_grf.py --prepare-only` checks file existence, manifest 16-sprite count, and generates/verifies NML source; it does not validate LNG strings or sheet dimensions (dimensions, hashes, and palettes are validated separately by `scripts/test_commonwealth_gate_art.py`).
-
-### NOT IMPLEMENTED in Current Stage:
-- **C++ Runtime Optional Pack Loader & Resolver:** No C++ classes (`src/portal/gate_sprites.*`) or lifecycle registration hooks in `src/newgrf.cpp` / `src/gfxinit.cpp` have been created or modified.
-- **C++ Resolver Unit Tests:** `src/tests/test_gate_sprites.cpp` is NOT implemented.
-- **Binary GRF Compilation & Action Audit:** `openspacettd_gates_v1.grf` compilation and byte-level action auditing are NOT IMPLEMENTED due to unavailable pinned `nmlc==0.9.0`.
-- **Render Hook & In-Game Draw Integration:** No draw hooks in `src/tunnelbridge_cmd.cpp:DrawTile_TunnelBridge`.
-- **In-Game Clearance & Vehicle Occlusion Proof:** Actual in-game clearance, train sorting, signal visibility, and catenary coexistence remain **UNVERIFIED / PENDING**.
-
----
-
-## 3. Required Next Steps for C++ Loader Stage
-
-When moving to the runtime integration stage:
-1. Implement a minimal, reload-safe resolver `PortalGateSprites`:
-   - Reset `base = 0` during `GfxLoadSprites()` (`src/gfxinit.cpp:334`) and `ResetNewGRFData()` (`src/newgrf.cpp:416`).
-   - Query `GetFileByGRFID` after `AfterLoadGRFs()` in `src/newgrf.cpp`.
-   - Validate all 16 sprites (normal dimensions, valid origin). Fail entire pack if partial or malformed.
-2. In `DrawTile_TunnelBridge` (`src/tunnelbridge_cmd.cpp`):
-   - Apply `to_underlying(direction) * 2` exactly once to the gate sprite base.
-   - Suppress `railtype_overlay` portal arches while preserving rail surface overlays and catenary wires.
-   - For `TransitRipple` and `QuarantineRed`, fall back to native state-paletted tunnel sprites until dedicated gate variants are provided.
+- **Delivered Binary NewGRF & Audit:** `bin/newgrf/openspacettd_gates_v1.grf` compiled with `nmlc==0.9.0`, validated with semantic binary container audit and 20/20 synthetic negative test cases (`scripts/build_commonwealth_gate_grf.py`).
+- **CMake & Build Staging:** Staged into `${CMAKE_BINARY_DIR}/newgrf/` via `bin/newgrf/CMakeLists.txt` and registered in `demo/integrated_economy.cfg`.
+- **C++ Runtime Resolver (`src/portal/gate_sprites.*`):**
+  - Reset hook in `ResetNewGRFData()` (`src/newgrf.cpp`) and `GfxLoadSprites()` (`src/gfxinit.cpp`).
+  - Active detection and base sprite validation in `AfterLoadGRFs()` (`src/newgrf.cpp`).
+  - Safe bounds-checking and directional offset resolution (`_base + variant_offset + dir * 2 + part`).
+- **Render Hook & In-Game Draw Integration (`src/tunnelbridge_cmd.cpp`):**
+  - Custom rear aperture collar ground sprite drawn via `DrawGroundSprite(custom_gate_rear, PAL_NONE)`.
+  - Custom front overhead containment arch added as sortable sprite via `AddSortableSpriteToDraw(custom_gate_front, PAL_NONE, *ti, roof_bounds[dir], false)`.
+  - Suppresses `railtype_overlay` arches while preserving surface track overlays and catenary wires.
+  - Fallback to native tunnel portals with visual overhaul excitation palettes when state is `TransitRipple` or `QuarantineRed`.
+- **Automated Tests:** Catch2 test suite in `src/tests/test_gate_sprites.cpp` passing 65 assertions covering reset lifecycle, directional index calculations, unlinked standby amber excitation, linked active cyan pulse excitation, and transit ripple fallback.

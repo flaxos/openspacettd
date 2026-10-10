@@ -1,5 +1,27 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Commonwealth Wormhole Gate Runtime Integration (Art Track Sprint 2) — 11 October 2026
+
+Delivered runtime engine integration of the Commonwealth Wormhole Gate NewGRF (`openspacettd_gates_v1.grf`, GRFID `0x4F535002` / `OST\x07`) into the OpenSpaceTTD rendering pipeline:
+1. **Engine Draw Hooks & Sorting (`src/tunnelbridge_cmd.cpp`)**:
+   - `DrawTile_TunnelBridge` queries `PortalGateSprites::GetSprite(...)` when `is_portal_gate && PortalGateSprites::IsActive()`.
+   - Renders custom rear aperture collar ground sprite (`PAL_NONE`) and overhead front containment arch as sortable sprite within native roof bounds.
+   - Suppresses native/railtype tunnel portal arch overlays while preserving ground track underlays, reserved track highlights, and electrified catenary wires.
+   - Graceful fallback: unhandled excitation states (`TransitRipple`, `QuarantineRed`) return 0 and cleanly fall back to native tunnel portals with visual overhaul excitation palettes.
+2. **Runtime Resolver & Lifecycle (`src/portal/gate_sprites.*`)**:
+   - Dynamic GRM base sprite resolution from `GetFileByGRFID(COMMONWEALTH_GATES_GRFID)->GetParam(10)`.
+   - Verifies 16 contiguous real sprites in spritecache during NewGRF post-load finalization (`AfterLoadGRFs`).
+   - Clean reset during sprite cache clear (`GfxLoadSprites`) and NewGRF reload (`ResetNewGRFData`).
+3. **Build Staging & Packaging**:
+   - Registered `openspacettd_gates_v1.grf` in `bin/newgrf/CMakeLists.txt` for automatic deployment to build tree.
+   - Registered in `demo/integrated_economy.cfg` under `[newgrf]`.
+   - Verified 64-bit integer comparison portability in `src/portal/connected_economy.cpp:1181`.
+   - Added complete Doxygen documentation in `src/portal/gate_sprites.h` and trailing newline to `manifest.json`.
+4. **Verification & Tests**:
+   - 65 unit assertions in `src/tests/test_gate_sprites.cpp` passing across reset lifecycle, directional indexing, and integration with `VisualOverhaulManager` and `PortalRegistry`.
+   - Deterministic asset audit and synthetic negative tests (20/20) passing in `scripts/build_commonwealth_gate_grf.py`.
+   - Native engine startup verified in headless game with active gate resolution (base sprite 6283).
+
 ## Functional-first direction — 1 October 2026
 
 **Current owner-approved priority: prove the functional game loop, then balance

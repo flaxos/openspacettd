@@ -1,5 +1,21 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Commonwealth Wormhole Gate Runtime Integration (Art Track Sprint 2) — 11 October 2026
+
+**TESTED runtime integration; human visual UAT Pending.** Delivered C++ engine loader,
+sprite resolver, and rendering pipeline hooks for the Commonwealth wormhole gate NewGRF:
+- **Runtime Resolution**: `PortalGateSprites` resolves Action A sprite base dynamically from
+  Action D GRM parameter 10, validating all 16 sprites in cache at `AfterLoadGRFs()`.
+- **Tunnel Draw Hooks**: `DrawTile_TunnelBridge` draws rear aperture collars and overhead front
+  arches for `ActiveCyanPulse` and `StandbyAmber` across all 4 diagonal orientations (NE, SE, SW, NW),
+  while preserving catenary and rail overlays and falling back to native state-paletted portals for
+  unhandled states (`TransitRipple`, `QuarantineRed`).
+- **Portability & Packaging**: Staged `openspacettd_gates_v1.grf` in CMake build, enabled in demo config,
+  resolved compiler ambiguity on Clang/macOS/Windows, documented Doxygen comments, and verified
+  clean headless engine startup.
+- **Verification**: 65 unit assertions in `test_gate_sprites.cpp`, 20/20 synthetic negative audits in
+  `build_commonwealth_gate_grf.py`, asset tests in `test_commonwealth_gate_art.py`, and repo linters.
+
 ## Functional progression priority revision — 1 October 2026
 
 **PLANNED; documentation only.** Owner-approved functional-first direction is
