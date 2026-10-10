@@ -1178,7 +1178,7 @@ bool GenerationContract(std::span<std::string_view> argv)
 		if (GenerationSnapshot() != before) { IConsolePrint(CC_ERROR, "CONNECTED FAIL generation query mutated native state"); return true; }
 		if (argv[1] == "generation-contract-queries") { IConsolePrint(CC_DEFAULT, "CONNECTED generation-query {}", report.dump()); return true; }
 		generation_contract_fresh = false;
-		if (report["total_quote"].get<int64_t>() >= company->money) {
+		if (report["total_quote"].get<int64_t>() >= int64_t(company->money)) {
 			IConsolePrint(CC_ERROR, "CONNECTED FAIL generation proof unaffordable with ordinary starting cash"); return true;
 		}
 		for (Json &join : report["joins"]) {

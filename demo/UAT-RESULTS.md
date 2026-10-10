@@ -1,5 +1,13 @@
 # Human UAT results — recovery / v1.1
 
+## Commonwealth Wormhole Gate Art Runtime Integration — 11 October 2026
+
+**Human visual status: Pending.** Automated Catch2 test suite (65 assertions in `test_gate_sprites.cpp`),
+CTest suite (503/503 passing), native headless engine game initialization (resolving base sprite 6283),
+and asset tests (`test_commonwealth_gate_art.py`) verify runtime loading and state/orientation mapping.
+Human visual acceptance (verifying train transit clearance, sprite sorting, catenary wire overlay,
+and visual aesthetics across zoom levels in desktop GUI) remains **Pending**.
+
 ## Functional progression replan — 1 October 2026
 
 **Human status: Pending. No new game or human test was run for this docs change.**

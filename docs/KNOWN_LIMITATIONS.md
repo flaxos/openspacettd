@@ -1,5 +1,15 @@
 # OpenSpaceTTD Known Limitations
 
+## Commonwealth Wormhole Gate Art Runtime Boundaries — 11 October 2026
+
+- **Sprite Variants**: The 16-sprite gate pack provides custom hexagonal containment geometry for
+  `ActiveCyanPulse` (offsets 0..7) and `StandbyAmber` (offsets 8..15) across all 4 diagonal orientations.
+  Transient transit shimmers (`TransitRipple`) and isolation states (`QuarantineRed`) cleanly fall back
+  to native tunnel portals with visual overhaul color palettes until dedicated Action A variants are authored.
+- **Vehicle Clearance & Human UAT**: Automated tests and headless engine runs prove sprite resolution,
+  catenary retention, and sorting bounds. Human visual acceptance (evaluating aesthetic clearance with
+  multi-unit trains in desktop GUI) remains **Pending**.
+
 ## Functional-first acceptance boundaries — 1 October 2026
 
 Current priority follows the owner's [functional-first approval](PROJECT_STATUS_AND_ROADMAP.md#functional-first-direction--1-october-2026).

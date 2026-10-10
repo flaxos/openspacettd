@@ -29,7 +29,10 @@ public:
 	/** Reset the gate sprite base (called on NewGRF reset or sprite cache clear). */
 	static void Reset();
 
-	/** Query the loaded Commonwealth gates NewGRF and resolve the allocated base sprite ID. */
+	/**
+	 * Query the loaded Commonwealth gates NewGRF and resolve the allocated base sprite ID.
+	 * @return True if Commonwealth gates NewGRF was loaded and validated, false otherwise.
+	 */
 	static bool Load();
 
 	/** @return Whether the gate NewGRF is loaded and active with a valid base sprite. */
@@ -47,11 +50,14 @@ public:
 	/** @return The resolved base sprite ID (for inspection/testing). */
 	static SpriteID GetBase();
 
-	/** Set base sprite manually (for unit testing without full NewGRF activation). */
+	/**
+	 * Set base sprite manually (for unit testing without full NewGRF activation).
+	 * @param base Base sprite ID to use for tests.
+	 */
 	static void SetBaseForTesting(SpriteID base);
 
 private:
-	static inline SpriteID _base = 0;
+	static inline SpriteID _base = 0; ///< Base sprite ID allocated by GRM.
 };
 
 #endif /* GATE_SPRITES_H */
