@@ -1,5 +1,17 @@
 # Human UAT results — recovery / v1.1
 
+## Recovered full-basket evidence — 10 October 2026
+
+**Human UAT Pending.** Historical automated evidence from October 5 records one
+atomic FOOD/STEL/BALL consuming month and native growth-hook observation.
+Population 1,191 and 29 houses did not increase; a hook observation is not house
+growth acceptance. Sustained supply, a second basket and safe post-helper cold
+continuation remain open. The October 10 Antigravity primary-checkout tests do
+not establish gameplay acceptance or verify the unpublished station adapter.
+
+[Exact checkpoint alignment and proof boundaries](../docs/audit/2026-10-10/checkpoint-alignment/README.md).
+No owner save was loaded or advanced for this synchronization delivery.
+
 ## Core Megacity panel repair — 3 October 2026
 
 **Human UAT Pending.** Antigravity's Core display patch passes focused and
