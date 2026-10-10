@@ -1,15 +1,19 @@
 # Human UAT results — recovery / v1.1
 
-## Core basket repeat — 10 October 2026
+## Core basket repeat and town station delivery — 10 October 2026
 
-**Human UAT Pending.** Automated offline evidence shows a second atomic basket
-and a clean fresh-process reload, with no house growth. Playable scenario staged
-at `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` with step-by-step human guidance
-in [Track 9 of HUMAN-GRAPHICAL-UAT-GUIDE.md](HUMAN-GRAPHICAL-UAT-GUIDE.md#track-9-core-megacity-basket-repeat--town-station-unloading).
-Player-visible check: launch `./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`,
-confirm Train 4 delivers FOOD to the new Core station (Station 10), and verify
-the Core Megacity panel reports atomic monthly consumption (20 STEL + 20 BALL + 55 FOOD).
-See [the evidence](../docs/audit/2026-10-10/core-basket-repeat/README.md).
+**Human UAT Passed (Transport & Station Unloading) with Operational Starvation Finding.**
+Human desktop playtest executed using staged scenario `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`
+and advanced over 24 in-game years (tick 378,112 to tick 668,053, saved to
+`demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`).
+Confirmed: Train 4 reliably departs Station 2, transits to Station 10, unloads FOOD into
+Core Megacity (Town 0) reserves, and generates valid transport revenue (£18,484,224 over 13 trips).
+Operational finding: Because the city storage buffer is hard-capped at 3 months (150–165 units)
+by `IntegratedEconomy::AcceptCity`, Train 4's single-consist 105-unit delivery sustains the city for
+only ~1.9 months against a 17-month round-trip journey. The city spends >90% of simulation time in
+starvation, resulting in net population decline (1,096 -> 870) and near-zero house growth (29 -> 30).
+Automated proof: `./build/openttd_test` (522 cases), `ctest` (537/537 passed).
+See [audit evidence](../docs/audit/2026-10-10/sustained-food-growth/README.md).
 
 ## Recovered full-basket evidence — 10 October 2026
 

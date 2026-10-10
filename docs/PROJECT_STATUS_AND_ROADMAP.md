@@ -10,10 +10,11 @@ Delivered all three follow-up items concluding the Core Megacity repeat campaign
    - Proved that under sustained supply, `grow_counter` decrements continuously through 0, invoking native `GrowTown` and resetting `grow_counter = growth_rate`.
    - Added unit test in `src/tests/test_core_construction_basket.cpp` (`[sustained-growth]`) with 10 assertions passing.
    - Published audit evidence in `docs/audit/2026-10-10/sustained-food-growth/README.md`.
-2. **Human Playtest Scenario Staging & UAT Playbook**:
+2. **Human Playtest Scenario Staging & Desktop Execution**:
    - Staged scenario save `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` from verified checkpoint `build/core-basket-repeat/basket-consumed.sav` (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`, tick 378,112).
-   - Documented Track 9 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` with launch command (`./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`), camera positioning at Station 10 (tiles 795..796, 62) and Town 0, observation of Train 4 unloading and Core Megacity panel metrics (20 STEL + 20 BALL + 55 FOOD).
-   - Updated `demo/UAT-RESULTS.md` with Track 9 recorded as Human UAT Pending.
+   - Documented Track 9 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` with launch command (`./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav`), camera positioning at Station 10 (tiles 795..796, 62) and Town 0.
+   - User desktop playtest executed and verified over 24 in-game years (saved to `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`), confirming Train 4 transport, station unloading, and £18.4M profit across 13 runs, while validating the operational starvation finding.
+   - Updated `demo/UAT-RESULTS.md` recording Track 9 as Human UAT Passed with Operational Finding.
 3. **Player-Funded Electronics Loop Implementation & Verification**:
    - Expanded unit tests in `src/tests/test_electronics_loop.cpp` with monthly supply evaluation and complete end-to-end test case (`[electronics-loop][e2e]`), passing all 84 assertions in 5 test cases.
    - Authored and ran `scripts/verify_electronics_loop.py` against `basket-consumed.sav`: Corporate HQ on World 0, `TECH_MATERIALS_1` prerequisite, £250,000 cash debit for `TECH_MATERIALS_2` (250 RP), 16x16 site discovery for `COPR` and `SAND` on World 1, Pipeline B batch balance (80 Copper -> 80 Wire, 40 Sand -> 20 Chips, 0 loss), Core Megacity Wire (Tier 2) & Chip (Tier 3) acceptance, and transition to `HyperGrowth` (2.0x growth, 1.5x traffic).

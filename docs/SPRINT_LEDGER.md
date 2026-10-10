@@ -9,17 +9,19 @@ Delivered three coordinated items following the Core basket repeat proof (PR #78
    `MegacityGrowthState::Starvation` and `TOWN_GROWTH_RATE_NONE`, locking `grow_counter` and preventing `GrowTown`.
    Added unit test `test_core_construction_basket.cpp` (`[sustained-growth]`) proving continuous decrement through 0
    under sustained delivery. Published `docs/audit/2026-10-10/sustained-food-growth/README.md`.
-2. **Playable UAT Staging**: Published `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` from `basket-consumed.sav`
+2. **Playable UAT Staging & Desktop Execution**: Published `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` from `basket-consumed.sav`
    (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`, tick 378,112). Added Track 9 to
    `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` covering launch commands, viewport coordinates (Station 10 tiles 795..796, 62),
-   Train 4 unloading observation, and panel metrics verification. Recorded Track 9 in `demo/UAT-RESULTS.md` (Human UAT Pending).
+   Train 4 unloading observation, and panel metrics verification. Human desktop playtest executed over 24 game years
+   (saved to `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`), confirming transport revenue (£18.4M across 13 runs)
+   and validating the operational starvation finding. Recorded in `demo/UAT-RESULTS.md` as Human UAT Passed with Operational Finding.
 3. **Player-Funded Electronics Loop**: Enhanced `src/tests/test_electronics_loop.cpp` with end-to-end lifecycle coverage
    (`[electronics-loop][e2e]`, 5 cases, 84 assertions). Authored `scripts/verify_electronics_loop.py` and executed against
    `basket-consumed.sav`, verifying Corporate HQ, `TECH_MATERIALS_1` prerequisite, £250,000 research debit for
    `TECH_MATERIALS_2` (250 RP), 16x16 site discovery for Copper and Sand on World 1, Pipeline B batch conservation
    (80 Copper -> 80 Wire, 40 Sand -> 20 Chips), and Megacity multi-tier prosperity transitioning to `HyperGrowth`
    (2.0x growth, 1.5x traffic). Published `docs/audit/2026-10-10/electronics-loop/README.md` and `verification.json`.
-Full suite passing (Catch2 + CTest), linters and git diff clean; human UAT pending.
+Full suite passing (Catch2 + CTest), linters and git diff clean; Track 9 human UAT passed with operational finding.
 
 ## Core basket repeat and cold proof — 10 October 2026
 

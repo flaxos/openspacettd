@@ -5,10 +5,11 @@
 A second basket was consumed and reloaded cleanly in automated offline proof
 ([evidence](audit/2026-10-10/core-basket-repeat/README.md)), and the food starvation mechanism
 (single consist carrying 105 FOOD vs $3 \times \text{demand} = 165$ buffer ceiling over a 17-month journey)
-has been audited and mathematically proven with unit test coverage (`[sustained-growth]`). Continuous town
-growth in an active run requires either multiple staggered consists ($\le 2$ months interval) or nearby buffering.
-Playable UAT scenario is staged at `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` with Track 9 in
-`demo/HUMAN-GRAPHICAL-UAT-GUIDE.md`; human graphical acceptance remains Pending.
+has been audited and mathematically proven with unit test coverage (`[sustained-growth]`).
+Human desktop playtest (Track 9, `demo/OpenSpaceTTD-Core-Basket-Repeat-UAT.sav` -> `demo/save/ASSISTED FUNCTIONAL Core Supply, 1974-09-02.sav`)
+confirmed mechanical transport and Station 10 unloading (£18,484,224 profit across 13 runs over 24 years),
+while verifying the operational starvation finding: continuous town growth requires multiple staggered consists
+($\le 2$ months interval) or nearby buffering rather than a single train.
 
 The Player-Funded Electronics Loop (`TECH_MATERIALS_2`, Pipeline B, HyperGrowth) is verified via unit test
 (`test_electronics_loop.cpp`) and authoritative script against the consumed basket save; in-world railway construction
