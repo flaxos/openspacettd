@@ -429,9 +429,9 @@ TEST_CASE("Core town FOOD retarget leaves a currently loading pickup intact thro
 	train->current_order.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop, OrderNonStopFlag::GoVia});
 	REQUIRE(train->cur_real_order_index == 0);
 	CHECK(GetCoreTownStationNativeTrainError(train).empty());
-	train->GetOrder(1)->SetWaitTime(7);
+	train->GetOrder(1)->SetWaitTimetabled(true);
 	CHECK(GetCoreTownStationNativeTrainError(train) == "unsupported-delivery-order");
-	train->GetOrder(1)->SetWaitTime(0);
+	train->GetOrder(1)->SetWaitTimetabled(false);
 	train->cur_implicit_order_index = 1;
 	CHECK(GetCoreTownStationNativeTrainError(train) == "unsafe-implicit-order");
 	train->cur_implicit_order_index = 0;

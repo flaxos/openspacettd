@@ -1,5 +1,17 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Core basket repeat and cold proof — 10 October 2026
+
+From the pinned tick-304,384 checkpoint, the PR #75 adapter built a Core station
+(£1,020 native, quote == paid) and retargeted Train 4's FOOD delivery. After 36
+advances a second atomic consumption (20 STEL + 20 BALL + 55 FOOD) occurred at
+tick 377,347 with growth/passengers 1.0 and native growth observed. A fresh
+process reloaded the saved checkpoint with equal money, RNG, cargo custody, reserves,
+population and orders. Population was 1,096 and houses stayed 29: no house growth.
+Also fixed: 3-tile connector, Train 4 order admission and a stale viewport k-d tree in a
+shared test fixture. Offline `infinite_money`; human UAT pending.
+See [evidence](audit/2026-10-10/core-basket-repeat/README.md).
+
 ## Coordinated delivery: Station Adapter (PR #75), Gate Art (PR #76), and Electronics Preflight — 10 October 2026
 
 Delivered all three coordinated roadmap items:

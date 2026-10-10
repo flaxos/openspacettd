@@ -34,6 +34,12 @@ implementation owner and one separate art owner remain the coordination rule.
 
 ## Coordinated track update — 7 October 2026
 
+**Update 10 October 2026:** the repeat/cold campaign below has run once. A second
+full Core basket was consumed at tick 377,347 after Train 4 was retargeted to a new
+nearer Core station, and a fresh-process reload matched the saved state. House
+growth, sustained FOOD service and human UAT remain open (population 1,096,
+houses 29). See [the evidence](audit/2026-10-10/core-basket-repeat/README.md).
+
 The [7 October dispatch update](COORDINATED_GAMEPLAY_AND_ART.md#dispatch-update--7-october-2026)
 supersedes the older prompts below. Preserved 5 October native evidence proves
 one atomic FOOD+STEL+BALL Core basket consumption at tick 284,995 and an observed

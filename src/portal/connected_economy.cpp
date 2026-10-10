@@ -2714,8 +2714,8 @@ std::string TownStationTrainError(const Train *train)
 		(!train->current_order.IsType(OT_GOTO_STATION) && !train->current_order.IsType(OT_LOADING))) return "unsafe-current-order";
 	/* An implicit index elsewhere can be rewritten by the insert/delete pair. */
 	if (train->cur_implicit_order_index != 0) return "unsafe-implicit-order";
-	if (delivery->GetRefitCargo() != CARGO_NO_REFIT || delivery->GetWaitTime() != 0 || delivery->GetTravelTime() != 0 ||
-		delivery->GetMaxSpeed() != UINT16_MAX || delivery->IsWaitTimetabled() || delivery->IsTravelTimetabled()) return "unsupported-delivery-order";
+	if (delivery->GetRefitCargo() != CARGO_NO_REFIT || delivery->GetMaxSpeed() != UINT16_MAX ||
+		delivery->IsWaitTimetabled() || delivery->IsTravelTimetabled()) return "unsupported-delivery-order";
 	return {};
 }
 
@@ -2744,7 +2744,7 @@ Json TownStationGuardSnapshot()
 		station->owner.base(), station->town == nullptr ? UINT16_MAX : station->town->index.base(),
 		station->time_since_load, station->time_since_unload,
 		IsValidCargoType(food) && GetAcceptanceMask(station).Test(food)});
-	for (auto [x, y] : {std::pair{794u, 62u}, {795u, 62u}, {796u, 62u}}) {
+	for (auto [x, y] : {std::pair{792u, 62u}, {793u, 62u}, {794u, 62u}, {795u, 62u}, {796u, 62u}}) {
 		TileIndex tile = TileXY(x, y);
 		Json part = GenerationTile(tile);
 		if (IsPlainRailTile(tile)) part["reservation"] = GetRailReservationTrackBits(tile).base();
@@ -2819,12 +2819,23 @@ std::string TownStationSiteError(TileIndex tile, TileIndex connector, Track trac
 	/* This bounded straight approach follows the station's Axis::X rail; a
 	 * curve, junction or different topology needs its own reviewed plan. */
 	if (track != Track::X) return "unsupported-connector-topology";
-	if (!IsCoreTownStationConnectorTileAllowed(connector, track)) return "connector-demolition-or-incompatible";
-	if (TileX(connector) == 0) return "missing-owned-approach";
-	const TileIndex approach = TileXY(TileX(connector) - 1, TileY(connector));
-	if (!IsInnerTile(approach) || !IsPlainRailTile(approach) ||
-		GetTileOwner(approach) != CompanyID{0} || GetRailType(approach) != RAILTYPE_RAIL ||
-		!GetTrackBits(approach).Test(Track::X)) return "missing-owned-straight-approach";
+	if (TileX(connector) != 794 || TileY(connector) != 62) return "connector-demolition-or-incompatible";
+	for (uint x = 792; x <= 794; ++x) {
+		TileIndex part = TileXY(x, 62);
+		if (!IsInnerTile(part) || PlanetManager::GetTileWorld(part) != WorldID{0} ||
+			!IsCoreTownStationConnectorTileAllowed(part, track)) return "connector-demolition-or-incompatible";
+	}
+	const TileIndex approach = TileXY(791, 62);
+	if (!IsInnerTile(approach) || PlanetManager::GetTileWorld(approach) != WorldID{0} ||
+		GetTileOwner(approach) != CompanyID{0} || GetRailType(approach) != RAILTYPE_RAIL)
+		return "missing-owned-straight-approach";
+	if (IsPlainRailTile(approach)) {
+		if (!GetTrackBits(approach).Test(Track::X)) return "missing-owned-straight-approach";
+	} else if (IsRailStationTile(approach)) {
+		if (GetRailStationAxis(approach) != Axis::X) return "missing-owned-straight-approach";
+	} else {
+		return "missing-owned-straight-approach";
+	}
 	return {};
 }
 
@@ -2933,8 +2944,13 @@ bool CoreTownStation(std::span<std::string_view> argv)
 				town_station.maximum = plan.at("maximum_native_cost").get<int64_t>();
 			}
 			auto station_quote = QueryCoreTownStation(tile);
-			auto link_quote = QueryCoreBasketRail(connector, track);
-			if (station_quote.Failed() || link_quote.Failed()) { stop("native-station-or-link-quote"); return finish(argv[1]); }
+			CommandCost link_quote;
+			for (uint x = 792; x <= 794; ++x) {
+				auto q = QueryCoreBasketRail(TileXY(x, 62), track);
+				if (q.Failed()) { stop("native-station-or-link-quote"); return finish(argv[1]); }
+				link_quote.AddCost(q.GetCost());
+			}
+			if (station_quote.Failed()) { stop("native-station-or-link-quote"); return finish(argv[1]); }
 			int64_t total = int64_t(station_quote.GetCost()) + int64_t(link_quote.GetCost());
 			if (total <= 0 || total > town_station.maximum) { stop("native-cost-ceiling"); return finish(argv[1]); }
 			Json live_quote = {{"station_cost", int64_t(station_quote.GetCost())}, {"link_cost_provisional", int64_t(link_quote.GetCost())},
@@ -2955,18 +2971,25 @@ bool CoreTownStation(std::span<std::string_view> argv)
 	guard_before = TownStationGuardSnapshot();
 	TileIndex planned_tile = TileXY(795, 62);
 	const Station *built_site = Station::GetIfValid(town_station.station);
+	bool connectors_allowed = true;
+	for (uint x = 792; x <= 794; ++x) {
+		if (!IsCoreTownStationConnectorTileAllowed(TileXY(x, 62), static_cast<Track>(town_station.envelope.at("connector_track").get<uint>()))) {
+			connectors_allowed = false;
+			break;
+		}
+	}
 	bool site_ok = town_station.stage == 0 ?
 		TownStationSiteError(planned_tile, TileXY(794, 62), static_cast<Track>(town_station.envelope.at("connector_track").get<uint>())).empty() :
 		built_site != nullptr && built_site->owner == CompanyID{0} && IsRailStationTile(planned_tile) &&
 		IsRailStationTile(planned_tile + TileDiffXY(1, 0)) && GetStationIndex(planned_tile) == town_station.station &&
 		GetStationIndex(planned_tile + TileDiffXY(1, 0)) == town_station.station &&
-		IsCoreTownStationConnectorTileAllowed(TileXY(794, 62), static_cast<Track>(town_station.envelope.at("connector_track").get<uint>()));
+		connectors_allowed;
 	if (guard_before != town_station.guard || !TownStationTrainError(Train::GetIfValid(VehicleID{4})).empty() || !site_ok) {
 		stop("changed-native-train-or-site-before-spend"); return finish(argv[1]);
 	}
 	const std::string_view step = argv[3];
 	const int64_t paid_before = town_station.paid;
-	TileIndex tile = TileXY(795, 62), connector = TileXY(794, 62);
+	TileIndex tile = TileXY(795, 62);
 	Track track = static_cast<Track>(town_station.envelope.at("connector_track").get<uint>());
 	if (step == "station" && town_station.stage == 0) {
 		auto quote = QueryCoreTownStation(tile);
@@ -2999,20 +3022,36 @@ bool CoreTownStation(std::span<std::string_view> argv)
 			}
 		}
 	} else if (step == "link" && town_station.stage == 1) {
-		auto quote = QueryCoreBasketRail(connector, track);
-		std::string link_error = GetCoreTownStationLinkQuoteError(quote, town_station.quote.at("link_cost_provisional").get<int64_t>(),
+		CommandCost quote_total;
+		for (uint x = 792; x <= 794; ++x) {
+			auto q = QueryCoreBasketRail(TileXY(x, 62), track);
+			if (q.Failed()) { quote_total = q; break; }
+			quote_total.AddCost(q.GetCost());
+		}
+		std::string link_error = GetCoreTownStationLinkQuoteError(quote_total, town_station.quote.at("link_cost_provisional").get<int64_t>(),
 			town_station.paid, town_station.maximum);
 		if (!link_error.empty()) stop("partial-construction-" + link_error);
 		else if (TownStationGuardSnapshot() != guard_before) stop("link-query-mutated-state");
-		else if (quote.GetCost() == 0) town_station.stage = 2;
+		else if (quote_total.GetCost() == 0) town_station.stage = 2;
 		else {
-			if (FabricationManager::UseForRail(CompanyID{0}, RAILTYPE_RAIL))
-				for (auto [cargo, units] : FabricationManager::GetTrackBOM(RAILTYPE_RAIL).materials) town_station.material_quote.push_back({cargo, units});
-			auto result = Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, connector, RAILTYPE_RAIL, track, false);
-			if (result.Failed()) { town_station.material_quote = Json::array(); stop("partial-construction-link-execute"); }
-			else {
-				town_station.paid += int64_t(result.GetCost()); town_station.stage = 2;
-				if (result.GetCost() != quote.GetCost()) stop("partial-construction-link-cost-parity");
+			Money total_built_cost = Money{0};
+			bool build_failed = false;
+			for (uint x = 792; x <= 794; ++x) {
+				TileIndex part = TileXY(x, 62);
+				if (IsPlainRailTile(part) && GetTrackBits(part).Test(track)) continue;
+				if (FabricationManager::UseForRail(CompanyID{0}, RAILTYPE_RAIL))
+					for (auto [cargo, units] : FabricationManager::GetTrackBOM(RAILTYPE_RAIL).materials) town_station.material_quote.push_back({cargo, units});
+				auto result = Command<Commands::BuildRail>::Do(DoCommandFlag::Execute, part, RAILTYPE_RAIL, track, false);
+				if (result.Failed()) { build_failed = true; break; }
+				total_built_cost += result.GetCost();
+			}
+			if (build_failed) {
+				town_station.material_quote = Json::array();
+				stop("partial-construction-link-execute");
+			} else {
+				town_station.paid += int64_t(total_built_cost);
+				town_station.stage = 2;
+				if (total_built_cost != quote_total.GetCost()) stop("partial-construction-link-cost-parity");
 			}
 		}
 	} else if (step == "orders" && town_station.stage == 2) {
@@ -3023,6 +3062,10 @@ bool CoreTownStation(std::span<std::string_view> argv)
 		else {
 			Order replacement = *train->GetOrder(1);
 			replacement.SetDestination(built->index);
+			replacement.SetWaitTime(0);
+			replacement.SetTravelTime(0);
+			replacement.SetWaitTimetabled(false);
+			replacement.SetTravelTimetabled(false);
 			if (Command<Commands::InsertOrder>::Do(DoCommandFlag::QueryCost, VehicleID{4}, VehicleOrderID{1}, replacement).Failed())
 				stop("partial-construction-insert-quote");
 			else if (TownStationGuardSnapshot() != guard_before) stop("insert-query-mutated-state");
@@ -3187,6 +3230,15 @@ std::string GetCoreBasketAdmissionError(const nlohmann::json &state, const CoreB
 				(*train).at("engine") != (i % 4 == 0 ? 32 : i < 4 ? 50 : 52)) return "inherited-fleet";
 			if (i == 0 || i == 4) {
 				Json orders = Json::array({Json::array({1, i == 0 ? 0 : 2, 2, 4, 1, 0}), Json::array({1, i == 0 ? 1 : 3, 4, 0, 1, 0})});
+				if (i == 4 && (*train).at("orders") != orders) {
+					if ((*train).at("orders").size() == 2 && (*train).at("orders")[0] == Json::array({1, 2, 2, 4, 1, 0})) {
+						StationID dest{(*train).at("orders")[1][1].get<uint16_t>()};
+						const Station *st = Station::GetIfValid(dest);
+						if (st != nullptr && st->owner == CompanyID{0} && MegacityManager::IsConsumerStation(st)) {
+							orders[1][1] = dest.base();
+						}
+					}
+				}
 				if ((*train).at("orders") != orders) return "inherited-orders";
 			}
 		}

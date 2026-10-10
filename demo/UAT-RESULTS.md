@@ -1,5 +1,13 @@
 # Human UAT results — recovery / v1.1
 
+## Core basket repeat — 10 October 2026
+
+**Human UAT Pending.** Automated offline evidence shows a second atomic basket
+and a clean fresh-process reload, with no house growth. Player-visible check:
+load the saved checkpoint, confirm Train 4 delivers FOOD to the new Core station
+and the Core panel shows the basket consumed. See
+[the evidence](../docs/audit/2026-10-10/core-basket-repeat/README.md).
+
 ## Recovered full-basket evidence — 10 October 2026
 
 **Human UAT Pending.** Historical automated evidence from October 5 records one

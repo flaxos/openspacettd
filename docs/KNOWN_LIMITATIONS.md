@@ -1,5 +1,13 @@
 # OpenSpaceTTD Known Limitations
 
+## Core basket repeat boundaries — 10 October 2026
+
+A second basket was consumed and reloaded cleanly in automated offline proof
+([evidence](audit/2026-10-10/core-basket-repeat/README.md)). Still open: actual house growth (native growth was
+enabled and observed; houses stayed 29 and population fell 1,191 -> 1,096),
+sustained FOOD supply (short in months 12-35), a post-reload advance (the basket
+session is not persisted), ordinary-start economics, and human acceptance.
+
 ## Station Adapter and Gate Art delivery boundaries — 10 October 2026
 
 The station adapter is committed and submitted as PR #75 on `codex/dev-core-town-station-adapter`,

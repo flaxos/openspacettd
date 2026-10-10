@@ -18,6 +18,7 @@
 #include "../town_kdtree.h"
 #include "../station_base.h"
 #include "../station_kdtree.h"
+#include "../viewport_kdtree.h"
 #include "../station_map.h"
 #include "../station_cmd.h"
 #include "../newgrf_station.h"
@@ -157,6 +158,7 @@ void SetupCommandAuthorityWorld(WorldPhase phase, uint32_t score)
 	}
 	RebuildTownKdtree();
 	RebuildStationKdtree();
+	RebuildViewportKdtree();
 	REQUIRE(CorporateHQManager::RegisterHQ(CompanyID{0}, WorldID{0}, TileXY(20, 20), "Authority HQ"));
 	_screen.width = _screen.pitch = 1024;
 	_screen.height = 768;
