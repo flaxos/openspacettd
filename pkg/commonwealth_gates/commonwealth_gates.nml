@@ -1,0 +1,69 @@
+/* Original OpenSpaceTTD art, GPL-2.0-only; generated from gates.json. */
+grf {
+	grfid: "OST\07";
+	name: string(STR_GRF_NAME);
+	desc: string(STR_GRF_DESC);
+	version: 1;
+	min_compatible_version: 1;
+}
+
+param[10] = reserve_sprites(16);
+
+replace gate_set(param[10], "sprites/gate_8bpp.png") {
+	[0,    0, 48, 48, -24, -12, NOCROP]
+	[0,   48, 48, 48, -24, -12, NOCROP]
+	[0,   96, 48, 48, -24, -12, NOCROP]
+	[0,  144, 48, 48, -24, -12, NOCROP]
+	[0,  192, 48, 48, -24,  -8, NOCROP]
+	[0,  240, 48, 48, -24,  -8, NOCROP]
+	[0,  288, 48, 48, -24,  -8, NOCROP]
+	[0,  336, 48, 48, -24,  -8, NOCROP]
+	[0,  384, 48, 48, -24, -12, NOCROP]
+	[0,  432, 48, 48, -24, -12, NOCROP]
+	[0,  480, 48, 48, -24, -12, NOCROP]
+	[0,  528, 48, 48, -24, -12, NOCROP]
+	[0,  576, 48, 48, -24,  -8, NOCROP]
+	[0,  624, 48, 48, -24,  -8, NOCROP]
+	[0,  672, 48, 48, -24,  -8, NOCROP]
+	[0,  720, 48, 48, -24,  -8, NOCROP]
+}
+
+alternative_sprites(gate_set, ZOOM_LEVEL_NORMAL, BIT_DEPTH_32BPP,
+                    "sprites/gate_32bpp.png", "sprites/gate_mask.png") {
+	[0,    0, 48, 48, -24, -12, NOCROP]
+	[0,   48, 48, 48, -24, -12, NOCROP]
+	[0,   96, 48, 48, -24, -12, NOCROP]
+	[0,  144, 48, 48, -24, -12, NOCROP]
+	[0,  192, 48, 48, -24,  -8, NOCROP]
+	[0,  240, 48, 48, -24,  -8, NOCROP]
+	[0,  288, 48, 48, -24,  -8, NOCROP]
+	[0,  336, 48, 48, -24,  -8, NOCROP]
+	[0,  384, 48, 48, -24, -12, NOCROP]
+	[0,  432, 48, 48, -24, -12, NOCROP]
+	[0,  480, 48, 48, -24, -12, NOCROP]
+	[0,  528, 48, 48, -24, -12, NOCROP]
+	[0,  576, 48, 48, -24,  -8, NOCROP]
+	[0,  624, 48, 48, -24,  -8, NOCROP]
+	[0,  672, 48, 48, -24,  -8, NOCROP]
+	[0,  720, 48, 48, -24,  -8, NOCROP]
+}
+
+alternative_sprites(gate_set, ZOOM_LEVEL_IN_2X, BIT_DEPTH_32BPP,
+                    "sprites/gate_2x_32bpp.png", "sprites/gate_2x_mask.png") {
+	[0,    0, 96, 96, -48, -24, NOCROP]
+	[0,   96, 96, 96, -48, -24, NOCROP]
+	[0,  192, 96, 96, -48, -24, NOCROP]
+	[0,  288, 96, 96, -48, -24, NOCROP]
+	[0,  384, 96, 96, -48, -16, NOCROP]
+	[0,  480, 96, 96, -48, -16, NOCROP]
+	[0,  576, 96, 96, -48, -16, NOCROP]
+	[0,  672, 96, 96, -48, -16, NOCROP]
+	[0,  768, 96, 96, -48, -24, NOCROP]
+	[0,  864, 96, 96, -48, -24, NOCROP]
+	[0,  960, 96, 96, -48, -24, NOCROP]
+	[0, 1056, 96, 96, -48, -24, NOCROP]
+	[0, 1152, 96, 96, -48, -16, NOCROP]
+	[0, 1248, 96, 96, -48, -16, NOCROP]
+	[0, 1344, 96, 96, -48, -16, NOCROP]
+	[0, 1440, 96, 96, -48, -16, NOCROP]
+}
