@@ -1,5 +1,20 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Synchronization status — 10 October 2026
+
+This file retains the historical First Core Construction Basket plan and consumed
+attempts below. Its October 3 clocks and load permissions are closed. The owner's
+current request is checkpoint synchronization; it supplies no new simulation
+clock, load budget or source-save campaign. No historical clock is being reset.
+
+Later October 5 evidence proves one full consuming basket, superseding older
+unproved-outcome prose below for that specific result. See
+[the checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md).
+The existing [station-adapter source handoff](handoffs/CORE_TOWN_STATION_ADAPTER.md)
+remains the next bounded gameplay review. A subsequent repeat/cold campaign needs
+an agreed replacement here with exact checkpoint, delivered helper and finite
+load/tick/wall bounds. This status update does not create that next plan.
+
 For the current First Core Construction Basket development proof, the owner
 explicitly deferred financial balance and authorized unlimited virtual money.
 The former £600,000 quote, £750,000 aggregate gross-spend and cash-reserve

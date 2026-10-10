@@ -1,5 +1,21 @@
 # OpenSpaceTTD Known Limitations
 
+## Retained basket evidence and unpublished adapter — 10 October 2026
+
+The October 5 archive establishes one atomic 60 FOOD + 20 STEL + 20 BALL
+consumption at tick 284,995. The recorded native growth hook was observed, but
+native growth remained disabled and town population/house count did not rise.
+Full-basket consumption supersedes older blanket NOT RUN claims for that
+outcome only. Repeated baskets, sustained receiver service, post-adapter cold
+continuation, ordinary economics and human acceptance remain unproved.
+
+The four-file station adapter patch remains uncommitted. Exact-final native
+checks were not run in this alignment task; October 10 primary-checkout tests
+cover published PR71, not this patch. Art assets compile to the retained GRF
+hash but have no proved gate runtime draw hook or human clearance result.
+Historical temporary native outputs are absent; the durable archive/checkpoint
+remain verified. See [checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md).
+
 ## Core Megacity panel proof boundary — 3 October 2026
 
 The Core panel now reports each construction shortage and displays Core growth

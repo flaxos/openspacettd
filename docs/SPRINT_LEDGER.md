@@ -1,5 +1,20 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Local/GitHub/cloud checkpoint reconciliation — 10 October 2026
+
+Documentation delivery only; no new sprint, implementation or simulation run.
+Recovered October 7 planning records are published against PR71 while both
+implementation trees stay untouched. Fresh local verification of the October 5
+cloud archive passes ZIP CRC, 27 operation hashes and 24 checkpoint hashes.
+The final retained save matches `89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f`,
+tick 304,384. One full consuming basket and growth-hook observation are recorded;
+actual house/population growth and post-helper cold proof remain open.
+
+The existing helper patch and all 22 unpublished art files are independently
+preserved. Resumed Antigravity owns the primary PR71 checkout and finished its
+checks waiting for a decision; no duplicate worker was dispatched. See
+[checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md) for exact heads, proof boundaries and next ownership transition.
+
 ## Core Megacity basket display follow-up — 3 October 2026
 
 Antigravity repaired the Core panel's demand/reserve and construction-first

@@ -1,5 +1,70 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Checkpoint alignment — 10 October 2026
+
+[checkpoint alignment](audit/2026-10-10/checkpoint-alignment/README.md) reconciles GitHub, local planning, the resumed Antigravity
+workspace and retained cloud evidence. The October 5 archive proves one atomic
+FOOD/STEL/BALL consumption; actual house growth, repeated supply and post-helper
+cold proof remain open. The published development source remains PR71
+`1c95f075`, stacked on draft PR66 `7bc29a60`, with integrated main `85c423b4`.
+The unpublished station adapter and gate assets remain in separate preserved
+checkouts. This documentation delivery publishes the October 7 planning delta
+without importing either unfinished implementation or renewing the old campaign.
+
+Antigravity resumed in the primary checkout on October 10, checked PR71, and
+finished waiting for a decision about a fresh run. That proposal predates its
+awareness of the recovered October 5 outcome. Continue the existing station
+adapter review before considering another copied-save campaign. One gameplay
+implementation owner and one separate art owner remain the coordination rule.
+
+## Coordinated track update — 7 October 2026
+
+The [7 October dispatch update](COORDINATED_GAMEPLAY_AND_ART.md#dispatch-update--7-october-2026)
+supersedes the older prompts below. Preserved 5 October native evidence proves
+one atomic FOOD+STEL+BALL Core basket consumption at tick 284,995 and an observed
+growth hook, but not house growth, a repeated basket, sustained service or human
+acceptance. The paused final checkpoint is tick 304,384, SHA256
+`89e94d49dc95b5df0277679dcaa7c52f95b39c2bc0b90b840f5d4484e346663f`.
+Train 28 restarted; its earlier failure is historical. A station/FOOD-order
+adapter is uncommitted on an isolated PR71-based branch, with native safety and
+verification still due. This does not renew the expired 3 October active campaign.
+
+The independent gate branch has original gate assets and an uncommitted GRF,
+but no engine loader or gate-only draw hook, so the gates still look like
+tunnels in game. The merged PR64 remains a four-sprite optional platform proof,
+not a complete graphics overhaul. Gate runtime integration precedes a first
+existing locomotive/wagon cosmetic family and combined human review. Neither
+art track changes routing, commands, saves, economy or phase/economic role.
+Federation remains parallel; financial balance is deferred under the approved
+offline development-money proof mode.
+
+## Coordinated gameplay and sci-fi art reassessment — 5 October 2026
+
+The owner requests functional gameplay development alongside distinctive wormhole
+gates and phase-1 train graphics. The [bounded sprint specifications and dispatch
+prompts](COORDINATED_GAMEPLAY_AND_ART.md) assess live main and the PR66→PR71 stack.
+They are queued planning proposals, not another active tracker or permission to
+restart an expired campaign. [ACTIVE_EXECUTION_PLAN.md](ACTIVE_EXECUTION_PLAN.md)
+remains the sole implementation authority until a reviewed continuation handoff
+is recorded there. Preserve its historical bounds and failed attempts.
+
+Gameplay order: **Checkpoint and Ownership Reconciliation → Core Basket Closure
+→ Player-Funded Electronics Loop**. Financial profitability is deferred under
+the approved offline unlimited development-money mode; physical resources, legal
+commands and conservation remain mandatory. The electronics slice depends on
+basket closure and a concrete paid-site preflight; it is not authorized now.
+Federation continues in its own lane without becoming a solo-game prerequisite.
+
+Cosmetic order: **Wormhole Gate Family → Phase-1 Fleet Family → Combined Visual
+Acceptance**. Gate asset preparation can proceed alongside gameplay after an
+owner check, using separate files/branches/builds/profiles. The fleet slice starts
+with one existing locomotive and one existing wagon, then follows accepted
+coverage rather than promising a complete reskin. The new requested direction
+allows preparation beyond the earlier platform-only research gate; first-family
+human review still gates broader production rollout. Development phase and
+economic role do not change. No implementation, Antigravity launch, push, PR,
+merge, save operation or publishing is performed by this reassessment.
+
 ## Core Megacity basket display repair — 3 October 2026
 
 Antigravity implemented a bounded Core Megacity panel repair on a draft branch
