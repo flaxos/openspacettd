@@ -52,6 +52,8 @@
 #include "table/strings.h"
 #include "table/pricebase.h"
 
+#include "portal/gate_sprites.h"
+
 #include "safeguards.h"
 
 /* TTDPatch extended GRF format codec
@@ -415,6 +417,7 @@ extern void ResetGRM();
  */
 void ResetNewGRFData()
 {
+	PortalGateSprites::Reset();
 	CleanUpStrings();
 	CleanUpGRFTownNames();
 
@@ -1648,6 +1651,7 @@ static void AfterLoadGRFs()
 	/* Polish cargoes */
 	FinaliseCargoArray();
 	CommonwealthPackManager::RepairLegacyCargoStrings();
+	PortalGateSprites::Load();
 
 	/* Pre-calculate all refit masks after loading GRF files. */
 	CalculateRefitMasks();

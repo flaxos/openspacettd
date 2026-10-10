@@ -464,6 +464,8 @@ add_files(
     portal/prebuilt_trade.h
     portal/corporate_charter.cpp
     portal/corporate_charter.h
+    portal/gate_sprites.cpp
+    portal/gate_sprites.h
     portal/planet_manager.cpp
     portal/planet_manager.h
     portal/planet_type.h

@@ -1,0 +1,208 @@
+{
+  "schema_version": 2,
+  "name": "Commonwealth compact wormhole gate",
+  "license": "GPL-2.0-only",
+  "author": "OpenSpaceTTD Developers",
+  "provenance": "Original parametric vector model by OpenSpaceTTD Developers. No third-party or generated images.",
+  "geometry": {
+    "footprint": "1x1 tile native tunnel portal replacement",
+    "track_gauge": "Standard native track geometry",
+    "aperture_shape": "Engineered hexagonal containment frame with faceted hoop and centered static horizon disc",
+    "cell_1x": [48, 48],
+    "cell_2x": [96, 96],
+    "total_sprites": 16,
+    "variants": ["active_cyan", "standby_amber"]
+  },
+  "materials": {
+    "graphite": "#283239",
+    "steel_dark": "#3b4c54",
+    "steel_mid": "#596b73",
+    "steel_light": "#77898d",
+    "ceramic": "#d7d8ce",
+    "amber_standby": "#d8a34b",
+    "cyan_active": "#55c7d1",
+    "horizon_dark": "#0a1926",
+    "horizon_core": "#1c3d52",
+    "horizon_field": "#2b5876",
+    "track_ballast": "#4b5358",
+    "rail_steel": "#8a9ba3"
+  },
+  "sprites": [
+    {
+      "index": 0,
+      "variant": "active_cyan",
+      "direction": "NE",
+      "part": "rear",
+      "description": "Northeast active portal rear hexagonal mounting collar and cyan static horizon aperture",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 1,
+      "variant": "active_cyan",
+      "direction": "NE",
+      "part": "front",
+      "description": "Northeast active portal front overhead hexagonal containment arch with ceramic bezel and cyan emitters",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 2,
+      "variant": "active_cyan",
+      "direction": "SE",
+      "part": "rear",
+      "description": "Southeast active portal rear hexagonal mounting collar and cyan static horizon aperture",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 3,
+      "variant": "active_cyan",
+      "direction": "SE",
+      "part": "front",
+      "description": "Southeast active portal front overhead hexagonal containment arch with ceramic bezel and cyan emitters",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 4,
+      "variant": "active_cyan",
+      "direction": "SW",
+      "part": "rear",
+      "description": "Southwest active portal rear hexagonal mounting collar and cyan static horizon aperture",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 5,
+      "variant": "active_cyan",
+      "direction": "SW",
+      "part": "front",
+      "description": "Southwest active portal front overhead hexagonal containment arch with ceramic bezel and cyan emitters",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 6,
+      "variant": "active_cyan",
+      "direction": "NW",
+      "part": "rear",
+      "description": "Northwest active portal rear hexagonal mounting collar and cyan static horizon aperture",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 7,
+      "variant": "active_cyan",
+      "direction": "NW",
+      "part": "front",
+      "description": "Northwest active portal front overhead hexagonal containment arch with ceramic bezel and cyan emitters",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 8,
+      "variant": "standby_amber",
+      "direction": "NE",
+      "part": "rear",
+      "description": "Northeast standby portal rear hexagonal mounting collar and amber static horizon aperture",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 9,
+      "variant": "standby_amber",
+      "direction": "NE",
+      "part": "front",
+      "description": "Northeast standby portal front overhead hexagonal containment arch with ceramic bezel and amber emitters",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 10,
+      "variant": "standby_amber",
+      "direction": "SE",
+      "part": "rear",
+      "description": "Southeast standby portal rear hexagonal mounting collar and amber static horizon aperture",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 11,
+      "variant": "standby_amber",
+      "direction": "SE",
+      "part": "front",
+      "description": "Southeast standby portal front overhead hexagonal containment arch with ceramic bezel and amber emitters",
+      "xoff": -24,
+      "yoff": -12,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 12,
+      "variant": "standby_amber",
+      "direction": "SW",
+      "part": "rear",
+      "description": "Southwest standby portal rear hexagonal mounting collar and amber static horizon aperture",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 13,
+      "variant": "standby_amber",
+      "direction": "SW",
+      "part": "front",
+      "description": "Southwest standby portal front overhead hexagonal containment arch with ceramic bezel and amber emitters",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 14,
+      "variant": "standby_amber",
+      "direction": "NW",
+      "part": "rear",
+      "description": "Northwest standby portal rear hexagonal mounting collar and amber static horizon aperture",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "index": 15,
+      "variant": "standby_amber",
+      "direction": "NW",
+      "part": "front",
+      "description": "Northwest standby portal front overhead hexagonal containment arch with ceramic bezel and amber emitters",
+      "xoff": -24,
+      "yoff": -8,
+      "width": 48,
+      "height": 48
+    }
+  ]
+}

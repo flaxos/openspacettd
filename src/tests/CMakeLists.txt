@@ -78,6 +78,7 @@ add_test_files(
     test_prefab_world_uat.cpp
     test_script_admin.cpp
     test_window_desc.cpp
+    test_gate_sprites.cpp
     tilearea.cpp
     utf8.cpp
 )

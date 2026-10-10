@@ -1,0 +1,58 @@
+{
+  "audit": {
+    "action6_patch": {
+      "param": 10,
+      "size": 2,
+      "target_offset": 3
+    },
+    "actionA_replacement": {
+      "base_sprite": 0,
+      "count": 16,
+      "sets": 1
+    },
+    "compression": 0,
+    "container_version": 2,
+    "grm_reservation": {
+      "count": 16,
+      "feature": 8,
+      "operation": 0,
+      "param": 10
+    },
+    "pseudo_actions": [
+      "14",
+      "08",
+      "0D",
+      "06",
+      "0A"
+    ],
+    "real_sprites_count": 16,
+    "sprite_entries_count": 48,
+    "total_records": 22
+  },
+  "engine_content_md5": "4da726f50a0fae0dd2161e6af35b932c",
+  "files": {
+    "bin/newgrf/openspacettd_gates_v1.grf": {
+      "bytes": 41303,
+      "sha256": "268b9b705504c3d081b35459c39e1c952dbec10c2ff56ba330d20063b5b576b2"
+    },
+    "pkg/commonwealth_gates/commonwealth_gates.nml": {
+      "bytes": 2356,
+      "sha256": "653e1c36673fe4edd22a9980d20e2eea152d94862a48ed80e41c233c870e9484"
+    },
+    "pkg/commonwealth_gates/lang/english.lng": {
+      "bytes": 260,
+      "sha256": "e757fe8c1316046a2efb76d39598243191fbf85c283c64c815d376db0e48ef02"
+    }
+  },
+  "grfid_hex": "0754534f",
+  "grfid_text": "OST\u0007",
+  "license": "GPL-2.0-only",
+  "name": "OpenSpaceTTD Commonwealth Wormhole Gates Pack",
+  "schema_version": 1,
+  "tools": {
+    "Pillow": "12.3.0",
+    "compiler": "/home/flax/Documents/Codex/2026-10-06/task/.venv-gate-art/bin/nmlc",
+    "nmlc": "0.9.0"
+  },
+  "version": 1
+}
