@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include "../3rdparty/nlohmann/json.hpp"
 #include "../command_type.h"
 #include "../tile_type.h"
@@ -35,6 +36,75 @@ struct CoreBasketAdmissionContext {
 	bool loaded = false; ///< Authorization comes from a loaded save, not generation.
 	uint32_t companies = 0; ///< Number of native companies in the save.
 };
+
+/** Native environment for the one offline Core town station repair. */
+struct CoreTownStationAdmissionContext {
+	bool normal = false; ///< Ordinary gameplay mode is active.
+	bool offline = false; ///< No network session can accept commands.
+	bool paused = false; ///< The saved simulation is paused.
+	bool profile = false; ///< Exact canonical settings and content are loaded.
+	bool loaded = false; ///< Authorization comes from a loaded save, not generation.
+	bool competing_basket = false; ///< Competing basket operations are absent.
+	bool shared_orders = false; ///< Shared order list constraints are respected.
+	uint32_t companies = 0; ///< Number of native companies in the save.
+};
+
+struct Train;
+
+/**
+ * Read-only admission for the inherited FOOD train and its ordinary orders.
+ * @param state Paused native checkpoint projection.
+ * @param context Verified native environment conditions.
+ * @return Empty on admission, otherwise denial reason.
+ */
+std::string GetCoreTownStationAdmissionError(const nlohmann::json &state, const CoreTownStationAdmissionContext &context);
+
+/**
+ * Reject native order details that cannot survive the bounded insert/delete stage.
+ * @param train Native train pointer to validate.
+ * @return Empty if orders are valid, otherwise denial reason.
+ */
+std::string GetCoreTownStationNativeTrainError(const Train *train);
+
+/**
+ * Reserve the sole process-local token; game load does not clear its history.
+ * @param token Token identifier to reserve.
+ * @return True if token was successfully reserved.
+ */
+bool TryReserveCoreTownStationToken(std::string_view token);
+
+/**
+ * Compare the paid link's live native quote with its frozen preconstruction cost.
+ * @param quote Live native command quote.
+ * @param frozen_cost Frozen preconstruction cost.
+ * @param paid Cumulative paid cost so far.
+ * @param maximum Budget ceiling.
+ * @return Empty if within bounds, otherwise error string.
+ */
+std::string GetCoreTownStationLinkQuoteError(const CommandCost &quote, int64_t frozen_cost, int64_t paid, int64_t maximum);
+
+/**
+ * Keep a repeated read-only quote identical to the first accepted components.
+ * @param frozen Output frozen quote JSON.
+ * @param live Live quote JSON to compare or freeze.
+ * @return True if quotes match or was newly frozen.
+ */
+bool TryFreezeCoreTownStationQuote(nlohmann::json &frozen, const nlohmann::json &live);
+
+/**
+ * The single connector may reuse owned compatible rail or clear ordinary ground.
+ * @param tile Tile to inspect.
+ * @param track Track direction to check.
+ * @return True if tile can host the connector rail.
+ */
+bool IsCoreTownStationConnectorTileAllowed(TileIndex tile, Track track);
+
+/**
+ * Native, read-only quote for a two-tile independent Axis::X Core platform.
+ * @param tile Tile where platform originates.
+ * @return Native command quote or failure cost.
+ */
+CommandCost QueryCoreTownStation(TileIndex tile);
 
 /**
  * Read-only admission decision for the exact checkpoint contract.

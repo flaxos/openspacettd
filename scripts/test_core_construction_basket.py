@@ -120,6 +120,67 @@ def authorized_command(command):
     return any(re.fullmatch(pattern, command) for pattern in patterns)
 
 
+def authorized_town_station_command(command):
+    """A separate paused helper allowlist cannot enter the old campaign loop."""
+    return bool(re.fullmatch(r'connected_economy town-station-quote "[^"\n\r\x00]+"', command) or
+                re.fullmatch(r'connected_economy town-station-apply [A-Za-z0-9]{16,128} (?:station|link|orders)', command))
+
+
+def verify_town_station_response(value, before=None, observation_before=None):
+    """Accept progress only with a complete zero-tick native cost/custody report."""
+    fields = ('version', 'operation', 'stage', 'stopped', 'reason', 'secondary_errors', 'token', 'station',
+              'native_paid', 'maximum_native_cost', 'actual_ticks', 'cash_debits',
+              'state', 'observation', 'materials_used', 'materials_expected',
+              'cargo_accounted', 'rng_unchanged', 'rng_expected', 'rng_accounted', 'cash_conserved')
+    require(isinstance(value, dict) and all(key in value for key in fields),
+            'Incomplete native town-station response')
+    require(value['version'] == 1 and value['operation'] in ('town-station-quote', 'town-station-apply') and
+            type(value['stage']) is int and 0 <= value['stage'] <= 3 and
+            type(value['stopped']) is bool and isinstance(value['reason'], str) and isinstance(value['secondary_errors'], list) and
+            isinstance(value['token'], str) and type(value['station']) is int and 0 <= value['station'] <= 65535 and
+            type(value['native_paid']) is int and value['native_paid'] >= 0 and
+            type(value['maximum_native_cost']) is int and type(value['cash_debits']) is int and
+            type(value['actual_ticks']) is int and value['actual_ticks'] == 0 and
+            isinstance(value['state'], dict) and isinstance(value['observation'], dict) and
+            isinstance(value['rng_expected'], list) and len(value['rng_expected']) == 2 and
+            all(type(n) is int and 0 <= n <= 0xFFFFFFFF for n in value['rng_expected']) and
+            isinstance(value['materials_used'], list) and isinstance(value['materials_expected'], list),
+            'Malformed native town-station response')
+    for materials in (value['materials_used'], value['materials_expected']):
+        require(all(isinstance(row, list) and len(row) == 2 and type(row[0]) is int and
+                    0 <= row[0] < CARGO_COUNT and type(row[1]) is int and row[1] >= 0 for row in materials) and
+                len({row[0] for row in materials}) == len(materials),
+                'Malformed native town-station material ledger')
+    require(value['rng_accounted'] is True and value['state'].get('rng') == value['rng_expected'] and
+            value['cash_conserved'] is True and
+            value['cargo_accounted'] is True and value['materials_used'] == value['materials_expected'],
+            'Native town-station accounting or RNG changed')
+    if value['operation'] == 'town-station-quote':
+        require(before is not None and observation_before is not None and
+                value['state'] == before and value['observation'] == observation_before and
+                value['cash_debits'] == 0 and value['materials_used'] == [] and
+                value['materials_expected'] == [] and value['rng_unchanged'] is True,
+                'Native town-station quote changed state, custody, cash, or RNG')
+    if not value['stopped']:
+        require(re.fullmatch(r'[A-Za-z0-9]{16,128}', value['token']) is not None and
+                value['native_paid'] <= value['maximum_native_cost'] and
+                (value['operation'] != 'town-station-quote' or isinstance(value.get('quote'), dict)),
+                'Unbounded native town-station progress')
+    if before is not None:
+        require(value['state'].get('tick') == before.get('tick') and
+                value['state'].get('money') == before.get('money') - value['cash_debits'],
+                'Native town-station state/cash mismatch')
+        require(value['rng_unchanged'] is (value['state'].get('rng') == before.get('rng')),
+                'Native town-station RNG flag mismatch')
+        held_before, held_after = before.get('all_held'), value['state'].get('all_held')
+        require(isinstance(held_before, list) and isinstance(held_after, list) and
+                len(held_before) == len(held_after) == CARGO_COUNT,
+                'Malformed native town-station custody')
+        used = [[cargo, old - new] for cargo, (old, new) in enumerate(zip(held_before, held_after)) if old != new]
+        require(used == value['materials_used'], 'Native town-station custody mismatch')
+    return value
+
+
 def pairs(rows):
     require(isinstance(rows, list) and all(isinstance(row, list) and len(row) == 2 for row in rows),
             'Malformed native cargo map')
@@ -1470,6 +1531,104 @@ class AdmissionGuardTests(unittest.TestCase):
             verify_plan(plan, 0, {})
 
 
+class TownStationAdapterTests(unittest.TestCase):
+    def response(self):
+        return {'version': 1, 'operation': 'town-station-apply', 'stage': 1,
+                'stopped': False, 'reason': '', 'secondary_errors': [], 'token': 'a' * 16, 'station': 4,
+                'native_paid': 100, 'maximum_native_cost': 500, 'actual_ticks': 0,
+                'cash_debits': 100, 'state': {'tick': 304384, 'rng': [1, 2]}, 'observation': {'paused': True},
+                'materials_used': [[9, 2]], 'materials_expected': [[9, 2]],
+                'cargo_accounted': True, 'rng_unchanged': True, 'rng_expected': [1, 2],
+                'rng_accounted': True, 'cash_conserved': True}
+
+    def test_helper_allowlist_is_separate_from_campaign(self):
+        quote = 'connected_economy town-station-quote "/tmp/station.json"'
+        apply = 'connected_economy town-station-apply ' + 'a' * 16 + ' station'
+        self.assertTrue(authorized_town_station_command(quote))
+        self.assertTrue(authorized_town_station_command(apply))
+        self.assertFalse(authorized_command(quote))
+        self.assertFalse(authorized_command(apply))
+        for command in ('connected_economy town-station-apply a orders',
+                        'connected_economy town-station-apply ' + 'a' * 16 + ' advance',
+                        'connected_economy town-station-quote "/tmp/a\nnewgame"'):
+            self.assertFalse(authorized_town_station_command(command))
+
+    def test_paid_partial_and_material_accounting_are_explicit(self):
+        value = self.response()
+        self.assertEqual(verify_town_station_response(value)['stage'], 1)
+        before = {'tick': 304384, 'money': 1000, 'rng': [1, 2], 'all_held': [0] * CARGO_COUNT}
+        before['all_held'][9] = 5
+        value['state'].update(money=900, all_held=copy.deepcopy(before['all_held']))
+        value['state']['all_held'][9] = 3
+        self.assertEqual(verify_town_station_response(value, before)['native_paid'], 100)
+        bad_custody = copy.deepcopy(value)
+        bad_custody['state']['all_held'][9] = 4
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(bad_custody, before)
+        value['stopped'] = True
+        value['reason'] = 'partial-construction-receiver-or-radius'
+        self.assertTrue(verify_town_station_response(value)['stopped'])
+        refused = copy.deepcopy(value)
+        refused['reason'] = 'unplanned-used-or-stale-apply'
+        refused['cash_debits'] = 0
+        refused['materials_used'] = []
+        refused['materials_expected'] = []
+        self.assertTrue(verify_town_station_response(refused, copy.deepcopy(value['state']))['stopped'])
+        for field in ('cash_conserved', 'cargo_accounted', 'rng_accounted'):
+            bad = copy.deepcopy(value)
+            bad[field] = False
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                verify_town_station_response(bad)
+        bad = copy.deepcopy(value)
+        bad['materials_used'] = []
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(bad)
+        bad = copy.deepcopy(value)
+        bad['actual_ticks'] = 1
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(bad)
+        for field in tuple(value):
+            bad = copy.deepcopy(value)
+            del bad[field]
+            with self.subTest(missing=field), self.assertRaises(RuntimeError):
+                verify_town_station_response(bad)
+
+    def test_quote_rng_is_immutable_but_paid_native_rng_is_accounted(self):
+        value = self.response()
+        value['operation'] = 'town-station-quote'
+        value['quote'] = {'station_cost': 100}
+        value['cash_debits'] = 0
+        value['materials_used'] = []
+        value['materials_expected'] = []
+        value['state'].update(money=900, all_held=[0] * CARGO_COUNT)
+        before = copy.deepcopy(value['state'])
+        observation_before = copy.deepcopy(value['observation'])
+        self.assertEqual(verify_town_station_response(value, before, observation_before)['rng_expected'], [1, 2])
+        for field, changed in (('rng_unchanged', False), ('cash_debits', 1),
+                               ('materials_used', [[9, 2]]), ('materials_expected', [[9, 2]])):
+            bad = copy.deepcopy(value)
+            bad[field] = changed
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                verify_town_station_response(bad, before, observation_before)
+        bad = copy.deepcopy(value)
+        bad['state']['money'] = 1
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(bad, before, observation_before)
+        bad = copy.deepcopy(value)
+        bad['observation']['private_rail'] = [[12, 1]]
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(bad, before, observation_before)
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(value, before)
+        value['operation'] = 'town-station-apply'
+        value['rng_expected'] = [3, 4]
+        value['state']['rng'] = [3, 4]
+        self.assertTrue(verify_town_station_response(value)['rng_accounted'])
+        value['rng_expected'] = [3, 5]
+        with self.assertRaises(RuntimeError):
+            verify_town_station_response(value)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog='Bounds are fixed by the owner handoff. No retry, fresh game, funding, loan or research option exists.')
@@ -1478,10 +1637,15 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--execute', action='store_true', help='Launch the one initial load and one planned cold process from unchanged prepared inputs')
     mode.add_argument('--self-test', action='store_true', help='Run admission/accounting/event guard tests without launching a native process')
+    mode.add_argument('--adapter-self-test', action='store_true', help='Run paused town-station response/allowlist checks without launching a native process')
     args = parser.parse_args()
     if args.self_test:
         require(args.output is None, '--self-test does not create campaign output')
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(AdmissionGuardTests)
+        return 0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1
+    if args.adapter_self_test:
+        require(args.output is None, '--adapter-self-test does not create campaign output')
+        suite = unittest.defaultTestLoader.loadTestsFromTestCase(TownStationAdapterTests)
         return 0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1
     require(args.output is not None, '--output is required for preparation or execution')
     output = args.output.resolve()
