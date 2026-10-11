@@ -73,7 +73,11 @@ def verify_prototype(args):
         post_commission_status = json.loads(engine.command("connected_economy status", "CONNECTED state "))
         report["post_commission_status"] = post_commission_status
 
-        # Verify BOM deducted and work assigned
+        # Verify commissioning cash debit (£50,000) and BOM
+        initial_money = initial_status.get("money", 0)
+        post_money = post_commission_status.get("money", 0)
+        require(initial_money - post_money == 50000, f"Expected £50,000 commission debit, got £{initial_money - post_money}")
+
         factories = post_commission_status.get("economy", {}).get("factories", [])
         require(len(factories) > 0, "No factories found in economy state")
         # Ballast factory is first or has recipe matching
@@ -95,6 +99,7 @@ def verify_prototype(args):
 
         # Step 4: Advance 24 periods with feeder interruption
         print("Running 24-period simulation...", flush=True)
+        total_evaluations = 0
         for period in range(1, 25):
             if period == 13:
                 print(f"Period {period}: Interrupting SILC feeder...", flush=True)
@@ -116,21 +121,30 @@ def verify_prototype(args):
             # Extract metrics
             town_state = step_data.get("cities", [{}])[0] if step_data.get("cities") else {}
             batches = [f.get("batches", 0) for f in step_data.get("facilities", [])]
+            city_months = step_data.get("city_months", [])
+            total_evaluations += len(city_months)
             report["ledger"].append({
                 "period": period,
+                "tick": step_data.get("tick"),
                 "year": step_data.get("year"),
                 "month": step_data.get("month"),
                 "money": step_data.get("money"),
                 "batches": batches,
                 "town_population": town_state.get("population"),
-                "town_food_last": town_state.get("last", []),
-                "town_state": town_state.get("state")
+                "town_houses": town_state.get("houses"),
+                "food_rate": town_state.get("food_rate", 0),
+                "food_reserve": town_state.get("food_reserve", 0),
+                "food_consumed_history": town_state.get("food_consumed_history", []),
+                "food_requested_history": town_state.get("food_requested_history", []),
+                "food_delivered_last": town_state.get("food_delivered_last", 0),
+                "town_state": town_state.get("state"),
+                "evaluations_observed": len(city_months)
             })
 
             if period % 4 == 0 or period in (12, 13, 18, 19):
                 print(f"Period {period}: year={step_data.get('year')} month={step_data.get('month')} "
                       f"batches={batches[:3]} pop={town_state.get('population')} "
-                      f"food_last={town_state.get('last', [])}", flush=True)
+                      f"food_cons={town_state.get('food_consumed_history', [])}", flush=True)
 
         checkpoint_24_sav = output / "checkpoint-24.sav"
         engine.save(checkpoint_24_sav)
@@ -139,6 +153,10 @@ def verify_prototype(args):
 
     finally:
         engine.close()
+        if report["status"] != "PASSED":
+            report["status"] = "FAILED"
+            evidence_file = output / "evidence.json"
+            evidence_file.write_text(json.dumps(report, indent=2) + "\n")
 
     # Step 5: Cold reload in fresh process
     print("Testing cold reload in fresh process...", flush=True)
@@ -159,6 +177,10 @@ def verify_prototype(args):
         report["post_reload_periods_passed"] = 4
     finally:
         probe.close()
+        if report["status"] != "PASSED":
+            report["status"] = "FAILED"
+            evidence_file = output / "evidence.json"
+            evidence_file.write_text(json.dumps(report, indent=2) + "\n")
 
     report["status"] = "PASSED"
     report["end_time_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

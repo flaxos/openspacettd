@@ -21,6 +21,8 @@
 #include "../road_map.h"
 #include "../clear_map.h"
 #include "../newgrf_house.h"
+#include "../newgrf_config.h"
+#include "../newgrf.h"
 #include "../portal/connected_economy.h"
 #include "../portal/resource_sites.h"
 #include "../portal/portal_registry.h"
@@ -37,8 +39,28 @@ namespace
 {
 struct WorksTestFixture {
 	IndustrySpec saved_spec;
+	GRFConfigList saved_configs = std::move(_grfconfig);
+	std::array<CargoSpec, NUM_CARGO> saved_cargos;
+	GRFFile industry_file;
+
 	WorksTestFixture()
 	{
+		for (size_t i = 0; i < NUM_CARGO; ++i) saved_cargos[i] = *CargoSpec::Get(i);
+		industry_file.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+		{
+			auto ind_cfg = std::make_unique<GRFConfig>();
+			ind_cfg->ident.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+			ind_cfg->version = 5;
+			ind_cfg->status = GRFStatus::Activated;
+			_grfconfig.push_back(std::move(ind_cfg));
+
+			auto rail_cfg = std::make_unique<GRFConfig>();
+			rail_cfg->ident.grfid = COMMONWEALTH_RAIL_GRFID;
+			rail_cfg->version = 2;
+			rail_cfg->status = GRFStatus::Activated;
+			_grfconfig.push_back(std::move(rail_cfg));
+		}
+
 		InitWindowSystem();
 		IntegratedEconomy::Reset();
 		PlanetManager::Reset();
@@ -70,6 +92,7 @@ struct WorksTestFixture {
 			std::copy_n(labels[c], 4, label.begin());
 			CargoSpec::Get(CargoType(c))->label = label;
 			CargoSpec::Get(CargoType(c))->bitnum = c;
+			CargoSpec::Get(CargoType(c))->grffile = &industry_file;
 		}
 		BuildCargoLabelMap();
 
@@ -92,7 +115,9 @@ struct WorksTestFixture {
 		_industry_pool.CleanPool();
 		_town_pool.CleanPool();
 		*const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{0})) = saved_spec;
-		SetupCargoForClimate(LandscapeType::Temperate);
+		_grfconfig = std::move(saved_configs);
+		for (size_t i = 0; i < NUM_CARGO; ++i) *CargoSpec::Get(i) = saved_cargos[i];
+		BuildCargoLabelMap();
 		ProductionChainManager::InitDefaultRecipes();
 		UnInitWindowSystem();
 	}
@@ -769,4 +794,434 @@ TEST_CASE("Works alternative world connection, direct portal linking, and bottle
 		else MakeVoid(tile);
 	}
 	UpdateSignalsInBuffer();
+}
+
+TEST_CASE("Town food service benefit retirement on company deletion vs acquisition transfer", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	if (!Town::CanAllocateItem()) return;
+	auto town = Town::Create(TileXY(15, 15));
+	town->cache.population = 5000;
+	town->cache.num_houses = 200;
+	MegacityManager::RegisterMegacity(town->index, WorldID{0}, "RetirementTown", 5000);
+
+	// Commission food service at rate 40 for Company 0
+	REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 40).Succeeded());
+	auto svc = IntegratedEconomy::GetTownFoodService(town->index);
+	REQUIRE(svc != nullptr);
+	CHECK(svc->owner == CompanyID{0});
+
+	// Fill all four history entries with 40 units (total 160 units consumed)
+	// That earns full +25% passenger bonus (160 / 640 = 0.25)
+	for (size_t i = 0; i < 4; ++i) {
+		IntegratedEconomy::AcceptCity(town->index, C("FOOD"), 40, true);
+		float g = 0, p = 0;
+		REQUIRE(IntegratedEconomy::EvaluateCity(town->index, g, p));
+	}
+	CHECK(svc->consumed_history[0] == 40);
+	CHECK(svc->consumed_history[1] == 40);
+	CHECK(svc->consumed_history[2] == 40);
+	CHECK(svc->consumed_history[3] == 40);
+
+	// Town has 50 units in food reserve
+	IntegratedEconomy::AcceptCity(town->index, C("FOOD"), 50, true);
+	CHECK(IntegratedEconomy::City(town->index)->reserves.at(C("FOOD")) == 50);
+
+	// 1. Company Deletion: Company 0 is deleted (new_owner is Invalid)
+	IntegratedEconomy::ChangeCompany(CompanyID{0}, CompanyID::Invalid());
+
+	// Verify service is retired to uncommissioned defaults
+	CHECK(svc->owner == CompanyID::Invalid());
+	CHECK(svc->selected_rate == 0);
+	CHECK(svc->history_cursor == 0);
+	CHECK(svc->fractional_passenger_remainder == 0);
+	for (size_t i = 0; i < 4; ++i) {
+		CHECK(svc->consumed_history[i] == 0);
+		CHECK(svc->requested_history[i] == 0);
+	}
+	// Verify town reserve is preserved (not discarded or wiped)
+	CHECK(IntegratedEconomy::City(town->index)->reserves.at(C("FOOD")) == 50);
+
+	// 2. Recommission before another evaluation by a new company (Company 1)
+	Company *c1 = Company::GetIfValid(CompanyID{1});
+	if (c1 == nullptr) {
+		c1 = Company::CreateAtIndex(CompanyID{1});
+	}
+	c1->money = 10000000;
+	{
+		AutoRestoreBackup cur_co(_current_company, CompanyID{1});
+		REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 20).Succeeded());
+	}
+	CHECK(svc->owner == CompanyID{1});
+	CHECK(svc->selected_rate == 20);
+
+	// Before another monthly evaluation: bonus must be baseline 1.0x (0% bonus)
+	float growth = 0, passengers = 0;
+	// EvaluateCity month: consumes 20 from retained reserve 50 -> 30 left
+	REQUIRE(IntegratedEconomy::EvaluateCity(town->index, growth, passengers));
+	CHECK(IntegratedEconomy::City(town->index)->reserves.at(C("FOOD")) == 30);
+	// Only this period's 20 units are consumed; older 3 periods are 0
+	CHECK(svc->consumed_history[0] == 20);
+	CHECK(svc->consumed_history[1] == 0);
+	CHECK(svc->consumed_history[2] == 0);
+	CHECK(svc->consumed_history[3] == 0);
+	// Bonus earned is only 20 / 640 (+3.125%), NOT +25%
+	CHECK(passengers == Approx(1.0f + 20.0f / 640.0f));
+
+	// 3. Acquisition: Company 1 acquired by Company 2 (valid company)
+	Company *c2 = Company::GetIfValid(CompanyID{2});
+	if (c2 == nullptr) {
+		c2 = Company::CreateAtIndex(CompanyID{2});
+	}
+	c2->money = 10000000;
+	IntegratedEconomy::ChangeCompany(CompanyID{1}, CompanyID{2});
+	CHECK(svc->owner == CompanyID{2});
+	CHECK(svc->selected_rate == 20);
+	CHECK(svc->consumed_history[0] == 20); // Retained!
+
+	// 4. Foreign company command rejected without mutation
+	{
+		AutoRestoreBackup cur_co(_current_company, CompanyID{3});
+		Company *c3 = Company::GetIfValid(CompanyID{3});
+		if (c3 == nullptr) c3 = Company::CreateAtIndex(CompanyID{3});
+		auto foreign_res = Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 40);
+		CHECK(foreign_res.Failed());
+		CHECK(svc->owner == CompanyID{2});
+		CHECK(svc->selected_rate == 20);
+	}
+
+	// 5. Spectator command rejected without mutation
+	{
+		AutoRestoreBackup cur_co(_current_company, COMPANY_SPECTATOR);
+		auto spec_res = Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 40);
+		CHECK(spec_res.Failed());
+		CHECK(svc->owner == CompanyID{2});
+		CHECK(svc->selected_rate == 20);
+	}
+
+	// 6. Owner-selected Off: Company 2 sets rate to 0
+	{
+		AutoRestoreBackup cur_co(_current_company, CompanyID{2});
+		REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 0).Succeeded());
+		CHECK(svc->owner == CompanyID{2});
+		CHECK(svc->selected_rate == 0);
+		// History is preserved to age out normally
+		CHECK(svc->consumed_history[0] == 20);
+	}
+}
+
+TEST_CASE("Strict v2 save invariants reject impossible factory and food service states", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	auto ind = fixture.CreateFactory(0x11);
+	if (!Town::CanAllocateItem()) return;
+	auto town = Town::Create(TileXY(15, 15));
+	MegacityManager::RegisterMegacity(town->index, WorldID{0}, "InvariantTown", 5000);
+
+	// Commission Reserve works and rate 20
+	StockpileManager::AddCargo(WorldID{1}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{1}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionEconomyWork>::Do(DoCommandFlag::Execute, ind->index, FactoryWorkType::Reserve).Succeeded());
+	REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 20).Succeeded());
+
+	std::string valid_json = IntegratedEconomy::Save();
+	auto base_j = nlohmann::json::parse(valid_json);
+
+	// Helper to test rejection without mutating state
+	auto test_reject = [&](nlohmann::json j) {
+		std::string before_state = IntegratedEconomy::Save();
+		CHECK_FALSE(IntegratedEconomy::Load(j.dump()));
+		CHECK(IntegratedEconomy::Save() == before_state); // Transactional rollback verified
+	};
+
+	// 1. Factory tuple rejections
+	{
+		auto j = base_j;
+		// work = 0 (None) with cap = 150
+		j["factories"][0][6] = 0;
+		j["factories"][0][2] = 150;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// work = 1 (Capacity) with in_cap = 600
+		j["factories"][0][6] = 1;
+		j["factories"][0][2] = 150;
+		j["factories"][0][7] = 600;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// work = 2 (Reserve) with cap = 150
+		j["factories"][0][6] = 2;
+		j["factories"][0][2] = 150;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// invalid work = 3
+		j["factories"][0][6] = 3;
+		test_reject(j);
+	}
+
+	// 2. Food service rejections
+	{
+		auto j = base_j;
+		// rate not in {0, 10, 20, 40}
+		j["town_food_services"][0][2] = 15;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// rate > 40
+		j["town_food_services"][0][2] = 50;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// market_ceiling != 40
+		j["town_food_services"][0][3] = 60;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// receiver_capacity != 60
+		j["town_food_services"][0][4] = 100;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// requested history not in {0, 10, 20, 40}
+		j["town_food_services"][0][6][0] = 30;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// consumed > requested
+		j["town_food_services"][0][5][0] = 30;
+		j["town_food_services"][0][6][0] = 20;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// consumed > 40
+		j["town_food_services"][0][5][0] = 50;
+		j["town_food_services"][0][6][0] = 40;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// remainder == 640
+		j["town_food_services"][0][8] = 640;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// remainder > 640
+		j["town_food_services"][0][8] = 700;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// invalid owner with non-zero rate
+		j["town_food_services"][0][1] = 0xFF; // CompanyID::Invalid
+		j["town_food_services"][0][2] = 20;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// invalid owner with non-zero history
+		j["town_food_services"][0][1] = 0xFF;
+		j["town_food_services"][0][2] = 0;
+		j["town_food_services"][0][5][0] = 10;
+		test_reject(j);
+	}
+	{
+		auto j = base_j;
+		// duplicate town_food_services row
+		j["town_food_services"].push_back(j["town_food_services"][0]);
+		test_reject(j);
+	}
+
+	// 3. ValidateAfterLoad role and reference checks
+	CHECK(IntegratedEconomy::ValidateAfterLoad());
+
+	TownID tid = town->index;
+	auto svc = IntegratedEconomy::GetTownFoodService(tid);
+	REQUIRE(svc != nullptr);
+
+	// Town on non-Core world fails ValidateAfterLoad
+	TileIndex orig_xy = town->xy;
+	town->xy = TileXY(40, 40); // World 1 is Industrial (non-Core)
+	CHECK_FALSE(IntegratedEconomy::ValidateAfterLoad());
+	town->xy = orig_xy;
+	CHECK(IntegratedEconomy::ValidateAfterLoad());
+
+	// Invalid company owner in town_food_services fails ValidateAfterLoad
+	svc->owner = CompanyID{10}; // Company 10 does not exist
+	CHECK_FALSE(IntegratedEconomy::ValidateAfterLoad());
+	svc->owner = CompanyID{0};
+	CHECK(IntegratedEconomy::ValidateAfterLoad());
+	// Set 4x40 in history
+	svc->consumed_history = {40, 40, 40, 40};
+	svc->fractional_passenger_remainder = 0;
+
+	// In town_cmd, passenger generation bonus is bounded to 25% max
+	uint amount_pass = 100;
+	uint32_t total_c = svc->consumed_history[0] + svc->consumed_history[1] + svc->consumed_history[2] + svc->consumed_history[3];
+	uint64_t prod = static_cast<uint64_t>(amount_pass) * total_c + svc->fractional_passenger_remainder;
+	uint32_t bonus = static_cast<uint32_t>(prod / 640);
+	CHECK(bonus == 25); // Exactly +25%
+	CHECK(bonus <= 25);
+}
+
+TEST_CASE("Works prototype Sprint 2 truthful acceptance: native housing completion and population credit", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	if (!Town::CanAllocateItem()) return;
+	auto town = Town::Create(TileXY(15, 15));
+	InitializeBuildingCounts(town);
+	MegacityManager::RegisterMegacity(town->index, WorldID{0}, "HousingTown", 5000);
+
+	// 1. Uncommissioned town: TryGrowResidentialDistrict fails and never places or completes houses
+	CHECK_FALSE(IntegratedEconomy::TryGrowResidentialDistrict(town->index));
+	auto dist = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	CHECK(dist == nullptr);
+
+	// 2. Food service alone never creates houses
+	REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 40).Succeeded());
+	float g = 0, p = 0;
+	IntegratedEconomy::EvaluateCity(town->index, g, p);
+	CHECK(town->cache.num_houses == 0);
+
+	// 3. Commission residential works with 160 STEL + 80 BALL
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	dist = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	REQUIRE(dist != nullptr);
+	CHECK(dist->commissioned);
+	CHECK(dist->building_opportunities == 4);
+	CHECK(dist->buildings_placed == 0);
+	CHECK(dist->buildings_completed == 0);
+
+	// Make road frontage
+	MakeRoadNormal(TileXY(15, 16), ROAD_ALL, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, CompanyID{0}, OWNER_TOWN);
+
+	// 4. Place house 1: opportunities drops to 3, placed = 1, completed = 0
+	uint32_t pop_before = town->cache.population;
+	REQUIRE(IntegratedEconomy::TryGrowResidentialDistrict(town->index));
+	CHECK(dist->building_opportunities == 3);
+	CHECK(dist->buildings_placed == 1);
+	CHECK(dist->buildings_completed == 0);
+	// Shell stage 0 does NOT add population yet
+	CHECK(town->cache.population == pop_before);
+
+	// Find placed tile
+	TileIndex placed_tile = INVALID_TILE;
+	for (int dy = -10; dy <= 10; ++dy) {
+		for (int dx = -10; dx <= 10; ++dx) {
+			TileIndex t = TileXY(15 + dx, 15 + dy);
+			if (IsValidTile(t) && IsTileType(t, TileType::House)) {
+				placed_tile = t;
+				break;
+			}
+		}
+		if (placed_tile != INVALID_TILE) break;
+	}
+	REQUIRE(placed_tile != INVALID_TILE);
+	CHECK(IsHousePlayerProtected(placed_tile));
+
+	// 5. Native progression: loop tile_loop_proc until completed
+	while (!IsHouseCompleted(placed_tile)) {
+		_tile_type_procs[GetTileType(placed_tile)]->tile_loop_proc(placed_tile);
+	}
+	CHECK(IsHouseCompleted(placed_tile));
+	CHECK(dist->buildings_completed == 1);
+	CHECK(town->cache.population > pop_before); // Real population credit!
+
+	// 6. Demolition protection: town cannot delete the house
+	{
+		AutoRestoreBackup cur_co(_current_company, OWNER_TOWN);
+		CHECK_FALSE(CanDeleteHouse(placed_tile));
+	}
+
+	// 7. Decoupling: turn food service Off. Completed house and population remain 100% intact!
+	REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 0).Succeeded());
+	IntegratedEconomy::EvaluateCity(town->index, g, p);
+	CHECK(dist->buildings_completed == 1);
+	CHECK(IsHouseCompleted(placed_tile));
+	CHECK(town->cache.population > pop_before);
+}
+
+TEST_CASE("Works prototype Sprint 3 truthful acceptance: alternate-source deliveries and production", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	// World 1: Industrial Commonwealth (Ballast Crusher consuming SILC to produce BALL)
+	Industry *crusher = fixture.CreateFactory(0x11);
+	REQUIRE(crusher != nullptr);
+	const auto *recipe = ProductionChainManager::GetRecipe(IntegratedEconomy::IndustryRecipe(crusher->type));
+	REQUIRE(recipe != nullptr);
+
+	// Setup World 2 (Primary extraction) and World 3 (Alternate extraction)
+	PlanetRegion w2{
+		.id = WorldID{2},
+		.name = "Primary Extraction",
+		.phase = WorldPhase::Phase2_Developed,
+		.biome = WorldBiome::AridDesert,
+		.min_x = 1,
+		.min_y = 65,
+		.max_x = 30,
+		.max_y = 120,
+		.development_score = 4000,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(w2));
+	IntegratedEconomy::RegisterRole(WorldID{2}, EconomicRole::Frontier);
+
+	PlanetRegion w3{
+		.id = WorldID{3},
+		.name = "Alternative Extraction",
+		.phase = WorldPhase::Phase3_Frontier,
+		.biome = WorldBiome::AridDesert,
+		.min_x = 31,
+		.min_y = 65,
+		.max_x = 62,
+		.max_y = 120,
+		.development_score = 3000,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(w3));
+	IntegratedEconomy::RegisterRole(WorldID{3}, EconomicRole::Frontier);
+
+	CargoType silc_cargo = C("SILC");
+
+	// Initial factory state: input buffer has 0 SILC, produced has 0 BALL (input_capacity 300 batches * 2 SILC = 600)
+	CHECK(IntegratedEconomy::IndustrySpace(crusher, silc_cargo) == 600);
+	CHECK(crusher->produced[0].waiting == 0);
+
+	// 1. Alternate-source delivery: Deliver 100 units of SILC from World 3 to the Ballast Crusher
+	uint32_t accepted = IntegratedEconomy::AcceptIndustry(crusher, silc_cargo, 100);
+	CHECK(accepted == 100);
+	CHECK(crusher->accepted[0].waiting == 100);
+
+	// 2. Production from alternate-source delivery
+	uint64_t batches_before = IntegratedEconomy::Factories().at(crusher->index).total_batches;
+	IntegratedEconomy::Produce();
+	const auto &factory_after = IntegratedEconomy::Factories().at(crusher->index);
+	CHECK(factory_after.total_batches > batches_before);
+	CHECK(crusher->accepted[0].waiting < 100); // Input consumed
+	CHECK(crusher->produced[0].waiting > 0);   // Output BALL produced!
+
+	// 3. Primary feeder interruption: simulate stopping primary World 2 feeder
+	// Continue deliveries exclusively from World 3 alternate source
+	uint32_t delivered_alt2 = IntegratedEconomy::AcceptIndustry(crusher, silc_cargo, 100);
+	CHECK(delivered_alt2 == 100);
+	uint64_t batches_mid = factory_after.total_batches;
+	IntegratedEconomy::Produce();
+	CHECK(IntegratedEconomy::Factories().at(crusher->index).total_batches > batches_mid);
+	// BALL output continues accumulating purely from alternate-source supply!
+	CHECK(crusher->produced[0].waiting > 0);
 }

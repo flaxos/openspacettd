@@ -1,5 +1,46 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Commonwealth Pilot Correction and Acceptance Supplement (11 October 2026)
+
+Owner authorized the "Commonwealth Pilot Correction and Acceptance" task on the PR #82 stack (`codex/capacity-or-reserve-pilot`, reviewed checkpoint `20ede820d0b9ac1670dd1ed3606df68d50073d1b`), resolving the five correction packages from `/home/flax/Documents/Codex/2026-10-10/task-4/OpenSpaceTTD-Sprint1-five-issue-takeover-plan-20261011.md` without reverting Sprint 2 or 3 features:
+
+### 1. Corrected Packages on Current Source
+- **Package 1 (Food Service Retirement & Lifecycle Resets)**:
+  - Distinct company deletion vs acquisition vs owner Off handling in `IntegratedEconomy::ChangeCompany`. Deletion resets `TownFoodService` state (wiping history, cursor, and fractional remainder) while preserving town-level food reserves; acquisition transfers ownership cleanly.
+  - Recommissioning uncommissioned or retired slots (`CmdSetTownFoodServiceRate`) resets to baseline (four zero periods).
+  - Foreign company commands fail with `STR_ERROR_OWNED_BY_ANOTHER_COMPANY`; spectators fail with `CMD_ERROR`.
+- **Package 2 (Strict V2 Save Invariants)**:
+  - Strict validation in `IntegratedEconomy::Load`: enforces exact `(work, throughput, input_cap, output_cap)` tuples for None `(0, 100, 300, 300)`, Capacity `(1, 150, 300, 300)`, and Reserve `(2, 100, 600, 300)`.
+  - Rates strictly restricted to `{0, 10, 20, 40}`; market ceiling 40; receiver capacity 60; history bounds `0 <= consumed[i] <= requested[i] <= 40`; history cursor 0–3; remainder 0–639.
+  - Invalid owner inactive defaults supported; neutral factory ownership preserved.
+  - Transactional rollback on parse or invariant failure.
+  - Cross-reference and Core world role validation in `IntegratedEconomy::ValidateAfterLoad`. Bounded passenger bonus (+25% max); unaffected mail generation.
+- **Package 3 (Reconciled GUI Controls & Feedback)**:
+  - `megacity_gui.cpp`: Button-only hit testing for rate cycling; disabled styling for spectator and foreign company contexts; chronological history display with fraction met; explicit received vs consumed displays; evaluation boundary (`Evaluates 1st of month`) noted.
+  - `empire_facilities_gui.cpp`: `Upgrade All` button visibly disabled in V2; displays explicit works bill (`£50k + 160 STEL/80 BALL`), throughput and capacities (`Cap: .../mo | Buffers: ... in, ... out`), and local stockpile stock.
+- **Package 4 (Truthful Runner & Offline Guards)**:
+  - `scripts/verify_commonwealth_works.py`: Reconciled advance count with monthly evaluation events using a monotonic identifier; records V2 service history (`food_rate`, `food_consumed_history`, `food_requested_history`, `food_reserve`, `food_delivered_last`, `evaluations_observed`); validates £50k commissioning cash debit; retains partial/error reports on failure in cleanup path.
+  - `scripts/test_verify_runner_guards.py`: 7/7 offline unit tests passing in 0.001s with zero engine processes launched.
+- **Package 5 (Physical Pilot Preparation)**:
+  - In `src/portal/connected_economy.cpp`, removed direct `StockpileManager::AddCargo` seed of 160 STEL / 80 BALL; routed TrainRoute 2 (BALL) and 7 (STEL) to Industrial warehouse Stop(30) in World 1.
+  - Exposed V2 service fields in `Snapshot().cities` and `advance` audit output (`city_months`).
+
+### 2. Truthful Acceptance Checks for Sprints 2 & 3
+- Added Catch2 automated test cases in `src/tests/test_commonwealth_works.cpp` verifying:
+  - **Sprint 2**: Material debit, legal road frontage requirement, house shell construction at stage 0, tile progression through native ticks to `TOWN_HOUSE_COMPLETED`, population credit (+232 citizens), and permanent demolition immunity (`IsHousePlayerProtected`) under food service shutoff.
+  - **Sprint 3**: Commissioning of alternate Silica extraction on World 3, direct portal delivery to Ballast Crusher in World 1, BALL production from alternate supply, and continuous BALL output during primary corridor feeder interruption.
+
+### 3. Historical Headless Evidence & Consumed Budget
+- The two historical headless runs in `docs/audit/2026-10-11/capacity-or-reserve/` are raw 22-calendar-month advance/reload/conservation traces with incomplete pilot acceptance (they did not record V2 service history or count evaluation boundaries). Their initial simulation run budget was consumed and is not silently renewed.
+
+### 4. Proposed Reserve Execution Envelope (Awaiting Owner Approval)
+- **Recommendation**: Reserve Works pilot execution (validating 600-batch buffer, transported commissioning kit, real food consumption/passengers, and cold equality).
+- **Proposed Run Envelope**:
+  - Run 1 (Main Simulation): 1 process, exactly 24 monthly evaluations (max 30 execution minutes).
+  - Run 2 (Reload Probe): 1 reload process, exactly 4 monthly evaluations (max 5 execution minutes).
+- **Stop Condition**: Immediate halt and artifact retention on first defect or invariant violation.
+- **Approval Gate**: Execution remains **FROZEN** until explicit renewed owner approval is received.
+
 ## Active execution handoff — A World Worth Connecting: Sprint 3 (11 October 2026)
 
 Owner approved the third candidate slice "A World Worth Connecting" from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` and sections 4, 5, and 7 of `OPENSPACETTD-DESIGN-STUDY.md` on branch `codex/capacity-or-reserve-pilot`:

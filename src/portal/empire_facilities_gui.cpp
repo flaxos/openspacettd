@@ -89,6 +89,12 @@ struct EmpireFacilitiesWindow : Window {
 		this->vscroll->SetStepSize(1);
 		this->FinishInitNested(window_number);
 		this->target_company = _local_company;
+		this->SetWidgetDisabledState(WID_EF_UPGRADE_ALL_BTN, IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2);
+	}
+
+	void OnInit() override
+	{
+		this->SetWidgetDisabledState(WID_EF_UPGRADE_ALL_BTN, IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2);
 	}
 
 	std::vector<ProcessingFacility> GetFilteredFacilities() const
@@ -204,8 +210,26 @@ struct EmpireFacilitiesWindow : Window {
 					Rect badge_r = Rect{row_rect.right - 290, y + 2, row_rect.right - 155, y + 16};
 					DrawString(badge_r, status_badge, status_col);
 
+					uint32_t throughput = f.monthly_capacity;
+					uint32_t in_cap = 300, out_cap = 300;
+					FactoryWorkType work = FactoryWorkType::None;
+					IndustryID ind_id{uint16_t(f.id - 1)};
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+						auto f_it = IntegratedEconomy::Factories().find(ind_id);
+						if (f_it != IntegratedEconomy::Factories().end()) {
+							work = f_it->second.work;
+							throughput = f_it->second.capacity;
+							in_cap = f_it->second.input_capacity;
+							out_cap = f_it->second.output_capacity;
+						}
+					}
+
 					/* Line 2: Recipe Name & Inputs/Outputs */
-					std::string line2 = (rec != nullptr) ? fmt::format("Recipe: {} (Cap: {} t/mo)", rec->name, f.monthly_capacity) : "Recipe: None";
+					std::string line2 = (rec != nullptr) ?
+						(IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 ?
+							fmt::format("Recipe: {} (Cap: {}/mo | Buffers: {} in, {} out)", rec->name, throughput, in_cap, out_cap) :
+							fmt::format("Recipe: {} (Cap: {} t/mo)", rec->name, f.monthly_capacity)) :
+						"Recipe: None";
 					Rect line2_r = Rect{row_rect.left + 2, y + 16, row_rect.right - 155, y + 30};
 					DrawString(line2_r, line2, TextColour::White);
 
@@ -219,21 +243,28 @@ struct EmpireFacilitiesWindow : Window {
 						}
 					}
 
-					std::string out_desc = fmt::format("Plat Target: {} t", f.platform_capacity);
-					if (IntegratedEconomy::Enabled()) {
-						out_desc = "Out: ";
-						for (auto [c, n] : f.output_buffers)
-							out_desc += fmt::format("{} {}; ", n, GetString(CargoSpec::Get(c)->name));
+					std::string line3;
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && work == FactoryWorkType::None) {
+						WorldID world = (f.tile != INVALID_TILE) ? PlanetManager::GetTileWorld(f.tile) : WorldID{0};
+						CargoType stel_c = GetCargoTypeByLabel(CargoLabel{"STEL"});
+						CargoType ball_c = GetCargoTypeByLabel(CargoLabel{"BALL"});
+						uint32_t stel_stock = StockpileManager::GetStock(world, _local_company, stel_c);
+						uint32_t ball_stock = StockpileManager::GetStock(world, _local_company, ball_c);
+						line3 = fmt::format("{} | Bill: £50k + 160 STEL/80 BALL (Stock: {} STEL, {} BALL)", in_desc, stel_stock, ball_stock);
+					} else {
+						std::string out_desc = fmt::format("Plat Target: {} t", f.platform_capacity);
+						if (IntegratedEconomy::Enabled()) {
+							out_desc = "Out: ";
+							for (auto [c, n] : f.output_buffers)
+								out_desc += fmt::format("{} {}; ", n, GetString(CargoSpec::Get(c)->name));
+						}
+						line3 = fmt::format("{} | {}", in_desc, out_desc);
 					}
-					std::string line3 = fmt::format("{} | {}", in_desc, out_desc);
 					Rect line3_r = Rect{row_rect.left + 2, y + 30, row_rect.right - 155, y + 46};
 					DrawString(line3_r, line3, TextColour::Silver);
 
 					/* Interactive Buttons on right */
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
-						IndustryID ind_id{uint16_t(f.id - 1)};
-						auto f_it = IntegratedEconomy::Factories().find(ind_id);
-						FactoryWorkType work = (f_it != IntegratedEconomy::Factories().end()) ? f_it->second.work : FactoryWorkType::None;
 
 						if (work == FactoryWorkType::None) {
 							Rect btn_cap = Rect{row_rect.right - 150, y + 4, row_rect.right - 104, y + 22};

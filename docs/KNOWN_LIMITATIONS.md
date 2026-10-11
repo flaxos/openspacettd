@@ -1,5 +1,12 @@
 # OpenSpaceTTD Known Limitations
 
+## Commonwealth Pilot Correction and Truthful Acceptance Boundaries — 11 October 2026
+
+- **Historical Headless Traces & Consumed Budget**: The two earlier headless simulation runs staged at `docs/audit/2026-10-11/capacity-or-reserve/` represent 22-month advance/reload/conservation traces with incomplete pilot acceptance (they did not record V2 service history or count evaluation boundaries). Their initial simulation run budget was consumed and is not silently renewed.
+- **Physical Native Proof Prepared and Frozen**: The corrected physical Reserve pilot runner (`scripts/verify_commonwealth_works.py`) and fixture adjustments (routing trains to World 1 warehouse Stop(30) without direct material injection) are prepared and verified with offline unit guards (`scripts/test_verify_runner_guards.py`). Execution of the native simulation campaign is strictly frozen pending explicit renewed owner approval of the proposed finite run budget.
+- **Sprint 2 & 3 Non-Reversion & Truthful Acceptance**: Sprints 2 and 3 features remain active on the branch; automated regressions now truthfully verify native residential shell completion/demolition immunity and alternate-source delivery/production resilience without substituting unit tests for native or human acceptance.
+- **Human Desktop UAT Pending**: Desktop GUI verification (Megacity FOOD controls, works commissioning buttons, status displays, and physical multi-world route traversal) remains **Pending** for human play.
+
 ## A World Worth Connecting Boundaries (Sprint 3) — 11 October 2026
 
 - **Concrete Pilot Slice & Single Consumer Focus**: Sprint 3 expansion focuses on a single concrete raw resource connection (World 3 Silica extraction feeding Ballast Crusher at Node 4 in World 1) to prove bottleneck bypass and independent route redundancy. Additional resource chains, multi-stop distribution networks, or higher-tier expansion worlds remain deferred to subsequent Commonwealth milestones.

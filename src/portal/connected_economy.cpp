@@ -863,17 +863,11 @@ bool PrepareWorksInternal()
 	        "industrial warehouse"))
 		return false;
 
-	// Provide the one-time BOM kit (160 STEL + 80 BALL) in World 1 stockpile for Company 0
-	StockpileManager::AddCargo(WorldID{1}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"STEL"}), 160);
-	StockpileManager::AddCargo(WorldID{1}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"BALL"}), 80);
-	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"STEL"}), 160);
-	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"BALL"}), 80);
-
 	// Dedicated narrow rail routes:
 	// 1. Silica dunes (13) -> Ballast crusher (4): SILC
 	if (!TrainRoute(13, 4, GetCargoTypeByLabel(CargoLabel{"SILC"}), 6)) return false;
-	// 2. Ballast crusher (4) -> HQ warehouse (0): BALL
-	if (!TrainRoute(4, 0, GetCargoTypeByLabel(CargoLabel{"BALL"}), 4)) return false;
+	// 2. Ballast crusher (4) -> Industrial warehouse (30): BALL
+	if (!TrainRoute(4, 30, GetCargoTypeByLabel(CargoLabel{"BALL"}), 4)) return false;
 	// 3. Farm (18) -> Food works (3): GRAI
 	CargoType farm_cargo = GetCargoTypeByLabel(CargoLabel{"GRAI"});
 	if (!IsValidCargoType(farm_cargo)) farm_cargo = GetCargoTypeByLabel(CargoLabel{"WHEA"});
@@ -885,8 +879,8 @@ bool PrepareWorksInternal()
 	if (!TrainRoute(20, 1, GetCargoTypeByLabel(CargoLabel{"PASS"}), 4)) return false;
 	// 6. Iron mine (14) -> Steel furnace (5): IRON
 	if (!TrainRoute(14, 5, GetCargoTypeByLabel(CargoLabel{"IRON"}), 6)) return false;
-	// 7. Steel furnace (5) -> HQ warehouse (0): STEL
-	if (!TrainRoute(5, 0, GetCargoTypeByLabel(CargoLabel{"STEL"}), 4)) return false;
+	// 7. Steel furnace (5) -> Industrial warehouse (30): STEL
+	if (!TrainRoute(5, 30, GetCargoTypeByLabel(CargoLabel{"STEL"}), 4)) return false;
 
 	for (auto [x, y, name] : {std::tuple{120u, 60u, "START: Works prototype"},
 	         std::tuple{70u, 60u, "HQ: research and stockpiles"}}) {
@@ -1171,6 +1165,10 @@ Json Snapshot()
 	for (const auto &m : MegacityManager::GetAllMegacities()) {
 		const Town *t = Town::Get(m.town_id);
 		const auto r_dist = IntegratedEconomy::GetTownResidentialDistrict(m.town_id);
+		const auto svc = IntegratedEconomy::GetTownFoodService(m.town_id);
+		const auto city = IntegratedEconomy::City(m.town_id);
+		CargoType food_cargo = GetCargoTypeByLabel(CargoLabel{"FOOD"});
+		uint32_t food_reserve = (city && city->reserves.contains(food_cargo)) ? city->reserves.at(food_cargo) : 0;
 		r["cities"].push_back(
 		    {{"id", m.town_id.base()}, {"population", t->cache.population}, {"houses", t->cache.num_houses}, {"quotas", m.monthly_quota},
 		        {"last", m.delivered_last}, {"current", m.delivered_current}, {"state", static_cast<uint>(m.growth_state)},
@@ -1178,7 +1176,15 @@ Json Snapshot()
 		        {"residential_opportunities", r_dist ? r_dist->building_opportunities : 0},
 		        {"residential_placed", r_dist ? r_dist->buildings_placed : 0},
 		        {"residential_completed", r_dist ? r_dist->buildings_completed : 0},
-		        {"residential_blocked", r_dist ? r_dist->site_blocked : false}});
+		        {"residential_blocked", r_dist ? r_dist->site_blocked : false},
+		        {"food_rate", svc ? svc->selected_rate : 0},
+		        {"food_reserve", food_reserve},
+		        {"food_consumed_history", svc ? svc->consumed_history : std::array<uint32_t, 4>{}},
+		        {"food_requested_history", svc ? svc->requested_history : std::array<uint32_t, 4>{}},
+		        {"food_cursor", svc ? svc->history_cursor : 0},
+		        {"food_remainder", svc ? svc->fractional_passenger_remainder : 0},
+		        {"food_delivered_current", svc ? svc->delivered_this_period : 0},
+		        {"food_delivered_last", svc ? svc->delivered_last_period : 0}});
 	}
 	r["stations"] = Json::array();
 	for (size_t i = 0; i < nodes.size(); ++i)
@@ -3855,6 +3861,9 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		after["deliveries"] = audit.deliveries;
 		after["vehicle_deliveries"] = audit.vehicle_deliveries;
 		after["research_consumed"] = audit.research_consumed;
+		after["city_months"] = audit.city_months;
+		after["consumed"] = audit.consumed;
+		after["produced"] = audit.produced;
 		IConsolePrint(CC_DEFAULT, "CONNECTED advance {}", after.dump());
 	} else if (argv[1] == "fabricate") {
 		const Blueprint *bp = BlueprintManager::FindBuiltin("CST Mainline Double Straight");

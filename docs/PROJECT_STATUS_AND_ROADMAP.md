@@ -1,5 +1,27 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Commonwealth Pilot Correction and Truthful Acceptance — 11 October 2026
+
+Delivered comprehensive correction across the Sprint 1–3 stack on `codex/capacity-or-reserve-pilot` (PR #82) addressing the five packages from `OpenSpaceTTD-Sprint1-five-issue-takeover-plan-20261011.md` while adding truthful acceptance checks for Sprint 2/3 features without reverting either sprint:
+1. **Engine Corrections (Packages 1 & 2)**:
+   - Fixed food service retirement lifecycle: Company deletion resets `TownFoodService` history, cursor, and remainder while retaining town reserves; acquisition transfers ownership cleanly; recommissioning resets to 4 zero periods; foreign company and spectator access guarded.
+   - Enforced strict V2 save invariants in `IntegratedEconomy::Load` and `ValidateAfterLoad`: factory tuples `(0,100,300,300)`, `(1,150,300,300)`, `(2,100,600,300)`; rates in `{0,10,20,40}`; ceilings 40/60; history bounds `0 <= consumed <= requested <= 40`; remainder `0..639`; Core town validation and invalid-owner defaults; neutral factory preservation; transactional rollback on malformed input.
+2. **GUI Feedback Reconciled (Package 3)**:
+   - `megacity_gui.cpp`: Rate cycling confined to dedicated button bounds; disabled styling for spectator and foreign companies; chronological history display with fraction met; explicit received vs consumed displays; evaluation boundary noted.
+   - `empire_facilities_gui.cpp`: Visibly disabled `Upgrade All` button in V2; displays explicit works bill (`£50k + 160 STEL/80 BALL`), throughput and capacities (`Cap: .../mo | Buffers: ... in, ... out`), and local stockpile stock.
+3. **Runner Truthfulness & Physical Pilot (Packages 4 & 5)**:
+   - `scripts/verify_commonwealth_works.py`: Reconciled advance count with monthly evaluation events using a monotonic identifier; records V2 service history; asserts £50k commissioning cash debit; retains partial/error reports on failure.
+   - Authoritative offline runner guard tests (`scripts/test_verify_runner_guards.py`, 7/7 passing in 0.001s, 0 engine processes).
+   - Removed direct commissioning-kit seed from `connected_economy.cpp`; routed trains to World 1 warehouse Stop(30); exposed V2 service audit metrics (`city_months`).
+4. **Sprint 2 & 3 Truthful Acceptance Regressions**:
+   - Automated Catch2 test cases added to `src/tests/test_commonwealth_works.cpp` verifying Sprint 2 native house shell staged growth, completion, population credit (+232 citizens), permanent demolition immunity (`IsHousePlayerProtected`), and food service decoupling; and Sprint 3 alternate-source SILC delivery, BALL production, and uninterrupted output during primary feeder interruption.
+5. **Verification & Audit**:
+   - Unit tests: `[commonwealth-works]` (374 assertions in 13 cases) and `[integrated-economy]` (490 assertions in 17 cases) passing 100%.
+   - Full suite: 307,709 assertions across 543 test cases in `./build/openttd_test` passing 100%.
+   - CTest suite: 558/558 tests passing 100%. Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` clean.
+   - Binary SHA256: `build/openttd`: `fb5692a3d28299269ef9703779cdc0f386290186e6f909ef87b51a718ed02d19`, `build/openttd_test`: `1e84a79ed7803367fcc66edbdd12a945370f5328e9212ccf16f0054e66f8ca57`.
+   - Native Reserve simulation envelope proposed and frozen pending explicit renewed owner approval.
+
 ## A World Worth Connecting (Sprint 3) — 11 October 2026
 
 Delivered Sprint 3 ("A World Worth Connecting") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex and Astra review:

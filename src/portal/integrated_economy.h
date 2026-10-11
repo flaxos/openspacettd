@@ -42,6 +42,8 @@ struct TownFoodService {
 	std::array<uint32_t, 4> requested_history{0, 0, 0, 0};
 	uint8_t history_cursor = 0;
 	uint32_t fractional_passenger_remainder = 0;
+	uint32_t delivered_this_period = 0;
+	uint32_t delivered_last_period = 0;
 };
 struct TownResidentialDistrict {
 	CompanyID owner = CompanyID::Invalid();

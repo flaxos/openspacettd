@@ -1,5 +1,14 @@
 # Human UAT results — recovery / v1.1
 
+## Commonwealth Pilot Correction and Truthful Acceptance — 11 October 2026
+
+**Human desktop status: Pending.** Automated Catch2 test suite (374 assertions across 13 test cases in `src/tests/test_commonwealth_works.cpp`), `[integrated-economy]` suite (490 assertions across 17 test cases), full Catch2 suite (307,709 assertions in 543 test cases), CTest suite (558/558 tests passing), and offline runner guards (`scripts/test_verify_runner_guards.py`, 7/7 passing) executed on branch `codex/capacity-or-reserve-pilot`.
+- **Sprint 1 Engine & GUI Corrections**: Verified retired food service reset on company deletion vs acquisition, strict V2 save invariant rejections (factory tuples, rates, ceilings, history bounds, fractional remainder, transactional rollback), button-only rate cycling in `megacity_gui.cpp`, spectator/foreign disabling, chronological history with fraction met, and visibly disabled V2 Upgrade All in `empire_facilities_gui.cpp`.
+- **Sprint 2 Truthful Acceptance**: Verified material debit (£50k, 160 STEL, 80 BALL), legal road frontage requirement, native house shell placement at stage 0, tile progression through native ticks to `TOWN_HOUSE_COMPLETED`, population credit (+232 citizens), and permanent demolition immunity (`IsHousePlayerProtected`) under commercial food shutoff.
+- **Sprint 3 Truthful Acceptance**: Verified commissioning of alternate Silica extraction on World 3, direct portal delivery to Ballast Crusher in World 1, BALL production from alternate supply, and continuous BALL output during primary corridor feeder interruption.
+- **Physical Pilot Simulation**: Corrected runner (`scripts/verify_commonwealth_works.py`) prepared with monotonic evaluation events, V2 service history recording, and partial/error report retention. Physical native execution is **FROZEN** pending explicit renewed owner approval of the proposed finite run budget.
+- **Human Desktop Acceptance**: Interactive GUI inspection (Megacity food rate cycling, facilities works choice buttons, works bill display) and multi-world route playtesting remain **Pending**. Playable owner mission defined below.
+
 ## A World Worth Connecting (Sprint 3) — 11 October 2026
 
 **Human desktop status: Pending.** Automated Catch2 test suite (229 assertions across 9 test cases in `src/tests/test_commonwealth_works.cpp`), full Catch2 suite (307,564 assertions in 539 test cases), CTest suite (554/554 tests passing), and headless verification runner (`scripts/verify_commonwealth_expansion.py`) executed on branch `codex/capacity-or-reserve-pilot`.
