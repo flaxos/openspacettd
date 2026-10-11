@@ -242,7 +242,7 @@ Money HouseSpec::GetRemovalCost() const
 	return (_price[Price::ClearHouse] * this->removal_cost) >> 8;
 }
 
-static bool TryBuildTownHouse(Town *t, TileIndex tile, TownExpandModes modes);
+static bool TryBuildTownHouse(Town *t, TileIndex tile, TownExpandModes modes, bool is_protected = false);
 static Town *CreateRandomTown(uint attempts, uint32_t townnameparts, TownSize size, bool city, TownLayout layout);
 
 static void TownDrawHouseLift(const TileInfo *ti)
@@ -497,6 +497,13 @@ static void AdvanceSingleHouseConstruction(TileIndex tile)
 		 * building to the town. */
 		ChangePopulation(Town::GetByTile(tile), HouseSpec::Get(GetHouseType(tile))->population);
 		ResetHouseAge(tile);
+		if (IsHousePlayerProtected(tile) && IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+			HouseID hid = GetHouseType(tile);
+			if (GetHouseNorthPart(hid) == 0) {
+				Town *town = Town::GetByTile(tile);
+				if (town != nullptr) IntegratedEconomy::OnResidentialHouseCompleted(town->index);
+			}
+		}
 	}
 	MarkTileDirtyByTile(tile);
 }
@@ -3089,7 +3096,7 @@ static void BuildTownHouse(Town *t, TileIndex tile, const HouseSpec *hs, HouseID
  * @param modes The parts of the town that are being grown.
  * @return false iff no house can be built on this tile.
  */
-static bool TryBuildTownHouse(Town *t, TileIndex tile, TownExpandModes modes)
+static bool TryBuildTownHouse(Town *t, TileIndex tile, TownExpandModes modes, bool is_protected)
 {
 	/* forbidden building here by town layout */
 	if (!TownLayoutAllowsHouseHere(t, tile, modes)) return false;
@@ -3205,11 +3212,60 @@ static bool TryBuildTownHouse(Town *t, TileIndex tile, TownExpandModes modes)
 		/* Special houses that there can be only one of. */
 		t->flags.Set(oneof);
 
-		BuildTownHouse(t, tile, hs, house, random_bits, false, false);
+		BuildTownHouse(t, tile, hs, house, random_bits, false, is_protected);
 
 		return true;
 	}
 
+	return false;
+}
+
+bool TryBuildTownHouseProtected(Town *t, TileIndex tile)
+{
+	AutoRestoreBackup cur_company(_current_company, OWNER_TOWN);
+	return TryBuildTownHouse(t, tile, {TownExpandMode::Buildings}, true);
+}
+
+bool TryGrowTownResidentialHouse(Town *t, TileIndex *placed_tile)
+{
+	if (t == nullptr) return false;
+	AutoRestoreBackup cur_company(_current_company, OWNER_TOWN);
+	if (t->cache.building_counts.id_count.empty()) InitializeBuildingCounts(t);
+
+	int max_dist = std::clamp(static_cast<int>(std::sqrt(t->cache.squared_town_zone_radius[to_underlying(HouseZone::TownEdge)])) + 8, 12, 32);
+
+	for (int dist = 1; dist <= max_dist; ++dist) {
+		for (int dy = -dist; dy <= dist; ++dy) {
+			for (int dx = -dist; dx <= dist; ++dx) {
+				if (std::abs(dx) != dist && std::abs(dy) != dist) continue;
+
+				TileIndex tile = TileAddXY(t->xy, dx, dy);
+				if (!IsValidTile(tile)) continue;
+				if (IsTileType(tile, TileType::House) || HasTileWaterGround(tile) || IsTileType(tile, TileType::Void)) continue;
+
+				bool has_road = false;
+				for (DiagDirection dir : EnumRange(DiagDirection::End)) {
+					TileIndex neighbor = TileAddByDiagDir(tile, dir);
+					if (IsValidTile(neighbor) && GetTownRoadBits(neighbor).Any()) {
+						has_road = true;
+						break;
+					}
+				}
+				if (!has_road) continue;
+
+				if (!RoadTypesAllowHouseHere(tile)) continue;
+				if (!TownLayoutAllowsHouseHere(t, tile, {TownExpandMode::Buildings})) continue;
+				if (!CanBuildHouseHere(tile, false)) continue;
+
+				if (Chance16(1, 6)) LevelTownLand(tile);
+
+				if (TryBuildTownHouse(t, tile, {TownExpandMode::Buildings}, true)) {
+					if (placed_tile != nullptr) *placed_tile = tile;
+					return true;
+				}
+			}
+		}
+	}
 	return false;
 }
 

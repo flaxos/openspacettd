@@ -17,6 +17,11 @@
 #include "../portal/tech_tree.h"
 #include "../town.h"
 #include "../town_cmd.h"
+#include "../town_map.h"
+#include "../road_map.h"
+#include "../clear_map.h"
+#include "../newgrf_house.h"
+#include "../tile_cmd.h"
 #include "../window_func.h"
 #include "../safeguards.h"
 
@@ -28,6 +33,7 @@ struct WorksTestFixture {
 	IndustrySpec saved_spec;
 	WorksTestFixture()
 	{
+		InitWindowSystem();
 		IntegratedEconomy::Reset();
 		PlanetManager::Reset();
 		SetupCommandAuthorityWorld(WorldPhase::Phase1_Core, 10000);
@@ -78,6 +84,7 @@ struct WorksTestFixture {
 		IntegratedEconomy::Reset();
 		PlanetManager::Reset();
 		_industry_pool.CleanPool();
+		_town_pool.CleanPool();
 		*const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{0})) = saved_spec;
 		SetupCargoForClimate(LandscapeType::Temperate);
 		ProductionChainManager::InitDefaultRecipes();
@@ -416,11 +423,17 @@ TEST_CASE("Works prototype save and load round-trip and version boundary", "[com
 	float g = 0, p = 0;
 	IntegratedEconomy::EvaluateCity(town->index, g, p);
 
+	// Also commission residential district on town
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+
 	// Save to JSON
 	std::string saved_data = IntegratedEconomy::Save();
 	auto j = nlohmann::json::parse(saved_data);
 	CHECK(j.at("version") == 2);
 	CHECK(j.contains("town_food_services"));
+	CHECK(j.contains("town_residential_districts"));
 
 	// Clean and reload
 	IntegratedEconomy::Reset();
@@ -442,7 +455,143 @@ TEST_CASE("Works prototype save and load round-trip and version boundary", "[com
 	CHECK(svc->selected_rate == 40);
 	CHECK(svc->consumed_history[0] == 40);
 
+	// Verify town residential district preserved
+	auto dist = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	REQUIRE(dist != nullptr);
+	CHECK(dist->commissioned);
+	CHECK(dist->building_opportunities == 4);
+	CHECK(dist->owner == CompanyID{0});
+
 	// Verify rejection of future version 3
 	j["version"] = 3;
 	CHECK_FALSE(IntegratedEconomy::Load(j.dump()));
+}
+
+TEST_CASE("Works prototype residential district commissioning, materials, and limits", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	if (!Town::CanAllocateItem()) return;
+	auto town = Town::Create(TileXY(15, 15));
+	MegacityManager::RegisterMegacity(town->index, WorldID{0}, "PilotTown", 5000);
+
+	// Company starts with money, but 0 materials
+	CHECK(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Failed());
+
+	// Partial materials (only STEL)
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	CHECK(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Failed());
+
+	// Add BALL to complete kit
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+
+	// Commission succeeds
+	auto res = Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index);
+	REQUIRE(res.Succeeded());
+	CHECK(res.GetCost() == 50000);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("BALL")) == 0);
+
+	auto dist = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	REQUIRE(dist != nullptr);
+	CHECK(dist->commissioned);
+	CHECK(dist->building_opportunities == 4);
+	CHECK(dist->buildings_placed == 0);
+	CHECK(dist->buildings_completed == 0);
+	CHECK_FALSE(dist->site_blocked);
+
+	// Cannot double-commission
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	CHECK(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Failed());
+}
+
+TEST_CASE("Works prototype residential house placement, stage progression, protection, and decoupling", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	if (!Town::CanAllocateItem()) return;
+	auto town = Town::Create(TileXY(15, 15));
+	InitializeBuildingCounts(town);
+	MegacityManager::RegisterMegacity(town->index, WorldID{0}, "PilotTown", 5000);
+
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+
+	auto dist = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	REQUIRE(dist != nullptr);
+
+	SECTION("1. Blocked site handling") {
+		// Town center (15, 15) has no road frontage on surrounding tiles.
+		// TryGrowResidentialDistrict fails gracefully and marks site_blocked = true without consuming budget.
+		for (int dy = -5; dy <= 5; ++dy) {
+			for (int dx = -5; dx <= 5; ++dx) {
+				TileIndex t = TileXY(15 + dx, 15 + dy);
+				if (IsValidTile(t)) MakeClear(t, ClearGround::Grass, 0);
+			}
+		}
+		CHECK_FALSE(IntegratedEconomy::TryGrowResidentialDistrict(town->index));
+		CHECK(dist->site_blocked);
+		CHECK(dist->building_opportunities == 4);
+		CHECK(dist->buildings_placed == 0);
+	}
+
+	SECTION("2. Unblock site, house placement, progression, and protection") {
+		for (int dy = -5; dy <= 5; ++dy) {
+			for (int dx = -5; dx <= 5; ++dx) {
+				TileIndex t = TileXY(15 + dx, 15 + dy);
+				if (IsValidTile(t)) MakeClear(t, ClearGround::Grass, 0);
+			}
+		}
+		MakeRoadNormal(TileXY(15, 16), ROAD_ALL, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, CompanyID{0}, OWNER_TOWN);
+
+		uint32_t pop_before = town->cache.population;
+		REQUIRE(IntegratedEconomy::TryGrowResidentialDistrict(town->index));
+		CHECK_FALSE(dist->site_blocked);
+		CHECK(dist->building_opportunities == 3);
+		CHECK(dist->buildings_placed == 1);
+		CHECK(dist->buildings_completed == 0);
+
+		// Find the newly placed house tile
+		TileIndex placed_tile = INVALID_TILE;
+		for (int dy = -10; dy <= 10; ++dy) {
+			for (int dx = -10; dx <= 10; ++dx) {
+				TileIndex t = TileXY(15 + dx, 15 + dy);
+				if (IsValidTile(t) && IsTileType(t, TileType::House)) {
+					placed_tile = t;
+					break;
+				}
+			}
+			if (placed_tile != INVALID_TILE) break;
+		}
+		REQUIRE(placed_tile != INVALID_TILE);
+		CHECK(IsHousePlayerProtected(placed_tile));
+		CHECK_FALSE(IsHouseCompleted(placed_tile));
+		// Shell starts at stage 0, so population was NOT added yet!
+		CHECK(town->cache.population == pop_before);
+
+		// 3. Native stage progression and completion:
+		// Advance construction until complete
+		while (!IsHouseCompleted(placed_tile)) {
+			_tile_type_procs[GetTileType(placed_tile)]->tile_loop_proc(placed_tile);
+		}
+		CHECK(IsHouseCompleted(placed_tile));
+		CHECK(dist->buildings_completed == 1);
+		CHECK(town->cache.population > pop_before);
+
+		// 4. Demolition immunity:
+		// CanDeleteHouse must return false when the town attempts redevelopment demolition because house is protected
+		{
+			AutoRestoreBackup cur_company(_current_company, OWNER_TOWN);
+			CHECK_FALSE(CanDeleteHouse(placed_tile));
+		}
+
+		// 5. Food service decoupling:
+		// Food service rate is 0 (off), but completed house and population remain 100% intact!
+		auto svc = IntegratedEconomy::GetTownFoodService(town->index);
+		CHECK((svc == nullptr || svc->selected_rate == 0));
+		CHECK(dist->buildings_completed == 1);
+		CHECK(IsTileType(placed_tile, TileType::House));
+	}
 }

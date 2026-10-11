@@ -1,5 +1,11 @@
 # OpenSpaceTTD Known Limitations
 
+## A District That Stays Built Boundaries (Sprint 2) — 11 October 2026
+
+- **Pilot Town Boundary & Finite Opportunities**: Sprint 2 residential expansion is implemented strictly for one pilot Core town (`TownID{0}`) with a non-repeatable finite budget of 4 building opportunities costing `160 STEL + 80 BALL` and £50,000 cash. Expansion to multiple towns, additional tiers, or infinite/recurrent residential commissioning remains deferred to subsequent Commonwealth progression.
+- **Physical Road Frontage Prerequisite**: Native building opportunities require legal road frontage. If town road networks do not provide frontage adjacent to clear, buildable tiles, commissioning correctly enters `"Awaiting site access"` state; it will not burn the finite budget or fabricate houses out of nothing.
+- **Human Desktop UAT Pending**: Automated unit testing (`test_commonwealth_works.cpp`, 202 assertions across 8 cases), CTest suite (553/553), and headless 24-period simulation evidence (`verify_commonwealth_residential.py`) prove commissioning, staged shell growth, permanent redevelopment demolition immunity, commercial food decoupling, and cold reload match. Live interactive desktop playtesting (viewing the Megacity window Tier 2 panel, clicking [Commission District], and observing physical house construction in the viewport) remains **Pending**.
+
 ## Capacity or Reserve Pilot Prototype Boundaries (Sprint 1) — 11 October 2026
 
 - **Isolated Pilot Scope & Sprint 2 Gate**: Sprint 1 is implemented strictly on isolated branch `codex/capacity-or-reserve-pilot` for architectural review and is not merged into main. Sprint 2 (world generation integration, expansion worlds, additional works tiers, and federation publishing) remains deferred until Sprint 1 receives Codex architectural sign-off.

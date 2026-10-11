@@ -43,6 +43,14 @@ struct TownFoodService {
 	uint8_t history_cursor = 0;
 	uint32_t fractional_passenger_remainder = 0;
 };
+struct TownResidentialDistrict {
+	CompanyID owner = CompanyID::Invalid();
+	bool commissioned = false;
+	uint8_t building_opportunities = 0;
+	uint8_t buildings_placed = 0;
+	uint8_t buildings_completed = 0;
+	bool site_blocked = false;
+};
 struct EconomyResearch {
 	TechID kit_project = TECH_NONE;
 	WorldID kit_world = INVALID_WORLD;
@@ -89,6 +97,10 @@ class IntegratedEconomy
 	static bool IsManagedCityCargo(TownID town, CargoType cargo);
 	static TownFoodService *GetTownFoodService(TownID town);
 	static const std::map<TownID, TownFoodService> &TownFoodServices();
+	static TownResidentialDistrict *GetTownResidentialDistrict(TownID town);
+	static const std::map<TownID, TownResidentialDistrict> &TownResidentialDistricts();
+	static bool TryGrowResidentialDistrict(TownID town);
+	static void OnResidentialHouseCompleted(TownID town);
 	static bool StartNewWorksPrototype();
 	static uint32_t AcceptCity(TownID town, CargoType cargo, uint32_t amount, bool execute);
 	static bool EvaluateCity(TownID town, float &growth, float &passengers);

@@ -271,11 +271,34 @@ struct MegacityOverviewWindow : Window {
 						}
 						DrawString(tr, fmt::format("Passenger Bonus: +{:.1f}% (Baseline traffic 1.0x preserved)", bonus_pct), TextColour::Green);
 					} else if (tier_idx == 1) {
-						tr.top += GetCharacterHeight(FontSize::Normal);
-						DrawString(tr, "Residential Expansion: Stable / No Construction Active", TextColour::Silver);
+						auto r_dist = town != nullptr ? IntegratedEconomy::GetTownResidentialDistrict(town->index) : nullptr;
+						bool can_commission = (r_dist == nullptr || !r_dist->commissioned);
+
+						if (can_commission) {
+							Rect comm_btn = Rect{tr.right - 180, tr.top - 2, tr.right - 4, tr.top + 16};
+							GfxFillRect(comm_btn, GetColourGradient(Colours::Grey, Shade::Normal));
+							DrawString(comm_btn, "Commission District", TextColour::Yellow, AlignmentH::Centre);
+
+							tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+							DrawString(tr, "Kit: 160 STEL + 80 BALL | Cash: £50,000", TextColour::White);
+							tr.top += GetCharacterHeight(FontSize::Normal);
+							DrawString(tr, "Residential Expansion: Stable / Ready for commissioning", TextColour::Silver);
+						} else {
+							tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+							if (r_dist->buildings_completed >= 4) {
+								DrawString(tr, fmt::format("Residential Works: Completed ({} permanent houses)", r_dist->buildings_completed), TextColour::Green);
+							} else if (r_dist->site_blocked) {
+								DrawString(tr, fmt::format("Residential Works: Awaiting site access ({} remaining, frontage blocked)", r_dist->building_opportunities), TextColour::Orange);
+							} else {
+								DrawString(tr, fmt::format("Residential Works: Building ({} remaining, {} placed, {} completed)",
+									r_dist->building_opportunities, r_dist->buildings_placed, r_dist->buildings_completed), TextColour::White);
+							}
+							tr.top += GetCharacterHeight(FontSize::Normal);
+							DrawString(tr, "Protected houses: Permanent immunity to redevelopment demolition", TextColour::Silver);
+						}
 					} else {
 						tr.top += GetCharacterHeight(FontSize::Normal);
-						DrawString(tr, "Prosperity: None Active (Sprint 1 Scope)", TextColour::Silver);
+						DrawString(tr, "Prosperity: None Active (Sprint 2 Scope)", TextColour::Silver);
 					}
 					break;
 				}
@@ -379,6 +402,17 @@ struct MegacityOverviewWindow : Window {
 					uint32_t next_rate = (current_rate == 0) ? 10 : (current_rate == 10) ? 20 : (current_rate == 20) ? 40 : 0;
 					Command<Commands::SetTownFoodServiceRate>::Post(this->current_town, next_rate);
 					this->SetDirty();
+				}
+				break;
+			}
+
+			case WID_MCO_TIER2_PANEL: {
+				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && this->current_town != TownID::Invalid()) {
+					auto r_dist = IntegratedEconomy::GetTownResidentialDistrict(this->current_town);
+					if (r_dist == nullptr || !r_dist->commissioned) {
+						Command<Commands::CommissionTownResidentialDistrict>::Post(this->current_town);
+						this->SetDirty();
+					}
 				}
 				break;
 			}

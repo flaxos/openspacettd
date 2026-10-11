@@ -429,6 +429,7 @@ enum class Commands : uint8_t {
 	DesignateMegacitySpectator, ///< preserve the free designation action for spectators
 	CommissionEconomyWork,   ///< commission capacity or reserve works for an owned factory
 	SetTownFoodServiceRate,  ///< configure commercial food service rate for an owned town slot
+	CommissionTownResidentialDistrict, ///< commission finite residential works for an owned town
 	End, ///< @important Must ALWAYS be on the end of this list!! (period)
 };
 

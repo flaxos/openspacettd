@@ -412,6 +412,38 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
      * Verify badge displays active works status (`Capacity Works` or `Reserve Works`).
      * Verify commissioning buttons disable after works choice is active to prevent accidental duplicate debits.
 
+### 3.12 Track 12: A District That Stays Built (Sprint 2)
+* **Goal**: Validate finite material-funded native residential commissioning, road-frontage site access, staged native house progression, permanent redevelopment demolition immunity, and food service decoupling.
+* **Target Save**: `docs/audit/2026-10-11/residential-district/checkpoint-24.sav` (or fresh launch via `scripts/verify_commonwealth_residential.py`).
+* **Command**:
+  ```bash
+  ./build/openttd -c demo/connected_economy.cfg -g docs/audit/2026-10-11/residential-district/checkpoint-24.sav
+  ```
+* **Steps**:
+  1. **Inspect Megacity Overview Window (Tier 2 Panel):**
+     * Open Commonwealth Metropolis (Town 0) Megacity overview window.
+     * Examine Tier 2 Expansion panel.
+     * Before commissioning, verify button displays `[Commission District]` with kit details `Kit: 160 STEL + 80 BALL | Cash: £50,000`.
+     * If frontage is blocked, verify orange warning: `Residential Works: Awaiting site access (4 remaining, frontage blocked)`.
+  2. **Audit Commissioning Execution & Debits:**
+     * Click `[Commission District]`.
+     * Verify £50,000 cash debited from company balance and `160 STEL + 80 BALL` consumed from World 0 stockpile.
+     * Verify duplicate commissioning is blocked; button transitions to active works status display.
+  3. **Observe Physical Shell Placement & Progression:**
+     * In main viewport, locate Commonwealth Metropolis (x=120, y=74).
+     * Observe 4 new native house shells placed adjacent to town road frontage.
+     * Verify shells start at construction stage 0 without premature population inflation.
+     * As game days advance, observe construction sprites progressing through stages 0 -> 1 -> 2 -> 3 (`TOWN_HOUSE_COMPLETED`).
+     * Once completed, observe town population incrementing (+232 citizens).
+  4. **Verify Permanent Redevelopment Demolition Immunity:**
+     * Fast forward multiple game years.
+     * Observe standard OpenTTD town redevelopment loops.
+     * Confirm all 4 commissioned houses remain protected and are never demolished or replaced by town growth routines.
+  5. **Verify Commercial Food Decoupling:**
+     * In Megacity window, cycle Food Service rate to `Off` (or stop the food train via console `connected_economy stop-food`).
+     * Allow town to run multiple months with zero food delivery.
+     * Confirm completed residential houses and credited population remain 100% intact with zero decay or demolition.
+
 ---
 
 ## 4. Troubleshooting & Savegame Recovery

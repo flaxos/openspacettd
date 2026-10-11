@@ -866,6 +866,8 @@ bool PrepareWorks()
 	// Provide the one-time BOM kit (160 STEL + 80 BALL) in World 1 stockpile for Company 0
 	StockpileManager::AddCargo(WorldID{1}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"STEL"}), 160);
 	StockpileManager::AddCargo(WorldID{1}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"BALL"}), 80);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"STEL"}), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, GetCargoTypeByLabel(CargoLabel{"BALL"}), 80);
 
 	// Dedicated narrow rail routes:
 	// 1. Silica dunes (13) -> Ballast crusher (4): SILC
@@ -974,9 +976,15 @@ Json Snapshot()
 	r["cities"] = Json::array();
 	for (const auto &m : MegacityManager::GetAllMegacities()) {
 		const Town *t = Town::Get(m.town_id);
+		const auto r_dist = IntegratedEconomy::GetTownResidentialDistrict(m.town_id);
 		r["cities"].push_back(
 		    {{"id", m.town_id.base()}, {"population", t->cache.population}, {"houses", t->cache.num_houses}, {"quotas", m.monthly_quota},
-		        {"last", m.delivered_last}, {"current", m.delivered_current}, {"state", static_cast<uint>(m.growth_state)}});
+		        {"last", m.delivered_last}, {"current", m.delivered_current}, {"state", static_cast<uint>(m.growth_state)},
+		        {"residential_commissioned", r_dist ? r_dist->commissioned : false},
+		        {"residential_opportunities", r_dist ? r_dist->building_opportunities : 0},
+		        {"residential_placed", r_dist ? r_dist->buildings_placed : 0},
+		        {"residential_completed", r_dist ? r_dist->buildings_completed : 0},
+		        {"residential_blocked", r_dist ? r_dist->site_blocked : false}});
 	}
 	r["stations"] = Json::array();
 	for (size_t i = 0; i < nodes.size(); ++i)
@@ -3496,7 +3504,7 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 	if (argv.size() >= 2 && argv[1].starts_with("generation-contract-")) return GenerationContract(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("first-freight-")) return FirstFreight(argv);
 	if (argv.size() < 2) {
-		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-works|prepare-surveys|status|audit|advance|stop-food|start-food|stop-silica|start-silica|commission-capacity|commission-reserve|set-food-rate <rate>: isolated demo only");
+		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-works|prepare-surveys|status|audit|advance|stop-food|start-food|stop-silica|start-silica|commission-capacity|commission-reserve|commission-residential|set-food-rate <rate>: isolated demo only");
 		return true;
 	}
 	if (_game_mode != GameMode::Normal || (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) ||
@@ -3692,6 +3700,21 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		auto cost = Command<Commands::CommissionEconomyWork>::Do(DoCommandFlag::Execute, ballast_id, work);
 		if (!Result(cost, "commission works")) return true;
 		IConsolePrint(CC_DEFAULT, "CONNECTED commissioned {}", argv[1] == "commission-capacity" ? "capacity" : "reserve");
+	} else if (argv[1] == "commission-residential") {
+		TownID core_town_id = TownID::Invalid();
+		for (auto town : Town::Iterate()) {
+			if (MegacityManager::IsMegacity(town->index)) {
+				core_town_id = town->index;
+				break;
+			}
+		}
+		if (core_town_id == TownID::Invalid()) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL megacity town not found");
+			return true;
+		}
+		auto cost = Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, core_town_id);
+		if (!Result(cost, "commission residential district")) return true;
+		IConsolePrint(CC_DEFAULT, "CONNECTED commissioned residential");
 	} else if (argv[1] == "set-food-rate") {
 		if (argv.size() < 3) {
 			IConsolePrint(CC_ERROR, "Usage: connected_economy set-food-rate <0|10|20|40>");

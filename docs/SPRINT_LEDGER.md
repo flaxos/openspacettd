@@ -1,5 +1,15 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## A District That Stays Built (Sprint 2) — 11 October 2026
+
+**TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**
+Delivered Sprint 2 ("A District That Stays Built") of the Commonwealth design study for Codex and Astra review:
+- **Material-Funded Residential Expansion**: Commissioned one-time residential expansion for pilot Core town (`TownID{0}`, Commonwealth Metropolis) under `EconomyRulesVersion::V2`. Replicated command `Commands::CommissionTownResidentialDistrict` atomically debits `160 STEL + 80 BALL` and £50,000 cash; grants a finite budget of 4 native building opportunities.
+- **Native House Shells & Staged Growth**: Candidate sites search outwards from town center for legal road frontage (`RoadTypesAllowHouseHere`, `TownLayoutAllowsHouseHere`, `CanBuildHouseHere`). Blocked frontage reports `"Residential Works: Awaiting site access (N remaining, frontage blocked)"` without burning budget. Available frontage constructs native house shells at stage 0 with zero premature population. Shells progress natively through stages 0 -> 1 -> 2 -> 3; upon `TOWN_HOUSE_COMPLETED`, town population is credited (+232 citizens).
+- **Permanent Demolition Immunity**: Sets native `IsHousePlayerProtected` bit on completed residential buildings. Permanently blocks OpenTTD's random town redevelopment demolition loop in `TileLoop_Town` and `CanDeleteHouse`.
+- **Food Service Decoupling**: Residential district construction and preservation operate independently of commercial food service. Completely shutting off food delivery does not revoke completed housing or trigger population decay.
+- **Verification & Evidence**: Catch2 unit tests (`src/tests/test_commonwealth_works.cpp`, 202 assertions across 8 test cases) passing 100%. Full test suite (307,537 Catch2 assertions across 538 cases) and CTest suite (553/553 tests) passing 100%. Headless verification runner (`scripts/verify_commonwealth_residential.py`) completed 24 native periods, proving commissioning, staged shell growth, 4 completed houses, food service shutoff with zero demolition, 100% cargo conservation, and byte-for-byte cold reload match in a fresh process. Evidence published at `docs/audit/2026-10-11/residential-district/evidence.json`. Local handoff to Codex/Astra; zero push/PR, no merge to main.
+
 ## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
 
 **TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**

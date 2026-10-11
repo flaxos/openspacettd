@@ -1,5 +1,31 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## A District That Stays Built (Sprint 2) — 11 October 2026
+
+Delivered Sprint 2 ("A District That Stays Built") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex and Astra review:
+1. **Material-Funded Native Residential Works**:
+   - Commissioned one-time residential expansion district for pilot Core town (`TownID{0}`, Commonwealth Metropolis) under `EconomyRulesVersion::V2`.
+   - Replicated command `Commands::CommissionTownResidentialDistrict` atomically debits `160 STEL + 80 BALL` from the world company stockpile and £50,000 cash; rejects duplicate commissioning.
+   - Grants a finite budget of 4 native building opportunities.
+2. **Native Placement and Staged Construction**:
+   - Building opportunities search outwards from town center for legal road frontage (`RoadTypesAllowHouseHere`, `TownLayoutAllowsHouseHere`, `CanBuildHouseHere`).
+   - If road frontage or building sites are blocked, status accurately reports `"Residential Works: Awaiting site access (N remaining, frontage blocked)"` without burning material budget or fabricating houses.
+   - When frontage is available, native house shells are constructed with `is_protected = true`.
+   - Shells start at construction stage 0 without premature population attribution.
+   - Native tile progression advances shells through stages 0 -> 1 -> 2 -> 3 (`TOWN_HOUSE_COMPLETED`). Population is added natively by OpenTTD upon completion (+232 citizens across 4 houses).
+3. **Permanent Immunity to Redevelopment Demolition**:
+   - Sets native `IsHousePlayerProtected` bit on completed residential buildings.
+   - Permanent immunity in `TileLoop_Town` and `CanDeleteHouse`: OpenTTD's random town redevelopment demolition loop is completely barred from demolishing completed residential houses.
+4. **Decoupling from Commercial Food Service**:
+   - Residential district construction and preservation operate independently of commercial food service.
+   - Shutting off food delivery does not revoke completed housing or trigger population decay.
+5. **Verification & Audit**:
+   - Unit tests: Added Catch2 test cases in `src/tests/test_commonwealth_works.cpp` (202 assertions across 8 test cases, passing 100%).
+   - Full test suite: 307,537 assertions across 538 test cases passing 100%; CTest suite: 553/553 tests passing 100%.
+   - Headless verification runner (`scripts/verify_commonwealth_residential.py`) executed 24 native simulation periods proving commissioning, staged shell growth, 4 completed houses, food service shutoff with zero demolition, 100% cargo conservation, and byte-for-byte cold reload match in a fresh process.
+   - Published audit evidence in `docs/audit/2026-10-11/residential-district/evidence.json`.
+   - Handoff status: Review-ready locally on `codex/capacity-or-reserve-pilot`. Zero push, zero PR, no merge to main, sprint 3 deferred.
+
 ## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
 
 Delivered Sprint 1 ("Capacity or Reserve") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex architectural review:
