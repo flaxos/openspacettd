@@ -1,5 +1,18 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Freight You Can Read (Card C1) — 11 October 2026
+
+**TESTED facility presentation & authoritative bottleneck diagnosis on codex/capacity-or-reserve-pilot; desktop UAT Pending.**
+Delivered Card C1 ("Freight You Can Read") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot`:
+- **Understandable Facility Presentation**: 4-line row architecture in `empire_facilities_gui.cpp`:
+  * Line 1: World Name, Economic Role (`Core` / `Industrial` / `Frontier`), Development Phase (`Phase 1 Core` .. `Phase 4 Expansion`), and Station/tile name.
+  * Line 2: Prominent bottleneck badge, recipe name with exact cargo conversion ratio, rated throughput (`Rated: X batches/mo`), and observed completed-period production (`Last mo: Y batches` or `[Unavailable]`).
+  * Line 3: Machine input buffers with complete batches permitted (`permits X batches`) and output buffers with remaining clearance (`space for Y batches`).
+  * Line 4: Works Bill (`£50k + 160 STEL / 80 BALL`), pure queried price via `DoCommandFlag::Query`, active Works effects (Capacity +50% throughput / Reserve 2x input buffer), and local warehouse stockpile inventory.
+- **First Limiting Bottleneck Diagnosis**: Authoritative diagnosis hierarchy implemented in `DiagnoseFacilityBottleneck`: tech lock -> blocked output -> starved input (missing/insufficient) -> active -> ready -> idle.
+- **Query Purity & Asset Navigation**: Pure read navigation buttons `[Locate Plant]` and `[Locate Station]` / `[Locate Hub]`. Zero state, money, date, or RNG mutations on opening, painting, tab cycling, refresh clicks, or navigation clicks. Distinct separation of factory machine buffers from company planetary construction stock.
+- **Verification & Quality**: Catch2 unit & GUI tests in `src/tests/test_sprint43_empire_facilities.cpp`: `[empire-facilities]` (86 assertions across 5 cases) and `[sprint43]` (274 assertions across 12 cases) passing 100%. Full CTest suite (563/563 tests passing 100%). Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` clean. Local review packet; zero remote push, zero PR creation, no merge, and P1 blocked until C1 review is approved.
+
 ## Commonwealth Pilot Correction and Truthful Acceptance — 11 October 2026
 
 **TESTED correction packages & truthful acceptance on codex/capacity-or-reserve-pilot; physical native pilot campaign pending renewed approval.**

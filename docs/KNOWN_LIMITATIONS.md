@@ -1,5 +1,12 @@
 # OpenSpaceTTD Known Limitations
 
+## Freight You Can Read Boundaries (Card C1) — 11 October 2026
+
+- **Truth-in-Advertising Metrics & No Speculative ETAs**: The Facilities window displays exact buffered units, completed-period production, and complete batches permitted (`permits X batches`). It intentionally avoids speculative arrival estimates, average burn rates, or predictive delivery timers.
+- **Pure Query Contract**: Facility window interactions (opening, painting, tab switching, and clicking `[Locate Plant]` or `[Locate Station]`) are guaranteed pure reads. Commissioning works actions (`[Capacity]`, `[Reserve]`, `[Retire]`) remain server-authoritative replicated commands restricted to the facility owner.
+- **Local Review Scope**: Delivered on isolated branch `codex/capacity-or-reserve-pilot`. P1 ("Portals That Don't Lie") remains blocked and deferred until C1 local review is approved by the owner. Zero remote push or PR creation.
+- **Human Desktop UAT Pending**: Automated verification proves query purity, bottleneck diagnosis, 4-line presentation, and works price querying. Human graphical acceptance of the Facilities window against live gameplay scenarios remains **Pending**.
+
 ## Commonwealth Pilot Correction and Truthful Acceptance Boundaries — 11 October 2026
 
 - **Historical Headless Traces & Consumed Budget**: The two earlier headless simulation runs staged at `docs/audit/2026-10-11/capacity-or-reserve/` represent 22-month advance/reload/conservation traces with incomplete pilot acceptance (they did not record V2 service history or count evaluation boundaries). Their initial simulation run budget was consumed and is not silently renewed.

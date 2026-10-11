@@ -18,6 +18,7 @@
 #include "../portal/company_stockpile.h"
 #include "../portal/logistics_hub.h"
 #include "../portal/tech_tree.h"
+#include "../portal/integrated_economy.h"
 #include "../portal/commonwealth_pack.h"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -42,6 +43,8 @@
 #include "../industry.h"
 #include "../void_map.h"
 #include "../engine_base.h"
+#include "../timer/timer_game_tick.h"
+#include "../timer/timer_game_calendar.h"
 #include "../engine_func.h"
 #include "../saveload/saveload.h"
 #include "../fileio_func.h"
@@ -51,6 +54,9 @@
 #include "../table/sprites.h"
 #include "../table/strings.h"
 #include "../window_gui.h"
+#include "../window_func.h"
+#include "../driver.h"
+#include "../video/video_driver.hpp"
 #include <filesystem>
 #include <vector>
 
@@ -72,6 +78,8 @@ static Station *SetupSprint43Environment()
 		_searchpaths[Searchpath::BinaryDir] = std::move(saved_binary);
 	}
 	SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
+	_grfconfig.clear();
+	SetupCargoForClimate(LandscapeType::Temperate);
 	ProductionChainManager::Reset();
 	ProductionChainManager::ResetOverflowMetrics();
 	PlanetManager::Reset();
@@ -100,7 +108,6 @@ static Station *SetupSprint43Environment()
 			else MakeVoid(tile);
 		}
 	}
-	SetupCargoForClimate(LandscapeType::Temperate);
 	_engine_mngr.ResetToDefaultMapping();
 	SetupEngines();
 	Company *company = Company::CreateAtIndex(CompanyID{0});
@@ -139,6 +146,12 @@ static Station *SetupSprint43Environment()
 	RebuildStationKdtree();
 	RebuildTownKdtree();
 	station->RecomputeCatchment();
+	if (VideoDriver::GetInstance() == nullptr) DriverFactoryBase::SelectDriver("null", Driver::Type::Video);
+	UnInitWindowSystem();
+	_screen.width = _screen.pitch = 1024;
+	_screen.height = 768;
+	ScreenSizeChanged();
+	InitWindowSystem();
 	if (_valid_searchpaths.empty()) _valid_searchpaths.push_back(Searchpath::WorkingDir);
 	return station;
 }
@@ -558,4 +571,317 @@ TEST_CASE("Sprint 43 - In-Game Viewport Overlays and Dashboard Retire Lifecycle"
 	CHECK(normal_str.find("[Starved]") == std::string::npos);
 	CHECK(normal_str.find("[Active]") == std::string::npos);
 	CHECK(normal_str.find("[Overflow]") == std::string::npos);
+}
+
+TEST_CASE("Sprint 43 / C1 - Facilities GUI Query Purity and Pure Navigation", "[empire-facilities][sprint43][gui]")
+{
+	Station *station = SetupSprint43Environment();
+	REQUIRE(station != nullptr);
+
+	_current_company = CompanyID{0};
+	_local_company = CompanyID{0};
+	auto *c = Company::Get(CompanyID{0});
+	REQUIRE(c != nullptr);
+	Money initial_money = c->money;
+	auto initial_ticks = TimerGameTick::counter;
+	auto initial_date = TimerGameCalendar::date;
+	uint32_t initial_rng_0 = _random.state[0];
+	uint32_t initial_rng_1 = _random.state[1];
+
+	auto build_res = Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING);
+	REQUIRE(build_res.Succeeded());
+
+	c->money = initial_money;
+	initial_rng_0 = _random.state[0];
+	initial_rng_1 = _random.state[1];
+
+	ShowEmpireFacilitiesWindow(_local_company);
+	Window *w = FindWindowById(WindowClass::EmpireFacilities, 0);
+	REQUIRE(w != nullptr);
+	AutoRestoreBackup dpi(_cur_dpi, &_screen);
+
+	/* 1. Painting must never alter game state, money, ticks, or RNG */
+	w->DrawWidget({0, 0, 760, 440}, WID_EF_LIST_PANEL);
+	CHECK(c->money == initial_money);
+	CHECK(TimerGameTick::counter == initial_ticks);
+	CHECK(TimerGameCalendar::date == initial_date);
+	CHECK(_random.state[0] == initial_rng_0);
+	CHECK(_random.state[1] == initial_rng_1);
+
+	/* 2. Switching tabs must never alter game state */
+	w->OnClick(Point{0, 0}, WID_EF_TAB_PIPE_A, 1);
+	w->DrawWidget({0, 0, 760, 440}, WID_EF_LIST_PANEL);
+	w->OnClick(Point{0, 0}, WID_EF_TAB_PIPE_B, 1);
+	w->DrawWidget({0, 0, 760, 440}, WID_EF_LIST_PANEL);
+	w->OnClick(Point{0, 0}, WID_EF_TAB_ALL, 1);
+	w->DrawWidget({0, 0, 760, 440}, WID_EF_LIST_PANEL);
+	CHECK(c->money == initial_money);
+	CHECK(TimerGameTick::counter == initial_ticks);
+	CHECK(TimerGameCalendar::date == initial_date);
+
+	/* 3. Clicking refresh button must never alter game state */
+	w->OnClick(Point{0, 0}, WID_EF_REFRESH, 1);
+	CHECK(c->money == initial_money);
+	CHECK(TimerGameTick::counter == initial_ticks);
+	CHECK(TimerGameCalendar::date == initial_date);
+
+	/* 4. Clicking navigation buttons [Locate Plant] and [Locate Station] must never alter simulation state */
+	NWidgetBase *nwi = w->GetWidget<NWidgetBase>(WID_EF_LIST_PANEL);
+	REQUIRE(nwi != nullptr);
+	Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
+
+	/* Click Locate Plant (rel_y = 40, x near right - 110) */
+	Point pt_plant{r.right - 110, r.top + 40};
+	w->OnClick(pt_plant, WID_EF_LIST_PANEL, 1);
+	CHECK(c->money == initial_money);
+	CHECK(TimerGameTick::counter == initial_ticks);
+	CHECK(TimerGameCalendar::date == initial_date);
+	CHECK(_random.state[0] == initial_rng_0);
+	CHECK(_random.state[1] == initial_rng_1);
+
+	/* Click Locate Station (rel_y = 40, x near right - 30) */
+	Point pt_station{r.right - 30, r.top + 40};
+	w->OnClick(pt_station, WID_EF_LIST_PANEL, 1);
+	CHECK(c->money == initial_money);
+	CHECK(TimerGameTick::counter == initial_ticks);
+	CHECK(TimerGameCalendar::date == initial_date);
+	CHECK(_random.state[0] == initial_rng_0);
+	CHECK(_random.state[1] == initial_rng_1);
+
+	w->Close();
+	UnInitWindowSystem();
+}
+
+TEST_CASE("Sprint 43 / C1 - Authoritative Bottleneck Diagnosis", "[empire-facilities][sprint43][bottlenecks]")
+{
+	(void)SetupSprint43Environment();
+	std::array<CargoSpec, NUM_CARGO> saved_cargos;
+	for (size_t i = 0; i < NUM_CARGO; ++i) saved_cargos[i] = *CargoSpec::Get(i);
+
+	const char *labels[] = {"SILC", "IRON", "STEL", "COPR", "WIRE", "SAND", "CHIP", "SIGE", "MACH", "RARE",
+							"ALLO", "OIL_", "POLY", "MGLA", "BCRY", "QCRY", "CCRY", "GRAI", "FOOD", "BALL"};
+	for (uint8_t c = 0; c < std::size(labels); ++c) {
+		CargoLabel label;
+		std::copy_n(labels[c], 4, label.begin());
+		CargoSpec::Get(CargoType(c))->label = label;
+		CargoSpec::Get(CargoType(c))->bitnum = c;
+		if (CargoSpec::Get(CargoType(c))->name == STR_EMPTY || CargoSpec::Get(CargoType(c))->name == STR_NULL) {
+			CargoSpec::Get(CargoType(c))->name = STR_CARGO_PLURAL_NOTHING + c;
+		}
+	}
+	BuildCargoLabelMap();
+
+	IntegratedEconomy::Reset();
+	IntegratedEconomy::SetEnabled(true);
+	IntegratedEconomy::SetRulesVersion(EconomyRulesVersion::V2);
+
+	_current_company = CompanyID{0};
+	_local_company = CompanyID{0};
+
+	ProcessingFacility f{};
+	f.id = 1;
+	f.tile = TileXY(10, 10);
+	f.world_id = WorldID{0};
+	f.recipe_id = RECIPE_BALLAST_CRUSHING;
+	f.owner = CompanyID{0};
+	f.monthly_capacity = 100;
+	f.last_month_production = 0;
+	const ProductionRecipe *rec = ProductionChainManager::GetRecipe(RECIPE_BALLAST_CRUSHING);
+	REQUIRE(rec != nullptr);
+
+	/* Case 1: Starved - Missing input cargo (0/2) */
+	REQUIRE(!rec->inputs.empty());
+	CargoType in_cargo = rec->inputs[0].first;
+	uint32_t in_req = rec->inputs[0].second;
+	{
+		f.input_buffers.clear();
+		f.output_buffers.clear();
+		f.last_month_production = 0;
+		FacilityBottleneck b = DiagnoseFacilityBottleneck(f, rec, 100, 300, 300);
+		CHECK(b.colour == TextColour::Red);
+		CHECK(b.badge.find("[Starved: Missing") != std::string::npos);
+		CHECK(b.badge.find(fmt::format("0/{} per batch)]", in_req)) != std::string::npos);
+		CHECK(b.batches_permitted == 0);
+	}
+
+	/* Case 2: Starved - Insufficient input cargo (1/2) */
+	{
+		f.input_buffers.clear();
+		f.input_buffers[in_cargo] = in_req / 2;
+		FacilityBottleneck b = DiagnoseFacilityBottleneck(f, rec, 100, 300, 300);
+		CHECK(b.colour == TextColour::Red);
+		CHECK(b.badge.find("[Starved: Insufficient") != std::string::npos);
+		CHECK(b.badge.find(fmt::format("{}/{} for batch)]", in_req / 2, in_req)) != std::string::npos);
+		CHECK(b.batches_permitted == 0);
+	}
+
+	/* Case 3: Ready - Buffered inputs permit complete batches */
+	{
+		f.input_buffers.clear();
+		f.input_buffers[in_cargo] = in_req * 10;
+		FacilityBottleneck b = DiagnoseFacilityBottleneck(f, rec, 100, 300, 300);
+		CHECK(b.colour == TextColour::Green);
+		CHECK(b.badge == "[Ready: 10 batches buffered]");
+		CHECK(b.batches_permitted == 10);
+	}
+
+	/* Case 4: Active - Completed-period production > 0 */
+	{
+		f.last_month_production = 100;
+		FacilityBottleneck b = DiagnoseFacilityBottleneck(f, rec, 100, 300, 300);
+		CHECK(b.colour == TextColour::Green);
+		CHECK(b.badge == "[Active: 100/100 batches/mo]");
+	}
+
+	/* Case 5: Technology Locked */
+	{
+		const ProductionRecipe *rec_steel = ProductionChainManager::GetRecipe(RECIPE_STEEL_SMELTING);
+		REQUIRE(rec_steel != nullptr);
+		ProcessingFacility f_steel = f;
+		f_steel.recipe_id = RECIPE_STEEL_SMELTING;
+		TechTreeManager::Reset();
+		FacilityBottleneck b = DiagnoseFacilityBottleneck(f_steel, rec_steel, 100, 300, 300);
+		CHECK(b.colour == TextColour::Red);
+		CHECK(b.badge.find("[Locked: Requires") != std::string::npos);
+	}
+
+	/* Case 6: Mixed Multi-Input Recipe */
+	{
+		const ProductionRecipe *rec_sig = ProductionChainManager::GetRecipe(RECIPE_SIGNALLING_ASSEMBLY);
+		REQUIRE(rec_sig != nullptr);
+		REQUIRE(rec_sig->inputs.size() >= 2);
+		ProcessingFacility f_sig = f;
+		f_sig.recipe_id = RECIPE_SIGNALLING_ASSEMBLY;
+		CargoType c_0 = rec_sig->inputs[0].first;
+		CargoType c_1 = rec_sig->inputs[1].first;
+
+		TechTreeManager::RestoreCompanyTech(f_sig.owner, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_MATERIALS_2});
+
+		f_sig.input_buffers.clear();
+		f_sig.input_buffers[c_0] = 0;
+		f_sig.input_buffers[c_1] = 10;
+		f_sig.last_month_production = 0;
+		FacilityBottleneck b = DiagnoseFacilityBottleneck(f_sig, rec_sig, 100, 300, 300);
+		CHECK(b.colour == TextColour::Red);
+		CHECK(b.badge.find("[Starved: Missing") != std::string::npos);
+	}
+
+	IntegratedEconomy::Reset();
+	for (size_t i = 0; i < NUM_CARGO; ++i) *CargoSpec::Get(i) = saved_cargos[i];
+	BuildCargoLabelMap();
+	ProductionChainManager::InitDefaultRecipes();
+}
+
+TEST_CASE("Sprint 43 / C1 - Capacity or Reserve Works Effects and Price Query", "[empire-facilities][sprint43][works]")
+{
+	(void)SetupSprint43Environment();
+	std::array<CargoSpec, NUM_CARGO> saved_cargos;
+	for (size_t i = 0; i < NUM_CARGO; ++i) saved_cargos[i] = *CargoSpec::Get(i);
+
+	const char *labels[] = {"SILC", "IRON", "STEL", "COPR", "WIRE", "SAND", "CHIP", "SIGE", "MACH", "RARE",
+							"ALLO", "OIL_", "POLY", "MGLA", "BCRY", "QCRY", "CCRY", "GRAI", "FOOD", "BALL"};
+	for (uint8_t c = 0; c < std::size(labels); ++c) {
+		CargoLabel label;
+		std::copy_n(labels[c], 4, label.begin());
+		CargoSpec::Get(CargoType(c))->label = label;
+		CargoSpec::Get(CargoType(c))->bitnum = c;
+		if (CargoSpec::Get(CargoType(c))->name == STR_EMPTY || CargoSpec::Get(CargoType(c))->name == STR_NULL) {
+			CargoSpec::Get(CargoType(c))->name = STR_CARGO_PLURAL_NOTHING + c;
+		}
+	}
+	BuildCargoLabelMap();
+
+	IntegratedEconomy::Reset();
+	IntegratedEconomy::SetEnabled(true);
+	IntegratedEconomy::SetRulesVersion(EconomyRulesVersion::V2);
+
+	_current_company = CompanyID{0};
+	_local_company = CompanyID{0};
+
+	auto spec = const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{0}));
+	IndustrySpec saved_spec = *spec;
+	spec->grf_prop.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+	spec->grf_prop.local_id = 0x11;
+
+	TileIndex tile = TileXY(15, 15);
+	REQUIRE(Industry::CanAllocateItem());
+	Industry *ind = Industry::Create(tile);
+	ind->type = IndustryType{0};
+	ind->founder = CompanyID{0};
+	IntegratedEconomy::RegisterIndustry(ind);
+
+	WorldID world = PlanetManager::GetTileWorld(tile);
+	CargoType c_stel = GetCargoTypeByLabel(CargoLabel{"STEL"});
+	CargoType c_ball = GetCargoTypeByLabel(CargoLabel{"BALL"});
+	StockpileManager::Reset();
+	StockpileManager::AddCargo(world, CompanyID{0}, c_stel, 160);
+	StockpileManager::AddCargo(world, CompanyID{0}, c_ball, 80);
+
+	auto query_res = Command<Commands::CommissionEconomyWork>::Do(DoCommandFlags{}, ind->index, FactoryWorkType::Capacity);
+	CHECK(!query_res.Failed());
+	CHECK(query_res.GetCost().base() == 50000);
+
+	*const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{0})) = saved_spec;
+	_industry_pool.CleanPool();
+	IntegratedEconomy::Reset();
+	for (size_t i = 0; i < NUM_CARGO; ++i) *CargoSpec::Get(i) = saved_cargos[i];
+	BuildCargoLabelMap();
+	ProductionChainManager::InitDefaultRecipes();
+}
+
+TEST_CASE("Sprint 43 / C1 - Factory Buffers Distinct from Planetary Construction Stockpile", "[empire-facilities][sprint43][stockpile]")
+{
+	(void)SetupSprint43Environment();
+	WorldID world{1};
+	CompanyID company{0};
+	CargoType c_raw = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+	CargoType c_stel = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+	CargoType c_wire = StockpileManager::RoleToDefaultCargo(FabricationRole::Wiring);
+
+	StockpileManager::Reset();
+	StockpileManager::AddCargo(world, company, c_stel, 160);
+	StockpileManager::AddCargo(world, company, c_wire, 80);
+
+	CHECK(StockpileManager::GetStock(world, company, c_stel) == 160);
+	CHECK(StockpileManager::GetStock(world, company, c_wire) == 80);
+	CHECK(StockpileManager::GetStock(world, company, c_raw) == 0);
+
+	ProcessingFacility f{};
+	f.id = 1;
+	f.tile = TileXY(20, 20);
+	f.world_id = world;
+	f.owner = company;
+	f.input_buffers = {{c_raw, 50}};
+	CHECK(f.input_buffers[c_raw] == 50);
+	CHECK(StockpileManager::GetStock(world, company, c_raw) == 0);
+}
+
+TEST_CASE("Sprint 43 / C1 - Economic Role and Development Phase Separation", "[empire-facilities][sprint43][roles]")
+{
+	(void)SetupSprint43Environment();
+	IntegratedEconomy::Reset();
+	IntegratedEconomy::SetEnabled(true);
+
+	WorldID w_core{0};
+	WorldID w_ind{1};
+	WorldID w_front{2};
+
+	IntegratedEconomy::RegisterRole(w_core, EconomicRole::Core);
+	IntegratedEconomy::RegisterRole(w_ind, EconomicRole::Industrial);
+	IntegratedEconomy::RegisterRole(w_front, EconomicRole::Frontier);
+
+	CHECK(IntegratedEconomy::Role(w_core) == EconomicRole::Core);
+	CHECK(IntegratedEconomy::Role(w_ind) == EconomicRole::Industrial);
+	CHECK(IntegratedEconomy::Role(w_front) == EconomicRole::Frontier);
+
+	CHECK(GetString(STR_EMPIRE_FACILITIES_ROLE_CORE) == "Core");
+	CHECK(GetString(STR_EMPIRE_FACILITIES_ROLE_INDUSTRIAL) == "Industrial");
+	CHECK(GetString(STR_EMPIRE_FACILITIES_ROLE_FRONTIER) == "Frontier");
+
+	CHECK(GetString(STR_EMPIRE_FACILITIES_PHASE_1) == "Phase 1 Core");
+	CHECK(GetString(STR_EMPIRE_FACILITIES_PHASE_2) == "Phase 2 Developed");
+	CHECK(GetString(STR_EMPIRE_FACILITIES_PHASE_3) == "Phase 3 Frontier");
+	CHECK(GetString(STR_EMPIRE_FACILITIES_PHASE_4) == "Phase 4 Expansion");
+
+	IntegratedEconomy::Reset();
 }

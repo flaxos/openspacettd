@@ -1,5 +1,32 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Freight You Can Read (Card C1) — 11 October 2026
+
+Delivered Card C1 ("Freight You Can Read") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot` following C0 acceptance verification:
+1. **Understandable Facility Presentation (`empire_facilities_gui.cpp`)**:
+   - Re-architected facility row presentation into a clean, 4-line layout with truth-in-advertising metrics:
+     * Line 1: World Name, Economic Role (`Core` / `Industrial` / `Frontier`), Development Phase (`Phase 1 Core` .. `Phase 4 Expansion`), and Station name or tile coordinates.
+     * Line 2: Prominent bottleneck status badge in distinct status colors, active recipe name, exact input/output cargo ratios (e.g., `2 Silica Sand -> 2 Trackbed Ballast`), rated throughput (`Rated: X batches/mo`), and observed completed-period production (`Last mo: Y batches` or `Last mo: [Unavailable]`).
+     * Line 3: Machine input buffers with complete batches permitted (`permits X batches`) and output buffers with available clearance (`space for Y batches`), strictly avoiding speculative ETAs.
+     * Line 4: Works Bill (`£50k + 160 STEL / 80 BALL`), live queried price via `DoCommandFlag::Query` (£50,000), active Works effects (Capacity +50% throughput / Reserve 2x input buffer), and local planetary warehouse construction stock.
+2. **First Limiting Bottleneck Diagnosis (`DiagnoseFacilityBottleneck`)**:
+   - Implemented authoritative constraint hierarchy:
+     1. Technology locked: `[Locked: Requires <TechName>]` (Red).
+     2. Blocked output: `[Blocked: Output <Cargo> Full (<amt>/<cap>)]` (Gold).
+     3. Starved inputs: `[Starved: Missing <Cargo> (0/<req> per batch)]` or `[Starved: Insufficient <Cargo> (<amt>/<req> for batch)]` (Red).
+     4. Active operation: `[Active: <last>/<cap> batches/mo]` (Green).
+     5. Buffered ready: `[Ready: <batches> batches buffered]` (Green).
+     6. Fallback idle: `[Idle: Cap <cap> batches/mo]` (Grey).
+3. **Purity Contract & Asset Navigation**:
+   - Pure read navigation: `[Locate Plant]` (centers viewport on factory tile) and `[Locate Station]` / `[Locate Hub]` (centers viewport on linked station or logistics hub).
+   - Strict query purity: Opening, resizing, painting, tab cycling, refresh clicks, and navigation clicks execute 100% pure reads with zero simulation state, money, calendar, or RNG mutations.
+   - Distinct machine buffers vs company planetary construction stock: machine buffers remain strictly separated from warehouse construction inventory.
+4. **Verification & Quality**:
+   - Catch2 unit & GUI tests in `src/tests/test_sprint43_empire_facilities.cpp`: `[empire-facilities]` (86 assertions across 5 cases) and `[sprint43]` (274 assertions across 12 cases) passing 100%.
+   - Full CTest suite: 563/563 tests passing 100%.
+   - Repository linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` passing with zero warnings or errors.
+   - Handoff status: Local review-ready packet on `codex/capacity-or-reserve-pilot`. Zero remote push, zero PR creation, no merge, and P1 blocked until C1 review is approved.
+
 ## Commonwealth Pilot Correction and Truthful Acceptance — 11 October 2026
 
 Delivered comprehensive correction across the Sprint 1–3 stack on `codex/capacity-or-reserve-pilot` (PR #82) addressing the five packages from `OpenSpaceTTD-Sprint1-five-issue-takeover-plan-20261011.md` while adding truthful acceptance checks for Sprint 2/3 features without reverting either sprint:

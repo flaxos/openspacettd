@@ -14,12 +14,14 @@
 #include "logistics_hub.h"
 #include "company_stockpile.h"
 #include "../window_gui.h"
+#include "../window_func.h"
 #include "../strings_func.h"
 #include "../zoom_func.h"
 #include "../palette_func.h"
 #include "../gfx_func.h"
 #include "../station_base.h"
 #include "../station_func.h"
+#include "../industry.h"
 #include "../viewport_func.h"
 #include "../command_func.h"
 #include "../company_func.h"
@@ -39,7 +41,158 @@ enum class EmpireFacilityFilter : uint8_t {
 	DataCrystals = 4,
 };
 
-static constexpr uint ROW_HEIGHT = 48;
+static constexpr uint ROW_HEIGHT = 68;
+
+static void SafeScrollMainWindowToTile(TileIndex tile)
+{
+	if (tile == INVALID_TILE) return;
+	if (FindWindowById(WindowClass::MainWindow, 0) == nullptr) return;
+	ScrollMainWindowToTile(tile);
+}
+
+static std::string GetFacilityCargoName(CargoType cargo)
+{
+	if (cargo < CargoSpec::GetArraySize() && CargoSpec::Get(cargo)->IsValid()) {
+		return GetString(CargoSpec::Get(cargo)->name);
+	}
+	return "Cargo";
+}
+
+FacilityBottleneck DiagnoseFacilityBottleneck(const ProcessingFacility &f, const ProductionRecipe *rec, uint32_t throughput, uint32_t in_cap, uint32_t out_cap)
+{
+	FacilityBottleneck b;
+	if (rec == nullptr) {
+		b.badge = "[No Recipe]";
+		b.colour = TextColour::Grey;
+		return b;
+	}
+
+	if (!IntegratedEconomy::Enabled()) {
+		FacilityStatus status = ProductionChainManager::GetFacilityStatus(&f);
+		switch (status) {
+			case FacilityStatus::Overflow:
+				b.badge = fmt::format("[Overflow: {} t to Hub]", f.last_month_hub_overflow);
+				b.colour = TextColour::Gold;
+				break;
+			case FacilityStatus::Active:
+				b.badge = fmt::format("[Active: {}/{} t/mo]", f.last_month_production, f.monthly_capacity);
+				b.colour = TextColour::White;
+				break;
+			case FacilityStatus::Starved:
+				b.badge = "[Starved: Need Inputs]";
+				b.colour = TextColour::Red;
+				break;
+			case FacilityStatus::Idle:
+			default:
+				b.badge = fmt::format("[Idle (Cap: {} t/mo)]", f.monthly_capacity);
+				b.colour = TextColour::Grey;
+				break;
+		}
+		return b;
+	}
+
+	IndustryID ind_id{uint16_t(f.id - 1)};
+	const Industry *ind = Industry::GetIfValid(ind_id);
+
+	/* 1. Tech lock */
+	TechID tech = IntegratedEconomy::RecipeTech(rec->id);
+	if (Company::IsValidID(f.owner) && tech != TECH_NONE && !TechTreeManager::IsTechUnlocked(f.owner, tech)) {
+		const TechProjectNode *node = TechTreeManager::GetNode(tech);
+		std::string tech_name = (node != nullptr) ? node->name : fmt::format("Tech {}", tech);
+		b.badge = fmt::format("[Locked: Requires {}]", tech_name);
+		b.colour = TextColour::Red;
+		return b;
+	}
+
+	/* 2. Blocked output */
+	if (ind != nullptr && IntegratedEconomy::OutputBatchLimit(ind) == 0) {
+		uint32_t yield = (Company::IsValidID(f.owner) && TechTreeManager::IsTechUnlocked(f.owner, TECH_MATERIALS_3)) ? 115 : 100;
+		for (auto [cargo, units] : rec->outputs) {
+			auto out_it = ind->GetCargoProduced(cargo);
+			uint32_t waiting = (out_it != ind->produced.end()) ? out_it->waiting : 0;
+			uint32_t cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
+				? std::min(65535u, (out_cap * units * yield + 99) / 100)
+				: std::min(65535u, (throughput * units * 3 * yield + 99) / 100);
+			if (waiting >= cap || (cap - waiting) < units) {
+				std::string cargo_name = GetFacilityCargoName(cargo);
+				b.badge = fmt::format("[Blocked: Output {} Full ({}/{})]", cargo_name, waiting, cap);
+				b.colour = TextColour::Gold;
+				return b;
+			}
+		}
+		b.badge = "[Output blocked]";
+		b.colour = TextColour::Gold;
+		return b;
+	}
+
+	/* 3. Starved inputs (missing or insufficient) */
+	CargoType missing_cargo = NUM_CARGO;
+	uint32_t missing_req = 0;
+	CargoType insufficient_cargo = NUM_CARGO;
+	uint32_t insufficient_have = 0;
+	uint32_t insufficient_req = 0;
+	uint32_t batches_permitted = UINT32_MAX;
+
+	for (auto [cargo, req] : rec->inputs) {
+		uint32_t waiting = 0;
+		if (ind != nullptr) {
+			auto in_it = ind->GetCargoAccepted(cargo);
+			waiting = (in_it != ind->accepted.end()) ? in_it->waiting : 0;
+		} else {
+			auto it = f.input_buffers.find(cargo);
+			waiting = (it != f.input_buffers.end()) ? it->second : 0;
+		}
+
+		uint32_t c_cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
+			? in_cap * req
+			: throughput * req * 3;
+		if (req > 0) {
+			batches_permitted = std::min(batches_permitted, std::min(waiting, c_cap) / req);
+		}
+
+		if (waiting == 0 && missing_cargo == NUM_CARGO) {
+			missing_cargo = cargo;
+			missing_req = req;
+		} else if (waiting < req && insufficient_cargo == NUM_CARGO) {
+			insufficient_cargo = cargo;
+			insufficient_have = waiting;
+			insufficient_req = req;
+		}
+	}
+	if (batches_permitted == UINT32_MAX) batches_permitted = 0;
+	b.batches_permitted = batches_permitted;
+
+	if (missing_cargo != NUM_CARGO) {
+		std::string cargo_name = GetFacilityCargoName(missing_cargo);
+		b.badge = fmt::format("[Starved: Missing {} (0/{} per batch)]", cargo_name, missing_req);
+		b.colour = TextColour::Red;
+		return b;
+	}
+
+	if (insufficient_cargo != NUM_CARGO) {
+		std::string cargo_name = GetFacilityCargoName(insufficient_cargo);
+		b.badge = fmt::format("[Starved: Insufficient {} ({}/{} for batch)]", cargo_name, insufficient_have, insufficient_req);
+		b.colour = TextColour::Red;
+		return b;
+	}
+
+	/* 4. Active or Ready */
+	if (f.last_month_production > 0) {
+		b.badge = fmt::format("[Active: {}/{} batches/mo]", f.last_month_production, throughput);
+		b.colour = TextColour::Green;
+		return b;
+	}
+
+	if (batches_permitted > 0) {
+		b.badge = fmt::format("[Ready: {} {} buffered]", batches_permitted, batches_permitted == 1 ? "batch" : "batches");
+		b.colour = TextColour::Green;
+		return b;
+	}
+
+	b.badge = fmt::format("[Idle: Cap {} batches/mo]", throughput);
+	b.colour = TextColour::Grey;
+	return b;
+}
 
 static constexpr std::initializer_list<NWidgetPart> _nested_empire_facilities_widgets = {
 	NWidget(NWID_HORIZONTAL),
@@ -147,6 +300,8 @@ struct EmpireFacilitiesWindow : Window {
 
 	void DrawWidget(const Rect &r, WidgetID widget) const override
 	{
+		if (_cur_dpi == nullptr || _screen.dst_ptr == nullptr) return;
+
 		switch (widget) {
 			case WID_EF_LIST_PANEL: {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
@@ -169,46 +324,9 @@ struct EmpireFacilitiesWindow : Window {
 					Rect row_rect = Rect{tr.left, y, tr.right, y + static_cast<int>(ROW_HEIGHT) - 2};
 					GfxFillRect(row_rect, (i % 2 == 0) ? GetColourGradient(Colours::DarkGreen, Shade::Darkest) : GetColourGradient(Colours::DarkGreen, Shade::Dark));
 
-					/* Line 1: World + Station name + Status */
-					std::string world_str = (region != nullptr) ? fmt::format("World {}: {} ({})", f.world_id.base() + 1, region->name,
-						region->phase == WorldPhase::Phase1_Core ? "Core" :
-						region->phase == WorldPhase::Phase2_Developed ? "Developed" :
-						region->phase == WorldPhase::Phase3_Frontier ? "Frontier" : "Expansion") : fmt::format("World {}", f.world_id.base() + 1);
-
-					std::string st_name = (st != nullptr) ? fmt::format("{} [{}, {}]", st->name, TileX(f.tile), TileY(f.tile)) : fmt::format("Tile [{}, {}]", TileX(f.tile), TileY(f.tile));
-
-					std::string line1 = fmt::format("{}  >>  {}", world_str, st_name);
-					Rect line1_r = row_rect.Shrink(2);
-					DrawString(line1_r, line1, TextColour::Yellow);
-
-					/* Status Badge on right */
-					FacilityStatus status = ProductionChainManager::GetFacilityStatus(&f);
-					std::string status_badge;
-					TextColour status_col = TextColour::Green;
-					switch (status) {
-						case FacilityStatus::Overflow:
-							status_badge = IntegratedEconomy::Enabled() ? "[Output blocked]"
-																		: fmt::format("[Overflow: {} t to Hub]", f.last_month_hub_overflow);
-							status_col = TextColour::Gold;
-							break;
-						case FacilityStatus::Active:
-							status_badge = fmt::format("[Active: {}/{} {}]", f.last_month_production, f.monthly_capacity,
-													   IntegratedEconomy::Enabled() ? "batches/mo" : "t/mo");
-							status_col = TextColour::White;
-							break;
-						case FacilityStatus::Starved:
-							status_badge = "[Starved: Need Inputs]";
-							status_col = TextColour::Red;
-							break;
-						case FacilityStatus::Idle:
-						default:
-							status_badge = fmt::format("[Idle (Cap: {} t/mo)]", f.monthly_capacity);
-							status_col = TextColour::Grey;
-							break;
-					}
-
-					Rect badge_r = Rect{row_rect.right - 290, y + 2, row_rect.right - 155, y + 16};
-					DrawString(badge_r, status_badge, status_col);
+					int x_btn_left = row_rect.right - 150;
+					int x_btn_right = row_rect.right - 4;
+					Rect tr_text = Rect{row_rect.left + 4, y + 2, x_btn_left - 6, y + static_cast<int>(ROW_HEIGHT) - 2};
 
 					uint32_t throughput = f.monthly_capacity;
 					uint32_t in_cap = 300, out_cap = 300;
@@ -224,83 +342,212 @@ struct EmpireFacilitiesWindow : Window {
 						}
 					}
 
-					/* Line 2: Recipe Name & Inputs/Outputs */
-					std::string line2 = (rec != nullptr) ?
-						(IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 ?
-							fmt::format("Recipe: {} (Cap: {}/mo | Buffers: {} in, {} out)", rec->name, throughput, in_cap, out_cap) :
-							fmt::format("Recipe: {} (Cap: {} t/mo)", rec->name, f.monthly_capacity)) :
-						"Recipe: None";
-					Rect line2_r = Rect{row_rect.left + 2, y + 16, row_rect.right - 155, y + 30};
-					DrawString(line2_r, line2, TextColour::White);
+					FacilityBottleneck bottleneck = DiagnoseFacilityBottleneck(f, rec, throughput, in_cap, out_cap);
 
-					/* Line 3: Input/Output Buffers */
+					/* Line 1: World (Role & Phase separated) >> Station name / Tile */
+					EconomicRole role = IntegratedEconomy::Role(f.world_id);
+					StringID role_str_id = (role == EconomicRole::Core) ? STR_EMPIRE_FACILITIES_ROLE_CORE :
+					                       (role == EconomicRole::Industrial) ? STR_EMPIRE_FACILITIES_ROLE_INDUSTRIAL :
+					                       STR_EMPIRE_FACILITIES_ROLE_FRONTIER;
+					std::string role_name = GetString(role_str_id);
+
+					std::string phase_name;
+					if (region != nullptr) {
+						StringID phase_str_id = (region->phase == WorldPhase::Phase1_Core) ? STR_EMPIRE_FACILITIES_PHASE_1 :
+						                        (region->phase == WorldPhase::Phase2_Developed) ? STR_EMPIRE_FACILITIES_PHASE_2 :
+						                        (region->phase == WorldPhase::Phase3_Frontier) ? STR_EMPIRE_FACILITIES_PHASE_3 :
+						                        STR_EMPIRE_FACILITIES_PHASE_4;
+						phase_name = GetString(phase_str_id);
+					} else {
+						phase_name = GetString(STR_EMPIRE_FACILITIES_PHASE_1);
+					}
+
+					std::string world_str = (region != nullptr)
+						? fmt::format("World {}: {} (Role: {} | Phase: {})", f.world_id.base() + 1, region->name, role_name, phase_name)
+						: fmt::format("World {} (Role: {})", f.world_id.base() + 1, role_name);
+
+					const Station *target_st = st;
+					if (target_st == nullptr && IntegratedEconomy::Enabled() && f.id > 0) {
+						if (auto ind = Industry::GetIfValid(ind_id)) {
+							if (ind->neutral_station != nullptr) {
+								target_st = ind->neutral_station;
+							} else if (!ind->stations_near.empty()) {
+								target_st = *ind->stations_near.begin();
+							}
+						}
+					}
+
+					std::string st_name = (target_st != nullptr)
+						? fmt::format("{} [{}, {}]", target_st->name, TileX(f.tile), TileY(f.tile))
+						: fmt::format("Tile [{}, {}]", TileX(f.tile), TileY(f.tile));
+
+					std::string line1 = fmt::format("{}  >>  {}", world_str, st_name);
+					Rect line1_r = Rect{tr_text.left, y + 2, tr_text.right, y + 16};
+					DrawString(line1_r, line1, TextColour::Yellow);
+
+					/* Line 2: Status Badge + Recipe with exact ratios + Rated throughput + Last month completed-period production */
+					int badge_width = GetStringBoundingBox(bottleneck.badge).width;
+					Rect badge_r = Rect{tr_text.left, y + 18, std::min(tr_text.right, tr_text.left + badge_width), y + 32};
+					DrawString(badge_r, bottleneck.badge, bottleneck.colour);
+
+					std::string in_ratio;
+					if (rec != nullptr) {
+						for (size_t idx = 0; idx < rec->inputs.size(); ++idx) {
+							if (idx > 0) in_ratio += " + ";
+							in_ratio += fmt::format("{} {}", rec->inputs[idx].second, GetFacilityCargoName(rec->inputs[idx].first));
+						}
+					}
+					std::string out_ratio;
+					if (rec != nullptr) {
+						for (size_t idx = 0; idx < rec->outputs.size(); ++idx) {
+							if (idx > 0) out_ratio += " + ";
+							out_ratio += fmt::format("{} {}", rec->outputs[idx].second, GetFacilityCargoName(rec->outputs[idx].first));
+						}
+					}
+					std::string ratio_str = (rec != nullptr) ? fmt::format("{} -> {}", in_ratio, out_ratio) : "None";
+
+					std::string last_prod_str;
+					if (IntegratedEconomy::Enabled()) {
+						last_prod_str = fmt::format("Last mo: {} batches", f.last_month_production);
+					} else if (f.last_month_production > 0) {
+						last_prod_str = fmt::format("Last mo: {} t", f.last_month_production);
+					} else {
+						last_prod_str = fmt::format("Last mo: {}", GetString(STR_EMPIRE_FACILITIES_UNAVAILABLE));
+					}
+
+					std::string line2 = (rec != nullptr)
+						? (IntegratedEconomy::Enabled()
+							? fmt::format("Recipe: {} ({}) | Rated: {} batches/mo | {}", rec->name, ratio_str, throughput, last_prod_str)
+							: fmt::format("Recipe: {} ({}) | Cap: {} t/mo | {}", rec->name, ratio_str, throughput, last_prod_str))
+						: fmt::format("Recipe: None | {}", last_prod_str);
+
+					int recipe_x = tr_text.left + badge_width + 8;
+					if (recipe_x < tr_text.right) {
+						Rect recipe_r = Rect{recipe_x, y + 18, tr_text.right, y + 32};
+						DrawString(recipe_r, line2, TextColour::White);
+					}
+
+					/* Line 3: Machine Input/Output Buffers with truthful units and batches permitted */
+					const Industry *ind = Industry::GetIfValid(ind_id);
 					std::string in_desc = "In: ";
 					if (rec != nullptr) {
-						for (const auto &[in_c, in_amt] : rec->inputs) {
-							auto it = f.input_buffers.find(in_c);
-							uint32_t buf = (it != f.input_buffers.end()) ? it->second : 0;
-							in_desc += fmt::format("{} {} (buf: {}); ", in_amt, GetString(CargoSpec::Get(in_c)->name), buf);
+						for (size_t idx = 0; idx < rec->inputs.size(); ++idx) {
+							auto [in_c, in_req] = rec->inputs[idx];
+							uint32_t waiting = 0;
+							if (ind != nullptr) {
+								auto in_it = ind->GetCargoAccepted(in_c);
+								waiting = (in_it != ind->accepted.end()) ? in_it->waiting : 0;
+							} else {
+								auto it = f.input_buffers.find(in_c);
+								waiting = (it != f.input_buffers.end()) ? it->second : 0;
+							}
+							uint32_t c_cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
+								? in_cap * in_req
+								: throughput * in_req * 3;
+							uint32_t b_perm = (in_req > 0) ? (waiting / in_req) : 0;
+							if (idx > 0) in_desc += "; ";
+							in_desc += fmt::format("{}: {}/{} units (permits {} batches)",
+								GetFacilityCargoName(in_c), waiting, c_cap, b_perm);
 						}
 					}
-
-					std::string line3;
-					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && work == FactoryWorkType::None) {
-						WorldID world = (f.tile != INVALID_TILE) ? PlanetManager::GetTileWorld(f.tile) : WorldID{0};
-						CargoType stel_c = GetCargoTypeByLabel(CargoLabel{"STEL"});
-						CargoType ball_c = GetCargoTypeByLabel(CargoLabel{"BALL"});
-						uint32_t stel_stock = StockpileManager::GetStock(world, _local_company, stel_c);
-						uint32_t ball_stock = StockpileManager::GetStock(world, _local_company, ball_c);
-						line3 = fmt::format("{} | Bill: £50k + 160 STEL/80 BALL (Stock: {} STEL, {} BALL)", in_desc, stel_stock, ball_stock);
-					} else {
-						std::string out_desc = fmt::format("Plat Target: {} t", f.platform_capacity);
-						if (IntegratedEconomy::Enabled()) {
-							out_desc = "Out: ";
-							for (auto [c, n] : f.output_buffers)
-								out_desc += fmt::format("{} {}; ", n, GetString(CargoSpec::Get(c)->name));
+					std::string out_desc = "Out: ";
+					if (rec != nullptr) {
+						uint32_t yield = (Company::IsValidID(f.owner) && TechTreeManager::IsTechUnlocked(f.owner, TECH_MATERIALS_3)) ? 115 : 100;
+						for (size_t idx = 0; idx < rec->outputs.size(); ++idx) {
+							auto [out_c, out_yield] = rec->outputs[idx];
+							uint32_t waiting = 0;
+							if (ind != nullptr) {
+								auto out_it = ind->GetCargoProduced(out_c);
+								waiting = (out_it != ind->produced.end()) ? out_it->waiting : 0;
+							} else {
+								auto it = f.output_buffers.find(out_c);
+								waiting = (it != f.output_buffers.end()) ? it->second : 0;
+							}
+							uint32_t c_cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
+								? std::min(65535u, (out_cap * out_yield * yield + 99) / 100)
+								: std::min(65535u, (throughput * out_yield * 3 * yield + 99) / 100);
+							uint32_t b_space = (out_yield > 0 && c_cap > waiting) ? ((c_cap - waiting) / out_yield) : 0;
+							if (idx > 0) out_desc += "; ";
+							out_desc += fmt::format("{}: {}/{} units (space for {} batches)",
+								GetFacilityCargoName(out_c), waiting, c_cap, b_space);
 						}
-						line3 = fmt::format("{} | {}", in_desc, out_desc);
 					}
-					Rect line3_r = Rect{row_rect.left + 2, y + 30, row_rect.right - 155, y + 46};
+					std::string line3 = fmt::format("Factory Buffers: {} | {}", in_desc, out_desc);
+					Rect line3_r = Rect{tr_text.left, y + 34, tr_text.right, y + 48};
 					DrawString(line3_r, line3, TextColour::Silver);
 
-					/* Interactive Buttons on right */
+					/* Line 4: Works Bill & Queried Price + Planetary Warehouse Construction Stock */
+					WorldID world = (f.tile != INVALID_TILE) ? PlanetManager::GetTileWorld(f.tile) : WorldID{0};
+					CargoType stel_c = StockpileManager::RoleToDefaultCargo(FabricationRole::StructuralMetal);
+					CargoType ball_c = StockpileManager::RoleToDefaultCargo(FabricationRole::Ballast);
+					uint32_t stel_stock = (stel_c != INVALID_CARGO) ? StockpileManager::GetStock(world, _local_company, stel_c) : 0;
+					uint32_t ball_stock = (ball_c != INVALID_CARGO) ? StockpileManager::GetStock(world, _local_company, ball_c) : 0;
+
+					std::string line4;
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
-
 						if (work == FactoryWorkType::None) {
-							Rect btn_cap = Rect{row_rect.right - 150, y + 4, row_rect.right - 104, y + 22};
-							GfxFillRect(btn_cap, GetColourGradient(Colours::Grey, Shade::Normal));
-							DrawString(btn_cap, GetString(STR_WORKS_CAPACITY_BTN), TextColour::Yellow, AlignmentH::Centre);
-
-							Rect btn_res = Rect{row_rect.right - 100, y + 4, row_rect.right - 58, y + 22};
-							GfxFillRect(btn_res, GetColourGradient(Colours::Grey, Shade::Normal));
-							DrawString(btn_res, GetString(STR_WORKS_RESERVE_BTN), TextColour::Yellow, AlignmentH::Centre);
+							Money queried_price{50000};
+							Backup<CompanyID> cur_company(_current_company, _local_company);
+							auto query_res = Command<Commands::CommissionEconomyWork>::Do(DoCommandFlags{}, ind_id, FactoryWorkType::Capacity);
+							if (query_res.Succeeded()) {
+								queried_price = query_res.GetCost();
+							}
+							line4 = fmt::format("Works: None | Bill: £50,000 + 160 STEL / 80 BALL (Queried Price: £{:L}) | World Stock: {} STEL, {} BALL",
+								queried_price.base(), stel_stock, ball_stock);
 						} else if (work == FactoryWorkType::Capacity) {
-							Rect badge_work = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
+							line4 = fmt::format("Works: Active - Capacity (+50% throughput, 150 batches/mo) | World Stock: {} STEL, {} BALL",
+								stel_stock, ball_stock);
+						} else {
+							line4 = fmt::format("Works: Active - Reserve (2x input buffer, 600 batch storage) | World Stock: {} STEL, {} BALL",
+								stel_stock, ball_stock);
+						}
+					} else {
+						line4 = fmt::format("World Stock: {} STEL, {} BALL | Platform Target: {} t",
+							stel_stock, ball_stock, f.platform_capacity);
+					}
+					Rect line4_r = Rect{tr_text.left, y + 50, tr_text.right, y + 64};
+					DrawString(line4_r, line4, TextColour::Silver);
+
+					/* Right Action Column: Upper half works/controls, Lower half navigation */
+					bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+						if (work == FactoryWorkType::None) {
+							Rect btn_cap = Rect{x_btn_left, y + 4, x_btn_left + 46, y + 26};
+							GfxFillRect(btn_cap, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
+							DrawString(btn_cap, GetString(STR_WORKS_CAPACITY_BTN), is_owner ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
+
+							Rect btn_res = Rect{x_btn_left + 50, y + 4, x_btn_left + 94, y + 26};
+							GfxFillRect(btn_res, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
+							DrawString(btn_res, GetString(STR_WORKS_RESERVE_BTN), is_owner ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
+						} else if (work == FactoryWorkType::Capacity) {
+							Rect badge_work = Rect{x_btn_left, y + 4, x_btn_left + 94, y + 26};
 							DrawString(badge_work, GetString(STR_WORKS_STATUS_CAPACITY), TextColour::Green, AlignmentH::Centre);
 						} else {
-							Rect badge_work = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
+							Rect badge_work = Rect{x_btn_left, y + 4, x_btn_left + 94, y + 26};
 							DrawString(badge_work, GetString(STR_WORKS_STATUS_RESERVE), TextColour::Green, AlignmentH::Centre);
 						}
 
-						Rect btn_retire = Rect{row_rect.right - 54, y + 4, row_rect.right - 4, y + 22};
-						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, Shade::Normal));
-						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), TextColour::White, AlignmentH::Centre);
+						Rect btn_retire = Rect{x_btn_left + 98, y + 4, x_btn_right, y + 26};
+						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, is_owner ? Shade::Normal : Shade::Dark));
+						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), is_owner ? TextColour::White : TextColour::Grey, AlignmentH::Centre);
 					} else {
-						Rect btn_upgrade = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
-						GfxFillRect(btn_upgrade, GetColourGradient(Colours::Grey, Shade::Normal));
-						DrawString(btn_upgrade, "Upgrade (+50)", TextColour::Yellow, AlignmentH::Centre);
+						Rect btn_upgrade = Rect{x_btn_left, y + 4, x_btn_left + 94, y + 26};
+						GfxFillRect(btn_upgrade, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
+						DrawString(btn_upgrade, "Upgrade (+50)", is_owner ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
 
-						Rect btn_retire = Rect{row_rect.right - 54, y + 4, row_rect.right - 4, y + 22};
-						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, Shade::Normal));
-						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), TextColour::White, AlignmentH::Centre);
+						Rect btn_retire = Rect{x_btn_left + 98, y + 4, x_btn_right, y + 26};
+						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, is_owner ? Shade::Normal : Shade::Dark));
+						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), is_owner ? TextColour::White : TextColour::Grey, AlignmentH::Centre);
 					}
 
-					Rect btn_target = Rect{row_rect.right - 150, y + 26, row_rect.right - 4, y + 44};
-					GfxFillRect(btn_target, GetColourGradient(Colours::Grey, Shade::Normal));
-					std::string target_label = IntegratedEconomy::Enabled() ? "Locate factory"
-											   : (f.platform_capacity == 0) ? "Platform: 0 (Hub)"
-																			: fmt::format("Platform: {} t", f.platform_capacity);
-					DrawString(btn_target, target_label, TextColour::White, AlignmentH::Centre);
+					/* Navigation buttons */
+					Rect btn_plant = Rect{x_btn_left, y + 34, x_btn_left + 72, y + 58};
+					GfxFillRect(btn_plant, GetColourGradient(Colours::Grey, Shade::Normal));
+					DrawString(btn_plant, GetString(STR_EMPIRE_FACILITIES_LOCATE_PLANT), TextColour::White, AlignmentH::Centre);
+
+					Rect btn_station = Rect{x_btn_left + 76, y + 34, x_btn_right, y + 58};
+					GfxFillRect(btn_station, GetColourGradient(Colours::Grey, Shade::Normal));
+					DrawString(btn_station, target_st != nullptr ? GetString(STR_EMPIRE_FACILITIES_LOCATE_STATION) : GetString(STR_EMPIRE_FACILITIES_LOCATE_HUB), TextColour::White, AlignmentH::Centre);
 
 					y += ROW_HEIGHT;
 				}
@@ -394,57 +641,89 @@ struct EmpireFacilitiesWindow : Window {
 				const auto &f = filtered[idx];
 				int rel_y = (pt.y - r.top) % ROW_HEIGHT;
 
-				if (IntegratedEconomy::Enabled()) {
-					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
-						if (pt.x >= r.right - 150 && pt.x <= r.right - 4 && rel_y >= 4 && rel_y <= 22) {
-							IndustryID ind_id{uint16_t(f.id - 1)};
-							if (pt.x > r.right - 58) {
-								Command<Commands::ManageEconomyFactory>::Post(ind_id, true);
-							} else if (pt.x <= r.right - 104) {
-								Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Capacity);
-							} else if (pt.x >= r.right - 100 && pt.x <= r.right - 58) {
-								Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Reserve);
-							}
-						} else {
-							ScrollMainWindowToTile(f.tile);
+				const Station *st = Station::GetIfValid(f.linked_station);
+				if (st == nullptr && IntegratedEconomy::Enabled() && f.id > 0) {
+					if (auto ind = Industry::GetIfValid(IndustryID{uint16_t(f.id - 1)})) {
+						if (ind->neutral_station != nullptr) {
+							st = ind->neutral_station;
+						} else if (!ind->stations_near.empty()) {
+							st = *ind->stations_near.begin();
 						}
-						return;
 					}
-					if (pt.x >= r.right - 150 && pt.x <= r.right - 4 && rel_y >= 4 && rel_y <= 22)
-						Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, pt.x > r.right - 58);
-					else
-						ScrollMainWindowToTile(f.tile);
-					return;
 				}
+
 				/* Check button clicks on right side */
 				if (pt.x >= r.right - 150 && pt.x <= r.right - 4) {
-					if (rel_y >= 4 && rel_y <= 22) {
-						if (pt.x <= r.right - 58) {
-							/* Upgrade button */
-							if (f.linked_station != StationID::Invalid()) {
-								Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
+					if (rel_y >= 4 && rel_y <= 28) {
+						bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
+						if (!is_owner) return;
+
+						if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+							IndustryID ind_id{uint16_t(f.id - 1)};
+							FactoryWorkType work = FactoryWorkType::None;
+							auto f_it = IntegratedEconomy::Factories().find(ind_id);
+							if (f_it != IntegratedEconomy::Factories().end()) work = f_it->second.work;
+
+							if (work == FactoryWorkType::None) {
+								if (pt.x <= r.right - 104) {
+									Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Capacity);
+								} else if (pt.x <= r.right - 56) {
+									Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Reserve);
+								} else if (pt.x >= r.right - 52) {
+									Command<Commands::ManageEconomyFactory>::Post(ind_id, true);
+								}
+							} else {
+								if (pt.x >= r.right - 52) {
+									Command<Commands::ManageEconomyFactory>::Post(ind_id, true);
+								}
 							}
-							return;
 						} else {
-							/* Retire button */
-							if (f.linked_station != StationID::Invalid()) {
-								Command<Commands::RemoveProcessingFacility>::Post(STR_ERROR_CAN_T_REMOVE_FACILITY, f.linked_station);
+							if (pt.x <= r.right - 56) {
+								if (IntegratedEconomy::Enabled()) {
+									Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, false);
+								} else if (f.linked_station != StationID::Invalid()) {
+									Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
+								}
+							} else {
+								if (IntegratedEconomy::Enabled()) {
+									Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, true);
+								} else if (f.linked_station != StationID::Invalid()) {
+									Command<Commands::RemoveProcessingFacility>::Post(STR_ERROR_CAN_T_REMOVE_FACILITY, f.linked_station);
+								}
 							}
-							return;
 						}
-					} else if (rel_y >= 26 && rel_y <= 44) {
-						/* Platform target cycle: 0 -> 50 -> 100 -> 200 -> 0 */
-						uint32_t next_target = (f.platform_capacity == 0) ? 50 : (f.platform_capacity == 50) ? 100 : (f.platform_capacity == 100) ? 200 : 0;
-						if (f.linked_station != StationID::Invalid()) {
-							Command<Commands::SetFacilityPlatformCapacity>::Post(STR_ERROR_CAN_T_SET_PLATFORM_CAP, f.linked_station, next_target);
+						this->SetDirty();
+						return;
+					} else if (rel_y >= 32 && rel_y <= 62) {
+						if (pt.x <= r.right - 78) {
+							/* Locate Plant */
+							if (f.tile != INVALID_TILE) SafeScrollMainWindowToTile(f.tile);
+						} else {
+							/* Locate Station / Hub */
+							if (st != nullptr && st->xy != INVALID_TILE) {
+								SafeScrollMainWindowToTile(st->xy);
+							} else {
+								TileIndex hub_tile = INVALID_TILE;
+								for (const auto &hub : LogisticsHubManager::GetAllHubs()) {
+									if (hub.world_id == f.world_id && hub.company_id == _local_company) {
+										hub_tile = hub.tile;
+										break;
+									}
+								}
+								if (hub_tile != INVALID_TILE) {
+									SafeScrollMainWindowToTile(hub_tile);
+								} else if (f.tile != INVALID_TILE) {
+									SafeScrollMainWindowToTile(f.tile);
+								}
+							}
 						}
 						return;
 					}
 				}
 
-				/* Click elsewhere on row: scroll viewport to station */
+				/* Click elsewhere on row: scroll viewport to plant */
 				if (f.tile != INVALID_TILE) {
-					ScrollMainWindowToTile(f.tile);
+					SafeScrollMainWindowToTile(f.tile);
 				}
 				break;
 			}

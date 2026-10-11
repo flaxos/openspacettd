@@ -1,5 +1,25 @@
 # Human UAT results — recovery / v1.1
 
+## Freight You Can Read (Card C1) — 11 October 2026
+
+**Human desktop status: Pending.** Automated Catch2 test suite (86 assertions in 5 cases in `test_sprint43_empire_facilities.cpp`), `[sprint43]` suite (274 assertions in 12 cases), and full CTest suite (563/563 tests passing 100%) executed on branch `codex/capacity-or-reserve-pilot`.
+- **4-Line Facility Presentation**: Verified complete row layout in `empire_facilities_gui.cpp`:
+  * Line 1: World Name, Role, Phase distinct, Station name/Tile.
+  * Line 2: Status badge in highlight colour + Recipe ratio + Rated throughput (`batches/mo`) + Last completed-period production (`batches` or `[Unavailable]`).
+  * Line 3: Factory Buffers (inputs with complete batches permitted, outputs with remaining clearance).
+  * Line 4: Works Bill (`£50k + 160 STEL / 80 BALL`), queried price via `DoCommandFlag::Query`, and World Warehouse Stock.
+- **Authoritative Bottleneck Diagnosis**: Verified constraint evaluation order: technology locked (`[Locked: Requires ...]`), blocked output (`[Blocked: Output <Cargo> Full]`), missing input (`[Starved: Missing ...]`), partial input (`[Starved: Insufficient ...]`), active operation (`[Active: ...]`), buffered ready (`[Ready: ...]`).
+- **Query Purity & Navigation**: Verified that opening, resizing, painting, tab cycling, refresh clicks, and navigation clicks (`[Locate Plant]`, `[Locate Station]`) execute pure reads without modifying company money, game ticks, calendar dates, or RNG state.
+- **Desktop Playtest Mission (5 Minutes)**:
+  * **Objective**: Verify that an owned processing plant (Ballast Crusher at Node 4, World 1) is immediately understandable in the Facilities window without external guides.
+  * **Step 1**: Launch OpenSpaceTTD desktop GUI and open the Facilities window from the map menu (or hotkey).
+  * **Step 2**: Inspect Ballast Crusher row: confirm Line 1 shows World 1 ("Industrial Commonwealth"), Role ("Industrial"), Phase ("Phase 2 Developed"), and linked station Stop 4.
+  * **Step 3**: Confirm Line 2 shows prominent status badge, recipe name (`2 Silica Sand -> 2 Trackbed Ballast`), rated throughput (`Rated: 100 batches/mo`), and completed-period output.
+  * **Step 4**: Confirm Line 3 shows input buffers with complete batches permitted (`permits X batches`) and output buffer space.
+  * **Step 5**: Confirm Line 4 shows Works bill (`£50k + 160 STEL / 80 BALL`), queried price, and warehouse construction stock.
+  * **Step 6**: Click `[Locate Plant]` and `[Locate Station]`: verify viewport instantly centers on the factory and platform without mutating funds or state.
+  * **Success Criteria**: All four lines are visible, truth-in-advertising metrics reflect physical reality, and navigation centers correctly.
+
 ## Commonwealth Pilot Correction and Truthful Acceptance — 11 October 2026
 
 **Human desktop status: Pending.** Automated Catch2 test suite (374 assertions across 13 test cases in `src/tests/test_commonwealth_works.cpp`), `[integrated-economy]` suite (490 assertions across 17 test cases), full Catch2 suite (307,709 assertions in 543 test cases), CTest suite (558/558 tests passing), and offline runner guards (`scripts/test_verify_runner_guards.py`, 7/7 passing) executed on branch `codex/capacity-or-reserve-pilot`.

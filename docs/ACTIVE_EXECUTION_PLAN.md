@@ -1,5 +1,23 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Active execution slice — Freight You Can Read: C1 (11 October 2026)
+
+Owner authorized the "Freight You Can Read" (Card C1) execution slice from `/home/flax/Documents/Codex/2026-10-11/task/feature-delivery/OPENSPACETTD-FEATURE-DELIVERY-PLAN.md` on branch `codex/capacity-or-reserve-pilot` following C0 pilot correction and acceptance:
+- **Principle**: Clear, honest, and actionable understanding of owned industrial facilities and physical logistics directly within the existing game UI.
+- **Ruleset**: Applied to the existing Facilities window (`empire_facilities_gui.cpp`) across all modes, with enhanced V2 works integration and strict preservation of legacy/V1 fallbacks.
+- **Scope & Implementation**:
+  - **Active Recipe & Units**: Displays recipe name, exact input/output cargo ratios (e.g. `2 Silica Sand -> 2 Trackbed Ballast`), rated throughput (`Rated: X batches/mo`), and observed completed-period production (`Last mo: Y batches` or `[Unavailable]`). Eliminates misleading `t/mo` units in integrated modes.
+  - **First Limiting Bottleneck**: Diagnoses and displays the first limiting constraint on the plant using authoritative rules: technology locked (`[Locked: Requires ...]`), blocked output (`[Blocked: Output <Cargo> Full (<amt>/<cap>)]`), missing input (`[Starved: Missing <Cargo> (0/<req> per batch)]`), partial input (`[Starved: Insufficient <Cargo> (<amt>/<req> for batch)]`), operational production (`[Active: <last>/<cap> batches/mo]`), or buffered ready (`[Ready: <batches> batches buffered]`).
+  - **Factory Buffers vs World Stockpile**: Explicitly distinguishes machine input/output buffers from company planetary construction stockpiles. Shows exact buffer quantities, capacities, and complete batches permitted (`permits X batches`) without speculative forecasting.
+  - **Works Effects & Queried Cost**: In V2 rules, displays works bill (`160 STEL + 80 BALL`), queried command cost via `DoCommandFlag::Query` (£50,000), active Capacity (+50% throughput, 150 batches/mo) or Reserve (2x input buffer, 600 batch storage) effects, and local planetary warehouse stock.
+  - **Role vs Phase Separation**: Queries and displays world economic role (`Core`, `Industrial`, `Frontier`) distinctly from development phase (`Phase 1 Core`, `Phase 2 Developed`, `Phase 3 Frontier`, `Phase 4 Expansion`).
+  - **Asset Navigation & Controls**: Interactive `[Locate Plant]` (centers on factory tile `f.tile`) and `[Locate Station]` / `[Locate Hub]` (centers on station `st->xy` or planetary logistics hub `hub.tile`). Preserves V2 commissioning buttons (`[Capacity]`, `[Reserve]`, `[Retire]`) with foreign/spectator disablement.
+  - **Query Purity Contract**: Opening, painting, resizing, tooltips, and navigation clicks strictly execute pure reads; zero simulation commands dispatched and zero game state mutated.
+- **Verification & Non-Goals**:
+  - No new telemetry database, notification system, dispatch AI, timetable optimizer, or economic balance modifications.
+  - Unit & GUI regressions in `src/tests/test_sprint43_empire_facilities.cpp`.
+  - Delivery boundary: Local review-ready patch on `codex/capacity-or-reserve-pilot`. No remote push, no PR creation, no merge, and no starting P1.
+
 ## Commonwealth Pilot Correction and Acceptance Supplement (11 October 2026)
 
 Owner authorized the "Commonwealth Pilot Correction and Acceptance" task on the PR #82 stack (`codex/capacity-or-reserve-pilot`, reviewed checkpoint `20ede820d0b9ac1670dd1ed3606df68d50073d1b`), resolving the five correction packages from `/home/flax/Documents/Codex/2026-10-10/task-4/OpenSpaceTTD-Sprint1-five-issue-takeover-plan-20261011.md` without reverting Sprint 2 or 3 features:

@@ -6474,3 +6474,16 @@ STR_WORKS_CAPACITY_BTN                                          :Capacity
 STR_WORKS_RESERVE_BTN                                           :Reserve
 STR_WORKS_STATUS_CAPACITY                                       :{GREEN}[Capacity Works: 150 batches/mo]
 STR_WORKS_STATUS_RESERVE                                        :{GREEN}[Reserve Works: 600 batch storage]
+
+# OpenSpaceTTD Commonwealth Works: Freight You Can Read (C1)
+STR_EMPIRE_FACILITIES_LOCATE_PLANT                               :Locate Plant
+STR_EMPIRE_FACILITIES_LOCATE_STATION                             :Locate Station
+STR_EMPIRE_FACILITIES_LOCATE_HUB                                 :Locate Hub
+STR_EMPIRE_FACILITIES_ROLE_CORE                                  :Core
+STR_EMPIRE_FACILITIES_ROLE_INDUSTRIAL                            :Industrial
+STR_EMPIRE_FACILITIES_ROLE_FRONTIER                              :Frontier
+STR_EMPIRE_FACILITIES_PHASE_1                                    :Phase 1 Core
+STR_EMPIRE_FACILITIES_PHASE_2                                    :Phase 2 Developed
+STR_EMPIRE_FACILITIES_PHASE_3                                    :Phase 3 Frontier
+STR_EMPIRE_FACILITIES_PHASE_4                                    :Phase 4 Expansion
+STR_EMPIRE_FACILITIES_UNAVAILABLE                                :[Unavailable]
