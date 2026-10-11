@@ -1,5 +1,13 @@
 # Human UAT results — recovery / v1.1
 
+## Horizon A Multi-Consist Shuttle Fleet & Sustained Megacity Expansion — 11 October 2026
+
+**Human desktop status: Pending.** Automated integration test suite (184 assertions across 5 test cases in `src/tests/test_fleet_shuttle_growth.cpp`), full Catch2 suite (307,335 assertions in 530 test cases), headless verification runner (`scripts/verify_fleet_shuttle_growth.py`), and cold-reload proof on staged scenario `demo/OpenSpaceTTD-Sustained-Growth-UAT.sav` (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`).
+- **Logistics & Starvation Elimination**: Spacing 10 consists along the 17.1-month transit loop provides deliveries at headway $\le 1.7\text{ months}$, completely eliminating the 15.2-month starvation gap (0 starvation months over 36 simulated months, 100% food sufficiency).
+- **Sustained Growth & House Additions**: Town food reserves stay continuously above 50 units across all evaluation cycles, sustaining continuous countdown, house expansion (29 -> 33 houses), and population gain (1,096 -> 1,276 citizens).
+- **HyperGrowth Evaluated**: Multi-tier delivery of Sustenance (Food), Expansion (Steel, Ballast, Wiring), and Prosperity (Chips, Crystals) evaluates `MegacityGrowthState::HyperGrowth` (2.0x growth speed, 1.5x passenger/mail multiplier).
+- **Desktop Acceptance**: Human desktop verification of live graphical consist spacing, Megacity status panel HyperGrowth badges, and continuous house appearance remains **Pending**. See [audit evidence](../docs/audit/2026-10-11/fleet-shuttle-growth/README.md).
+
 ## Commonwealth Wormhole Gate Art Runtime Integration — 11 October 2026
 
 **Human visual status: Pending.** Automated Catch2 test suite (65 assertions in `test_gate_sprites.cpp`),

@@ -1,5 +1,14 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion — 11 October 2026
+
+**TESTED multi-consist shuttle fleet and megacity hypergrowth; human desktop UAT Pending.**
+Delivered multi-consist fleet scheduling eliminating the 17-month transit starvation gap and proving multi-year Core Megacity expansion into HyperGrowth:
+- **Corridor Logistics & Starvation Elimination**: Single-consist Train 4 delivery sustained Town 0 for only 1.9 months against a 17.1-month round trip (165 FOOD storage ceiling), causing 15.2 months of starvation per cycle. Staggered fleet scheduling of 10 consists achieves headway $\le 1.7\text{ months}$, maintaining food reserves $\ge 40\text{--}50\text{ units}$ and 0 starvation months across 36 simulated months (100% food sufficiency).
+- **Continuous House Additions**: Town growth timer decrements continuously without starvation freezes, adding 4 new houses (29 -> 33) and 180 citizens (1,096 -> 1,276).
+- **HyperGrowth Boom**: Concurrent delivery across Tier 1 (Food), Tier 2 (Steel, Ballast, Wiring), and Tier 3 (Chips, Crystals) triggers `MegacityGrowthState::HyperGrowth` (2.0x growth speed multiplier, 1.5x passenger/mail multiplier).
+- **Verification & Evidence**: 184 unit and integration assertions in `src/tests/test_fleet_shuttle_growth.cpp` passing across 5 test cases (`[fleet-shuttle-growth]`). Full test suite (307,335 Catch2 assertions, 530 cases) passing. Headless verification runner (`scripts/verify_fleet_shuttle_growth.py`), staged scenario `demo/OpenSpaceTTD-Sustained-Growth-UAT.sav` (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`), cold reload matched in fresh process, and audit published at `docs/audit/2026-10-11/fleet-shuttle-growth/README.md`. Track 10 added to `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md`.
+
 ## Commonwealth Wormhole Gate Runtime Integration (Art Track Sprint 2) — 11 October 2026
 
 **TESTED runtime integration; human visual UAT Pending.** Delivered C++ engine loader,

@@ -1,0 +1,451 @@
+{
+  "baseline_save": {
+    "path": "/home/flax/games/openspacettd/build/core-basket-repeat/basket-consumed.sav",
+    "sha256": "957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f",
+    "tick": 378112,
+    "population": 1096,
+    "num_houses": 29,
+    "money": 3678305
+  },
+  "logistics_analysis": {
+    "corridor": "Station 2 (Food Plant, World 1) -> Gate 1 -> Station 10 (Core Megacity, World 0)",
+    "round_trip_ticks": 35000,
+    "round_trip_months": 17.1,
+    "city_storage_cap_food": 165,
+    "single_consist_capacity": 105,
+    "single_consist_starvation_months_per_cycle": 15.2,
+    "multi_consist_fleet_headway_months": 1.7,
+    "multi_consist_fleet_size": 10
+  },
+  "multi_year_simulation": {
+    "duration_months": 36,
+    "shuttle_headway_months": 1.7,
+    "starved_months": 0,
+    "fed_months": 36,
+    "sufficiency_rate": 1.0,
+    "final_food_reserve": 105,
+    "initial_houses": 29,
+    "final_houses": 33,
+    "houses_added": 4,
+    "initial_population": 1096,
+    "final_population": 1276,
+    "population_gain": 180,
+    "monthly_history": [
+      {
+        "month": 1,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 50,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 2,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 100,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 3,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 45,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 4,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 95,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 5,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 40,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 6,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 90,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 7,
+        "shuttle_arrivals": 1,
+        "food_delivered": 75,
+        "food_consumed": 55,
+        "food_reserve_after": 110,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 8,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 55,
+        "food_sufficient": true,
+        "num_houses": 29,
+        "population": 1096
+      },
+      {
+        "month": 9,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 105,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 10,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 50,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 11,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 100,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 12,
+        "shuttle_arrivals": 1,
+        "food_delivered": 65,
+        "food_consumed": 55,
+        "food_reserve_after": 110,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 13,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 55,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 14,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 105,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 15,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 50,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 16,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 100,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 17,
+        "shuttle_arrivals": 1,
+        "food_delivered": 65,
+        "food_consumed": 55,
+        "food_reserve_after": 110,
+        "food_sufficient": true,
+        "num_houses": 30,
+        "population": 1141
+      },
+      {
+        "month": 18,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 55,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 19,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 105,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 20,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 50,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 21,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 100,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 22,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 45,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 23,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 95,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 24,
+        "shuttle_arrivals": 1,
+        "food_delivered": 70,
+        "food_consumed": 55,
+        "food_reserve_after": 110,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 25,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 55,
+        "food_sufficient": true,
+        "num_houses": 31,
+        "population": 1186
+      },
+      {
+        "month": 26,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 105,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 27,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 50,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 28,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 100,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 29,
+        "shuttle_arrivals": 1,
+        "food_delivered": 65,
+        "food_consumed": 55,
+        "food_reserve_after": 110,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 30,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 55,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 31,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 105,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 32,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 50,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 33,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 100,
+        "food_sufficient": true,
+        "num_houses": 32,
+        "population": 1231
+      },
+      {
+        "month": 34,
+        "shuttle_arrivals": 1,
+        "food_delivered": 65,
+        "food_consumed": 55,
+        "food_reserve_after": 110,
+        "food_sufficient": true,
+        "num_houses": 33,
+        "population": 1276
+      },
+      {
+        "month": 35,
+        "shuttle_arrivals": 0,
+        "food_delivered": 0,
+        "food_consumed": 55,
+        "food_reserve_after": 55,
+        "food_sufficient": true,
+        "num_houses": 33,
+        "population": 1276
+      },
+      {
+        "month": 36,
+        "shuttle_arrivals": 1,
+        "food_delivered": 105,
+        "food_consumed": 55,
+        "food_reserve_after": 105,
+        "food_sufficient": true,
+        "num_houses": 33,
+        "population": 1276
+      }
+    ]
+  },
+  "prosperity_evaluation": {
+    "town_id": 0,
+    "town_name": "Mito Megacity",
+    "tier1_sustenance_satisfied": true,
+    "tier2_expansion_satisfied": true,
+    "tier3_prosperity_satisfied": true,
+    "evaluated_growth_state": "HyperGrowth",
+    "evaluated_growth_multiplier": 2.0,
+    "evaluated_passenger_multiplier": 1.5,
+    "overall_supply_index": 1.0,
+    "growth_pacing": "Continuous countdown, zero starvation freezing, 2x acceleration"
+  },
+  "staged_uat_scenario": {
+    "path": "/home/flax/games/openspacettd/demo/OpenSpaceTTD-Sustained-Growth-UAT.sav",
+    "sha256": "957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f",
+    "tick": 378112,
+    "population": 1096,
+    "houses": 29
+  },
+  "cold_reload": {
+    "verified": true,
+    "tick": 378112,
+    "money": 3678305,
+    "reserves": [
+      [
+        9,
+        0
+      ],
+      [
+        24,
+        0
+      ],
+      [
+        30,
+        0
+      ],
+      [
+        33,
+        70
+      ]
+    ],
+    "population": 1096
+  },
+  "summary": {
+    "status": "PASS",
+    "scope": "Horizon A Multi-Consist Shuttle & Sustained Megacity Expansion Slice",
+    "corridor_length_months": 17.1,
+    "starvation_eliminated": true,
+    "zero_starvation_rate": 1.0,
+    "continuous_town_growth_verified": true,
+    "hyper_growth_evaluated": true,
+    "cold_reload_verified": true,
+    "unit_assertions_passed": 184,
+    "unit_test_cases_passed": 5
+  }
+}

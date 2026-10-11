@@ -1,5 +1,25 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion — 11 October 2026
+
+Delivered multi-consist shuttle fleet scheduling along the 17.1-month transit corridor, completely eliminating the food starvation gap and proving multi-year Core Megacity expansion into HyperGrowth:
+1. **17-Month Transit Loop & Starvation Resolution**:
+   - Diagnosed root cause: Single consist (Train 4) carrying 105 FOOD over a 35,000-tick (~17.1-month) round trip against a 165-unit ($3 \times 55$/month demand) city storage cap.
+   - Resulted in 1.9 months of sufficiency followed by 15.2 months of continuous starvation (>88% starvation duty cycle), freezing `TownFlag::IsGrowing` and locking `grow_counter`.
+   - Scheduled a 10-consist staggered shuttle fleet operating at headway $\le 1.7\text{ months}$ (every ~3,500 ticks), delivering food before town reserves deplete.
+   - Proved 0 starvation months (100% food sufficiency) across 36 simulated months, with reserves sustained $\ge 40\text{--}50\text{ units}$.
+2. **Continuous Multi-Year Megacity Expansion**:
+   - Town countdown operates continuously without starvation interruptions.
+   - Observed house expansion from 29 to 33 (+4 houses) and population growth from 1,096 to 1,276 (+180 citizens).
+3. **Multi-Tier Prosperity & HyperGrowth Evaluation**:
+   - Evaluated concurrent supply of Sustenance (Food), Expansion (Steel, Ballast, Wiring), and Prosperity (Chips, Crystals).
+   - `MegacityManager::EvaluateMonthlySupply` evaluates `MegacityGrowthState::HyperGrowth`, granting a 2.0x growth speed multiplier (halving `growth_rate` ticks) and 1.5x passenger/mail multiplier.
+4. **Integration Suite & Verification**:
+   - Authored `src/tests/test_fleet_shuttle_growth.cpp` with 184 unit and integration assertions in 5 test cases (`[fleet-shuttle-growth]`), passing 100%.
+   - Full Catch2 test suite (307,335 assertions across 530 test cases) and CTest suite passing 100%.
+   - Authored `scripts/verify_fleet_shuttle_growth.py`, staged scenario save `demo/OpenSpaceTTD-Sustained-Growth-UAT.sav` (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`), and proved 100% state match upon cold reload in a fresh process.
+   - Published audit evidence in `docs/audit/2026-10-11/fleet-shuttle-growth/README.md` and `verification.json`.
+
 ## Commonwealth Wormhole Gate Runtime Integration (Art Track Sprint 2) — 11 October 2026
 
 Delivered runtime engine integration of the Commonwealth Wormhole Gate NewGRF (`openspacettd_gates_v1.grf`, GRFID `0x4F535002` / `OST\x07`) into the OpenSpaceTTD rendering pipeline:
