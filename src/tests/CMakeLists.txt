@@ -1,4 +1,5 @@
 add_test_files(
+    test_commonwealth_works.cpp
     test_core_construction_basket.cpp
     test_fleet_shuttle_growth.cpp
     test_integrated_economy.cpp

@@ -6464,3 +6464,13 @@ STR_ECONOMY_ACCELERATION :Toggle research material acceleration
 STR_ECONOMY_FACTORIES                                            :Factories
 STR_ECONOMY_CITY                                                 :City demand
 STR_ECONOMY_HQ                                                   :HQ and stockpiles
+
+# OpenSpaceTTD Commonwealth Works: Capacity or Reserve Prototype (Sprint 1)
+STR_ERROR_ALREADY_COMMISSIONED                                  :Facility improvement already commissioned
+STR_ERROR_NOT_ENOUGH_MATERIALS                                  :Not enough materials in company stockpile
+STR_ERROR_OWNED_BY_ANOTHER_COMPANY                              :Service slot owned by another company
+STR_MEGACITY_GROWTH_CORE_STABLE                                 :{GREEN}Stable (No Expansion Commissioned)
+STR_WORKS_CAPACITY_BTN                                          :Capacity
+STR_WORKS_RESERVE_BTN                                           :Reserve
+STR_WORKS_STATUS_CAPACITY                                       :{GREEN}[Capacity Works: 150 batches/mo]
+STR_WORKS_STATUS_RESERVE                                        :{GREEN}[Reserve Works: 600 batch storage]

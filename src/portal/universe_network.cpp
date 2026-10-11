@@ -60,8 +60,12 @@ GlobalStationID StationIdentity(const json &r)
 }
 bool Compatible(const json &r)
 {
+	uint32_t expected_ruleset = 0;
+	if (IntegratedEconomy::Enabled()) {
+		expected_ruleset = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) ? 2 : IntegratedEconomy::VERSION;
+	}
 	return r.value("online", false) && r.value("manifest", "") == UniverseNetwork::Manifest() &&
-		   r.value("ruleset", 0u) == (IntegratedEconomy::Enabled() ? IntegratedEconomy::VERSION : 0);
+		   r.value("ruleset", 0u) == expected_ruleset;
 }
 } // namespace
 void UniverseNetwork::Reset()
@@ -108,7 +112,7 @@ json UniverseNetwork::Advertisement()
 	json host{{"namespace", ns},
 			  {"address", address ? address : fmt::format("127.0.0.1:{}", _settings_client.network.server_port)},
 			  {"manifest", Manifest()},
-			  {"ruleset", IntegratedEconomy::Enabled() ? IntegratedEconomy::VERSION : 0},
+			  {"ruleset", IntegratedEconomy::Enabled() ? (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 ? 2 : IntegratedEconomy::VERSION) : 0},
 			  {"researchs", IntegratedEconomy::ResearchAdvertisements()},
 			  {"worlds", json::array()},
 			  {"stations", json::array()},
@@ -272,8 +276,12 @@ void UniverseNetwork::Tick(uint64_t tick)
 	if (!publishing) {
 		const char *token = std::getenv("OPENTTD_UNIVERSE_HOST_TOKEN");
 		if (token && *token) {
-			publishing = std::make_unique<AuthorityRequest>(url, AuthorityOperation::PublishUniverse, json{{"token", token}, {"host", Advertisement()}});
-			publishing->Start();
+			if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+				Debug(net, 0, "Federation registration unsupported for experimental economy rules v2");
+			} else {
+				publishing = std::make_unique<AuthorityRequest>(url, AuthorityOperation::PublishUniverse, json{{"token", token}, {"host", Advertisement()}});
+				publishing->Start();
+			}
 		}
 	}
 	if (!fetching) {

@@ -1,5 +1,14 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
+
+**TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**
+Delivered Sprint 1 ("Capacity or Reserve") of the Commonwealth design study for Codex review:
+- **Stable Core Settlements**: Mature Core towns under `EconomyRulesVersion::V2` maintain 1.0 passenger generation ("Stable") immune to food starvation decay or frozen supply counters; house growth decoupled from commodity starvation.
+- **Optional Commercial FOOD Service**: Rate-selectable (`Off / 10 / 20 / 40`) service with fixed receiver capacity 60 and sliding 4-month civic passenger bonus (up to +25%). Rate Off rejects deliveries, keeping cargo safely in consist custody, with fractional generation preserved via integer remainder accumulator.
+- **Factory Works Choice**: One-time commissioning choice on player-owned bootstrap factory (Ballast Crusher: 2 SILC -> 2 BALL). Capacity Works boosts processing throughput from 100 to 150 batches/month; Reserve Works expands input buffer from 300 to 600 batch equivalents (1200 SILC). Real materials `160 STEL + 80 BALL` and £50,000 cash consumed atomically with duplicate protection.
+- **Verification & Evidence**: 150 unit assertions across 6 test cases in `src/tests/test_commonwealth_works.cpp` passing. Full Catch2 suite (307,485 assertions in 536 cases) and CTest suite (551/551 tests) passing. 24-period native simulation runs (`scripts/verify_commonwealth_works.py`) proved SILC feeder interruption, food interruption, 100% cargo conservation, and fresh-process cold reload. Audit evidence staged at `docs/audit/2026-10-11/capacity-or-reserve/README.md`. Local handoff to Codex; zero push/PR, no merge.
+
 ## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion — 11 October 2026
 
 **TESTED multi-consist shuttle fleet and megacity hypergrowth; human desktop UAT Pending.**

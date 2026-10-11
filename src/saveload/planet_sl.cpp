@@ -810,6 +810,20 @@ struct MEGAChunkHandler : ChunkHandler {
 		if (!IntegratedEconomy::Enabled()) return;
 		for (auto p : MegacityManager::GetAllMegacities()) {
 			if (IntegratedEconomy::Role(p.world_id) != EconomicRole::Core) continue;
+			if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+				p.growth_state = MegacityGrowthState::Subsistence;
+				p.growth_multiplier = 0.0f;
+				p.passenger_multiplier = 1.0f;
+				if (auto svc = IntegratedEconomy::GetTownFoodService(p.town_id)) {
+					uint32_t total_consumed = svc->consumed_history[0] + svc->consumed_history[1] +
+					                          svc->consumed_history[2] + svc->consumed_history[3];
+					p.passenger_multiplier = 1.0f + (static_cast<float>(total_consumed) / 640.0f);
+				}
+				p.satisfaction_pct = {1.0f, 1.0f, 1.0f};
+				p.overall_supply_index = 1.0f;
+				MegacityManager::RestoreMegacity(p);
+				continue;
+			}
 			p.growth_multiplier = p.growth_state == MegacityGrowthState::HyperGrowth ? 2.0f
 								: p.growth_state == MegacityGrowthState::MetropolitanBoom ? 1.0f : 0.0f;
 			p.passenger_multiplier = p.growth_state == MegacityGrowthState::Starvation ? 0.5f

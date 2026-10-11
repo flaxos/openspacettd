@@ -1,5 +1,19 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Active execution handoff — Capacity or Reserve Prototype: Sprint 1 (11 October 2026)
+
+Owner authorized the experimental "Capacity or Reserve" prototype from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` on branch `codex/capacity-or-reserve-pilot`:
+- **Principle**: Stable settlements, optional FOOD civic service, and a factory capacity-versus-reserve choice.
+- **Ruleset**: Opt-in experimental v2 rules for fresh disposable fixtures only (`connected_economy prepare-works` / `--works-prototype`). V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope**:
+  - One mature Core town with Stable civic baseline (no supply-driven growth, no starvation lockout).
+  - One optional FOOD service slot per town: rate Off / 10 / 20 / 40, receiver cap 60, market ceiling 40, four-period sliding useful consumption history yielding up to +25% passenger generation bonus.
+  - One owned bootstrap ballast plant (`CompanyID{0}`) with one-time commissioning choice between Capacity Works (speed 100 -> 150 batches/period, storage 300) and Reserve Works (speed 100, storage 300 -> 600 batch-equiv), costing `160 STEL + 80 BALL` and £50,000 cash debit.
+  - V1 generic +50 upgrade bypass blocked under v2.
+  - Managed town cargo routing in `economy.cpp` separating managed destination status from active demand, preventing rate-Off FOOD and non-demanded commodities from generic absorption.
+- **Budget & Bounds**: One fresh fixture generation, one bounded run up to 24 actual economy periods or 30 execution minutes, one fresh-process cold reload and up to 4 further periods. Stop at first integrity/command defect. Real transported physical cargo; no calculated growth claims.
+- **Delivery Boundary**: Local review-ready delivery only. No push, no PR creation, no merge, no Sprint 2 execution. Hand off to Codex for review.
+
 ## Active execution handoff — Core Basket Repeat and Cold Proof (10 October 2026)
 
 This replaces the expired campaign permissions with an owner-authorized finite continuation:

@@ -389,6 +389,29 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
      * Houses increment continuously from 29 to 30, 31, 32, 33...
      * Population expands smoothly from 1,096 past 1,270+ without starvation dropouts.
 
+### 3.11 Track 11: Capacity or Reserve Prototype (Sprint 1)
+* **Goal**: Validate Stable settlements, optional Commercial Food Service dashboard, and Factory Works commissioning UI.
+* **Target Save**: `build/audit-capacity-or-reserve/checkpoint-24.sav` (or fresh launch via `scripts/verify_commonwealth_works.py`).
+* **Command**:
+  ```bash
+  ./build/openttd -c demo/connected_economy.cfg -g build/audit-capacity-or-reserve/checkpoint-24.sav
+  ```
+* **Steps**:
+  1. **Inspect Stable Core Megacity:**
+     * Open Commonwealth Metropolis (Town 0) Megacity window.
+     * Verify header shows "Stable" settlement status with baseline 1.0 traffic.
+     * Confirm town has no starvation alerts or house-freezing decay even if food delivery is interrupted.
+  2. **Audit Commercial Food Service Dashboard:**
+     * Observe the food service control widget on the Megacity window.
+     * Click the rate toggle button: verify it cycles smoothly through `Off` -> `10/mo` -> `20/mo` -> `40/mo` -> `Off`.
+     * When set to `Off`, verify arriving food trains retain cargo without station absorption.
+     * When set to `10`, `20`, or `40`, observe reserve consumption up to receiver capacity (60) and passenger generation bonus (`+25%` max).
+  3. **Inspect Factory Works Badges & Commissioning:**
+     * Open Empire Facilities window (`F4` or company industry directory).
+     * Locate the player-owned Ballast Crusher (Node 4).
+     * Verify badge displays active works status (`Capacity Works` or `Reserve Works`).
+     * Verify commissioning buttons disable after works choice is active to prevent accidental duplicate debits.
+
 ---
 
 ## 4. Troubleshooting & Savegame Recovery

@@ -1,5 +1,14 @@
 # Human UAT results — recovery / v1.1
 
+## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
+
+**Human desktop status: Pending.** Automated Catch2 test suite (150 assertions in 6 test cases in `src/tests/test_commonwealth_works.cpp`), full Catch2 suite (307,485 assertions in 536 test cases), CTest suite (551/551 tests passing), and headless simulation runner (`scripts/verify_commonwealth_works.py`) executed on isolated branch `codex/capacity-or-reserve-pilot`.
+- **Stable Core Settlements**: Core towns under `EconomyRulesVersion::V2` maintain 1.0 passenger baseline ("Stable") without starvation freezes or population collapse when commodity delivery stops; house growth decoupled from supply counters.
+- **Optional Commercial FOOD Service**: Rate-selectable (`Off / 10 / 20 / 40`) service with fixed receiver capacity 60 and sliding 4-month civic passenger bonus (up to +25%). Rate Off rejects deliveries, keeping cargo safely in consist custody, with fractional generation preserved via integer remainder accumulator.
+- **Factory Works Choice**: One-time commissioning choice on player-owned bootstrap factory (Ballast Crusher: 2 SILC -> 2 BALL). Capacity Works boosts processing throughput from 100 to 150 batches/month; Reserve Works expands input buffer from 300 to 600 batch equivalents (1200 SILC). Real materials `160 STEL + 80 BALL` and £50,000 cash consumed atomically with duplicate protection.
+- **Simulation Proof**: 24-period native simulation runs proved SILC feeder interruption, food interruption, 100% cargo conservation, and fresh-process cold reload.
+- **Desktop Acceptance**: Human desktop verification of interactive GUI elements (food service cycling button, commissioning buttons, status badges) remains **Pending**. Track 11 documented in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md`. Audit evidence staged at `docs/audit/2026-10-11/capacity-or-reserve/README.md`.
+
 ## Horizon A Multi-Consist Shuttle Fleet & Sustained Megacity Expansion — 11 October 2026
 
 **Human desktop status: Pending.** Automated integration test suite (184 assertions across 5 test cases in `src/tests/test_fleet_shuttle_growth.cpp`), full Catch2 suite (307,335 assertions in 530 test cases), headless verification runner (`scripts/verify_fleet_shuttle_growth.py`), and cold-reload proof on staged scenario `demo/OpenSpaceTTD-Sustained-Growth-UAT.sav` (SHA256: `957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f`).

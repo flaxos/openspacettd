@@ -192,7 +192,9 @@ struct MegacityOverviewWindow : Window {
 				if (profile != nullptr) {
 					bool is_core = IntegratedEconomy::Enabled() && (IntegratedEconomy::Role(profile->world_id) == EconomicRole::Core || (town != nullptr && IntegratedEconomy::Role(PlanetManager::GetTileWorld(town->xy)) == EconomicRole::Core));
 					StringID growth_str;
-					if (is_core) {
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && is_core) {
+						growth_str = STR_MEGACITY_GROWTH_CORE_STABLE;
+					} else if (is_core) {
 						switch (profile->growth_state) {
 							case MegacityGrowthState::Starvation:       growth_str = STR_MEGACITY_GROWTH_STARVATION; break;
 							case MegacityGrowthState::Subsistence:      growth_str = STR_MEGACITY_GROWTH_CORE_SUBSISTENCE; break;
@@ -212,8 +214,11 @@ struct MegacityOverviewWindow : Window {
 					DrawString(tr, growth_str);
 					tr.top += GetCharacterHeight(FontSize::Normal);
 
-					std::string supply_str = fmt::format("Overall Commodity Satisfaction: {:.1f}% (Growth: {:.1f}x, Traffic: {:.1f}x)",
-						profile->overall_supply_index * 100.0f, profile->growth_multiplier, profile->passenger_multiplier);
+					std::string supply_str = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
+						? fmt::format("Civilian Demand: Optional Food Service (Growth: {:.1f}x, Traffic: {:.1f}x)",
+							profile->growth_multiplier, profile->passenger_multiplier)
+						: fmt::format("Overall Commodity Satisfaction: {:.1f}% (Growth: {:.1f}x, Traffic: {:.1f}x)",
+							profile->overall_supply_index * 100.0f, profile->growth_multiplier, profile->passenger_multiplier);
 					DrawString(tr, supply_str, TextColour::White);
 					tr.top += GetCharacterHeight(FontSize::Normal);
 					if (IntegratedEconomy::Enabled() && town != nullptr) DrawStringMultiLine(tr, IntegratedEconomy::CityStatus(town->index), TextColour::White);
@@ -239,6 +244,41 @@ struct MegacityOverviewWindow : Window {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
 				DrawString(tr, tier_label, TextColour::Gold);
 				tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+
+				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+					if (tier_idx == 0) {
+						auto svc = town != nullptr ? IntegratedEconomy::GetTownFoodService(town->index) : nullptr;
+						auto city = town != nullptr ? IntegratedEconomy::City(town->index) : nullptr;
+						CargoType food_cargo = GetCargoTypeByLabel(CargoLabel{"FOOD"});
+						uint32_t stock = (city && city->reserves.contains(food_cargo)) ? city->reserves.at(food_cargo) : 0;
+						uint32_t rate = svc ? svc->selected_rate : 0;
+						uint32_t total_consumed = svc ? (svc->consumed_history[0] + svc->consumed_history[1] + svc->consumed_history[2] + svc->consumed_history[3]) : 0;
+						float bonus_pct = (static_cast<float>(total_consumed) / 640.0f) * 100.0f;
+
+						std::string rate_str = rate == 0 ? "Rate: Off [Click to cycle]" : fmt::format("Rate: {}/mo [Click to cycle]", rate);
+						Rect rate_btn = Rect{tr.right - 170, tr.top - 2, tr.right - 4, tr.top + 16};
+						GfxFillRect(rate_btn, GetColourGradient(Colours::Grey, Shade::Normal));
+						DrawString(rate_btn, rate_str, TextColour::Yellow, AlignmentH::Centre);
+
+						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+						DrawString(tr, fmt::format("Reserve: {} / 60 units (Free receiver: {} units)", stock, stock < 60 ? 60 - stock : 0), TextColour::White);
+						tr.top += GetCharacterHeight(FontSize::Normal);
+						if (svc != nullptr) {
+							DrawString(tr, fmt::format("History: consumed [{}/{}/{}/{}] | requested [{}/{}/{}/{}]",
+								svc->consumed_history[0], svc->consumed_history[1], svc->consumed_history[2], svc->consumed_history[3],
+								svc->requested_history[0], svc->requested_history[1], svc->requested_history[2], svc->requested_history[3]), TextColour::Silver);
+							tr.top += GetCharacterHeight(FontSize::Normal);
+						}
+						DrawString(tr, fmt::format("Passenger Bonus: +{:.1f}% (Baseline traffic 1.0x preserved)", bonus_pct), TextColour::Green);
+					} else if (tier_idx == 1) {
+						tr.top += GetCharacterHeight(FontSize::Normal);
+						DrawString(tr, "Residential Expansion: Stable / No Construction Active", TextColour::Silver);
+					} else {
+						tr.top += GetCharacterHeight(FontSize::Normal);
+						DrawString(tr, "Prosperity: None Active (Sprint 1 Scope)", TextColour::Silver);
+					}
+					break;
+				}
 
 				if (IntegratedEconomy::Enabled() && town != nullptr && !IntegratedEconomy::CityDemand(town->index).empty()) {
 					auto demand = IntegratedEconomy::CityDemand(town->index);
@@ -328,6 +368,17 @@ struct MegacityOverviewWindow : Window {
 					} else {
 						Command<Commands::DesignateMegacity>::Post(this->current_town);
 					}
+				}
+				break;
+			}
+
+			case WID_MCO_TIER1_PANEL: {
+				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && this->current_town != TownID::Invalid()) {
+					auto svc = IntegratedEconomy::GetTownFoodService(this->current_town);
+					uint32_t current_rate = svc ? svc->selected_rate : 0;
+					uint32_t next_rate = (current_rate == 0) ? 10 : (current_rate == 10) ? 20 : (current_rate == 20) ? 40 : 0;
+					Command<Commands::SetTownFoodServiceRate>::Post(this->current_town, next_rate);
+					this->SetDirty();
 				}
 				break;
 			}

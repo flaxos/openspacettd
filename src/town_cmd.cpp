@@ -538,9 +538,21 @@ static void TownGenerateCargo(Town *t, CargoType cargo, uint amount, StationFind
 	/* Boost passenger and mail generation in HyperGrowth Megacities */
 	if (MegacityManager::IsMegacity(t->index)) {
 		const MegacityProfile *prof = MegacityManager::GetProfile(t->index);
-		if (prof != nullptr &&
-			(IntegratedEconomy::Enabled() ? cargo == GetCargoTypeByLabel(CargoLabel{"PASS"}) : prof->passenger_multiplier > 1.0f)) {
-			amount = static_cast<uint>(amount * prof->passenger_multiplier);
+		if (prof != nullptr) {
+			if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+				if (cargo == GetCargoTypeByLabel(CargoLabel{"PASS"})) {
+					if (auto svc = IntegratedEconomy::GetTownFoodService(t->index)) {
+						uint32_t total_consumed = svc->consumed_history[0] + svc->consumed_history[1] +
+						                          svc->consumed_history[2] + svc->consumed_history[3];
+						uint64_t prod = static_cast<uint64_t>(amount) * total_consumed + svc->fractional_passenger_remainder;
+						uint32_t bonus = static_cast<uint32_t>(prod / 640);
+						svc->fractional_passenger_remainder = static_cast<uint32_t>(prod % 640);
+						amount += bonus;
+					}
+				}
+			} else if (IntegratedEconomy::Enabled() ? cargo == GetCargoTypeByLabel(CargoLabel{"PASS"}) : prof->passenger_multiplier > 1.0f) {
+				amount = static_cast<uint>(amount * prof->passenger_multiplier);
+			}
 		}
 	}
 

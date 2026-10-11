@@ -1,5 +1,29 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
+
+Delivered Sprint 1 ("Capacity or Reserve") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex architectural review:
+1. **Stable Core Settlements (Decoupled Baseline)**:
+   - Established mature native Core settlements under `EconomyRulesVersion::V2` with baseline 1.0 passenger traffic labeled "Stable".
+   - Decoupled baseline town vitality from commodity delivery; starvation freezes and population decay are eliminated for Core worlds, while house growth is gated on physical construction rather than supply counters.
+2. **Optional Commercial FOOD Service**:
+   - Implemented player-configurable commercial food delivery rate (`Off (0)`, `10`, `20`, `40` units/period) with fixed receiver capacity ceiling of `60`.
+   - When turned `Off`, incoming deliveries reject station absorption and remain safely in consist custody; existing reserves do not evaporate.
+   - Sliding 4-month civic benefit delivers up to +25% passenger generation (`1.0 + total_consumed / 640.0`).
+   - Exact integer remainder accumulator in town tick generation prevents fractional passenger bonus loss.
+3. **Factory Works Choice (Capacity vs. Reserve)**:
+   - Commissioned one-time works choice for player-owned bootstrap Ballast Crusher (2 SILC -> 2 BALL).
+   - Baseline: 100 batches/month, 300 batch-equivalent input buffer (600 SILC), 300 output buffer.
+   - Capacity Works: 150 batches/month throughput (+50%), 300 input buffer, 300 output buffer.
+   - Reserve Works: 100 batches/month throughput, 600 batch-equivalent input buffer (1200 SILC, +100% buffer depth), 300 output buffer.
+   - Consumes `160 STEL + 80 BALL` atomically from the world company stockpile and debits £50,000 cash; duplicate commissioning and switching are strictly rejected.
+4. **Verification & Audit**:
+   - Authored `src/tests/test_commonwealth_works.cpp` with 150 assertions in 6 test cases (`[commonwealth-works]`), passing 100%.
+   - Full Catch2 test suite (307,485 assertions in 536 test cases) and CTest suite (551/551 tests) passing 100%.
+   - Headless verification runner (`scripts/verify_commonwealth_works.py`) executed 24 native simulation periods under both Capacity and Reserve paths, proving feeder interruption, buffer depletion/recovery, starvation immunity, 100% cargo conservation, and byte-for-byte cold reload match in a fresh process.
+   - Published audit evidence in `docs/audit/2026-10-11/capacity-or-reserve/README.md`, `evidence-capacity.json`, and `evidence-reserve.json`.
+   - Handoff status: Review-ready locally for Codex review. Zero push, zero PR, no merge to main, sprint 2 deferred.
+
 ## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion — 11 October 2026
 
 Delivered multi-consist shuttle fleet scheduling along the 17.1-month transit corridor, completely eliminating the food starvation gap and proving multi-year Core Megacity expansion into HyperGrowth:

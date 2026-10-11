@@ -1,5 +1,11 @@
 # OpenSpaceTTD Known Limitations
 
+## Capacity or Reserve Pilot Prototype Boundaries (Sprint 1) — 11 October 2026
+
+- **Isolated Pilot Scope & Sprint 2 Gate**: Sprint 1 is implemented strictly on isolated branch `codex/capacity-or-reserve-pilot` for architectural review and is not merged into main. Sprint 2 (world generation integration, expansion worlds, additional works tiers, and federation publishing) remains deferred until Sprint 1 receives Codex architectural sign-off.
+- **Default & V1 Save Isolation**: All V2 prototype mechanics (`EconomyRulesVersion::V2`, Works choices, Commercial Food Service) are scoped strictly under V2 rules. Default gameplay, legacy saves, and V1 economies remain 100% untouched. Binary save format bumped to `version: 2`; attempting to load V2 saves in older V1 binaries cleanly errors rather than silently corrupting data.
+- **Human Desktop UAT Pending**: Automated unit testing (`test_commonwealth_works.cpp`, 150 assertions), CTest suite (551/551), and headless simulation evidence (`verify_commonwealth_works.py`, 24 periods with SILC/FOOD interruption, recovery, and cold reload) prove all mechanics. Live interactive human playtesting of GUI widgets (cycling food service rates, commissioning works buttons, and inspecting status badges) remains **Pending**.
+
 ## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion Boundaries — 11 October 2026
 
 - **Fleet Headway & Storage Buffer Synchronization**: The mathematical model and integration test suite prove that maintaining 0 starvation months along the 17.1-month transit corridor requires consist headway $\le 1.7\text{ months}$ (or intermediate staging buffers). Single-consist deliveries inevitably leave the receiving city in starvation for $>88\%$ of the duty cycle due to the 3-month city storage ceiling ($3 \times 55 = 165\text{ units}$).

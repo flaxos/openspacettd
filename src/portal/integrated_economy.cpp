@@ -33,10 +33,12 @@ std::vector<nlohmann::json> *_integrated_city_month_audit = nullptr;
 namespace
 {
 bool enabled = false;
+EconomyRulesVersion rules_version = EconomyRulesVersion::V1;
 EconomyAccounting accounting{};
 std::map<WorldID, EconomicRole> roles;
 std::map<IndustryID, EconomyFactory> factories;
 std::map<TownID, EconomyCity> cities;
+std::map<TownID, TownFoodService> town_food_services;
 std::map<CompanyID, EconomyResearch> research;
 std::map<std::string, nlohmann::json> shared_research;
 std::string Identity(CompanyID company)
@@ -60,12 +62,31 @@ std::map<CargoType, uint32_t> Materials(IndustryType type)
 void IntegratedEconomy::Reset()
 {
 	enabled = false;
+	rules_version = EconomyRulesVersion::V1;
 	accounting = {};
 	roles.clear();
 	factories.clear();
 	cities.clear();
+	town_food_services.clear();
 	research.clear();
 	shared_research.clear();
+}
+EconomyRulesVersion IntegratedEconomy::ActiveRules()
+{
+	return enabled ? rules_version : EconomyRulesVersion::Legacy;
+}
+void IntegratedEconomy::SetRulesVersion(EconomyRulesVersion rules)
+{
+	rules_version = rules;
+}
+TownFoodService *IntegratedEconomy::GetTownFoodService(TownID town)
+{
+	auto it = town_food_services.find(town);
+	return it == town_food_services.end() ? nullptr : &it->second;
+}
+const std::map<TownID, TownFoodService> &IntegratedEconomy::TownFoodServices()
+{
+	return town_food_services;
 }
 void IntegratedEconomy::Record(EconomyFlow flow, CargoType cargo, uint32_t units)
 {
@@ -101,8 +122,25 @@ bool IntegratedEconomy::ContentReady()
 bool IntegratedEconomy::StartNewGame()
 {
 	if (!ContentReady() || PlanetManager::Count() < 2) return false;
+	SetRulesVersion(EconomyRulesVersion::V1);
 	SetEnabled(true);
 	/* Surveyed, player-built expansion is part of this ruleset, not a legacy toggle. */
+	_settings_game.game_creation.player_built_economy = true;
+	ResourceSiteManager::SetEnabled(true);
+	for (auto &world : PlanetManager::GetAllRegions()) {
+		auto role = world.phase == WorldPhase::Phase1_Core		  ? EconomicRole::Core
+					: world.phase == WorldPhase::Phase2_Developed ? EconomicRole::Industrial
+																  : EconomicRole::Frontier;
+		if (world.name == "Tandil") role = EconomicRole::Industrial;
+		RegisterRole(world.id, role);
+	}
+	return true;
+}
+bool IntegratedEconomy::StartNewWorksPrototype()
+{
+	if (!ContentReady() || PlanetManager::Count() < 2) return false;
+	SetRulesVersion(EconomyRulesVersion::V2);
+	SetEnabled(true);
 	_settings_game.game_creation.player_built_economy = true;
 	ResourceSiteManager::SetEnabled(true);
 	for (auto &world : PlanetManager::GetAllRegions()) {
@@ -228,6 +266,16 @@ void IntegratedEconomy::ChangeCompany(CompanyID old_owner, CompanyID new_owner)
 			f.owner = Company::IsValidID(new_owner) ? new_owner : CompanyID{OWNER_NONE};
 			if (auto industry = Industry::GetIfValid(id)) industry->founder = f.owner;
 		}
+	for (auto &[id, svc] : town_food_services) {
+		if (svc.owner == old_owner) {
+			if (Company::IsValidID(new_owner)) {
+				svc.owner = new_owner;
+			} else {
+				svc.owner = CompanyID::Invalid();
+				svc.selected_rate = 0;
+			}
+		}
+	}
 	CancelResearch(old_owner);
 	research.erase(old_owner);
 	StockpileManager::ChangeCompany(old_owner, new_owner);
@@ -302,7 +350,9 @@ uint32_t IntegratedEconomy::IndustrySpace(const Industry *i, CargoType cargo)
 		if (c == cargo) {
 			auto it = i->GetCargoAccepted(cargo);
 			if (it == i->accepted.end()) return 0;
-			uint32_t cap = std::min(65535u, f->second.capacity * n * 3);
+			uint32_t cap = (rules_version == EconomyRulesVersion::V2)
+				? std::min(65535u, f->second.input_capacity * n)
+				: std::min(65535u, f->second.capacity * n * 3);
 			return cap > it->waiting ? cap - it->waiting : 0;
 		}
 	return 0;
@@ -326,7 +376,9 @@ uint32_t IntegratedEconomy::OutputBatchLimit(const Industry *industry)
 	for (auto [cargo, units] : recipe->outputs) {
 		auto output = industry->GetCargoProduced(cargo);
 		if (output == industry->produced.end()) return 0;
-		uint32_t cap = std::min(65535u, (factory.capacity * units * 3 * yield + 99) / 100);
+		uint32_t cap = (rules_version == EconomyRulesVersion::V2)
+			? std::min(65535u, (factory.output_capacity * units * yield + 99) / 100)
+			: std::min(65535u, (factory.capacity * units * 3 * yield + 99) / 100);
 		uint32_t space = cap > output->waiting ? cap - output->waiting : 0;
 		uint32_t remainder = factory.remainder.contains(cargo) ? factory.remainder.at(cargo) : 0;
 		uint64_t numerator = uint64_t(space) * 100 + 99;
@@ -378,16 +430,51 @@ void IntegratedEconomy::Produce()
 		}
 	}
 }
+bool IntegratedEconomy::IsManagedCityCargo(TownID town, CargoType cargo)
+{
+	auto t = Town::GetIfValid(town);
+	if (!enabled || t == nullptr || Role(PlanetManager::GetTileWorld(t->xy)) != EconomicRole::Core) return false;
+	if (rules_version == EconomyRulesVersion::V2) {
+		for (const char *label : {"FOOD", "STEL", "BALL", "CHIP", "CCRY"}) {
+			if (cargo == Cargo(label)) return true;
+		}
+		return false;
+	}
+	return CityDemand(town).contains(cargo);
+}
 std::map<CargoType, uint32_t> IntegratedEconomy::CityDemand(TownID town)
 {
 	auto t = Town::GetIfValid(town);
 	if (!enabled || t == nullptr || Role(PlanetManager::GetTileWorld(t->xy)) != EconomicRole::Core) return {};
+	if (rules_version == EconomyRulesVersion::V2) {
+		auto svc = GetTownFoodService(town);
+		if (svc != nullptr && svc->selected_rate > 0) {
+			return {{Cargo("FOOD"), svc->selected_rate}};
+		}
+		return {};
+	}
 	auto pop = t->cache.population;
 	uint32_t food = std::max(50u, (pop + 19) / 20), build = std::max(20u, (pop + 99) / 100), luxury = std::max(10u, (pop + 199) / 200);
 	return {{Cargo("FOOD"), food}, {Cargo("STEL"), build}, {Cargo("BALL"), build}, {Cargo("CHIP"), luxury}, {Cargo("CCRY"), luxury}};
 }
 std::string IntegratedEconomy::CityStatus(TownID town)
 {
+	auto t = Town::GetIfValid(town);
+	if (!enabled || t == nullptr || Role(PlanetManager::GetTileWorld(t->xy)) != EconomicRole::Core) return {};
+	if (rules_version == EconomyRulesVersion::V2) {
+		auto svc = GetTownFoodService(town);
+		if (svc == nullptr || svc->selected_rate == 0) {
+			return "Commercial Food Service: Off. Town stable (1.0x traffic).";
+		}
+		uint32_t reserve = 0;
+		if (auto city = City(town)) {
+			if (auto it = city->reserves.find(Cargo("FOOD")); it != city->reserves.end()) reserve = it->second;
+		}
+		uint32_t total_consumed = svc->consumed_history[0] + svc->consumed_history[1] + svc->consumed_history[2] + svc->consumed_history[3];
+		float bonus_pct = (static_cast<float>(total_consumed) / 640.0f) * 100.0f;
+		return fmt::format("Food Service: {} units/mo (Reserve: {}/{}) | Traffic: +{:.1f}%",
+			svc->selected_rate, reserve, svc->receiver_capacity, bonus_pct);
+	}
 	auto demand = CityDemand(town);
 	if (demand.empty()) return {};
 	auto city = City(town);
@@ -429,6 +516,22 @@ const EconomyCity *IntegratedEconomy::City(TownID town)
 }
 uint32_t IntegratedEconomy::AcceptCity(TownID town, CargoType cargo, uint32_t amount, bool execute)
 {
+	if (!enabled) return 0;
+	if (rules_version == EconomyRulesVersion::V2) {
+		auto t = Town::GetIfValid(town);
+		if (t == nullptr || Role(PlanetManager::GetTileWorld(t->xy)) != EconomicRole::Core) return 0;
+		if (cargo != Cargo("FOOD")) return 0;
+		auto svc = GetTownFoodService(town);
+		if (svc == nullptr || svc->selected_rate == 0) return 0;
+		uint32_t cap = svc->receiver_capacity;
+		uint32_t stock = 0;
+		if (auto city = City(town)) {
+			if (auto it = city->reserves.find(cargo); it != city->reserves.end()) stock = it->second;
+		}
+		auto accepted = std::min(amount, cap > stock ? cap - stock : 0);
+		if (execute && accepted) cities[town].reserves[cargo] += accepted;
+		return accepted;
+	}
 	auto demand = CityDemand(town);
 	auto d = demand.find(cargo);
 	if (d == demand.end()) return 0;
@@ -441,6 +544,57 @@ uint32_t IntegratedEconomy::AcceptCity(TownID town, CargoType cargo, uint32_t am
 }
 bool IntegratedEconomy::EvaluateCity(TownID town, float &growth, float &passengers)
 {
+	auto t = Town::GetIfValid(town);
+	if (!enabled || t == nullptr || Role(PlanetManager::GetTileWorld(t->xy)) != EconomicRole::Core) return false;
+
+	if (rules_version == EconomyRulesVersion::V2) {
+		growth = 0.0f;
+		passengers = 1.0f;
+		auto svc = GetTownFoodService(town);
+		auto &city = cities[town];
+		city.consumed.clear();
+
+		uint32_t to_consume = 0;
+		auto food_cargo = Cargo("FOOD");
+		if (svc != nullptr && svc->selected_rate > 0) {
+			uint32_t reserve = city.reserves.contains(food_cargo) ? city.reserves[food_cargo] : 0;
+			to_consume = std::min(svc->selected_rate, reserve);
+			city.reserves[food_cargo] = reserve - to_consume;
+			city.consumed[food_cargo] = to_consume;
+			Record(EconomyFlow::Consumed, food_cargo, to_consume);
+			if (_commonwealth_slice_audit != nullptr) {
+				_commonwealth_slice_audit->consumed[food_cargo] += to_consume;
+				_commonwealth_slice_audit->city_months.push_back({TimerGameCalendar::date.base(), town.base(), to_consume, city.reserves[food_cargo]});
+			}
+		}
+
+		if (svc != nullptr) {
+			svc->consumed_history[svc->history_cursor] = to_consume;
+			svc->requested_history[svc->history_cursor] = svc->selected_rate;
+			svc->history_cursor = (svc->history_cursor + 1) % 4;
+
+			uint32_t total_consumed = svc->consumed_history[0] + svc->consumed_history[1] +
+			                          svc->consumed_history[2] + svc->consumed_history[3];
+			passengers = 1.0f + (static_cast<float>(total_consumed) / 640.0f);
+		}
+
+		if (_integrated_city_month_audit != nullptr) {
+			_integrated_city_month_audit->push_back({
+				{"tick", TimerGameTick::counter},
+				{"date", TimerGameCalendar::date.base()},
+				{"town", town.base()},
+				{"population", t->cache.population},
+				{"house_count", t->cache.num_houses},
+				{"selected_rate", svc ? svc->selected_rate : 0},
+				{"consumed", to_consume},
+				{"reserve", city.reserves[food_cargo]},
+				{"passengers", passengers},
+				{"growth", growth}
+			});
+		}
+		return true;
+	}
+
 	auto demand = CityDemand(town);
 	if (demand.empty()) return false;
 	auto &city = cities[town];
@@ -598,7 +752,11 @@ std::string IntegratedEconomy::IndustryDescription(IndustryType type)
 std::string IntegratedEconomy::Save()
 {
 	using nlohmann::json;
-	json j = {{"version", enabled ? VERSION : 0},
+	uint32_t version_num = 0;
+	if (enabled) {
+		version_num = (rules_version == EconomyRulesVersion::V2) ? 2 : 1;
+	}
+	json j = {{"version", version_num},
 			  {"roles", json::array()},
 			  {"factories", json::array()},
 			  {"cities", json::array()},
@@ -609,7 +767,12 @@ std::string IntegratedEconomy::Save()
 		json rem = json::array();
 		for (auto [c, n] : f.remainder)
 			rem.push_back({c, n});
-		j["factories"].push_back({id.base(), f.owner.base(), f.capacity, f.last_batches, rem, f.total_batches});
+		if (rules_version == EconomyRulesVersion::V2) {
+			j["factories"].push_back({id.base(), f.owner.base(), f.capacity, f.last_batches, rem, f.total_batches,
+			                          static_cast<uint8_t>(f.work), f.input_capacity, f.output_capacity});
+		} else {
+			j["factories"].push_back({id.base(), f.owner.base(), f.capacity, f.last_batches, rem, f.total_batches});
+		}
 	}
 	for (auto &[id, c] : cities) {
 		json stock = json::array(), used = json::array();
@@ -618,6 +781,14 @@ std::string IntegratedEconomy::Save()
 		for (auto [k, n] : c.consumed)
 			used.push_back({k, n});
 		j["cities"].push_back({id.base(), stock, used});
+	}
+	if (rules_version == EconomyRulesVersion::V2) {
+		json services = json::array();
+		for (auto &[id, s] : town_food_services) {
+			services.push_back({id.base(), s.owner.base(), s.selected_rate, s.market_ceiling, s.receiver_capacity,
+			                    s.consumed_history, s.requested_history, s.history_cursor, s.fractional_passenger_remainder});
+		}
+		j["town_food_services"] = services;
 	}
 	for (auto &[id, r] : research) {
 		json stock = json::array();
@@ -637,7 +808,7 @@ bool IntegratedEconomy::Load(const std::string &data)
 			if (!value.is_number_unsigned() || value.get<uint64_t>() > maximum) throw std::runtime_error("Invalid economy integer");
 			return value.get<uint64_t>();
 		};
-		const auto version = number(j.at("version"), VERSION);
+		const auto version = number(j.at("version"), FORMAT_VERSION);
 		EconomyAccounting loaded_accounting{};
 		if (j.contains("accounting")) {
 			const auto &rows = j.at("accounting");
@@ -651,6 +822,7 @@ bool IntegratedEconomy::Load(const std::string &data)
 		decltype(roles) loaded_roles;
 		decltype(factories) loaded_factories;
 		decltype(cities) loaded_cities;
+		decltype(town_food_services) loaded_town_food_services;
 		decltype(research) loaded_research;
 		auto cargo_map = [&](const nlohmann::json &rows, uint32_t maximum) {
 			std::map<CargoType, uint32_t> result;
@@ -670,7 +842,11 @@ bool IntegratedEconomy::Load(const std::string &data)
 				return false;
 		}
 		for (const auto &v : j.at("factories")) {
-			if (v.size() != 6) return false;
+			if (version == 2) {
+				if (v.size() != 9) return false;
+			} else {
+				if (v.size() != 6) return false;
+			}
 			EconomyFactory f{IndustryID{static_cast<uint16_t>(number(v.at(0), UINT16_MAX - 1))},
 							 CompanyID{static_cast<uint8_t>(number(v.at(1), UINT8_MAX))},
 							 static_cast<uint32_t>(number(v.at(2), 1000)),
@@ -680,12 +856,38 @@ bool IntegratedEconomy::Load(const std::string &data)
 			if (f.capacity < 100 || f.capacity % 50 != 0 || f.last_batches > f.capacity) return false;
 			f.remainder = cargo_map(v.at(4), 99);
 			f.total_batches = number(v.at(5), UINT64_MAX);
+			if (version == 2) {
+				f.work = static_cast<FactoryWorkType>(number(v.at(6), 2));
+				f.input_capacity = static_cast<uint32_t>(number(v.at(7), 10000));
+				f.output_capacity = static_cast<uint32_t>(number(v.at(8), 10000));
+			}
 			if (!loaded_factories.emplace(f.industry, f).second) return false;
 		}
 		for (const auto &v : j.at("cities")) {
 			if (v.size() != 3) return false;
 			EconomyCity c{cargo_map(v.at(1), UINT32_MAX), cargo_map(v.at(2), UINT32_MAX)};
 			if (!loaded_cities.emplace(TownID{static_cast<uint16_t>(number(v.at(0), UINT16_MAX - 1))}, c).second) return false;
+		}
+		if (version == 2 && j.contains("town_food_services")) {
+			for (const auto &v : j.at("town_food_services")) {
+				if (v.size() != 9) return false;
+				TownID town_id{static_cast<uint16_t>(number(v.at(0), UINT16_MAX - 1))};
+				TownFoodService s;
+				s.owner = CompanyID{static_cast<uint8_t>(number(v.at(1), UINT8_MAX))};
+				s.selected_rate = static_cast<uint32_t>(number(v.at(2), 40));
+				s.market_ceiling = static_cast<uint32_t>(number(v.at(3), 1000));
+				s.receiver_capacity = static_cast<uint32_t>(number(v.at(4), 1000));
+				const auto &c_hist = v.at(5);
+				const auto &r_hist = v.at(6);
+				if (!c_hist.is_array() || c_hist.size() != 4 || !r_hist.is_array() || r_hist.size() != 4) return false;
+				for (size_t idx = 0; idx < 4; ++idx) {
+					s.consumed_history[idx] = static_cast<uint32_t>(number(c_hist.at(idx), UINT32_MAX));
+					s.requested_history[idx] = static_cast<uint32_t>(number(r_hist.at(idx), UINT32_MAX));
+				}
+				s.history_cursor = static_cast<uint8_t>(number(v.at(7), 3));
+				s.fractional_passenger_remainder = static_cast<uint32_t>(number(v.at(8), 640));
+				if (!loaded_town_food_services.emplace(town_id, s).second) return false;
+			}
 		}
 		for (const auto &v : j.at("research")) {
 			if (v.size() != 5 || !v.at(3).is_boolean()) return false;
@@ -701,21 +903,23 @@ bool IntegratedEconomy::Load(const std::string &data)
 		auto loaded_shared = j.value("shared_research", std::map<std::string, nlohmann::json>{});
 		for (const auto &[key, row] : loaded_shared) {
 			if (key != row.at("id").get<std::string>() || row.at("home") != row.at("namespace") ||
-				!UniverseNetwork::ParseNamespace(row.at("home")).IsValid() || row.at("ruleset") != VERSION)
+				!UniverseNetwork::ParseNamespace(row.at("home")).IsValid() || row.at("ruleset") != version)
 				return false;
 			auto unlocks = row.at("unlocks").get<std::set<TechID>>();
 			if (unlocks.size() != row.at("unlocks").size() || number(row.at("revision"), 12) != unlocks.size()) return false;
 			for (auto tech : unlocks)
 				if (!TechTreeManager::GetNode(tech)) return false;
 		}
-		if (version == 0 && (!loaded_roles.empty() || !loaded_factories.empty() || !loaded_cities.empty() || !loaded_research.empty() ||
-							 !loaded_shared.empty()))
+		if (version == 0 && (!loaded_roles.empty() || !loaded_factories.empty() || !loaded_cities.empty() ||
+		                     !loaded_town_food_services.empty() || !loaded_research.empty() || !loaded_shared.empty()))
 			return false;
-		enabled = version == VERSION;
+		enabled = version != 0;
+		rules_version = (version == 2) ? EconomyRulesVersion::V2 : (version == 1 ? EconomyRulesVersion::V1 : EconomyRulesVersion::Legacy);
 		accounting = loaded_accounting;
 		roles = std::move(loaded_roles);
 		factories = std::move(loaded_factories);
 		cities = std::move(loaded_cities);
+		town_food_services = std::move(loaded_town_food_services);
 		research = std::move(loaded_research);
 		shared_research = std::move(loaded_shared);
 		ProductionChainManager::InitDefaultRecipes();
@@ -734,11 +938,15 @@ bool IntegratedEconomy::ValidateAfterLoad()
 		if (PlanetManager::GetRegion(world) == nullptr) return false;
 	std::erase_if(factories, [](auto &p) { return !Industry::IsValidID(p.first); });
 	std::erase_if(cities, [](auto &p) { return !Town::IsValidID(p.first); });
+	std::erase_if(town_food_services, [](auto &p) { return !Town::IsValidID(p.first); });
 	std::erase_if(research, [](auto &p) { return !Company::IsValidID(p.first); });
+	for (const auto &[town_id, s] : town_food_services) {
+		if (s.owner != CompanyID::Invalid() && s.owner != OWNER_NONE && s.owner != OWNER_DEITY && !Company::IsValidID(s.owner)) return false;
+	}
 	for (const auto &[id, f] : factories) {
 		auto industry = Industry::Get(id);
 		if (!Managed(industry) || f.owner != industry->founder ||
-			(f.owner != OWNER_NONE && !Company::IsValidID(f.owner))) return false;
+			(f.owner != OWNER_NONE && f.owner != OWNER_DEITY && !Company::IsValidID(f.owner))) return false;
 		auto recipe = ProductionChainManager::GetRecipe(IndustryRecipe(industry->type));
 		for (const auto &[cargo, remainder] : f.remainder)
 			if (std::ranges::none_of(recipe->outputs, [cargo](const auto &output) { return output.first == cargo; })) return false;
@@ -776,13 +984,13 @@ bool IntegratedEconomy::SharedUnlock(CompanyID company, TechID tech)
 	auto it = shared_research.find(Identity(company));
 	if (it == shared_research.end()) return false;
 	const auto &unlocks = it->second.at("unlocks");
-	return std::find(unlocks.begin(), unlocks.end(), tech) != unlocks.end();
+	return std::ranges::any_of(unlocks, [tech](const auto &v) { return v.is_number_integer() && v.template get<TechID>() == tech; });
 }
 nlohmann::json IntegratedEconomy::ResearchAdvertisements()
 {
 	using nlohmann::json;
 	auto out = json::array();
-	if (!enabled) return out;
+	if (!enabled || rules_version == EconomyRulesVersion::V2) return out;
 	auto ns = UniverseNetwork::Namespace(FederationIdentityRegistry::GetNamespace());
 	for (auto company : Company::Iterate()) {
 		auto identity = Identity(company->index);
@@ -835,6 +1043,7 @@ CommandCost CmdManageEconomyFactory(DoCommandFlags flags, IndustryID industry, b
 	if (!enabled || ind == nullptr || it == factories.end() || it->second.owner != _current_company ||
 		!Company::IsValidID(_current_company))
 		return CMD_ERROR;
+	if (!retire && rules_version == EconomyRulesVersion::V2) return CMD_ERROR;
 	if (!retire && it->second.capacity >= 1000) return CommandCost(STR_ERROR_FACILITY_MAX_CAPACITY);
 	Money price = retire ? GetIndustrySpec(ind->type)->GetRemovalCost() : Money{50000};
 	if (flags.Test(DoCommandFlag::Execute)) {
@@ -844,4 +1053,66 @@ CommandCost CmdManageEconomyFactory(DoCommandFlags flags, IndustryID industry, b
 			it->second.capacity = std::min(1000u, it->second.capacity + 50);
 	}
 	return CommandCost(ExpensesType::Construction, price);
+}
+
+CommandCost CmdCommissionEconomyWork(DoCommandFlags flags, IndustryID industry, FactoryWorkType work)
+{
+	if (!IntegratedEconomy::Enabled() || IntegratedEconomy::ActiveRules() != EconomyRulesVersion::V2)
+		return CMD_ERROR;
+	auto it = factories.find(industry);
+	auto ind = Industry::GetIfValid(industry);
+	if (ind == nullptr || it == factories.end() || it->second.owner != _current_company ||
+		!Company::IsValidID(_current_company))
+		return CMD_ERROR;
+	if (work != FactoryWorkType::Capacity && work != FactoryWorkType::Reserve)
+		return CMD_ERROR;
+	if (it->second.work != FactoryWorkType::None)
+		return CommandCost(STR_ERROR_ALREADY_COMMISSIONED);
+
+	WorldID world = PlanetManager::GetTileWorld(ind->location.tile);
+	std::map<CargoType, uint32_t> bom = {{Cargo("STEL"), 160}, {Cargo("BALL"), 80}};
+
+	if (!StockpileManager::HasSufficient(world, _current_company, bom))
+		return CommandCost(STR_ERROR_NOT_ENOUGH_MATERIALS);
+
+	Money price{50000};
+	if (flags.Test(DoCommandFlag::Execute)) {
+		if (!StockpileManager::ConsumeBOM(world, _current_company, bom, true))
+			return CommandCost(STR_ERROR_NOT_ENOUGH_MATERIALS);
+		it->second.work = work;
+		if (work == FactoryWorkType::Capacity) {
+			it->second.capacity = 150;
+			it->second.input_capacity = 300;
+			it->second.output_capacity = 300;
+		} else { // Reserve
+			it->second.capacity = 100;
+			it->second.input_capacity = 600;
+			it->second.output_capacity = 300;
+		}
+	}
+	return CommandCost(ExpensesType::Construction, price);
+}
+
+CommandCost CmdSetTownFoodServiceRate(DoCommandFlags flags, TownID town, uint32_t rate)
+{
+	if (!IntegratedEconomy::Enabled() || IntegratedEconomy::ActiveRules() != EconomyRulesVersion::V2)
+		return CMD_ERROR;
+	auto t = Town::GetIfValid(town);
+	if (t == nullptr || !Company::IsValidID(_current_company))
+		return CMD_ERROR;
+	if (IntegratedEconomy::Role(PlanetManager::GetTileWorld(t->xy)) != EconomicRole::Core)
+		return CMD_ERROR;
+	if (rate != 0 && rate != 10 && rate != 20 && rate != 40)
+		return CMD_ERROR;
+
+	auto it = town_food_services.find(town);
+	if (it != town_food_services.end() && it->second.owner != CompanyID::Invalid() && it->second.owner != _current_company)
+		return CommandCost(STR_ERROR_OWNED_BY_ANOTHER_COMPANY);
+
+	if (flags.Test(DoCommandFlag::Execute)) {
+		auto &svc = town_food_services[town];
+		svc.owner = _current_company;
+		svc.selected_rate = rate;
+	}
+	return CommandCost();
 }
