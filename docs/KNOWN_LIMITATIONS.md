@@ -1,5 +1,23 @@
 # OpenSpaceTTD Known Limitations
 
+## A World Worth Connecting Boundaries (Sprint 3) — 11 October 2026
+
+- **Concrete Pilot Slice & Single Consumer Focus**: Sprint 3 expansion focuses on a single concrete raw resource connection (World 3 Silica extraction feeding Ballast Crusher at Node 4 in World 1) to prove bottleneck bypass and independent route redundancy. Additional resource chains, multi-stop distribution networks, or higher-tier expansion worlds remain deferred to subsequent Commonwealth milestones.
+- **Dedicated Independent Direct Portal Pair**: The direct wormhole portal pair connects World 3 (`TileXY(790, 96)`) directly to World 1 (`TileXY(476, 96)`), requiring sufficient land area for portal gate heads and terminal track geometry (as planned in `PortalTerminal::Plan`). Bypassing intermediate worlds depends on direct inter-world links and does not replace the existing multi-world galactic routing graph.
+- **Human Desktop UAT Pending**: Automated unit testing (`test_commonwealth_works.cpp`, 229 assertions across 9 cases), full suite (307,564 assertions in 539 cases), CTest suite (554/554), and headless 24-period simulation evidence (`verify_commonwealth_expansion.py`) prove surveying, industry founding, direct portal linking, 15.6% route distance reduction (294 vs 248 tiles), primary throat closure resilience, corridor reopening, 100% cargo conservation, and exact cold reload match. Live interactive desktop playtesting (Track 13 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md`) remains **Pending**.
+
+## A District That Stays Built Boundaries (Sprint 2) — 11 October 2026
+
+- **Pilot Town Boundary & Finite Opportunities**: Sprint 2 residential expansion is implemented strictly for one pilot Core town (`TownID{0}`) with a non-repeatable finite budget of 4 building opportunities costing `160 STEL + 80 BALL` and £50,000 cash. Expansion to multiple towns, additional tiers, or infinite/recurrent residential commissioning remains deferred to subsequent Commonwealth progression.
+- **Physical Road Frontage Prerequisite**: Native building opportunities require legal road frontage. If town road networks do not provide frontage adjacent to clear, buildable tiles, commissioning correctly enters `"Awaiting site access"` state; it will not burn the finite budget or fabricate houses out of nothing.
+- **Human Desktop UAT Pending**: Automated unit testing (`test_commonwealth_works.cpp`, 202 assertions across 8 cases), CTest suite (553/553), and headless 24-period simulation evidence (`verify_commonwealth_residential.py`) prove commissioning, staged shell growth, permanent redevelopment demolition immunity, commercial food decoupling, and cold reload match. Live interactive desktop playtesting (viewing the Megacity window Tier 2 panel, clicking [Commission District], and observing physical house construction in the viewport) remains **Pending**.
+
+## Capacity or Reserve Pilot Prototype Boundaries (Sprint 1) — 11 October 2026
+
+- **Isolated Pilot Scope & Sprint 2 Gate**: Sprint 1 is implemented strictly on isolated branch `codex/capacity-or-reserve-pilot` for architectural review and is not merged into main. Sprint 2 (world generation integration, expansion worlds, additional works tiers, and federation publishing) remains deferred until Sprint 1 receives Codex architectural sign-off.
+- **Default & V1 Save Isolation**: All V2 prototype mechanics (`EconomyRulesVersion::V2`, Works choices, Commercial Food Service) are scoped strictly under V2 rules. Default gameplay, legacy saves, and V1 economies remain 100% untouched. Binary save format bumped to `version: 2`; attempting to load V2 saves in older V1 binaries cleanly errors rather than silently corrupting data.
+- **Human Desktop UAT Pending**: Automated unit testing (`test_commonwealth_works.cpp`, 150 assertions), CTest suite (551/551), and headless simulation evidence (`verify_commonwealth_works.py`, 24 periods with SILC/FOOD interruption, recovery, and cold reload) prove all mechanics. Live interactive human playtesting of GUI widgets (cycling food service rates, commissioning works buttons, and inspecting status badges) remains **Pending**.
+
 ## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion Boundaries — 11 October 2026
 
 - **Fleet Headway & Storage Buffer Synchronization**: The mathematical model and integration test suite prove that maintaining 0 starvation months along the 17.1-month transit corridor requires consist headway $\le 1.7\text{ months}$ (or intermediate staging buffers). Single-consist deliveries inevitably leave the receiving city in starvation for $>88\%$ of the duty cycle due to the 3-month city storage ceiling ($3 \times 55 = 165\text{ units}$).

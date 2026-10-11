@@ -246,6 +246,13 @@ DEF_CMD_TRAIT(Commands::SetCorporateAlliance, CmdSetCorporateAlliance, {}, Comma
 
 CommandCost CmdSetResearchAcceleration(DoCommandFlags flags, bool enabled);
 CommandCost CmdManageEconomyFactory(DoCommandFlags flags, IndustryID industry, bool retire);
+enum class FactoryWorkType : uint8_t;
+CommandCost CmdCommissionEconomyWork(DoCommandFlags flags, IndustryID industry, FactoryWorkType work);
+CommandCost CmdSetTownFoodServiceRate(DoCommandFlags flags, TownID town, uint32_t rate);
+CommandCost CmdCommissionTownResidentialDistrict(DoCommandFlags flags, TownID town);
 DEF_CMD_TRAIT(Commands::SetResearchAcceleration, CmdSetResearchAcceleration, {}, CommandType::CompanySetting)
 DEF_CMD_TRAIT(Commands::ManageEconomyFactory, CmdManageEconomyFactory, {}, CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::CommissionEconomyWork, CmdCommissionEconomyWork, {}, CommandType::LandscapeConstruction)
+DEF_CMD_TRAIT(Commands::SetTownFoodServiceRate, CmdSetTownFoodServiceRate, {}, CommandType::CompanySetting)
+DEF_CMD_TRAIT(Commands::CommissionTownResidentialDistrict, CmdCommissionTownResidentialDistrict, {}, CommandType::LandscapeConstruction)
 #endif /* PORTAL_CMD_H */

@@ -230,13 +230,39 @@ struct EmpireFacilitiesWindow : Window {
 					DrawString(line3_r, line3, TextColour::Silver);
 
 					/* Interactive Buttons on right */
-					Rect btn_upgrade = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
-					GfxFillRect(btn_upgrade, GetColourGradient(Colours::Grey, Shade::Normal));
-					DrawString(btn_upgrade, "Upgrade (+50)", TextColour::Yellow, AlignmentH::Centre);
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+						IndustryID ind_id{uint16_t(f.id - 1)};
+						auto f_it = IntegratedEconomy::Factories().find(ind_id);
+						FactoryWorkType work = (f_it != IntegratedEconomy::Factories().end()) ? f_it->second.work : FactoryWorkType::None;
 
-					Rect btn_retire = Rect{row_rect.right - 54, y + 4, row_rect.right - 4, y + 22};
-					GfxFillRect(btn_retire, GetColourGradient(Colours::Red, Shade::Normal));
-					DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), TextColour::White, AlignmentH::Centre);
+						if (work == FactoryWorkType::None) {
+							Rect btn_cap = Rect{row_rect.right - 150, y + 4, row_rect.right - 104, y + 22};
+							GfxFillRect(btn_cap, GetColourGradient(Colours::Grey, Shade::Normal));
+							DrawString(btn_cap, GetString(STR_WORKS_CAPACITY_BTN), TextColour::Yellow, AlignmentH::Centre);
+
+							Rect btn_res = Rect{row_rect.right - 100, y + 4, row_rect.right - 58, y + 22};
+							GfxFillRect(btn_res, GetColourGradient(Colours::Grey, Shade::Normal));
+							DrawString(btn_res, GetString(STR_WORKS_RESERVE_BTN), TextColour::Yellow, AlignmentH::Centre);
+						} else if (work == FactoryWorkType::Capacity) {
+							Rect badge_work = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
+							DrawString(badge_work, GetString(STR_WORKS_STATUS_CAPACITY), TextColour::Green, AlignmentH::Centre);
+						} else {
+							Rect badge_work = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
+							DrawString(badge_work, GetString(STR_WORKS_STATUS_RESERVE), TextColour::Green, AlignmentH::Centre);
+						}
+
+						Rect btn_retire = Rect{row_rect.right - 54, y + 4, row_rect.right - 4, y + 22};
+						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, Shade::Normal));
+						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), TextColour::White, AlignmentH::Centre);
+					} else {
+						Rect btn_upgrade = Rect{row_rect.right - 150, y + 4, row_rect.right - 58, y + 22};
+						GfxFillRect(btn_upgrade, GetColourGradient(Colours::Grey, Shade::Normal));
+						DrawString(btn_upgrade, "Upgrade (+50)", TextColour::Yellow, AlignmentH::Centre);
+
+						Rect btn_retire = Rect{row_rect.right - 54, y + 4, row_rect.right - 4, y + 22};
+						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, Shade::Normal));
+						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), TextColour::White, AlignmentH::Centre);
+					}
 
 					Rect btn_target = Rect{row_rect.right - 150, y + 26, row_rect.right - 4, y + 44};
 					GfxFillRect(btn_target, GetColourGradient(Colours::Grey, Shade::Normal));
@@ -307,6 +333,10 @@ struct EmpireFacilitiesWindow : Window {
 				break;
 
 			case WID_EF_UPGRADE_ALL_BTN: {
+				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+					// Generic upgrade is disabled in v2; works require an explicit choice.
+					break;
+				}
 				auto filtered = this->GetFilteredFacilities();
 				for (const auto &f : filtered) {
 					if (IntegratedEconomy::Enabled()) {
@@ -334,6 +364,21 @@ struct EmpireFacilitiesWindow : Window {
 				int rel_y = (pt.y - r.top) % ROW_HEIGHT;
 
 				if (IntegratedEconomy::Enabled()) {
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+						if (pt.x >= r.right - 150 && pt.x <= r.right - 4 && rel_y >= 4 && rel_y <= 22) {
+							IndustryID ind_id{uint16_t(f.id - 1)};
+							if (pt.x > r.right - 58) {
+								Command<Commands::ManageEconomyFactory>::Post(ind_id, true);
+							} else if (pt.x <= r.right - 104) {
+								Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Capacity);
+							} else if (pt.x >= r.right - 100 && pt.x <= r.right - 58) {
+								Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Reserve);
+							}
+						} else {
+							ScrollMainWindowToTile(f.tile);
+						}
+						return;
+					}
 					if (pt.x >= r.right - 150 && pt.x <= r.right - 4 && rel_y >= 4 && rel_y <= 22)
 						Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, pt.x > r.right - 58);
 					else

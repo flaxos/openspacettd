@@ -389,6 +389,99 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
      * Houses increment continuously from 29 to 30, 31, 32, 33...
      * Population expands smoothly from 1,096 past 1,270+ without starvation dropouts.
 
+### 3.11 Track 11: Capacity or Reserve Prototype (Sprint 1)
+* **Goal**: Validate Stable settlements, optional Commercial Food Service dashboard, and Factory Works commissioning UI.
+* **Target Save**: `build/audit-capacity-or-reserve/checkpoint-24.sav` (or fresh launch via `scripts/verify_commonwealth_works.py`).
+* **Command**:
+  ```bash
+  ./build/openttd -c demo/connected_economy.cfg -g build/audit-capacity-or-reserve/checkpoint-24.sav
+  ```
+* **Steps**:
+  1. **Inspect Stable Core Megacity:**
+     * Open Commonwealth Metropolis (Town 0) Megacity window.
+     * Verify header shows "Stable" settlement status with baseline 1.0 traffic.
+     * Confirm town has no starvation alerts or house-freezing decay even if food delivery is interrupted.
+  2. **Audit Commercial Food Service Dashboard:**
+     * Observe the food service control widget on the Megacity window.
+     * Click the rate toggle button: verify it cycles smoothly through `Off` -> `10/mo` -> `20/mo` -> `40/mo` -> `Off`.
+     * When set to `Off`, verify arriving food trains retain cargo without station absorption.
+     * When set to `10`, `20`, or `40`, observe reserve consumption up to receiver capacity (60) and passenger generation bonus (`+25%` max).
+  3. **Inspect Factory Works Badges & Commissioning:**
+     * Open Empire Facilities window (`F4` or company industry directory).
+     * Locate the player-owned Ballast Crusher (Node 4).
+     * Verify badge displays active works status (`Capacity Works` or `Reserve Works`).
+     * Verify commissioning buttons disable after works choice is active to prevent accidental duplicate debits.
+
+### 3.12 Track 12: A District That Stays Built (Sprint 2)
+* **Goal**: Validate finite material-funded native residential commissioning, road-frontage site access, staged native house progression, permanent redevelopment demolition immunity, and food service decoupling.
+* **Target Save**: `docs/audit/2026-10-11/residential-district/checkpoint-24.sav` (or fresh launch via `scripts/verify_commonwealth_residential.py`).
+* **Command**:
+  ```bash
+  ./build/openttd -c demo/connected_economy.cfg -g docs/audit/2026-10-11/residential-district/checkpoint-24.sav
+  ```
+* **Steps**:
+  1. **Inspect Megacity Overview Window (Tier 2 Panel):**
+     * Open Commonwealth Metropolis (Town 0) Megacity overview window.
+     * Examine Tier 2 Expansion panel.
+     * Before commissioning, verify button displays `[Commission District]` with kit details `Kit: 160 STEL + 80 BALL | Cash: £50,000`.
+     * If frontage is blocked, verify orange warning: `Residential Works: Awaiting site access (4 remaining, frontage blocked)`.
+  2. **Audit Commissioning Execution & Debits:**
+     * Click `[Commission District]`.
+     * Verify £50,000 cash debited from company balance and `160 STEL + 80 BALL` consumed from World 0 stockpile.
+     * Verify duplicate commissioning is blocked; button transitions to active works status display.
+  3. **Observe Physical Shell Placement & Progression:**
+     * In main viewport, locate Commonwealth Metropolis (x=120, y=74).
+     * Observe 4 new native house shells placed adjacent to town road frontage.
+     * Verify shells start at construction stage 0 without premature population inflation.
+     * As game days advance, observe construction sprites progressing through stages 0 -> 1 -> 2 -> 3 (`TOWN_HOUSE_COMPLETED`).
+     * Once completed, observe town population incrementing (+232 citizens).
+  4. **Verify Permanent Redevelopment Demolition Immunity:**
+     * Fast forward multiple game years.
+     * Observe standard OpenTTD town redevelopment loops.
+     * Confirm all 4 commissioned houses remain protected and are never demolished or replaced by town growth routines.
+  5. **Verify Commercial Food Decoupling:**
+     * In Megacity window, cycle Food Service rate to `Off` (or stop the food train via console `connected_economy stop-food`).
+     * Allow town to run multiple months with zero food delivery.
+     * Confirm completed residential houses and credited population remain 100% intact with zero decay or demolition.
+
+### 3.13 Track 13: A World Worth Connecting (Sprint 3)
+* **Goal**: Validate alternative raw silica connection on World 3, direct portal linking bypassing World 2, primary throat corridor closure resilience, and corridor restoration.
+* **Target Save**: `docs/audit/2026-10-11/world-connection/checkpoint-24.sav` (or fresh launch via `scripts/verify_commonwealth_expansion.py`).
+* **Command**:
+  ```bash
+  ./build/openttd -c demo/connected_economy.cfg -g docs/audit/2026-10-11/world-connection/checkpoint-24.sav
+  ```
+* **Steps**:
+  1. **Inspect Ballast Crusher (Node 4) Rail Geometry:**
+     * In main viewport, jump to Ballast Crusher at tile (300, 80) in World 1.
+     * Verify two distinct incoming delivery platforms:
+       - **Platform 1 (Row 82)**: Primary corridor from World 2 Silica Dunes (`Node 13`, x=650) traversing the World 2 ↔ World 1 throat (distance: 294 tiles).
+       - **Platform 2 (Row 96)**: Direct alternative corridor connecting to World 3 via portal head at `TileXY(476, 96)` (distance: 248 tiles, ~15.6% shorter).
+  2. **Audit Independent Wormhole Link (World 1 ↔ World 3):**
+     * Follow track row 96 east from Ballast Crusher to portal head at `TileXY(476, 96)` (World 1).
+     * Inspect linked wormhole endpoint at `TileXY(790, 96)` on World 3 (`Research Frontier`).
+     * Confirm the wormhole directly bridges World 1 and World 3, completely bypassing World 2 and avoiding the World 2 throat on row 82.
+  3. **Inspect World 3 Extraction Site & Freight Consist:**
+     * Navigate east on World 3 along row 96 to station `Stop 32` (`TileXY(860, 96)`).
+     * Confirm the player-funded Silica Dunes extraction industry and rail depot.
+     * Observe Train 9 ("W3 Silica > Ballast crusher", Consist 46) loading SILC and departing through the World 3 portal.
+  4. **Test Primary Throat Corridor Interruption & Resilience:**
+     * Open developer console (`` ` ``) and execute:
+       ```
+       connected_economy close-primary-corridor
+       ```
+     * Verify Train 1 ("Silica dunes > Ballast crusher") comes to a complete halt, stopping World 2 deliveries.
+     * Observe Ballast Crusher operations in the Empire Facilities window (`F4`):
+       - Train 9 continues delivering SILC from World 3 via the independent corridor.
+       - Ballast Crusher batches continue advancing; BALL production does not stall.
+  5. **Test Primary Throat Recovery & Combined Flow:**
+     * In console, execute:
+       ```
+       connected_economy reopen-primary-corridor
+       ```
+     * Verify Train 1 restarts and resumes deliveries alongside Train 9.
+     * Confirm both trains feed Ballast Crusher platforms concurrently with zero cargo loss or gridlock.
+
 ---
 
 ## 4. Troubleshooting & Savegame Recovery

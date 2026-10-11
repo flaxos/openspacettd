@@ -1,5 +1,34 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## A World Worth Connecting (Sprint 3) — 11 October 2026
+
+**TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**
+Delivered Sprint 3 ("A World Worth Connecting") of the Commonwealth design study for Codex and Astra review:
+- **Concrete Flow & Redundant Source**: Ballast Crusher (`Node 4`, `TileXY(300, 80)`, World 1) consuming raw SILC to produce BALL. Primary supply from World 2 Silica Dunes (`Node 13`, x=650) via Train 1 through the World 2 ↔ World 1 throat on row 82 (distance: 294 tiles). Alternative supply from World 3 Silica Dunes (`Research Frontier`, `WorldID{3}`, Stop 32 at `TileXY(860, 96)`), surveyed via `Commands::SurveyResources` and funded via `Commands::BuildIndustry`.
+- **Independent Direct Portal Pair & Bottleneck Bypass**: Direct portal pair linking World 3 (`TileXY(790, 96)`) directly to World 1 (`TileXY(476, 96)`) via server-authoritative `Commands::BuildPortalPair`, feeding a new platform at Ballast Crusher (Stop 4) on row 96. Shorter route of 248 tiles (~15.6% reduction). Bypasses World 2 entirely and does NOT share the throat on row 82.
+- **Genuine Capital Costs**: Full capital cost breakdown (£5,095,387 total spent from real company balance): surveying £60,000, industry £4,921,875, station £1,365, platform £1,093, portal pair £13,532, depot £540, freight consist (Train 9) £76,657.
+- **Selective Interruption & Production Resilience**: Primary corridor closure via `connected_economy close-primary-corridor` halts Train 1; Train 9 sustains SILC deliveries from World 3, keeping Ballast Crusher production rate steady without starvation collapse. Reopening via `connected_economy reopen-primary-corridor` restores dual-source flow.
+- **Verification & Evidence**: Catch2 unit tests in `src/tests/test_commonwealth_works.cpp` (229 assertions in 9 cases) passing 100%. Full Catch2 suite (307,564 assertions in 539 cases) and CTest suite (554/554 tests) passing 100%. Headless runner `scripts/verify_commonwealth_expansion.py` completed 24 native periods with 100% cargo conservation and exact cold reload match. Evidence published at `docs/audit/2026-10-11/world-connection/evidence.json`. Local handoff to Codex/Astra; zero push/PR, no merge to main.
+
+## A District That Stays Built (Sprint 2) — 11 October 2026
+
+**TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**
+Delivered Sprint 2 ("A District That Stays Built") of the Commonwealth design study for Codex and Astra review:
+- **Material-Funded Residential Expansion**: Commissioned one-time residential expansion for pilot Core town (`TownID{0}`, Commonwealth Metropolis) under `EconomyRulesVersion::V2`. Replicated command `Commands::CommissionTownResidentialDistrict` atomically debits `160 STEL + 80 BALL` and £50,000 cash; grants a finite budget of 4 native building opportunities.
+- **Native House Shells & Staged Growth**: Candidate sites search outwards from town center for legal road frontage (`RoadTypesAllowHouseHere`, `TownLayoutAllowsHouseHere`, `CanBuildHouseHere`). Blocked frontage reports `"Residential Works: Awaiting site access (N remaining, frontage blocked)"` without burning budget. Available frontage constructs native house shells at stage 0 with zero premature population. Shells progress natively through stages 0 -> 1 -> 2 -> 3; upon `TOWN_HOUSE_COMPLETED`, town population is credited (+232 citizens).
+- **Permanent Demolition Immunity**: Sets native `IsHousePlayerProtected` bit on completed residential buildings. Permanently blocks OpenTTD's random town redevelopment demolition loop in `TileLoop_Town` and `CanDeleteHouse`.
+- **Food Service Decoupling**: Residential district construction and preservation operate independently of commercial food service. Completely shutting off food delivery does not revoke completed housing or trigger population decay.
+- **Verification & Evidence**: Catch2 unit tests (`src/tests/test_commonwealth_works.cpp`, 202 assertions across 8 test cases) passing 100%. Full test suite (307,537 Catch2 assertions across 538 cases) and CTest suite (553/553 tests) passing 100%. Headless verification runner (`scripts/verify_commonwealth_residential.py`) completed 24 native periods, proving commissioning, staged shell growth, 4 completed houses, food service shutoff with zero demolition, 100% cargo conservation, and byte-for-byte cold reload match in a fresh process. Evidence published at `docs/audit/2026-10-11/residential-district/evidence.json`. Local handoff to Codex/Astra; zero push/PR, no merge to main.
+
+## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
+
+**TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**
+Delivered Sprint 1 ("Capacity or Reserve") of the Commonwealth design study for Codex review:
+- **Stable Core Settlements**: Mature Core towns under `EconomyRulesVersion::V2` maintain 1.0 passenger generation ("Stable") immune to food starvation decay or frozen supply counters; house growth decoupled from commodity starvation.
+- **Optional Commercial FOOD Service**: Rate-selectable (`Off / 10 / 20 / 40`) service with fixed receiver capacity 60 and sliding 4-month civic passenger bonus (up to +25%). Rate Off rejects deliveries, keeping cargo safely in consist custody, with fractional generation preserved via integer remainder accumulator.
+- **Factory Works Choice**: One-time commissioning choice on player-owned bootstrap factory (Ballast Crusher: 2 SILC -> 2 BALL). Capacity Works boosts processing throughput from 100 to 150 batches/month; Reserve Works expands input buffer from 300 to 600 batch equivalents (1200 SILC). Real materials `160 STEL + 80 BALL` and £50,000 cash consumed atomically with duplicate protection.
+- **Verification & Evidence**: 150 unit assertions across 6 test cases in `src/tests/test_commonwealth_works.cpp` passing. Full Catch2 suite (307,485 assertions in 536 cases) and CTest suite (551/551 tests) passing. 24-period native simulation runs (`scripts/verify_commonwealth_works.py`) proved SILC feeder interruption, food interruption, 100% cargo conservation, and fresh-process cold reload. Audit evidence staged at `docs/audit/2026-10-11/capacity-or-reserve/README.md`. Local handoff to Codex; zero push/PR, no merge.
+
 ## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion — 11 October 2026
 
 **TESTED multi-consist shuttle fleet and megacity hypergrowth; human desktop UAT Pending.**

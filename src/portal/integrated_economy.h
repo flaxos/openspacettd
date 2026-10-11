@@ -13,6 +13,8 @@
 struct Industry;
 struct Station;
 enum class EconomicRole : uint8_t { Frontier, Industrial, Core };
+enum class EconomyRulesVersion : uint8_t { Legacy = 0, V1 = 1, V2 = 2 };
+enum class FactoryWorkType : uint8_t { None = 0, Capacity = 1, Reserve = 2 };
 /** Cumulative physical events; transport/storage are movements, not consumption. */
 enum class EconomyFlow : uint8_t { Produced, Transported, Stored, Consumed, Discarded };
 using EconomyAccounting = std::array<std::array<uint64_t, NUM_CARGO>, 5>;
@@ -23,10 +25,31 @@ struct EconomyFactory {
 	uint32_t last_batches = 0;
 	std::map<CargoType, uint32_t> remainder;
 	uint64_t total_batches = 0;
+	FactoryWorkType work = FactoryWorkType::None;
+	uint32_t input_capacity = 300;
+	uint32_t output_capacity = 300;
 };
 struct EconomyCity {
 	std::map<CargoType, uint32_t> reserves;
 	std::map<CargoType, uint32_t> consumed;
+};
+struct TownFoodService {
+	CompanyID owner = CompanyID::Invalid();
+	uint32_t selected_rate = 0; // Off = 0, 10, 20, 40
+	uint32_t market_ceiling = 40;
+	uint32_t receiver_capacity = 60;
+	std::array<uint32_t, 4> consumed_history{0, 0, 0, 0};
+	std::array<uint32_t, 4> requested_history{0, 0, 0, 0};
+	uint8_t history_cursor = 0;
+	uint32_t fractional_passenger_remainder = 0;
+};
+struct TownResidentialDistrict {
+	CompanyID owner = CompanyID::Invalid();
+	bool commissioned = false;
+	uint8_t building_opportunities = 0;
+	uint8_t buildings_placed = 0;
+	uint8_t buildings_completed = 0;
+	bool site_blocked = false;
 };
 struct EconomyResearch {
 	TechID kit_project = TECH_NONE;
@@ -40,7 +63,10 @@ class IntegratedEconomy
 {
   public:
 	static constexpr uint32_t VERSION = 1;
+	static constexpr uint32_t FORMAT_VERSION = 2;
 	static void Reset();
+	static EconomyRulesVersion ActiveRules();
+	static void SetRulesVersion(EconomyRulesVersion rules);
 	static void Record(EconomyFlow flow, CargoType cargo, uint32_t units);
 	static const EconomyAccounting &Accounting();
 	static void RestoreAccounting(const EconomyAccounting &value);
@@ -68,6 +94,14 @@ class IntegratedEconomy
 	static std::map<CargoType, uint32_t> CityDemand(TownID town);
 	static std::string CityStatus(TownID town);
 	static const EconomyCity *City(TownID town);
+	static bool IsManagedCityCargo(TownID town, CargoType cargo);
+	static TownFoodService *GetTownFoodService(TownID town);
+	static const std::map<TownID, TownFoodService> &TownFoodServices();
+	static TownResidentialDistrict *GetTownResidentialDistrict(TownID town);
+	static const std::map<TownID, TownResidentialDistrict> &TownResidentialDistricts();
+	static bool TryGrowResidentialDistrict(TownID town);
+	static void OnResidentialHouseCompleted(TownID town);
+	static bool StartNewWorksPrototype();
 	static uint32_t AcceptCity(TownID town, CargoType cargo, uint32_t amount, bool execute);
 	static bool EvaluateCity(TownID town, float &growth, float &passengers);
 	/**

@@ -317,6 +317,8 @@ Town *ClosestTownFromTile(TileIndex tile, uint threshold);
 void ChangeTownRating(Town *t, int add, int max, DoCommandFlags flags);
 HouseZone GetTownRadiusGroup(const Town *t, TileIndex tile);
 void SetTownRatingTestMode(bool mode);
+bool TryGrowTownResidentialHouse(Town *t, TileIndex *placed_tile = nullptr);
+bool TryBuildTownHouseProtected(Town *t, TileIndex tile);
 TownActions GetMaskOfTownActions(CompanyID cid, const Town *t);
 uint GetDefaultTownsForMapSize();
 bool GenerateTowns(TownLayout layout, std::optional<uint> number = std::nullopt);

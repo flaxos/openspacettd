@@ -175,6 +175,12 @@ void MegacityManager::EvaluateMonthlySupply()
 		profile.delivered_current.fill(0);
 
 		if (IntegratedEconomy::EvaluateCity(profile.town_id, profile.growth_multiplier, profile.passenger_multiplier)) {
+			if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+				profile.growth_state = MegacityGrowthState::Subsistence;
+				profile.satisfaction_pct = {1.0f, 1.0f, 1.0f};
+				profile.overall_supply_index = 1.0f;
+				continue;
+			}
 			profile.satisfaction_pct = {profile.passenger_multiplier >= 1 ? 1.0f : 0.0f, profile.growth_multiplier >= 1 ? 1.0f : 0.0f,
 										profile.growth_multiplier >= 2 ? 1.0f : 0.0f};
 			profile.overall_supply_index = (profile.satisfaction_pct[0] + profile.satisfaction_pct[1] + profile.satisfaction_pct[2]) / 3.0f;

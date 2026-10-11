@@ -1062,11 +1062,11 @@ static uint32_t IntegratedDeliverySpace(const Station *st, CompanyID company, Ca
 			IntegratedEconomy::Managed(ind) ? IntegratedEconomy::IndustrySpace(ind, cargo) : 65535 - ind->GetCargoAccepted(cargo)->waiting;
 	}
 	if (MegacityManager::IsConsumerStation(st)) {
-		auto demand = IntegratedEconomy::CityDemand(st->town->index);
-		if (demand.contains(cargo))
+		if (IntegratedEconomy::IsManagedCityCargo(st->town->index, cargo)) {
 			space += IntegratedEconomy::AcceptCity(st->town->index, cargo, UINT32_MAX, false);
-		else if (st->always_accepted.Test(cargo))
+		} else if (st->always_accepted.Test(cargo)) {
 			return UINT32_MAX;
+		}
 	} else if (st->always_accepted.Test(cargo))
 		return UINT32_MAX;
 	return ClampTo<uint32_t>(space);
@@ -1173,10 +1173,11 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		accepted_ind = DeliverGoodsToIndustry(st, cargo_type, remaining, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
 	}
 
-	/* If this cargo type is always accepted, the town accepts the remainder. */
-	uint accepted_total = hub == nullptr && st->always_accepted.Test(cargo_type) ? num_pieces : accepted_facility + accepted_ind;
-	if (IntegratedEconomy::Enabled() && hub == nullptr && MegacityManager::IsConsumerStation(st) &&
-		IntegratedEconomy::CityDemand(st->town->index).contains(cargo_type)) {
+	bool is_managed_city = IntegratedEconomy::Enabled() && hub == nullptr && MegacityManager::IsConsumerStation(st) &&
+		IntegratedEconomy::IsManagedCityCargo(st->town->index, cargo_type);
+	/* If this cargo type is always accepted and not managed by the integrated city, the town accepts the remainder. */
+	uint accepted_total = (!is_managed_city && hub == nullptr && st->always_accepted.Test(cargo_type)) ? num_pieces : accepted_facility + accepted_ind;
+	if (is_managed_city) {
 		accepted_total = accepted_facility + accepted_ind +
 						 IntegratedEconomy::AcceptCity(st->town->index, cargo_type, num_pieces - accepted_facility - accepted_ind, true);
 	}
@@ -1188,7 +1189,7 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 	}
 	IntegratedEconomy::Record(EconomyFlow::Transported, cargo_type, accepted_total + stored);
 	IntegratedEconomy::Record(EconomyFlow::Stored, cargo_type, stored);
-	if (hub == nullptr && !IntegratedEconomy::CityDemand(st->town->index).contains(cargo_type)) {
+	if (hub == nullptr && !is_managed_city) {
 		IntegratedEconomy::Record(EconomyFlow::Consumed, cargo_type, accepted_total - accepted_facility - accepted_ind);
 	}
 

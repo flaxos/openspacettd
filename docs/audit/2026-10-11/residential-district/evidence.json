@@ -1,0 +1,2221 @@
+{
+  "status": "PASSED",
+  "binary_sha256": "5cc4d2a5fe897887941c807e9f7b32ac7a171e06c916f38f8994c48faf2d5365",
+  "start_time_utc": "2026-10-11T03:35:08Z",
+  "ledger": [
+    {
+      "period": 1,
+      "year": 1950,
+      "month": 0,
+      "money": 98032188,
+      "town_population": 904,
+      "town_houses": 31,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 4,
+      "district_placed": 0,
+      "district_completed": 0,
+      "district_blocked": false
+    },
+    {
+      "period": 2,
+      "year": 1950,
+      "month": 1,
+      "money": 98031953,
+      "town_population": 919,
+      "town_houses": 32,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 3,
+      "district_placed": 1,
+      "district_completed": 0,
+      "district_blocked": false
+    },
+    {
+      "period": 3,
+      "year": 1950,
+      "month": 2,
+      "money": 98031719,
+      "town_population": 904,
+      "town_houses": 34,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 2,
+      "district_placed": 2,
+      "district_completed": 0,
+      "district_blocked": false
+    },
+    {
+      "period": 4,
+      "year": 1950,
+      "month": 3,
+      "money": 98274866,
+      "town_population": 904,
+      "town_houses": 35,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 1,
+      "district_placed": 3,
+      "district_completed": 0,
+      "district_blocked": false
+    },
+    {
+      "period": 5,
+      "year": 1950,
+      "month": 4,
+      "money": 98274631,
+      "town_population": 920,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 1,
+      "district_blocked": false
+    },
+    {
+      "period": 6,
+      "year": 1950,
+      "month": 5,
+      "money": 98274397,
+      "town_population": 1039,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 2,
+      "district_blocked": false
+    },
+    {
+      "period": 7,
+      "year": 1950,
+      "month": 6,
+      "money": 98346121,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 3,
+      "district_blocked": false
+    },
+    {
+      "period": 8,
+      "year": 1950,
+      "month": 7,
+      "money": 98518824,
+      "town_population": 1136,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 9,
+      "year": 1950,
+      "month": 8,
+      "money": 98518589,
+      "town_population": 1136,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 10,
+      "year": 1950,
+      "month": 9,
+      "money": 98518357,
+      "town_population": 1136,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 11,
+      "year": 1950,
+      "month": 10,
+      "money": 98762870,
+      "town_population": 1136,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 12,
+      "year": 1950,
+      "month": 10,
+      "money": 98762826,
+      "town_population": 1136,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 13,
+      "year": 1950,
+      "month": 11,
+      "money": 98762593,
+      "town_population": 1136,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 14,
+      "year": 1951,
+      "month": 0,
+      "money": 98922813,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 15,
+      "year": 1951,
+      "month": 1,
+      "money": 99007082,
+      "town_population": 1103,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 16,
+      "year": 1951,
+      "month": 2,
+      "money": 99006848,
+      "town_population": 1103,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 17,
+      "year": 1951,
+      "month": 3,
+      "money": 99078572,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 18,
+      "year": 1951,
+      "month": 4,
+      "money": 99251233,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 19,
+      "year": 1951,
+      "month": 5,
+      "money": 99250999,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 20,
+      "year": 1951,
+      "month": 6,
+      "money": 99322785,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 21,
+      "year": 1951,
+      "month": 7,
+      "money": 99410704,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 22,
+      "year": 1951,
+      "month": 8,
+      "money": 99494975,
+      "town_population": 1119,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 23,
+      "year": 1951,
+      "month": 8,
+      "money": 99494932,
+      "town_population": 1029,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    },
+    {
+      "period": 24,
+      "year": 1951,
+      "month": 9,
+      "money": 99655081,
+      "town_population": 1029,
+      "town_houses": 36,
+      "town_food_last": [
+        0,
+        0,
+        0
+      ],
+      "district_opportunities": 0,
+      "district_placed": 4,
+      "district_completed": 4,
+      "district_blocked": false
+    }
+  ],
+  "initial_status": {
+    "cities": [
+      {
+        "current": [
+          0,
+          0,
+          0
+        ],
+        "houses": 31,
+        "id": 1,
+        "last": [
+          0,
+          0,
+          0
+        ],
+        "population": 904,
+        "quotas": [
+          50,
+          30,
+          10
+        ],
+        "residential_blocked": false,
+        "residential_commissioned": false,
+        "residential_completed": 0,
+        "residential_opportunities": 0,
+        "residential_placed": 0,
+        "state": 0
+      }
+    ],
+    "date": 712223,
+    "economy": {
+      "accounting": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "cities": [],
+      "factories": [
+        [
+          3,
+          18,
+          100,
+          0,
+          [],
+          0,
+          0,
+          300,
+          300
+        ],
+        [
+          4,
+          0,
+          100,
+          0,
+          [],
+          0,
+          0,
+          300,
+          300
+        ],
+        [
+          5,
+          18,
+          100,
+          0,
+          [],
+          0,
+          0,
+          300,
+          300
+        ]
+      ],
+      "research": [],
+      "roles": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "shared_research": {},
+      "town_food_services": [
+        [
+          1,
+          0,
+          0,
+          40,
+          60,
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          0,
+          0
+        ]
+      ],
+      "town_residential_districts": [],
+      "version": 2
+    },
+    "facilities": [
+      {
+        "batches": 0,
+        "id": 4,
+        "inputs": [
+          [
+            34,
+            0
+          ]
+        ],
+        "outputs": [
+          [
+            11,
+            0
+          ]
+        ],
+        "recipe": 404
+      },
+      {
+        "batches": 0,
+        "id": 5,
+        "inputs": [
+          [
+            16,
+            0
+          ]
+        ],
+        "outputs": [
+          [
+            30,
+            0
+          ]
+        ],
+        "recipe": 101
+      },
+      {
+        "batches": 0,
+        "id": 6,
+        "inputs": [
+          [
+            17,
+            0
+          ]
+        ],
+        "outputs": [
+          [
+            18,
+            0
+          ]
+        ],
+        "recipe": 102
+      }
+    ],
+    "held": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      320,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      160,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "money": 98082230,
+    "month": 0,
+    "research": [
+      {
+        "budget": 0,
+        "project": 0,
+        "rp": 0,
+        "unlocked": [
+          101,
+          102,
+          301
+        ]
+      }
+    ],
+    "stations": [
+      {
+        "consumer": false,
+        "id": 0,
+        "name": "HQ warehouse"
+      },
+      {
+        "consumer": true,
+        "id": 1,
+        "name": "Megacity consumers"
+      },
+      {
+        "consumer": false,
+        "id": 2,
+        "name": "Consumer crystals"
+      },
+      {
+        "consumer": false,
+        "id": 3,
+        "name": "Food works"
+      },
+      {
+        "consumer": false,
+        "id": 4,
+        "name": "Ballast crusher"
+      },
+      {
+        "consumer": false,
+        "id": 5,
+        "name": "Steel furnace"
+      },
+      {
+        "consumer": false,
+        "id": 6,
+        "name": "Alloy foundry"
+      },
+      {
+        "consumer": false,
+        "id": 7,
+        "name": "Copper works"
+      },
+      {
+        "consumer": false,
+        "id": 8,
+        "name": "Silicon works"
+      },
+      {
+        "consumer": false,
+        "id": 9,
+        "name": "Signal works"
+      },
+      {
+        "consumer": false,
+        "id": 10,
+        "name": "Polymer works"
+      },
+      {
+        "consumer": false,
+        "id": 11,
+        "name": "Propulsion works"
+      },
+      {
+        "consumer": false,
+        "id": 12,
+        "name": "Blank crystal fab"
+      },
+      {
+        "consumer": false,
+        "id": 13,
+        "name": "Stone quarry"
+      },
+      {
+        "consumer": false,
+        "id": 14,
+        "name": "Iron mine"
+      },
+      {
+        "consumer": false,
+        "id": 15,
+        "name": "Copper mine"
+      },
+      {
+        "consumer": false,
+        "id": 16,
+        "name": "Silica dunes"
+      },
+      {
+        "consumer": false,
+        "id": 17,
+        "name": "Rare earth mine"
+      },
+      {
+        "consumer": false,
+        "id": 18,
+        "name": "Farm"
+      },
+      {
+        "consumer": false,
+        "id": 19,
+        "name": "Quantum observatory"
+      },
+      {
+        "consumer": false,
+        "id": 20,
+        "name": "Frontier passengers"
+      },
+      {
+        "consumer": false,
+        "id": 21,
+        "name": "City distribution"
+      },
+      {
+        "consumer": false,
+        "id": 22,
+        "name": "Farm export warehouse"
+      },
+      {
+        "consumer": false,
+        "id": 23,
+        "name": "Stone export"
+      },
+      {
+        "consumer": false,
+        "id": 24,
+        "name": "Iron export"
+      },
+      {
+        "consumer": false,
+        "id": 25,
+        "name": "Copper export"
+      },
+      {
+        "consumer": false,
+        "id": 26,
+        "name": "Silica export"
+      },
+      {
+        "consumer": false,
+        "id": 27,
+        "name": "Rare earth export"
+      },
+      {
+        "consumer": false,
+        "id": 28,
+        "name": "Oil wells"
+      },
+      {
+        "consumer": false,
+        "id": 29,
+        "name": "Machine assembly"
+      },
+      {
+        "consumer": false,
+        "id": 30,
+        "name": "Industrial warehouse"
+      },
+      {
+        "consumer": false,
+        "id": 31,
+        "name": "Research frontier warehouse"
+      }
+    ],
+    "stellar": {
+      "admitted": [],
+      "next": 1,
+      "policies": [],
+      "projects": [],
+      "version": 1,
+      "worlds": [],
+      "zones": []
+    },
+    "stocks": [
+      {
+        "inventory": [
+          [
+            18,
+            160
+          ],
+          [
+            30,
+            80
+          ]
+        ],
+        "world": 0
+      },
+      {
+        "inventory": [
+          [
+            18,
+            160
+          ],
+          [
+            30,
+            80
+          ]
+        ],
+        "world": 1
+      }
+    ],
+    "tick": 1281,
+    "trains": [
+      {
+        "cargo": 0,
+        "cargo_types": [
+          16
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 0,
+        "lost": false,
+        "name": "Stone quarry > Ballast crus",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 83242
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          30
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 7,
+        "lost": false,
+        "name": "Ballast crus > HQ warehouse",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 85290
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          34
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 12,
+        "lost": false,
+        "name": "Farm > Food works",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 85440
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          11
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 19,
+        "lost": false,
+        "name": "Food works > Megacity con",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 87488
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          0
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 24,
+        "lost": false,
+        "name": "Megacity con > Frontier pas",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 89961
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          0
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 29,
+        "lost": false,
+        "name": "Frontier pas > Megacity con",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 92009
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          17
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 34,
+        "lost": false,
+        "name": "Iron mine > Steel furnac",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 93497
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          18
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 41,
+        "lost": false,
+        "name": "Steel furnac > HQ warehouse",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 95545
+      }
+    ],
+    "year": 1950
+  },
+  "post_commission_status": {
+    "cities": [
+      {
+        "current": [
+          0,
+          0,
+          0
+        ],
+        "houses": 31,
+        "id": 1,
+        "last": [
+          0,
+          0,
+          0
+        ],
+        "population": 904,
+        "quotas": [
+          50,
+          30,
+          10
+        ],
+        "residential_blocked": false,
+        "residential_commissioned": true,
+        "residential_completed": 0,
+        "residential_opportunities": 4,
+        "residential_placed": 0,
+        "state": 0
+      }
+    ],
+    "date": 712223,
+    "economy": {
+      "accounting": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          160,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          80,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "cities": [],
+      "factories": [
+        [
+          3,
+          18,
+          100,
+          0,
+          [],
+          0,
+          0,
+          300,
+          300
+        ],
+        [
+          4,
+          0,
+          100,
+          0,
+          [],
+          0,
+          0,
+          300,
+          300
+        ],
+        [
+          5,
+          18,
+          100,
+          0,
+          [],
+          0,
+          0,
+          300,
+          300
+        ]
+      ],
+      "research": [],
+      "roles": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "shared_research": {},
+      "town_food_services": [
+        [
+          1,
+          0,
+          0,
+          40,
+          60,
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          0,
+          0
+        ]
+      ],
+      "town_residential_districts": [
+        [
+          1,
+          0,
+          true,
+          4,
+          0,
+          0,
+          false
+        ]
+      ],
+      "version": 2
+    },
+    "facilities": [
+      {
+        "batches": 0,
+        "id": 4,
+        "inputs": [
+          [
+            34,
+            0
+          ]
+        ],
+        "outputs": [
+          [
+            11,
+            0
+          ]
+        ],
+        "recipe": 404
+      },
+      {
+        "batches": 0,
+        "id": 5,
+        "inputs": [
+          [
+            16,
+            0
+          ]
+        ],
+        "outputs": [
+          [
+            30,
+            0
+          ]
+        ],
+        "recipe": 101
+      },
+      {
+        "batches": 0,
+        "id": 6,
+        "inputs": [
+          [
+            17,
+            0
+          ]
+        ],
+        "outputs": [
+          [
+            18,
+            0
+          ]
+        ],
+        "recipe": 102
+      }
+    ],
+    "held": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      160,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      80,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "money": 98032230,
+    "month": 0,
+    "research": [
+      {
+        "budget": 0,
+        "project": 0,
+        "rp": 0,
+        "unlocked": [
+          101,
+          102,
+          301
+        ]
+      }
+    ],
+    "stations": [
+      {
+        "consumer": false,
+        "id": 0,
+        "name": "HQ warehouse"
+      },
+      {
+        "consumer": true,
+        "id": 1,
+        "name": "Megacity consumers"
+      },
+      {
+        "consumer": false,
+        "id": 2,
+        "name": "Consumer crystals"
+      },
+      {
+        "consumer": false,
+        "id": 3,
+        "name": "Food works"
+      },
+      {
+        "consumer": false,
+        "id": 4,
+        "name": "Ballast crusher"
+      },
+      {
+        "consumer": false,
+        "id": 5,
+        "name": "Steel furnace"
+      },
+      {
+        "consumer": false,
+        "id": 6,
+        "name": "Alloy foundry"
+      },
+      {
+        "consumer": false,
+        "id": 7,
+        "name": "Copper works"
+      },
+      {
+        "consumer": false,
+        "id": 8,
+        "name": "Silicon works"
+      },
+      {
+        "consumer": false,
+        "id": 9,
+        "name": "Signal works"
+      },
+      {
+        "consumer": false,
+        "id": 10,
+        "name": "Polymer works"
+      },
+      {
+        "consumer": false,
+        "id": 11,
+        "name": "Propulsion works"
+      },
+      {
+        "consumer": false,
+        "id": 12,
+        "name": "Blank crystal fab"
+      },
+      {
+        "consumer": false,
+        "id": 13,
+        "name": "Stone quarry"
+      },
+      {
+        "consumer": false,
+        "id": 14,
+        "name": "Iron mine"
+      },
+      {
+        "consumer": false,
+        "id": 15,
+        "name": "Copper mine"
+      },
+      {
+        "consumer": false,
+        "id": 16,
+        "name": "Silica dunes"
+      },
+      {
+        "consumer": false,
+        "id": 17,
+        "name": "Rare earth mine"
+      },
+      {
+        "consumer": false,
+        "id": 18,
+        "name": "Farm"
+      },
+      {
+        "consumer": false,
+        "id": 19,
+        "name": "Quantum observatory"
+      },
+      {
+        "consumer": false,
+        "id": 20,
+        "name": "Frontier passengers"
+      },
+      {
+        "consumer": false,
+        "id": 21,
+        "name": "City distribution"
+      },
+      {
+        "consumer": false,
+        "id": 22,
+        "name": "Farm export warehouse"
+      },
+      {
+        "consumer": false,
+        "id": 23,
+        "name": "Stone export"
+      },
+      {
+        "consumer": false,
+        "id": 24,
+        "name": "Iron export"
+      },
+      {
+        "consumer": false,
+        "id": 25,
+        "name": "Copper export"
+      },
+      {
+        "consumer": false,
+        "id": 26,
+        "name": "Silica export"
+      },
+      {
+        "consumer": false,
+        "id": 27,
+        "name": "Rare earth export"
+      },
+      {
+        "consumer": false,
+        "id": 28,
+        "name": "Oil wells"
+      },
+      {
+        "consumer": false,
+        "id": 29,
+        "name": "Machine assembly"
+      },
+      {
+        "consumer": false,
+        "id": 30,
+        "name": "Industrial warehouse"
+      },
+      {
+        "consumer": false,
+        "id": 31,
+        "name": "Research frontier warehouse"
+      }
+    ],
+    "stellar": {
+      "admitted": [],
+      "next": 1,
+      "policies": [],
+      "projects": [],
+      "version": 1,
+      "worlds": [],
+      "zones": []
+    },
+    "stocks": [
+      {
+        "inventory": [
+          [
+            18,
+            160
+          ],
+          [
+            30,
+            80
+          ]
+        ],
+        "world": 1
+      }
+    ],
+    "tick": 1281,
+    "trains": [
+      {
+        "cargo": 0,
+        "cargo_types": [
+          16
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 0,
+        "lost": false,
+        "name": "Stone quarry > Ballast crus",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 83242
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          30
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 7,
+        "lost": false,
+        "name": "Ballast crus > HQ warehouse",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 85290
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          34
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 12,
+        "lost": false,
+        "name": "Farm > Food works",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 85440
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          11
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 19,
+        "lost": false,
+        "name": "Food works > Megacity con",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 87488
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          0
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 24,
+        "lost": false,
+        "name": "Megacity con > Frontier pas",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 89961
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          0
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 29,
+        "lost": false,
+        "name": "Frontier pas > Megacity con",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 92009
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          17
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 34,
+        "lost": false,
+        "name": "Iron mine > Steel furnac",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 93497
+      },
+      {
+        "cargo": 0,
+        "cargo_types": [
+          18
+        ],
+        "crashed": false,
+        "direction": 3,
+        "id": 41,
+        "lost": false,
+        "name": "Steel furnac > HQ warehouse",
+        "order": 0,
+        "speed": 0,
+        "stopped": false,
+        "tile": 95545
+      }
+    ],
+    "year": 1950
+  },
+  "cold_start_save_sha256": "cc2a94b4aa65132bf279ff6f4ac02bc1a79787302e3d2c9a4f33c353af684e20",
+  "checkpoint_24_save_sha256": "8987cb9c9c746071cedc485d4023010c0189e44fe70d6881a7fe4408d329fb26",
+  "cold_reload_equal": true,
+  "post_reload_periods_passed": 4,
+  "end_time_utc": "2026-10-11T03:35:25Z"
+}

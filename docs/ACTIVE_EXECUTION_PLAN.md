@@ -1,5 +1,73 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Active execution handoff — A World Worth Connecting: Sprint 3 (11 October 2026)
+
+Owner approved the third candidate slice "A World Worth Connecting" from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` and sections 4, 5, and 7 of `OPENSPACETTD-DESIGN-STUDY.md` on branch `codex/capacity-or-reserve-pilot`:
+- **Principle**: Purposeful inter-world expansion providing supply diversification, topological bottleneck independence, and demonstrable industrial output resilience.
+- **Ruleset**: Opt-in experimental v2 rules for fresh disposable fixtures only. V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope & Implementation**:
+  - **Existing Consumer**: Player-owned bootstrap Ballast Crusher at Node 4 (`TileXY(300, 80)`, World 1 / Industrial Commonwealth) consuming raw SILC to produce BALL.
+  - **Original Source & Corridor**: Silica Dunes at Node 13 (`TileXY(650, 80)`, World 2 / Extraction Frontier) delivered via Train 1 across the World 2 ↔ World 1 portal throat on row 82 (`TileXY(534, 82)` ↔ `TileXY(476, 82)`). Track length: 294 tiles.
+  - **Alternative Raw Resource Origin**: A new Silica Dunes extraction facility on World 3 (`Research frontier`, `WorldID{3}`, Phase 3 Frontier), discovered via paid company area surveying (`Commands::SurveyResources`), funded via native `Commands::BuildIndustry`.
+  - **Independent Wormhole Link**: A direct portal pair constructed via `Commands::BuildPortalPair` directly between World 3 (`TileXY(790, 96)`) and World 1 (`TileXY(476, 96)`), connecting to a new platform at Ballast Crusher (Stop 4) on row 96. Track length: 248 tiles (~16% shorter route).
+  - **Bottleneck Independence**: The World 3 connection completely bypasses World 2 and does **NOT** share the World 2 ↔ World 1 portal throat on row 82. When the primary corridor is deliberately closed, World 3 maintains deliveries without interruption.
+- **Verification & Bounds**:
+  - Measure route timing, transit distance, and round-trip cycles between World 2 and World 3 origins.
+  - Deliver native before/after operating sample: baseline operation (periods 1–6), expansion connected (period 7), dual-source operation (periods 8–12), deliberate closure of original corridor (periods 13–18), reopening/recovery (periods 19–24).
+  - Demonstrate sustained Ballast Crusher production during closure of the original approach.
+  - Fresh-process cold reload at period 24 and 4 post-reload periods with 100% cargo conservation.
+  - Real costs and treasury accounting: surveying, industry funding, portal pair construction, track laying, depot, and train purchase.
+- **Delivery Boundary**: Local review-ready delivery on `codex/capacity-or-reserve-pilot`. No push, no PR creation, no merge, no Sprint 4 execution. Hand off to Codex/Astra for review.
+
+## Active execution handoff — A District That Stays Built: Sprint 2 (11 October 2026)
+
+Owner accepted Sprint 1 "Capacity or Reserve" pilot evidence and approved the residential slice "A District That Stays Built" from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` on branch `codex/capacity-or-reserve-pilot`:
+- **Principle**: Finite native residential works, material-funded capital additions, and durable development that stays built through supply interruption.
+- **Ruleset**: Opt-in experimental v2 rules for fresh disposable fixtures only. V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope & Implementation**:
+  - One non-repeatable pilot residential work for one pilot Core town (`TownID{0}`, Commonwealth Metropolis).
+  - Material kit: `160 STEL + 80 BALL` and £50,000 cash debited atomically from company world stockpile via replicated command `Commands::CommissionTownResidentialDistrict`.
+  - Grants a finite budget of 4 native building opportunities.
+  - Native building opportunities locate legal road-adjacent building sites (`CanBuildHouseHere` and `RoadTypesAllowHouseHere`) and construct native house shells with `is_protected = true`.
+  - House shells start at construction stage 0 and progress through native tile ticks to completion; native population is added by `AdvanceSingleHouseConstruction` upon reaching `TOWN_HOUSE_COMPLETED`. Zero phantom or clamped population.
+  - Native protection bit (`IsHousePlayerProtected`) permanently shields completed buildings from OpenTTD's native random redevelopment demolition loop (`CanDeleteHouse`).
+  - Blocked physical access (lack of valid road frontage or terrain obstruction) is clearly reported in UI/status ("Awaiting site access") without burning materials or fabricating houses.
+  - Optional Commercial FOOD service is decoupled: neither unlocks residential construction nor revokes committed or completed development during service interruption.
+- **Verification & Evidence**:
+  - Status: **PASSED (Execution Completed)**
+  - Automated Unit Tests: Catch2 suite `[commonwealth-works]` (202 assertions passed across 8 test cases); full suite 307,537 assertions across 538 cases passed.
+  - CTest Suite: 553/553 tests passed (100%).
+  - Repo Linters: `file-descriptions.py` OK, `unused-strings.py` OK, `git diff --check` clean.
+  - Headless Simulation Artifacts (`docs/audit/2026-10-11/residential-district/`):
+    - Binary SHA256: `5cc4d2a5fe897887941c807e9f7b32ac7a171e06c916f38f8994c48faf2d5365`
+    - Cold Start Save SHA256: `cc2a94b4aa65132bf279ff6f4ac02bc1a79787302e3d2c9a4f33c353af684e20`
+    - Checkpoint-24 Save SHA256: `8987cb9c9c746071cedc485d4023010c0189e44fe70d6881a7fe4408d329fb26`
+    - Cold Reload Equality: Verified 100% identical state across tick, date, money, held, stocks, facilities, economy.
+    - 4 post-reload periods passed with zero cargo conservation errors.
+  - Mechanics Verified in Headless Run:
+    - Atomically debited £50,000 cash and 160 STEL + 80 BALL materials.
+    - Initial period 1: 4 opportunities, 0 placed, 0 completed.
+    - Periods 2..5: 4 native house shells placed adjacent to road frontage; opportunities decremented 4 -> 0; shells started at stage 0 with population unaltered.
+    - Period 8: All 4 houses reached native completion (`TOWN_HOUSE_COMPLETED`); completed reached 4; town population rose from 904 to 1136 (+232 native population).
+    - Periods 14..18: Commercial food service completely shut off; completed houses remained strictly at 4 and were never demolished.
+    - Period 18: Food service restored.
+- **Delivery Boundary**: Local review-ready delivery on `codex/capacity-or-reserve-pilot`. No push, no PR creation, no merge, no Sprint 3 execution. Stopped at agreed boundary for review.
+
+
+## Active execution handoff — Capacity or Reserve Prototype: Sprint 1 (11 October 2026)
+
+Owner authorized the experimental "Capacity or Reserve" prototype from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` on branch `codex/capacity-or-reserve-pilot`:
+- **Principle**: Stable settlements, optional FOOD civic service, and a factory capacity-versus-reserve choice.
+- **Ruleset**: Opt-in experimental v2 rules for fresh disposable fixtures only (`connected_economy prepare-works` / `--works-prototype`). V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope**:
+  - One mature Core town with Stable civic baseline (no supply-driven growth, no starvation lockout).
+  - One optional FOOD service slot per town: rate Off / 10 / 20 / 40, receiver cap 60, market ceiling 40, four-period sliding useful consumption history yielding up to +25% passenger generation bonus.
+  - One owned bootstrap ballast plant (`CompanyID{0}`) with one-time commissioning choice between Capacity Works (speed 100 -> 150 batches/period, storage 300) and Reserve Works (speed 100, storage 300 -> 600 batch-equiv), costing `160 STEL + 80 BALL` and £50,000 cash debit.
+  - V1 generic +50 upgrade bypass blocked under v2.
+  - Managed town cargo routing in `economy.cpp` separating managed destination status from active demand, preventing rate-Off FOOD and non-demanded commodities from generic absorption.
+- **Budget & Bounds**: One fresh fixture generation, one bounded run up to 24 actual economy periods or 30 execution minutes, one fresh-process cold reload and up to 4 further periods. Stop at first integrity/command defect. Real transported physical cargo; no calculated growth claims.
+- **Delivery Boundary**: Local review-ready delivery only. No push, no PR creation, no merge, no Sprint 2 execution. Hand off to Codex for review.
+
 ## Active execution handoff — Core Basket Repeat and Cold Proof (10 October 2026)
 
 This replaces the expired campaign permissions with an owner-authorized finite continuation:
