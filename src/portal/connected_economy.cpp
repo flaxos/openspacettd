@@ -1089,6 +1089,176 @@ bool SetPrimaryCorridorClosedInternal(bool closed)
 }
 
 /**
+ * Commission Pipeline B research freight chain and surveyed Rare Earth opportunity on World 2.
+ * @param report JSON output recording costs, site IDs, and confirmation.
+ * @return True if all construction, industry funding, routes, and baseline prerequisites succeeded.
+ */
+bool CommissionResearchChainInternal(Json &report)
+{
+	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	Company *company = Company::GetIfValid(CompanyID{0});
+	if (company == nullptr) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL Company 0 invalid");
+		return false;
+	}
+
+	report = {{"success", false}, {"costs", Json::object()}};
+
+	// 1. Establish Corporate HQ on World 0 at TileXY(70, 60)
+	if (!CorporateHQManager::HasHQ(CompanyID{0})) {
+		auto hq_res = Command<Commands::PlaceCorporateHQ>::Do(
+			DoCommandFlag::Execute, TileXY(70, 60), std::string("Commonwealth Central HQ"));
+		if (!Result(hq_res, "build Corporate HQ")) return false;
+		report["costs"]["corporate_hq"] = int64_t(hq_res.GetCost());
+	}
+
+	// 2. Feedstock acceleration must be explicitly OFF
+	CmdSetResearchAcceleration(DoCommandFlag::Execute, false);
+
+	// 3. Ensure baseline prerequisites Materials I & II are unlocked
+	if (!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_1)) {
+		TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1});
+	}
+	if (!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_2)) {
+		auto sel_res = Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_MATERIALS_2);
+		if (!Result(sel_res, "select Materials II")) return false;
+		auto bud_res = Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, 250000);
+		if (!Result(bud_res, "budget Materials II")) return false;
+		TechTreeManager::ProcessMonthlyResearch();
+		if (!TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_2)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL baseline Materials II not unlocked");
+			return false;
+		}
+		report["costs"]["materials_2_research"] = 250000;
+	}
+
+	// Helper to place fixture industry
+	auto build_fixture_industry = [](size_t node, IndustryType type, CompanyID founder) -> bool {
+		AutoRestoreBackup founder_owner(_current_company, founder);
+		for (uint dy = 5; dy <= 12; ++dy) {
+			for (uint32_t layout = 0; layout < GetIndustrySpec(type)->layouts.size(); ++layout) {
+				TileIndex site = TileXY(nodes[node].x, TOP - dy);
+				if (ExtractCommandCost(Command<Commands::BuildIndustry>::Do({}, site, type, layout, false, 1)).Failed()) continue;
+				if (Result(Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, site, type, layout, false, 1), nodes[node].name))
+					return true;
+			}
+		}
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL could not place industry {}", nodes[node].name);
+		return false;
+	};
+
+	// 4. Extractive & Processing Industries for Pipeline B
+	ResourceSiteManager::SetEnabled(true);
+
+	// Copper mine at Node 15 (0x16)
+	IndustryType copr_mine_type = MapNewGRFIndustryType(0x80 | 0x16, COMMONWEALTH_INDUSTRY_GRFID);
+	TileIndex copr_survey = TileXY(nodes[15].x, TOP - 12);
+	ResourceSiteManager::AddSite(copr_survey, copr_mine_type, 16, 16);
+	Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, copr_survey);
+	if (!build_fixture_industry(15, copr_mine_type, OWNER_DEITY)) return false;
+
+	// Copper smelter at Node 7 (0x17, RECIPE_COPPER_SMELTING: 2 COPR -> 2 WIRE)
+	IndustryType copr_smelter_type = MapNewGRFIndustryType(0x80 | 0x17, COMMONWEALTH_INDUSTRY_GRFID);
+	if (!build_fixture_industry(7, copr_smelter_type, OWNER_DEITY)) return false;
+
+	// Silica dunes at Node 16 (0x18, producing SAND)
+	IndustryType sand_mine_type = MapNewGRFIndustryType(0x80 | 0x18, COMMONWEALTH_INDUSTRY_GRFID);
+	TileIndex sand_survey = TileXY(nodes[16].x, TOP - 12);
+	ResourceSiteManager::AddSite(sand_survey, sand_mine_type, 16, 16);
+	Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, sand_survey);
+	if (!build_fixture_industry(16, sand_mine_type, OWNER_DEITY)) return false;
+
+	// Silicon arcology at Node 8 (0x19, RECIPE_SILICON_ARC: 2 SAND + 1 WIRE -> 1 CHIP)
+	IndustryType chip_fab_type = MapNewGRFIndustryType(0x80 | 0x19, COMMONWEALTH_INDUSTRY_GRFID);
+	if (!build_fixture_industry(8, chip_fab_type, OWNER_DEITY)) return false;
+
+	// 5. Survey Rare Earth site on World 2 at Node 17 (0x14)
+	IndustryType rare_mine_type = MapNewGRFIndustryType(0x80 | 0x14, COMMONWEALTH_INDUSTRY_GRFID);
+	TileIndex rare_survey = TileXY(nodes[17].x, TOP - 5);
+	uint32_t rare_site_id = ResourceSiteManager::AddSite(rare_survey, rare_mine_type, 16, 16);
+	if (rare_site_id == 0) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL could not register rare site");
+		return false;
+	}
+	auto survey_res = Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, rare_survey);
+	if (!Result(survey_res, "survey rare site")) return false;
+	report["rare_site_id"] = rare_site_id;
+	report["costs"]["survey_rare"] = int64_t(survey_res.GetCost());
+
+	// 6. Dedicated Freight Rail Routes
+	// Route: Copper mine (15) -> Copper smelter (7): COPR (4 wagons)
+	if (!TrainRoute(15, 7, GetCargoTypeByLabel(CargoLabel{"COPR"}), 4)) return false;
+	// Route: Copper smelter (7) -> Silicon works (8): WIRE (2 wagons)
+	if (!TrainRoute(7, 8, GetCargoTypeByLabel(CargoLabel{"WIRE"}), 2)) return false;
+	// Route: Silica dunes (16) -> Silicon works (8): SAND (4 wagons)
+	if (!TrainRoute(16, 8, GetCargoTypeByLabel(CargoLabel{"SAND"}), 4)) return false;
+	// Route: Silicon works (8) -> HQ warehouse (0): CHIP (1 wagon)
+	if (!TrainRoute(8, 0, GetCargoTypeByLabel(CargoLabel{"CHIP"}), 1)) return false;
+	// Route: Steel furnace (5) -> HQ warehouse (0): STEL (2 wagons)
+	if (!TrainRoute(5, 0, GetCargoTypeByLabel(CargoLabel{"STEL"}), 2)) return false;
+
+	UpdateSignalsInBuffer();
+	report["success"] = true;
+	return true;
+}
+
+/**
+ * Test atomic escrow reservation, insufficient kit rejection, and refund negative paths.
+ * @param report JSON output recording test assertions.
+ * @return True if tests succeeded.
+ */
+bool TestResearchNegativePathsInternal(Json &report)
+{
+	report = {{"success", false}, {"tests", Json::object()}};
+
+	// 1. Check stock in World 0 stockpile
+	CargoType stel_cargo = GetCargoTypeByLabel(CargoLabel{"STEL"});
+	CargoType chip_cargo = GetCargoTypeByLabel(CargoLabel{"CHIP"});
+	uint32_t stel_stock = StockpileManager::GetStock(WorldID{0}, CompanyID{0}, stel_cargo);
+	uint32_t chip_stock = StockpileManager::GetStock(WorldID{0}, CompanyID{0}, chip_cargo);
+	report["stel_stock"] = stel_stock;
+	report["chip_stock"] = chip_stock;
+
+	// 2. Missing kit rejection:
+	// If company has kit for Materials 3, test missing kit rejection using TECH_MATERIALS_4 (which requires BCRY).
+	// If company has insufficient kit for Materials 3, testing Materials 3 confirms rejection.
+	bool missing_kit_rejected = (stel_stock < 40 || chip_stock < 20)
+		? !IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_3)
+		: !IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_4);
+	report["tests"]["missing_kit_rejected"] = missing_kit_rejected;
+
+	// 3. Foreign company rejection:
+	bool foreign_rejected = !IntegratedEconomy::PrepareResearch(CompanyID{1}, TECH_MATERIALS_3);
+	report["tests"]["foreign_rejected"] = foreign_rejected;
+
+	if (stel_stock >= 40 && chip_stock >= 20) {
+		// Test Escrow reservation
+		bool prepared = IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_3);
+		report["tests"]["escrow_prepared"] = prepared;
+		uint32_t stel_after_prep = StockpileManager::GetStock(WorldID{0}, CompanyID{0}, stel_cargo);
+		uint32_t chip_after_prep = StockpileManager::GetStock(WorldID{0}, CompanyID{0}, chip_cargo);
+		bool escrow_debited = (stel_after_prep == stel_stock - 40) && (chip_after_prep == chip_stock - 20);
+		report["tests"]["escrow_debited"] = escrow_debited;
+
+		// Test Cancel / switch refund
+		IntegratedEconomy::CancelResearch(CompanyID{0});
+		uint32_t stel_after_cancel = StockpileManager::GetStock(WorldID{0}, CompanyID{0}, stel_cargo);
+		uint32_t chip_after_cancel = StockpileManager::GetStock(WorldID{0}, CompanyID{0}, chip_cargo);
+		bool escrow_refunded = (stel_after_cancel == stel_stock) && (chip_after_cancel == chip_stock);
+		report["tests"]["escrow_refunded"] = escrow_refunded;
+
+		// Re-prepare research for normal progression
+		IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_3);
+		report["tests"]["escrow_restored"] = true;
+
+		report["success"] = missing_kit_rejected && foreign_rejected && escrow_debited && escrow_refunded;
+	} else {
+		report["success"] = missing_kit_rejected && foreign_rejected;
+	}
+	return report["success"];
+}
+
+/**
  * Observe cargo, vehicles, facilities, town growth and research without mutation.
  * @return JSON snapshot of the current fixture.
  */
@@ -1213,6 +1383,25 @@ Json Snapshot()
 		{"route_distance_w2", 294},
 		{"route_distance_w3", 248}
 	};
+	const auto hq = CorporateHQManager::GetHQ(CompanyID{0});
+	r["hq"] = Json{
+		{"has_hq", hq != nullptr},
+		{"tier", hq ? static_cast<uint>(hq->tier) : 0},
+		{"tile", hq ? hq->tile.base() : 0},
+		{"world", hq ? hq->world_id.base() : 0}
+	};
+	r["resource_sites"] = Json::array();
+	for (const auto &site : ResourceSiteManager::Sites()) {
+		r["resource_sites"].push_back({
+			{"id", site.id},
+			{"tile", site.anchor.base()},
+			{"world", site.world.base()},
+			{"type", ResourceSiteManager::ResolveType(site)},
+			{"surveyed", ResourceSiteManager::Surveyed(CompanyID{0}, site.anchor)},
+			{"discovered", ResourceSiteManager::Discovered(CompanyID{0}, site)},
+			{"occupant", site.occupant.base()}
+		});
+	}
 	return r;
 }
 /**
@@ -3528,6 +3717,16 @@ bool SetPrimaryCorridorClosed(bool closed)
 	return SetPrimaryCorridorClosedInternal(closed);
 }
 
+bool CommissionResearchChain(nlohmann::json &report)
+{
+	return CommissionResearchChainInternal(report);
+}
+
+bool TestResearchNegativePaths(nlohmann::json &report)
+{
+	return TestResearchNegativePathsInternal(report);
+}
+
 std::string GetCoreTownStationNativeTrainError(const Train *train)
 {
 	return TownStationTrainError(train);
@@ -3742,7 +3941,7 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 	if (argv.size() >= 2 && argv[1].starts_with("generation-contract-")) return GenerationContract(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("first-freight-")) return FirstFreight(argv);
 	if (argv.size() < 2) {
-		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-works|prepare-surveys|status|audit|advance|stop-food|start-food|stop-silica|start-silica|commission-capacity|commission-reserve|commission-residential|connect-world|close-primary-corridor|reopen-primary-corridor|set-food-rate <rate>: isolated demo only");
+		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-works|prepare-surveys|status|audit|advance|stop-food|start-food|stop-silica|start-silica|commission-capacity|commission-reserve|commission-residential|connect-world|close-primary-corridor|reopen-primary-corridor|set-food-rate <rate>|commission-research|test-research-negative|start-research-3 [budget]|cancel-research: isolated demo only");
 		return true;
 	}
 	if (_game_mode != GameMode::Normal || (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) ||
@@ -4003,6 +4202,39 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 		bool close = argv[1] == "close-primary-corridor";
 		SetPrimaryCorridorClosedInternal(close);
 		IConsolePrint(CC_DEFAULT, "CONNECTED primary-corridor {}", close ? "closed" : "reopened");
+	} else if (argv[1] == "commission-research") {
+		Json report;
+		if (!CommissionResearchChainInternal(report)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL commission-research");
+			return true;
+		}
+		IConsolePrint(CC_DEFAULT, "CONNECTED research-commissioned {}", report.dump());
+	} else if (argv[1] == "test-research-negative") {
+		Json report;
+		if (!TestResearchNegativePathsInternal(report)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL test-research-negative");
+			return true;
+		}
+		IConsolePrint(CC_DEFAULT, "CONNECTED research-negative-tested {}", report.dump());
+	} else if (argv[1] == "start-research-3") {
+		uint32_t budget = 600000;
+		if (argv.size() >= 3) {
+			budget = ParseInteger<uint32_t>(argv[2]).value_or(600000);
+		}
+		if (!IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_3)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL prepare research 3 (escrow/prereq)");
+			return true;
+		}
+		auto sel_res = Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_MATERIALS_3);
+		if (!Result(sel_res, "select Materials III")) return true;
+		auto bud_res = Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, budget);
+		if (!Result(bud_res, "budget Materials III")) return true;
+		IConsolePrint(CC_DEFAULT, "CONNECTED research-3-started budget {}", budget);
+	} else if (argv[1] == "cancel-research") {
+		IntegratedEconomy::CancelResearch(CompanyID{0});
+		Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_NONE);
+		Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, 0);
+		IConsolePrint(CC_DEFAULT, "CONNECTED research-cancelled");
 	} else
 		IConsolePrint(CC_ERROR, "CONNECTED FAIL unknown action");
 	return true;

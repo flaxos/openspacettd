@@ -1,5 +1,14 @@
 # OpenSpaceTTD Known Limitations
 
+## One Material-Funded Research Unlock Boundaries (Card P1) — 11 October 2026
+
+- **Progression Slice & Single Rare Earth Discovery**: Card P1 implements the single progression bridge from physical freight delivery (40 STEL + 20 CHIP) to Materials III research unlock and one advanced rare earth resource opportunity on World 2. Additional research tiers (Materials IV, Maglev), full A–D electronics chains, city consumer baskets (CCRY), market pricing, and dynamic galaxy generation remain deferred.
+- **Disabled Feedstock Acceleration**: Feedstock acceleration is explicitly disabled (`CmdSetResearchAcceleration(false)`) during Card P1 to maintain absolute accounting separation between material kit escrow/consumption and research rate boosts.
+- **Authored Baseline Prerequisites**: Corporate HQ is founded at `TileXY(70, 60)` with £2.5M capital, Materials I is authored at 100 RP baseline, and Materials II is funded with £250k budget to unlock prerequisite recipes and extraction rights. This tests the Tier III bridge, not bootstrap from year zero.
+- **Human Desktop UAT Pending**: Automated unit testing, full CTest suite, and headless native simulation runs (15 periods + 4 reload periods with 100% cargo conservation) prove freight haulage, escrow atomicity, unlock, and site discovery. Desktop interactive human acceptance (Track 14 in `demo/UAT-RESULTS.md`) remains **Pending**.
+
+
+
 ## Freight You Can Read Boundaries (Card C1) — 11 October 2026
 
 - **Truth-in-Advertising Metrics & No Speculative ETAs**: The Facilities window displays exact buffered units, completed-period production, and complete batches permitted (`permits X batches`). It intentionally avoids speculative arrival estimates, average burn rates, or predictive delivery timers.

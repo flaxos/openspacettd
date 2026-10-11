@@ -25,6 +25,8 @@
 #include "../newgrf.h"
 #include "../portal/connected_economy.h"
 #include "../portal/resource_sites.h"
+#include "../portal/corporate_hq.h"
+#include "../portal/stellar_network.h"
 #include "../portal/portal_registry.h"
 #include "../train.h"
 #include "../vehicle_cmd.h"
@@ -1224,4 +1226,155 @@ TEST_CASE("Works prototype Sprint 3 truthful acceptance: alternate-source delive
 	CHECK(IntegratedEconomy::Factories().at(crusher->index).total_batches > batches_mid);
 	// BALL output continues accumulating purely from alternate-source supply!
 	CHECK(crusher->produced[0].waiting > 0);
+}
+
+TEST_CASE("Works prototype Sprint 4 truthful acceptance: Pipeline B research freight, kit escrow, Materials III unlock, and rare resource discovery", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	// Register World 2 (Frontier) for rare resource site
+	PlanetRegion w2{
+		.id = WorldID{2},
+		.name = "Frontier Survey",
+		.phase = WorldPhase::Phase3_Frontier,
+		.biome = WorldBiome::AridDesert,
+		.min_x = 63,
+		.min_y = 1,
+		.max_x = 94,
+		.max_y = 62,
+		.development_score = 3000,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(w2));
+	IntegratedEconomy::RegisterRole(WorldID{2}, EconomicRole::Frontier);
+	StellarNetwork::RegisterWorld({WorldID{2}, "uat-2", "UAT world 2", 6, 0, true});
+
+	// Corporate HQ on Core World 0
+	CorporateHQManager::Reset();
+	REQUIRE(CorporateHQManager::RegisterHQ(CompanyID{0}, WorldID{0}, TileXY(15, 15), "Commonwealth Central HQ"));
+	CHECK(CorporateHQManager::HasHQ(CompanyID{0}));
+
+	// Feedstock acceleration explicitly OFF
+	IntegratedEconomy::SetAcceleration(CompanyID{0}, false);
+	CHECK_FALSE(IntegratedEconomy::Accelerates(CompanyID{0}));
+
+	// Baseline prerequisites Materials I and II
+	TechTreeManager::RestoreCompanyTech(CompanyID{0}, TECH_NONE, 0, 0, {TECH_MATERIALS_1, TECH_MATERIALS_2});
+	CHECK(TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_1));
+	CHECK(TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_2));
+	CHECK_FALSE(TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_3));
+
+	// Configure industries for 2-input CHIP production:
+	// Copper smelter (0x17, RECIPE_COPPER_SMELTING: 2 COPR -> 2 WIRE)
+	auto *spec_copper = const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{1}));
+	*spec_copper = fixture.saved_spec;
+	spec_copper->grf_prop.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+	spec_copper->grf_prop.local_id = 0x17;
+	spec_copper->enabled = true;
+	REQUIRE(Industry::CanAllocateItem());
+	auto copper_smelter = Industry::Create(TileXY(35, 30));
+	copper_smelter->type = IndustryType{1};
+	copper_smelter->founder = OWNER_DEITY;
+	copper_smelter->accepted.push_back({.cargo = C("COPR")});
+	copper_smelter->produced.push_back({.cargo = C("WIRE")});
+	IntegratedEconomy::RegisterIndustry(copper_smelter);
+
+	// Silicon works (0x19, RECIPE_SILICON_ARC: 2 SAND + 1 WIRE -> 1 CHIP)
+	auto *spec_silicon = const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{2}));
+	*spec_silicon = fixture.saved_spec;
+	spec_silicon->grf_prop.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+	spec_silicon->grf_prop.local_id = 0x19;
+	spec_silicon->enabled = true;
+	REQUIRE(Industry::CanAllocateItem());
+	auto silicon_works = Industry::Create(TileXY(40, 30));
+	silicon_works->type = IndustryType{2};
+	silicon_works->founder = OWNER_DEITY;
+	silicon_works->accepted.push_back({.cargo = C("SAND")});
+	silicon_works->accepted.push_back({.cargo = C("WIRE")});
+	silicon_works->produced.push_back({.cargo = C("CHIP")});
+	IntegratedEconomy::RegisterIndustry(silicon_works);
+
+	// Rare Earth Mine spec (extractive, producing RARE)
+	auto *spec_rare = const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{3}));
+	*spec_rare = fixture.saved_spec;
+	spec_rare->grf_prop.grfid = COMMONWEALTH_INDUSTRY_GRFID;
+	spec_rare->grf_prop.local_id = 0x14;
+	spec_rare->enabled = true;
+	spec_rare->life_type = IndustryLifeType::Extractive;
+	spec_rare->produced_cargo[0] = C("RARE");
+
+	// Rare Earth resource site on World 2
+	ResourceSiteManager::Reset();
+	ResourceSiteManager::SetEnabled(true);
+	TileIndex rare_survey_tile = TileXY(70, 20);
+	uint32_t rare_site_id = ResourceSiteManager::AddSite(rare_survey_tile, IndustryType{3}, 16, 16);
+	REQUIRE(rare_site_id != 0);
+	REQUIRE(ResourceSiteManager::Survey(DoCommandFlag::Execute, CompanyID{0}, rare_survey_tile).Succeeded());
+	const auto &sites = ResourceSiteManager::Sites();
+	REQUIRE(!sites.empty());
+	const auto &rare_site = sites.front();
+
+	// Prior to Materials III unlock, rare site is surveyed but NOT discovered
+	CHECK(ResourceSiteManager::Surveyed(CompanyID{0}, rare_survey_tile));
+	CHECK_FALSE(ResourceSiteManager::Discovered(CompanyID{0}, rare_site));
+
+	// 1. Deliver COPR to smelter, produce WIRE
+	CHECK(IntegratedEconomy::AcceptIndustry(copper_smelter, C("COPR"), 40) == 40);
+	IntegratedEconomy::Produce();
+	CHECK(copper_smelter->produced[0].waiting > 0);
+
+	// 2. Deliver SAND and WIRE to silicon works, produce CHIP (2 SAND + 1 WIRE -> 1 CHIP)
+	CHECK(IntegratedEconomy::AcceptIndustry(silicon_works, C("SAND"), 40) == 40);
+	CHECK(IntegratedEconomy::AcceptIndustry(silicon_works, C("WIRE"), 20) == 20);
+	IntegratedEconomy::Produce();
+	CHECK(silicon_works->produced[0].waiting > 0);
+
+	// 3. Deliveries to World 0 company stockpile: 40 STEL + 20 CHIP
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 40);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("CHIP"), 20);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 40);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("CHIP")) == 20);
+
+	// 4. Negative Paths:
+	CHECK_FALSE(IntegratedEconomy::PrepareResearch(CompanyID{1}, TECH_MATERIALS_3));
+
+	// Atomic Escrow reservation
+	REQUIRE(IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_3));
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("CHIP")) == 0);
+	auto res_info = IntegratedEconomy::Research(CompanyID{0});
+	REQUIRE(res_info != nullptr);
+	CHECK(res_info->reserved.at(C("STEL")) == 40);
+	CHECK(res_info->reserved.at(C("CHIP")) == 20);
+
+	// Cancellation / switch refund restores 100% of kit back to stockpile
+	IntegratedEconomy::CancelResearch(CompanyID{0});
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 40);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("CHIP")) == 20);
+	CHECK(res_info->reserved.empty());
+
+	// Re-reserve kit for research progression
+	REQUIRE(IntegratedEconomy::PrepareResearch(CompanyID{0}, TECH_MATERIALS_3));
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("CHIP")) == 0);
+
+	// 5. Progression & Materials III unlock:
+	REQUIRE(Command<Commands::SelectResearchProject>::Do(DoCommandFlag::Execute, TECH_MATERIALS_3).Succeeded());
+	REQUIRE(Command<Commands::SetResearchBudget>::Do(DoCommandFlag::Execute, 600000).Succeeded());
+	TechTreeManager::ProcessMonthlyResearch();
+
+	// Research completed! TECH_MATERIALS_3 unlocked!
+	CHECK(TechTreeManager::IsTechUnlocked(CompanyID{0}, TECH_MATERIALS_3));
+	CHECK(TechTreeManager::GetActiveProject(CompanyID{0}) == TECH_NONE);
+
+	// 6. Rare Earth discovery revelation:
+	CHECK(ResourceSiteManager::Discovered(CompanyID{0}, rare_site));
+
+	// Cleanup
+	*spec_copper = fixture.saved_spec;
+	*spec_silicon = fixture.saved_spec;
+	*spec_rare = fixture.saved_spec;
+	TechTreeManager::Reset();
+	CorporateHQManager::Reset();
+	ResourceSiteManager::Reset();
+	StellarNetwork::Reset();
 }

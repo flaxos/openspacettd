@@ -1,5 +1,17 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## One Material-Funded Research Unlock (Card P1) — 11 October 2026
+
+**TESTED Pipeline B freight delivery, Tier III kit escrow/unlock, and rare resource discovery on codex/capacity-or-reserve-pilot; desktop UAT Pending.**
+Delivered Card P1 ("One Material-Funded Research Unlock") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot`:
+- **Physical Kit Logistics & 2-Input CHIP Haulage**: Dedicated 5-consist freight network hauling genuine physical materials: Iron mine (14) -> Steel furnace (5) -> HQ warehouse (0) delivering 40 `STEL`; Copper mine (15) -> Copper smelter (7) converting `COPR -> WIRE`; Silica dunes (16) -> Silicon works (8) delivering `SAND`; Copper smelter (7) -> Silicon works (8) delivering `WIRE`; Silicon works (8) -> HQ warehouse (0) delivering 20 `CHIP` produced via `RECIPE_SILICON_ARC` (`2 SAND + 1 WIRE -> 1 CHIP`). Physical unloading into company stockpile at World 0 warehouse.
+- **Corporate HQ & Feedstock Acceleration Invariant**: Corporate HQ established at Core World 0 (`TileXY(70, 60)`, £2.5M capital expenditure). Research feedstock acceleration explicitly disabled (`CmdSetResearchAcceleration(false)` / `IntegratedEconomy::SetAcceleration(false)`), ensuring delivered chips cannot be burned for passive RP. Baseline Materials I (100 RP) and Materials II (250 RP, £250k budget) prerequisites verified.
+- **Atomic Kit Escrow & Negative Paths**: Missing kit rejection when company stockpile has insufficient materials (< 40 STEL or < 20 CHIP); rejection of foreign/unstocked companies. Selecting `TECH_MATERIALS_3` (303) debits 40 STEL + 20 CHIP atomically into `research[c0].reserved`. Cancelling or switching research cleanly refunds 100% of escrowed cargo back to the stockpile without leakage or duplication.
+- **Materials III Unlock & Advanced Resource Discovery**: Funding 600 RP (£600k budget) consumes the escrowed kit into `research_consumed` upon research completion, unlocking `TECH_MATERIALS_3`. Surveyed 16x16 Rare Earth extraction site (0x14, producing `RARE`) on World 2 at Node 17 transitions from undiscovered (`Discovered() == false`) to discoverable (`Discovered() == true`).
+- **Verification & Native Simulation Proof**: Catch2 test in `test_commonwealth_works.cpp` (`[commonwealth-works]`, 416 assertions across 14 cases passing 100%). Full CTest suite (564/564 tests passing 100%). Headless simulation runner (`scripts/verify_commonwealth_research.py`) completed 15 native economy periods on seed 11 (accumulating 80 STEL and 35 CHIP), verified negative paths and atomic escrow, executed Materials III unlock, verified Rare Earth discovery revelation, ran 6 post-unlock periods with 100% cargo conservation, and completed a fresh-process cold reload probe with 100% state match and 4 additional conserved periods. Evidence recorded at `docs/audit/2026-10-11/material-research/evidence.json` (checkpoint SHA-256 `0ddfdb3c4423868f0c096b4aa3b100c4d2f2306fcd4dd1bacd2e66b029df7c02`).
+- **Quality & Linters**: Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` clean.
+
+
 ## Freight You Can Read (Card C1) — 11 October 2026
 
 **TESTED facility presentation & authoritative bottleneck diagnosis on codex/capacity-or-reserve-pilot; desktop UAT Pending.**

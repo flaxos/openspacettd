@@ -1,5 +1,33 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Active execution slice — One Material-Funded Research Unlock: P1 (11 October 2026)
+
+Owner authorized the "One Material-Funded Research Unlock" (Card P1) execution slice from `/home/flax/Documents/Codex/2026-10-11/task/feature-delivery/OPENSPACETTD-FEATURE-DELIVERY-PLAN.md` on branch `codex/capacity-or-reserve-pilot` following C0/C1 delivery and preflight approval:
+- **Principle**: The railway physically manufactures a capability the player can point to: real delivered materials complete Materials III and expose an existing advanced resource opportunity.
+- **Ruleset**: Opt-in experimental V2 rules (`EconomyRulesVersion::V2`) on the connected 4-world fixture. V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope & Implementation**:
+  - **Corporate HQ & Baseline Prerequisites**: Corporate HQ founded on World 0 (`TileXY(70, 60)`, £2.5M capital expenditure). Baseline Materials I (100 RP) authored; baseline Materials II (250 RP, £250,000 cash budget) unlocked via server research commands, unlocking legal extraction of Copper (`COPR`) and Silica (`SAND`), plus recipes for Wire (`RECIPE_COPPER_SMELTING`) and Chips (`RECIPE_SILICON_ARC`).
+  - **Feedstock Acceleration**: Explicitly turned OFF (`CmdSetResearchAcceleration(false)`) so delivered `CHIP` cannot be burned for monthly RP.
+  - **Physical Kit Freight Delivery**:
+    * Iron mine (14) -> Steel furnace (5) -> HQ warehouse (0): 40 `STEL`.
+    * Copper mine (15) -> Copper smelter (7): `COPR -> WIRE`.
+    * Silica dunes (16) -> Silicon works (8): `SAND`.
+    * Copper smelter (7) -> Silicon works (8): `WIRE`.
+    * Silicon works (8) -> HQ warehouse (0): `2 SAND + 1 WIRE -> 1 CHIP` (20 `CHIP`).
+    * Both cargos physically delivered and unloaded at Stop 0 into the World 0 company stockpile.
+  - **Negative Paths & Atomic Escrow**:
+    * Calling `PrepareResearch(CompanyID{0}, TECH_MATERIALS_3)` when stock < 40 STEL or < 20 CHIP fails/rejected.
+    * With kit present, selecting `TECH_MATERIALS_3` reserves 40 STEL + 20 CHIP into escrow (`research[company].reserved`).
+    * Cancelling/switching project restores 40 STEL + 20 CHIP back into World 0 stockpile without loss or duplication.
+  - **Unlock & Site Visibility**:
+    * Funding 600 RP (£600,000 cash budget) consumes the escrowed kit via `FinishResearch()`, unlocks `TECH_MATERIALS_3`.
+    * Surveyed 16x16 Rare Earth site on World 2 at Node 17 changes from undiscovered (`Discovered() == false`) to discoverable (`Discovered() == true`).
+  - **Cold Reload Equality**: Fresh-process reload at completion checkpoint, 4 subsequent monthly evaluations, verifying identical state, persistent unlock, persistent site discovery, and 100% cargo conservation.
+- **Execution Budget & Non-Goals**:
+  - Run capped at 36 actual economy evaluations or 45 execution minutes; reload probe capped at 4 evaluations/5 minutes.
+  - No new recipe, city HyperGrowth basket, Materials IV, maglev, full A–D campaign, normal-new-game rollout, price tuning or federation.
+  - Delivery boundary: Local review-ready delivery on `codex/capacity-or-reserve-pilot`. No remote push, no PR creation, no merge.
+
 ## Active execution slice — Freight You Can Read: C1 (11 October 2026)
 
 Owner authorized the "Freight You Can Read" (Card C1) execution slice from `/home/flax/Documents/Codex/2026-10-11/task/feature-delivery/OPENSPACETTD-FEATURE-DELIVERY-PLAN.md` on branch `codex/capacity-or-reserve-pilot` following C0 pilot correction and acceptance:

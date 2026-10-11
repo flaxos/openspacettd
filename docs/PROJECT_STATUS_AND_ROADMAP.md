@@ -1,5 +1,33 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## One Material-Funded Research Unlock (Card P1) — 11 October 2026
+
+Delivered Card P1 ("One Material-Funded Research Unlock") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot` following Card C0/C1 acceptance:
+1. **Pipeline B Freight & 2-Input CHIP Production**:
+   - Copper Smelting (`RECIPE_COPPER_SMELTING`, 0x17): 2 `COPR` -> 2 `WIRE` at Copper smelter (Node 7).
+   - Silicon Arcology (`RECIPE_SILICON_ARC`, 0x19): 2 `SAND` + 1 `WIRE` -> 1 `CHIP` at Silicon works (Node 8).
+   - Structural Steel Smelting (`RECIPE_STEEL_SMELTING`, 0x13): 2 `IRON` -> 1 `STEL` at Steel furnace (Node 5).
+   - Dedicated freight rail consists hauling physical cargo: Copper mine -> Copper smelter (`COPR`), Copper smelter -> Silicon works (`WIRE`), Silica dunes -> Silicon works (`SAND`), Silicon works -> HQ warehouse (`CHIP`), Steel furnace -> HQ warehouse (`STEL`).
+2. **Corporate HQ & Feedstock Acceleration Governance**:
+   - Corporate HQ established on Core World 0 (`TileXY(70, 60)`), funded via server command `Commands::PlaceCorporateHQ` costing £2,500,000 cash.
+   - Feedstock acceleration explicitly disabled (`CmdSetResearchAcceleration(false)` / `IntegratedEconomy::SetAcceleration(false)`). Delivered `CHIP` is retained in the World 0 company stockpile rather than burned for monthly RP.
+   - Baseline prerequisites Materials I (`TECH_MATERIALS_1`, 301, 100 RP) and Materials II (`TECH_MATERIALS_2`, 302, 250 RP funded with £250k budget) verified prior to Tier III unlock.
+3. **Atomic Escrow Reservation & Negative Paths**:
+   - Missing kit rejection: Rejects research selection if company stockpile lacks 40 `STEL` or 20 `CHIP`.
+   - Foreign company rejection: Rejects unstocked / non-HQ foreign companies.
+   - Atomic escrow debited: Moves 40 `STEL` + 20 `CHIP` from World 0 stockpile to `research[c0].reserved` cleanly, maintaining strict conservation in snapshot `held`.
+   - Cancellation / refund: Cancelling research returns 100% of reserved cargo back to the stockpile without leakage or duplication.
+4. **Research Progression & Opportunity Revelation**:
+   - Ordinary server research commands: `start-research-3 600000` reserves kit, selects Materials III (`TECH_MATERIALS_3`, 303), and budgets £600,000 cash.
+   - Monthly evaluation completes 600 RP, consumes escrowed kit into `_commonwealth_slice_audit->research_consumed`, and unlocks `TECH_MATERIALS_3`.
+   - 16x16 Rare Earth extraction site (0x14, producing `RARE`) surveyed on World 2 at Node 17 transitions from undiscovered (`Discovered() == false`) to discoverable (`Discovered() == true`).
+5. **Verification & Audit**:
+   - Catch2 unit tests in `src/tests/test_commonwealth_works.cpp`: `[commonwealth-works]` (416 assertions in 14 cases) passing 100%.
+   - Full CTest suite: 564/564 tests passing 100%.
+   - Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` passing with zero warnings or errors.
+   - Headless native simulation runner (`scripts/verify_commonwealth_research.py`) completed physical freight haulage, stock accumulation (80 STEL, 35 CHIP), negative paths verification, Materials III unlock, rare earth discovery revelation, 6 additional post-unlock periods with 100% cargo conservation, and byte-for-byte cold reload match in a fresh process.
+   - Audit evidence: `docs/audit/2026-10-11/material-research/evidence.json` (checkpoint SHA-256 `0ddfdb3c4423868f0c096b4aa3b100c4d2f2306fcd4dd1bacd2e66b029df7c02`).
+
 ## Freight You Can Read (Card C1) — 11 October 2026
 
 Delivered Card C1 ("Freight You Can Read") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot` following C0 acceptance verification:

@@ -743,11 +743,12 @@ std::map<CargoType, uint32_t> IntegratedEconomy::ResearchKit(TechID tech)
 bool IntegratedEconomy::PrepareResearch(CompanyID company, TechID project)
 {
 	if (!enabled) return true;
+	if (!Company::IsValidID(company)) return false;
+	auto hq = CorporateHQManager::GetHQ(company);
+	if (!hq) return false;
 	auto &r = research[company];
 	if (r.kit_project == project) return true;
 	if (r.kit_project != TECH_NONE) CancelResearch(company);
-	auto hq = CorporateHQManager::GetHQ(company);
-	if (!hq) return false;
 	auto kit = ResearchKit(project);
 	if (!kit.empty() && !StockpileManager::ConsumeBOM(hq->world_id, company, kit, false)) return false;
 	r.kit_project = project;
@@ -758,7 +759,9 @@ bool IntegratedEconomy::PrepareResearch(CompanyID company, TechID project)
 void IntegratedEconomy::FinishResearch(CompanyID company)
 {
 	if (!enabled) return;
-	auto &r = research[company];
+	auto it = research.find(company);
+	if (it == research.end()) return;
+	auto &r = it->second;
 	for (auto [cargo, units] : r.reserved)
 		Record(EconomyFlow::Consumed, cargo, units);
 	if (_commonwealth_slice_audit != nullptr)
@@ -787,6 +790,7 @@ bool IntegratedEconomy::Accelerates(CompanyID company)
 }
 void IntegratedEconomy::SetAcceleration(CompanyID company, bool value)
 {
+	if (!Company::IsValidID(company)) return;
 	research[company].acceleration = value;
 }
 const EconomyResearch *IntegratedEconomy::Research(CompanyID company)
