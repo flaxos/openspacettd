@@ -359,6 +359,38 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
 
 ---
 
+### Track 10: Sustained Core Fleet Shuttles & HyperGrowth Megacity Expansion
+
+**Objective:** Verify that multi-consist shuttle scheduling along the 17.1-month transit corridor eliminates the starvation gap, maintains continuous food and construction basket reserves, sustains steady multi-year house and population additions, and achieves `MegacityGrowthState::HyperGrowth` with 2.0x growth speed and 1.5x passenger/mail throughput.
+
+1. **Launch Scenario:**
+   * `./build/openttd -c demo/integrated_economy.cfg -g demo/OpenSpaceTTD-Sustained-Growth-UAT.sav`
+2. **Inspect Core Megacity Panel & Reserves:**
+   * Viewport centers on **Station 10** (tiles 795..796, 62) and **Town 0 (Mito)** (tile 71454).
+   * Click on Mito town nameplate → open **Core Megacity Management** panel.
+   * **Expected:**
+     * Food reserve displays active stock ($\ge 50$ units).
+     * Zero starvation alert; growth indicator displays active countdown (`grow_counter` actively ticking down).
+3. **Inspect Fleet Headway & Shuttle Scheduling:**
+   * Open train list for Company 0 and inspect the staggered shuttle consists assigned to the Station 2 -> Station 10 transit loop.
+   * Observe consist spacing: deliveries arrive at headway $\le 1.7\text{ months}$ (approx. every 3,500 ticks).
+   * **Expected:**
+     * Town food reserves never drop to 0.
+     * `MegacityGrowthState::Starvation` is never entered.
+4. **Observe HyperGrowth Boom:**
+   * When Tier 1 (Food), Tier 2 (Steel, Ballast, Wiring), and Tier 3 (Chips, Crystals) are supplied concurrently:
+   * **Expected:**
+     * Megacity status advances to **HyperGrowth**.
+     * Growth multiplier reports 2.0x (halving tick period between house expansion attempts).
+     * Passenger and mail production multipliers report 1.5x.
+5. **Multi-Year House Expansion Observation:**
+   * Fast-forward simulation across calendar years.
+   * **Expected:**
+     * Houses increment continuously from 29 to 30, 31, 32, 33...
+     * Population expands smoothly from 1,096 past 1,270+ without starvation dropouts.
+
+---
+
 ## 4. Troubleshooting & Savegame Recovery
 
 * **Accidental save corruption:** Do not overwrite the baseline fixtures. Keep `demo/OpenSpaceTTD-Integrated-Economy-UAT.sav` read-only or copy it to `demo/save/` before playing.

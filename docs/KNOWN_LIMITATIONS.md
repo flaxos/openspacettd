@@ -1,5 +1,10 @@
 # OpenSpaceTTD Known Limitations
 
+## Horizon A Fleet Shuttle Scheduling & Sustained Megacity Expansion Boundaries — 11 October 2026
+
+- **Fleet Headway & Storage Buffer Synchronization**: The mathematical model and integration test suite prove that maintaining 0 starvation months along the 17.1-month transit corridor requires consist headway $\le 1.7\text{ months}$ (or intermediate staging buffers). Single-consist deliveries inevitably leave the receiving city in starvation for $>88\%$ of the duty cycle due to the 3-month city storage ceiling ($3 \times 55 = 165\text{ units}$).
+- **Human Desktop UAT Pending**: The automated verification suite (`src/tests/test_fleet_shuttle_growth.cpp`, `scripts/verify_fleet_shuttle_growth.py`, and scenario `demo/OpenSpaceTTD-Sustained-Growth-UAT.sav`) validates starvation elimination, house progression (29 -> 33), population gain (1,096 -> 1,276), and `MegacityGrowthState::HyperGrowth` evaluation. Live human observation of multiple trains traversing the corridor and real-time GUI panel updates remains **Pending**.
+
 ## Commonwealth Wormhole Gate Art Runtime Boundaries — 11 October 2026
 
 - **Sprite Variants**: The 16-sprite gate pack provides custom hexagonal containment geometry for
