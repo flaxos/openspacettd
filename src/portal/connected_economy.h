@@ -133,4 +133,13 @@ void ResetConnectedEconomyProof();
 /** @return Read-only native map type/height/ownership fingerprint, including ownerless tiles. */
 uint64_t GetConnectedEconomyMapFingerprint();
 
+/** Prepare isolated Commonwealth works prototype scenario. */
+bool PrepareWorks();
+
+/** Commission alternative raw-resource connection on World 3 with independent portal link. */
+bool ConnectWorldSource(nlohmann::json &report);
+
+/** Control closure of primary World 2 silica corridor. */
+bool SetPrimaryCorridorClosed(bool closed);
+
 #endif /* CONNECTED_ECONOMY_H */

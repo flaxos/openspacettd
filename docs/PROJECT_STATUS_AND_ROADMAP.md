@@ -1,5 +1,37 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## A World Worth Connecting (Sprint 3) — 11 October 2026
+
+Delivered Sprint 3 ("A World Worth Connecting") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex and Astra review:
+1. **Alternative Raw Source & Redundant Route**:
+   - Identified concrete industrial flow: Ballast Crusher (`Node 4`, `TileXY(300, 80)`, World 1 / Industrial Commonwealth) consuming raw Silica (`SILC`) to produce Ballast (`BALL`).
+   - Primary Source: Silica Dunes at `Node 13` (`TileXY(650, 80)`, World 2 / Extraction Frontier) delivering via Train 1 across the shared World 2 ↔ World 1 throat on row 82 (track length: 294 tiles).
+   - Alternative Source: Commissioned Silica Dunes extraction on World 3 (`Research Frontier`, `WorldID{3}`, Phase 3 Frontier) via paid area surveying (`Commands::SurveyResources`) and native industry founding (`Commands::BuildIndustry`).
+2. **Independent Wormhole Link & Bottleneck Independence**:
+   - Constructed direct portal pair linking World 3 (`TileXY(790, 96)`) directly to World 1 (`TileXY(476, 96)`) via server-authoritative `Commands::BuildPortalPair`.
+   - Connected directly to a new platform at Ballast Crusher (Stop 4) on row 96.
+   - Route length: 248 tiles (~15.6% shorter route than World 2).
+   - Bottleneck Independence: The World 3 direct link completely bypasses World 2 and does NOT share the World 2 ↔ World 1 throat on row 82.
+3. **Genuine Capital Costs & Treasury Debits**:
+   - Commissioned with full capital cost breakdown (£5,095,387 total spent from real company balance):
+     * Surveying: £60,000 (`Commands::SurveyResources`)
+     * Industry Founding: £4,921,875 (`Commands::BuildIndustry`)
+     * Extraction Station (World 3): £1,365 (`Commands::BuildRailStation`)
+     * Consumer Platform (World 1): £1,093 (`Commands::BuildRailStation`)
+     * Direct Portal Pair (W1 ↔ W3): £13,532 (`Commands::BuildPortalPair`)
+     * Depot: £540 (`Commands::BuildRailDepot`)
+     * Dedicated Freight Consist (Train 9 / Consist 46): £76,657 (`Commands::BuildVehicle` & `Commands::MoveRailVehicle`)
+4. **Selective Primary Corridor Interruption & Production Resilience**:
+   - Selective control of the primary throat corridor via `connected_economy close-primary-corridor` (stopping Train 1) and `connected_economy reopen-primary-corridor` (restarting Train 1).
+   - During primary corridor interruption (Periods 13–18), Train 9 sustained raw SILC deliveries from World 3, maintaining Ballast Crusher output and preventing production collapse.
+   - Primary corridor reopened cleanly (Periods 19–24), restoring dual-source supply with 100% material cargo conservation.
+5. **Verification & Audit**:
+   - Unit tests: Added Catch2 test cases in `src/tests/test_commonwealth_works.cpp` (229 assertions across 9 test cases, passing 100%).
+   - Full test suite: 307,564 assertions across 539 test cases passing 100% (`./build/openttd_test`); CTest suite: 554/554 tests passing 100%.
+   - Headless verification runner (`scripts/verify_commonwealth_expansion.py`) executed 24 native simulation periods proving connection, dual-source operation, throat closure resilience, corridor reopening, 100% cargo conservation, and exact cold reload match in a fresh process.
+   - Published audit evidence in `docs/audit/2026-10-11/world-connection/evidence.json`.
+   - Handoff status: Review-ready locally on `codex/capacity-or-reserve-pilot`. Zero push, zero PR, no merge to main, Sprint 4 deferred.
+
 ## A District That Stays Built (Sprint 2) — 11 October 2026
 
 Delivered Sprint 2 ("A District That Stays Built") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex and Astra review:

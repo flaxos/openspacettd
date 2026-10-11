@@ -372,6 +372,7 @@ void VehicleLengthChanged(const Vehicle *u)
 	const Engine *engine = u->GetEngine();
 	GrfID grfid = engine->grf_prop.grfid;
 	GRFConfig *grfconfig = GetGRFConfig(grfid);
+	if (grfconfig == nullptr) return;
 	if (_gamelog.GRFBugReverse(grfid, engine->grf_prop.local_id) || !grfconfig->grf_bugs.Test(GRFBug::VehLength)) {
 		ShowNewGrfVehicleError(u->engine_type, STR_NEWGRF_BROKEN, STR_NEWGRF_BROKEN_VEHICLE_LENGTH, GRFBug::VehLength, true);
 	}

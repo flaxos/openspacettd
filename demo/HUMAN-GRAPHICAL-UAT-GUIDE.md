@@ -444,6 +444,44 @@ Execute the following 8 tracks in sequence. Record your observations in [HUMAN-U
      * Allow town to run multiple months with zero food delivery.
      * Confirm completed residential houses and credited population remain 100% intact with zero decay or demolition.
 
+### 3.13 Track 13: A World Worth Connecting (Sprint 3)
+* **Goal**: Validate alternative raw silica connection on World 3, direct portal linking bypassing World 2, primary throat corridor closure resilience, and corridor restoration.
+* **Target Save**: `docs/audit/2026-10-11/world-connection/checkpoint-24.sav` (or fresh launch via `scripts/verify_commonwealth_expansion.py`).
+* **Command**:
+  ```bash
+  ./build/openttd -c demo/connected_economy.cfg -g docs/audit/2026-10-11/world-connection/checkpoint-24.sav
+  ```
+* **Steps**:
+  1. **Inspect Ballast Crusher (Node 4) Rail Geometry:**
+     * In main viewport, jump to Ballast Crusher at tile (300, 80) in World 1.
+     * Verify two distinct incoming delivery platforms:
+       - **Platform 1 (Row 82)**: Primary corridor from World 2 Silica Dunes (`Node 13`, x=650) traversing the World 2 ↔ World 1 throat (distance: 294 tiles).
+       - **Platform 2 (Row 96)**: Direct alternative corridor connecting to World 3 via portal head at `TileXY(476, 96)` (distance: 248 tiles, ~15.6% shorter).
+  2. **Audit Independent Wormhole Link (World 1 ↔ World 3):**
+     * Follow track row 96 east from Ballast Crusher to portal head at `TileXY(476, 96)` (World 1).
+     * Inspect linked wormhole endpoint at `TileXY(790, 96)` on World 3 (`Research Frontier`).
+     * Confirm the wormhole directly bridges World 1 and World 3, completely bypassing World 2 and avoiding the World 2 throat on row 82.
+  3. **Inspect World 3 Extraction Site & Freight Consist:**
+     * Navigate east on World 3 along row 96 to station `Stop 32` (`TileXY(860, 96)`).
+     * Confirm the player-funded Silica Dunes extraction industry and rail depot.
+     * Observe Train 9 ("W3 Silica > Ballast crusher", Consist 46) loading SILC and departing through the World 3 portal.
+  4. **Test Primary Throat Corridor Interruption & Resilience:**
+     * Open developer console (`` ` ``) and execute:
+       ```
+       connected_economy close-primary-corridor
+       ```
+     * Verify Train 1 ("Silica dunes > Ballast crusher") comes to a complete halt, stopping World 2 deliveries.
+     * Observe Ballast Crusher operations in the Empire Facilities window (`F4`):
+       - Train 9 continues delivering SILC from World 3 via the independent corridor.
+       - Ballast Crusher batches continue advancing; BALL production does not stall.
+  5. **Test Primary Throat Recovery & Combined Flow:**
+     * In console, execute:
+       ```
+       connected_economy reopen-primary-corridor
+       ```
+     * Verify Train 1 restarts and resumes deliveries alongside Train 9.
+     * Confirm both trains feed Ballast Crusher platforms concurrently with zero cargo loss or gridlock.
+
 ---
 
 ## 4. Troubleshooting & Savegame Recovery

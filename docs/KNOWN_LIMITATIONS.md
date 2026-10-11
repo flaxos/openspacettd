@@ -1,5 +1,11 @@
 # OpenSpaceTTD Known Limitations
 
+## A World Worth Connecting Boundaries (Sprint 3) — 11 October 2026
+
+- **Concrete Pilot Slice & Single Consumer Focus**: Sprint 3 expansion focuses on a single concrete raw resource connection (World 3 Silica extraction feeding Ballast Crusher at Node 4 in World 1) to prove bottleneck bypass and independent route redundancy. Additional resource chains, multi-stop distribution networks, or higher-tier expansion worlds remain deferred to subsequent Commonwealth milestones.
+- **Dedicated Independent Direct Portal Pair**: The direct wormhole portal pair connects World 3 (`TileXY(790, 96)`) directly to World 1 (`TileXY(476, 96)`), requiring sufficient land area for portal gate heads and terminal track geometry (as planned in `PortalTerminal::Plan`). Bypassing intermediate worlds depends on direct inter-world links and does not replace the existing multi-world galactic routing graph.
+- **Human Desktop UAT Pending**: Automated unit testing (`test_commonwealth_works.cpp`, 229 assertions across 9 cases), full suite (307,564 assertions in 539 cases), CTest suite (554/554), and headless 24-period simulation evidence (`verify_commonwealth_expansion.py`) prove surveying, industry founding, direct portal linking, 15.6% route distance reduction (294 vs 248 tiles), primary throat closure resilience, corridor reopening, 100% cargo conservation, and exact cold reload match. Live interactive desktop playtesting (Track 13 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md`) remains **Pending**.
+
 ## A District That Stays Built Boundaries (Sprint 2) — 11 October 2026
 
 - **Pilot Town Boundary & Finite Opportunities**: Sprint 2 residential expansion is implemented strictly for one pilot Core town (`TownID{0}`) with a non-repeatable finite budget of 4 building opportunities costing `160 STEL + 80 BALL` and £50,000 cash. Expansion to multiple towns, additional tiers, or infinite/recurrent residential commissioning remains deferred to subsequent Commonwealth progression.

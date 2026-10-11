@@ -1,5 +1,15 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## A World Worth Connecting (Sprint 3) — 11 October 2026
+
+**TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**
+Delivered Sprint 3 ("A World Worth Connecting") of the Commonwealth design study for Codex and Astra review:
+- **Concrete Flow & Redundant Source**: Ballast Crusher (`Node 4`, `TileXY(300, 80)`, World 1) consuming raw SILC to produce BALL. Primary supply from World 2 Silica Dunes (`Node 13`, x=650) via Train 1 through the World 2 ↔ World 1 throat on row 82 (distance: 294 tiles). Alternative supply from World 3 Silica Dunes (`Research Frontier`, `WorldID{3}`, Stop 32 at `TileXY(860, 96)`), surveyed via `Commands::SurveyResources` and funded via `Commands::BuildIndustry`.
+- **Independent Direct Portal Pair & Bottleneck Bypass**: Direct portal pair linking World 3 (`TileXY(790, 96)`) directly to World 1 (`TileXY(476, 96)`) via server-authoritative `Commands::BuildPortalPair`, feeding a new platform at Ballast Crusher (Stop 4) on row 96. Shorter route of 248 tiles (~15.6% reduction). Bypasses World 2 entirely and does NOT share the throat on row 82.
+- **Genuine Capital Costs**: Full capital cost breakdown (£5,095,387 total spent from real company balance): surveying £60,000, industry £4,921,875, station £1,365, platform £1,093, portal pair £13,532, depot £540, freight consist (Train 9) £76,657.
+- **Selective Interruption & Production Resilience**: Primary corridor closure via `connected_economy close-primary-corridor` halts Train 1; Train 9 sustains SILC deliveries from World 3, keeping Ballast Crusher production rate steady without starvation collapse. Reopening via `connected_economy reopen-primary-corridor` restores dual-source flow.
+- **Verification & Evidence**: Catch2 unit tests in `src/tests/test_commonwealth_works.cpp` (229 assertions in 9 cases) passing 100%. Full Catch2 suite (307,564 assertions in 539 cases) and CTest suite (554/554 tests) passing 100%. Headless runner `scripts/verify_commonwealth_expansion.py` completed 24 native periods with 100% cargo conservation and exact cold reload match. Evidence published at `docs/audit/2026-10-11/world-connection/evidence.json`. Local handoff to Codex/Astra; zero push/PR, no merge to main.
+
 ## A District That Stays Built (Sprint 2) — 11 October 2026
 
 **TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**

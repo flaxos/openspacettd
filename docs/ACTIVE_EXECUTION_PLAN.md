@@ -1,5 +1,24 @@
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Active execution handoff — A World Worth Connecting: Sprint 3 (11 October 2026)
+
+Owner approved the third candidate slice "A World Worth Connecting" from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` and sections 4, 5, and 7 of `OPENSPACETTD-DESIGN-STUDY.md` on branch `codex/capacity-or-reserve-pilot`:
+- **Principle**: Purposeful inter-world expansion providing supply diversification, topological bottleneck independence, and demonstrable industrial output resilience.
+- **Ruleset**: Opt-in experimental v2 rules for fresh disposable fixtures only. V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope & Implementation**:
+  - **Existing Consumer**: Player-owned bootstrap Ballast Crusher at Node 4 (`TileXY(300, 80)`, World 1 / Industrial Commonwealth) consuming raw SILC to produce BALL.
+  - **Original Source & Corridor**: Silica Dunes at Node 13 (`TileXY(650, 80)`, World 2 / Extraction Frontier) delivered via Train 1 across the World 2 ↔ World 1 portal throat on row 82 (`TileXY(534, 82)` ↔ `TileXY(476, 82)`). Track length: 294 tiles.
+  - **Alternative Raw Resource Origin**: A new Silica Dunes extraction facility on World 3 (`Research frontier`, `WorldID{3}`, Phase 3 Frontier), discovered via paid company area surveying (`Commands::SurveyResources`), funded via native `Commands::BuildIndustry`.
+  - **Independent Wormhole Link**: A direct portal pair constructed via `Commands::BuildPortalPair` directly between World 3 (`TileXY(790, 96)`) and World 1 (`TileXY(476, 96)`), connecting to a new platform at Ballast Crusher (Stop 4) on row 96. Track length: 248 tiles (~16% shorter route).
+  - **Bottleneck Independence**: The World 3 connection completely bypasses World 2 and does **NOT** share the World 2 ↔ World 1 portal throat on row 82. When the primary corridor is deliberately closed, World 3 maintains deliveries without interruption.
+- **Verification & Bounds**:
+  - Measure route timing, transit distance, and round-trip cycles between World 2 and World 3 origins.
+  - Deliver native before/after operating sample: baseline operation (periods 1–6), expansion connected (period 7), dual-source operation (periods 8–12), deliberate closure of original corridor (periods 13–18), reopening/recovery (periods 19–24).
+  - Demonstrate sustained Ballast Crusher production during closure of the original approach.
+  - Fresh-process cold reload at period 24 and 4 post-reload periods with 100% cargo conservation.
+  - Real costs and treasury accounting: surveying, industry funding, portal pair construction, track laying, depot, and train purchase.
+- **Delivery Boundary**: Local review-ready delivery on `codex/capacity-or-reserve-pilot`. No push, no PR creation, no merge, no Sprint 4 execution. Hand off to Codex/Astra for review.
+
 ## Active execution handoff — A District That Stays Built: Sprint 2 (11 October 2026)
 
 Owner accepted Sprint 1 "Capacity or Reserve" pilot evidence and approved the residential slice "A District That Stays Built" from `ANTIGRAVITY-PLAN-AND-PROMPTS.md` on branch `codex/capacity-or-reserve-pilot`:

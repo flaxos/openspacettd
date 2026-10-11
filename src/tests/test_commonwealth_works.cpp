@@ -21,8 +21,14 @@
 #include "../road_map.h"
 #include "../clear_map.h"
 #include "../newgrf_house.h"
-#include "../tile_cmd.h"
-#include "../window_func.h"
+#include "../portal/connected_economy.h"
+#include "../portal/resource_sites.h"
+#include "../portal/portal_registry.h"
+#include "../train.h"
+#include "../vehicle_cmd.h"
+#include "../vehicle_func.h"
+#include "../void_map.h"
+#include "../rail_cmd.h"
 #include "../safeguards.h"
 
 extern void SetupCommandAuthorityWorld(WorldPhase phase, uint32_t score);
@@ -594,4 +600,173 @@ TEST_CASE("Works prototype residential house placement, stage progression, prote
 		CHECK(dist->buildings_completed == 1);
 		CHECK(IsTileType(placed_tile, TileType::House));
 	}
+}
+
+TEST_CASE("Works alternative world connection, direct portal linking, and bottleneck independence", "[commonwealth-works]")
+{
+	WorksTestFixture fixture;
+
+	// Reset planet regions and expand map to 256x256 to allow terminal footprints
+	PlanetManager::Reset();
+	Map::Allocate(256, 256);
+	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
+		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
+		else MakeVoid(tile);
+	}
+
+	PlanetRegion w1{
+		.id = WorldID{1},
+		.name = "Industrial Commonwealth",
+		.phase = WorldPhase::Phase2_Developed,
+		.biome = WorldBiome::Temperate,
+		.min_x = 10,
+		.min_y = 10,
+		.max_x = 100,
+		.max_y = 100,
+		.development_score = 10000,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(w1));
+	IntegratedEconomy::RegisterRole(WorldID{1}, EconomicRole::Industrial);
+
+	// Setup World 2 (extraction frontier) and World 3 (research frontier)
+	PlanetRegion w2{
+		.id = WorldID{2},
+		.name = "Extraction Frontier",
+		.phase = WorldPhase::Phase2_Developed,
+		.biome = WorldBiome::AridDesert,
+		.min_x = 10,
+		.min_y = 110,
+		.max_x = 100,
+		.max_y = 200,
+		.development_score = 4000,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(w2));
+	IntegratedEconomy::RegisterRole(WorldID{2}, EconomicRole::Frontier);
+
+	PlanetRegion w3{
+		.id = WorldID{3},
+		.name = "Research Frontier",
+		.phase = WorldPhase::Phase3_Frontier,
+		.biome = WorldBiome::AridDesert,
+		.min_x = 150,
+		.min_y = 10,
+		.max_x = 240,
+		.max_y = 100,
+		.development_score = 3000,
+	};
+	REQUIRE(PlanetManager::RegisterRegion(w3));
+	IntegratedEconomy::RegisterRole(WorldID{3}, EconomicRole::Frontier);
+
+	// 2. Resource site registration & Surveying on World 3
+	ResourceSiteManager::Reset();
+	ResourceSiteManager::SetEnabled(true);
+	TileIndex w3_site = TileXY(180, 70); // In World 3
+	auto *spec0 = const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{0}));
+	spec0->enabled = true;
+	spec0->life_type.Set(IndustryLifeType::Extractive);
+	IndustryType ind_type = IndustryType{0};
+	uint32_t site_id = ResourceSiteManager::AddSite(w3_site, ind_type, 16, 16);
+	REQUIRE(site_id != 0);
+
+	// Site is unsurveyed by Company 0 initially
+	CHECK_FALSE(ResourceSiteManager::Surveyed(CompanyID{0}, w3_site));
+
+	// Survey command on World 3
+	auto survey_res = Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, w3_site);
+	REQUIRE(survey_res.Succeeded());
+	CHECK(ResourceSiteManager::Surveyed(CompanyID{0}, w3_site));
+
+	// 3. Direct Portal Pair linking between World 1 and World 3
+	TileIndex portal_w1 = TileXY(50, 50);
+	TileIndex portal_w3 = TileXY(180, 50);
+
+	Company *c = Company::GetIfValid(CompanyID{0});
+	REQUIRE(c != nullptr);
+	c->clear_limit = 1000 << 16;
+	c->avail_railtypes.Set(RAILTYPE_BEGIN);
+
+	auto portal_res = Command<Commands::BuildPortalPair>::Do(
+		DoCommandFlag::Execute,
+		portal_w1, DiagDirection::NE,
+		portal_w3, DiagDirection::SW,
+		RAILTYPE_BEGIN
+	);
+	REQUIRE(portal_res.Succeeded());
+	UpdateSignalsInBuffer();
+
+	// Verify both portal tiles are registered and linked directly
+	CHECK(PortalRegistry::IsPortalTile(portal_w1));
+	CHECK(PortalRegistry::IsPortalTile(portal_w3));
+	CHECK(PortalRegistry::GetOtherPortalEnd(portal_w1) == portal_w3);
+	CHECK(PortalRegistry::GetOtherPortalEnd(portal_w3) == portal_w1);
+
+	// Bottleneck independence: This portal links World 1 <-> World 3 directly,
+	// completely bypassing World 2!
+	CHECK(PlanetManager::GetTileWorld(portal_w1) == WorldID{1});
+	CHECK(PlanetManager::GetTileWorld(portal_w3) == WorldID{3});
+
+	// 4. Train isolation and selective corridor closure
+	ResetRailTypes();
+	MakeRailNormal(TileXY(50, 60), CompanyID{0}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	MakeRailNormal(TileXY(180, 60), CompanyID{0}, TrackBits{Track::X}, RAILTYPE_RAIL);
+	_engine_pool.CleanPool();
+	Engine::CreateAtIndex(EngineID{0}, VehicleType::Train, 0);
+	auto *rvi0 = const_cast<RailVehicleInfo *>(RailVehInfo(EngineID{0}));
+	rvi0->power = 1000;
+	rvi0->weight = 50;
+	rvi0->railtypes = RailTypes{RAILTYPE_RAIL};
+
+	REQUIRE(Vehicle::CanAllocateItem(2));
+	Train *t1 = Vehicle::Create<Train>();
+	t1->SetFrontEngine();
+	t1->owner = CompanyID{0};
+	t1->name = "Silica dunes > Ballast crusher";
+	t1->tile = TileXY(50, 60);
+	t1->track = Track::X;
+	t1->railtypes = RailTypes{RAILTYPE_RAIL};
+	t1->engine_type = EngineID{0};
+	t1->cargo_type = CargoType{0};
+	t1->gcache.cached_power = 1000;
+	t1->gcache.cached_veh_length = 8;
+
+	Train *t9 = Vehicle::Create<Train>();
+	t9->SetFrontEngine();
+	t9->owner = CompanyID{0};
+	t9->name = "W3 Silica > Ballast crusher";
+	t9->tile = TileXY(180, 60);
+	t9->track = Track::X;
+	t9->railtypes = RailTypes{RAILTYPE_RAIL};
+	t9->engine_type = EngineID{0};
+	t9->cargo_type = CargoType{0};
+	t9->gcache.cached_power = 1000;
+	t9->gcache.cached_veh_length = 8;
+
+	// Both trains are running initially (not stopped)
+	CHECK_FALSE(t1->vehstatus.Test(VehState::Stopped));
+	CHECK_FALSE(t9->vehstatus.Test(VehState::Stopped));
+
+	// Close primary corridor: stops t1 only
+	CHECK(SetPrimaryCorridorClosed(true));
+	CHECK(t1->vehstatus.Test(VehState::Stopped));
+	CHECK_FALSE(t9->vehstatus.Test(VehState::Stopped)); // Alternative source is NOT interrupted!
+
+	// Reopen primary corridor: restarts t1
+	CHECK(SetPrimaryCorridorClosed(false));
+	CHECK_FALSE(t1->vehstatus.Test(VehState::Stopped));
+	CHECK_FALSE(t9->vehstatus.Test(VehState::Stopped));
+
+	_vehicle_pool.CleanPool();
+	ResetVehicleHash();
+	_engine_pool.CleanPool();
+	_engine_mngr.ResetToDefaultMapping();
+	SetupEngines();
+	PortalRegistry::Reset();
+	ResourceSiteManager::Reset();
+	ResourceSiteManager::SetEnabled(false);
+	Map::Allocate(64, 64);
+	for (TileIndex tile{0}; tile < Map::Size(); ++tile) {
+		if (IsInnerTile(tile)) MakeClear(tile, ClearGround::Grass, 3);
+		else MakeVoid(tile);
+	}
+	UpdateSignalsInBuffer();
 }

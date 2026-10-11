@@ -1,5 +1,24 @@
 # Human UAT results — recovery / v1.1
 
+## A World Worth Connecting (Sprint 3) — 11 October 2026
+
+**Human desktop status: Pending.** Automated Catch2 test suite (229 assertions across 9 test cases in `src/tests/test_commonwealth_works.cpp`), full Catch2 suite (307,564 assertions in 539 test cases), CTest suite (554/554 tests passing), and headless verification runner (`scripts/verify_commonwealth_expansion.py`) executed on branch `codex/capacity-or-reserve-pilot`.
+- **Concrete Source / Link / Consumer**: Ballast Crusher (`Node 4`, `TileXY(300, 80)`, World 1) consuming raw SILC to produce BALL. Primary source from World 2 Silica Dunes (`Node 13`, x=650) via Train 1 through the World 2 ↔ World 1 throat on row 82 (distance: 294 tiles). Alternative source on World 3 (`Research Frontier`, `WorldID{3}`, Stop 32 at `TileXY(860, 96)`), surveyed via `Commands::SurveyResources` and funded via `Commands::BuildIndustry`.
+- **Independent Direct Portal Pair & Bottleneck Bypass**: Direct portal pair linking World 3 (`TileXY(790, 96)`) directly to World 1 (`TileXY(476, 96)`) via server-authoritative `Commands::BuildPortalPair`, feeding a new platform at Ballast Crusher (Stop 4) on row 96. Shorter route of 248 tiles (~15.6% reduction). Bypasses World 2 entirely and does NOT share the throat on row 82.
+- **Genuine Capital Costs**: Full capital cost breakdown (£5,095,387 total spent from real company balance): surveying £60,000, industry £4,921,875, station £1,365, platform £1,093, portal pair £13,532, depot £540, freight consist (Train 9 / Consist 46) £76,657.
+- **Selective Interruption & Production Resilience**: Primary corridor closure via `connected_economy close-primary-corridor` halts Train 1; Train 9 sustains SILC deliveries from World 3, keeping Ballast Crusher production rate steady without starvation collapse. Reopening via `connected_economy reopen-primary-corridor` restores dual-source flow.
+- **Simulation Proof**: 24-period native simulation runs proved connection, dual-source operation, throat closure resilience, corridor reopening, 100% cargo conservation, and exact cold reload match.
+- **Desktop Acceptance**: Human desktop verification of Track 13 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` remains **Pending**. Audit evidence staged at `docs/audit/2026-10-11/world-connection/README.md`.
+
+## A District That Stays Built (Sprint 2) — 11 October 2026
+
+**Human desktop status: Pending.** Automated Catch2 test suite (202 assertions across 8 test cases in `src/tests/test_commonwealth_works.cpp`), full Catch2 suite (307,537 assertions in 538 test cases), CTest suite (553/553 tests passing), and headless simulation runner (`scripts/verify_commonwealth_residential.py`) executed on branch `codex/capacity-or-reserve-pilot`.
+- **Material-Funded Residential Expansion**: Commissioned one-time residential expansion for pilot Core town (`TownID{0}`, Commonwealth Metropolis) under `EconomyRulesVersion::V2`. Replicated command `Commands::CommissionTownResidentialDistrict` atomically debits `160 STEL + 80 BALL` and £50,000 cash; grants a finite budget of 4 native building opportunities.
+- **Native House Shells & Staged Growth**: Candidate sites search outwards from town center for legal road frontage (`RoadTypesAllowHouseHere`, `TownLayoutAllowsHouseHere`, `CanBuildHouseHere`). Blocked frontage reports `"Residential Works: Awaiting site access (N remaining, frontage blocked)"` without burning budget. Available frontage constructs native house shells at stage 0 with zero premature population. Shells progress natively through stages 0 -> 1 -> 2 -> 3; upon `TOWN_HOUSE_COMPLETED`, town population is credited (+232 citizens).
+- **Permanent Demolition Immunity**: Sets native `IsHousePlayerProtected` bit on completed residential buildings. Permanently blocks OpenTTD's random town redevelopment demolition loop in `TileLoop_Town` and `CanDeleteHouse`.
+- **Food Service Decoupling**: Residential district construction and preservation operate independently of commercial food service. Completely shutting off food delivery does not revoke completed housing or trigger population decay.
+- **Desktop Acceptance**: Human desktop verification of Track 12 in `demo/HUMAN-GRAPHICAL-UAT-GUIDE.md` remains **Pending**. Audit evidence staged at `docs/audit/2026-10-11/residential-district/evidence.json`.
+
 ## Capacity or Reserve Pilot Prototype (Sprint 1) — 11 October 2026
 
 **Human desktop status: Pending.** Automated Catch2 test suite (150 assertions in 6 test cases in `src/tests/test_commonwealth_works.cpp`), full Catch2 suite (307,485 assertions in 536 test cases), CTest suite (551/551 tests passing), and headless simulation runner (`scripts/verify_commonwealth_works.py`) executed on isolated branch `codex/capacity-or-reserve-pilot`.

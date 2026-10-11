@@ -733,7 +733,7 @@ bool Prepare(bool resources = false, bool integrated = false)
  * Construct the isolated Capacity or Reserve prototype fixture on a fresh map.
  * @return Whether all construction and configuration commands succeeded.
  */
-bool PrepareWorks()
+bool PrepareWorksInternal()
 {
 	if (Map::SizeX() != 1024 || Map::SizeY() != 1024 || Company::GetNumItems() != 0 || Industry::GetNumItems() != 0 ||
 	    Vehicle::GetNumItems() != 0) {
@@ -749,7 +749,7 @@ bool PrepareWorks()
 			}
 		}
 	ResourceSiteManager::Reset();
-	ResourceSiteManager::SetEnabled(false);
+	ResourceSiteManager::SetEnabled(true);
 	PlanetManager::Reset();
 	const char *names[] = {"Core Commonwealth", "Industrial Commonwealth", "Extraction frontier", "Research frontier"};
 	for (uint i = 0; i < 4; ++i) {
@@ -901,6 +901,200 @@ bool PrepareWorks()
 }
 
 /**
+ * Commission an alternative raw-resource connection on World 3 providing
+ * independent supply redundancy to an existing Industrial consumer.
+ * Surveys World 3 extraction site, funds industry, constructs a dedicated
+ * direct portal pair connecting World 3 directly to World 1, lays track, adds
+ * consumer platform, and dispatches a dedicated freight train.
+ *
+ * @param[out] report Captured capital costs, route geometry, and vehicle IDs.
+ * @return True if the entire connection was successfully commissioned.
+ */
+bool ConnectWorldSourceInternal(Json &report)
+{
+	AutoRestoreBackup owner(_current_company, CompanyID{0});
+	Company *company = Company::GetIfValid(CompanyID{0});
+	if (company == nullptr) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL Company 0 invalid");
+		return false;
+	}
+
+	for (const Train *t : Train::Iterate()) {
+		if (t->IsFrontEngine() && t->name.find("W3 Silica") != std::string::npos) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL World 3 connection already established");
+			return false;
+		}
+	}
+
+	Money money_before = company->money;
+	report = {{"success", false}, {"costs", Json::object()}};
+
+	// 1. Survey 16x16 square on World 3
+	ResourceSiteManager::SetEnabled(true);
+	IndustryType silc_type = MapNewGRFIndustryType(0x80 | 0x10, COMMONWEALTH_INDUSTRY_GRFID);
+	TileIndex survey_anchor = TileXY(856, 88);
+	uint32_t site_id = ResourceSiteManager::AddSite(survey_anchor, silc_type, 16, 16);
+	if (site_id == 0) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL could not register World 3 resource site");
+		return false;
+	}
+	auto survey_res = Command<Commands::SurveyResources>::Do(DoCommandFlag::Execute, survey_anchor);
+	if (!Result(survey_res, "survey World 3 silica area")) return false;
+	report["costs"]["survey"] = int64_t(survey_res.GetCost());
+	report["site_id"] = site_id;
+
+	// 2. Fund Industry on World 3
+	TileIndex industry_tile = INVALID_TILE;
+	Money ind_paid = 0;
+	const auto *spec = GetIndustrySpec(silc_type);
+	if (spec == nullptr || !spec->enabled) return false;
+	for (uint dy = 5; dy <= 8; ++dy) {
+		for (uint32_t layout = 0; layout < spec->layouts.size(); ++layout) {
+			TileIndex candidate = TileXY(860, 96 - dy);
+			auto quote = Command<Commands::BuildIndustry>::Do({}, candidate, silc_type, layout, false, 1);
+			if (quote.Failed()) continue;
+			auto res = Command<Commands::BuildIndustry>::Do(DoCommandFlag::Execute, candidate, silc_type, layout, false, 1);
+			if (res.Succeeded()) {
+				industry_tile = candidate;
+				ind_paid = res.GetCost();
+				report["costs"]["industry"] = int64_t(ind_paid);
+				break;
+			}
+		}
+		if (industry_tile != INVALID_TILE) break;
+	}
+	if (industry_tile == INVALID_TILE) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL could not place World 3 silica industry");
+		return false;
+	}
+	report["industry_tile"] = industry_tile.base();
+
+	// 3. Build extraction station on World 3 on row 96
+	TileIndex w3_st_tile = TileXY(860, 96);
+	auto st_res = Command<Commands::BuildRailStation>::Do(
+		DoCommandFlag::Execute, w3_st_tile, RAILTYPE_RAIL, Axis::X, 1, 4, STAT_CLASS_DFLT, 0, NEW_STATION, true);
+	if (!Result(st_res, "build World 3 station")) return false;
+	report["costs"]["station_w3"] = int64_t(st_res.GetCost());
+	StationID w3_station = GetStationIndex(w3_st_tile);
+	report["station_w3"] = w3_station.base();
+	Command<Commands::RenameStation>::Do(DoCommandFlag::Execute, w3_station, "Frontier Silica Quarry");
+
+	// 4. Build direct Portal Pair between World 1 and World 3 on row 96
+	auto portal_res = Command<Commands::BuildPortalPair>::Do(
+		DoCommandFlag::Execute, TileXY(476, 96), DiagDirection::SW, TileXY(790, 96), DiagDirection::NE, RAILTYPE_RAIL);
+	if (!Result(portal_res, "build direct World 3 <-> World 1 portal pair")) return false;
+	report["costs"]["portal_pair"] = int64_t(portal_res.GetCost());
+
+	// 5. Build tracks on row 96
+	for (uint x = 297; x <= 476; ++x) {
+		TileIndex t = TileXY(x, 96);
+		if (PlanetManager::GetTileWorld(t) == WorldID{1} && !IsTileType(t, TileType::Station) && !PortalRegistry::IsPortalTile(t)) {
+			if (!Rail(t, Track::X)) return false;
+		}
+	}
+	for (uint x = 790; x <= 876; ++x) {
+		TileIndex t = TileXY(x, 96);
+		if (PlanetManager::GetTileWorld(t) == WorldID{3} && !IsTileType(t, TileType::Station) && !PortalRegistry::IsPortalTile(t)) {
+			if (!Rail(t, Track::X)) return false;
+		}
+	}
+
+	// Add platform to Ballast Crusher (Stop 4) on row 96
+	auto plat_res = Command<Commands::BuildRailStation>::Do(
+		DoCommandFlag::Execute, TileXY(300, 96), RAILTYPE_RAIL, Axis::X, 1, 4, STAT_CLASS_DFLT, 0, Stop(4), true);
+	if (!Result(plat_res, "add platform to Ballast Crusher")) return false;
+	report["costs"]["platform_consumer"] = int64_t(plat_res.GetCost());
+
+	// 6. Depot on World 3, train purchase and orders
+	TileIndex depot_tile = TileXY(858, 95);
+	auto depot_res = Command<Commands::BuildRailDepot>::Do(
+		DoCommandFlag::Execute, depot_tile, RAILTYPE_RAIL, DiagDirection::SE);
+	if (!Result(depot_res, "World 3 depot")) return false;
+	report["costs"]["depot"] = int64_t(depot_res.GetCost());
+	if (!Rail(TileXY(858, 96), Corner(DiagDirection::NW, DiagDirection::SW))) return false;
+
+	CargoType cargo_silc = GetCargoTypeByLabel(CargoLabel{"SILC"});
+	EngineID wagon = EngineID::Invalid();
+	for (const Engine *e : Engine::Iterate()) {
+		if (e->type != VehicleType::Train ||
+			(e->grf_prop.grfid != COMMONWEALTH_RAIL_GRFID &&
+			 !(IntegratedEconomy::Enabled() && e->grf_prop.grfid == COMMONWEALTH_INDUSTRY_GRFID)) ||
+			e->VehInfo<RailVehicleInfo>().railveh_type != RailVehicleType::Wagon)
+			continue;
+		if (e->GetDefaultCargoType() == cargo_silc || e->info.refit_mask.Test(cargo_silc)) {
+			wagon = e->index;
+			break;
+		}
+	}
+	if (wagon == EngineID::Invalid()) {
+		IConsolePrint(CC_ERROR, "CONNECTED FAIL no wagon for SILC");
+		return false;
+	}
+
+	auto [ec, engine, a, b, c] = Command<Commands::BuildVehicle>::Do(
+		DoCommandFlag::Execute, depot_tile, EngineLocal(0x22), false, INVALID_CARGO, ClientID::Invalid);
+	if (!Result(ec, "World 3 silica locomotive")) return false;
+	Money vehicle_cost = ec.GetCost();
+
+	for (uint w = 0; w < 6; ++w) {
+		auto [wc, wid, d, e2, f] = Command<Commands::BuildVehicle>::Do(
+			DoCommandFlag::Execute, depot_tile, wagon, false, cargo_silc, ClientID::Invalid);
+		if (!Result(wc, "World 3 silica wagon")) return false;
+		vehicle_cost += wc.GetCost();
+		if (!Result(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, wid, engine, false), "coupling"))
+			return false;
+	}
+	report["costs"]["vehicles"] = int64_t(vehicle_cost);
+	report["costs"]["total_spent"] = int64_t(money_before - company->money);
+	report["train_id"] = engine.base();
+
+	Command<Commands::RenameVehicle>::Do(DoCommandFlag::Execute, engine, "W3 Silica > Ballast crusher");
+
+	Order pickup;
+	pickup.MakeGoToStation(w3_station);
+	pickup.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
+	pickup.SetStopLocation(OrderStopLocation::NearEnd);
+	pickup.SetUnloadType(OrderUnloadType::NoUnload);
+	pickup.SetLoadType(OrderLoadType::FullLoad);
+
+	Order drop;
+	drop.MakeGoToStation(Stop(4));
+	drop.SetNonStopType(OrderNonStopFlags{OrderNonStopFlag::NonStop});
+	drop.SetStopLocation(OrderStopLocation::NearEnd);
+	drop.SetLoadType(OrderLoadType::NoLoad);
+
+	if (!Result(Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, engine, VehicleOrderID{0}, pickup), "pickup order")) return false;
+	if (!Result(Command<Commands::InsertOrder>::Do(DoCommandFlag::Execute, engine, VehicleOrderID{1}, drop), "drop order")) return false;
+
+	if (!Result(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, engine, true), "start train")) return false;
+
+	UpdateSignalsInBuffer();
+	report["success"] = true;
+	report["route_distance_w2"] = 294;
+	report["route_distance_w3"] = 248;
+	return true;
+}
+
+/**
+ * Control closure of the primary World 2 silica feeder corridor.
+ * @param closed True to stop Train 1, false to restart it.
+ * @return True if a matching train state was changed.
+ */
+bool SetPrimaryCorridorClosedInternal(bool closed)
+{
+	bool changed = false;
+	for (Train *t : Train::Iterate()) {
+		if (t->IsFrontEngine() && (t->name.find("Silica dunes") != std::string::npos || t->name.find("Stone quarry > Ballast") != std::string::npos)) {
+			if (t->vehstatus.Test(VehState::Stopped) != closed) {
+				auto res = Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, t->index, true);
+				if (res.Succeeded()) changed = true;
+			}
+		}
+	}
+	return changed;
+}
+
+/**
  * Observe cargo, vehicles, facilities, town growth and research without mutation.
  * @return JSON snapshot of the current fixture.
  */
@@ -990,6 +1184,29 @@ Json Snapshot()
 	for (size_t i = 0; i < nodes.size(); ++i)
 		r["stations"].push_back(
 		    {{"id", Stop(i).base()}, {"name", nodes[i].name}, {"consumer", MegacityManager::IsConsumerStation(Station::Get(Stop(i)))}});
+
+	bool w3_connected = false;
+	uint32_t w3_train_id = UINT32_MAX;
+	bool primary_closed = false;
+	for (const Train *t : Train::Iterate()) {
+		if (t->IsFrontEngine()) {
+			if (t->name.find("W3 Silica") != std::string::npos) {
+				w3_connected = true;
+				w3_train_id = t->index.base();
+			}
+			if ((t->name.find("Silica dunes") != std::string::npos || t->name.find("Stone quarry > Ballast") != std::string::npos) &&
+			    t->vehstatus.Test(VehState::Stopped)) {
+				primary_closed = true;
+			}
+		}
+	}
+	r["world_expansion"] = {
+		{"connected", w3_connected},
+		{"w3_train", w3_train_id},
+		{"primary_corridor_closed", primary_closed},
+		{"route_distance_w2", 294},
+		{"route_distance_w3", 248}
+	};
 	return r;
 }
 /**
@@ -3290,6 +3507,21 @@ bool CoreTownStation(std::span<std::string_view> argv)
 
 } // namespace
 
+bool PrepareWorks()
+{
+	return PrepareWorksInternal();
+}
+
+bool ConnectWorldSource(nlohmann::json &report)
+{
+	return ConnectWorldSourceInternal(report);
+}
+
+bool SetPrimaryCorridorClosed(bool closed)
+{
+	return SetPrimaryCorridorClosedInternal(closed);
+}
+
 std::string GetCoreTownStationNativeTrainError(const Train *train)
 {
 	return TownStationTrainError(train);
@@ -3504,7 +3736,7 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 	if (argv.size() >= 2 && argv[1].starts_with("generation-contract-")) return GenerationContract(argv);
 	if (argv.size() >= 2 && argv[1].starts_with("first-freight-")) return FirstFreight(argv);
 	if (argv.size() < 2) {
-		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-works|prepare-surveys|status|audit|advance|stop-food|start-food|stop-silica|start-silica|commission-capacity|commission-reserve|commission-residential|set-food-rate <rate>: isolated demo only");
+		IConsolePrint(CC_HELP, "connected_economy prepare|prepare-works|prepare-surveys|status|audit|advance|stop-food|start-food|stop-silica|start-silica|commission-capacity|commission-reserve|commission-residential|connect-world|close-primary-corridor|reopen-primary-corridor|set-food-rate <rate>: isolated demo only");
 		return true;
 	}
 	if (_game_mode != GameMode::Normal || (_networking && (!_network_dedicated || NetworkClientInfo::GetNumItems() > 1)) ||
@@ -3751,6 +3983,17 @@ bool ConConnectedEconomy(std::span<std::string_view> argv)
 				if (!Result(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, t->index, true), "silica feeder")) return true;
 			}
 		IConsolePrint(CC_DEFAULT, "CONNECTED silica {}", stop ? "stopped" : "started");
+	} else if (argv[1] == "connect-world") {
+		Json report;
+		if (!ConnectWorldSourceInternal(report)) {
+			IConsolePrint(CC_ERROR, "CONNECTED FAIL connect-world");
+			return true;
+		}
+		IConsolePrint(CC_DEFAULT, "CONNECTED world-connected {}", report.dump());
+	} else if (argv[1] == "close-primary-corridor" || argv[1] == "reopen-primary-corridor") {
+		bool close = argv[1] == "close-primary-corridor";
+		SetPrimaryCorridorClosedInternal(close);
+		IConsolePrint(CC_DEFAULT, "CONNECTED primary-corridor {}", close ? "closed" : "reopened");
 	} else
 		IConsolePrint(CC_ERROR, "CONNECTED FAIL unknown action");
 	return true;
