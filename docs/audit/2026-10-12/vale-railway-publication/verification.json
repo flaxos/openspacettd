@@ -103,5 +103,25 @@
     "ctest_pass": 652,
     "independent_review": "GO",
     "exact_head_ci": "Pending portability repair publication"
+  },
+  "macos_fixture_admission": {
+    "failed_head": "2161e8f2bcdf8e1dc8ad6cd43c71fae76d12835b",
+    "failed_jobs": [
+      114995055363,
+      114995055418
+    ],
+    "fifo_cause": "Hardcoded /tmp ancestor is a symlink on Darwin; strict admission rejects it",
+    "fifo_repair": "Canonical exclusive fixture directory; positive path/FIFO checks and negative symlink-ancestor case",
+    "hub_observation": "Unchanged fixture create_directory returned false before SaveOrLoad",
+    "hub_cause_inference": "Timestamp name collision under parallel execution",
+    "hub_repair": "At most128 atomic directory creation attempts; no reuse/deletion of existing candidates; fail on real filesystem errors",
+    "production_or_guard_change": false,
+    "focused_pass": 8,
+    "catch_cases": 631,
+    "catch_assertions": 310776,
+    "ctest_pass": 652,
+    "independent_review": "GO",
+    "native_gameplay_reexecuted": false,
+    "exact_head_ci": "Pending fixture repair publication"
   }
 }

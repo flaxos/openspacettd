@@ -76,3 +76,18 @@ return and exception paths, rethrowing the original exception. Retry and I/O bou
 cleanup and assertions remain unchanged. Independent review is GO; the rebuilt
 fixture passes all six isolated startup/completion checks and the full local suite.
 The macOS deployment target and CI configuration are preserved.
+
+
+The assertion-enabled macOS test run then exposed two fixture prerequisites. Its
+`/tmp` path has a symlink ancestor, which production admission correctly rejects.
+The exclusive FIFO fixture now uses its canonical directory; an added negative
+case verifies rejection of a symlink ancestor. Production admission is unchanged.
+The unchanged hub pickup reload fixture separately failed to create a timestamp-named
+directory before SaveOrLoad. Its bounded exclusive creation now preserves existing
+candidates and claims only a directory it creates itself. A parallel timestamp
+collision explains the observed failure but is an inference, not a measured cause.
+
+Independent review approves both fixture-only repairs. Rebuild, eight focused checks,
+aggregate 631 cases / 310,776 assertions, 648 isolated CTest cases and four localhost
+relays pass. No native gameplay proof or owner save is rerun or replaced. Exact new
+revision CI is recorded subsequently on the PR.
