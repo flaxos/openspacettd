@@ -1149,8 +1149,18 @@ static Station *ReloadHubPickup(Station *station, Train *train)
 	train->cargo.Truncate();
 	_vehicle_pool.CleanPool();
 	ResetVehicleHash();
-	const auto dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-hub-wp03-{}", std::chrono::steady_clock::now().time_since_epoch().count());
-	REQUIRE(std::filesystem::create_directory(dir));
+	/* Parallel CTest processes can observe the same clock tick. Own only a directory
+	 * this fixture creates exclusively; preserve existing candidates on collision. */
+	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+	std::filesystem::path dir;
+	bool created = false;
+	for (uint attempt = 0; attempt < 128 && !created; ++attempt) {
+		dir = std::filesystem::temp_directory_path() / fmt::format("openspacettd-hub-wp03-{}-{}", stamp, attempt);
+		std::error_code error;
+		created = std::filesystem::create_directory(dir, error);
+		REQUIRE_FALSE(error);
+	}
+	REQUIRE(created);
 	const auto path = (dir / "pickup.sav").string();
 	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
 	REQUIRE(SaveOrLoad(path, SaveLoadOperation::Load, DetailedFileType::GameFile, Subdirectory::None, false) == SaveLoadResult::Ok);
