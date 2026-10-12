@@ -3,6 +3,8 @@
 #include "../stdafx.h"
 #include "fabrication_manager.h"
 #include "integrated_economy.h"
+#include "first_permanent_line.h"
+#include "world0_opening.h"
 #include "../3rdparty/nlohmann/json.hpp"
 #include "../cargotype.h"
 #include "../command_func.h"
@@ -110,6 +112,7 @@ bool IntegratedEconomy::TryGrowResidentialDistrict(TownID town)
 	if (TryGrowTownResidentialHouse(t, &placed)) {
 		it->second.building_opportunities--;
 		it->second.buildings_placed++;
+		FirstPermanentLine::OnHousePlaced(town, placed);
 		it->second.site_blocked = false;
 		return true;
 	} else {
@@ -170,6 +173,24 @@ bool IntegratedEconomy::StartNewGame()
 		if (world.name == "Tandil") role = EconomicRole::Industrial;
 		RegisterRole(world.id, role);
 	}
+	return true;
+}
+bool IntegratedEconomy::StartAuthoredWorld0(const std::array<TownID, 3> &towns)
+{
+	const PlanetRegion *world = PlanetManager::GetRegion(WorldID{0});
+	const World0OpeningState &staged = World0Opening::State();
+	if (enabled || !roles.empty() || !ContentReady() || !World0Opening::Ready() || staged.active ||
+		PlanetManager::Count() != 1 || world == nullptr || world->phase != WorldPhase::Phase3_Frontier ||
+		staged.profile.towns != towns || !Company::IsValidID(staged.profile.company)) return false;
+	for (TownID id : towns) {
+		const Town *town = Town::GetIfValid(id);
+		if (town == nullptr || town->cache.population == 0 || PlanetManager::GetTileWorld(town->xy) != WorldID{0}) return false;
+	}
+	SetRulesVersion(EconomyRulesVersion::V2);
+	SetEnabled(true);
+	_settings_game.game_creation.player_built_economy = true;
+	ResourceSiteManager::SetEnabled(true);
+	RegisterRole(WorldID{0}, EconomicRole::Frontier);
 	return true;
 }
 bool IntegratedEconomy::StartNewWorksPrototype()
@@ -275,6 +296,7 @@ void IntegratedEconomy::RegisterIndustry(Industry *i)
 }
 void IntegratedEconomy::RemoveIndustry(IndustryID id)
 {
+	World0Opening::OnIndustryRemoved(id);
 	if (enabled && factories.contains(id)) {
 		if (auto i = Industry::GetIfValid(id)) {
 			auto discard = [](const auto &cargo) {
@@ -297,6 +319,7 @@ const std::map<IndustryID, EconomyFactory> &IntegratedEconomy::Factories()
 void IntegratedEconomy::ChangeCompany(CompanyID old_owner, CompanyID new_owner)
 {
 	if (!enabled || old_owner == new_owner) return;
+	World0Opening::OnCompanyChanged(old_owner, new_owner);
 	for (auto &[id, f] : factories)
 		if (f.owner == old_owner) {
 			f.owner = Company::IsValidID(new_owner) ? new_owner : CompanyID{OWNER_NONE};
@@ -329,6 +352,7 @@ CommandCost IntegratedEconomy::CheckIndustry(TileIndex tile, IndustryType type, 
 	bool valid = primary ? role == EconomicRole::Frontier : recipe != RECIPE_NONE && role == EconomicRole::Industrial;
 	if (recipe == RECIPE_QUANTUM_ENRICHMENT) valid = role == EconomicRole::Frontier;
 	if (recipe == RECIPE_CONSUMER_CRYSTAL_FORMAT) valid = role == EconomicRole::Core;
+	if (!valid && World0Opening::PermitsCrusher(tile, type, company)) valid = true;
 	if (!valid) return CommandCost(STR_ERROR_PRODUCTION_WORLD);
 	if (!_generating_world && Company::IsValidID(company)) {
 		auto tech = primary ? ResourceSiteManager::RequiredTech(type) : RecipeTech(recipe);
@@ -430,6 +454,8 @@ uint32_t IntegratedEconomy::OutputBatchLimit(const Industry *industry)
 void IntegratedEconomy::Produce()
 {
 	if (!enabled) return;
+	FirstPermanentLine::OnEconomyEvaluation();
+	World0Opening::OnEconomyEvaluation();
 	for (auto &[id, f] : factories) {
 		auto i = Industry::GetIfValid(id);
 		if (i == nullptr) continue;
@@ -468,6 +494,8 @@ void IntegratedEconomy::Produce()
 				_commonwealth_slice_audit->processor_cargo.push_back({TimerGameCalendar::date.base(), id.base(), c, int64_t(units / 100)});
 			}
 		}
+		FirstPermanentLine::OnProduction(id, batches);
+		World0Opening::OnProduction(id, batches);
 	}
 }
 bool IntegratedEconomy::IsManagedCityCargo(TownID town, CargoType cargo)
@@ -996,15 +1024,22 @@ bool IntegratedEconomy::Load(const std::string &data)
 		decltype(town_residential_districts) loaded_town_residential_districts;
 		if (version == 2 && j.contains("town_residential_districts")) {
 			for (const auto &v : j.at("town_residential_districts")) {
-				if (v.size() != 7) return false;
+				if (!v.is_array() || v.size() != 7 || !v.at(2).is_boolean() || !v.at(6).is_boolean()) return false;
 				TownID town_id{static_cast<uint16_t>(number(v.at(0), UINT16_MAX - 1))};
 				TownResidentialDistrict d;
 				d.owner = CompanyID{static_cast<uint8_t>(number(v.at(1), UINT8_MAX))};
 				d.commissioned = v.at(2).get<bool>();
-				d.building_opportunities = static_cast<uint8_t>(number(v.at(3), 255));
-				d.buildings_placed = static_cast<uint8_t>(number(v.at(4), 255));
-				d.buildings_completed = static_cast<uint8_t>(number(v.at(5), 255));
+				d.building_opportunities = static_cast<uint8_t>(number(v.at(3), 4));
+				d.buildings_placed = static_cast<uint8_t>(number(v.at(4), 4));
+				d.buildings_completed = static_cast<uint8_t>(number(v.at(5), 4));
 				d.site_blocked = v.at(6).get<bool>();
+				if (d.buildings_completed > d.buildings_placed) return false;
+				if (d.commissioned) {
+					/* Paid town works survive retirement with the explicit ownerless sentinel. */
+					if ((d.owner != CompanyID::Invalid() && d.owner.base() >= MAX_COMPANIES) || d.building_opportunities + d.buildings_placed != 4) return false;
+				} else if (d.owner != CompanyID::Invalid() || d.building_opportunities != 0 || d.buildings_placed != 0 || d.buildings_completed != 0 || d.site_blocked) {
+					return false;
+				}
 				if (!loaded_town_residential_districts.emplace(town_id, d).second) return false;
 			}
 		}
@@ -1059,7 +1094,6 @@ bool IntegratedEconomy::ValidateAfterLoad()
 		if (PlanetManager::GetRegion(world) == nullptr) return false;
 	std::erase_if(factories, [](auto &p) { return !Industry::IsValidID(p.first); });
 	std::erase_if(cities, [](auto &p) { return !Town::IsValidID(p.first); });
-	std::erase_if(town_residential_districts, [](auto &p) { return !Town::IsValidID(p.first); });
 	std::erase_if(research, [](auto &p) { return !Company::IsValidID(p.first); });
 	for (const auto &[town_id, s] : town_food_services) {
 		if (!Town::IsValidID(town_id)) return false;
@@ -1074,7 +1108,9 @@ bool IntegratedEconomy::ValidateAfterLoad()
 		}
 	}
 	for (const auto &[town_id, d] : town_residential_districts) {
-		if (d.owner != CompanyID::Invalid() && d.owner != OWNER_NONE && d.owner != OWNER_DEITY && !Company::IsValidID(d.owner)) return false;
+		const Town *town = Town::GetIfValid(town_id);
+		if (town == nullptr || Role(PlanetManager::GetTileWorld(town->xy)) != EconomicRole::Core ||
+			(d.commissioned && d.owner != CompanyID::Invalid() && !Company::IsValidID(d.owner))) return false;
 	}
 	for (const auto &[id, f] : factories) {
 		auto industry = Industry::Get(id);
@@ -1283,6 +1319,8 @@ CommandCost CmdCommissionTownResidentialDistrict(DoCommandFlags flags, TownID to
 		dist.buildings_placed = 0;
 		dist.buildings_completed = 0;
 		dist.site_blocked = false;
+		FirstPermanentLine::OnCommission(_current_company, town);
+		FirstPermanentLine::Evaluate();
 	}
 	return CommandCost(ExpensesType::Construction, price);
 }

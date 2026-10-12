@@ -285,6 +285,8 @@ enum TownDirectoryInvalidateWindowData {
 };
 
 CommandCost CheckforTownRating(DoCommandFlags flags, Town *t, TownRatingCheckType type);
+/** Pure construction-permission policy derived from the saved integrated economy mode. */
+bool UsesCommonwealthConstructionRules();
 
 
 TileIndexDiff GetHouseNorthPart(HouseID &house);

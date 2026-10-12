@@ -5,11 +5,14 @@
 #include "../cargotype.h"
 #include "../command_func.h"
 #include "../company_base.h"
+#include "../company_cmd.h"
+#include "../company_func.h"
 #include "../industry.h"
 #include "../engine_func.h"
 #include "../portal/commonwealth_pack.h"
 #include "../portal/company_stockpile.h"
 #include "../portal/integrated_economy.h"
+#include "../portal/first_permanent_line.h"
 #include "../portal/megacity_manager.h"
 #include "../portal/planet_manager.h"
 #include "../portal/portal_cmd.h"
@@ -113,6 +116,7 @@ struct WorksTestFixture {
 	~WorksTestFixture()
 	{
 		IntegratedEconomy::Reset();
+		MegacityManager::Reset();
 		PlanetManager::Reset();
 		_industry_pool.CleanPool();
 		_town_pool.CleanPool();
@@ -147,6 +151,39 @@ struct WorksTestFixture {
 CargoType C(const char (&label)[5])
 {
 	return GetCargoTypeByLabel(CargoLabel{label});
+}
+
+Town *DistrictTownWithFrontage()
+{
+	REQUIRE(Town::CanAllocateItem());
+	Town *town = Town::Create(TileXY(15, 15));
+	InitializeBuildingCounts(town);
+	for (uint x = 11; x <= 19; ++x) {
+		MakeRoadNormal(TileXY(x, 16), ROAD_ALL, ROADTYPE_ROAD, INVALID_ROADTYPE, town->index, OWNER_TOWN, OWNER_TOWN);
+	}
+	return town;
+}
+
+std::vector<TileIndex> DistrictHouseTiles(TownID town)
+{
+	std::vector<TileIndex> houses;
+	for (TileIndex tile : Map::Iterate()) {
+		if (!IsTileType(tile, TileType::House) || GetTownIndex(tile) != town || !IsHousePlayerProtected(tile)) continue;
+		HouseID house = GetHouseType(tile);
+		if (GetHouseNorthPart(house) == 0) houses.push_back(tile);
+	}
+	return houses;
+}
+
+void CompleteDistrictHouses(TownID town)
+{
+	for (TileIndex tile : DistrictHouseTiles(town)) {
+		/* Advance the native construction loop, never manufacture a house or progress counter. */
+		for (uint i = 0; i < 64 && !IsHouseCompleted(tile); ++i) {
+			_tile_type_procs[GetTileType(tile)]->tile_loop_proc(tile);
+		}
+		REQUIRE(IsHouseCompleted(tile));
+	}
 }
 } // namespace
 
@@ -537,6 +574,180 @@ TEST_CASE("Works prototype residential district commissioning, materials, and li
 	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
 	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
 	CHECK(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Failed());
+}
+
+TEST_CASE("Residential district native command keeps cash and material spending atomic", "[commonwealth-works][first-line-prerequisite]")
+{
+	WorksTestFixture fixture;
+	REQUIRE(Town::CanAllocateItem());
+	auto town = Town::Create(TileXY(15, 15));
+	auto company = Company::Get(CompanyID{0});
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	company->money = 49999;
+	CHECK(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Failed());
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 160);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("BALL")) == 80);
+	CHECK(company->money == 49999);
+	CHECK(IntegratedEconomy::GetTownResidentialDistrict(town->index) == nullptr);
+	company->money = 50000;
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do({}, town->index).Succeeded());
+	CHECK(company->money == 50000);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 160);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	CHECK(company->money == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("BALL")) == 0);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	CHECK(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Failed());
+	CHECK(company->money == 0);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("STEL")) == 160);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{0}, C("BALL")) == 80);
+}
+
+TEST_CASE("Residential district save rejects impossible progress transactionally", "[commonwealth-works][first-line-prerequisite]")
+{
+	WorksTestFixture fixture;
+	REQUIRE(Town::CanAllocateItem());
+	auto town = Town::Create(TileXY(15, 15));
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	const auto saved = IntegratedEconomy::Save();
+	auto doc = nlohmann::json::parse(saved);
+	SECTION("extra opportunity") { doc["town_residential_districts"][0][3] = 5; }
+	SECTION("completed before placed") { doc["town_residential_districts"][0][5] = 1; }
+	SECTION("missing opportunity") { doc["town_residential_districts"][0][3] = 3; }
+	SECTION("nonboolean commission") { doc["town_residential_districts"][0][2] = 1; }
+	SECTION("uncommissioned evidence") { doc["town_residential_districts"][0][2] = false; }
+	SECTION("duplicate town") { doc["town_residential_districts"].push_back(doc["town_residential_districts"][0]); }
+	SECTION("invalid company") { doc["town_residential_districts"][0][1] = MAX_COMPANIES; }
+	SECTION("neutral owner is not retired company sentinel") { doc["town_residential_districts"][0][1] = OWNER_NONE.base(); }
+	SECTION("deity owner is not retired company sentinel") { doc["town_residential_districts"][0][1] = OWNER_DEITY.base(); }
+	SECTION("negative progress") { doc["town_residential_districts"][0][4] = -1; }
+	SECTION("fractional progress") { doc["town_residential_districts"][0][4] = 1.5; }
+	CHECK_FALSE(IntegratedEconomy::Load(doc.dump()));
+	CHECK(IntegratedEconomy::Save() == saved);
+}
+
+TEST_CASE("Residential district postload rejects foreign world and missing town", "[commonwealth-works][first-line-prerequisite]")
+{
+	WorksTestFixture fixture;
+	REQUIRE(Town::CanAllocateItem());
+	auto town = Town::Create(TileXY(15, 15));
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	SECTION("wrong world") { town->xy = TileXY(35, 15); }
+	SECTION("missing town") { delete town; }
+	SECTION("in-range missing company") {
+		const CompanyID missing{MAX_COMPANIES - 1};
+		REQUIRE_FALSE(Company::IsValidID(missing));
+		auto saved = nlohmann::json::parse(IntegratedEconomy::Save());
+		saved["town_residential_districts"][0][1] = missing.base();
+		REQUIRE(IntegratedEconomy::Load(saved.dump()));
+	}
+	CHECK_FALSE(IntegratedEconomy::ValidateAfterLoad());
+}
+
+TEST_CASE("Native designation enables monthly construction of four completed district houses", "[commonwealth-works][first-line-correction]")
+{
+	WorksTestFixture fixture;
+	Town *town = DistrictTownWithFrontage();
+	CHECK_FALSE(FirstPermanentLine::Active());
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	const auto *district = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	REQUIRE(district != nullptr);
+	REQUIRE(MegacityManager::GetProfile(town->index) == nullptr);
+	MegacityManager::EvaluateMonthlySupply();
+	CHECK(district->buildings_placed == 0);
+	CHECK(DistrictHouseTiles(town->index).empty());
+	REQUIRE(Command<Commands::DesignateMegacity>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	const auto *profile = MegacityManager::GetProfile(town->index);
+	REQUIRE(profile != nullptr);
+	CHECK(profile->world_id == WorldID{0});
+	const uint32_t population_before = town->cache.population;
+	for (uint8_t month = 1; month <= 4; ++month) {
+		MegacityManager::EvaluateMonthlySupply();
+		REQUIRE(district->buildings_placed == month);
+		CHECK(district->building_opportunities == 4 - month);
+		CHECK(district->buildings_completed == month - 1);
+		REQUIRE(DistrictHouseTiles(town->index).size() == month);
+		CompleteDistrictHouses(town->index);
+		CHECK(district->buildings_completed == month);
+	}
+	CHECK(town->cache.population > population_before);
+	for (TileIndex tile : DistrictHouseTiles(town->index)) {
+		CHECK(IsHouseCompleted(tile));
+		AutoRestoreBackup owner(_current_company, OWNER_TOWN);
+		CHECK_FALSE(CanDeleteHouse(tile));
+	}
+	MegacityManager::EvaluateMonthlySupply();
+	CHECK(district->building_opportunities == 0);
+	CHECK(district->buildings_placed == 4);
+	CHECK(district->buildings_completed == 4);
+	CHECK(DistrictHouseTiles(town->index).size() == 4);
+}
+
+TEST_CASE("Paid residential district survives company deletion or acquisition and reload", "[commonwealth-works][first-line-correction]")
+{
+	WorksTestFixture fixture;
+	/* The native deletion command emits a bankruptcy notice using both names. */
+	Company::Get(CompanyID{0})->president_name = "District commissioner";
+	Town *town = DistrictTownWithFrontage();
+	CHECK_FALSE(FirstPermanentLine::Active());
+	REQUIRE(Command<Commands::DesignateMegacity>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("BALL"), 80);
+	REQUIRE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	MegacityManager::EvaluateMonthlySupply();
+	CompleteDistrictHouses(town->index);
+	const auto houses = DistrictHouseTiles(town->index);
+	REQUIRE(houses.size() == 1);
+	const uint32_t population = town->cache.population;
+	CompanyID expected_owner;
+	SECTION("native company deletion retains ownerless paid works") {
+		REQUIRE(Command<Commands::CompanyControl>::Do(DoCommandFlag::Execute, CompanyCtrlAction::Delete,
+			CompanyID{0}, CompanyRemoveReason::Bankrupt, ClientID::Invalid).Succeeded());
+		expected_owner = CompanyID::Invalid();
+	}
+	SECTION("native acquisition ownership handler transfers paid works") {
+		ChangeOwnershipOfCompanyItems(CompanyID{0}, CompanyID{1});
+		delete Company::Get(CompanyID{0});
+		expected_owner = CompanyID{1};
+	}
+	REQUIRE_FALSE(Company::IsValidID(CompanyID{0}));
+	_current_company = CompanyID{1};
+	const auto saved = IntegratedEconomy::Save();
+	REQUIRE(IntegratedEconomy::Load(saved));
+	CHECK(IntegratedEconomy::Save() == saved);
+	REQUIRE(IntegratedEconomy::ValidateAfterLoad());
+	const auto *district = IntegratedEconomy::GetTownResidentialDistrict(town->index);
+	REQUIRE(district != nullptr);
+	CHECK(district->owner == expected_owner);
+	CHECK(district->commissioned);
+	CHECK(district->building_opportunities == 3);
+	CHECK(district->buildings_placed == 1);
+	CHECK(district->buildings_completed == 1);
+	CHECK(DistrictHouseTiles(town->index) == houses);
+	CHECK(IsHouseCompleted(houses.front()));
+	CHECK(town->cache.population == population);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{1}, C("STEL")) == 0);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{1}, C("STEL"), 160);
+	StockpileManager::AddCargo(WorldID{0}, CompanyID{1}, C("BALL"), 80);
+	CHECK_FALSE(Command<Commands::CommissionTownResidentialDistrict>::Do(DoCommandFlag::Execute, town->index).Succeeded());
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{1}, C("STEL")) == 160);
+	CHECK(StockpileManager::GetStock(WorldID{0}, CompanyID{1}, C("BALL")) == 80);
+	/* The original remaining allowance continues through the ordinary monthly path. */
+	MegacityManager::EvaluateMonthlySupply();
+	CompleteDistrictHouses(town->index);
+	CHECK(district->building_opportunities == 2);
+	CHECK(district->buildings_placed == 2);
+	CHECK(district->buildings_completed == 2);
+	CHECK(DistrictHouseTiles(town->index).size() == 2);
 }
 
 TEST_CASE("Works prototype residential house placement, stage progression, protection, and decoupling", "[commonwealth-works]")

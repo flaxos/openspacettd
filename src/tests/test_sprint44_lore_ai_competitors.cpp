@@ -35,6 +35,8 @@
 #include "../saveload/saveload.h"
 #include "../saveload/saveload_func.h"
 #include "../fileio_func.h"
+#include "../base_media_graphics.h"
+#include "../video/video_driver.hpp"
 #include "../gfx_func.h"
 #include "../table/sprites.h"
 #include "../economy_func.h"
@@ -45,8 +47,53 @@
 #include <filesystem>
 #include <vector>
 #include <algorithm>
+#include <chrono>
+#include <cstdlib>
 
 #include "../safeguards.h"
+
+extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+extern void DetermineBasePaths(std::string_view exe);
+
+/* In the aggregate test process an earlier GUI fixture may leave a null video
+ * driver installed. Native reload still loads sprites whenever a driver exists,
+ * so provide the same real base-graphics prerequisite as a cold-load fixture. */
+static void PrepareLoreReloadGraphics()
+{
+	if (VideoDriver::GetInstance() == nullptr) return;
+	std::filesystem::path binary;
+	if (const char *provided = std::getenv("OSTTD_TEST_BINARY")) binary = provided;
+	else {
+		for (const auto &candidate : {std::filesystem::path("openttd_test"), std::filesystem::path("build/openttd_test")}) {
+			if (std::filesystem::exists(candidate)) { binary = candidate; break; }
+		}
+	}
+	REQUIRE(!binary.empty());
+	REQUIRE(std::filesystem::is_regular_file(binary));
+	DetermineBasePaths(std::filesystem::absolute(binary).string());
+	_valid_searchpaths.clear();
+	for (Searchpath path : EnumRange(Searchpath::End)) if (!_searchpaths[path].empty()) _valid_searchpaths.push_back(path);
+	TarScanner::DoScan(TarScanner::Mode::Baseset);
+	BaseGraphics::FindSets();
+	REQUIRE(BaseGraphics::SetSet(nullptr));
+}
+
+struct LoreSaveFile {
+	std::filesystem::path dir, path;
+	LoreSaveFile()
+	{
+		auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+		for (uint n = 0; n < 64; ++n) {
+			auto candidate = std::filesystem::temp_directory_path() / fmt::format("osttd-lore-{}-{}", stamp, n);
+			std::error_code error;
+			if (std::filesystem::create_directory(candidate, error)) { dir = std::move(candidate); break; }
+			REQUIRE((!error || error == std::errc::file_exists));
+		}
+		REQUIRE(!dir.empty());
+		path = dir / "competitor.sav";
+	}
+	~LoreSaveFile() { std::error_code error; std::filesystem::remove_all(dir, error); }
+};
 
 static void SetupTestEnvironment(uint32_t map_w = 256, uint32_t map_h = 256)
 {
@@ -418,8 +465,8 @@ TEST_CASE("Sprint 44 - Megacity Multi-Commodity Supply Competition")
 
 TEST_CASE("Sprint 44 - Save/Load Serialization via LORE Chunk")
 {
-	const std::string test_save_file = (std::filesystem::temp_directory_path() / "test_openspacettd_lore_competitor.sav").string();
-	std::filesystem::remove(test_save_file);
+	LoreSaveFile save;
+	const std::string test_save_file = save.path.string();
 
 	SetupTestEnvironment();
 	MockEnvironment &mock = MockEnvironment::Instance();
@@ -444,6 +491,7 @@ TEST_CASE("Sprint 44 - Save/Load Serialization via LORE Chunk")
 	uint64_t cargo_before = cst_before->total_cargo_delivered;
 	uint64_t revenue_before = cst_before->total_revenue_earned;
 	uint32_t tier_before = cst_before->milestone_tier;
+	PrepareLoreReloadGraphics();
 
 	/* Save game */
 	SaveLoadResult save_res = SaveOrLoad(test_save_file, SaveLoadOperation::Save, DetailedFileType::GameFile, Subdirectory::None, false);
@@ -467,5 +515,4 @@ TEST_CASE("Sprint 44 - Save/Load Serialization via LORE Chunk")
 	CHECK(cst_after->total_revenue_earned == revenue_before);
 	CHECK(cst_after->milestone_tier == tier_before);
 
-	std::filesystem::remove(test_save_file);
 }

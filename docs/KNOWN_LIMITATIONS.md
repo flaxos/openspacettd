@@ -1,5 +1,22 @@
 # OpenSpaceTTD Known Limitations
 
+## Vale Railway publication — source and automated proof
+
+The optional Aster Vale founding scenario is ready for draft review, stacked on
+PR83. It adds a native persistent objective observer, pure GameScript queries,
+empty-stock authored assistance and isolated bounded preparation/proof tools.
+The freight purchase list now accepts physically compatible unpowered wagons;
+locomotive power checks remain. Native LORE and purchase-test fixtures repair
+base-graphics and stale signal-buffer prerequisites without weakening assertions.
+
+Prior local proof passed preparation/service/fresh reload at 0/9/4 evaluations and
+actual SDL purchase of one empty 40 BALL wagon for93GBP with zero added evaluations.
+Publication integration and exact-head CI are separately recorded. Human desktop
+comprehension, enjoyment and pacing remain pending; inherited modular car artwork
+is cosmetic and unchanged. The broader Reserve/FOOD pilot is not accepted.
+[Scenario guide](VALE_RAILWAY.md) and [sanitised engineering evidence](audit/2026-10-12/vale-railway-publication/README.md).
+
+
 ## One Material-Funded Research Unlock Boundaries (Card P1) — 11 October 2026
 
 - **Progression Slice & Single Rare Earth Discovery**: Card P1 implements the single progression bridge from physical freight delivery (40 STEL + 20 CHIP) to Materials III research unlock and one advanced rare earth resource opportunity on World 2. Additional research tiers (Materials IV, Maglev), full A–D electronics chains, city consumer baskets (CCRY), market pricing, and dynamic galaxy generation remain deferred.

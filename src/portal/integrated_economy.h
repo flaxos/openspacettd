@@ -75,6 +75,11 @@ class IntegratedEconomy
 	static bool Enabled();
 	static bool ContentReady();
 	static bool StartNewGame();
+	/** Activate v2 only for a staged, populated, one-region Aster Vale profile.
+	 * @param towns Existing Greybank, Stonecross and Merefield towns in profile order.
+	 * @return Whether the native authored profile was admitted and v2 activated.
+	 */
+	static bool StartAuthoredWorld0(const std::array<TownID, 3> &towns);
 	static void SetEnabled(bool enabled);
 	static EconomicRole Role(WorldID world);
 	static void RegisterRole(WorldID world, EconomicRole role);

@@ -1247,7 +1247,7 @@ STR_TERRAIN_TYPE_CUSTOM_VALUE                                   :Custom height (
 STR_CITY_APPROVAL_LENIENT                                       :Lenient
 STR_CITY_APPROVAL_TOLERANT                                      :Tolerant
 STR_CITY_APPROVAL_HOSTILE                                       :Hostile
-STR_CITY_APPROVAL_PERMISSIVE                                    :Permissive (no effect on company actions)
+STR_CITY_APPROVAL_PERMISSIVE                                    :Permissive
 
 STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}No suitable AIs available...{}{}You can download several AIs via the 'Online Content' system
 
@@ -1372,7 +1372,7 @@ STR_CONFIG_SETTING_DISASTERS                                    :Disasters: {STR
 STR_CONFIG_SETTING_DISASTERS_HELPTEXT                           :Toggle disasters which may occasionally block or destroy vehicles or infrastructure
 
 STR_CONFIG_SETTING_CITY_APPROVAL                                :Local authority attitude: {STRING2}
-STR_CONFIG_SETTING_CITY_APPROVAL_HELPTEXT                       :Choose how much noise and environmental damage by companies affect their town rating and further construction actions in the town
+STR_CONFIG_SETTING_CITY_APPROVAL_HELPTEXT                       :In Classic games, town rating limits construction and demolition. In integrated games, reputation does not block construction. This setting still affects airport noise or airport count limits
 
 STR_CONFIG_SETTING_MAP_HEIGHT_LIMIT                             :Map height limit: {STRING2}
 STR_CONFIG_SETTING_MAP_HEIGHT_LIMIT_HELPTEXT                    :Set the maximum height of the map terrain. With "(auto)" a good value will be picked after terrain generation
@@ -1390,8 +1390,8 @@ STR_CONFIG_SETTING_CATCHMENT_HELPTEXT                           :Have differentl
 STR_CONFIG_SETTING_SERVE_NEUTRAL_INDUSTRIES                     :Company stations can serve industries with attached neutral stations: {STRING2}
 STR_CONFIG_SETTING_SERVE_NEUTRAL_INDUSTRIES_HELPTEXT            :When enabled, industries with attached stations (such as Oil Rigs) may also be served by company-owned stations built nearby. When disabled, these industries may only be served by their attached stations. Any nearby company stations won't be able to serve them, nor will the attached station serve anything else other than the industry
 
-STR_CONFIG_SETTING_EXTRADYNAMITE                                :Allow removal of more town-owned roads, bridges and tunnels: {STRING2}
-STR_CONFIG_SETTING_EXTRADYNAMITE_HELPTEXT                       :Make it easier to remove town-owned infrastructure and buildings
+STR_CONFIG_SETTING_EXTRADYNAMITE                                :Extra demolition of town infrastructure in Classic: {STRING2}
+STR_CONFIG_SETTING_EXTRADYNAMITE_HELPTEXT                       :In Classic games, relax restrictions on removing town-owned roads, bridges and tunnels. In integrated games, town infrastructure may be remodelled at normal cost regardless of this setting
 
 STR_CONFIG_SETTING_TRAIN_LENGTH                                 :Maximum length of trains: {STRING2}
 STR_CONFIG_SETTING_TRAIN_LENGTH_HELPTEXT                        :Set the maximum length of trains
@@ -1511,7 +1511,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :Reduced
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :Normal
 
 STR_CONFIG_SETTING_CROSSING_WITH_COMPETITOR                     :Allow level crossings with roads or rails owned by competitors: {STRING2}
-STR_CONFIG_SETTING_CROSSING_WITH_COMPETITOR_HELPTEXT            :Allow construction of level crossings on roads or rails owned by competitors
+STR_CONFIG_SETTING_CROSSING_WITH_COMPETITOR_HELPTEXT            :Allow level crossings on competitors' roads or rails. In integrated games, normal town-owned public roads are exempt, but foreign-owned road or tram components remain protected when this setting is off
 
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :Allow drive-through road stops on roads owned by towns: {STRING2}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :Allow construction of drive-through road stops on roads owned by towns
@@ -3839,6 +3839,7 @@ STR_LOCAL_AUTHORITY_CAPTION                                     :{WHITE}{TOWN} l
 STR_LOCAL_AUTHORITY_ZONE                                        :{BLACK}Zone
 STR_LOCAL_AUTHORITY_ZONE_TOOLTIP                                :{BLACK}Show zone within local authority boundaries
 STR_LOCAL_AUTHORITY_COMPANY_RATINGS                             :{BLACK}Transport company ratings:
+STR_LOCAL_AUTHORITY_COMMONWEALTH_CONSTRUCTION                   :{BLACK}Commonwealth construction: town reputation does not block building. Town roads may be remodelled at normal cost. Terrain, occupied tiles, ownership and material requirements still apply.
 STR_LOCAL_AUTHORITY_COMPANY_RATING                              :{YELLOW}{COMPANY} {COMPANY_NUM}: {ORANGE}{STRING}
 STR_LOCAL_AUTHORITY_ACTIONS_TITLE                               :{BLACK}Actions available:
 STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP                             :{BLACK}List of things to do at this town - click on item for more details

@@ -8,6 +8,7 @@
 /** @file town_cmd.cpp Handling of town tiles. */
 
 #include "stdafx.h"
+#include "portal/first_permanent_line.h"
 #include "portal/integrated_economy.h"
 #include "portal/commonwealth_slice.h"
 #include "misc/history_type.hpp"
@@ -504,6 +505,8 @@ static void AdvanceSingleHouseConstruction(TileIndex tile)
 				if (town != nullptr) IntegratedEconomy::OnResidentialHouseCompleted(town->index);
 			}
 		}
+		FirstPermanentLine::OnHouseCompleted(tile);
+		FirstPermanentLine::Evaluate();
 	}
 	MarkTileDirtyByTile(tile);
 }
@@ -748,8 +751,8 @@ static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlags flags)
 			if (rating > RATING_MAXIMUM) {
 				return CommandCost(STR_ERROR_BUILDING_IS_PROTECTED);
 			}
-			/* If town authority controls removal, check the company's rating. */
-			if (rating > t->ratings[_current_company] && _settings_game.difficulty.town_council_tolerance != TOWN_COUNCIL_PERMISSIVE) {
+			/* Classic town authority can require sufficient rating for explicit house removal. */
+			if (!UsesCommonwealthConstructionRules() && rating > t->ratings[_current_company] && _settings_game.difficulty.town_council_tolerance != TOWN_COUNCIL_PERMISSIVE) {
 				return CommandCostWithParam(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS, t->index);
 			}
 		}
@@ -3396,6 +3399,7 @@ CommandCost CmdPlaceHouseArea(DoCommandFlags flags, TileIndex tile, TileIndex st
 static void DoClearTownHouseHelper(TileIndex tile, Town *t, HouseID house)
 {
 	assert(IsTileType(tile, TileType::House));
+	FirstPermanentLine::OnHouseRemoved(tile);
 	DecreaseBuildingCount(t, house);
 	DoClearSquare(tile);
 
@@ -4327,8 +4331,8 @@ static void UpdateTownGrowth(Town *t)
  */
 CommandCost CheckIfAuthorityAllowsNewStation(TileIndex tile, DoCommandFlags flags)
 {
-	/* The required rating is hardcoded to RATING_VERYPOOR (see below), not the authority attitude setting, so we can bail out like this. */
-	if (_settings_game.difficulty.town_council_tolerance == TOWN_COUNCIL_PERMISSIVE) return CommandCost();
+	/* Only Classic requires the hardcoded RATING_VERYPOOR station threshold. */
+	if (UsesCommonwealthConstructionRules() || _settings_game.difficulty.town_council_tolerance == TOWN_COUNCIL_PERMISSIVE) return CommandCost();
 
 	if (!Company::IsValidID(_current_company) || flags.Test(DoCommandFlag::NoTestTownRating)) return CommandCost();
 
@@ -4475,6 +4479,12 @@ void ChangeTownRating(Town *t, int add, int max, DoCommandFlags flags)
 	}
 }
 
+/** @return Whether the saved integrated economy uses public construction rules. */
+bool UsesCommonwealthConstructionRules()
+{
+	return IntegratedEconomy::Enabled();
+}
+
 /**
  * Does the town authority allow the (destructive) action of the current company?
  * @param flags Checking flags of the command.
@@ -4485,7 +4495,7 @@ void ChangeTownRating(Town *t, int add, int max, DoCommandFlags flags)
 CommandCost CheckforTownRating(DoCommandFlags flags, Town *t, TownRatingCheckType type)
 {
 	/* if magic_bulldozer cheat is active, town doesn't restrict your destructive actions */
-	if (t == nullptr || !Company::IsValidID(_current_company) ||
+	if (UsesCommonwealthConstructionRules() || t == nullptr || !Company::IsValidID(_current_company) ||
 			_cheats.magic_bulldozer.value || flags.Test(DoCommandFlag::NoTestTownRating)) {
 		return CommandCost();
 	}

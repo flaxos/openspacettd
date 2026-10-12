@@ -6,6 +6,7 @@ server and client execution queues. It does not exercise the join/map-transfer h
 """
 
 import argparse
+import json
 import os
 import socket
 import struct
@@ -44,13 +45,45 @@ def assert_equal(states, label):
         raise AssertionError(f"{label}: server and clients diverged: {states!r}")
 
 
+def policy_state(raw, mode):
+    state = json.loads(raw)
+    required = {'mode', 'rating', 'money', 'materials', 'economy', 'map', 'rng',
+                'crossing', 'foreign_tram', 'demolition', 'competitor_crossing', 'extra_dynamite'}
+    if not isinstance(state, dict) or set(state) != required or state['mode'] != mode or state['rating'] != -200:
+        raise AssertionError('construction-policy native state is incomplete or has a different mode/rating')
+    if state['competitor_crossing'] is not False or state['extra_dynamite'] is not False:
+        raise AssertionError('construction-policy fixture must retain both restrictive settings')
+    return state
+
+
+def assert_policy_transition(before_raw, after_raw, command, mode):
+    before, after = policy_state(before_raw, mode), policy_state(after_raw, mode)
+    for field in ('rating', 'materials', 'economy', 'rng', 'foreign_tram',
+                  'competitor_crossing', 'extra_dynamite'):
+        if after[field] != before[field]:
+            raise AssertionError(f'{command} changed native {field}')
+    if after['money'] >= before['money'] or after['map'] == before['map']:
+        raise AssertionError(f'{command} lacked a paid native map change')
+    if command == 'a':
+        if after['demolition'] != before['demolition'] or after['crossing'].get('crossing') is not True:
+            raise AssertionError('public road crossing did not construct the native crossing')
+        for field in ('tile', 'road_owner', 'tram_owner', 'road_bits'):
+            if after['crossing'].get(field) != before['crossing'].get(field):
+                raise AssertionError(f'public road crossing changed {field}')
+    elif command == 'd':
+        if after['crossing'] != before['crossing'] or after['demolition']['type'] == before['demolition']['type']:
+            raise AssertionError('connected town road was not cleared by the native command')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("test_binary", help="built openttd_test executable")
     parser.add_argument("--resource-surveys", action="store_true", help="Exercise private surveys and competing industry construction")
     parser.add_argument("--megacity-designation", action="store_true", help="Exercise free live-town designation, invalid and duplicate denial, and MEGA reload")
+    parser.add_argument("--construction-policy", choices=("classic", "v1", "v2"),
+                        help="Exercise paid public construction permissions in three independent native workers")
     args = parser.parse_args()
-    if args.resource_surveys and args.megacity_designation:
+    if sum((args.resource_surveys, args.megacity_designation, args.construction_policy is not None)) > 1:
         parser.error("choose one scoped command fixture")
     workers = []
     sockets = []
@@ -71,6 +104,8 @@ def main():
                 env["OSTTD_RESOURCE_LOOPBACK"] = "1"
             if args.megacity_designation:
                 env["OSTTD_MEGACITY_LOOPBACK"] = "1"
+            if args.construction_policy is not None:
+                env["OSTTD_CONSTRUCTION_POLICY_LOOPBACK"] = {"classic": "0", "v1": "1", "v2": "2"}[args.construction_policy]
             process = subprocess.Popen(
                 [args.test_binary, CASE],
                 env=env,
@@ -86,6 +121,11 @@ def main():
         states = [receive(sock, "S") for sock in sockets]
         assert_equal(states, "initial fixture")
         baseline = states[0]
+        policy_mode = {"classic": 0, "v1": 1, "v2": 2}.get(args.construction_policy)
+        if policy_mode is not None:
+            initial = policy_state(baseline, policy_mode)
+            if initial['crossing'].get('crossing') is not False or initial['demolition']['type'] != initial['crossing']['type']:
+                raise AssertionError('construction-policy starting roads differ')
         changed = 0
 
         operations = (
@@ -105,6 +145,10 @@ def main():
         if args.megacity_designation:
             operations = ((1, "F", False), (1, "G", True), (2, "G", False),
                           (2, "X", False), (2, "E", True), (1, "E", False))
+        if args.construction_policy is not None:
+            integrated = args.construction_policy != "classic"
+            operations = ((1, "f", False), (2, "a", integrated),
+                          (1, "a", False), (1, "d", integrated))
         for origin, command, success in operations:
             if command == "C" and not success and states[0] != baseline and changed == 1:
                 # Set the same low cash balance in all independent fixtures.
@@ -144,8 +188,12 @@ def main():
                 raise AssertionError(f"successful {command} made no state change")
             if not success and states[0] != before:
                 raise AssertionError(f"denied {command} changed state")
+            if args.construction_policy is not None:
+                policy_state(states[0], policy_mode)
+                if success:
+                    assert_policy_transition(before, states[0], command, policy_mode)
             state = states[0].decode("utf-8")
-            if success:
+            if success and args.construction_policy is None:
                 required = {
                     "Q": (";survey:0:1950", "company:0:9999000;"),
                     "J": (";survey:1:1950", "company:1:9999000;"),
@@ -161,16 +209,17 @@ def main():
             changed += int(states[0] != before)
             print(f"{command}: {'accepted' if success else 'denied'}; frame state {states[0].decode('utf-8', 'replace')}")
 
-        expected_changes = 2 if args.megacity_designation else 3
-        if changed != expected_changes or states[0] == baseline:
+        expected_changes = (0 if args.construction_policy == "classic" else 2) if args.construction_policy is not None else 2 if args.megacity_designation else 3
+        if changed != expected_changes or (states[0] == baseline) != (expected_changes == 0):
             raise AssertionError(f"expected exactly {expected_changes} accepted state changes")
 
-        for sock in sockets:
-            send(sock, "R")
-        reloaded = [receive(sock, "S") for sock in sockets]
-        assert_equal(reloaded, "save/reload")
-        if reloaded[0] != states[0]:
-            raise AssertionError("save/reload changed canonical authority state")
+        if args.construction_policy is None:
+            for sock in sockets:
+                send(sock, "R")
+            reloaded = [receive(sock, "S") for sock in sockets]
+            assert_equal(reloaded, "save/reload")
+            if reloaded[0] != states[0]:
+                raise AssertionError("save/reload changed canonical authority state")
 
         for sock in sockets:
             send(sock, "Z")
@@ -178,8 +227,11 @@ def main():
             output, _ = process.communicate(timeout=15)
             if process.returncode != 0:
                 raise RuntimeError(f"{role} failed ({process.returncode}):\n{output}")
-        print(f"save/reload: {reloaded[0].decode('utf-8', 'replace')}")
-        print("WP-05 TCP loopback: native server queue and two independent client queues, denial, save/reload equality PASS")
+        if args.construction_policy is None:
+            print(f"save/reload: {reloaded[0].decode('utf-8', 'replace')}")
+            print("WP-05 TCP loopback: native server queue and two independent client queues, denial, save/reload equality PASS")
+        else:
+            print(f"Construction policy {args.construction_policy}: native server queue, two independent client queues, public construction and foreign-tram denial PASS")
     finally:
         for sock in sockets:
             sock.close()

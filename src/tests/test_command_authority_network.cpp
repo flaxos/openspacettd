@@ -32,6 +32,9 @@
 extern void SetupCommandAuthorityWorld(WorldPhase phase, uint32_t score);
 extern std::string CommandAuthorityState();
 extern void SaveReloadCommandAuthority();
+extern void SetupConstructionPolicyNetworkFixture(int mode);
+extern std::string ConstructionPolicyState();
+extern CommandPacket MakeConstructionPolicyCommand(char op);
 
 namespace {
 #ifndef _WIN32
@@ -78,9 +81,13 @@ void WriteMessage(int fd, char op, std::span<const uint8_t> data = {})
 	if (!data.empty()) WriteExact(fd, data.data(), data.size());
 }
 
-void WriteState(int fd)
+void WriteState(int fd, bool construction_policy)
 {
-	std::string state = CommandAuthorityState();
+	std::string state = construction_policy ? ConstructionPolicyState() : CommandAuthorityState();
+	if (construction_policy) {
+		WriteMessage(fd, 'S', std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(state.data()), state.size()));
+		return;
+	}
 	for (const auto &city : MegacityManager::GetAllMegacities()) {
 		state += fmt::format(";megacity:{}:{}:{}:{}:{}:{}:{}", city.town_id.base(), city.world_id.base(), city.town_name,
 			city.population, city.monthly_quota[0], city.monthly_quota[1], city.monthly_quota[2]);
@@ -133,6 +140,7 @@ CommandPacket ParseWirePacket(NetworkGameSocketHandler &handler, std::span<const
 
 CommandPacket MakeCommand(char op)
 {
+	if (op == 'f' || op == 'a' || op == 'd') return MakeConstructionPolicyCommand(op);
 	CommandPacket cp;
 	cp.company = CompanyID{0};
 	cp.err_msg = StringID{0};
@@ -200,7 +208,14 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 	(void)MockEnvironment::Instance();
 	const bool resources = std::getenv("OSTTD_RESOURCE_LOOPBACK") != nullptr;
 	const bool megacity = std::getenv("OSTTD_MEGACITY_LOOPBACK") != nullptr;
-	SetupCommandAuthorityWorld(megacity ? WorldPhase::Phase3_Frontier : resources ? WorldPhase::Phase2_Developed : WorldPhase::Phase4_Expansion, 10000);
+	const char *policy_env = std::getenv("OSTTD_CONSTRUCTION_POLICY_LOOPBACK");
+	const bool construction_policy = policy_env != nullptr;
+	if (construction_policy) {
+		REQUIRE((std::string_view(policy_env) == "0" || std::string_view(policy_env) == "1" || std::string_view(policy_env) == "2"));
+		SetupConstructionPolicyNetworkFixture(policy_env[0] - '0');
+	} else {
+		SetupCommandAuthorityWorld(megacity ? WorldPhase::Phase3_Frontier : resources ? WorldPhase::Phase2_Developed : WorldPhase::Phase4_Expansion, 10000);
+	}
 	if (megacity) {
 		Town::Get(TownID{0})->cache.population = 1240;
 		REQUIRE(Town::CanAllocateItem());
@@ -209,7 +224,7 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 		town->townnametype = SPECSTR_TOWNNAME_START;
 		town->cache.population = 1000;
 	}
-	ResourceSiteManager::Reset();
+	if (!construction_policy) ResourceSiteManager::Reset();
 	if (resources) {
 		ResetIndustries();
 		ResourceSiteManager::SetEnabled(true);
@@ -225,15 +240,19 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 	_frame_counter = 0;
 	_frame_counter_max = 0;
 	ClientNetworkGameSocketHandler handler(INVALID_SOCKET, "loopback-test");
-	WriteState(fd);
+	WriteState(fd, construction_policy);
 	for (;;) {
 		auto [op, payload] = ReadMessage(fd);
 		if (op == 'Z') break;
-		if (op == 'S') { WriteState(fd); continue; }
-		if (op == 'R') { SaveReloadCommandAuthority(); WriteState(fd); continue; }
+		if (op == 'S') { WriteState(fd, construction_policy); continue; }
+		if (op == 'R') {
+			if (construction_policy) throw std::runtime_error("construction policy uses a separate cold-load fixture");
+			SaveReloadCommandAuthority(); WriteState(fd, construction_policy); continue;
+		}
 		if (op == 'L' || op == 'H') {
+			if (construction_policy) throw std::runtime_error("construction policy cannot replace fixture cash");
 			Company::Get(CompanyID{0})->money = op == 'L' ? 0 : 10000000;
-			WriteState(fd);
+			WriteState(fd, construction_policy);
 			continue;
 		}
 		if (op == 'B') {
@@ -255,10 +274,11 @@ TEST_CASE("WP-05 isolated loopback command worker", "[authority-network-worker]"
 				handler.incoming_queue.push_back(std::move(cp));
 				NetworkExecuteLocalCommandQueue();
 			}
-			WriteState(fd);
+			WriteState(fd, construction_policy);
 			continue;
 		}
-		if (op == 'G' || op == 'F' || op == 'E' || op == 'X' || op == 'Q' || op == 'J' || op == 'M' || op == 'N' || op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V') {
+		if (op == 'G' || op == 'F' || op == 'E' || op == 'X' || op == 'Q' || op == 'J' || op == 'M' || op == 'N' || op == 'U' || op == 'D' || op == 'I' || op == 'C' || op == 'P' || op == 'V' ||
+				(construction_policy && (op == 'f' || op == 'a' || op == 'd'))) {
 			auto bytes = WirePacket(handler, MakeCommand(op));
 			WriteMessage(fd, 'K', bytes);
 			continue;
