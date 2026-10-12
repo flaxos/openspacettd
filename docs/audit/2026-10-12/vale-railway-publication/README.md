@@ -91,3 +91,10 @@ Independent review approves both fixture-only repairs. Rebuild, eight focused ch
 aggregate 631 cases / 310,776 assertions, 648 isolated CTest cases and four localhost
 relays pass. No native gameplay proof or owner save is rerun or replaced. Exact new
 revision CI is recorded subsequently on the PR.
+
+
+The follow-up head `e115d4ca1d` passes all platform builds/tests and static workflows.
+Its final annotation gate reports one MSVC width conversion in the fixed three-town
+fixture. Using a `uint` loop index keeps coordinates 20, 40 and 60 and matches native
+`TileXY` without narrowing. Independent review and the rebuilt fixture/full local
+suite pass. The annotation gate is retained; exact updated-head CI remains required.

@@ -123,5 +123,20 @@
     "independent_review": "GO",
     "native_gameplay_reexecuted": false,
     "exact_head_ci": "Pending fixture repair publication"
+  },
+  "msvc_width_annotation": {
+    "head": "e115d4ca1d98b37261df099a81aa8cc61d0690f3",
+    "build_run": 38307290990,
+    "all_platform_content_jobs": "PASS",
+    "annotation_job": 115011899983,
+    "annotation": "size_t to uint TileXY coordinate in fixed three-town fixture",
+    "repair": "uint loop index; same coordinates20/40/60",
+    "check_weakened": false,
+    "independent_review": "GO",
+    "rebuilt_and_focused_pass": 6,
+    "catch_cases": 631,
+    "catch_assertions": 310776,
+    "ctest_pass": 652,
+    "exact_updated_head_ci": "Pending"
   }
 }

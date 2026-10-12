@@ -199,7 +199,7 @@ struct ValeStartupFixture {
 		region.min_x = region.min_y = 1; region.max_x = region.max_y = 254;
 		REQUIRE(PlanetManager::RegisterRegion(region));
 		std::array<TownID, 3> towns;
-		for (size_t n = 0; n < towns.size(); ++n) {
+		for (uint n = 0; n < towns.size(); ++n) {
 			REQUIRE(Town::CanAllocateItem());
 			Town *town = Town::Create(TileXY(20 + 20 * n, 20));
 			town->cache.population = 200;
