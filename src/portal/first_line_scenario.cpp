@@ -62,16 +62,27 @@
 #include "../safeguards.h"
 extern Company *DoStartupNewCompany(bool, CompanyID);
 namespace {
+/** Compact JSON value for scenario receipts and native audits. */
 using Json = nlohmann::json;
+/** Exact names of the four authored station shells. */
 constexpr std::array<const char *, 4> STOPS{"Clonclurry Iron", "Clonclurry Silica", "Merredin Commission Works", "Mito Commission Warehouse"};
+/** Length in tiles of each authored rail platform. */
 constexpr uint LENGTH = 4;
 
+/** Print a setup failure in both machine-readable and human-readable forms.
+ * @param reason Reason to report.
+ * @return Always false for propagation by the caller.
+ */
 bool Failure(std::string_view reason)
 {
 	IConsolePrint(CC_DEFAULT, "FIRSTLINE setup {}", Json{{"stage", "failure"}, {"reason", reason}}.dump());
 	IConsolePrint(CC_ERROR, "FIRSTLINE FAIL {}", reason);
 	return false;
 }
+/** Bound native command error text for the setup receipt.
+ * @param cost Failed command result.
+ * @return IDs, readable text and cost as JSON.
+ */
 Json SetupCostError(CommandCost &cost)
 {
 	StringID id = cost.GetErrorMessage(), extra = cost.GetExtraErrorMessage();
@@ -84,6 +95,11 @@ Json SetupCostError(CommandCost &cost)
 		{"decoded", decoded}, {"extra", extra_text},
 		{"cost", int64_t(cost.GetCost())}};
 }
+/** Accept a native command result or report its named setup failure.
+ * @param cost Native command result.
+ * @param action Description of the attempted action.
+ * @return Whether the command succeeded.
+ */
 bool Result(CommandCost cost, std::string_view action)
 {
 	if (cost.Succeeded()) return true;
@@ -91,7 +107,16 @@ bool Result(CommandCost cost, std::string_view action)
 	IConsolePrint(CC_DEFAULT, "FIRSTLINE setup {}", Json{{"stage", "native_command"}, {"action", action}, {"error", error}}.dump());
 	return Failure(fmt::format("{}: {}", action, error["decoded"].get<std::string>()));
 }
+/** Resolve a loaded four-character cargo label.
+ * @param label Four cargo-label characters.
+ * @return Current cargo type for that label.
+ */
 CargoType Cargo(const char *label) { CargoLabel v; std::copy_n(label, 4, v.begin()); return GetCargoTypeByLabel(v); }
+/** Find the portal endpoint on one side of a named world pair.
+ * @param world World containing the desired endpoint.
+ * @param other World on the far side of the portal.
+ * @return Matching endpoint or nullptr.
+ */
 const PortalEndpoint *Endpoint(WorldID world, WorldID other)
 {
 	for (const auto &[id, link] : PortalRegistry::GetAllPortals()) {
@@ -100,8 +125,16 @@ const PortalEndpoint *Endpoint(WorldID world, WorldID other)
 	}
 	return nullptr;
 }
+/** Find one of the four bound company station shells by name.
+ * @param n Index into the authored stop names.
+ * @return Matching station or nullptr.
+ */
 Station *Stop(size_t n) { for (Station *s : Station::Iterate()) if (s->owner == CompanyID{0} && s->name == STOPS[n]) return s; return nullptr; }
-/** Put the starter depot beyond the platform end opposite its public approach. */
+/** Put the starter depot beyond the platform end opposite its public approach.
+ * @param platform First tile of the proposed platform.
+ * @param axis Platform rail axis.
+ * @return Depot tile and exit direction, or no plan if the gate is unavailable.
+ */
 std::optional<std::pair<TileIndex, DiagDirection>> StarterDepot(TileIndex platform, Axis axis)
 {
 	const auto *gate = Endpoint(WorldID{2}, WorldID{1});
@@ -115,13 +148,25 @@ std::optional<std::pair<TileIndex, DiagDirection>> StarterDepot(TileIndex platfo
 	for (uint i = 1; i < LENGTH; ++i) platform = TileAddByDiagDir(platform, positive);
 	return std::pair{TileAddByDiagDir(platform, positive), ReverseDiagDir(positive)};
 }
+/** Find a loaded train engine by its NewGRF and local identity.
+ * @param local NewGRF-local vehicle ID.
+ * @param grf NewGRF that owns the vehicle.
+ * @return Loaded engine ID or an invalid ID.
+ */
 EngineID EngineLocal(uint local, GrfID grf = COMMONWEALTH_RAIL_GRFID)
 {
 	for (const Engine *e : Engine::Iterate()) if (e->type == VehicleType::Train && e->grf_prop.grfid == grf && e->grf_prop.local_id == local) return e->index;
 	return EngineID::Invalid();
 }
+/** Find the authored player's front engine. @return Starter train or nullptr. */
 Train *Starter() { for (Train *t : Train::Iterate()) if (t->IsFrontEngine() && t->owner == CompanyID{0}) return t; return nullptr; }
-/** Print the bounded native-command evidence for every authored asset. */
+/** Print the bounded native-command evidence for every authored asset.
+ * @param type Industry type to found.
+ * @param world World receiving the industry.
+ * @param near Preferred construction tile.
+ * @param primary Whether a resource-site survey is required.
+ * @return Founded industry or nullptr after a recorded failure.
+ */
 Industry *Fund(IndustryType type, WorldID world, TileIndex near, bool primary)
 {
 	Json report;
@@ -130,13 +175,33 @@ Industry *Fund(IndustryType type, WorldID world, TileIndex near, bool primary)
 	if (industry == nullptr) Failure(fmt::format("native industry funding {} at stage {}", report.value("status", "failed"), report.value("stage", "unknown")));
 	return industry;
 }
+/** Test whether a station catchment covers any tile of an industry.
+ * @param s Candidate station.
+ * @param i Industry to collect from or deliver to.
+ * @return Whether their footprints overlap through the station catchment.
+ */
 bool Catches(const Station *s, const Industry *i) { for (TileIndex tile : i->location) if (s->catchment_tiles.HasTile(tile)) return true; return false; }
-/** A prospective four-tile shell; no mutation precedes approach selection. */
-struct ShellChoice { TileIndex tile = INVALID_TILE; Axis axis = Axis::X; TileIndex depot = INVALID_TILE; DiagDirection depot_dir = DiagDirection::Invalid; };
-struct ApproachChoice { size_t stop = 0; WorldID world{0}; WorldID other{0}; };
+/** A prospective four-tile station shell; no mutation precedes selection. */
+struct ShellChoice {
+	TileIndex tile = INVALID_TILE; ///< First tile of the platform.
+	Axis axis = Axis::X; ///< Platform's rail axis.
+	TileIndex depot = INVALID_TILE; ///< Optional starter depot tile.
+	DiagDirection depot_dir = DiagDirection::Invalid; ///< Optional starter depot exit.
+};
+/** One station-to-gate leg to quote in the joint approach search. */
+struct ApproachChoice {
+	size_t stop = 0; ///< Index of the station shell for this leg.
+	WorldID world{0}; ///< World containing the station-side gate endpoint.
+	WorldID other{0}; ///< World on the other side of that gate.
+};
+/** Five required approach legs between four shells and public gates. */
 constexpr std::array<ApproachChoice, 5> APPROACHES{{
 	{0, WorldID{2}, WorldID{1}}, {1, WorldID{2}, WorldID{1}},
 	{2, WorldID{1}, WorldID{2}}, {2, WorldID{1}, WorldID{0}}, {3, WorldID{0}, WorldID{1}}}};
+/** Summarize an industry and its occupied resource site for route planning.
+ * @param industry Bound industry, if it exists.
+ * @return Industry and site identity, or JSON null.
+ */
 Json IndustryContext(const Industry *industry)
 {
 	if (industry == nullptr) return nullptr;
@@ -149,12 +214,27 @@ Json IndustryContext(const Industry *industry)
 	return {{"industry_id", industry->index.base()}, {"tile", industry->location.tile.base()},
 		{"world", PlanetManager::GetTileWorld(industry->location.tile).base()}, {"site", site}};
 }
+/** Arrange bound industries by the four authored station shells.
+ * @param iron Iron source served by the first shell.
+ * @param silica Silica source served by the second shell.
+ * @param steel Steel works served by the third shell.
+ * @param ballast Ballast works also served by the third shell.
+ * @return Per-shell industry context for native approach searches.
+ */
 std::array<Json, 4> ApproachContext(const Industry *iron, const Industry *silica, const Industry *steel, const Industry *ballast)
 {
 	return {Json::array({IndustryContext(iron)}), Json::array({IndustryContext(silica)}),
 		Json::array({IndustryContext(steel), IndustryContext(ballast)}), Json::array()};
 }
-/** Native station/depot quotes and bounded 37x37x2 enumeration; first 32 feasible per shell. */
+/** Quote station and depot candidates in a bounded 37x37x2 enumeration.
+ * @param n Authored stop index.
+ * @param world World in which the shell must fit.
+ * @param near Preferred tile around which candidates are ranked.
+ * @param industries Industries the platform must cover.
+ * @param budget Shared native-command query budget.
+ * @param report Receives enumeration counts and native refusal samples.
+ * @return Up to the first 32 feasible shell choices.
+ */
 std::vector<ShellChoice> ShellCandidates(size_t n, WorldID world, TileIndex near,
 	const std::vector<const Industry *> &industries, FirstLineApproachBudget &budget, Json &report)
 {
@@ -211,7 +291,16 @@ std::vector<ShellChoice> ShellCandidates(size_t n, WorldID world, TileIndex near
 	}
 	return candidates;
 }
-/** Full footprint reservation and all five quotes use one shared authoring budget. */
+/** Reserve every shell footprint and quote all five approach legs together.
+ * @param shells Four proposed station shells.
+ * @param budget Shared search-state and native-command query budget.
+ * @param industries Per-shell industry context for diagnostics.
+ * @param plans Receives five approach plans on success.
+ * @param reports Receives per-leg diagnostics.
+ * @param failed_stop Receives the shell index at the first failure.
+ * @param quote Receives the summed native construction quote.
+ * @return Whether all five legs have legal quoted routes.
+ */
 bool PlanApproaches(const std::array<ShellChoice, 4> &shells, FirstLineApproachBudget &budget,
 	const std::array<Json, 4> &industries, std::array<FirstLineApproachPlan, 5> &plans,
 	std::array<Json, 5> &reports, size_t &failed_stop, int64_t &quote)
@@ -256,7 +345,16 @@ bool PlanApproaches(const std::array<ShellChoice, 4> &shells, FirstLineApproachB
 	}
 	return true;
 }
-/** Bound candidate changes as well as graph states. All four footprints are known before each attempt. */
+/** Try bounded shell combinations with all four footprints known before each attempt.
+ * @param candidates Feasible choices for each station shell.
+ * @param budget Shared search-state and command-query budget.
+ * @param industries Per-shell industry context for diagnostics.
+ * @param shells Receives the selected four shells on success.
+ * @param plans Receives five quoted approaches on success.
+ * @param reports Receives the latest per-leg diagnostics.
+ * @param quote Receives the summed construction quote.
+ * @return Whether a jointly legal four-shell, five-approach plan was found.
+ */
 bool ChooseShells(const std::array<std::vector<ShellChoice>, 4> &candidates, FirstLineApproachBudget &budget,
 	const std::array<Json, 4> &industries, std::array<ShellChoice, 4> &shells, std::array<FirstLineApproachPlan, 5> &plans,
 	std::array<Json, 5> &reports, int64_t &quote)
@@ -287,6 +385,12 @@ bool ChooseShells(const std::array<std::vector<ShellChoice>, 4> &candidates, Fir
 		{"states", budget.states}, {"queries", budget.queries}, {"budget_exhausted", budget.exhausted}}.dump());
 	return false;
 }
+/** Build and name a paid station shell, then verify its industry catchment.
+ * @param n Authored stop index.
+ * @param choice Selected station tile and axis.
+ * @param industries Industries the shell must cover.
+ * @return Built station or nullptr after a native command or catchment failure.
+ */
 Station *BuildShell(size_t n, const ShellChoice &choice, const std::vector<const Industry *> &industries)
 {
 	auto built = Command<Commands::BuildRailStation>::Do(DoCommandFlag::Execute, choice.tile, RAILTYPE_RAIL, choice.axis, 1, LENGTH, STAT_CLASS_DFLT, 0, NEW_STATION, true);
@@ -296,7 +400,11 @@ Station *BuildShell(size_t n, const ShellChoice &choice, const std::vector<const
 	for (const Industry *industry : industries) if (!Catches(station, industry)) { Failure(fmt::format("native shell {} catchment differs at industry {}", STOPS[n], industry->index.base())); return nullptr; }
 	return station;
 }
-/** Replan against saved native shells before ordinary paid construction. */
+/** Replan against saved native shells before ordinary paid construction.
+ * @param execute Whether to build quoted pieces after planning.
+ * @param quote Receives the total native construction quote.
+ * @return Whether planning, and any requested construction, succeeded.
+ */
 bool Connections(bool execute, int64_t &quote)
 {
 	std::array<ShellChoice, 4> shells;
@@ -330,12 +438,23 @@ bool Connections(bool execute, int64_t &quote)
 	}
 	return true;
 }
+/** Buy an empty cargo wagon and couple it to the authored consist.
+ * @param depot Depot where the wagon is purchased.
+ * @param front Front vehicle to receive the wagon.
+ * @param local NewGRF-local wagon ID.
+ * @param label Cargo label requested at purchase.
+ * @param grf NewGRF containing the wagon.
+ * @return Whether purchase and native coupling succeeded.
+ */
 bool Wagon(TileIndex depot, VehicleID front, uint local, const char *label, GrfID grf = COMMONWEALTH_RAIL_GRFID)
 {
 	EngineID e = EngineLocal(local, grf); if (e == EngineID::Invalid()) return Failure("missing loaded wagon");
 	auto [cost, id, capacity, mail, cargos] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, depot, e, false, Cargo(label), ClientID::Invalid);
 	return Result(cost, "empty wagon") && Result(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, id, front, false), "ordinary coupling");
 }
+/** Capture the current native mission, economy, cargo and asset state.
+ * @return JSON snapshot for offline proof and status queries.
+ */
 Json Snapshot()
 {
 	Json r = GetCoreBasketObservation();
@@ -380,6 +499,9 @@ Json Snapshot()
 	for (const auto &tech : TechTreeManager::GetAllCompanyTechStates()) r["research"].push_back({tech.active_project, tech.accumulated_rp, tech.monthly_budget, tech.unlocked_techs});
 	return r;
 }
+/** Author the guarded empty opening and bind its native observer.
+ * @return Whether every founding asset and baseline check succeeded.
+ */
 bool Prepare()
 {
 	const Json admission{{"active", FirstPermanentLine::Active()}, {"vehicles", Vehicle::GetNumItems()},
@@ -457,6 +579,9 @@ bool Prepare()
 	if (!FirstPermanentLine::Begin(b)) return Failure("native observer rejected opening");
 	IConsolePrint(CC_DEFAULT, "FIRSTLINE prepared {}", Json{{"stake", int64_t(c->money)}, {"construction_quote", quote}, {"unlock", "Materials I"}, {"assets", "2 native works, 2 legal extractors, 4 empty platforms, warehouse, depot, Pioneer + 2 IRON hoppers + 1 SILC hopper; native Mito monthly settlement registration"}, {"baseline", Snapshot()}}.dump()); return true;
 }
+/** Build the proof route and start ordinary recurring train service.
+ * @return Whether construction, wagon purchase and orders succeeded.
+ */
 bool Build()
 {
 	const auto &s = FirstPermanentLine::State(); Train *train = Starter();
@@ -474,6 +599,9 @@ bool Build()
 	if (!Result(Command<Commands::StartStopVehicle>::Do(DoCommandFlag::Execute, train->index, true), "ordinary departure")) return false;
 	IConsolePrint(CC_DEFAULT, "FIRSTLINE built {}", Snapshot().dump()); return true;
 }
+/** Scan the authored map and active cargo strings for invalid content.
+ * @return Terrain, viewport and language audit evidence.
+ */
 Json Audit()
 {
 	Json r{{"invalid_slopes", 0}, {"invalid_foundations", 0}, {"pixel_queries", 0}, {"viewport_queries", 0}, {"language", GetCurrentLanguageIsoCode()}, {"cargos", Json::array()}};

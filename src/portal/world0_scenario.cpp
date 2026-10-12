@@ -97,20 +97,37 @@ std::vector<std::pair<TileIndex, Track>> GetWorld0RailRoute(uint route)
 }
 
 namespace {
+/** @brief JSON representation of native Vale diagnostic receipts. */
 using Json = nlohmann::json;
+/** @brief Length of each short authored rail platform. */
 constexpr uint LENGTH = 4;
+/** @brief Anchors of quarry, works input, works output, and yard platforms. */
 constexpr std::array<std::pair<uint, uint>, 4> PLATFORMS{{{48, 70}, {96, 116}, {104, 123}, {147, 146}}};
+/** @brief Stable native names for the four authored freight stops. */
 constexpr std::array<const char *, 4> STOPS{"Stonecross Quarry", "Stonecross Works Input", "Stonecross Works Output", "Greybank Yard"};
+/** @brief Three visible Story Book goal descriptions. */
 constexpr std::array<const char *, 3> GOALS{"Deliver 80 SILC and make 40 native ballast batches", "Bring 40 BALL home to Greybank Yard", "Return to the works and make another useful ballast delivery"};
+/** @brief Opening narrative shown in the Vale Story Book. */
 constexpr const char *BRIEF = "You have founded Vale Railway in Aster Vale. Greybank, Stonecross and Merefield already have homes and roads. Stonecross Works needs a railway: bring silica from the quarry, then take its ballast to your yard beside Greybank.";
+/** @brief Founding assets and limited plot permit explained to the player. */
 constexpr const char *ASSISTANCE = "Aster Vale is Phase 3 Frontier; its economic role is Frontier. Your charter permits one ballast works on its named plot. Founding assistance: GBP 750,000, imported 80 STEL, Materials I, an empty Pioneer with two SILC hoppers, the quarry and works, short platforms and depot stubs, and an empty Greybank yard. Both through railways are yours to build. Every SILC and BALL store starts empty.";
+/** @brief Native railway construction and freight instructions. */
 constexpr const char *INSTRUCTIONS = "Finish Quarry to Works input, give the Pioneer those two orders and start it. Collect BALL from the separate Works output platform and unload it at Greybank Yard. The yard stores your materials; warehouse freight pays no sale income. Rail fabrication starts off, so normal pioneer track is cash-built. With BALL and the finite imported STEL you may later enable fabrication.";
+/** @brief Recovery guidance for interrupted freight service. */
 constexpr const char *RECOVERY = "No deadline or starvation loop applies. Empty input means send silica; full output means collect ballast. A stopped train, wrong orders or full buffer can be fixed. Two useful ballast arrivals separated by a return to the works establish the railway. Keep the company and continue free play.";
+/** @brief Whether a Vale startup FIFO callback is already queued. */
 bool bridge_pending = false;
 
+/** @brief Print a Vale-specific authoring failure and stop the current step.
+ * @param reason Human-readable failure context.
+ * @return Always false for direct propagation.
+ */
 bool Failure(std::string_view reason) { IConsolePrint(CC_ERROR, "VALE FAIL {}", reason); return false; }
 
-/** The startup script may run before modal generation cleanup. This predicate never authors state. */
+/** @brief Admit only the empty editor or a paused, validated Vale opening.
+ * The startup script may run before modal generation cleanup. This predicate never authors state.
+ * @return True when the current native context may use the Vale startup bridge.
+ */
 bool BridgeAdmission()
 {
 	if (_networking || _network_dedicated || _settings_game.difficulty.infinite_money ||
@@ -143,7 +160,11 @@ bool BridgeAdmission()
 	return world != nullptr && world->phase == WorldPhase::Phase3_Frontier && World0Opening::State().profile.crusher_plot != INVALID_TILE;
 }
 
-/** Reject parser metacharacters, noncanonical paths, symlinks and non-FIFOs before queuing and again before exec. */
+/** @brief Validate the exact native FIFO path before queueing and again before exec.
+ * Reject parser metacharacters, noncanonical paths, and symlinks.
+ * @param raw Proposed absolute startup FIFO path.
+ * @return True only for a canonical, existing, non-symlink FIFO path.
+ */
 bool BridgePath(std::string_view raw)
 {
 	if (raw.empty() || raw.size() > 1024) return false;
@@ -160,6 +181,9 @@ bool BridgePath(std::string_view raw)
 	return std::filesystem::is_fifo(std::filesystem::status(path, error)) && !error;
 }
 
+/** @brief Execute an admitted startup FIFO after modal generation cleanup.
+ * @param path Validated absolute FIFO path retained across deferred callbacks.
+ */
 void RunBridge(std::string path)
 {
 	VideoDriver *driver = VideoDriver::GetInstance();
@@ -179,27 +203,56 @@ void RunBridge(std::string path)
 	}
 	IConsoleCmdExec(fmt::format("exec \"{}\"", path));
 }
+/** @brief Report the exact native command rejection for an authoring action.
+ * @param cost Native quote or execution result.
+ * @param action Action name for the diagnostic receipt.
+ * @return True when the native command succeeded.
+ */
 bool Result(CommandCost cost, std::string_view action)
 {
 	if (cost.Succeeded()) return true;
 	const StringID id = cost.GetErrorMessage();
 	return Failure(fmt::format("{}: error {} {}", action, id.base(), cost.GetEncodedMessage().empty() ? (id == INVALID_STRING_ID ? "command rejected" : GetString(id)) : cost.GetEncodedMessage().GetDecodedString()));
 }
+/** @brief Resolve a four-character catalog cargo label.
+ * @param label Four-character cargo label.
+ * @return Native cargo type, or INVALID_CARGO when absent.
+ */
 CargoType Cargo(const char *label) { CargoLabel value; std::copy_n(label, 4, value.begin()); return GetCargoTypeByLabel(value); }
+/** @brief Find a train engine by its authored GRF and local identifier.
+ * @param local Local engine identifier in the GRF.
+ * @param grf Source GRF identifier.
+ * @return Matching native engine identifier, or invalid when absent.
+ */
 EngineID EngineLocal(uint local, GrfID grf = COMMONWEALTH_RAIL_GRFID)
 {
 	for (const Engine *engine : Engine::Iterate()) if (engine->type == VehicleType::Train && engine->grf_prop.grfid == grf && engine->grf_prop.local_id == local) return engine->index;
 	return EngineID::Invalid();
 }
+/** @brief Find one of the four named Vale platforms owned by the charter.
+ * @param n Index in the authored stop-name table.
+ * @return Matching station, or null when absent.
+ */
 Station *Stop(size_t n)
 {
 	for (Station *station : Station::Iterate()) if (station->owner == World0Opening::State().profile.company && station->name == STOPS[n]) return station;
 	return nullptr;
 }
+/** @brief Find the charter-owned starter front train at its initial depot tile.
+ * @return The native starter train, or null when absent.
+ */
 Train *Starter() { for (Train *train : Train::Iterate()) if (train->IsFrontEngine() && train->owner == World0Opening::State().profile.company && train->tile == TileXY(46, 70)) return train; return nullptr; }
+/** @brief Check whether a station catchment covers an industry tile.
+ * @param station Station to inspect, or null.
+ * @param industry Industry to inspect, or null.
+ * @return True when the station can serve the industry.
+ */
 bool Catches(const Station *station, const Industry *industry) { if (station == nullptr || industry == nullptr) return false; for (TileIndex tile : industry->location) if (station->catchment_tiles.HasTile(tile)) return true; return false; }
 
-/** Fresh terrain only. Height is a shared corner field, blended around roads, settlements and rail. */
+/** @brief Shape only fresh authored terrain around Vale roads and rail.
+ * Height is a shared corner field blended around roads, settlements, and rail.
+ * @return True after the deterministic terrain pass completes.
+ */
 bool Landscape()
 {
 	std::vector<std::pair<int, int>> flat;
@@ -234,16 +287,38 @@ bool Landscape()
 	for (auto [x, y] : water) { TileIndex tile = TileXY(x, y); if (GetTileSlope(tile) == SLOPE_FLAT) MakeRiver(tile, uint8_t((x * 19 + y * 7) & 255)); }
 	return true;
 }
+/** @brief Build an authored regional road through the ordinary native command.
+ * @param x1 First endpoint X coordinate.
+ * @param y1 First endpoint Y coordinate.
+ * @param x2 Second endpoint X coordinate.
+ * @param y2 Second endpoint Y coordinate.
+ * @return True when the paid native road command succeeds.
+ */
 bool Road(uint x1, uint y1, uint x2, uint y2)
 {
 	if (!Result(Command<Commands::BuildRoadLong>::Do(DoCommandFlag::Execute, TileXY(x2, y2), TileXY(x1, y1), ROADTYPE_ROAD, x1 == x2 ? Axis::Y : Axis::X, {}, false, false, false), "regional road")) return false;
 	return true;
 }
+/** @brief Purchase and couple one empty native wagon to the specified train.
+ * @param depot Rail depot tile for purchase.
+ * @param front Front train receiving the wagon.
+ * @param local Wagon local GRF identifier.
+ * @param cargo Requested wagon cargo.
+ * @param grf Wagon GRF identifier.
+ * @return True when purchase and ordinary coupling both succeed.
+ */
 bool Wagon(TileIndex depot, VehicleID front, uint local, CargoType cargo, GrfID grf = COMMONWEALTH_RAIL_GRFID)
 {
 	auto [cost, id, capacity, mail, cargos] = Command<Commands::BuildVehicle>::Do(DoCommandFlag::Execute, depot, EngineLocal(local, grf), false, cargo, ClientID::Invalid);
 	return Result(cost, "empty hopper") && Result(Command<Commands::MoveRailVehicle>::Do(DoCommandFlag::Execute, id, front, false), "ordinary coupling");
 }
+/** @brief Quote or pay for one authored rail piece using the native command.
+ * @param tile Target rail tile.
+ * @param track Requested track segment.
+ * @param execute Whether to perform the paid command after quoting.
+ * @param sum Accumulated native quoted cost.
+ * @return True when reuse or native quote and optional execution succeed.
+ */
 bool Rail(TileIndex tile, Track track, bool execute, int64_t &sum)
 {
 	if (IsPlainRailTile(tile) && GetTileOwner(tile) == _current_company && GetRailType(tile) == RAILTYPE_RAIL && GetTrackBits(tile).Test(track)) return true;
@@ -256,11 +331,19 @@ bool Rail(TileIndex tile, Track track, bool execute, int64_t &sum)
 	}
 	return true;
 }
+/** @brief Process both fixed Vale rail corridors in their authored order.
+ * @param execute Whether to construct each missing rail piece.
+ * @param sum Accumulated native quoted rail cost.
+ * @return True when all corridor pieces succeed.
+ */
 bool Routes(bool execute, int64_t &sum)
 {
 	for (uint route = 0; route < 2; ++route) for (auto [tile, track] : GetWorld0RailRoute(route)) if (!Rail(tile, track, execute, sum)) return false;
 	return true;
 }
+/** @brief Capture current native Vale custody, mission, economy, map, and UI evidence.
+ * @return A read-only JSON snapshot for authoring or diagnostic receipts.
+ */
 Json Snapshot()
 {
 	Json r = GetCoreBasketObservation();
@@ -300,6 +383,9 @@ Json Snapshot()
 	r["permit"] = World0Opening::PermitsCrusher(s.profile.crusher_plot, MapNewGRFIndustryType(0x91, COMMONWEALTH_INDUSTRY_GRFID), s.profile.company);
 	return r;
 }
+/** @brief Create the Vale Story Book briefing and three native goals.
+ * @return True when every ordinary story and goal command succeeds.
+ */
 bool Briefing()
 {
 	AutoRestoreBackup deity(_current_company, OWNER_DEITY);
@@ -324,6 +410,9 @@ bool Briefing()
 	}
 	return Result(Command<Commands::ShowStoryPage>::Do(DoCommandFlag::Execute, page), "show founding charter");
 }
+/** @brief Author the bounded empty World 0 opening and finish its native briefing.
+ * @return True when the complete native Vale baseline is prepared.
+ */
 bool Prepare()
 {
 	if (_game_mode != GameMode::Editor || Map::SizeX() != 256 || Map::SizeY() != 256 || _generating_world ||
@@ -406,6 +495,9 @@ bool Prepare()
 	}
 	return FinishWorld0Authoring(route_quote, service_quote);
 }
+/** @brief Purchase both rail corridors and start the two ordered freight services.
+ * @return True when all native construction and service commands succeed.
+ */
 bool Build()
 {
 	const auto &s = World0Opening::State(); Train *starter = Starter();
@@ -428,6 +520,9 @@ bool Build()
 	IConsolePrint(CC_DEFAULT, "VALE built {}", Json{{"rail_quote", rail_quote}, {"native_total_debit", money_before - int64_t(Company::Get(s.profile.company)->money)}, {"feeder", starter->index.base()}, {"export", export_train.base()}, {"state", Snapshot()}}.dump());
 	return true;
 }
+/** @brief Read native terrain, viewport mapping, and translated cargo-string diagnostics.
+ * @return JSON integrity observations without game-state mutation.
+ */
 Json Audit()
 {
 	Json r{{"invalid_slopes", 0}, {"invalid_foundations", 0}, {"pixel_queries", 0}, {"viewport_queries", 0}, {"language", GetCurrentLanguageIsoCode()}, {"cargos", Json::array()}};
@@ -445,6 +540,9 @@ Json Audit()
 	for (const CargoSpec *cargo : CargoSpec::Iterate()) r["cargos"].push_back({{"label", cargo->label.AsString()}, {"name", GetString(cargo->name)}, {"single", GetString(cargo->name_single)}, {"units", GetString(cargo->units_volume, 100)}, {"quantity", GetString(cargo->quantifier, 100)}, {"zero", GetString(cargo->quantifier, 0)}, {"large", GetString(cargo->quantifier, 100000)}, {"abbreviation", GetString(cargo->abbrev)}});
 	return r;
 }
+/** @brief Advance until one native economy evaluation or the finite safety bound.
+ * @return True after emitting the native advance receipt; failures are recorded there.
+ */
 bool Advance()
 {
 	const uint start = World0Opening::State().economy_evaluations;

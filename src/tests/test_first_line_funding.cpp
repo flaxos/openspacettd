@@ -117,7 +117,7 @@ struct FundingFixture {
 bool HasError(const Json &report, std::string_view stage, StringID id)
 {
 	for (const auto &r : report.at("rejections")) {
-		if (r.at("stage") == stage && r.at("error_id") == id.base()) return true;
+		if (r.at("stage").get<std::string>() == stage && r.at("error_id") == id.base()) return true;
 	}
 	return false;
 }

@@ -45,6 +45,26 @@ local checks; remote CI exercises its normal suite. File descriptions, unused
 strings, script mode enforcement and upstream diff validation pass. Independent
 staged privacy/scope review is GO. Exact-head CI is pending at publication.
 
-The clean publication branch has one new implementation commit on the dependency
-head. Original local commits, private proofs, game files and Antigravity checkout
+The clean publication branch has a new implementation commit and a bounded CI repair on the
+dependency head. Original local commits, private proofs, game files and Antigravity checkout
 remain intact; no rewrite, force push or merge is performed.
+
+## CI repair validation
+
+Initial CI exposed missing source documentation, a macOS `Boolean` type collision,
+an MSVC JSON/string-view overload ambiguity and an assertion-enabled demolition
+fixture that attempted replacement without clearing the original house tile.
+All 409 introduced warning signatures are cleared by matching Doxygen 1.17.0;
+new native modules have no warnings. Local parsing uses Autogen output to conserve
+disk, with the repository's warning settings retained. Remote CI still runs its
+unchanged documentation workflow.
+
+The two private JSON helper names are now `JsonBoolean`. The funding test extracts
+a string before comparing it. The demolition fixture initializes ordinary town
+counts and calls native `ClearTownHouse`, verifies a clear tile, then keeps the
+original invalidation and replacement-never-win assertions. Independent review
+confirms the bounded changes and no weakened assertions or checker suppressions.
+Both native targets rebuild; 35 focused cases / 957 assertions, aggregate 631 cases /
+310,774 assertions, 648 isolated nonrelay CTest cases and four localhost relays pass.
+Exact repair-head CI remains pending when this record is committed; the PR records
+its subsequent terminal outcome without replacing the original failed results.

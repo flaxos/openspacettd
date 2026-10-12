@@ -26,11 +26,19 @@
 #include "../safeguards.h"
 
 namespace {
+/** Compact JSON value used for bounded route diagnostics. */
 using Json = nlohmann::json;
+/** Maximum search states for one approach leg. */
 constexpr uint32_t LEG_STATES = 30000;
+/** Maximum detailed rejection samples retained in one report. */
 constexpr size_t MAX_SAMPLES = 16;
+/** Maximum distinct native refusal kinds retained in one report. */
 constexpr size_t MAX_ERRORS = 64;
 
+/** Decode a native command result into bounded, localization-safe diagnostics.
+ * @param cost Command result to inspect.
+ * @return Error IDs, readable text and quoted cost.
+ */
 Json Error(CommandCost &cost)
 {
 	StringID id = cost.GetErrorMessage(), extra = cost.GetExtraErrorMessage();
@@ -43,6 +51,12 @@ Json Error(CommandCost &cost)
 		{"extra", extra_text}, {"cost", int64_t(cost.GetCost())}};
 }
 
+/** Record one rejected native preview without growing the report without bound.
+ * @param report Search report to update.
+ * @param stage Search stage that issued the preview.
+ * @param tile Candidate tile that was rejected.
+ * @param cost Native command result to record.
+ */
 void Rejected(Json &report, const char *stage, TileIndex tile, CommandCost &cost)
 {
 	Json error = Error(cost);
@@ -56,6 +70,11 @@ void Rejected(Json &report, const char *stage, TileIndex tile, CommandCost &cost
 	if (report["samples"].size() < MAX_SAMPLES) report["samples"].push_back({{"stage", stage}, {"tile", tile.base()}, {"x", TileX(tile)}, {"y", TileY(tile)}, {"error", error}});
 }
 
+/** Resolve the track curve connecting two diagonal directions.
+ * @param a First exit direction.
+ * @param b Second exit direction.
+ * @return Matching track or Track::Invalid.
+ */
 Track ApproachTrackCorner(DiagDirection a, DiagDirection b)
 {
 	for (Track track : TRACK_BIT_ALL) {
@@ -66,15 +85,23 @@ Track ApproachTrackCorner(DiagDirection a, DiagDirection b)
 	return Track::Invalid;
 }
 
+/** Check whether a candidate tile can host ordinary approach rail.
+ * @param tile Candidate route tile.
+ * @return Whether it is clear, wooded, road, or owner-held plain rail.
+ */
 bool Ground(TileIndex tile)
 {
 	return IsTileType(tile, TileType::Clear) || IsTileType(tile, TileType::Trees) || IsTileType(tile, TileType::Road) ||
 		(IsPlainRailTile(tile) && GetTileOwner(tile) == CompanyID{0});
 }
 
-/* A normal rail build on any other road shape removes town road pieces and can
- * consume town authority over successive paid commands. Keep only the native
- * full, perpendicular level-crossing shape; the command still decides legality. */
+/** Require a full perpendicular road crossing so an approach preserves town roads.
+ * A normal rail build on other road shapes can remove road pieces and consume
+ * town authority. The native command still decides construction legality.
+ * @param tile Candidate crossing tile.
+ * @param track Proposed rail track orientation.
+ * @return Whether the existing road survives this track placement.
+ */
 bool PreservesRoad(TileIndex tile, Track track)
 {
 	if (!IsTileType(tile, TileType::Road)) return true;
@@ -87,20 +114,45 @@ bool PreservesRoad(TileIndex tile, Track track)
 		 (track == Track::Y && GetAllRoadBits(tile) == ROAD_X));
 }
 
+/** Check whether an approach bridge can use an undisturbed head tile.
+ * @param tile Proposed bridge endpoint.
+ * @return Whether the tile is clear or wooded.
+ */
 bool ClearBridgeHead(TileIndex tile)
 {
 	return IsTileType(tile, TileType::Clear) || IsTileType(tile, TileType::Trees);
 }
 
+/** Read ownership without treating void, houses, or industries as route owners.
+ * @param tile Tile being summarized for search evidence.
+ * @return Observed owner or OWNER_NONE for non-ownable route terrain.
+ */
 Owner ObservedOwner(TileIndex tile)
 {
 	if (IsTileType(tile, TileType::Void) || IsTileType(tile, TileType::House) || IsTileType(tile, TileType::Industry)) return OWNER_NONE;
 	return GetTileOwner(tile);
 }
 
-struct Prior { uint32_t parent; FirstLineApproachPiece piece; };
+/** Search predecessor and native piece needed to reconstruct a route. */
+struct Prior {
+	uint32_t parent; ///< Encoded predecessor state.
+	FirstLineApproachPiece piece; ///< Piece traversed from the predecessor.
+};
 }
 
+/** Preview a bounded native approach without modifying the map.
+ * @param platform First tile of the station platform.
+ * @param axis Platform rail axis.
+ * @param length Number of platform tiles.
+ * @param gate Portal endpoint to connect.
+ * @param blocked Tiles excluded from the route search.
+ * @param planned_rails Reserved track bits; updated only after a complete quote.
+ * @param reserved_bridges Reserved bridge spans; updated only after a complete quote.
+ * @param budget Shared search-state and command-query budget.
+ * @param plan Receives the ordered route on success.
+ * @param report Receives bounded search and native-refusal evidence.
+ * @return Whether a complete native-command-quoted approach was found.
+ */
 bool FirstLineQuoteApproach(TileIndex platform, Axis axis, uint length, const PortalEndpoint &gate,
 	const std::set<TileIndex> &blocked, std::map<TileIndex, TrackBits> &planned_rails,
 	FirstLineBridgeReservations &reserved_bridges, FirstLineApproachBudget &budget,
@@ -355,6 +407,11 @@ search_done:
 	return true;
 }
 
+/** Requote and build a planned approach using ordinary native commands.
+ * @param plan Previously quoted ordered approach.
+ * @param report Receives actual costs and first-failure evidence.
+ * @return Whether every piece was built at its quoted cost.
+ */
 bool FirstLineExecuteApproach(const FirstLineApproachPlan &plan, Json &report)
 {
 	report = {{"status", "executing"}, {"quoted_cost", plan.cost}, {"actual_cost", 0}, {"pieces", plan.pieces.size()}};

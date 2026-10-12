@@ -28,13 +28,34 @@
 #include "../safeguards.h"
 
 namespace {
+/** @brief JSON representation used for bounded Vale opening saves. */
 using Json = nlohmann::json;
+/** @brief The single authored Aster Vale world. */
 constexpr WorldID WORLD{0};
+/** @brief Maximum freight units credited by persisted Vale counters. */
 constexpr uint32_t MAX_UNITS = 1000000;
+/** @brief Maximum live train journeys tracked by the opening. */
 constexpr size_t MAX_JOURNEYS = 4096;
+/** @var LOST_QUARRY
+ * @brief Tombstone bit for removal of the bound silica quarry.
+ */
+/** @var LOST_CRUSHER
+ * @brief Tombstone bit for removal of the bound ballast crusher.
+ */
+/** @var LOST_YARD
+ * @brief Tombstone bit for removal of the bound logistics hub.
+ */
+/** @var LOST_COMPANY
+ * @brief Tombstone bit for revocation of the founding charter.
+ */
 constexpr uint8_t LOST_QUARRY = 1, LOST_CRUSHER = 2, LOST_YARD = 4, LOST_COMPANY = 8;
+/** @brief Current private Vale opening state. */
 World0OpeningState opening;
 
+/** @brief Resolve a four-character Vale cargo label.
+ * @param label Four-character cargo label.
+ * @return The native cargo type, or INVALID_CARGO when absent.
+ */
 CargoType Cargo(const char *label)
 {
 	CargoLabel value;
@@ -42,12 +63,20 @@ CargoType Cargo(const char *label)
 	return GetCargoTypeByLabel(value);
 }
 
+/** @brief Find the authored quarry resource record by stable site identifier.
+ * @param id Resource-site identifier.
+ * @return The matching native site, or null when absent.
+ */
 const ResourceSite *QuarrySite(uint32_t id)
 {
 	for (const ResourceSite &site : ResourceSiteManager::Sites()) if (site.id == id) return &site;
 	return nullptr;
 }
 
+/** @brief Validate the one-world Frontier profile, towns, plot, and silica site.
+ * @param p Authored opening profile.
+ * @return True when its native geography and source catalog remain valid.
+ */
 bool WorldProfileValid(const World0OpeningProfile &p)
 {
 	const PlanetRegion *region = PlanetManager::GetRegion(WORLD);
@@ -72,6 +101,10 @@ bool WorldProfileValid(const World0OpeningProfile &p)
 		std::ranges::find(outputs, Cargo("SILC")) != outputs.end();
 }
 
+/** @brief Validate the charter company and active v2 Frontier role.
+ * @param p Authored opening profile.
+ * @return True when the saved profile matches the live economy.
+ */
 bool IdentityValid(const World0OpeningProfile &p)
 {
 	return Company::IsValidID(p.company) && WorldProfileValid(p) &&
@@ -79,6 +112,11 @@ bool IdentityValid(const World0OpeningProfile &p)
 		IntegratedEconomy::Role(WORLD) == EconomicRole::Frontier;
 }
 
+/** @brief Verify a player-founded World 0 ballast crusher.
+ * @param id Crusher industry identifier.
+ * @param owner Required founding company.
+ * @return True when the live factory has the required owner, world, and recipe.
+ */
 bool FactoryValid(IndustryID id, CompanyID owner)
 {
 	const Industry *industry = Industry::GetIfValid(id);
@@ -89,6 +127,10 @@ bool FactoryValid(IndustryID id, CompanyID owner)
 		PlanetManager::GetTileWorld(industry->location.tile) == WORLD;
 }
 
+/** @brief Match the bound silica quarry to its surveyed resource site.
+ * @param s Opening state carrying the quarry binding and site identity.
+ * @return True when the live quarry occupies the correct site and produces SILC.
+ */
 bool QuarryValid(const World0OpeningState &s)
 {
 	const Industry *industry = Industry::GetIfValid(s.binding.quarry);
@@ -105,6 +147,10 @@ bool QuarryValid(const World0OpeningState &s)
 
 bool Catches(const Station *station, const Industry *industry);
 
+/** @brief Check the bound Greybank station and native logistics hub.
+ * @param s Opening state carrying the yard and charter.
+ * @return True when the owned yard is live, separate from the crusher, and valid.
+ */
 bool YardValid(const World0OpeningState &s)
 {
 	const Station *station = Station::GetIfValid(s.binding.yard);
@@ -117,6 +163,10 @@ bool YardValid(const World0OpeningState &s)
 		LogisticsHubManager::ValidateForStation(*hub);
 }
 
+/** @brief Validate all live Vale quarry, crusher, and yard bindings.
+ * @param s Bound opening state.
+ * @return True when the three native assets and opening identity agree.
+ */
 bool BindingValid(const World0OpeningState &s)
 {
 	const Industry *crusher = Industry::GetIfValid(s.binding.crusher);
@@ -126,6 +176,10 @@ bool BindingValid(const World0OpeningState &s)
 		crusher->IsCargoProduced(Cargo("BALL")) && YardValid(s);
 }
 
+/** @brief Reconcile tracked crusher input and batches with native physical buffers.
+ * @param s Opening evidence to check.
+ * @return True when pending SILC and credited batches match native custody limits.
+ */
 bool PhysicalEvidenceValid(const World0OpeningState &s)
 {
 	const Industry *crusher = Industry::GetIfValid(s.binding.crusher);
@@ -139,6 +193,10 @@ bool PhysicalEvidenceValid(const World0OpeningState &s)
 
 const char *LossReason(uint8_t losses);
 
+/** @brief Validate explicit removal tombstones and all surviving native bindings.
+ * @param s Unavailable opening state.
+ * @return True when losses explain cleared bindings and surviving assets remain valid.
+ */
 bool SurvivingBindingsValid(const World0OpeningState &s)
 {
 	if (!WorldProfileValid(s.profile) || !IntegratedEconomy::Enabled() ||
@@ -174,6 +232,10 @@ bool SurvivingBindingsValid(const World0OpeningState &s)
 	return true;
 }
 
+/** @brief Select the stable reason for explicit native asset or charter loss.
+ * @param losses Bitmask of recorded native removals.
+ * @return The highest-priority saved loss reason.
+ */
 const char *LossReason(uint8_t losses)
 {
 	if (losses & LOST_COMPANY) return "founding-charter-revoked";
@@ -183,6 +245,11 @@ const char *LossReason(uint8_t losses)
 	return "";
 }
 
+/** @brief Check whether station catchment includes any industry tile.
+ * @param station Station to inspect, or null.
+ * @param industry Industry to inspect, or null.
+ * @return True when the station can serve the industry.
+ */
 bool Catches(const Station *station, const Industry *industry)
 {
 	if (station == nullptr || industry == nullptr) return false;
@@ -190,6 +257,11 @@ bool Catches(const Station *station, const Industry *industry)
 	return false;
 }
 
+/** @brief Check a live, uncrashed front train belongs to the Vale charter.
+ * @param id Native vehicle identifier.
+ * @param owner Required charter company.
+ * @return True for an eligible native train.
+ */
 bool TrainValid(VehicleID id, CompanyID owner)
 {
 	const Vehicle *train = Vehicle::GetIfValid(id);
@@ -197,6 +269,11 @@ bool TrainValid(VehicleID id, CompanyID owner)
 		train->owner == owner && !train->vehstatus.Test(VehState::Crashed);
 }
 
+/** @brief Require an arrival at the current explicit station order.
+ * @param train Candidate front train.
+ * @param station Native arrival station.
+ * @return True when the active order proves this stop.
+ */
 bool ScheduledAt(const Vehicle *train, StationID station)
 {
 	if (train == nullptr || train->GetNumOrders() < 2 || train->cur_real_order_index >= train->GetNumOrders()) return false;
@@ -207,6 +284,11 @@ bool ScheduledAt(const Vehicle *train, StationID station)
 		!train->current_order.GetNonStopType().Test(OrderNonStopFlag::GoVia);
 }
 
+/** @brief Require ordered loading at the delivery station.
+ * @param train Delivering front train.
+ * @param station Destination yard station.
+ * @return True when the explicit order or native loading marker proves this visit.
+ */
 bool ScheduledDeliveryAt(const Vehicle *train, StationID station)
 {
 	if (train == nullptr || train->cur_real_order_index >= train->GetNumOrders()) return false;
@@ -218,6 +300,11 @@ bool ScheduledDeliveryAt(const Vehicle *train, StationID station)
 		!train->current_order.GetNonStopType().Test(OrderNonStopFlag::GoVia));
 }
 
+/** @brief Check recurring crusher-source and unloadable yard orders.
+ * @param train Candidate front train.
+ * @param s Opening bindings and charter identity.
+ * @return True when the native order list supports both required legs.
+ */
 bool RouteValid(const Vehicle *train, const World0OpeningState &s)
 {
 	if (train == nullptr || train->type != VehicleType::Train || !train->IsFrontEngine() ||
@@ -259,12 +346,20 @@ bool RouteValid(const Vehicle *train, const World0OpeningState &s)
 	return source && yard;
 }
 
+/** @brief Require an operable Vale train with a valid recurring route.
+ * @param train Candidate front train.
+ * @param s Opening bindings and charter identity.
+ * @return True when the train is running and the route remains valid.
+ */
 bool ServiceValid(const Vehicle *train, const World0OpeningState &s)
 {
 	return train != nullptr && !train->vehstatus.Test(VehState::Crashed) &&
 		!train->vehstatus.Test(VehState::Stopped) && RouteValid(train, s);
 }
 
+/** @brief Latch a native loss, clear journey evidence, and preserve prior milestones.
+ * @param kind Bit corresponding to the removed binding or charter.
+ */
 void Lose(uint8_t kind)
 {
 	opening.losses |= kind;
@@ -273,18 +368,31 @@ void Lose(uint8_t kind)
 	opening.journeys.clear();
 }
 
+/** @brief Parse a strictly unsigned bounded save integer.
+ * @param value JSON value to decode.
+ * @param max Largest permitted value.
+ * @return The decoded integer; throws on type or range mismatch.
+ */
 uint64_t Number(const Json &value, uint64_t max)
 {
 	if (!value.is_number_unsigned() || value.get<uint64_t>() > max) throw std::runtime_error("world0 integer");
 	return value.get<uint64_t>();
 }
 
-bool Boolean(const Json &value)
+/** @brief Parse a strictly typed save boolean.
+ * @param value JSON value to decode.
+ * @return The decoded boolean; throws for another JSON type.
+ */
+bool JsonBoolean(const Json &value)
 {
 	if (!value.is_boolean()) throw std::runtime_error("world0 boolean");
 	return value.get<bool>();
 }
 
+/** @brief Reject save objects with missing or extra fields.
+ * @param value JSON object to inspect.
+ * @param keys Exact required field names.
+ */
 void ExactObject(const Json &value, std::initializer_list<const char *> keys)
 {
 	if (!value.is_object() || value.size() != keys.size()) throw std::runtime_error("world0 object");
@@ -292,7 +400,13 @@ void ExactObject(const Json &value, std::initializer_list<const char *> keys)
 }
 } // namespace
 
+/** @brief Clear the authored profile, live bindings, and observer evidence.
+ */
 void World0Opening::Reset() { opening = {}; }
+/** @brief Report whether authoring is ready or an opening is already active.
+ * @return True for a validated pre-activation profile or an already active opening.
+ * This is not the crusher-placement predicate.
+ */
 bool World0Opening::Ready()
 {
 	if (!opening.ready || FirstPermanentLine::Active()) return false;
@@ -301,6 +415,9 @@ bool World0Opening::Ready()
 	return !IntegratedEconomy::Enabled() && Company::IsValidID(opening.profile.company) &&
 		WorldProfileValid(opening.profile) && site != nullptr && !Industry::IsValidID(site->occupant);
 }
+/** @brief Report whether a complete Vale observer binding is installed.
+ * @return True for an active bound opening, including unavailable free play.
+ */
 bool World0Opening::Active() { return opening.active; }
 const World0OpeningState &World0Opening::State() { return opening; }
 
@@ -370,6 +487,14 @@ bool World0Opening::Begin(const World0OpeningBindings &binding)
 	return true;
 }
 
+/** @brief Classify native SILC input as quarry-qualified or unqualified custody.
+ * @param vehicle Delivering vehicle.
+ * @param company Delivering company.
+ * @param source Source industry.
+ * @param destination Accepting industry.
+ * @param cargo Delivered cargo type.
+ * @param units Native units accepted by the crusher.
+ */
 void World0Opening::OnIndustryDelivery(VehicleID vehicle, CompanyID company, IndustryID source, IndustryID destination, CargoType cargo, uint32_t units)
 {
 	if (!opening.active || opening.unavailable || destination != opening.binding.crusher ||
@@ -396,6 +521,10 @@ void World0Opening::OnIndustryDelivery(VehicleID vehicle, CompanyID company, Ind
 	}
 }
 
+/** @brief Debit pending crusher input and credit conservatively qualified batches.
+ * @param industry Producing industry.
+ * @param batches Native ballast batches produced.
+ */
 void World0Opening::OnProduction(IndustryID industry, uint32_t batches)
 {
 	if (!opening.active || opening.unavailable || industry != opening.binding.crusher || batches == 0) return;
@@ -409,6 +538,10 @@ void World0Opening::OnProduction(IndustryID industry, uint32_t batches)
 	opening.production_goal = opening.qualified_batches >= 40;
 }
 
+/** @brief Record a scheduled crusher-source or yard visit for the return journey.
+ * @param vehicle Arriving train.
+ * @param station Native station visited.
+ */
 void World0Opening::OnArrival(VehicleID vehicle, StationID station)
 {
 	if (!opening.active || opening.unavailable || opening.awarded || !TrainValid(vehicle, opening.profile.company)) return;
@@ -430,6 +563,14 @@ void World0Opening::OnArrival(VehicleID vehicle, StationID station)
 	if (source && journey.phase == 1) journey.phase = 2;
 }
 
+/** @brief Record native BALL storage and one positive deposit per yard visit.
+ * @param vehicle Delivering train.
+ * @param company Delivering company.
+ * @param source Bound crusher.
+ * @param destination Bound yard station.
+ * @param cargo Stored cargo type.
+ * @param units Positive native units stored.
+ */
 void World0Opening::OnStoredDelivery(VehicleID vehicle, CompanyID company, IndustryID source, StationID destination, CargoType cargo, uint32_t units)
 {
 	if (!opening.active || opening.unavailable || opening.awarded || company != opening.profile.company ||
@@ -448,6 +589,9 @@ void World0Opening::OnStoredDelivery(VehicleID vehicle, CompanyID company, Indus
 	else if (journey.phase == 2) journey.phase = 3;
 }
 
+/** @brief Discard journey evidence before native vehicle identifier reuse.
+ * @param vehicle Removed vehicle identifier.
+ */
 void World0Opening::OnVehicleRemoved(VehicleID vehicle) { opening.journeys.erase(vehicle); }
 
 void World0Opening::OnIndustryRemoved(IndustryID industry)
@@ -461,6 +605,11 @@ void World0Opening::OnIndustryRemoved(IndustryID industry)
 	}
 }
 
+/** @brief Tombstone removal of the bound hub without treating future ID reuse as evidence.
+ * @param station Removed hub station.
+ * @param hub_id Historical native hub identifier.
+ * @param tile Historical hub tile.
+ */
 void World0Opening::OnYardRemoved(StationID station, uint32_t hub_id, TileIndex tile)
 {
 	if (!opening.active || station != opening.binding.yard || hub_id == 0 || tile == INVALID_TILE) return;
@@ -471,6 +620,10 @@ void World0Opening::OnYardRemoved(StationID station, uint32_t hub_id, TileIndex 
 	Lose(LOST_YARD);
 }
 
+/** @brief Revoke the original charter on native company transfer or deletion.
+ * @param old_owner Former owner identifier.
+ * @param new_owner Successor owner, or invalid after deletion.
+ */
 void World0Opening::OnCompanyChanged(CompanyID old_owner, CompanyID new_owner)
 {
 	if (!opening.active || old_owner != opening.profile.company || old_owner == new_owner) return;
@@ -479,6 +632,8 @@ void World0Opening::OnCompanyChanged(CompanyID old_owner, CompanyID new_owner)
 	Lose(LOST_COMPANY);
 }
 
+/** @brief Count one native integrated-economy production invocation.
+ */
 void World0Opening::OnEconomyEvaluation()
 {
 	if (!opening.active || opening.economy_evaluations == UINT32_MAX) return;
@@ -504,6 +659,9 @@ void World0Opening::Evaluate()
 	}
 }
 
+/** @brief Serialize the complete active Vale opening as schema-one JSON.
+ * @return JSON evidence for a bound opening, or an empty string when inactive.
+ */
 std::string World0Opening::Save()
 {
 	if (!opening.active) return "";
@@ -537,7 +695,7 @@ bool World0Opening::Load(const std::string &data)
 			if (event == Json::parse_event_t::object_end) object_keys.pop_back();
 			return true;
 		});
-		if (j.is_object() && j.contains("active") && !Boolean(j.at("active"))) {
+		if (j.is_object() && j.contains("active") && !JsonBoolean(j.at("active"))) {
 			ExactObject(j, {"schema", "active"});
 			if (Number(j.at("schema"), 1) != 1) return false;
 			Reset(); return true;
@@ -545,10 +703,10 @@ bool World0Opening::Load(const std::string &data)
 		ExactObject(j, {"schema", "active", "unavailable", "awarded", "losses", "reason", "profile", "binding", "yard_tombstone", "economy_evaluations",
 			"accepted_silc", "qualified_input_remaining", "unqualified_input_remaining", "qualified_batches", "stored_ball",
 			"input_goal", "production_goal", "storage_goal", "journeys"});
-		if (Number(j.at("schema"), 1) != 1 || !Boolean(j.at("active"))) return false;
+		if (Number(j.at("schema"), 1) != 1 || !JsonBoolean(j.at("active"))) return false;
 		World0OpeningState next;
 		next.ready = next.active = true;
-		next.unavailable = Boolean(j.at("unavailable")); next.awarded = Boolean(j.at("awarded"));
+		next.unavailable = JsonBoolean(j.at("unavailable")); next.awarded = JsonBoolean(j.at("awarded"));
 		next.losses = uint8_t(Number(j.at("losses"), 15));
 		if (!j.at("reason").is_string()) return false;
 		next.reason = j.at("reason").get<std::string>();
@@ -588,9 +746,9 @@ bool World0Opening::Load(const std::string &data)
 		next.unqualified_input_remaining = uint32_t(Number(j.at("unqualified_input_remaining"), MAX_UNITS));
 		next.qualified_batches = uint32_t(Number(j.at("qualified_batches"), MAX_UNITS));
 		next.stored_ball = uint32_t(Number(j.at("stored_ball"), MAX_UNITS));
-		next.input_goal = Boolean(j.at("input_goal"));
-		next.production_goal = Boolean(j.at("production_goal"));
-		next.storage_goal = Boolean(j.at("storage_goal"));
+		next.input_goal = JsonBoolean(j.at("input_goal"));
+		next.production_goal = JsonBoolean(j.at("production_goal"));
+		next.storage_goal = JsonBoolean(j.at("storage_goal"));
 		if (uint64_t(next.qualified_input_remaining) + uint64_t(next.qualified_batches) * 2 > next.accepted_silc ||
 			next.input_goal != (next.accepted_silc >= 80) || next.production_goal != (next.qualified_batches >= 40) ||
 			next.storage_goal != (next.stored_ball >= 40) ||

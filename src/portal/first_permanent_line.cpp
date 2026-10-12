@@ -25,12 +25,29 @@
 #include <stdexcept>
 
 namespace {
+/** @brief JSON representation used for bounded observer save records. */
 using Json = nlohmann::json;
+/** @brief Current private First Permanent Line observer state. */
 FirstPermanentLineState mission;
+/** @var CORE
+ * @brief World 0 containing Mito and its residential objective.
+ */
+/** @var INDUSTRIAL
+ * @brief World 1 containing the bound steel and ballast factories.
+ */
+/** @var FRONTIER
+ * @brief World 2 containing the bound iron and silica sources.
+ */
 constexpr WorldID CORE{0}, INDUSTRIAL{1}, FRONTIER{2};
+/** @brief Maximum credited freight units per persisted objective counter. */
 constexpr uint32_t MAX_EVIDENCE_UNITS = 1000000;
+/** @brief Maximum vehicle journeys retained by the mission observer. */
 constexpr size_t MAX_JOURNEYS = 4096;
 
+/** @brief Resolve a four-character cargo label in the active cargo catalog.
+ * @param label Four-character cargo label.
+ * @return The native cargo type, or INVALID_CARGO when absent.
+ */
 CargoType Cargo(const char *label)
 {
 	CargoLabel value;
@@ -38,6 +55,12 @@ CargoType Cargo(const char *label)
 	return GetCargoTypeByLabel(value);
 }
 
+/** @brief Check a protected Core house anchor against its native tile and completion state.
+ * @param town Required Mito town.
+ * @param tile House anchor to inspect.
+ * @param complete Whether native house completion is required.
+ * @return True when the bound protected house meets the requested state.
+ */
 bool HouseValid(TownID town, TileIndex tile, bool complete)
 {
 	if (tile == INVALID_TILE || tile >= Map::Size() || !IsTileType(tile, TileType::House)) return false;
@@ -45,6 +68,12 @@ bool HouseValid(TownID town, TileIndex tile, bool complete)
 	return !complete || IsHouseCompleted(tile);
 }
 
+/** @brief Verify a player-founded Merredin factory and its bound recipe.
+ * @param id Factory industry identifier.
+ * @param owner Required founding company.
+ * @param recipe Required integrated-economy recipe.
+ * @return True when the live factory has the expected owner, world, and recipe.
+ */
 bool FactoryValid(IndustryID id, CompanyID owner, RecipeID recipe)
 {
 	const Industry *industry = Industry::GetIfValid(id);
@@ -54,12 +83,22 @@ bool FactoryValid(IndustryID id, CompanyID owner, RecipeID recipe)
 		IntegratedEconomy::IndustryRecipe(industry->type) == recipe && PlanetManager::GetTileWorld(industry->location.tile) == INDUSTRIAL;
 }
 
+/** @brief Verify a live Clonclurry source produces the specified cargo.
+ * @param id Source industry identifier.
+ * @param cargo Required output cargo.
+ * @return True for a live Frontier source with that output.
+ */
 bool SourceValid(IndustryID id, CargoType cargo)
 {
 	const Industry *industry = Industry::GetIfValid(id);
 	return industry != nullptr && PlanetManager::GetTileWorld(industry->location.tile) == FRONTIER && industry->IsCargoProduced(cargo);
 }
 
+/** @brief Verify a player-owned Mito station has a valid native logistics hub.
+ * @param id Station identifier.
+ * @param company Required owning company.
+ * @return True when the station and hub remain bound to the company and Core world.
+ */
 bool HubValid(StationID id, CompanyID company)
 {
 	const Station *station = Station::GetIfValid(id);
@@ -69,6 +108,10 @@ bool HubValid(StationID id, CompanyID company)
 		hub->world_id == CORE && LogisticsHubManager::ValidateForStation(*hub);
 }
 
+/** @brief Validate all saved mission identities against the current native economy.
+ * @param b Company, town, factory, and source bindings.
+ * @return True when every objective binding and role remains valid.
+ */
 bool BindingValid(const FirstPermanentLineBindings &b)
 {
 	const Town *town = Town::GetIfValid(b.mito);
@@ -87,6 +130,11 @@ bool BindingValid(const FirstPermanentLineBindings &b)
 		SourceValid(b.iron_source, Cargo("IRON")) && SourceValid(b.silica_source, Cargo("SILC"));
 }
 
+/** @brief Check whether a station catchment intersects an industry footprint.
+ * @param station Station to inspect, or null.
+ * @param industry Industry to inspect, or null.
+ * @return True when at least one industry tile lies in the catchment.
+ */
 bool Catches(const Station *station, const Industry *industry)
 {
 	if (station == nullptr || industry == nullptr) return false;
@@ -94,6 +142,11 @@ bool Catches(const Station *station, const Industry *industry)
 	return false;
 }
 
+/** @brief Require the current arrival to match an explicit station order.
+ * @param train Candidate front train.
+ * @param station Station reported by the native arrival hook.
+ * @return True when the active scheduled stop is this station.
+ */
 bool ScheduledAt(const Vehicle *train, StationID station)
 {
 	if (train == nullptr || train->GetNumOrders() < 2 || train->cur_real_order_index >= train->GetNumOrders()) return false;
@@ -104,6 +157,11 @@ bool ScheduledAt(const Vehicle *train, StationID station)
 		!train->current_order.GetNonStopType().Test(OrderNonStopFlag::GoVia);
 }
 
+/** @brief Require a delivery to occur during an ordered station loading visit.
+ * @param train Candidate front train.
+ * @param station Station receiving the delivery.
+ * @return True when its explicit order or native loading marker matches the station.
+ */
 bool ScheduledDeliveryAt(const Vehicle *train, StationID station)
 {
 	if (train == nullptr || train->cur_real_order_index >= train->GetNumOrders()) return false;
@@ -116,6 +174,12 @@ bool ScheduledDeliveryAt(const Vehicle *train, StationID station)
 		!train->current_order.GetNonStopType().Test(OrderNonStopFlag::GoVia));
 }
 
+/** @brief Check recurring explicit works pickup and unloadable Mito hub orders.
+ * @param train Candidate front train.
+ * @param hub Required hub, or invalid to accept any valid Mito hub.
+ * @param owner Company that must own the train and route stops.
+ * @return True when the native order list still supports both required legs.
+ */
 bool RouteValid(const Vehicle *train, StationID hub, CompanyID owner)
 {
 	if (train == nullptr || train->type != VehicleType::Train || !train->IsFrontEngine() || train->owner != owner ||
@@ -162,6 +226,11 @@ bool RouteValid(const Vehicle *train, StationID hub, CompanyID owner)
 	return source && dest;
 }
 
+/** @brief Find an explicit stopping order for a station.
+ * @param train Candidate train.
+ * @param station Station sought in its order list.
+ * @return True when the train has a non-via stop at the station.
+ */
 bool RouteContains(const Vehicle *train, StationID station)
 {
 	if (train == nullptr) return false;
@@ -173,12 +242,23 @@ bool RouteContains(const Vehicle *train, StationID station)
 	return false;
 }
 
+/** @brief Require a live running train and a valid recurring mission route.
+ * @param train Candidate train.
+ * @param hub Required hub, or invalid for any valid Mito hub.
+ * @param owner Required owner.
+ * @return True when the train is operable and its route is valid.
+ */
 bool ServiceValid(const Vehicle *train, StationID hub, CompanyID owner)
 {
 	return train != nullptr && !train->vehstatus.Test(VehState::Crashed) &&
 		!train->vehstatus.Test(VehState::Stopped) && RouteValid(train, hub, owner);
 }
 
+/** @brief Check a live, uncrashed front train belongs to the charter company.
+ * @param id Native vehicle identifier.
+ * @param company Required owner.
+ * @return True for an eligible native train.
+ */
 bool TrainValid(VehicleID id, CompanyID company)
 {
 	const Vehicle *train = Vehicle::GetIfValid(id);
@@ -186,19 +266,38 @@ bool TrainValid(VehicleID id, CompanyID company)
 		!train->vehstatus.Test(VehState::Crashed);
 }
 
+/** @brief Check both qualified input deliveries and subsequent factory production.
+ * @return True once the first freight milestone is complete.
+ */
 bool MilestoneOne() { return mission.input_delivered[0] && mission.input_delivered[1] && mission.produced_after_input[0] && mission.produced_after_input[1]; }
+/** @brief Latch an invalid mission reason and clear live journey evidence.
+ * @param reason Stable reason recorded in the mission state.
+ */
 void Invalidate(const char *reason) { mission.invalid = true; mission.reason = reason; mission.journeys.clear(); }
 
+/** @brief Parse a strictly unsigned bounded save integer.
+ * @param value JSON value to decode.
+ * @param max Largest permitted value.
+ * @return The decoded integer; throws on type or range mismatch.
+ */
 uint64_t Number(const Json &value, uint64_t max)
 {
 	if (!value.is_number_unsigned() || value.get<uint64_t>() > max) throw std::runtime_error("mission integer");
 	return value.get<uint64_t>();
 }
-bool Boolean(const Json &value)
+/** @brief Parse a strictly typed save boolean.
+ * @param value JSON value to decode.
+ * @return The decoded boolean; throws for another JSON type.
+ */
+bool JsonBoolean(const Json &value)
 {
 	if (!value.is_boolean()) throw std::runtime_error("mission boolean");
 	return value.get<bool>();
 }
+/** @brief Reject save objects with missing or extra fields.
+ * @param value JSON object to inspect.
+ * @param keys Exact required field names.
+ */
 void ExactObject(const Json &value, std::initializer_list<const char *> keys)
 {
 	if (!value.is_object() || value.size() != keys.size()) throw std::runtime_error("mission object");
@@ -206,7 +305,12 @@ void ExactObject(const Json &value, std::initializer_list<const char *> keys)
 }
 } // namespace
 
+/** @brief Clear all First Permanent Line bindings and evidence.
+ */
 void FirstPermanentLine::Reset() { mission = {}; }
+/** @brief Report whether a complete mission binding is installed.
+ * @return True while the observer is active, including after an award or invalidation.
+ */
 bool FirstPermanentLine::Active() { return mission.active; }
 const FirstPermanentLineState &FirstPermanentLine::State() { return mission; }
 
@@ -250,6 +354,14 @@ bool FirstPermanentLine::Begin(const FirstPermanentLineBindings &b)
 	return true;
 }
 
+/** @brief Record qualifying native train delivery from each bound source to its factory.
+ * @param vehicle Delivering vehicle.
+ * @param company Delivering company.
+ * @param source Producing industry.
+ * @param destination Accepting factory.
+ * @param cargo Delivered cargo type.
+ * @param units Positive native units delivered.
+ */
 void FirstPermanentLine::OnIndustryDelivery(VehicleID vehicle, CompanyID company, IndustryID source, IndustryID destination, CargoType cargo, uint32_t units)
 {
 	if (!mission.active || mission.invalid || mission.awarded || company != mission.binding.company || units == 0 || !TrainValid(vehicle, company)) return;
@@ -270,6 +382,10 @@ void FirstPermanentLine::OnEconomyEvaluation()
 	++mission.economy_evaluations;
 }
 
+/** @brief Record positive native factory production after qualified input.
+ * @param industry Factory that produced.
+ * @param batches Native batches produced.
+ */
 void FirstPermanentLine::OnProduction(IndustryID industry, uint32_t batches)
 {
 	if (!mission.active || mission.invalid || mission.awarded || batches == 0) return;
@@ -301,6 +417,9 @@ void FirstPermanentLine::OnHousePlaced(TownID town, TileIndex tile)
 	mission.houses[mission.house_count++] = tile;
 }
 
+/** @brief Mark a registered protected house complete after native construction.
+ * @param tile Completed house anchor.
+ */
 void FirstPermanentLine::OnHouseCompleted(TileIndex tile)
 {
 	if (!mission.active || mission.invalid || mission.awarded) return;
@@ -316,6 +435,10 @@ void FirstPermanentLine::OnHouseRemoved(TileIndex tile)
 	}
 }
 
+/** @brief Record an explicit works or Mito hub arrival for journey ordering.
+ * @param vehicle Arriving train.
+ * @param station Native station visited.
+ */
 void FirstPermanentLine::OnArrival(VehicleID vehicle, StationID station)
 {
 	if (!mission.active || mission.invalid || mission.awarded || !TrainValid(vehicle, mission.binding.company)) return;
@@ -338,6 +461,14 @@ void FirstPermanentLine::OnArrival(VehicleID vehicle, StationID station)
 	if (source && journey.phase == 1) journey.phase = 2;
 }
 
+/** @brief Record native rail storage and one positive deposit per ordered hub visit.
+ * @param vehicle Delivering train.
+ * @param company Delivering company.
+ * @param source Bound producing works.
+ * @param destination Receiving Mito hub station.
+ * @param cargo Stored cargo type.
+ * @param units Positive native units stored.
+ */
 void FirstPermanentLine::OnStoredDelivery(VehicleID vehicle, CompanyID company, IndustryID source, StationID destination, CargoType cargo, uint32_t units)
 {
 	if (!mission.active || mission.invalid || mission.awarded || company != mission.binding.company || units == 0 ||
@@ -358,6 +489,9 @@ void FirstPermanentLine::OnStoredDelivery(VehicleID vehicle, CompanyID company, 
 	else if (journey.phase == 2 && mission.commissioned) journey.phase = 3;
 }
 
+/** @brief Discard journey progress before a native vehicle identifier can be reused.
+ * @param vehicle Removed vehicle identifier.
+ */
 void FirstPermanentLine::OnVehicleRemoved(VehicleID vehicle) { mission.journeys.erase(vehicle); }
 
 void FirstPermanentLine::Evaluate()
@@ -384,6 +518,9 @@ void FirstPermanentLine::Evaluate()
 	}
 }
 
+/** @brief Serialize the bounded active observer state as schema-one JSON.
+ * @return JSON evidence for an active mission, or an empty string when inactive.
+ */
 std::string FirstPermanentLine::Save()
 {
 	if (!mission.active) return "";
@@ -403,18 +540,18 @@ bool FirstPermanentLine::Load(const std::string &data)
 	try {
 		if (data.size() > 300000) return false;
 		const Json j = Json::parse(data);
-		if (j.is_object() && j.contains("active") && !Boolean(j.at("active"))) {
+		if (j.is_object() && j.contains("active") && !JsonBoolean(j.at("active"))) {
 			ExactObject(j, {"schema", "active"});
 			if (Number(j.at("schema"), 1) != 1) return false;
 			Reset();
 			return true;
 		}
 		ExactObject(j, {"schema", "active", "economy_evaluations", "invalid", "awarded", "reason", "binding", "delivered", "produced", "stored", "commissioned", "house_count", "houses", "journeys"});
-		if (Number(j.at("schema"), 1) != 1 || !Boolean(j.at("active"))) return false;
+		if (Number(j.at("schema"), 1) != 1 || !JsonBoolean(j.at("active"))) return false;
 		FirstPermanentLineState next;
 		next.active = true;
 		next.economy_evaluations = uint32_t(Number(j.at("economy_evaluations"), UINT32_MAX));
-		next.invalid = Boolean(j.at("invalid")); next.awarded = Boolean(j.at("awarded"));
+		next.invalid = JsonBoolean(j.at("invalid")); next.awarded = JsonBoolean(j.at("awarded"));
 		if (!j.at("reason").is_string()) return false;
 		next.reason = j.at("reason").get<std::string>();
 		if (next.reason.size() > 64 || (next.invalid != !next.reason.empty()) || (next.invalid && next.awarded)) return false;
@@ -430,20 +567,20 @@ bool FirstPermanentLine::Load(const std::string &data)
 		for (const auto &[key, out] : {std::pair<const char *, std::array<bool, 2> *>{"delivered", &next.input_delivered}, {"produced", &next.produced_after_input}}) {
 			const auto &a = j.at(key);
 			if (!a.is_array() || a.size() != 2) return false;
-			for (size_t i = 0; i < 2; ++i) (*out)[i] = Boolean(a[i]);
+			for (size_t i = 0; i < 2; ++i) (*out)[i] = JsonBoolean(a[i]);
 		}
 		for (size_t i = 0; i < 2; ++i) if (next.produced_after_input[i] && !next.input_delivered[i]) return false;
 		const auto &stored = j.at("stored");
 		if (!stored.is_array() || stored.size() != 2) return false;
 		for (size_t i = 0; i < 2; ++i) next.stored_units[i] = uint32_t(Number(stored[i], MAX_EVIDENCE_UNITS));
-		next.commissioned = Boolean(j.at("commissioned"));
+		next.commissioned = JsonBoolean(j.at("commissioned"));
 		next.house_count = uint8_t(Number(j.at("house_count"), 4));
 		const auto &houses = j.at("houses");
 		if (!houses.is_array() || houses.size() != next.house_count || (!next.commissioned && next.house_count != 0)) return false;
 		for (size_t i = 0; i < next.house_count; ++i) {
 			if (!houses[i].is_array() || houses[i].size() != 2) return false;
 			next.houses[i] = TileIndex{uint32_t(Number(houses[i][0], UINT32_MAX - 1))};
-			next.house_completed[i] = Boolean(houses[i][1]);
+			next.house_completed[i] = JsonBoolean(houses[i][1]);
 			for (size_t k = 0; k < i; ++k) if (next.houses[k] == next.houses[i]) return false;
 		}
 		if (next.commissioned && (!next.input_delivered[0] || !next.input_delivered[1] || !next.produced_after_input[0] || !next.produced_after_input[1] || next.stored_units[0] < 160 || next.stored_units[1] < 80)) return false;
@@ -470,6 +607,9 @@ bool FirstPermanentLine::Load(const std::string &data)
 	} catch (const Json::exception &) { return false; } catch (const std::exception &) { return false; }
 }
 
+/** @brief Validate restored bindings and journey references against native objects.
+ * @return True when the restored observer is coherent; objective loss may mark it invalid.
+ */
 bool FirstPermanentLine::ValidateAfterLoad()
 {
 	if (!mission.active || mission.awarded) return true;

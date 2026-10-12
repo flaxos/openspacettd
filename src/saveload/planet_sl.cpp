@@ -1804,6 +1804,7 @@ struct ECONChunkHandler : ChunkHandler {
 static const ECONChunkHandler ECON;
 /** Optional mission evidence; old saves have no FLIN record and stay inactive. */
 struct FLINChunkHandler : ChunkHandler {
+	/** @brief Register the optional First Permanent Line table chunk. */
 	FLINChunkHandler() : ChunkHandler("FLIN", ChunkType::Table) {}
 	void Save() const override
 	{
@@ -1822,9 +1823,11 @@ struct FLINChunkHandler : ChunkHandler {
 		}
 	}
 };
+/** @brief Registered optional First Permanent Line save chunk. */
 static const FLINChunkHandler FLIN;
 /** Complete World 0 identity and evidence only; transient authoring is never saved. */
 struct W0OPChunkHandler : ChunkHandler {
+	/** @brief Register the optional complete World 0 opening table chunk. */
 	W0OPChunkHandler() : ChunkHandler("W0OP", ChunkType::Table) {}
 	void Save() const override
 	{
@@ -1844,6 +1847,7 @@ struct W0OPChunkHandler : ChunkHandler {
 		}
 	}
 };
+/** @brief Registered optional complete Vale opening save chunk. */
 static const W0OPChunkHandler W0OP;
 static const STLRChunkHandler STLR;
 static const UNETChunkHandler UNET;

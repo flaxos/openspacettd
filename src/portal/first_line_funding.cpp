@@ -24,19 +24,28 @@
 #include <vector>
 
 namespace {
+/** Compact JSON value used for funding receipts. */
 using Json = nlohmann::json;
+/** Maximum detailed native-command rejection samples. */
 constexpr size_t MAX_SAMPLES = 16;
+/** Maximum distinct rejection kinds retained in one report. */
 constexpr size_t MAX_REJECTION_KINDS = 64;
+/** Maximum world/type resource-site groups retained in the catalog. */
 constexpr size_t MAX_SITE_GROUPS = 32;
 
+/** One surveyed resource location or nearby processor tile to try. */
 struct Candidate {
-	uint distance;
-	TileIndex tile;
-	uint32_t site_id = 0;
-	TileIndex anchor = INVALID_TILE;
-	size_t site_index = SIZE_MAX;
+	uint distance; ///< Manhattan distance from the preferred tile.
+	TileIndex tile; ///< Proposed industry construction tile.
+	uint32_t site_id = 0; ///< Resource-site identity for primary industries.
+	TileIndex anchor = INVALID_TILE; ///< Resource-site anchor, if applicable.
+	size_t site_index = SIZE_MAX; ///< Position in the resource-site catalog, if applicable.
 };
 
+/** Describe a native survey or founding refusal for the bounded report.
+ * @param cost Command result whose error IDs and text are retained.
+ * @return Localization-safe error details and quoted cost.
+ */
 Json Error(CommandCost &cost)
 {
 	const StringID id = cost.GetErrorMessage(), extra = cost.GetExtraErrorMessage();
@@ -54,6 +63,10 @@ Json Error(CommandCost &cost)
 		{"extra", extra_text}, {"cost", int64_t(cost.GetCost())}};
 }
 
+/** Describe a candidate without exposing internal site vector positions.
+ * @param candidate Site or processor tile under consideration.
+ * @return Tile, resource-site identity and distance evidence.
+ */
 Json CandidateJson(const Candidate &candidate)
 {
 	return {{"site_id", candidate.site_id},
@@ -63,6 +76,14 @@ Json CandidateJson(const Candidate &candidate)
 }
 } // namespace
 
+/** Fund one industry through ordinary survey and construction commands.
+ * @param type Loaded industry type to found.
+ * @param world World containing the requested industry.
+ * @param near Preferred tile used to rank candidates.
+ * @param primary Whether a surveyed resource site is required.
+ * @param report Receives admission, candidate and native-command evidence.
+ * @return Founded industry, or nullptr if admission or every candidate fails.
+ */
 Industry *FirstLineFundIndustry(IndustryType type, WorldID world, TileIndex near, bool primary, Json &report)
 {
 	const Company *company = Company::GetIfValid(_current_company);

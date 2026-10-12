@@ -28,6 +28,7 @@
 #include "../town.h"
 #include "../train.h"
 #include "../newgrf.h"
+#include "../newgrf_house.h"
 #include "../vehicle_func.h"
 #include "../window_func.h"
 
@@ -563,9 +564,15 @@ TEST_CASE("First Permanent Line native demolition and invalid orders cannot revi
 	REQUIRE(FirstPermanentLine::Load(commissioned.dump()));
 	TileIndex tile = TileXY(10, 19);
 	MakeHouseTile(tile, fixture.town->index, 0, TOWN_HOUSE_COMPLETED, HouseID{0}, 0, true);
+	++fixture.town->cache.num_houses;
+	fixture.town->cache.population += HouseSpec::Get(HouseID{0})->population;
+	InitializeBuildingCounts(fixture.town);
+	REQUIRE_FALSE(fixture.town->cache.building_counts.id_count.empty());
+	IncreaseBuildingCount(fixture.town, HouseID{0});
 	FirstPermanentLine::OnHousePlaced(fixture.town->index, tile);
 	REQUIRE(FirstPermanentLine::State().house_count == 1);
-	FirstPermanentLine::OnHouseRemoved(tile);
+	ClearTownHouse(fixture.town, tile); // Native removal invokes the observer and clears the tile.
+	REQUIRE(IsTileType(tile, TileType::Clear));
 	CHECK(FirstPermanentLine::State().invalid);
 	CHECK(FirstPermanentLine::State().reason == "objective-house-removed");
 	MakeHouseTile(tile, fixture.town->index, 0, TOWN_HOUSE_COMPLETED, HouseID{0}, 0, true);
