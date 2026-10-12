@@ -45,7 +45,7 @@ local checks; remote CI exercises its normal suite. File descriptions, unused
 strings, script mode enforcement and upstream diff validation pass. Independent
 staged privacy/scope review is GO. Exact-head CI is pending at publication.
 
-The clean publication branch has a new implementation commit and a bounded CI repair on the
+The clean publication branch has a new implementation commit with bounded CI repairs on the
 dependency head. Original local commits, private proofs, game files and Antigravity checkout
 remain intact; no rewrite, force push or merge is performed.
 
@@ -68,3 +68,11 @@ Both native targets rebuild; 35 focused cases / 957 assertions, aggregate 631 ca
 310,774 assertions, 648 isolated nonrelay CTest cases and four localhost relays pass.
 Exact repair-head CI remains pending when this record is committed; the PR records
 its subsequent terminal outcome without replacing the original failed results.
+
+
+The next CI run exposed `std::jthread` availability below macOS 11 in the native
+FIFO fixture. The fixture now uses supported `std::thread` and joins on both normal
+return and exception paths, rethrowing the original exception. Retry and I/O bounds,
+cleanup and assertions remain unchanged. Independent review is GO; the rebuilt
+fixture passes all six isolated startup/completion checks and the full local suite.
+The macOS deployment target and CI configuration are preserved.

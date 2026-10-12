@@ -85,5 +85,23 @@
     "ctest_localhost_relay_pass": 4,
     "independent_review": "GO; no assertions weakened or checker suppression",
     "exact_head_ci": "Pending repair publication"
+  },
+  "macos_fifo_portability": {
+    "failed_head": "5a91bbff801412daf71d6435a06d3cefc8a86435",
+    "failed_jobs": [
+      114988594884,
+      114988594922
+    ],
+    "failure": "std::jthread unavailable below macOS11 deployment target",
+    "repair": "std::thread joined on normal and exception paths; original exception rethrown",
+    "production_change": false,
+    "assertions_or_bounds_weakened": false,
+    "native_test_target": "Rebuilt PASS",
+    "isolated_startup_completion_checks": 6,
+    "catch_cases": 631,
+    "catch_assertions": 310774,
+    "ctest_pass": 652,
+    "independent_review": "GO",
+    "exact_head_ci": "Pending portability repair publication"
   }
 }

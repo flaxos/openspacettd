@@ -330,7 +330,7 @@ void SelectValeNativeBaseGraphics()
 void PumpFromFifo(ValeStartupFixture &fixture, const ValeFifo &fifo)
 {
 	std::atomic<bool> wrote = false;
-	std::jthread writer([&] {
+	std::thread writer([&] {
 		const std::string path = fifo.path.string();
 		int fd = -1;
 		for (int n = 0; n < 200 && fd < 0; ++n) {
@@ -343,7 +343,13 @@ void PumpFromFifo(ValeStartupFixture &fixture, const ValeFifo &fifo)
 			close(fd);
 		}
 	});
-	fixture.driver->Pump(); writer.join();
+	try {
+		fixture.driver->Pump();
+	} catch (...) {
+		writer.join();
+		throw;
+	}
+	writer.join();
 	CHECK(wrote.load());
 }
 #endif
