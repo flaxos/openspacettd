@@ -416,6 +416,18 @@ add_files(
     portal/visual_overhaul.cpp
     portal/visual_overhaul.h
     portal/commonwealth_slice.cpp
+    portal/first_permanent_line.cpp
+    portal/first_permanent_line.h
+    portal/first_line_funding.cpp
+    portal/first_line_funding.h
+    portal/first_line_approach.cpp
+    portal/first_line_approach.h
+    portal/first_line_scenario.cpp
+    portal/first_line_scenario.h
+    portal/world0_opening.cpp
+    portal/world0_opening.h
+    portal/world0_scenario.cpp
+    portal/world0_scenario.h
     portal/connected_economy.cpp
     portal/connected_economy.h
     portal/commonwealth_slice.h

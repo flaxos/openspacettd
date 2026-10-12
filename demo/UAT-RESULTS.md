@@ -1,5 +1,16 @@
 # Human UAT results — recovery / v1.1
 
+## Vale Railway — automated proof passed; human UAT pending
+
+The authored empty opening, actual rail input and subsequent production, repeat
+warehouse service and fresh-process reload passed local bounded proof. The real
+SDL purchase screen selected a forty-unit BALL car and its ordinary Buy handler
+charged 93 GBP for one empty wagon, with zero simulation advancement. Existing
+fleet/materials/objectives remained intact. These are automated observations;
+human desktop appearance, comprehension, fun and pacing remain pending.
+[Sanitised result](../docs/audit/2026-10-12/vale-railway-publication/README.md).
+
+
 ## One Material-Funded Research Unlock (Card P1) — 11 October 2026
 
 **Human desktop status: Pending.** Automated Catch2 test suite (416 assertions across 14 cases in `src/tests/test_commonwealth_works.cpp`), full CTest suite (564/564 tests passing 100%), and native headless simulation runner (`scripts/verify_commonwealth_research.py`, 15 periods + 4 reload periods) executed on branch `codex/capacity-or-reserve-pilot`.

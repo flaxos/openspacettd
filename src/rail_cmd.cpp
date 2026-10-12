@@ -519,8 +519,22 @@ CommandCost CmdBuildSingleRail(DoCommandFlags flags, TileIndex tile, RailType ra
 			if (!HasBit(VALID_LEVEL_CROSSING_SLOPES, tileh)) return CommandCost(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 			if (!_settings_game.construction.crossing_with_competitor && _current_company != OWNER_DEITY) {
-				CommandCost ret = CheckTileOwnership(tile);
-				if (ret.Failed()) return ret;
+				/* A normal town road is public infrastructure in integrated games, but
+				 * a foreign company's tram component is still protected. Depots and
+				 * existing crossings keep their ordinary ownership check. */
+				bool public_town_road = UsesCommonwealthConstructionRules() && IsNormalRoad(tile) &&
+					GetRoadTypeRoad(tile) != INVALID_ROADTYPE && GetRoadOwner(tile, RoadTramType::Road) == OWNER_TOWN;
+				if (public_town_road && GetRoadTypeTram(tile) != INVALID_ROADTYPE) {
+					Owner tram_owner = GetRoadOwner(tile, RoadTramType::Tram);
+					if (Company::IsValidID(tram_owner) && tram_owner != _current_company) {
+						CommandCost ret = CheckOwnership(tram_owner, tile);
+						if (ret.Failed()) return ret;
+					}
+				}
+				if (!public_town_road) {
+					CommandCost ret = CheckTileOwnership(tile);
+					if (ret.Failed()) return ret;
+				}
 			}
 
 			CommandCost ret = EnsureNoVehicleOnGround(tile);

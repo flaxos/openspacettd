@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "title": "The First Permanent Line",
+  "scenario_version": "0.1",
+  "objective_schema": "FLIN/1",
+  "opening": "authored empty stock, experimental Works v2",
+  "normal_new_game": "unchanged v1",
+  "seed": 11,
+  "sector": {"worlds": 7, "map": [1024, 1024]},
+  "geography": {"core": "Mito", "industrial": "Merredin", "frontier": "Clonclurry"},
+  "source_identity": "Resolve legal generated IRON and SILC extraction sites; verify native funded industry identities before Begin",
+  "assets": [
+    "One player steelworks and one ballast works on Merredin, with empty buffers",
+    "Two legal native extractors on Clonclurry, with empty waiting cargo",
+    "Four empty single-platform station shells, one empty Mito warehouse, one depot",
+    "One stopped empty Pioneer with two IRON hoppers and one SILC hopper, no orders",
+    "Inherited neutral public CST terminals and routes",
+    "Mito Core town designated through the native command for monthly settlement evaluation"
+  ],
+  "unlocks": ["Materials I"],
+  "cash_stake": "GBP 500000 plus twice the native quote for five player approaches; exact amount in generated scenario-manifest.json",
+  "post_baseline_grants": "none",
+  "objectives": [
+    "Both native works accept their designated inputs from player rail and subsequently produce",
+    "160 rail-produced STEL and 80 BALL reach Mito company stock; ordinary Core district command consumes kit and GBP 50000",
+    "Four new district buildings actually complete and their protected native house entities still exist",
+    "One player export train makes two positive STEL or BALL deposits at an owned Mito hub, with an actual works return between; second after commissioning; recurring train service remains alive and running"
+  ],
+  "fragment_policy": "one positive deposit per native arrival visit",
+  "victory": "latched once, free play preserved",
+  "revenue": "warehouse freight pays no sale revenue; funded infrastructure commission",
+  "finite_proof": {"smoke_evaluations": 2, "proof_evaluations": 24, "proof_minutes": 30, "cold_reload_evaluations": 4, "cold_reload_minutes": 5},
+  "human_acceptance": "pending"
+}

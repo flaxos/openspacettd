@@ -1,5 +1,15 @@
 # Building reproducible UAT saves
 
+## Optional Vale authorer
+
+Use the named Vale workflow described in [VALE_RAILWAY.md](VALE_RAILWAY.md). Its
+one-world profile, exact plot exception and declared assistance are authored inputs.
+Pin all bytes, retain failed attempts and use disposable copies. Preparation has
+zero evaluations; service/reload have 12/4 and 300-second caps,120-second startup.
+No phase is implicit and no failed attempt is silently retried. Human player runs
+are separate from these finite proof budgets.
+
+
 Use this workflow when creating, repairing or publishing a playable scenario.
 It captures the connected UAT lessons: the first save moved cargo successfully,
 but human play exposed 742 invalid terrain tiles and missing quantity text for

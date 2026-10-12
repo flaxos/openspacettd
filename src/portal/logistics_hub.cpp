@@ -10,6 +10,7 @@
 #include "../stdafx.h"
 #include "stellar_network.h"
 #include "logistics_hub.h"
+#include "world0_opening.h"
 #include "company_stockpile.h"
 #include "planet_manager.h"
 #include "../company_base.h"
@@ -118,7 +119,11 @@ uint32_t LogisticsHubManager::RegisterHub(TileIndex tile, WorldID world, Company
 bool LogisticsHubManager::RemoveHub(uint32_t hub_id)
 {
 	std::lock_guard<std::mutex> lock(_hub_mutex);
-	return _logistics_hubs.erase(hub_id) > 0;
+	auto it = _logistics_hubs.find(hub_id);
+	if (it == _logistics_hubs.end()) return false;
+	World0Opening::OnYardRemoved(it->second.station_id, it->second.hub_id, it->second.tile);
+	_logistics_hubs.erase(it);
+	return true;
 }
 
 const LogisticsHub *LogisticsHubManager::GetHub(uint32_t hub_id)
@@ -255,7 +260,9 @@ void LogisticsHubManager::RemoveForStation(StationID station)
 {
 	std::lock_guard<std::mutex> lock(_hub_mutex);
 	for (auto it = _logistics_hubs.begin(); it != _logistics_hubs.end();) {
-		it = it->second.station_id == station ? _logistics_hubs.erase(it) : std::next(it);
+		if (it->second.station_id != station) { ++it; continue; }
+		World0Opening::OnYardRemoved(it->second.station_id, it->second.hub_id, it->second.tile);
+		it = _logistics_hubs.erase(it);
 	}
 }
 
@@ -263,7 +270,9 @@ void LogisticsHubManager::RefreshForStation(StationID station)
 {
 	std::lock_guard<std::mutex> lock(_hub_mutex);
 	for (auto it = _logistics_hubs.begin(); it != _logistics_hubs.end();) {
-		it = it->second.station_id == station && !ValidateForStationUnlocked(it->second) ? _logistics_hubs.erase(it) : std::next(it);
+		if (it->second.station_id != station || ValidateForStationUnlocked(it->second)) { ++it; continue; }
+		World0Opening::OnYardRemoved(it->second.station_id, it->second.hub_id, it->second.tile);
+		it = _logistics_hubs.erase(it);
 	}
 }
 
@@ -272,9 +281,14 @@ void LogisticsHubManager::ChangeCompanyOwner(CompanyID old_owner, CompanyID new_
 	std::lock_guard<std::mutex> lock(_hub_mutex);
 	for (auto it = _logistics_hubs.begin(); it != _logistics_hubs.end();) {
 		if (it->second.company_id != old_owner) { ++it; continue; }
-		if (!Company::IsValidID(new_owner)) { it = _logistics_hubs.erase(it); continue; }
+		if (!Company::IsValidID(new_owner)) {
+			World0Opening::OnYardRemoved(it->second.station_id, it->second.hub_id, it->second.tile);
+			it = _logistics_hubs.erase(it); continue;
+		}
 		it->second.company_id = new_owner;
-		it = ValidateForStationUnlocked(it->second) ? std::next(it) : _logistics_hubs.erase(it);
+		if (ValidateForStationUnlocked(it->second)) { ++it; continue; }
+		World0Opening::OnYardRemoved(it->second.station_id, it->second.hub_id, it->second.tile);
+		it = _logistics_hubs.erase(it);
 	}
 }
 

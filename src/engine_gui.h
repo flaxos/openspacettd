@@ -17,6 +17,7 @@
 #include "gfx_type.h"
 #include "vehicle_type.h"
 #include "engine_base.h"
+#include "rail_type.h"
 
 struct GUIEngineListItem {
 	EngineID engine_id;       ///< Engine to display in build purchase list
@@ -52,6 +53,7 @@ std::span<StringID const> GetEngineSortNames(VehicleType vehicle_type);
 std::span<EngList_SortTypeFunction * const> GetEngineSortFunctions(VehicleType vehicle_type);
 
 /* Functions in build_vehicle_gui.cpp */
+bool IsRailVehicleCompatibleWithDepot(EngineID engine, RailType railtype);
 uint GetEngineListHeight(VehicleType type);
 void DisplayVehicleSortDropDown(Window *w, VehicleType vehicle_type, int selected, WidgetID button);
 void DrawEngineList(VehicleType type, const Rect &r, const GUIEngineList &eng_list, const Scrollbar &sb, EngineID selected_id, bool show_count, GroupID selected_group, const GUIBadgeClasses &badge_classes, uint8_t sort_criteria);

@@ -8,6 +8,8 @@
 /** @file afterload.cpp Code updating data after game load. */
 
 #include "../stdafx.h"
+#include "../portal/first_permanent_line.h"
+#include "../portal/world0_opening.h"
 #include "../portal/integrated_economy.h"
 #include "../portal/stellar_network.h"
 #include "../portal/universe_network.h"
@@ -3372,6 +3374,8 @@ bool AfterLoadGame()
 	StellarNetwork::ValidateAfterLoad();
 	if (!IntegratedEconomy::ValidateAfterLoad())
 		SlErrorCorrupt("Integrated Commonwealth economy content or persistent references are incompatible");
+	if (!FirstPermanentLine::ValidateAfterLoad()) SlErrorCorrupt("Invalid First Permanent Line references");
+	if (!World0Opening::ValidateAfterLoad()) SlErrorCorrupt("Invalid World 0 opening references");
 	UniverseNetwork::ValidateAfterLoad();
 	if (!RemoteGateProjects::ValidateAfterLoad()) SlErrorCorrupt("Invalid remote gate project references");
 
