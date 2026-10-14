@@ -199,7 +199,7 @@ struct ValeStartupFixture {
 		region.min_x = region.min_y = 1; region.max_x = region.max_y = 254;
 		REQUIRE(PlanetManager::RegisterRegion(region));
 		std::array<TownID, 3> towns;
-		for (size_t n = 0; n < towns.size(); ++n) {
+		for (uint n = 0; n < towns.size(); ++n) {
 			REQUIRE(Town::CanAllocateItem());
 			Town *town = Town::Create(TileXY(20 + 20 * n, 20));
 			town->cache.population = 200;
@@ -264,8 +264,16 @@ struct ValeFifo {
 	{
 		char name[] = "/tmp/vale-startup-XXXXXX";
 		const char *created = mkdtemp(name); REQUIRE(created != nullptr);
-		dir = created; path = dir / "bridge.fifo";
+		/* /tmp itself can be a symlink (for example, to /private/tmp on Darwin). */
+		dir = std::filesystem::canonical(created);
+		REQUIRE(dir.is_absolute());
+		REQUIRE(dir == dir.lexically_normal());
+		REQUIRE_FALSE(std::filesystem::is_symlink(std::filesystem::symlink_status(dir)));
+		path = dir / "bridge.fifo";
 		REQUIRE(mkfifo(path.c_str(), 0600) == 0);
+		REQUIRE(path == std::filesystem::canonical(path));
+		REQUIRE_FALSE(std::filesystem::is_symlink(std::filesystem::symlink_status(path)));
+		REQUIRE(std::filesystem::is_fifo(std::filesystem::status(path)));
 	}
 	~ValeFifo() { std::error_code error; std::filesystem::remove_all(dir, error); }
 };
@@ -388,6 +396,10 @@ TEST_CASE("Vale bridge rejects malformed paths and unrelated startup states with
 	auto regular = fifo.dir / "plain"; { std::ofstream out(regular); out << "vale_bridge_marker\n"; }
 	f.Bridge(regular.string());
 	auto link = fifo.dir / "link"; std::filesystem::create_symlink(fifo.path, link); f.Bridge(link.string());
+	auto ancestor = fifo.dir / "linked-parent";
+	std::filesystem::create_directory_symlink(fifo.dir, ancestor);
+	REQUIRE(std::filesystem::is_symlink(std::filesystem::symlink_status(ancestor)));
+	f.Bridge((ancestor / fifo.path.filename()).string());
 	const uint32_t seed = _settings_game.game_creation.generation_seed;
 	_settings_game.game_creation.generation_seed = 12; f.Bridge(fifo.path.string()); _settings_game.game_creation.generation_seed = seed;
 	_settings_game.game_creation.cst_sector = true; f.Bridge(fifo.path.string()); _settings_game.game_creation.cst_sector = false;
