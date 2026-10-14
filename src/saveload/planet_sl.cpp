@@ -9,6 +9,8 @@
 
 #include "../stdafx.h"
 #include "../portal/integrated_economy.h"
+#include "../portal/first_permanent_line.h"
+#include "../portal/world0_opening.h"
 #include "../portal/universe_network.h"
 #include "../portal/stellar_network.h"
 
@@ -1800,6 +1802,53 @@ struct ECONChunkHandler : ChunkHandler {
 	}
 };
 static const ECONChunkHandler ECON;
+/** Optional mission evidence; old saves have no FLIN record and stay inactive. */
+struct FLINChunkHandler : ChunkHandler {
+	/** @brief Register the optional First Permanent Line table chunk. */
+	FLINChunkHandler() : ChunkHandler("FLIN", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_stellar_desc);
+		if (!FirstPermanentLine::Active()) return;
+		SlSetArrayIndex(0);
+		SlStellarState state{FirstPermanentLine::Save()}; SlObject(&state, _stellar_desc);
+	}
+	void Load() const override
+	{
+		auto table = SlTableHeader(_stellar_desc); bool seen = false;
+		while (SlIterateArray() != -1) {
+			SlStellarState state; SlObject(&state, table);
+			if (seen || state.data.empty() || !FirstPermanentLine::Load(state.data) || !FirstPermanentLine::Active()) SlErrorCorrupt("Invalid First Permanent Line mission");
+			seen = true;
+		}
+	}
+};
+/** @brief Registered optional First Permanent Line save chunk. */
+static const FLINChunkHandler FLIN;
+/** Complete World 0 identity and evidence only; transient authoring is never saved. */
+struct W0OPChunkHandler : ChunkHandler {
+	/** @brief Register the optional complete World 0 opening table chunk. */
+	W0OPChunkHandler() : ChunkHandler("W0OP", ChunkType::Table) {}
+	void Save() const override
+	{
+		SlTableHeader(_stellar_desc);
+		if (!World0Opening::Active()) return;
+		SlSetArrayIndex(0);
+		SlStellarState state{World0Opening::Save()}; SlObject(&state, _stellar_desc);
+	}
+	void Load() const override
+	{
+		auto table = SlTableHeader(_stellar_desc); bool seen = false;
+		while (SlIterateArray() != -1) {
+			SlStellarState state; SlObject(&state, table);
+			if (seen || state.data.empty() || !World0Opening::Load(state.data) || !World0Opening::Active())
+				SlErrorCorrupt("Invalid World 0 opening");
+			seen = true;
+		}
+	}
+};
+/** @brief Registered optional complete Vale opening save chunk. */
+static const W0OPChunkHandler W0OP;
 static const STLRChunkHandler STLR;
 static const UNETChunkHandler UNET;
 static const TECHChunkHandler TECH;
@@ -1959,6 +2008,8 @@ static const ChunkHandlerRef planet_chunk_handlers[] = {
 	RSRC,
 	STLR,
 	ECON,
+	FLIN,
+	W0OP,
 	UNET,
 	TECH,
 	PROD,

@@ -255,29 +255,64 @@ struct MegacityOverviewWindow : Window {
 						uint32_t total_consumed = svc ? (svc->consumed_history[0] + svc->consumed_history[1] + svc->consumed_history[2] + svc->consumed_history[3]) : 0;
 						float bonus_pct = (static_cast<float>(total_consumed) / 640.0f) * 100.0f;
 
-						std::string rate_str = rate == 0 ? "Rate: Off [Click to cycle]" : fmt::format("Rate: {}/mo [Click to cycle]", rate);
-						Rect rate_btn = Rect{tr.right - 170, tr.top - 2, tr.right - 4, tr.top + 16};
-						GfxFillRect(rate_btn, GetColourGradient(Colours::Grey, Shade::Normal));
-						DrawString(rate_btn, rate_str, TextColour::Yellow, AlignmentH::Centre);
+						CompanyID owner = svc ? svc->owner : CompanyID::Invalid();
+						bool is_spectator = (_current_company == COMPANY_SPECTATOR);
+						bool is_foreign = (owner != CompanyID::Invalid() && owner != _current_company);
+						bool can_interact = !is_spectator && !is_foreign;
+
+						std::string rate_str;
+						TextColour btn_text_col = TextColour::Yellow;
+						if (is_spectator) {
+							rate_str = rate == 0 ? "Rate: Off (Spectator)" : fmt::format("Rate: {}/mo (Spectator)", rate);
+							btn_text_col = TextColour::Grey;
+						} else if (is_foreign) {
+							rate_str = rate == 0 ? fmt::format("Rate: Off (Co. {})", owner.base()) : fmt::format("Rate: {}/mo (Co. {})", rate, owner.base());
+							btn_text_col = TextColour::Grey;
+						} else {
+							rate_str = rate == 0 ? "Rate: Off [Click to cycle]" : fmt::format("Rate: {}/mo [Click to cycle]", rate);
+						}
+						Rect rate_btn = Rect{tr.right - 190, tr.top - 2, tr.right - 4, tr.top + 16};
+						GfxFillRect(rate_btn, GetColourGradient(Colours::Grey, can_interact ? Shade::Normal : Shade::Dark));
+						DrawString(rate_btn, rate_str, btn_text_col, AlignmentH::Centre);
 
 						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-						DrawString(tr, fmt::format("Reserve: {} / 60 units (Free receiver: {} units)", stock, stock < 60 ? 60 - stock : 0), TextColour::White);
+						uint32_t delivered_now = svc ? svc->delivered_this_period : 0;
+						uint32_t delivered_last = svc ? svc->delivered_last_period : 0;
+						uint32_t last_consumed = 0;
+						if (svc != nullptr) {
+							size_t last_slot = (svc->history_cursor + 3) % 4;
+							last_consumed = svc->consumed_history[last_slot];
+						}
+						DrawString(tr, fmt::format("Reserve: {} / 60 units (Free: {}) | Delivered: {} (this mo), {} (last mo) | Consumed: {} (last mo)",
+							stock, stock < 60 ? 60 - stock : 0, delivered_now, delivered_last, last_consumed), TextColour::White);
 						tr.top += GetCharacterHeight(FontSize::Normal);
 						if (svc != nullptr) {
-							DrawString(tr, fmt::format("History: consumed [{}/{}/{}/{}] | requested [{}/{}/{}/{}]",
-								svc->consumed_history[0], svc->consumed_history[1], svc->consumed_history[2], svc->consumed_history[3],
-								svc->requested_history[0], svc->requested_history[1], svc->requested_history[2], svc->requested_history[3]), TextColour::Silver);
+							std::string hist_str = "History (oldest->newest): [";
+							for (int i = 0; i < 4; ++i) {
+								if (i > 0) hist_str += ", ";
+								size_t slot = (svc->history_cursor + i) % 4;
+								uint32_t cons = svc->consumed_history[slot];
+								uint32_t req = svc->requested_history[slot];
+								if (req == 0) {
+									hist_str += "Off";
+								} else {
+									hist_str += fmt::format("{}/{} ({:.0f}%)", cons, req, (static_cast<float>(cons) / req) * 100.0f);
+								}
+							}
+							hist_str += "]";
+							DrawString(tr, hist_str, TextColour::Silver);
 							tr.top += GetCharacterHeight(FontSize::Normal);
 						}
-						DrawString(tr, fmt::format("Passenger Bonus: +{:.1f}% (Baseline traffic 1.0x preserved)", bonus_pct), TextColour::Green);
+						DrawString(tr, fmt::format("Passenger Bonus: +{:.1f}% (Baseline 1.0x preserved | Evaluates 1st of month)", bonus_pct), TextColour::Green);
 					} else if (tier_idx == 1) {
 						auto r_dist = town != nullptr ? IntegratedEconomy::GetTownResidentialDistrict(town->index) : nullptr;
 						bool can_commission = (r_dist == nullptr || !r_dist->commissioned);
 
 						if (can_commission) {
-							Rect comm_btn = Rect{tr.right - 180, tr.top - 2, tr.right - 4, tr.top + 16};
-							GfxFillRect(comm_btn, GetColourGradient(Colours::Grey, Shade::Normal));
-							DrawString(comm_btn, "Commission District", TextColour::Yellow, AlignmentH::Centre);
+							bool is_spectator = (_current_company == COMPANY_SPECTATOR);
+							Rect comm_btn = Rect{tr.right - 190, tr.top - 2, tr.right - 4, tr.top + 16};
+							GfxFillRect(comm_btn, GetColourGradient(Colours::Grey, is_spectator ? Shade::Dark : Shade::Normal));
+							DrawString(comm_btn, is_spectator ? "Spectator (Read-Only)" : "Commission District", is_spectator ? TextColour::Grey : TextColour::Yellow, AlignmentH::Centre);
 
 							tr.top += GetCharacterHeight(FontSize::Normal) + 2;
 							DrawString(tr, "Kit: 160 STEL + 80 BALL | Cash: £50,000", TextColour::White);
@@ -397,7 +432,16 @@ struct MegacityOverviewWindow : Window {
 
 			case WID_MCO_TIER1_PANEL: {
 				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && this->current_town != TownID::Invalid()) {
+					if (_current_company == COMPANY_SPECTATOR) break;
+					NWidgetBase *nwi = this->GetWidget<NWidgetBase>(WID_MCO_TIER1_PANEL);
+					Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
+					int title_h = GetCharacterHeight(FontSize::Normal) + 2;
+					Rect rate_btn = Rect{r.right - 190, r.top + title_h - 2, r.right - 4, r.top + title_h + 16};
+					if (!rate_btn.Contains(pt)) break;
+
 					auto svc = IntegratedEconomy::GetTownFoodService(this->current_town);
+					if (svc != nullptr && svc->owner != CompanyID::Invalid() && svc->owner != _current_company) break;
+
 					uint32_t current_rate = svc ? svc->selected_rate : 0;
 					uint32_t next_rate = (current_rate == 0) ? 10 : (current_rate == 10) ? 20 : (current_rate == 20) ? 40 : 0;
 					Command<Commands::SetTownFoodServiceRate>::Post(this->current_town, next_rate);
@@ -408,6 +452,13 @@ struct MegacityOverviewWindow : Window {
 
 			case WID_MCO_TIER2_PANEL: {
 				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && this->current_town != TownID::Invalid()) {
+					if (_current_company == COMPANY_SPECTATOR) break;
+					NWidgetBase *nwi = this->GetWidget<NWidgetBase>(WID_MCO_TIER2_PANEL);
+					Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
+					int title_h = GetCharacterHeight(FontSize::Normal) + 2;
+					Rect comm_btn = Rect{r.right - 190, r.top + title_h - 2, r.right - 4, r.top + title_h + 16};
+					if (!comm_btn.Contains(pt)) break;
+
 					auto r_dist = IntegratedEconomy::GetTownResidentialDistrict(this->current_town);
 					if (r_dist == nullptr || !r_dist->commissioned) {
 						Command<Commands::CommissionTownResidentialDistrict>::Post(this->current_town);

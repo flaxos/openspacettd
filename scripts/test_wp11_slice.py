@@ -113,9 +113,16 @@ class OfflineEngine(Engine):
     The existing exec reader blocks between commands, so the simulation cannot
     run ahead. Use only a disposable POSIX profile and retain all console input.
     """
-    def __init__(self, binary, config, output, name, save=None, seed=11, world_count=7, deadline=None):
+    def __init__(self, binary, config, output, name, save=None, seed=11, world_count=7, deadline=None, editor=False, process_started=None,
+                 startup_bridge='connected_economy functional-bridge', pause_loaded_save=False):
         require(deadline is None or time.monotonic() < deadline, 'Offline startup wall limit exhausted')
+        require(startup_bridge in ('connected_economy functional-bridge', 'vale bridge'), 'Unsupported offline startup bridge')
+        require(not pause_loaded_save or (save is not None and not editor and startup_bridge == 'vale bridge'),
+                'Pausing a loaded save is restricted to the isolated Vale bridge')
+        self.startup_bridge = startup_bridge
         output = output.resolve()
+        if startup_bridge == 'vale bridge':
+            require(not any(character == '"' or ord(character) < 32 for character in str(output)), 'Unsafe Vale console path')
         self.log = (output / f'{name}.log').open('x')
         self.lines = []
         self.queue = queue.Queue()
@@ -127,24 +134,33 @@ class OfflineEngine(Engine):
         os.mkfifo(self.pipe, 0o600)
         scripts = output / 'scripts'
         scripts.mkdir(exist_ok=True)
-        (scripts / 'game_start.scr').write_text(
+        admission_log = f'script "{self.console_path}"\n' if startup_bridge == 'vale bridge' else ''
+        admission_flush = 'script\n' if startup_bridge == 'vale bridge' else ''
+        (scripts / ('editor_start.scr' if editor else 'game_start.scr')).write_text(
             f'script "{self.console_path}"\n'
             f'echo FUNCTIONAL_OFFLINE_START\n'
             'script\n'  # Native console logs are buffered; closing flushes the marker.
-            f'connected_economy functional-bridge "{self.pipe}"\n')
+            f'{admission_log}' + ('pause\n' if pause_loaded_save else '') +
+            f'{startup_bridge} "{self.pipe}"\n{admission_flush}')
         self.stdout_log = (output / f'{name}-stdout.log').open('x')
         env = {**os.environ, 'SDL_VIDEODRIVER': 'dummy', 'OPENSPACETTD_WORLD_COUNT': str(world_count)}
         args = [str(binary), '-v', 'sdl', '-s', 'null', '-m', 'null', '-x', '-c', str(config),
-                '-G', str(seed), '-t', '1950', '-g']
+                '-G', str(seed), '-t', '1950', '-e' if editor else '-g']
+        if startup_bridge == 'vale bridge':
+            args.insert(1, '-X')  # Keep the optional -g save argument adjacent to its flag.
         if save:
+            require(not editor, "Editor authoring cannot load an existing save")
             args.append(str(save))
         self.process = subprocess.Popen(args, cwd=output, stdin=subprocess.DEVNULL,
                                         stdout=self.stdout_log, stderr=subprocess.STDOUT, env=env)
+        if process_started is not None:
+            process_started(self.process)
         threading.Thread(target=self.read_console, daemon=True).start()
         try:
             self.wait('FUNCTIONAL_OFFLINE_START')
             # Nonblocking open cannot strand the runner if native exec failed.
             while True:
+                self.check_startup_output()
                 try:
                     fd = os.open(self.pipe, os.O_WRONLY | os.O_NONBLOCK)
                     os.set_blocking(fd, True)
@@ -158,6 +174,14 @@ class OfflineEngine(Engine):
         except BaseException:
             self.close()
             raise
+
+    def check_startup_output(self):
+        """Retain and surface a flushed Vale admission error before FIFO timeout."""
+        if self.startup_bridge != 'vale bridge':
+            return
+        for path in (self.console_path, Path(self.stdout_log.name)):
+            for line in path.read_text(errors='replace').splitlines():
+                require(not re.search(r'VALE FAIL|CONNECTED FAIL|Assertion failed|Your script made an error|script has crashed|Script died', line, re.I), line.strip())
 
     def read_console(self):
         pending = ''

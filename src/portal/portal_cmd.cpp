@@ -933,8 +933,8 @@ CommandCost CmdSetFacilityPlatformCapacity(DoCommandFlags flags, StationID stati
 {
 	Station *st = Station::GetIfValid(station);
 	const ProcessingFacility *facility = ProductionChainManager::GetFacilityForStation(station);
-	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || facility == nullptr || facility->owner != _current_company) return CMD_ERROR;
-	if (platform_capacity > 5000) return CMD_ERROR;
+	if (!Company::IsValidID(_current_company) || st == nullptr || st->owner != _current_company || facility == nullptr || facility->owner != _current_company) return CommandCost(STR_ERROR_CAN_T_SET_PLATFORM_CAP);
+	if (platform_capacity > 5000) return CommandCost(STR_ERROR_CAN_T_SET_PLATFORM_CAP);
 
 	if (flags.Test(DoCommandFlag::Execute)) {
 		ProductionChainManager::SetPlatformCapacityForStation(station, platform_capacity);

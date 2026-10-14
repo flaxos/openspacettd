@@ -48,6 +48,17 @@
 
 #include "safeguards.h"
 
+/** Match the native build command's railtype check for a train depot.
+ * @param engine Loaded train engine or wagon model to test.
+ * @param railtype Rail type of the target depot.
+ * @return Whether the native build command accepts the model's rail compatibility.
+ */
+bool IsRailVehicleCompatibleWithDepot(EngineID engine, RailType railtype)
+{
+	const RailVehicleInfo &rvi = Engine::Get(engine)->VehInfo<RailVehicleInfo>();
+	return rvi.railveh_type == RailVehicleType::Wagon ? IsCompatibleRail(rvi.railtypes, railtype) : HasPowerOnRail(rvi.railtypes, railtype);
+}
+
 /**
  * Get the height of a single 'entry' in the engine lists.
  * @param type the vehicle type to get the height of
@@ -1468,7 +1479,7 @@ struct BuildVehicleWindow : Window {
 			EngineID eid = e->index;
 			const RailVehicleInfo *rvi = &e->VehInfo<RailVehicleInfo>();
 
-			if (this->filter.railtype != INVALID_RAILTYPE && !HasPowerOnRail(rvi->railtypes, this->filter.railtype)) continue;
+			if (this->filter.railtype != INVALID_RAILTYPE && !IsRailVehicleCompatibleWithDepot(eid, this->filter.railtype)) continue;
 			if (!IsEngineBuildable(eid, VehicleType::Train, _local_company)) continue;
 
 			/* Filter now! So num_engines and num_wagons is valid */

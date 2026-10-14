@@ -963,6 +963,8 @@ static void MakeNewGame(bool from_heightmap, bool reset_settings)
 static void MakeNewEditorWorldDone()
 {
 	SetLocalCompany(OWNER_NONE);
+	/* Optional isolated authoring profile, equivalent to game_start.scr. */
+	IConsoleCmdExec("exec scripts/editor_start.scr 0");
 }
 
 static void MakeNewEditorWorld()

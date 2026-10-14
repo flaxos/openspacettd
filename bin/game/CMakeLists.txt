@@ -71,3 +71,35 @@ add_custom_target(openspacettd_uat_demo_files
 add_dependencies(openttd
     openspacettd_uat_demo_files
 )
+
+# Optional authored mission; ordinary New Game still selects no GameScript.
+set(FIRST_LINE_BINARY_FILES)
+foreach(FIRST_LINE_FILE info.nut main.nut)
+    set(FIRST_LINE_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_first_line/${FIRST_LINE_FILE})
+    set(FIRST_LINE_BINARY ${CMAKE_BINARY_DIR}/game/openspacettd_first_line/${FIRST_LINE_FILE})
+    add_custom_command(OUTPUT ${FIRST_LINE_BINARY}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/game/openspacettd_first_line
+            COMMAND ${CMAKE_COMMAND} -E copy ${FIRST_LINE_SOURCE} ${FIRST_LINE_BINARY}
+            MAIN_DEPENDENCY ${FIRST_LINE_SOURCE}
+            COMMENT "Copying First Permanent Line ${FIRST_LINE_FILE}"
+    )
+    list(APPEND FIRST_LINE_BINARY_FILES ${FIRST_LINE_BINARY})
+endforeach()
+add_custom_target(first_line_files DEPENDS ${FIRST_LINE_BINARY_FILES})
+add_dependencies(openttd first_line_files)
+
+# Optional single-world opening; normal New Game continues to select no script.
+set(VALE_BINARY_FILES)
+foreach(VALE_FILE info.nut main.nut)
+    set(VALE_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_vale/${VALE_FILE})
+    set(VALE_BINARY ${CMAKE_BINARY_DIR}/game/openspacettd_vale/${VALE_FILE})
+    add_custom_command(OUTPUT ${VALE_BINARY}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/game/openspacettd_vale
+            COMMAND ${CMAKE_COMMAND} -E copy ${VALE_SOURCE} ${VALE_BINARY}
+            MAIN_DEPENDENCY ${VALE_SOURCE}
+            COMMENT "Copying The Vale Railway ${VALE_FILE}"
+    )
+    list(APPEND VALE_BINARY_FILES ${VALE_BINARY})
+endforeach()
+add_custom_target(vale_files DEPENDS ${VALE_BINARY_FILES})
+add_dependencies(openttd vale_files)

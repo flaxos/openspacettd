@@ -8,6 +8,8 @@
 /** @file misc.cpp Misc functions that shouldn't be here. */
 
 #include "stdafx.h"
+#include "portal/first_permanent_line.h"
+#include "portal/world0_opening.h"
 #include "portal/integrated_economy.h"
 #include "portal/connected_economy.h"
 #include "portal/universe_network.h"
@@ -150,6 +152,8 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	TechTreeManager::Reset();
 	ResourceSiteManager::Reset();
 	IntegratedEconomy::Reset();
+	FirstPermanentLine::Reset();
+	World0Opening::Reset();
 	ResetConnectedEconomyProof();
 	ResetIntegratedCoreTownGenerationStats();
 	StellarNetwork::Reset();

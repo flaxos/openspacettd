@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "scope": "The Vale Railway founding scenario, construction prerequisites, train purchase repair and native test isolation",
+  "private_material_published": false,
+  "prior_automated_proof": {
+    "authored_opening_empty_stock": true,
+    "economy_evaluations": {
+      "prepare": 0,
+      "routes": 9,
+      "fresh_process_reload": 4
+    },
+    "processes_exited_cleanly": true,
+    "native_input_production_storage_repeat_service": true,
+    "zero_warehouse_sale_income": true,
+    "human_acceptance": "Pending"
+  },
+  "rendered_purchase_proof": {
+    "native_sdl_viewport_pixels_inspected": true,
+    "real_cargo_dropdown": "Ballast and Concrete",
+    "real_selected_model": "Commonwealth Modular Freight Car",
+    "capacity": 40,
+    "ordinary_native_buy_handler": true,
+    "paid_cash_debit": 93,
+    "new_wagon_empty": true,
+    "existing_fleet_materials_objectives_unchanged": true,
+    "economy_evaluation_delta": 0,
+    "process_exit_code": 0,
+    "elapsed_seconds_rounded": 0.37,
+    "initial_failed_probe_retained_privately": "Missing normal row selection; corrected before the passing run"
+  },
+  "aggregate_fixture_repairs": {
+    "lore": "Native base graphics prerequisite selected when an inherited video driver exists",
+    "purchase": "Flat ground, clearing and availability setup; native signal buffer flushed before exclusive depot cleanup",
+    "assertions_weakened": false
+  },
+  "prior_checked_source_tests": {
+    "catch_cases": 630,
+    "catch_assertions": 310730,
+    "ctest_pass": 651,
+    "ctest_game_regressions_excluded": 4,
+    "offline_pass": 30
+  },
+  "publication_integration_tests": {
+    "build": "Both native targets pass, serialj2",
+    "catch_cases": 631,
+    "catch_assertions": 310772,
+    "ctest_pass": 652,
+    "ctest_game_regressions_excluded": 4,
+    "offline_pass": 57,
+    "repository_linters": "file descriptions,unused strings,script mode enforcement pass",
+    "upstream_diff_validator": "pass",
+    "private_scope_review": "GO",
+    "ci": "Pending exact published head"
+  },
+  "pending": [
+    "Human desktop comprehension, fun and pacing",
+    "Inherited locomotive-style modular-car artwork",
+    "Broader Reserve/FOOD pilot acceptance"
+  ],
+  "ancestry": "New clean branch based on unmerged PR83. Local implementation history and private raw evidence preserved separately.",
+  "ci_repair_validation": {
+    "initial_head": "37debe2704ea752742cb43e97aae963e249ee79e",
+    "initial_failures": [
+      "409 new source Doxygen warnings",
+      "macOS Boolean type collision",
+      "MSVC JSON/string_view comparison ambiguity",
+      "assertion-enabled demolition fixture replacing an uncleared house tile"
+    ],
+    "repairs": [
+      "Meaningful source API and field documentation",
+      "JSON helper names changed to JsonBoolean",
+      "Explicit stage string extraction in the funding test",
+      "Native ClearTownHouse with valid fixture counts before replacement"
+    ],
+    "matching_doxygen_version": "1.17.0",
+    "initial_warning_signatures_remaining": 0,
+    "warnings_in_new_native_modules": 0,
+    "local_doc_output": "Autogen definition output instead of HTML to conserve disk; warning settings unchanged",
+    "native_targets": "Both pass, serial j2",
+    "focused_cases": 35,
+    "focused_assertions": 957,
+    "catch_cases": 631,
+    "catch_assertions": 310774,
+    "ctest_nonrelay_pass": 648,
+    "ctest_localhost_relay_pass": 4,
+    "independent_review": "GO; no assertions weakened or checker suppression",
+    "exact_head_ci": "Pending repair publication"
+  },
+  "macos_fifo_portability": {
+    "failed_head": "5a91bbff801412daf71d6435a06d3cefc8a86435",
+    "failed_jobs": [
+      114988594884,
+      114988594922
+    ],
+    "failure": "std::jthread unavailable below macOS11 deployment target",
+    "repair": "std::thread joined on normal and exception paths; original exception rethrown",
+    "production_change": false,
+    "assertions_or_bounds_weakened": false,
+    "native_test_target": "Rebuilt PASS",
+    "isolated_startup_completion_checks": 6,
+    "catch_cases": 631,
+    "catch_assertions": 310774,
+    "ctest_pass": 652,
+    "independent_review": "GO",
+    "exact_head_ci": "Pending portability repair publication"
+  },
+  "macos_fixture_admission": {
+    "failed_head": "2161e8f2bcdf8e1dc8ad6cd43c71fae76d12835b",
+    "failed_jobs": [
+      114995055363,
+      114995055418
+    ],
+    "fifo_cause": "Hardcoded /tmp ancestor is a symlink on Darwin; strict admission rejects it",
+    "fifo_repair": "Canonical exclusive fixture directory; positive path/FIFO checks and negative symlink-ancestor case",
+    "hub_observation": "Unchanged fixture create_directory returned false before SaveOrLoad",
+    "hub_cause_inference": "Timestamp name collision under parallel execution",
+    "hub_repair": "At most128 atomic directory creation attempts; no reuse/deletion of existing candidates; fail on real filesystem errors",
+    "production_or_guard_change": false,
+    "focused_pass": 8,
+    "catch_cases": 631,
+    "catch_assertions": 310776,
+    "ctest_pass": 652,
+    "independent_review": "GO",
+    "native_gameplay_reexecuted": false,
+    "exact_head_ci": "Pending fixture repair publication"
+  },
+  "msvc_width_annotation": {
+    "head": "e115d4ca1d98b37261df099a81aa8cc61d0690f3",
+    "build_run": 38307290990,
+    "all_platform_content_jobs": "PASS",
+    "annotation_job": 115011899983,
+    "annotation": "size_t to uint TileXY coordinate in fixed three-town fixture",
+    "repair": "uint loop index; same coordinates20/40/60",
+    "check_weakened": false,
+    "independent_review": "GO",
+    "rebuilt_and_focused_pass": 6,
+    "catch_cases": 631,
+    "catch_assertions": 310776,
+    "ctest_pass": 652,
+    "exact_updated_head_ci": "Pending"
+  }
+}

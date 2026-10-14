@@ -195,6 +195,16 @@ public:
 				text.top += this->resize.step_height;
 			}
 		}
+		if (UsesCommonwealthConstructionRules()) {
+			text.top += WidgetDimensions::scaled.vsep_normal;
+			Dimension note_size = GetStringMultiLineBoundingBox(STR_LOCAL_AUTHORITY_COMMONWEALTH_CONSTRUCTION,
+				{static_cast<uint>(r.right - r.left + 1), 0});
+			Rect note = r;
+			note.top = text.top;
+			note.bottom = note.top + note_size.height - 1;
+			DrawStringMultiLine(note, STR_LOCAL_AUTHORITY_COMMONWEALTH_CONSTRUCTION);
+			text.top = note.bottom + 1 + WidgetDimensions::scaled.vsep_normal;
+		}
 
 		text.bottom = text.top - 1;
 		if (text.bottom > r.bottom) {
@@ -274,6 +284,11 @@ public:
 			case WID_TA_RATING_INFO:
 				fill.height = resize.height = std::max({this->icon_size.height + WidgetDimensions::scaled.vsep_normal, this->exclusive_size.height + WidgetDimensions::scaled.vsep_normal, (uint)GetCharacterHeight(FontSize::Normal)});
 				size.height = 9 * resize.height + padding.height;
+				if (UsesCommonwealthConstructionRules()) {
+					size.height += GetStringMultiLineBoundingBox(STR_LOCAL_AUTHORITY_COMMONWEALTH_CONSTRUCTION,
+						{size.width > padding.width ? size.width - padding.width : 1, 0}).height +
+						2 * WidgetDimensions::scaled.vsep_normal;
+				}
 				break;
 		}
 	}

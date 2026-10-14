@@ -42,6 +42,8 @@ struct TownFoodService {
 	std::array<uint32_t, 4> requested_history{0, 0, 0, 0};
 	uint8_t history_cursor = 0;
 	uint32_t fractional_passenger_remainder = 0;
+	uint32_t delivered_this_period = 0;
+	uint32_t delivered_last_period = 0;
 };
 struct TownResidentialDistrict {
 	CompanyID owner = CompanyID::Invalid();
@@ -73,6 +75,11 @@ class IntegratedEconomy
 	static bool Enabled();
 	static bool ContentReady();
 	static bool StartNewGame();
+	/** Activate v2 only for a staged, populated, one-region Aster Vale profile.
+	 * @param towns Existing Greybank, Stonecross and Merefield towns in profile order.
+	 * @return Whether the native authored profile was admitted and v2 activated.
+	 */
+	static bool StartAuthoredWorld0(const std::array<TownID, 3> &towns);
 	static void SetEnabled(bool enabled);
 	static EconomicRole Role(WorldID world);
 	static void RegisterRole(WorldID world, EconomicRole role);

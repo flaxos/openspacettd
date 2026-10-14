@@ -294,8 +294,8 @@ CommandCost CheckAllowRemoveRoad(TileIndex tile, RoadBits remove, Owner owner, R
 	/* If 0 or 1 bits are set in n, or if no bits that match the bits to remove,
 	 * then allow it */
 	if (n.Count() > 1 && n.Any(remove)) {
-		/* you can remove all kind of roads with extra dynamite */
-		if (!_settings_game.construction.extra_dynamite) {
+		/* Classic requires extra dynamite for connected town roads; integrated games still charge normal removal costs. */
+		if (!_settings_game.construction.extra_dynamite && !UsesCommonwealthConstructionRules()) {
 			return CommandCostWithParam(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS, t->index);
 		}
 		rating_decrease = RATING_ROAD_DOWN_STEP_INNER;

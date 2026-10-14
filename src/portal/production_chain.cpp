@@ -486,11 +486,18 @@ std::vector<ProcessingFacility> ProductionChainManager::GetAllFacilities()
 		for (const auto &[id, f] : IntegratedEconomy::Factories()) {
 			auto i = Industry::GetIfValid(id);
 			if (!i) continue;
+			StationID st_id = StationID::Invalid();
+			if (i->neutral_station != nullptr) {
+				st_id = i->neutral_station->index;
+			} else if (!i->stations_near.empty() && *i->stations_near.begin() != nullptr) {
+				st_id = (*i->stations_near.begin())->index;
+			}
 			ProcessingFacility view{.id = uint32_t(id.base()) + 1,
 									.tile = i->location.tile,
 									.world_id = PlanetManager::GetTileWorld(i->location.tile),
 									.recipe_id = IntegratedEconomy::IndustryRecipe(i->type),
 									.owner = f.owner,
+									.linked_station = st_id,
 									.monthly_capacity = f.capacity,
 									.last_month_production = f.last_batches,
 									.input_buffers = {},

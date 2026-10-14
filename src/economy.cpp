@@ -8,6 +8,8 @@
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
+#include "portal/first_permanent_line.h"
+#include "portal/world0_opening.h"
 #include "timer/timer_game_tick.h"
 #include "portal/integrated_economy.h"
 #include "portal/stellar_network.h"
@@ -1090,9 +1092,10 @@ static bool AcceptsCargoForDelivery(const Station *st, CompanyID company, CargoT
  * @param num_pieces Amount of cargo delivered
  * @param source The source of the cargo
  * @param company The company delivering the cargo
+ * @param delivery_vehicle Native delivering vehicle identity for scenario evidence
  * @return actually accepted pieces of cargo
  */
-static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint num_pieces, IndustryID source, CompanyID company)
+static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint num_pieces, IndustryID source, CompanyID company, VehicleID delivery_vehicle)
 {
 	/* Find the nearest industrytile to the station sign inside the catchment area, whose industry accepts the cargo.
 	 * This fails in three cases:
@@ -1133,6 +1136,10 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoType cargo_type, uint
 		it->last_accepted = TimerGameEconomy::date;
 		num_pieces -= amount;
 		accepted += amount;
+		FirstPermanentLine::OnIndustryDelivery(delivery_vehicle, company, source, ind->index, cargo_type, amount);
+		FirstPermanentLine::Evaluate();
+		World0Opening::OnIndustryDelivery(delivery_vehicle, company, source, ind->index, cargo_type, amount);
+		World0Opening::Evaluate();
 
 		/* Update the cargo monitor. */
 		AddCargoDelivery(cargo_type, company, amount, {source, SourceType::Industry}, st, ind->index);
@@ -1170,7 +1177,7 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 		/* Freight at an owned hub is stored instead of being sold to nearby consumers. */
 		if (remaining > 0 && LogisticsHubManager::DepositToStockpile(hub->tile, company->index, cargo_type, remaining)) stored = remaining;
 	} else {
-		accepted_ind = DeliverGoodsToIndustry(st, cargo_type, remaining, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index);
+		accepted_ind = DeliverGoodsToIndustry(st, cargo_type, remaining, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), company->index, delivery_vehicle);
 	}
 
 	bool is_managed_city = IntegratedEconomy::Enabled() && hub == nullptr && MegacityManager::IsConsumerStation(st) &&
@@ -1189,6 +1196,10 @@ static Money DeliverGoods(int num_pieces, CargoType cargo_type, StationID dest, 
 	}
 	IntegratedEconomy::Record(EconomyFlow::Transported, cargo_type, accepted_total + stored);
 	IntegratedEconomy::Record(EconomyFlow::Stored, cargo_type, stored);
+	FirstPermanentLine::OnStoredDelivery(delivery_vehicle, company->index, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), dest, cargo_type, stored);
+	FirstPermanentLine::Evaluate();
+	World0Opening::OnStoredDelivery(delivery_vehicle, company->index, src.type == SourceType::Industry ? src.ToIndustryID() : IndustryID::Invalid(), dest, cargo_type, stored);
+	World0Opening::Evaluate();
 	if (hub == nullptr && !is_managed_city) {
 		IntegratedEconomy::Record(EconomyFlow::Consumed, cargo_type, accepted_total - accepted_facility - accepted_ind);
 	}

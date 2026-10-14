@@ -8,6 +8,8 @@
 /** @file vehicle.cpp Base implementations of all vehicles. */
 
 #include "stdafx.h"
+#include "portal/first_permanent_line.h"
+#include "portal/world0_opening.h"
 #include "portal/stellar_network.h"
 #include "portal/commonwealth_slice.h"
 #include "error.h"
@@ -840,6 +842,8 @@ void Vehicle::HandlePathfindingResult(bool path_found)
 /** Destroy all stuff that (still) needs the virtual functions to work properly */
 void Vehicle::PreDestructor()
 {
+	FirstPermanentLine::OnVehicleRemoved(this->index);
+	World0Opening::OnVehicleRemoved(this->index);
 	PortalRegistry::ClearPortalTransit(this->index);
 	FederationIdentityRegistry::ReleaseVehicle(this->index);
 
@@ -2246,6 +2250,10 @@ void Vehicle::DeleteUnreachedImplicitOrders()
  */
 void Vehicle::BeginLoading()
 {
+	FirstPermanentLine::OnArrival(this->index, this->last_station_visited);
+	FirstPermanentLine::Evaluate();
+	World0Opening::OnArrival(this->index, this->last_station_visited);
+	World0Opening::Evaluate();
 	assert(IsTileType(this->GetMovingFront()->tile, TileType::Station) || this->type == VehicleType::Ship);
 
 	if (_commonwealth_slice_audit != nullptr && this->owner == CompanyID{0})

@@ -9,6 +9,21 @@
 #define EMPIRE_FACILITIES_GUI_H
 
 #include "../company_type.h"
+#include "../gfx_type.h"
+#include <string>
+#include <cstdint>
+
+struct ProcessingFacility;
+struct ProductionRecipe;
+
+/** First limiting constraint evaluation for an industrial processing facility. */
+struct FacilityBottleneck {
+	std::string badge;
+	TextColour colour = TextColour::Green;
+	uint32_t batches_permitted = 0;
+};
+
+FacilityBottleneck DiagnoseFacilityBottleneck(const ProcessingFacility &f, const ProductionRecipe *rec, uint32_t throughput, uint32_t in_cap, uint32_t out_cap);
 
 void ShowEmpireFacilitiesWindow(CompanyID company = CompanyID::Invalid());
 

@@ -8,6 +8,8 @@
 /** @file console_cmds.cpp Implementation of the console hooks. */
 
 #include "stdafx.h"
+#include "portal/first_line_scenario.h"
+#include "portal/world0_scenario.h"
 #include "train_cmd.h"
 #include "vehicle_cmd.h"
 #include "portal/portal_cmd.h"
@@ -4333,6 +4335,8 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("colonize_world",          ConColonizeWorld);
 	IConsole::CmdRegister("promote_world",           ConPromoteWorld);
 	IConsole::CmdRegister("connected_economy", ConConnectedEconomy);
+	IConsole::CmdRegister("first_line", ConFirstLineScenario);
+	IConsole::CmdRegister("vale", ConWorld0Scenario);
 	IConsole::CmdRegister("federation_test_fixture", ConFederationTestFixture);
 	IConsole::CmdRegister("resource_sites", ConResourceSites);
 	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);
