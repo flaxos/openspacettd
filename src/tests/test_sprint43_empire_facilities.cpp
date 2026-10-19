@@ -42,6 +42,7 @@
 #include "../economy_func.h"
 #include "../industry.h"
 #include "../void_map.h"
+#include "../viewport_kdtree.h"
 #include "../engine_base.h"
 #include "../timer/timer_game_tick.h"
 #include "../timer/timer_game_calendar.h"
@@ -145,6 +146,8 @@ static Station *SetupSprint43Environment()
 	MakeRailStation(tile, company->index, station->index, Axis::X, 0, RAILTYPE_RAIL);
 	RebuildStationKdtree();
 	RebuildTownKdtree();
+	/* CleanPool skips sign removal, so drop earlier cases' station 0 signs before this one is labelled. */
+	RebuildViewportKdtree();
 	station->RecomputeCatchment();
 	if (VideoDriver::GetInstance() == nullptr) DriverFactoryBase::SelectDriver("null", Driver::Type::Video);
 	UnInitWindowSystem();
@@ -821,6 +824,21 @@ TEST_CASE("Sprint 43 / C1 - Capacity or Reserve Works Effects and Price Query", 
 	CHECK(!query_res.Failed());
 	CHECK(query_res.GetCost().base() == 50000);
 
+	/* The displayed price is a cost query: it ignores cash, keeps the caller's company and reports rejection. */
+	Company *company = Company::Get(CompanyID{0});
+	Money saved_money = company->money;
+	company->money = 0;
+	_current_company = COMPANY_SPECTATOR;
+	std::optional<Money> price = QueryWorksCommissionPrice(ind->index, CompanyID{0});
+	REQUIRE(price.has_value());
+	CHECK(price->base() == 50000);
+	CHECK(_current_company == COMPANY_SPECTATOR);
+	StockpileManager::Reset();
+	CHECK_FALSE(QueryWorksCommissionPrice(ind->index, CompanyID{0}).has_value());
+	CHECK(_current_company == COMPANY_SPECTATOR);
+	company->money = saved_money;
+	_current_company = CompanyID{0};
+
 	*const_cast<IndustrySpec *>(GetIndustrySpec(IndustryType{0})) = saved_spec;
 	_industry_pool.CleanPool();
 	IntegratedEconomy::Reset();
@@ -854,6 +872,84 @@ TEST_CASE("Sprint 43 / C1 - Factory Buffers Distinct from Planetary Construction
 	f.input_buffers = {{c_raw, 50}};
 	CHECK(f.input_buffers[c_raw] == 50);
 	CHECK(StockpileManager::GetStock(world, company, c_raw) == 0);
+}
+
+TEST_CASE("Sprint 43 / C1 - Legacy facility buffers never read an unrelated industry", "[empire-facilities][sprint43][stockpile]")
+{
+	Station *station = SetupSprint43Environment();
+	IntegratedEconomy::Reset();
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	ProcessingFacility *fac = ProductionChainManager::GetFacilityForStation(station->index);
+	REQUIRE(fac != nullptr);
+	REQUIRE(fac->id == 1);
+
+	CargoType c_iron = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::IronOre);
+	REQUIRE(ProductionChainManager::DeliverToStation(station->index, c_iron, 60) == 60);
+	CargoType c_stel = ProductionChainManager::GetDefaultCargo(CommonwealthCargoID::StructuralSteel);
+	fac->output_buffers[c_stel] = 9;
+
+	/* Industry 0 shares the facility's numeric slot (facility id 1 - 1) but is unrelated. */
+	REQUIRE(Industry::CanAllocateItem());
+	Industry *ind = Industry::Create(TileXY(20, 20));
+	REQUIRE(ind->index == IndustryID{0});
+	ind->accepted.emplace_back();
+	ind->accepted.back().cargo = c_iron;
+	ind->accepted.back().waiting = 77;
+	ind->produced.emplace_back();
+	ind->produced.back().cargo = c_stel;
+	ind->produced.back().waiting = 55;
+
+	CHECK(GetFacilityBufferedUnits(*fac, c_iron, true) == fac->input_buffers[c_iron]);
+	CHECK(GetFacilityBufferedUnits(*fac, c_stel, false) == 9);
+
+	/* Integrated-economy rows are industry views, so the industry is authoritative there. */
+	IntegratedEconomy::SetEnabled(true);
+	ProcessingFacility view{};
+	view.id = ind->index.base() + 1;
+	view.input_buffers[c_iron] = 1;
+	CHECK(GetFacilityBufferedUnits(view, c_iron, true) == 77);
+	CHECK(GetFacilityBufferedUnits(view, c_stel, false) == 55);
+
+	IntegratedEconomy::Reset();
+	_industry_pool.CleanPool();
+}
+
+TEST_CASE("Sprint 43 / C1 - Legacy platform target button cycles the holding target", "[empire-facilities][sprint43][gui]")
+{
+	Station *station = SetupSprint43Environment();
+	IntegratedEconomy::Reset();
+	_current_company = CompanyID{0};
+	_local_company = CompanyID{0};
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	ProcessingFacility *fac = ProductionChainManager::GetFacilityForStation(station->index);
+	REQUIRE(fac != nullptr);
+	REQUIRE(fac->platform_capacity == 0);
+
+	ShowEmpireFacilitiesWindow(_local_company);
+	Window *w = FindWindowById(WindowClass::EmpireFacilities, 0);
+	REQUIRE(w != nullptr);
+	AutoRestoreBackup dpi(_cur_dpi, &_screen);
+	w->DrawWidget({0, 0, 760, 440}, WID_EF_LIST_PANEL);
+
+	NWidgetBase *nwi = w->GetWidget<NWidgetBase>(WID_EF_LIST_PANEL);
+	REQUIRE(nwi != nullptr);
+	Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
+	/* First row, fourth text line, inside the button that ends where the action column's gutter starts. */
+	Point pt_platform{r.right - 156 - 60, r.top + 56};
+
+	for (uint32_t expected : {50u, 100u, 200u, 0u}) {
+		w->OnClick(pt_platform, WID_EF_LIST_PANEL, 1);
+		CHECK(fac->platform_capacity == expected);
+	}
+
+	/* Spectators see the button but cannot change the target. */
+	_local_company = COMPANY_SPECTATOR;
+	w->OnClick(pt_platform, WID_EF_LIST_PANEL, 1);
+	CHECK(fac->platform_capacity == 0);
+	_local_company = CompanyID{0};
+
+	w->Close();
+	UnInitWindowSystem();
 }
 
 TEST_CASE("Sprint 43 / C1 - Economic Role and Development Phase Separation", "[empire-facilities][sprint43][roles]")

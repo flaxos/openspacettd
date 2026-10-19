@@ -58,6 +58,66 @@ static std::string GetFacilityCargoName(CargoType cargo)
 	return "Cargo";
 }
 
+/**
+ * Get the managed industry behind an integrated-economy facility row.
+ * Legacy station facilities number their own IDs, so they never map to an industry.
+ * @param f Facility row.
+ * @return The managed industry, or nullptr for a legacy facility.
+ */
+static const Industry *GetFacilityIndustry(const ProcessingFacility &f)
+{
+	if (!IntegratedEconomy::Enabled() || f.id == INVALID_FACILITY) return nullptr;
+	return Industry::GetIfValid(IndustryID{uint16_t(f.id - 1)});
+}
+
+/**
+ * Get the units waiting in a facility's machine buffer.
+ * @param f Facility row.
+ * @param cargo Cargo to look up.
+ * @param input True for the input buffer, false for the output buffer.
+ * @return Units waiting.
+ */
+uint32_t GetFacilityBufferedUnits(const ProcessingFacility &f, CargoType cargo, bool input)
+{
+	if (const Industry *ind = GetFacilityIndustry(f); ind != nullptr) {
+		if (input) {
+			auto it = ind->GetCargoAccepted(cargo);
+			return (it != ind->accepted.end()) ? it->waiting : 0;
+		}
+		auto it = ind->GetCargoProduced(cargo);
+		return (it != ind->produced.end()) ? it->waiting : 0;
+	}
+	const auto &buffers = input ? f.input_buffers : f.output_buffers;
+	auto it = buffers.find(cargo);
+	return (it != buffers.end()) ? it->second : 0;
+}
+
+/**
+ * Query the cost of commissioning works without executing or checking cash.
+ * @param industry Factory to commission.
+ * @param company Company asking.
+ * @return The authoritative command cost, or std::nullopt when commissioning would be rejected.
+ */
+std::optional<Money> QueryWorksCommissionPrice(IndustryID industry, CompanyID company)
+{
+	AutoRestoreBackup cur_company(_current_company, company);
+	auto res = Command<Commands::CommissionEconomyWork>::Do(DoCommandFlag::QueryCost, industry, FactoryWorkType::Capacity);
+	if (res.Failed()) return std::nullopt;
+	return res.GetCost();
+}
+
+/**
+ * Get the legacy platform target button, right-aligned at the end of the fourth text line.
+ * @param row_right Right edge of the row.
+ * @param row_top Top of the row.
+ * @return Button rectangle.
+ */
+static Rect PlatformTargetButtonRect(int row_right, int row_top)
+{
+	int right = row_right - 156;
+	return Rect{right - 120, row_top + 48, right, row_top + 64};
+}
+
 FacilityBottleneck DiagnoseFacilityBottleneck(const ProcessingFacility &f, const ProductionRecipe *rec, uint32_t throughput, uint32_t in_cap, uint32_t out_cap)
 {
 	FacilityBottleneck b;
@@ -91,8 +151,7 @@ FacilityBottleneck DiagnoseFacilityBottleneck(const ProcessingFacility &f, const
 		return b;
 	}
 
-	IndustryID ind_id{uint16_t(f.id - 1)};
-	const Industry *ind = Industry::GetIfValid(ind_id);
+	const Industry *ind = GetFacilityIndustry(f);
 
 	/* 1. Tech lock */
 	TechID tech = IntegratedEconomy::RecipeTech(rec->id);
@@ -134,14 +193,7 @@ FacilityBottleneck DiagnoseFacilityBottleneck(const ProcessingFacility &f, const
 	uint32_t batches_permitted = UINT32_MAX;
 
 	for (auto [cargo, req] : rec->inputs) {
-		uint32_t waiting = 0;
-		if (ind != nullptr) {
-			auto in_it = ind->GetCargoAccepted(cargo);
-			waiting = (in_it != ind->accepted.end()) ? in_it->waiting : 0;
-		} else {
-			auto it = f.input_buffers.find(cargo);
-			waiting = (it != f.input_buffers.end()) ? it->second : 0;
-		}
+		uint32_t waiting = GetFacilityBufferedUnits(f, cargo, true);
 
 		uint32_t c_cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
 			? in_cap * req
@@ -367,8 +419,8 @@ struct EmpireFacilitiesWindow : Window {
 						: fmt::format("World {} (Role: {})", f.world_id.base() + 1, role_name);
 
 					const Station *target_st = st;
-					if (target_st == nullptr && IntegratedEconomy::Enabled() && f.id > 0) {
-						if (auto ind = Industry::GetIfValid(ind_id)) {
+					if (target_st == nullptr) {
+						if (const Industry *ind = GetFacilityIndustry(f)) {
 							if (ind->neutral_station != nullptr) {
 								target_st = ind->neutral_station;
 							} else if (!ind->stations_near.empty()) {
@@ -428,19 +480,11 @@ struct EmpireFacilitiesWindow : Window {
 					}
 
 					/* Line 3: Machine Input/Output Buffers with truthful units and batches permitted */
-					const Industry *ind = Industry::GetIfValid(ind_id);
 					std::string in_desc = "In: ";
 					if (rec != nullptr) {
 						for (size_t idx = 0; idx < rec->inputs.size(); ++idx) {
 							auto [in_c, in_req] = rec->inputs[idx];
-							uint32_t waiting = 0;
-							if (ind != nullptr) {
-								auto in_it = ind->GetCargoAccepted(in_c);
-								waiting = (in_it != ind->accepted.end()) ? in_it->waiting : 0;
-							} else {
-								auto it = f.input_buffers.find(in_c);
-								waiting = (it != f.input_buffers.end()) ? it->second : 0;
-							}
+							uint32_t waiting = GetFacilityBufferedUnits(f, in_c, true);
 							uint32_t c_cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
 								? in_cap * in_req
 								: throughput * in_req * 3;
@@ -455,14 +499,7 @@ struct EmpireFacilitiesWindow : Window {
 						uint32_t yield = (Company::IsValidID(f.owner) && TechTreeManager::IsTechUnlocked(f.owner, TECH_MATERIALS_3)) ? 115 : 100;
 						for (size_t idx = 0; idx < rec->outputs.size(); ++idx) {
 							auto [out_c, out_yield] = rec->outputs[idx];
-							uint32_t waiting = 0;
-							if (ind != nullptr) {
-								auto out_it = ind->GetCargoProduced(out_c);
-								waiting = (out_it != ind->produced.end()) ? out_it->waiting : 0;
-							} else {
-								auto it = f.output_buffers.find(out_c);
-								waiting = (it != f.output_buffers.end()) ? it->second : 0;
-							}
+							uint32_t waiting = GetFacilityBufferedUnits(f, out_c, false);
 							uint32_t c_cap = (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2)
 								? std::min(65535u, (out_cap * out_yield * yield + 99) / 100)
 								: std::min(65535u, (throughput * out_yield * 3 * yield + 99) / 100);
@@ -483,17 +520,15 @@ struct EmpireFacilitiesWindow : Window {
 					uint32_t stel_stock = (stel_c != INVALID_CARGO) ? StockpileManager::GetStock(world, _local_company, stel_c) : 0;
 					uint32_t ball_stock = (ball_c != INVALID_CARGO) ? StockpileManager::GetStock(world, _local_company, ball_c) : 0;
 
+					bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
+					Rect line4_r = Rect{tr_text.left, y + 50, tr_text.right, y + 64};
 					std::string line4;
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
 						if (work == FactoryWorkType::None) {
-							Money queried_price{50000};
-							Backup<CompanyID> cur_company(_current_company, _local_company);
-							auto query_res = Command<Commands::CommissionEconomyWork>::Do(DoCommandFlags{}, ind_id, FactoryWorkType::Capacity);
-							if (query_res.Succeeded()) {
-								queried_price = query_res.GetCost();
-							}
-							line4 = fmt::format("Works: None | Bill: £50,000 + 160 STEL / 80 BALL (Queried Price: £{:L}) | World Stock: {} STEL, {} BALL",
-								queried_price.base(), stel_stock, ball_stock);
+							std::optional<Money> queried_price = QueryWorksCommissionPrice(ind_id, _local_company);
+							std::string price_str = queried_price.has_value() ? fmt::format("£{:L}", queried_price->base()) : "unavailable";
+							line4 = fmt::format("Works: None | Bill: £50,000 + 160 STEL / 80 BALL (Queried Price: {}) | World Stock: {} STEL, {} BALL",
+								price_str, stel_stock, ball_stock);
 						} else if (work == FactoryWorkType::Capacity) {
 							line4 = fmt::format("Works: Active - Capacity (+50% throughput, 150 batches/mo) | World Stock: {} STEL, {} BALL",
 								stel_stock, ball_stock);
@@ -502,14 +537,19 @@ struct EmpireFacilitiesWindow : Window {
 								stel_stock, ball_stock);
 						}
 					} else {
-						line4 = fmt::format("World Stock: {} STEL, {} BALL | Platform Target: {} t",
-							stel_stock, ball_stock, f.platform_capacity);
+						line4 = fmt::format("World Stock: {} STEL, {} BALL", stel_stock, ball_stock);
 					}
-					Rect line4_r = Rect{tr_text.left, y + 50, tr_text.right, y + 64};
+					if (!IntegratedEconomy::Enabled()) {
+						/* Legacy station facilities: platform holding target cycles 0 -> 50 -> 100 -> 200 t. */
+						Rect btn_platform = PlatformTargetButtonRect(row_rect.right, y);
+						GfxFillRect(btn_platform, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
+						std::string platform_label = (f.platform_capacity == 0) ? "Platform: 0 (Hub)" : fmt::format("Platform: {} t", f.platform_capacity);
+						DrawString(btn_platform, platform_label, is_owner ? TextColour::White : TextColour::Grey, AlignmentH::Centre);
+						line4_r.right = btn_platform.left - 6;
+					}
 					DrawString(line4_r, line4, TextColour::Silver);
 
 					/* Right Action Column: Upper half works/controls, Lower half navigation */
-					bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
 						if (work == FactoryWorkType::None) {
 							Rect btn_cap = Rect{x_btn_left, y + 4, x_btn_left + 46, y + 26};
@@ -642,14 +682,25 @@ struct EmpireFacilitiesWindow : Window {
 				int rel_y = (pt.y - r.top) % ROW_HEIGHT;
 
 				const Station *st = Station::GetIfValid(f.linked_station);
-				if (st == nullptr && IntegratedEconomy::Enabled() && f.id > 0) {
-					if (auto ind = Industry::GetIfValid(IndustryID{uint16_t(f.id - 1)})) {
+				if (st == nullptr) {
+					if (const Industry *ind = GetFacilityIndustry(f)) {
 						if (ind->neutral_station != nullptr) {
 							st = ind->neutral_station;
 						} else if (!ind->stations_near.empty()) {
 							st = *ind->stations_near.begin();
 						}
 					}
+				}
+
+				/* Legacy platform holding target: 0 -> 50 -> 100 -> 200 -> 0 */
+				if (!IntegratedEconomy::Enabled() && PlatformTargetButtonRect(r.right, pt.y - rel_y).Contains(pt)) {
+					bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
+					if (is_owner && f.linked_station != StationID::Invalid()) {
+						uint32_t next_target = (f.platform_capacity == 0) ? 50 : (f.platform_capacity == 50) ? 100 : (f.platform_capacity == 100) ? 200 : 0;
+						Command<Commands::SetFacilityPlatformCapacity>::Post(STR_ERROR_CAN_T_SET_PLATFORM_CAP, f.linked_station, next_target);
+						this->SetDirty();
+					}
+					return;
 				}
 
 				/* Check button clicks on right side */

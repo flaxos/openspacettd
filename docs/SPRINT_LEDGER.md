@@ -1,5 +1,19 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Facilities window corrections (Card C1) — 20 October 2026
+
+Three review defects in the C1 Facilities window are fixed on PR83. Legacy
+(non-Commonwealth) rows now show their own machine buffers; before, they showed
+cargo from whichever industry had the facility ID minus one. The legacy platform holding
+target is clickable again on line 4 (0 -> 50 -> 100 -> 200 -> 0 t), restoring the
+only GUI path to `SetFacilityPlatformCapacity`. The works price is a real
+`DoCommandFlag::QueryCost` query that restores the current company without logging
+"Backed-up value was not restored!" on each repaint, and reads "unavailable"
+instead of a hard-coded £50,000 when commissioning would be rejected. The Sprint 43
+fixture rebuilds the viewport sign kd-tree so stale station signs from earlier
+cases cannot abort later ones. Focused, full Catch, CTest, linters and diff checks
+pass; human desktop UAT of the window remains Pending.
+
 ## Vale Railway publication — source and automated proof
 
 The optional Aster Vale founding scenario is ready for draft review, stacked on
