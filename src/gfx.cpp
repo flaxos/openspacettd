@@ -1253,6 +1253,14 @@ static void GfxMainBlitter(const Sprite *sprite, int x, int y, BlitterMode mode,
 	GfxBlitter<1, true>(sprite, x, y, mode, sub, sprite_id, zoom);
 }
 
+#ifdef WITH_CAB_VIEW
+/** Draw a transient sprite encoded by the cab renderer with the active blitter. */
+void GfxBlitEncodedSprite(const Sprite *sprite, int x, int y)
+{
+	GfxBlitter<1, true>(sprite, x, y, BlitterMode::Normal, nullptr, 0, ZoomLevel::Min);
+}
+#endif
+
 /**
  * Initialize _stringwidth_table cache for the specified font sizes.
  * @param fontsizes Font sizes to initialise.

@@ -355,6 +355,7 @@ enum class WindowClass : uint16_t {
 	 */
 	VehicleView,
 
+
 	/**
 	 * Station view; %Window numbers:
 	 *   - #StationID = #StationViewWidgets
@@ -775,6 +776,9 @@ enum class WindowClass : uint16_t {
 
 	/** Narrative Prompt-to-Savegame procedural scenario generator window. */
 	PromptScenarioGenerator,
+
+	/** Local read-only train camera; window number is its original VehicleID. */
+	VehicleCabView,
 
 	Invalid = 0xFFFF, ///< Invalid window.
 };

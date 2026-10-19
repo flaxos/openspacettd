@@ -4566,6 +4566,16 @@ STR_REPLACE_REMOVE_WAGON_GROUP_HELP                             :{STRING}. Ctrl+
 
 # Vehicle view
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
+STR_CAB_VIEW_CAPTION                                            :{WHITE}Cab: {VEHICLE}
+STR_CAB_VIEW_OPEN                                               :Cab view
+STR_CAB_VIEW_TOOLTIP                                            :{BLACK}Ride in the cab of this train (local camera only)
+STR_CAB_VIEW_LOOK_LEFT                                          :Look left
+STR_CAB_VIEW_LOOK_AHEAD                                         :Look ahead
+STR_CAB_VIEW_LOOK_RIGHT                                         :Look right
+STR_CAB_VIEW_LOCAL_TRANSIT                                      :Local gate transit
+STR_CAB_VIEW_EFFECT_FULL                                        :Effects: Full
+STR_CAB_VIEW_EFFECT_REDUCED                                     :Effects: Reduced
+STR_CAB_VIEW_EFFECT_OFF                                         :Effects: Off
 
 ###length VEHICLE_TYPES
 STR_VEHICLE_VIEW_TRAIN_CENTER_TOOLTIP                           :{BLACK}Centre main view on train's location. Double click to follow train in main view. Ctrl+Click to open a new viewport on train's location

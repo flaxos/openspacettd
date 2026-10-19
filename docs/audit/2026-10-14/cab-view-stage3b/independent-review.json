@@ -1,0 +1,47 @@
+{
+  "reviewer": "Astra (/root/astra_plan)",
+  "status": "CLEAR for bounded Stage3B engineering acceptance",
+  "source": "source04 / final-source",
+  "verified": {
+    "raw_profile_cells": 270,
+    "measured_frames": 27000,
+    "visible_vehicle_cells": 54,
+    "native_png_hashes": 231,
+    "fixed_off_byte_equalities": 72,
+    "normal_viewport_pixel_pairs": 6,
+    "native_sprite_cases": 7,
+    "max_sprite_channel_error": 0,
+    "source_and_binary_identity": true,
+    "content_and_grf_hashes": true,
+    "geometry_equal_across_modes": true,
+    "frozen_simulation_snapshots": true,
+    "palette_restoration": true,
+    "fresh_and_cached_frame_flags": true,
+    "max_full_added_median_us": 535,
+    "max_full_added_p95_us": 971,
+    "max_full_scene_ratio": 1.29637234770705,
+    "max_reduced_added_median_us": 157,
+    "max_reduced_added_p95_us": 317,
+    "max_off_matched_delta_us": 128,
+    "max_effect_scratch_bytes": 952320,
+    "max_vehicle_payload_bytes": 6816
+  },
+  "retained_failure": {
+    "matrix": "candidate/matrix-01",
+    "status": "FAILED",
+    "cell": "cold reverse-arrival 640x372 Reduced",
+    "median_added_p95_us": 1114,
+    "limit_us": 500,
+    "cause": "Unproven; zero direct-effect samples do not erase the end-to-end failure. Final passing matrix is separate evidence."
+  },
+  "limits": [
+    "One Linux offscreen fixture",
+    "Actual native journey sequences are single-layer",
+    "Diagnostic multilayer native-oracle proof is before mip generation",
+    "Static-palette private profiling does not establish animated-palette cache fidelity",
+    "Real SpriteStack GRF, translucent 32bpp content, human comfort and cross-platform UAT Pending",
+    "Destination-dependent transparency and text recolour deferred",
+    "Broad CTest reruns independently executed and recorded by Root, outside this review"
+  ],
+  "raw_final_response": "CLEAR for bounded Stage3B engineering acceptance. Independently verified source/binary identity, 270 cells and 27,000 frames, 231 PNG hashes, 72 exact baseline image comparisons, six unchanged viewport pairs, and seven zero-error native sprite-oracle cases. Final performance thresholds pass unchanged. The earlier matrix remains failed: Reduced p95 added 1,114µs, cause unproven. The final passing matrix is separate evidence. Remaining limits: actual journey assets are single-layer; real multilayer GRFs, animated palettes, human and cross-platform UAT remain pending. Destination-dependent transparency is deferred. Broad-suite reruns remain parent-owned."
+}

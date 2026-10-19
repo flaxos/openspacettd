@@ -235,5 +235,9 @@ std::pair<uint8_t, uint8_t> GetBroadestDigit(FontSize size);
 int GetCharacterHeight(FontSize size);
 
 extern DrawPixelInfo *_cur_dpi;
+#ifdef WITH_CAB_VIEW
+struct Sprite;
+void GfxBlitEncodedSprite(const Sprite *sprite, int x, int y);
+#endif
 
 #endif /* GFX_FUNC_H */

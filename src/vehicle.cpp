@@ -891,6 +891,9 @@ void Vehicle::PreDestructor()
 	}
 
 	if (this->IsPrimaryVehicle()) {
+#ifdef WITH_CAB_VIEW
+		CloseWindowById(WindowClass::VehicleCabView, this->index);
+#endif
 		CloseWindowById(WindowClass::VehicleView, this->index);
 		CloseWindowById(WindowClass::VehicleOrders, this->index);
 		CloseWindowById(WindowClass::VehicleRefit, this->index);
@@ -910,6 +913,11 @@ void Vehicle::PreDestructor()
 
 Vehicle::~Vehicle()
 {
+#ifdef WITH_CAB_VIEW
+	/* CleanPool bypasses the usual primary-vehicle window cleanup. A cab must
+	 * disappear before its index can identify a different train. */
+	CloseWindowById(WindowClass::VehicleCabView, this->index);
+#endif
 	StellarNetwork::ReleaseTrain(this->index);
 	if (!CleaningPool()) CloseWindowById(WindowClass::UniverseDestinations, this->index);
 	if (CleaningPool()) {

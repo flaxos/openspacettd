@@ -269,6 +269,13 @@ set_source_files_properties(src/3rdparty/fmt/format.cc PROPERTIES SKIP_PRECOMPIL
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/bin)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+# add_files() registers the cab sources on targets created in this directory.
+# Source properties must therefore be set here as well (CMake 3.17 compatible).
+if(WITH_CAB_VIEW AND NOT OPTION_DEDICATED AND NOT EMSCRIPTEN)
+    foreach(cab_source IN ITEMS cab_view_3d.cpp cab_view_gui.cpp viewport.cpp gfx.cpp gfxinit.cpp vehicle_gui.cpp vehicle.cpp train_cmd.cpp tests/test_cab_view.cpp tests/test_cab_view_native.cpp tests/test_cab_view_gate_native.cpp)
+        set_source_files_properties("${CMAKE_SOURCE_DIR}/src/${cab_source}" PROPERTIES COMPILE_DEFINITIONS WITH_CAB_VIEW)
+    endforeach()
+endif()
 add_subdirectory(${CMAKE_SOURCE_DIR}/media)
 
 add_dependencies(openttd

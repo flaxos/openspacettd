@@ -21,6 +21,9 @@
 #include "base_media_func.h"
 #include "base_media_graphics.h"
 #include "base_media_sounds.h"
+#ifdef WITH_CAB_VIEW
+#include "cab_view_3d.h"
+#endif
 
 #include "table/sprites.h"
 
@@ -343,6 +346,11 @@ void GfxLoadSprites()
 	VideoDriver::GetInstance()->ClearSystemSprites();
 	FontCache::ClearFontCaches(FONTSIZES_ALL);
 	PortalGateSprites::Reset();
+#ifdef WITH_CAB_VIEW
+	/* Sprite IDs may acquire different artwork after a base set or NewGRF
+	 * reload. Discard decoded cab textures before resetting that cache. */
+	ResetCabView3D();
+#endif
 	GfxInitSpriteMem();
 	LoadSpriteTables();
 	GfxInitPalettes();

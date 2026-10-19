@@ -1,0 +1,236 @@
+{
+  "recorded_utc": "2026-10-14T21:31:41.160180+00:00",
+  "status": "Stage 3A automated engineering complete; human UAT and other platforms Pending",
+  "baseline": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "upstream": {
+    "repository": "vaclavloubek/OpenTTD",
+    "tag": "15.3-cabview-alpha1",
+    "commit": "b7bd17b04dde3379b2be33be40ba4d6fc9f5d391"
+  },
+  "builds": {
+    "off": {
+      "configuration": "OFF",
+      "cab_compile_units": [],
+      "feature_definitions": [],
+      "binary_hashes": {
+        "openttd": "478269d21778be7ddf66135c7fe61153f7b134dd42201f4982d714bb0ae4ab65",
+        "openttd_test": "0298152ba195dec0807521627d06c62e2eb0a64b129151a9db7c9dc2d2f701b8",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++ 13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    },
+    "on": {
+      "configuration": "ON",
+      "cab_compile_units": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp"
+      ],
+      "feature_definitions": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp"
+      ],
+      "binary_hashes": {
+        "openttd": "68a515652c9f56e14aa7c0d6512e85616c33f9c60b72361f64058242436ec875",
+        "openttd_test": "94b1d57fb11ee1ea27a6e9bc893c335d1cf24332c4f3129c83931bd291e879a2",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++ 13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    }
+  },
+  "source_checks": {
+    "checks": {
+      "python3 .github/file-descriptions.py": {
+        "exit_code": 0,
+        "output": "OK\n"
+      },
+      "python3 .github/unused-strings.py": {
+        "exit_code": 0,
+        "output": "OK\n"
+      },
+      "git diff --check": {
+        "exit_code": 0,
+        "output": ""
+      }
+    },
+    "source_hashes": {
+      "src/cab_view.h": "330eb6c0f54321bbe5b680fe5291576ef1c49543c48a08bc9f317ec2721f671b",
+      "src/cab_view_gui.cpp": "0a7b57724e5a1a05c8838f64028b7559d34510cab1acace0a0d9cfd5c7556e97",
+      "src/cab_view_3d.cpp": "9d1d4df674d95cb3146af32a3238e2aa6839982cd06750aa23708fee2b7ab322",
+      "src/cab_view_3d.h": "923508b5c6353c5db09038099cccb7f281b1ca34e9f02b1c797c6a6cfc56b1f1",
+      "src/widgets/cab_view_widget.h": "4a14807fcc3f7207c1a5b44ecee3d6646115e80d97ca44f8d6de6b4d6cfdaa06",
+      "src/lang/english.txt": "6fe08501a7988b785d276c3528752ecd780a4eb52c48480c58c8ddba4c768581",
+      "src/tests/test_cab_view.cpp": "94cc141136624f66f377df69314e0f450c8585e80d2d21cf508a97e29ac53181",
+      "src/tests/test_cab_view_gate_native.cpp": "cbf499fc33716fd13ae9e75a9e6a74d4dfa4d1c581808906a8b08ca0ee12d117",
+      "scripts/test_cab_view_gate_native.py": "6d7f147ae7fd7eca469de16c28e82e644b086884cbb0cc9dba0ad7553307f18c",
+      "docs/ACTIVE_EXECUTION_PLAN.md": "24a0854c82825de744e4c92de6d640f6e021cfd8e42087eb1ab1f3fe1a63257f"
+    },
+    "runtime_matches_measured_source05": true
+  },
+  "regressions": {
+    "passed": 37,
+    "total": 37,
+    "assertions": 11198,
+    "log": "logs/stage3-effects-regressions-07.log"
+  },
+  "native_and_budget": {
+    "effect_budget_passed": true,
+    "off_regression_investigations": [],
+    "modes": {
+      "off": {
+        "median_added_us": 0.0,
+        "median_added_p95_us": 0,
+        "median_direct_effect_us": 0.0,
+        "median_direct_effect_p95_us": 0,
+        "max_scene_total_ratio": 1.0,
+        "max_cold_wall_us": 14276,
+        "max_effect_scratch_bytes": 0
+      },
+      "reduced": {
+        "median_added_us": 158.0,
+        "median_added_p95_us": 373,
+        "median_direct_effect_us": 117.0,
+        "median_direct_effect_p95_us": 145,
+        "max_scene_total_ratio": 1.107813033094507,
+        "max_cold_wall_us": 15326,
+        "max_effect_scratch_bytes": 0
+      },
+      "full": {
+        "median_added_us": 628.5,
+        "median_added_p95_us": 808,
+        "median_direct_effect_us": 532.5,
+        "median_direct_effect_p95_us": 663,
+        "max_scene_total_ratio": 1.3398157625383829,
+        "max_cold_wall_us": 13953,
+        "max_effect_scratch_bytes": 952320
+      }
+    },
+    "runs": [
+      {
+        "repeat": 1,
+        "passed": true,
+        "explicit_calls": 2495,
+        "pngs": 77,
+        "cells": 72,
+        "normal_changed_pixels": [
+          0,
+          0
+        ],
+        "sampled_max_rss_kib": 240200,
+        "native_assertions": 50
+      },
+      {
+        "repeat": 2,
+        "passed": true,
+        "explicit_calls": 2499,
+        "pngs": 77,
+        "cells": 72,
+        "normal_changed_pixels": [
+          0,
+          0
+        ],
+        "sampled_max_rss_kib": 239860,
+        "native_assertions": 50
+      },
+      {
+        "repeat": 3,
+        "passed": true,
+        "explicit_calls": 2495,
+        "pngs": 77,
+        "cells": 72,
+        "normal_changed_pixels": [
+          0,
+          0
+        ],
+        "sampled_max_rss_kib": 240672,
+        "native_assertions": 50
+      }
+    ],
+    "focused_assertions": 11198
+  },
+  "source05_archive_sha256": "f256b911c7d6a7d92839ac75d0d477553248aca6b221e725aabd373acb07ff3b",
+  "measured_source": {
+    "status": "final radius candidate; validation pending",
+    "source_hashes": {
+      "src/cab_view.h": "330eb6c0f54321bbe5b680fe5291576ef1c49543c48a08bc9f317ec2721f671b",
+      "src/cab_view_gui.cpp": "0a7b57724e5a1a05c8838f64028b7559d34510cab1acace0a0d9cfd5c7556e97",
+      "src/cab_view_3d.cpp": "9d1d4df674d95cb3146af32a3238e2aa6839982cd06750aa23708fee2b7ab322",
+      "src/cab_view_3d.h": "923508b5c6353c5db09038099cccb7f281b1ca34e9f02b1c797c6a6cfc56b1f1",
+      "src/widgets/cab_view_widget.h": "4a14807fcc3f7207c1a5b44ecee3d6646115e80d97ca44f8d6de6b4d6cfdaa06",
+      "src/lang/english.txt": "6fe08501a7988b785d276c3528752ecd780a4eb52c48480c58c8ddba4c768581",
+      "src/tests/test_cab_view.cpp": "94cc141136624f66f377df69314e0f450c8585e80d2d21cf508a97e29ac53181",
+      "src/tests/test_cab_view_gate_native.cpp": "cbf499fc33716fd13ae9e75a9e6a74d4dfa4d1c581808906a8b08ca0ee12d117",
+      "scripts/test_cab_view_gate_native.py": "6d7f147ae7fd7eca469de16c28e82e644b086884cbb0cc9dba0ad7553307f18c",
+      "docs/ACTIVE_EXECUTION_PLAN.md": "1b7dba00af6f6f8c4afd95685848be49ec7a81e95715add0f3669dd5fd60006f"
+    },
+    "binaries": {
+      "openttd": "68a515652c9f56e14aa7c0d6512e85616c33f9c60b72361f64058242436ec875",
+      "openttd_test": "94b1d57fb11ee1ea27a6e9bc893c335d1cf24332c4f3129c83931bd291e879a2"
+    },
+    "archive_sha256": "f256b911c7d6a7d92839ac75d0d477553248aca6b221e725aabd373acb07ff3b"
+  },
+  "independent_review": "independent-review.json",
+  "preserved": {
+    "stage1_patch_sha256": "42754c64b80c8d2b7d892af4f3177180be81e33ba7fcfddca665145d531748fe",
+    "stage2_patch_sha256": "973c7f924ac1019703d8c853463ca0c44f5a0b98890fa0870015ac42c0ed6ccf",
+    "stage2_audit_files_exact": {
+      "docs/audit/2026-10-14/cab-view-stage2/README.md": true,
+      "docs/audit/2026-10-14/cab-view-stage2/gate-approach.png": true,
+      "docs/audit/2026-10-14/cab-view-stage2/gate-arrival.png": true,
+      "docs/audit/2026-10-14/cab-view-stage2/gate-transit.png": true,
+      "docs/audit/2026-10-14/cab-view-stage2/independent-review.json": true,
+      "docs/audit/2026-10-14/cab-view-stage2/verification-evidence.tar.gz": true,
+      "docs/audit/2026-10-14/cab-view-stage2/verification.json": true
+    },
+    "baseline_instrumented_source_sha256": "0f57195c67f751171102df239fcb56d5eaa1bcef667e37df0ca870cacd6d450b"
+  },
+  "owner_repositories": {
+    "primary": {
+      "path": "/home/flax/games/openspacettd",
+      "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+      "status": ""
+    },
+    "prior": {
+      "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line",
+      "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+      "status": ""
+    }
+  },
+  "limitations": [
+    "One Linux SDL offscreen machine, assets and fixture",
+    "Private fixed-scale timing and injected paused GUI deltas; no interactive FPS claim",
+    "Human comfort and cross-platform behavior unverified",
+    "Actual widget 480x270 differs from diagnostic 480x272",
+    "Relative headroom modest; median-of-three rule does not mean every individual run passes",
+    "Broader Commonwealth composite sprites, other gate orientations/content and federation deferred"
+  ],
+  "publication": "none; uncommitted, default OFF",
+  "archive": {
+    "file": "verification-evidence.tar.gz",
+    "sha256": "879c6697d00aea7958a254e9e75b876b1c79db19ebc7065d85eb6a5b76825a23",
+    "bytes": 34578178,
+    "members": 1781,
+    "manifest": "archive-manifest.json",
+    "deduplication": {
+      "identical_content_hardlinks": 1416,
+      "logical_members": 1781,
+      "unique_contents": 365
+    }
+  }
+}

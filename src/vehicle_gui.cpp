@@ -8,6 +8,9 @@
 /** @file vehicle_gui.cpp The base GUI for all vehicles. */
 
 #include "stdafx.h"
+#ifdef WITH_CAB_VIEW
+#include "cab_view.h"
+#endif
 #include "debug.h"
 #include "company_func.h"
 #include "gui.h"
@@ -1607,6 +1610,10 @@ static inline void ChangeVehicleWindow(WindowClass window_class, VehicleID from_
  */
 void ChangeVehicleViewWindow(VehicleID from_index, VehicleID to_index)
 {
+#ifdef WITH_CAB_VIEW
+	/* An autoreplace is a new cab identity even if the old ID is reused. */
+	CloseWindowById(WindowClass::VehicleCabView, from_index);
+#endif
 	ChangeVehicleWindow(WindowClass::VehicleView, from_index, to_index);
 	ChangeVehicleWindow(WindowClass::VehicleOrders, from_index, to_index);
 	ChangeVehicleWindow(WindowClass::VehicleRefit, from_index, to_index);
@@ -2869,6 +2876,11 @@ static constexpr std::initializer_list<NWidgetPart> _nested_vehicle_view_widgets
 		NWidget(WWT_PUSHIMGBTN, Colours::Grey, WID_VV_RENAME), SetAspect(WidgetDimensions::ASPECT_RENAME), SetSpriteTip(SPR_RENAME),
 		NWidget(WWT_CAPTION, Colours::Grey, WID_VV_CAPTION),
 		NWidget(WWT_PUSHIMGBTN, Colours::Grey, WID_VV_LOCATION), SetAspect(WidgetDimensions::ASPECT_LOCATION), SetSpriteTip(SPR_GOTO_LOCATION),
+#ifdef WITH_CAB_VIEW
+		NWidget(NWID_SELECTION, Colours::Invalid, WID_VV_CAB_SELECT),
+			NWidget(WWT_TEXTBTN, Colours::Grey, WID_VV_CAB_VIEW), SetMinimalSize(36, 18), SetStringTip(STR_CAB_VIEW_OPEN, STR_CAB_VIEW_TOOLTIP),
+		EndContainer(),
+#endif
 		NWidget(WWT_DEBUGBOX, Colours::Grey),
 		NWidget(WWT_SHADEBOX, Colours::Grey),
 		NWidget(WWT_DEFSIZEBOX, Colours::Grey),
@@ -3085,6 +3097,9 @@ public:
 			default: NOT_REACHED();
 		}
 		this->FinishInitNested(window_number);
+#ifdef WITH_CAB_VIEW
+		this->GetWidget<NWidgetStacked>(WID_VV_CAB_SELECT)->SetDisplayedPlane(v->type == VehicleType::Train && v->owner == _local_company ? 0 : SZSP_NONE);
+#endif
 		this->owner = v->owner;
 		this->GetWidget<NWidgetViewport>(WID_VV_VIEWPORT)->InitializeViewport(this, static_cast<VehicleID>(this->window_number), ScaleZoomGUI(_vehicle_view_zoom_levels[v->type]));
 
@@ -3163,6 +3178,9 @@ public:
 	void OnPaint() override
 	{
 		const Vehicle *v = Vehicle::Get(this->window_number);
+#ifdef WITH_CAB_VIEW
+		this->SetWidgetDisabledState(WID_VV_CAB_VIEW, !CanShowCabView(v));
+#endif
 
 		const Window *mainwindow = GetMainWindow();
 		if (mainwindow->viewport->follow_vehicle == v->index) {
@@ -3290,6 +3308,11 @@ public:
 		const Vehicle *v = Vehicle::Get(this->window_number);
 
 		switch (widget) {
+#ifdef WITH_CAB_VIEW
+			case WID_VV_CAB_VIEW:
+				ShowCabViewWindow(v);
+				break;
+#endif
 			case WID_VV_RENAME: { // rename
 				ShowQueryString(GetString(STR_VEHICLE_NAME, v->index), STR_QUERY_RENAME_TRAIN_CAPTION + to_underlying(v->type),
 						MAX_LENGTH_VEHICLE_NAME_CHARS, this, CS_ALPHANUMERAL, {QueryStringFlag::EnableDefault, QueryStringFlag::LengthIsInChars});

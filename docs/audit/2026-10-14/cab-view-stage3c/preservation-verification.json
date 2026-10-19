@@ -1,0 +1,22 @@
+{
+  "stage3b_audit_files_exact": true,
+  "stage3b_patch_sha256": "f7dc1168cbc58b79e1d3cf267110bd06ec70eb5866e4ac1d87600dae00fdf5c4",
+  "stage3b_delivery_exact": true,
+  "stage3b_binary_copies_exact": true,
+  "final_on_matches_measured": true,
+  "final_off_matches_stage3b": true,
+  "owner_repositories": {
+    "primary": {
+      "path": "/home/flax/games/openspacettd",
+      "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+      "status": ""
+    },
+    "prior": {
+      "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line",
+      "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+      "status": ""
+    }
+  },
+  "default_off": true,
+  "real_index_sha256": "63f9193ceec6d36f4359f23dfa237af4bd19dd279aa981a7286b59e16bed5f7e"
+}

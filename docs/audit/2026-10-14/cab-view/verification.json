@@ -1,0 +1,147 @@
+{
+  "recorded_utc": "2026-10-14T11:20:03.308284+00:00",
+  "baseline": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "upstream": "b7bd17b04dde3379b2be33be40ba4d6fc9f5d391",
+  "upstream_tag": "15.3-cabview-alpha1",
+  "live_github_observation": {
+    "date": "2026-10-14",
+    "main": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+    "pr83": {
+      "state": "open",
+      "head": "6355873d4bba5c84dfdf29f26d78fccfdf9965a6"
+    },
+    "pr85": {
+      "state": "merged",
+      "target": "codex/capacity-or-reserve-pilot"
+    }
+  },
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cmake": "cmake version 3.28.3",
+  "source_sha256": {
+    "CMakeLists.txt": "d922d3f78bae544d0c2e396cffa2f20ebf4e7496892a31ab74d546f9eccef952",
+    "cmake/Options.cmake": "982b404fe0df64c9961f871f60d2f435c7400f3815c74f705dd3420ba178e236",
+    "src/CMakeLists.txt": "095eed94f4b6153a0b62c8f133a4a7a652c861eff6dfead706ea99388e1ea3bd",
+    "src/cab_view.h": "3ae4bce6fdd83b2b6ad615eef52b78873dea0d3defb9ac7d2325d9c39a9715c6",
+    "src/cab_view_3d.cpp": "359ccc808ddee8078f51669914a32e0e9cfe8dc0cfaa2ab3b1ec28a07e11a088",
+    "src/cab_view_3d.h": "9a8cf50096bcded87843ae0c5ae90e40f939e2c753899e386b1d92d63a52815b",
+    "src/cab_view_gui.cpp": "b8760ce4095af0be0ef7a5d31c0a971e38968f81a32146b0a9c7ad3d28c005a1",
+    "src/gfx.cpp": "0a1c84b017553514c182cec8dd07877afd198fe7ed266dd67910549250a29e27",
+    "src/gfx_func.h": "57595c9cec5af854ee8b85613a6c9a3529841b5d679d5dce2741d99fa08fc523",
+    "src/gfxinit.cpp": "6c1230b254acadb2598a01ec1ec72a3e80f42f90ed66747730f7426d9d79ab89",
+    "src/lang/english.txt": "c19ede7fd3b5180ea7b080321a4e897751278348298ff0d7e4d8488e47ee611e",
+    "src/tests/CMakeLists.txt": "4ffbd1b57c97bf6559cb6f4646591569a3790e414d5edc40dcb3d3304312c846",
+    "src/tests/test_cab_view.cpp": "e6d2e81fb3f3c8639f010d925c5d29511f3b11f8c2a1512a0706f4488c5219ce",
+    "src/train_cmd.cpp": "a5d7529ca41b77c6d52f97c1554f3844367d23cfdb07f14ab89831f59a9f785e",
+    "src/vehicle.cpp": "47e5def255929a568bf9837f65e7baa9b9749faaf1d2a4849a288c3198807905",
+    "src/vehicle_gui.cpp": "c8866367abf5de822abac56188100ca81548798e3e426ba34f60cecd592ff06d",
+    "src/viewport.cpp": "46a07fe2c56ecadce2f071f85cac5ff59dd3deba2742a3ca1d2c9b3bf76c9616",
+    "src/viewport_func.h": "35ff3caee540ecd4eb0830df7dd62f1d01f46852f08da65c04c85ad2b5d8fea9",
+    "src/widgets/cab_view_widget.h": "98b97a044dca6af2d6f95cb33eebe33add588e339eddeb4b3189df2aede9abc7",
+    "src/widgets/vehicle_widget.h": "55732c2a8aba44202241b85a808b840e26a566c67bd66e34c20700277ab69fcc",
+    "src/window_type.h": "b4654f5ddea60a05e0d42f42c25343e4746a748e4638fd3e2a023029fad1eff7"
+  },
+  "feature_off": {
+    "configuration": "WITH_CAB_VIEW=OFF, Release, OPTION_USE_ASSERTS=ON",
+    "cab_compile_units": [],
+    "cab_definitions": 0,
+    "binaries": {
+      "openttd": "ce7b2a7374a5650755fa77b184ac7763a7e0a290dd3c2b500003a0de3305a8ec",
+      "openttd_test": "19a2e4c931c52c993c31b65ae494fa9413f395b48a884c2bfa0a5689f7947176"
+    }
+  },
+  "feature_on": {
+    "configuration": "WITH_CAB_VIEW=ON, Release, OPTION_USE_ASSERTS=ON",
+    "cab_compile_units": [
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp"
+    ],
+    "feature_translation_units": [
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp"
+    ],
+    "binaries": {
+      "openttd": "7ad4dce70ff96f8c3013adfa0c64da41089e7c74702ec68d2835715f427e7a3c",
+      "openttd_test": "7a649a2b1220c244ee69ee76e148a067c9cb7d832834ed2d047426e8074f9546"
+    },
+    "english_lng_sha256": "02dcc0bb5e8521bcafbca1ef28b1b94d3b4020c2b9939441996370003148efcb"
+  },
+  "checks": {
+    "off_native_build_exit": 0,
+    "on_native_build_exit": 0,
+    "off_catch": {
+      "cases": 6,
+      "assertions": 10323,
+      "exit": 0
+    },
+    "on_catch": {
+      "cases": 8,
+      "assertions": 10334,
+      "exit": 0
+    },
+    "on_ctest": {
+      "passed": 7,
+      "total": 7,
+      "assertions": 110,
+      "exit": 0
+    },
+    "linters": [
+      {
+        "command": [
+          "python3",
+          ".github/file-descriptions.py"
+        ],
+        "exit_code": 0,
+        "output": "OK\n"
+      },
+      {
+        "command": [
+          "python3",
+          ".github/unused-strings.py"
+        ],
+        "exit_code": 0,
+        "output": "OK\n"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "output": ""
+      }
+    ],
+    "independent_astra_source_review": "CLEAR"
+  },
+  "owner_repositories": {
+    "primary": {
+      "path": "/home/flax/games/openspacettd",
+      "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+      "status": ""
+    },
+    "prior": {
+      "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line",
+      "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+      "status": ""
+    }
+  },
+  "not_run": [
+    "native desktop paint/resize/journey",
+    "human UAT",
+    "cross-platform builds",
+    "full unrelated save/network/economy suites"
+  ],
+  "content_limit": "Real installed baseset was loaded by the isolated scene test; exact selected asset identity/hash was not logged. Pin this before graphical acceptance.",
+  "log_archive_sha256": "006b2237fcb16b42fbca7c4644a77434e72e13e51650adfccd8afe31389bfb17",
+  "post_format_binary_equality": true
+}

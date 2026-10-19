@@ -71,6 +71,28 @@ void SetTileSelectBigSize(int ox, int oy, int sx, int sy);
 
 void ViewportDoDraw(const Viewport &vp, int left, int top, int right, int bottom);
 
+#ifdef WITH_CAB_VIEW
+/** Unclipped sprites collected for the cab renderer, in virtual viewport coordinates. */
+struct GroundSpriteToDraw {
+	SpriteID image;
+	PaletteID pal;
+	int32_t x;
+	int32_t y;
+};
+
+struct BoxSpriteToDraw {
+	SpriteID image;
+	PaletteID pal;
+	int32_t x, y;
+	int32_t xmin, ymin, zmin, xmax, ymax, zmax;
+	bool child;
+	bool bridge;
+};
+
+void CollectTileGroundSprites(TileIndex tile, std::vector<GroundSpriteToDraw> &sprites, std::vector<BoxSpriteToDraw> *boxes = nullptr);
+bool CabViewCollectorPreservesPendingStateForTest(TileIndex tile);
+#endif
+
 bool ScrollWindowToTile(TileIndex tile, Window *w, bool instant = false);
 bool ScrollWindowTo(int x, int y, int z, Window *w, bool instant = false);
 

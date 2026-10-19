@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "archive_sha256": "a0c1ed498eebe484f0ad437df9aefb2aeb47dbe080f7df2e19612e40c5254038",
+  "logical_files_verified": 226,
+  "regular_payloads_hashed": 118,
+  "hardlink_targets_verified": 108
+}

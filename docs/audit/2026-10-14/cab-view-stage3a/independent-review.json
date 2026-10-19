@@ -1,0 +1,29 @@
+{
+  "status": "CLEAR for bounded Stage 3A engineering acceptance",
+  "reviewer": "Astra independent agent",
+  "build_condition": "Final OFF/ON engine and test targets subsequently passed; ON binary hashes exactly match accepted runs.",
+  "independent_checks": [
+    "Source-05 production/tests and final native images reviewed",
+    "Recomputed 24 groups from 216 cells / 21600 measured frames; exact agreement with median-of-three and nearest-rank p95 calculations",
+    "Frozen absolute and scene-relative thresholds correctly applied; direct effect timing adds a guard",
+    "Recomputed all 24 Off baseline checks: no investigation flags",
+    "Rotations 0/1/2, equal poses/worlds across repeats, equal frozen snapshots and geometry across modes, fixed full scale verified",
+    "Effect scratch at most 952320 bytes; Off/Reduced zero",
+    "Verified 231 PNG hashes, independently repeated 27 Off baseline crops and all six ordinary viewport comparisons: exact",
+    "Native darkened pixels prove displacement rather than positive glow alone in outbound, reverse and cold paths"
+  ],
+  "metrics": {
+    "max_full_added_median_us": 628.5,
+    "max_full_added_p95_us": 808,
+    "max_full_scene_total_ratio": 1.3398157625383829,
+    "max_reduced_added_median_us": 158,
+    "max_reduced_added_p95_us": 373
+  },
+  "limitations": [
+    "One Linux SDL offscreen machine, assets and fixture",
+    "Private fixed-scale timing and injected paused GUI deltas; no interactive FPS claim",
+    "Human comfort and cross-platform behavior unverified",
+    "Actual widget 480x270 differs from diagnostic 480x272",
+    "Relative headroom modest; median-of-three rule does not mean every individual run passes"
+  ]
+}

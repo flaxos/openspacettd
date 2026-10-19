@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "runs": [
+    {
+      "repeat": 1,
+      "report_sha256": "d3b8bc7223d17e175d8fdca566e98821a488e71d61354ef2494a0f5d8c87acbd",
+      "explicit_calls": 2494,
+      "native_pngs": 77,
+      "fixed_comparisons": 24,
+      "normal_changed_pixels": [
+        0,
+        0
+      ],
+      "profile_cells": 90
+    },
+    {
+      "repeat": 2,
+      "report_sha256": "7da669af590d55567115fd810e9cd4950e8307186738d937ec4885d782f20de2",
+      "explicit_calls": 2495,
+      "native_pngs": 77,
+      "fixed_comparisons": 24,
+      "normal_changed_pixels": [
+        0,
+        0
+      ],
+      "profile_cells": 90
+    },
+    {
+      "repeat": 3,
+      "report_sha256": "42ca3e08d4c70f6ed682d91ba0b14262aa70bb544d3ac621074c26e83fe35cc7",
+      "explicit_calls": 2494,
+      "native_pngs": 77,
+      "fixed_comparisons": 24,
+      "normal_changed_pixels": [
+        0,
+        0
+      ],
+      "profile_cells": 90
+    }
+  ],
+  "profile_cells": 270,
+  "measured_frames": 27000,
+  "vehicle_cells": 54,
+  "fixed_image_comparisons": 72,
+  "actual_sequence_counts": [
+    1
+  ],
+  "max_sampled_rss_kib": 246404,
+  "max_vehicle_texture_payload_bytes": 6816,
+  "max_vehicle_union_pixels": 320,
+  "max_cache_payload_bytes": 1824532,
+  "max_vehicle_cold_us": 9778,
+  "measured_test_binary_sha256": "71478595cd950122c247fdf0cc6d8ec9e205384d8ed2cf44c8cf15e53621d01e",
+  "content_matches_baseline": true,
+  "modes": {
+    "off": {
+      "median_added_us": 0.0,
+      "median_added_p95_us": 0,
+      "median_direct_effect_us": 0.0,
+      "median_direct_effect_p95_us": 0,
+      "max_scene_total_ratio": 1.0
+    },
+    "reduced": {
+      "median_added_us": 157.0,
+      "median_added_p95_us": 317,
+      "median_direct_effect_us": 117.0,
+      "median_direct_effect_p95_us": 129,
+      "max_scene_total_ratio": 1.1035665294924555
+    },
+    "full": {
+      "median_added_us": 535.0,
+      "median_added_p95_us": 971,
+      "median_direct_effect_us": 524.0,
+      "median_direct_effect_p95_us": 555,
+      "max_scene_total_ratio": 1.29637234770705
+    }
+  },
+  "budget_sha256": "d537a3845871b328b8fff84a32ead0933cdd802370412247276068cc4eee7a49",
+  "positive_control_pixels_range": [
+    1419,
+    2594
+  ],
+  "vehicle_off_warm_medians_us_range": [
+    1932.5,
+    3444.0
+  ],
+  "max_off_delta_median_us": 128.0,
+  "scope": "One Linux SDL-offscreen fixture; private static-palette fixed-scale measurements; human, real SpriteStack NewGRF and animated-palette UAT Pending."
+}

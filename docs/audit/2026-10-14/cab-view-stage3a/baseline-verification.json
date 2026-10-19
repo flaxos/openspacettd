@@ -1,0 +1,58 @@
+{
+  "status": "Baseline engineering review CLEAR; effects candidate acceptance Pending",
+  "baseline_source": "build/cab-stage3-baseline/instrumented-source.tar.gz",
+  "baseline_source_sha256": "0f57195c67f751171102df239fcb56d5eaa1bcef667e37df0ca870cacd6d450b",
+  "initial_repeats": 3,
+  "extended_repeats": 3,
+  "extended_profile_cells_per_repeat": 24,
+  "measured_samples_per_cell": 100,
+  "warmups_per_cell": 20,
+  "cold_samples_per_cell": 1,
+  "separate_cached_sample_per_scene_cell": true,
+  "all_native_runs_passed": true,
+  "all_source_saves_unchanged": true,
+  "normal_viewport_changed_pixels": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "explicit_calls_by_repeat": [
+    2499,
+    2502,
+    2502,
+    2499,
+    2498,
+    2503
+  ],
+  "frozen_budget": {
+    "full_added_median_us": 1000,
+    "full_added_p95_us": 2000,
+    "full_scene_total_ratio_max": 1.35,
+    "reduced_added_median_us": 250,
+    "reduced_added_p95_us": 500,
+    "retained_effect_storage_formula": "8 * width * height + 256 KiB",
+    "aggregation": "Median of three matched-repeat deltas/ratios, rotated mode order; retain direct effect timings, per-repeat data and cold samples",
+    "off": "Exact Stage2 pixels, zero effect work; investigate median regression > max(250us, 10% matched baseline)"
+  },
+  "review": {
+    "reviewer": "Astra independent agent",
+    "source": "CLEAR: separate private renderer, fullscale, cold/fresh/cached timing, memory scans outside timers, per-cell FrozenState",
+    "data": "APPROVED bounded implementation after three extended native repeats; all24 comparison groups have identical poses",
+    "limitations": [
+      "Human comfort/gameplay and cross-platform acceptance pending",
+      "Cold means fresh renderer cache, not cold process assets; constructor fixed texture generation excluded",
+      "Retained vector payload excludes fixed textures, BuildingShape inline payload, containers/nodes/buckets/allocator overhead, temporary Draw/Output locals",
+      "Internal total ends after Output; external wall includes stats, adaptive timing bookkeeping and return",
+      "Diagnostic fixed-scale timings do not imply interactive FPS"
+    ]
+  }
+}

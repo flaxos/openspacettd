@@ -1,0 +1,182 @@
+{
+  "recorded_utc": "2026-10-14T23:05:18.923496+00:00",
+  "status": "Bounded diagnostic complete; no production rendering repair, real/animated vehicle qualification blocked, timing cause unresolved",
+  "base_commit": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "measured_source": {
+    "head": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+    "branch": "codex/cab-view-stage1",
+    "source": {
+      "CMakeLists.txt": "969f27df6d3a68da3fe867a63cc5c51eee7f319e2bdc5d91dba4fd3d17aded55",
+      "build/CMakeCache.txt": "00cd25676c438769229b4b45eb907f277e221023d9a00f9c8249373e709c4178",
+      "build/compile_commands.json": "4434c8903dc4e5a63eeef07ec6fc3622bbaf556a75d92517e88085113725f371",
+      "cmake/Options.cmake": "982b404fe0df64c9961f871f60d2f435c7400f3815c74f705dd3420ba178e236",
+      "docs/ACTIVE_EXECUTION_PLAN.md": "9edda4198f9deff742626fd58cb27495b2fd2f18d19f9308a022066f8c864d69",
+      "scripts/test_cab_view_gate_native.py": "902fa918d731a71e7a3a868f3aeddbde9e743db65b62df5a41e59a1bb1d8ed2d",
+      "src/CMakeLists.txt": "095eed94f4b6153a0b62c8f133a4a7a652c861eff6dfead706ea99388e1ea3bd",
+      "src/cab_view.h": "330eb6c0f54321bbe5b680fe5291576ef1c49543c48a08bc9f317ec2721f671b",
+      "src/cab_view_3d.cpp": "60af70df28acf45aa5c8a3e492f44879b7089a28a495a70b8ae9200edd8f4f18",
+      "src/cab_view_3d.h": "c072cc6ed86d73319ec2d6a6c4ab4d79438367fab2f598ce16d7a57c7cb15b9a",
+      "src/cab_view_gui.cpp": "0a7b57724e5a1a05c8838f64028b7559d34510cab1acace0a0d9cfd5c7556e97",
+      "src/lang/english.txt": "6fe08501a7988b785d276c3528752ecd780a4eb52c48480c58c8ddba4c768581",
+      "src/tests/CMakeLists.txt": "b04993b16a4d494b9c18baf0ffc2701af24d366e1fbe273fecd9c02c876950d7",
+      "src/tests/test_cab_view.cpp": "a40a85c86a5ca57d89347292b2661b5edef00b03134c6e09df90c6512fc5a76c",
+      "src/tests/test_cab_view_gate_native.cpp": "40c513978acd34604be8f51f91161cf9c4bd750b2b15666f14a752d5013b7263",
+      "src/tests/test_cab_view_native.cpp": "2435d64ce79f943a2c9f7c2da1d3fa9f74867e9f855abbc08e3c470d081bcffa",
+      "src/widgets/cab_view_widget.h": "4a14807fcc3f7207c1a5b44ecee3d6646115e80d97ca44f8d6de6b4d6cfdaa06"
+    },
+    "binaries": {
+      "openttd": "54e69f4bfa118c827cc1bc82b48426228a0bf39e7a173197eb9ca3d299317936",
+      "openttd_test": "a5a14477695ee2da9947fe0c21f99fe551c235cc46b535d1c79be70388662106",
+      "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+    },
+    "source_archive_sha256": "b9b73c8ffe782fade13b8429941cac2dc7f959eb48868617966f71a2bc3b7200"
+  },
+  "source_hashes": {
+    "src/cab_view_3d.cpp": "60af70df28acf45aa5c8a3e492f44879b7089a28a495a70b8ae9200edd8f4f18",
+    "src/cab_view_3d.h": "c072cc6ed86d73319ec2d6a6c4ab4d79438367fab2f598ce16d7a57c7cb15b9a",
+    "src/tests/test_cab_view_gate_native.cpp": "40c513978acd34604be8f51f91161cf9c4bd750b2b15666f14a752d5013b7263",
+    "scripts/test_cab_view_gate_native.py": "902fa918d731a71e7a3a868f3aeddbde9e743db65b62df5a41e59a1bb1d8ed2d"
+  },
+  "final_documents": {
+    "docs/ACTIVE_EXECUTION_PLAN.md": "e91f62379ad6cf4b10139cf275226663db18c8b5d20a7ceb7de9cbd6f2a573e5",
+    "docs/audit/2026-10-14/cab-view-stage3c/README.md": "ed4ba0e76e590216c6598d1f6cdab915b04a2d8e78192e5eccbbdd1f53abad3a"
+  },
+  "builds": {
+    "off": {
+      "configuration": "OFF",
+      "cab_compile_units": [],
+      "feature_definitions": [],
+      "binary_hashes": {
+        "openttd": "478269d21778be7ddf66135c7fe61153f7b134dd42201f4982d714bb0ae4ab65",
+        "openttd_test": "0298152ba195dec0807521627d06c62e2eb0a64b129151a9db7c9dc2d2f701b8",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    },
+    "on": {
+      "configuration": "ON",
+      "cab_compile_units": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp"
+      ],
+      "feature_definitions": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp"
+      ],
+      "binary_hashes": {
+        "openttd": "54e69f4bfa118c827cc1bc82b48426228a0bf39e7a173197eb9ca3d299317936",
+        "openttd_test": "a5a14477695ee2da9947fe0c21f99fe551c235cc46b535d1c79be70388662106",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    }
+  },
+  "focused_regressions": {
+    "passed": 37,
+    "total": 37,
+    "log": "logs/stage3c-regressions-01.log"
+  },
+  "default_catch": {
+    "cases": 545,
+    "assertions": 307645,
+    "passed": true,
+    "log": "logs/stage3c-final-default-catch.log"
+  },
+  "ctest": {
+    "initial_passed": 563,
+    "total": 564,
+    "initial_failure": "Megacity_designation_native_relay_and_reload: sandbox denied private loopback socket",
+    "targeted_rerun_passed": 1,
+    "all_cases_have_passing_evidence": true,
+    "logs": [
+      "logs/stage3c-final-ctest.log",
+      "logs/stage3c-final-loopback-ctest.log"
+    ]
+  },
+  "source_checks": {
+    "stage3c-final-file-descriptions": {
+      "command": [
+        "python3",
+        ".github/file-descriptions.py"
+      ],
+      "minimum_free_bytes": 104857600,
+      "starting_free_bytes": 2499051520,
+      "exit_code": 0,
+      "elapsed_seconds": 1.0023823000010452,
+      "ending_free_bytes": 2499039232
+    },
+    "stage3c-final-unused-strings": {
+      "command": [
+        "python3",
+        ".github/unused-strings.py"
+      ],
+      "minimum_free_bytes": 104857600,
+      "starting_free_bytes": 2499051520,
+      "exit_code": 0,
+      "elapsed_seconds": 1.0028720520003844,
+      "ending_free_bytes": 2499043328
+    },
+    "stage3c-final-diff-check": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "minimum_free_bytes": 104857600,
+      "starting_free_bytes": 2499051520,
+      "exit_code": 0,
+      "elapsed_seconds": 1.0021133889986231,
+      "ending_free_bytes": 2499035136
+    }
+  },
+  "diagnostic": "diagnostic-summary.json",
+  "independent_review": "independent-review.json",
+  "preservation": "preservation-verification.json",
+  "retained_attempts": [
+    {
+      "source": "candidate/source-01-before-build.tar.gz",
+      "log": "logs/stage3c-diagnostic-build-01.log",
+      "outcome": "compile failure: header PAL_NONE unavailable and repository safeguards reject memcmp; fixed before the only native run"
+    },
+    {
+      "source": "candidate/source-02-measured.tar.gz",
+      "run": "candidate/diagnostic-01/gate-runner-evidence.json",
+      "outcome": "one completed declared diagnostic; no replacement acceptance matrix"
+    }
+  ],
+  "source_delta": {
+    "file": "source-delta.patch",
+    "sha256": "e5ded248e3453f5511244630a6a3cb4e066ab3dffdf7f7255889fa73f4f647ac",
+    "bytes": 52413,
+    "base": "Preserved Stage3B working state; apply after cumulative Stage3B patch, not directly to Git HEAD",
+    "scope": "Five source/plan files; audit records and raw evidence delivered separately",
+    "reverse_apply_check_passed": true,
+    "real_git_index_unchanged": true
+  },
+  "publication": "none; uncommitted; default OFF",
+  "archive": {
+    "archive_sha256": "ecb01887adee00fd0cfac3fe8315b3ffa5a0b87c2d7cfa59ca19a632ef5b6257",
+    "archive_bytes": 9152534,
+    "logical_files": 233,
+    "unique_payloads": 122,
+    "identical_content_hardlinks": 111,
+    "file": "verification-evidence.tar.gz"
+  }
+}

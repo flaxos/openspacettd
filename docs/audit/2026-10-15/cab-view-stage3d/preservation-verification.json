@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "stage3c_audit_files_exact": true,
+  "stage3b_audit_files_exact": true,
+  "stage3c_delivery_exact": true,
+  "stage3b_delivery_exact": true,
+  "preserved_patch_sha256": {
+    "stage1": "42754c64b80c8d2b7d892af4f3177180be81e33ba7fcfddca665145d531748fe",
+    "stage2": "973c7f924ac1019703d8c853463ca0c44f5a0b98890fa0870015ac42c0ed6ccf",
+    "stage3a": "ce6e3df04a7f30ddc31ab8fb946f31fb7ef114959f227912b4deaa4eafd17a08",
+    "stage3b": "f7dc1168cbc58b79e1d3cf267110bd06ec70eb5866e4ac1d87600dae00fdf5c4",
+    "stage3c": "e5ded248e3453f5511244630a6a3cb4e066ab3dffdf7f7255889fa73f4f647ac"
+  },
+  "stage3c_and_stage3b_binary_copies_exact": true,
+  "final_on_matches_measured": true,
+  "final_off_matches_stage3c": true,
+  "measured_code_unchanged": true,
+  "active_plan_completion_metadata_only": true,
+  "owner_repositories": {
+    "primary": {
+      "path": "/home/flax/games/openspacettd",
+      "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+      "status": ""
+    },
+    "prior": {
+      "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line",
+      "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+      "status": ""
+    }
+  },
+  "default_off": true,
+  "real_index_sha256": "63f9193ceec6d36f4359f23dfa237af4bd19dd279aa981a7286b59e16bed5f7e"
+}

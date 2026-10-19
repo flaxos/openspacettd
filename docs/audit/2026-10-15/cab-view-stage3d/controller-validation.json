@@ -1,0 +1,1180 @@
+{
+  "passed": true,
+  "real_reports_accepted": 2,
+  "malformed_copies_rejected": 14,
+  "nonzero_reduced_timer_allowed": true,
+  "original_manifest_sha256": "eaf85b7ce17761245917ba0cafe897baf3df43eadde1f17fb24eb9c0b02c0237",
+  "checks": {
+    "real_cold": {
+      "passed": true,
+      "errors": [],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "real_roundtrip": {
+      "passed": true,
+      "errors": []
+    },
+    "missing_pair": {
+      "passed": false,
+      "errors": [
+        "Expected exactly 200 adjacent pairs",
+        "Expected 100 samples per label and 50 pairs per order"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 99,
+        "R": 99,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 49,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "duplicate_frame": {
+      "passed": false,
+      "errors": [
+        "Invalid chronological timing/frame identity: pair 0/1"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "control_runs_reduced": {
+      "passed": false,
+      "errors": [
+        "Incorrect member label/physical mode: pair 1/0"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "wrong_pair_order": {
+      "passed": false,
+      "errors": [
+        "Incorrect pair identity/order: 0"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "changed_cycle_cache": {
+      "passed": false,
+      "errors": [
+        "Paired cycle state/cache changed: 0"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "adaptive_scale": {
+      "passed": false,
+      "errors": [
+        "Member was not a fresh full-scale mode-null render: pair 0/0",
+        "Geometry/work changed: pair 0/1",
+        "Geometry/work changed: pair 1/0",
+        "Geometry/work changed: pair 1/1",
+        "Geometry/work changed: pair 2/0",
+        "Geometry/work changed: pair 2/1",
+        "Geometry/work changed: pair 3/0",
+        "Geometry/work changed: pair 3/1",
+        "Geometry/work changed: pair 4/0",
+        "Geometry/work changed: pair 4/1",
+        "Geometry/work changed: pair 5/0",
+        "Geometry/work changed: pair 5/1",
+        "Geometry/work changed: pair 6/0",
+        "Geometry/work changed: pair 6/1",
+        "Geometry/work changed: pair 7/0",
+        "Geometry/work changed: pair 7/1",
+        "Geometry/work changed: pair 8/0",
+        "Geometry/work changed: pair 8/1",
+        "Geometry/work changed: pair 9/0",
+        "Geometry/work changed: pair 9/1",
+        "Geometry/work changed: pair 10/0",
+        "Geometry/work changed: pair 10/1",
+        "Geometry/work changed: pair 11/0",
+        "Geometry/work changed: pair 11/1",
+        "Geometry/work changed: pair 12/0",
+        "Geometry/work changed: pair 12/1",
+        "Geometry/work changed: pair 13/0",
+        "Geometry/work changed: pair 13/1",
+        "Geometry/work changed: pair 14/0",
+        "Geometry/work changed: pair 14/1",
+        "Geometry/work changed: pair 15/0",
+        "Geometry/work changed: pair 15/1",
+        "Geometry/work changed: pair 16/0",
+        "Geometry/work changed: pair 16/1",
+        "Geometry/work changed: pair 17/0",
+        "Geometry/work changed: pair 17/1",
+        "Geometry/work changed: pair 18/0",
+        "Geometry/work changed: pair 18/1",
+        "Geometry/work changed: pair 19/0",
+        "Geometry/work changed: pair 19/1",
+        "Geometry/work changed: pair 20/0",
+        "Geometry/work changed: pair 20/1",
+        "Geometry/work changed: pair 21/0",
+        "Geometry/work changed: pair 21/1",
+        "Geometry/work changed: pair 22/0",
+        "Geometry/work changed: pair 22/1",
+        "Geometry/work changed: pair 23/0",
+        "Geometry/work changed: pair 23/1",
+        "Geometry/work changed: pair 24/0",
+        "Geometry/work changed: pair 24/1",
+        "Geometry/work changed: pair 25/0",
+        "Geometry/work changed: pair 25/1",
+        "Geometry/work changed: pair 26/0",
+        "Geometry/work changed: pair 26/1",
+        "Geometry/work changed: pair 27/0",
+        "Geometry/work changed: pair 27/1",
+        "Geometry/work changed: pair 28/0",
+        "Geometry/work changed: pair 28/1",
+        "Geometry/work changed: pair 29/0",
+        "Geometry/work changed: pair 29/1",
+        "Geometry/work changed: pair 30/0",
+        "Geometry/work changed: pair 30/1",
+        "Geometry/work changed: pair 31/0",
+        "Geometry/work changed: pair 31/1",
+        "Geometry/work changed: pair 32/0",
+        "Geometry/work changed: pair 32/1",
+        "Geometry/work changed: pair 33/0",
+        "Geometry/work changed: pair 33/1",
+        "Geometry/work changed: pair 34/0",
+        "Geometry/work changed: pair 34/1",
+        "Geometry/work changed: pair 35/0",
+        "Geometry/work changed: pair 35/1",
+        "Geometry/work changed: pair 36/0",
+        "Geometry/work changed: pair 36/1",
+        "Geometry/work changed: pair 37/0",
+        "Geometry/work changed: pair 37/1",
+        "Geometry/work changed: pair 38/0",
+        "Geometry/work changed: pair 38/1",
+        "Geometry/work changed: pair 39/0",
+        "Geometry/work changed: pair 39/1",
+        "Geometry/work changed: pair 40/0",
+        "Geometry/work changed: pair 40/1",
+        "Geometry/work changed: pair 41/0",
+        "Geometry/work changed: pair 41/1",
+        "Geometry/work changed: pair 42/0",
+        "Geometry/work changed: pair 42/1",
+        "Geometry/work changed: pair 43/0",
+        "Geometry/work changed: pair 43/1",
+        "Geometry/work changed: pair 44/0",
+        "Geometry/work changed: pair 44/1",
+        "Geometry/work changed: pair 45/0",
+        "Geometry/work changed: pair 45/1",
+        "Geometry/work changed: pair 46/0",
+        "Geometry/work changed: pair 46/1",
+        "Geometry/work changed: pair 47/0",
+        "Geometry/work changed: pair 47/1",
+        "Geometry/work changed: pair 48/0",
+        "Geometry/work changed: pair 48/1",
+        "Geometry/work changed: pair 49/0",
+        "Geometry/work changed: pair 49/1",
+        "Geometry/work changed: pair 50/0",
+        "Geometry/work changed: pair 50/1",
+        "Geometry/work changed: pair 51/0",
+        "Geometry/work changed: pair 51/1",
+        "Geometry/work changed: pair 52/0",
+        "Geometry/work changed: pair 52/1",
+        "Geometry/work changed: pair 53/0",
+        "Geometry/work changed: pair 53/1",
+        "Geometry/work changed: pair 54/0",
+        "Geometry/work changed: pair 54/1",
+        "Geometry/work changed: pair 55/0",
+        "Geometry/work changed: pair 55/1",
+        "Geometry/work changed: pair 56/0",
+        "Geometry/work changed: pair 56/1",
+        "Geometry/work changed: pair 57/0",
+        "Geometry/work changed: pair 57/1",
+        "Geometry/work changed: pair 58/0",
+        "Geometry/work changed: pair 58/1",
+        "Geometry/work changed: pair 59/0",
+        "Geometry/work changed: pair 59/1",
+        "Geometry/work changed: pair 60/0",
+        "Geometry/work changed: pair 60/1",
+        "Geometry/work changed: pair 61/0",
+        "Geometry/work changed: pair 61/1",
+        "Geometry/work changed: pair 62/0",
+        "Geometry/work changed: pair 62/1",
+        "Geometry/work changed: pair 63/0",
+        "Geometry/work changed: pair 63/1",
+        "Geometry/work changed: pair 64/0",
+        "Geometry/work changed: pair 64/1",
+        "Geometry/work changed: pair 65/0",
+        "Geometry/work changed: pair 65/1",
+        "Geometry/work changed: pair 66/0",
+        "Geometry/work changed: pair 66/1",
+        "Geometry/work changed: pair 67/0",
+        "Geometry/work changed: pair 67/1",
+        "Geometry/work changed: pair 68/0",
+        "Geometry/work changed: pair 68/1",
+        "Geometry/work changed: pair 69/0",
+        "Geometry/work changed: pair 69/1",
+        "Geometry/work changed: pair 70/0",
+        "Geometry/work changed: pair 70/1",
+        "Geometry/work changed: pair 71/0",
+        "Geometry/work changed: pair 71/1",
+        "Geometry/work changed: pair 72/0",
+        "Geometry/work changed: pair 72/1",
+        "Geometry/work changed: pair 73/0",
+        "Geometry/work changed: pair 73/1",
+        "Geometry/work changed: pair 74/0",
+        "Geometry/work changed: pair 74/1",
+        "Geometry/work changed: pair 75/0",
+        "Geometry/work changed: pair 75/1",
+        "Geometry/work changed: pair 76/0",
+        "Geometry/work changed: pair 76/1",
+        "Geometry/work changed: pair 77/0",
+        "Geometry/work changed: pair 77/1",
+        "Geometry/work changed: pair 78/0",
+        "Geometry/work changed: pair 78/1",
+        "Geometry/work changed: pair 79/0",
+        "Geometry/work changed: pair 79/1",
+        "Geometry/work changed: pair 80/0",
+        "Geometry/work changed: pair 80/1",
+        "Geometry/work changed: pair 81/0",
+        "Geometry/work changed: pair 81/1",
+        "Geometry/work changed: pair 82/0",
+        "Geometry/work changed: pair 82/1",
+        "Geometry/work changed: pair 83/0",
+        "Geometry/work changed: pair 83/1",
+        "Geometry/work changed: pair 84/0",
+        "Geometry/work changed: pair 84/1",
+        "Geometry/work changed: pair 85/0",
+        "Geometry/work changed: pair 85/1",
+        "Geometry/work changed: pair 86/0",
+        "Geometry/work changed: pair 86/1",
+        "Geometry/work changed: pair 87/0",
+        "Geometry/work changed: pair 87/1",
+        "Geometry/work changed: pair 88/0",
+        "Geometry/work changed: pair 88/1",
+        "Geometry/work changed: pair 89/0",
+        "Geometry/work changed: pair 89/1",
+        "Geometry/work changed: pair 90/0",
+        "Geometry/work changed: pair 90/1",
+        "Geometry/work changed: pair 91/0",
+        "Geometry/work changed: pair 91/1",
+        "Geometry/work changed: pair 92/0",
+        "Geometry/work changed: pair 92/1",
+        "Geometry/work changed: pair 93/0",
+        "Geometry/work changed: pair 93/1",
+        "Geometry/work changed: pair 94/0",
+        "Geometry/work changed: pair 94/1",
+        "Geometry/work changed: pair 95/0",
+        "Geometry/work changed: pair 95/1",
+        "Geometry/work changed: pair 96/0",
+        "Geometry/work changed: pair 96/1",
+        "Geometry/work changed: pair 97/0",
+        "Geometry/work changed: pair 97/1",
+        "Geometry/work changed: pair 98/0",
+        "Geometry/work changed: pair 98/1",
+        "Geometry/work changed: pair 99/0",
+        "Geometry/work changed: pair 99/1",
+        "Geometry/work changed: pair 100/0",
+        "Geometry/work changed: pair 100/1",
+        "Geometry/work changed: pair 101/0",
+        "Geometry/work changed: pair 101/1",
+        "Geometry/work changed: pair 102/0",
+        "Geometry/work changed: pair 102/1",
+        "Geometry/work changed: pair 103/0",
+        "Geometry/work changed: pair 103/1",
+        "Geometry/work changed: pair 104/0",
+        "Geometry/work changed: pair 104/1",
+        "Geometry/work changed: pair 105/0",
+        "Geometry/work changed: pair 105/1",
+        "Geometry/work changed: pair 106/0",
+        "Geometry/work changed: pair 106/1",
+        "Geometry/work changed: pair 107/0",
+        "Geometry/work changed: pair 107/1",
+        "Geometry/work changed: pair 108/0",
+        "Geometry/work changed: pair 108/1",
+        "Geometry/work changed: pair 109/0",
+        "Geometry/work changed: pair 109/1",
+        "Geometry/work changed: pair 110/0",
+        "Geometry/work changed: pair 110/1",
+        "Geometry/work changed: pair 111/0",
+        "Geometry/work changed: pair 111/1",
+        "Geometry/work changed: pair 112/0",
+        "Geometry/work changed: pair 112/1",
+        "Geometry/work changed: pair 113/0",
+        "Geometry/work changed: pair 113/1",
+        "Geometry/work changed: pair 114/0",
+        "Geometry/work changed: pair 114/1",
+        "Geometry/work changed: pair 115/0",
+        "Geometry/work changed: pair 115/1",
+        "Geometry/work changed: pair 116/0",
+        "Geometry/work changed: pair 116/1",
+        "Geometry/work changed: pair 117/0",
+        "Geometry/work changed: pair 117/1",
+        "Geometry/work changed: pair 118/0",
+        "Geometry/work changed: pair 118/1",
+        "Geometry/work changed: pair 119/0",
+        "Geometry/work changed: pair 119/1",
+        "Geometry/work changed: pair 120/0",
+        "Geometry/work changed: pair 120/1",
+        "Geometry/work changed: pair 121/0",
+        "Geometry/work changed: pair 121/1",
+        "Geometry/work changed: pair 122/0",
+        "Geometry/work changed: pair 122/1",
+        "Geometry/work changed: pair 123/0",
+        "Geometry/work changed: pair 123/1",
+        "Geometry/work changed: pair 124/0",
+        "Geometry/work changed: pair 124/1",
+        "Geometry/work changed: pair 125/0",
+        "Geometry/work changed: pair 125/1",
+        "Geometry/work changed: pair 126/0",
+        "Geometry/work changed: pair 126/1",
+        "Geometry/work changed: pair 127/0",
+        "Geometry/work changed: pair 127/1",
+        "Geometry/work changed: pair 128/0",
+        "Geometry/work changed: pair 128/1",
+        "Geometry/work changed: pair 129/0",
+        "Geometry/work changed: pair 129/1",
+        "Geometry/work changed: pair 130/0",
+        "Geometry/work changed: pair 130/1",
+        "Geometry/work changed: pair 131/0",
+        "Geometry/work changed: pair 131/1",
+        "Geometry/work changed: pair 132/0",
+        "Geometry/work changed: pair 132/1",
+        "Geometry/work changed: pair 133/0",
+        "Geometry/work changed: pair 133/1",
+        "Geometry/work changed: pair 134/0",
+        "Geometry/work changed: pair 134/1",
+        "Geometry/work changed: pair 135/0",
+        "Geometry/work changed: pair 135/1",
+        "Geometry/work changed: pair 136/0",
+        "Geometry/work changed: pair 136/1",
+        "Geometry/work changed: pair 137/0",
+        "Geometry/work changed: pair 137/1",
+        "Geometry/work changed: pair 138/0",
+        "Geometry/work changed: pair 138/1",
+        "Geometry/work changed: pair 139/0",
+        "Geometry/work changed: pair 139/1",
+        "Geometry/work changed: pair 140/0",
+        "Geometry/work changed: pair 140/1",
+        "Geometry/work changed: pair 141/0",
+        "Geometry/work changed: pair 141/1",
+        "Geometry/work changed: pair 142/0",
+        "Geometry/work changed: pair 142/1",
+        "Geometry/work changed: pair 143/0",
+        "Geometry/work changed: pair 143/1",
+        "Geometry/work changed: pair 144/0",
+        "Geometry/work changed: pair 144/1",
+        "Geometry/work changed: pair 145/0",
+        "Geometry/work changed: pair 145/1",
+        "Geometry/work changed: pair 146/0",
+        "Geometry/work changed: pair 146/1",
+        "Geometry/work changed: pair 147/0",
+        "Geometry/work changed: pair 147/1",
+        "Geometry/work changed: pair 148/0",
+        "Geometry/work changed: pair 148/1",
+        "Geometry/work changed: pair 149/0",
+        "Geometry/work changed: pair 149/1",
+        "Geometry/work changed: pair 150/0",
+        "Geometry/work changed: pair 150/1",
+        "Geometry/work changed: pair 151/0",
+        "Geometry/work changed: pair 151/1",
+        "Geometry/work changed: pair 152/0",
+        "Geometry/work changed: pair 152/1",
+        "Geometry/work changed: pair 153/0",
+        "Geometry/work changed: pair 153/1",
+        "Geometry/work changed: pair 154/0",
+        "Geometry/work changed: pair 154/1",
+        "Geometry/work changed: pair 155/0",
+        "Geometry/work changed: pair 155/1",
+        "Geometry/work changed: pair 156/0",
+        "Geometry/work changed: pair 156/1",
+        "Geometry/work changed: pair 157/0",
+        "Geometry/work changed: pair 157/1",
+        "Geometry/work changed: pair 158/0",
+        "Geometry/work changed: pair 158/1",
+        "Geometry/work changed: pair 159/0",
+        "Geometry/work changed: pair 159/1",
+        "Geometry/work changed: pair 160/0",
+        "Geometry/work changed: pair 160/1",
+        "Geometry/work changed: pair 161/0",
+        "Geometry/work changed: pair 161/1",
+        "Geometry/work changed: pair 162/0",
+        "Geometry/work changed: pair 162/1",
+        "Geometry/work changed: pair 163/0",
+        "Geometry/work changed: pair 163/1",
+        "Geometry/work changed: pair 164/0",
+        "Geometry/work changed: pair 164/1",
+        "Geometry/work changed: pair 165/0",
+        "Geometry/work changed: pair 165/1",
+        "Geometry/work changed: pair 166/0",
+        "Geometry/work changed: pair 166/1",
+        "Geometry/work changed: pair 167/0",
+        "Geometry/work changed: pair 167/1",
+        "Geometry/work changed: pair 168/0",
+        "Geometry/work changed: pair 168/1",
+        "Geometry/work changed: pair 169/0",
+        "Geometry/work changed: pair 169/1",
+        "Geometry/work changed: pair 170/0",
+        "Geometry/work changed: pair 170/1",
+        "Geometry/work changed: pair 171/0",
+        "Geometry/work changed: pair 171/1",
+        "Geometry/work changed: pair 172/0",
+        "Geometry/work changed: pair 172/1",
+        "Geometry/work changed: pair 173/0",
+        "Geometry/work changed: pair 173/1",
+        "Geometry/work changed: pair 174/0",
+        "Geometry/work changed: pair 174/1",
+        "Geometry/work changed: pair 175/0",
+        "Geometry/work changed: pair 175/1",
+        "Geometry/work changed: pair 176/0",
+        "Geometry/work changed: pair 176/1",
+        "Geometry/work changed: pair 177/0",
+        "Geometry/work changed: pair 177/1",
+        "Geometry/work changed: pair 178/0",
+        "Geometry/work changed: pair 178/1",
+        "Geometry/work changed: pair 179/0",
+        "Geometry/work changed: pair 179/1",
+        "Geometry/work changed: pair 180/0",
+        "Geometry/work changed: pair 180/1",
+        "Geometry/work changed: pair 181/0",
+        "Geometry/work changed: pair 181/1",
+        "Geometry/work changed: pair 182/0",
+        "Geometry/work changed: pair 182/1",
+        "Geometry/work changed: pair 183/0",
+        "Geometry/work changed: pair 183/1",
+        "Geometry/work changed: pair 184/0",
+        "Geometry/work changed: pair 184/1",
+        "Geometry/work changed: pair 185/0",
+        "Geometry/work changed: pair 185/1",
+        "Geometry/work changed: pair 186/0",
+        "Geometry/work changed: pair 186/1",
+        "Geometry/work changed: pair 187/0",
+        "Geometry/work changed: pair 187/1",
+        "Geometry/work changed: pair 188/0",
+        "Geometry/work changed: pair 188/1",
+        "Geometry/work changed: pair 189/0",
+        "Geometry/work changed: pair 189/1",
+        "Geometry/work changed: pair 190/0",
+        "Geometry/work changed: pair 190/1",
+        "Geometry/work changed: pair 191/0",
+        "Geometry/work changed: pair 191/1",
+        "Geometry/work changed: pair 192/0",
+        "Geometry/work changed: pair 192/1",
+        "Geometry/work changed: pair 193/0",
+        "Geometry/work changed: pair 193/1",
+        "Geometry/work changed: pair 194/0",
+        "Geometry/work changed: pair 194/1",
+        "Geometry/work changed: pair 195/0",
+        "Geometry/work changed: pair 195/1",
+        "Geometry/work changed: pair 196/0",
+        "Geometry/work changed: pair 196/1",
+        "Geometry/work changed: pair 197/0",
+        "Geometry/work changed: pair 197/1",
+        "Geometry/work changed: pair 198/0",
+        "Geometry/work changed: pair 198/1",
+        "Geometry/work changed: pair 199/0",
+        "Geometry/work changed: pair 199/1"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 0.8,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "image_mismatch": {
+      "passed": false,
+      "errors": [
+        "Pair 0 guard failed: pair_images_equal"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "invalid_palette": {
+      "passed": false,
+      "errors": [
+        "Invalid paired palette: canonical_palette_rgba"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "failed_restore": {
+      "passed": false,
+      "errors": [
+        "Paired guard failed: palette_restored"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "diagnostic_in_roundtrip": {
+      "passed": false,
+      "errors": [
+        "Paired diagnostic ran outside cold phase"
+      ]
+    },
+    "overlapping_timings": {
+      "passed": false,
+      "errors": [
+        "Invalid chronological timing/frame identity: pair 0/1"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "negative_stage": {
+      "passed": false,
+      "errors": [
+        "Invalid member stage timing: pair 0/1"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "missing_cycle": {
+      "passed": false,
+      "errors": [
+        "Expected exactly 50 paired cycle checks"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "reused_representative_file": {
+      "passed": false,
+      "errors": [
+        "Representative images missing, reused or different"
+      ],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    },
+    "nonzero_reduced_timer_allowed": {
+      "passed": true,
+      "errors": [],
+      "timing_scope": "one diagnostic; no acceptance threshold applied",
+      "sample_count_by_label": {
+        "O": 100,
+        "R": 100,
+        "A": 100,
+        "B": 100
+      },
+      "pair_count_by_order": {
+        "OR": 50,
+        "AB": 50,
+        "RO": 50,
+        "BA": 50
+      },
+      "geometry": {
+        "view_width": 640,
+        "view_height": 372,
+        "internal_width": 640,
+        "internal_height": 372,
+        "scale": 1.0,
+        "visible_tiles": 2693,
+        "triangles": 6256,
+        "threads": 8
+      },
+      "representative_images": {
+        "OR": {
+          "file": "stage3d_pair_OR.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "AB": {
+          "file": "stage3d_pair_AB.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "RO": {
+          "file": "stage3d_pair_RO.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        },
+        "BA": {
+          "file": "stage3d_pair_BA.ppm",
+          "sha256": "4927efb6f8252798b99491c940b61b648a42a701f3fedac70c4df70e5071430d",
+          "bytes": 714255
+        }
+      }
+    }
+  }
+}
