@@ -526,9 +526,9 @@ struct EmpireFacilitiesWindow : Window {
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
 						if (work == FactoryWorkType::None) {
 							std::optional<Money> queried_price = QueryWorksCommissionPrice(ind_id, _local_company);
-							std::string price_str = queried_price.has_value() ? fmt::format("£{:L}", queried_price->base()) : "unavailable";
-							line4 = fmt::format("Works: None | Bill: £50,000 + 160 STEL / 80 BALL (Queried Price: {}) | World Stock: {} STEL, {} BALL",
-								price_str, stel_stock, ball_stock);
+							std::string price_str = queried_price.has_value() ? GetString(STR_JUST_CURRENCY_LONG, *queried_price) : "unavailable";
+							line4 = fmt::format("Works: None | Bill: {} + 160 STEL / 80 BALL (Queried Price: {}) | World Stock: {} STEL, {} BALL",
+								GetString(STR_JUST_CURRENCY_LONG, Money{50000}), price_str, stel_stock, ball_stock);
 						} else if (work == FactoryWorkType::Capacity) {
 							line4 = fmt::format("Works: Active - Capacity (+50% throughput, 150 batches/mo) | World Stock: {} STEL, {} BALL",
 								stel_stock, ball_stock);
