@@ -1,5 +1,14 @@
 # Human UAT results — recovery / v1.1
 
+## Agent-simulated walkthrough — 20 October 2026
+
+**Human desktop status: Pending.** A scripted pass in the real game (SDL offscreen) captured and
+reviewed the Facilities window at 1× and 2×, Retire's confirmation, the Megacity FOOD panel, the cab
+look controls, and a cab crossing a bridge. All worked as intended; eleven presentation findings
+(three medium: truncated Facilities and Megacity text, Megacity buttons at 2×) are listed in the
+[walkthrough record](../docs/audit/2026-10-20/agent-walkthrough/README.md). Run it again with
+`python3 scripts/run_agent_uat.py --output <new dir>`.
+
 ## Reserve Works pilot — native run passed; human UAT pending (20 October 2026)
 
 **Human desktop status: Pending.** One approved headless run passed integrity: exactly 24 + 4
