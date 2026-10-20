@@ -1,5 +1,16 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Reserve Works pilot run — 20 October 2026
+
+**TESTED headless; integrity PASSED; desktop UAT Pending.** The owner approved the frozen
+Reserve envelope and the single run executed on `codex/capacity-or-reserve-pilot`.
+The runner now hauls the works kit by train before commissioning, checks the exact cash and
+World 1 kit debit, counts exactly 24 (then 4 post-reload) monthly evaluations with strictly
+increasing dates, schedules the SILC and FOOD cuts by evaluation, and checks the crusher's
+SILC buffer against its enforced cap. Its offline guards now import the runner's own checks
+(13 tests). Finding: the Reserve buffer was never used (SILC peak 270 of 1,200), so Reserve
+gives no visible benefit in this fixture. [Run record](audit/2026-10-20/reserve-pilot/README.md).
+
 ## Facilities window corrections (Card C1) — 20 October 2026
 
 Three review defects in the C1 Facilities window are fixed on PR83. Legacy

@@ -1,5 +1,18 @@
 # Human UAT results — recovery / v1.1
 
+## Reserve Works pilot — native run passed; human UAT pending (20 October 2026)
+
+**Human desktop status: Pending.** One approved headless run passed integrity: exactly 24 + 4
+monthly evaluations, conserved cargo, a train-hauled kit with an exact £50,000 + 160 STEL /
+80 BALL debit, and an equal fresh-process reload. The Reserve buffer was never used: SILC
+peaked at 270 of 1,200. [Run record](../docs/audit/2026-10-20/reserve-pilot/README.md).
+
+- **Desktop mission (5 minutes)**: load `docs/audit/2026-10-20/reserve-pilot/checkpoint-24.sav`.
+  Open the Facilities window and find the Ballast Crusher row. Success: it shows
+  `Works: Active - Reserve`, an input buffer below 1,200 SILC, and World 1 stock of
+  640 STEL / 1,360 BALL. Then open the Megacity window: the food rate reads 20/mo.
+  Report anything that disagrees, and whether Reserve felt worth choosing.
+
 ## Vale Railway — automated proof passed; human UAT pending
 
 The authored empty opening, actual rail input and subsequent production, repeat
@@ -56,7 +69,7 @@ human desktop appearance, comprehension, fun and pacing remain pending.
 - **Sprint 1 Engine & GUI Corrections**: Verified retired food service reset on company deletion vs acquisition, strict V2 save invariant rejections (factory tuples, rates, ceilings, history bounds, fractional remainder, transactional rollback), button-only rate cycling in `megacity_gui.cpp`, spectator/foreign disabling, chronological history with fraction met, and visibly disabled V2 Upgrade All in `empire_facilities_gui.cpp`.
 - **Sprint 2 Truthful Acceptance**: Verified material debit (£50k, 160 STEL, 80 BALL), legal road frontage requirement, native house shell placement at stage 0, tile progression through native ticks to `TOWN_HOUSE_COMPLETED`, population credit (+232 citizens), and permanent demolition immunity (`IsHousePlayerProtected`) under commercial food shutoff.
 - **Sprint 3 Truthful Acceptance**: Verified commissioning of alternate Silica extraction on World 3, direct portal delivery to Ballast Crusher in World 1, BALL production from alternate supply, and continuous BALL output during primary corridor feeder interruption.
-- **Physical Pilot Simulation**: Corrected runner (`scripts/verify_commonwealth_works.py`) prepared with monotonic evaluation events, V2 service history recording, and partial/error report retention. Physical native execution is **FROZEN** pending explicit renewed owner approval of the proposed finite run budget.
+- **Physical Pilot Simulation**: Corrected runner (`scripts/verify_commonwealth_works.py`) prepared with monotonic evaluation events, V2 service history recording, and partial/error report retention. Executed once on 20 October 2026 after owner approval; integrity passed and the Reserve buffer was never used ([run record](../docs/audit/2026-10-20/reserve-pilot/README.md)).
 - **Human Desktop Acceptance**: Interactive GUI inspection (Megacity food rate cycling, facilities works choice buttons, works bill display) and multi-world route playtesting remain **Pending**. Playable owner mission defined below.
 
 ## A World Worth Connecting (Sprint 3) — 11 October 2026

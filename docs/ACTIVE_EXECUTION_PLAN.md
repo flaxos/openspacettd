@@ -102,7 +102,10 @@ Owner authorized the "Commonwealth Pilot Correction and Acceptance" task on the 
   - Run 1 (Main Simulation): 1 process, exactly 24 monthly evaluations (max 30 execution minutes).
   - Run 2 (Reload Probe): 1 reload process, exactly 4 monthly evaluations (max 5 execution minutes).
 - **Stop Condition**: Immediate halt and artifact retention on first defect or invariant violation.
-- **Approval Gate**: Execution remains **FROZEN** until explicit renewed owner approval is received.
+- **Approval Gate**: Owner approved on 20 October 2026; the single run was executed and is
+  closed. Integrity PASSED (24 + 4 evaluations, conservation, exact kit debit, cold reload).
+  The Reserve buffer was never used in this fixture. See the
+  [run record](audit/2026-10-20/reserve-pilot/README.md); no further runs are authorized.
 
 ## Active execution handoff — A World Worth Connecting: Sprint 3 (11 October 2026)
 

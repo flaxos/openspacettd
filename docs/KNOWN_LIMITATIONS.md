@@ -1,5 +1,18 @@
 # OpenSpaceTTD Known Limitations
 
+## Reserve Works pilot run — 20 October 2026
+
+- **Reserve gives no visible benefit in the pilot fixture.** Each SILC delivery (210–270) is
+  consumed within a month by the crusher's 200 SILC/month, so the 1,200 SILC reserve cap is
+  never approached (peak 270), and production stops about two evaluations into a feeder cut.
+  Reserve can only matter with bursty or oversupplied inputs (longer consists, a second source).
+  This is a design finding, not a defect; balancing is deferred.
+- **BALL accumulates in the World 1 warehouse** (1,360 after 24 evaluations) because only works
+  commissioning consumes it.
+- **Headless only.** The run proves integrity (24 + 4 evaluations, conservation, exact kit debit,
+  cold reload). Human desktop UAT remains **Pending**.
+  [Run record](audit/2026-10-20/reserve-pilot/README.md).
+
 ## Vale Railway publication — source and automated proof
 
 The optional Aster Vale founding scenario is ready for draft review, stacked on
@@ -36,7 +49,7 @@ is cosmetic and unchanged. The broader Reserve/FOOD pilot is not accepted.
 ## Commonwealth Pilot Correction and Truthful Acceptance Boundaries — 11 October 2026
 
 - **Historical Headless Traces & Consumed Budget**: The two earlier headless simulation runs staged at `docs/audit/2026-10-11/capacity-or-reserve/` represent 22-month advance/reload/conservation traces with incomplete pilot acceptance (they did not record V2 service history or count evaluation boundaries). Their initial simulation run budget was consumed and is not silently renewed.
-- **Physical Native Proof Prepared and Frozen**: The corrected physical Reserve pilot runner (`scripts/verify_commonwealth_works.py`) and fixture adjustments (routing trains to World 1 warehouse Stop(30) without direct material injection) are prepared and verified with offline unit guards (`scripts/test_verify_runner_guards.py`). Execution of the native simulation campaign is strictly frozen pending explicit renewed owner approval of the proposed finite run budget.
+- **Physical Native Proof Executed**: The corrected physical Reserve pilot runner (`scripts/verify_commonwealth_works.py`) and fixture adjustments (routing trains to World 1 warehouse Stop(30) without direct material injection) are prepared and verified with offline unit guards (`scripts/test_verify_runner_guards.py`). The approved single run executed on 20 October 2026; see the Reserve pilot entry above.
 - **Sprint 2 & 3 Non-Reversion & Truthful Acceptance**: Sprints 2 and 3 features remain active on the branch; automated regressions now truthfully verify native residential shell completion/demolition immunity and alternate-source delivery/production resilience without substituting unit tests for native or human acceptance.
 - **Human Desktop UAT Pending**: Desktop GUI verification (Megacity FOOD controls, works commissioning buttons, status displays, and physical multi-world route traversal) remains **Pending** for human play.
 
