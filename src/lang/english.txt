@@ -4576,6 +4576,9 @@ STR_CAB_VIEW_LOOK_RIGHT                                         :Look right
 STR_CAB_VIEW_VIEW_TOOLTIP                                       :{BLACK}Drag to look around, use the mouse wheel to zoom. While this window is selected: A/D look left/right, W/S look up/down, R looks ahead, B looks behind, +/- zoom, E changes effects
 STR_CAB_VIEW_LOCAL_TRANSIT                                      :Local gate transit
 STR_CAB_VIEW_BRIDGE                                             :Bridge: the view resumes after the crossing
+STR_CAB_VIEW_HELP                                               :Controls
+STR_CAB_VIEW_HELP_TOOLTIP                                       :{BLACK}Show how to look around and zoom
+STR_CAB_VIEW_HELP_TEXT                                          :Drag the view to look around, with the mouse button that scrolls the map.{}Mouse wheel: zoom in and out.{}{}Keys, while this window is selected:{}A / D: look left / right{}W / S: look up / down{}R: look ahead     B: look behind{}+ / -: zoom     E: effects
 STR_CAB_VIEW_EFFECT_FULL                                        :Effects: Full
 STR_CAB_VIEW_EFFECT_REDUCED                                     :Effects: Reduced
 STR_CAB_VIEW_EFFECT_OFF                                         :Effects: Off
