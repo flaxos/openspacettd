@@ -1,0 +1,211 @@
+{
+  "scope": "Stage3D bounded Reduced-mode timing attribution; diagnostic-only code, stop without production repair",
+  "head": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "default_off": true,
+  "uncommitted": true,
+  "unpublished": true,
+  "outcome": {
+    "declared_diagnostic_complete": true,
+    "attributable_reduced_cost_identified": false,
+    "production_repair_justified": false,
+    "production_render_behavior_changed": false,
+    "broader_performance_acceptance": false,
+    "stop_rule_applied": true,
+    "paired_timing_runs": 1,
+    "real_multilayer_animated_palette_qualification": "Blocked by existing content; not repeated or substituted"
+  },
+  "source_delta": {
+    "file": "source-delta.patch",
+    "parent_file": "/home/flax/Documents/Codex/2026-10-14/task/cab-view-stage3d.patch",
+    "against": "preserved Stage3C working state; not cumulative against HEAD",
+    "files": 5,
+    "bytes": 37555,
+    "sha256": "d33d21028fd9e6286ea22c9f3ceb443b5d7e4e98c0492024c594d7ff6e8e67c3",
+    "reverse_apply_check_passed": true
+  },
+  "measured_snapshot": {
+    "file": "candidate/source-02-measured.json",
+    "source_archive_sha256": "bf69e747005211e1b65f123908135beddf9d35f4d42b6d92a25fcb5f1de70119",
+    "code_sha256": {
+      "scripts/test_cab_view_gate_native.py": "d9129e71ddfa37d3db449bb2ec079b0f86c1a5169664f7a030c0347989a24c28",
+      "src/cab_view_3d.cpp": "24defcefd48453eb0b1f7bc1c9ecd87ae84a89d4fc5bf55c508263c77127a5ea",
+      "src/cab_view_3d.h": "68ece9fb2c23db4ec8e9f02c1035c3b1fbb91d24ba3f7c119157ea736b581b1e",
+      "src/tests/test_cab_view_gate_native.cpp": "412dff628161c3c3e755d1cdff9c71fcf479c119116586b32244ab5bcedee11e"
+    },
+    "binaries": {
+      "openttd": "ed431abfb6458fee03d9b2a03bd510d204995c0e871bf3f6fd7f9b124df58c3d",
+      "openttd_test": "c826a32b70ca5bca4f0d9ba8420479c5d8df4570d22578348d9b8d88bedc9ccb",
+      "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+    }
+  },
+  "builds": {
+    "off": {
+      "configuration": "OFF",
+      "cab_compile_units": [],
+      "feature_definitions": [],
+      "binary_hashes": {
+        "openttd": "478269d21778be7ddf66135c7fe61153f7b134dd42201f4982d714bb0ae4ab65",
+        "openttd_test": "0298152ba195dec0807521627d06c62e2eb0a64b129151a9db7c9dc2d2f701b8",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    },
+    "on": {
+      "configuration": "ON",
+      "cab_compile_units": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp"
+      ],
+      "feature_definitions": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp"
+      ],
+      "binary_hashes": {
+        "openttd": "ed431abfb6458fee03d9b2a03bd510d204995c0e871bf3f6fd7f9b124df58c3d",
+        "openttd_test": "c826a32b70ca5bca4f0d9ba8420479c5d8df4570d22578348d9b8d88bedc9ccb",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    }
+  },
+  "focused_regressions": {
+    "passed": 37,
+    "total": 37,
+    "log": "logs/stage3d-regressions-01.log"
+  },
+  "default_catch": {
+    "passed": true,
+    "cases": 545,
+    "assertions": 307645,
+    "log": "logs/stage3d-final-default-catch.log"
+  },
+  "ctest": {
+    "initial_passed": 563,
+    "total": 564,
+    "initial_failure": "Megacity_designation_native_relay_and_reload: sandbox denied private loopback socket",
+    "targeted_rerun_passed": 1,
+    "all_cases_have_passing_evidence": true,
+    "logs": [
+      "logs/stage3d-final-ctest.log",
+      "logs/stage3d-final-loopback-ctest.log"
+    ]
+  },
+  "source_checks": {
+    "stage3d-final-file-descriptions": {
+      "command": [
+        "python3",
+        ".github/file-descriptions.py"
+      ],
+      "minimum_free_bytes": 104857600,
+      "starting_free_bytes": 2394284032,
+      "exit_code": 0,
+      "elapsed_seconds": 1.0023538339992228,
+      "ending_free_bytes": 2394275840
+    },
+    "stage3d-final-unused-strings": {
+      "command": [
+        "python3",
+        ".github/unused-strings.py"
+      ],
+      "minimum_free_bytes": 104857600,
+      "starting_free_bytes": 2394284032,
+      "exit_code": 0,
+      "elapsed_seconds": 1.0022640130009677,
+      "ending_free_bytes": 2394271744
+    },
+    "stage3d-final-diff-check": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "minimum_free_bytes": 104857600,
+      "starting_free_bytes": 2394284032,
+      "exit_code": 0,
+      "elapsed_seconds": 1.001872254000773,
+      "ending_free_bytes": 2394267648
+    }
+  },
+  "native": {
+    "passed": true,
+    "explicit_state_game_loop_calls": 2513,
+    "source_save_unchanged": true,
+    "source_save_sha256": "6ba5845f8f8c0be70bb33ac53db2efab65527776704cdae84b6671f81132afab",
+    "screenshots_hashed": 77,
+    "normal_viewport_pairs_exact": true,
+    "sampled_max_high_water_kib": 237184,
+    "manifest_sha256": "eaf85b7ce17761245917ba0cafe897baf3df43eadde1f17fb24eb9c0b02c0237",
+    "report_sha256": "4778a5657d6e54b4777c1ddc9e0f6e60c98fc4d9685405cc13373a91113f6506",
+    "frame_count": 400,
+    "pair_count": 200,
+    "cycle_count": 50,
+    "historical_identity": {
+      "pose": true,
+      "frozen_snapshot": true,
+      "canonical_palette_rgba": true,
+      "scene_effect": true,
+      "effect_elapsed_ms": true,
+      "view_width": true,
+      "view_height": true,
+      "scene_cache": true,
+      "all_images_exact_stage3c": true
+    }
+  },
+  "metrics": {
+    "original_style": {
+      "definition": "nearest-rank p95(R)-p95(O), experimental 100+100 samples only",
+      "added_p95_us": 425,
+      "unchanged_allowance_us": 500,
+      "within_allowance_this_diagnostic_only": true,
+      "median_difference_us": 17.5
+    },
+    "negative_control": {
+      "definition": "nearest-rank p95(B)-p95(A), both physically Off",
+      "added_p95_us": -240
+    },
+    "retained_prior_results": {
+      "stage3b_original_failed_median_added_p95_us": 1114,
+      "stage3b_later_matrix_median_added_p95_us": -313,
+      "stage3c_diagnostic_added_p95_us": 671,
+      "unchanged_allowance_us": 500
+    }
+  },
+  "controller_validation": {
+    "passed": true,
+    "real_reports_accepted": 2,
+    "malformed_copies_rejected": 14,
+    "nonzero_reduced_timer_allowed": true
+  },
+  "independent_review": "independent-review.json",
+  "preservation": "preservation-verification.json",
+  "limitations": [
+    "One diagnostic cannot replace the original failed acceptance matrix or prove stable performance",
+    "No attributable allocation/scheduler/worker/frequency cause; no speculative optimization",
+    "Real multilayer and animated-palette vehicle acceptance remains blocked; human UAT and other platforms pending"
+  ],
+  "archive": {
+    "archive_sha256": "a0c1ed498eebe484f0ad437df9aefb2aeb47dbe080f7df2e19612e40c5254038",
+    "archive_bytes": 8821301,
+    "logical_files": 226,
+    "unique_payloads": 118,
+    "identical_content_hardlinks": 108,
+    "file": "verification-evidence.tar.gz"
+  }
+}

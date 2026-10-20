@@ -1,0 +1,130 @@
+{
+  "cab_rectangle": [
+    0,
+    37,
+    480,
+    309
+  ],
+  "comparisons": [
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_back_approach.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_back_arrival_mixed.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_back_safe.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_back_transit.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_initial_cab.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_normal_after_reopen_close.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_normal_before_reopen.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_out_approach.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_out_arrival_mixed.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_out_safe.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_out_transit.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "roundtrip",
+      "image": "gate_roundtrip_reopened_for_recovery.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_back_approach.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_back_arrival_mixed.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_back_safe.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_back_transit.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_cold_reopened.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_normal_after_reopen_close.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_normal_before_reopen.png",
+      "changed_pixels": 0,
+      "bbox": null
+    },
+    {
+      "phase": "cold",
+      "image": "gate_cold_reopened_for_recovery.png",
+      "changed_pixels": 0,
+      "bbox": null
+    }
+  ]
+}

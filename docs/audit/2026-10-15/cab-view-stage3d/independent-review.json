@@ -1,0 +1,44 @@
+{
+  "status": "CLEAR for bounded diagnostic completion; no attributable mode-specific cost, no narrow repair justified",
+  "reviewer": "Astra independent agent",
+  "implementation_assessment": "Sol independent read-only source/tail assessment agrees with stop rule",
+  "source_review": [
+    "Exact 400-frame, 200-pair, 50-cycle schedule on one persistent renderer and framebuffer",
+    "Fixed sample arrays and preallocated/pre-touched image buffers; no probe allocations, JSON, validation or deep cache/state scans between pair members",
+    "Identical post-timer capture handling in experimental/control pairs; actual gap retained without subtraction",
+    "No production Draw/cache/painter/thread policy change",
+    "Original-style metric uses experimental 100 O and 100 R only; control/order/position statistics separate"
+  ],
+  "guard_fix": "Added SamePalette(_cur_palette, _palette) to Stage3D cycle callback before the one native run; reviewer verified final fixture hash",
+  "fixture_sha256": "412dff628161c3c3e755d1cdff9c71fcf479c119116586b32244ab5bcedee11e",
+  "evidence_checks": [
+    "Independently recomputed all label/order stage distributions and paired/control contrasts from 400 raw frames",
+    "All 77 PNG hashes, two normal viewport comparisons and four representative PPMs verified",
+    "Four PPMs and full FrozenState/camera/palette/cache exactly match Stage3C",
+    "Source-02 archive and measured engine/test/language hashes match final current files",
+    "Raw manifest matches embedded report; 100 frames per label and 50 pairs per order with unique fresh IDs",
+    "Controller accepted both real phase reports and rejected 14 malformed copies; positive Reduced timer allowed"
+  ],
+  "recomputed": {
+    "experimental_off_p95_us": 6202,
+    "experimental_reduced_p95_us": 6627,
+    "original_style_added_p95_us": 425,
+    "marginal_median_difference_us": 17.5,
+    "signed_paired_medians_us": {
+      "OR_R_minus_O": -61,
+      "RO_R_minus_O": 64,
+      "experimental_pooled_R_minus_O": 1,
+      "AB_B_minus_A": 27.5,
+      "BA_B_minus_A": 112.5,
+      "control_pooled_B_minus_A": 87
+    },
+    "control_marginal_p95_B_minus_A_us": -240
+  },
+  "conclusion": "No consistent mode-specific differential implementation work identified. Shared-stage tails also appear in physically Off controls. Stop without production repair or further run.",
+  "limits": [
+    "425 us is within 500 us for this diagnostic only; original 1114-us failure and 671-us diagnostic remain unresolved",
+    "No causal claim for allocation, worker scheduling/startup or frequency",
+    "Image copies can affect the next frame; 37-113 us observed intermember gaps remain in raw chronology",
+    "No real multilayer or animated-palette qualification; no assets downloaded"
+  ]
+}

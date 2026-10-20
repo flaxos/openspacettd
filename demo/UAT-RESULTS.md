@@ -72,6 +72,84 @@ human desktop appearance, comprehension, fun and pacing remain pending.
 - **Physical Pilot Simulation**: Corrected runner (`scripts/verify_commonwealth_works.py`) prepared with monotonic evaluation events, V2 service history recording, and partial/error report retention. Executed once on 20 October 2026 after owner approval; integrity passed and the Reserve buffer was never used ([run record](../docs/audit/2026-10-20/reserve-pilot/README.md)).
 - **Human Desktop Acceptance**: Interactive GUI inspection (Megacity food rate cycling, facilities works choice buttons, works bill display) and multi-world route playtesting remain **Pending**. Playable owner mission defined below.
 
+## Vehicle layers and palettes, Stage 3B — 14 October 2026
+
+**Human desktop and real SpriteStack content status: Pending.** The
+[Stage 3B audit](../docs/audit/2026-10-14/cab-view-stage3b/README.md) records bounded
+automated acceptance: seven explicit installed-asset sequences match native
+pixels, including visibly reversed red/blue train layers. Three final native
+journeys preserve the Stage 3A images, gate/world boundaries, simulation and
+normal viewport. The measured journey assets have one layer; no genuine stacked
+GRF journey is claimed. Final budgets pass, while an earlier Reduced p95 failure
+remains recorded with cause unproven.
+
+Next content mission: use an existing genuinely stacked vehicle GRF on a
+disposable save, record source/binary/content and every layer/palette, then check
+livery, offsets, order and visibility through approach, mixed arrival and return.
+Record actual display/blitter, natural-speed comfort and Pass/Fail/Partial;
+repeat relevant timing and ordinary-viewport checks. Animated palette behaviour,
+arbitrary translucent 32bpp assets and other platforms need separate evidence.
+Destination-dependent transparent/text-colour layers and aircraft shadows/rotors
+remain outside the supported claim. No owner save or running game was used.
+
+## Gate crossing effects, Stage 3A — 14 October 2026
+
+**Human desktop status: Pending.** The
+[Stage 3A audit](../docs/audit/2026-10-14/cab-view-stage3a/README.md) records accepted
+automated evidence: native forward/reverse/cold crossing, animated edge lensing,
+opaque transit, actual-arrival settling, static Reduced and exact Off. Three
+fresh native repeats provide 231 screenshots, 216 profiling cells and six exact
+normal-viewport comparisons. OFF/ON builds and 37 focused tests pass.
+
+Remaining mission: on a disposable local-gate train, watch approach/transit/arrival
+in both directions at natural speed; cycle Full / Reduced / Off, resize/look,
+close/reopen and check comfort/readability. Full is the fresh-window default;
+Reduced removes motion and distortion; Off restores baseline cab pixels. Confirm
+no stale source image or invented transit after a missed phase. Record exact
+source/binary/content, display/blitter and Pass/Fail/Partial. Injected paused GUI
+callbacks and private fixed-scale profiling do not establish interactive FPS or
+human comfort. Other platforms and broader graphics remain unaccepted.
+
+## Local gate cab, Stage 2 — 14 October 2026
+
+**Human desktop status: Pending.** Automated engineering acceptance is complete
+for the bounded local-gate slice; see the
+[Stage 2 audit](../docs/audit/2026-10-14/cab-view-stage2/README.md).
+Twenty final screenshots, 47 native assertions and independent Astra review
+cover an actual four-car A→B→A journey, opaque hidden transit, mixed-world
+visibility and a fresh-process reload/return. Both ordinary viewport comparisons
+are pixel-identical below the toolbar. A visible arrival-floor gap was repaired.
+This proof used a new private fixture and SDL offscreen; no owner save or running
+game was used. Human appearance, comfort, performance and other platforms remain
+unaccepted.
+
+Remaining mission: use a disposable owned-train local pair, observe approach,
+opaque transit and arrival in both directions, look and resize, close/reopen,
+then check access loss and unsupported gate classes fail safely. Record exact
+source/binary/content, display/blitter and Pass/Fail/Partial. The simple gate
+frame/floor is intentional at this stage; Commonwealth art fidelity belongs to
+the separately scoped Stage 3. The Stage 1 mission below is historical.
+
+
+## Experimental native train cab, Stage 1 — 14 October 2026
+
+**Human desktop status: Pending.** A default-OFF local source port exists on
+`codex/cab-view-stage1`, based on main `8182b3903f9a231d81b1823e82e6ec77e8a6a6ce`.
+Automated builds, pixel-buffer/mask/lifecycle checks and a native SDL offscreen
+proof are recorded in the [cab audit packet](../docs/audit/2026-10-14/cab-view/README.md).
+Nine screenshots and independent review verify paint, correct look directions,
+480×300 to 640×400 resize, a four-tile journey, reopening and owner-loss closure.
+This used a new disposable WP11 fixture; no owner save was loaded, advanced or
+converted, and no running owner game was used.
+
+Remaining desktop mission: use a fresh disposable owned-train fixture, open the
+cab, watch a short accessible-world journey, look left/ahead/right, resize and
+close/reopen, and inspect the ordinary 2D viewport. Approach an unsupported gate
+and verify safe closure before transit. Record the exact source/binary/content,
+display/blitter and Pass/Fail/Partial result. Automated native paint has passed;
+human appearance/controls, train artwork, comfort and performance remain unaccepted.
+Stage 2/3 and publication remain separate decisions.
+
 ## A World Worth Connecting (Sprint 3) — 11 October 2026
 
 **Human desktop status: Pending.** Automated Catch2 test suite (229 assertions across 9 test cases in `src/tests/test_commonwealth_works.cpp`), full Catch2 suite (307,564 assertions in 539 test cases), CTest suite (554/554 tests passing), and headless verification runner (`scripts/verify_commonwealth_expansion.py`) executed on branch `codex/capacity-or-reserve-pilot`.

@@ -96,6 +96,22 @@ add_test_files(
     utf8.cpp
 )
 
+if(WITH_CAB_VIEW AND NOT OPTION_DEDICATED AND NOT EMSCRIPTEN)
+    add_test_files(test_cab_view.cpp test_cab_view_native.cpp test_cab_view_gate_native.cpp)
+    add_test(NAME Cab_view_native_pixel_buffer
+        COMMAND openttd_test "Cab CPU renderer sky output resizes without simulation mutation")
+    set_tests_properties(Cab_view_native_pixel_buffer PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" TIMEOUT 60 LABELS "cab-view;integration")
+    add_test(NAME Cab_view_entry_policy
+        COMMAND openttd_test "Cab entry rejects foreign nonprimary and unsupported train states")
+    set_tests_properties(Cab_view_entry_policy PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" TIMEOUT 60 LABELS "cab-view;integration")
+    add_test(NAME Cab_view_window_lifecycle
+        COMMAND openttd_test "Cab window is singleton and closes on session change or train deletion")
+    set_tests_properties(Cab_view_window_lifecycle PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" TIMEOUT 60 LABELS "cab-view;integration")
+    add_test(NAME Cab_view_local_scene_mask
+        COMMAND openttd_test "Cab CPU renderer draws local terrain but masks foreign terrain and vehicles")
+    set_tests_properties(Cab_view_local_scene_mask PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" TIMEOUT 60 LABELS "cab-view;integration;requires-baseset")
+endif()
+
 # These editbox cases install a null video driver and must run in isolated
 # processes. Catch's default discovery excludes their hidden tag.
 foreach(case IN ITEMS

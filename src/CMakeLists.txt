@@ -34,6 +34,10 @@ add_files(
     CONDITION SSE_FOUND
 )
 
+if(WITH_CAB_VIEW AND NOT OPTION_DEDICATED AND NOT EMSCRIPTEN)
+    add_files(cab_view_3d.cpp cab_view_3d.h cab_view_gui.cpp widgets/cab_view_widget.h)
+endif()
+
 add_files(
     gfx_layout_icu.cpp
     gfx_layout_icu.h

@@ -66,6 +66,9 @@
 #include "core/backup_type.hpp"
 #include "landscape.h"
 #include "viewport_func.h"
+#ifdef WITH_CAB_VIEW
+#include "transparency.h"
+#endif
 #include "station_base.h"
 #include "portal/spaceport_manager.h"
 #include "portal/production_chain.h"
@@ -195,6 +198,17 @@ struct ViewportDrawer {
 static bool MarkViewportDirty(const Viewport &vp, int left, int top, int right, int bottom);
 
 static ViewportDrawer _vd;
+
+#ifdef WITH_CAB_VIEW
+/** Keep even partially assembled normal viewport queues intact while a cab tile is sampled. */
+struct ScopedCabViewportDrawer {
+	ViewportDrawer saved = std::move(_vd);
+	ScopedCabViewportDrawer() { _vd = {}; }
+	ScopedCabViewportDrawer(const ScopedCabViewportDrawer &) = delete;
+	ScopedCabViewportDrawer &operator=(const ScopedCabViewportDrawer &) = delete;
+	~ScopedCabViewportDrawer() { _vd = std::move(this->saved); }
+};
+#endif
 
 TileHighlightData _thd;
 static TileInfo _cur_ti;
@@ -1329,6 +1343,113 @@ static void ViewportAddLandscape()
 		}
 	}
 }
+
+#ifdef WITH_CAB_VIEW
+/** Collect a tile's normal ground and object sprites without disturbing a normal viewport draw. */
+void CollectTileGroundSprites(TileIndex tile, std::vector<GroundSpriteToDraw> &sprites, std::vector<BoxSpriteToDraw> *boxes)
+{
+	if (!IsValidTile(tile)) return;
+	ScopedCabViewportDrawer drawer;
+	AutoRestoreBackup dpi_backup(_cur_dpi, &_vd.dpi);
+	AutoRestoreBackup ti_backup(_cur_ti, _cur_ti);
+	TransparencyOptions transparent;
+	transparent.Set(TransparencyOption::Catenary);
+	AutoRestoreBackup transparency_backup(_transparency_opt, transparent);
+	AutoRestoreBackup invisibility_backup(_invisibility_opt, TransparencyOptions{});
+
+	_vd.dpi.zoom = ZoomLevel::Min;
+	_vd.dpi.left = -(1 << 28);
+	_vd.dpi.top = -(1 << 28);
+	_vd.dpi.width = 1 << 29;
+	_vd.dpi.height = 1 << 29;
+	_vd.combine_sprites = SpriteCombineMode::None;
+	_vd.last_child = LAST_CHILD_NONE;
+	_vd.foundation_part = FoundationPart::None;
+	for (FoundationPart part : {FoundationPart::Normal, FoundationPart::Halftile}) {
+		_vd.foundation[part] = -1;
+		_vd.last_foundation_child[part] = LAST_CHILD_NONE;
+	}
+	_cur_ti.tile = tile;
+	_cur_ti.x = TileX(tile) * TILE_SIZE;
+	_cur_ti.y = TileY(tile) * TILE_SIZE;
+	std::tie(_cur_ti.tileh, _cur_ti.z) = GetTilePixelSlope(tile);
+	_tile_type_procs[GetTileType(tile)]->draw_tile_proc(&_cur_ti);
+
+	for (const TileSpriteToDraw &ts : _vd.tile_sprites_to_draw) sprites.push_back({ts.image, ts.pal, ts.x, ts.y});
+	for (FoundationPart part : {FoundationPart::Normal, FoundationPart::Halftile}) {
+		if (_vd.foundation[part] == -1) continue;
+		const ParentSpriteToDraw &ps = _vd.parent_sprites_to_draw[_vd.foundation[part]];
+		for (int child = ps.first_child; child >= 0; child = _vd.child_screen_sprites_to_draw[child].next) {
+			const ChildScreenSpriteToDraw &cs = _vd.child_screen_sprites_to_draw[child];
+			sprites.push_back({cs.image, cs.pal, (cs.relative ? ps.left : ps.x) + cs.x, (cs.relative ? ps.top : ps.y) + cs.y});
+		}
+	}
+	if (boxes != nullptr) {
+		bool bridge = false;
+		for (size_t i = 0; i < _vd.parent_sprites_to_draw.size(); i++) {
+			if (static_cast<int>(i) == _vd.foundation[FoundationPart::Normal] || static_cast<int>(i) == _vd.foundation[FoundationPart::Halftile]) continue;
+			const ParentSpriteToDraw &ps = _vd.parent_sprites_to_draw[i];
+			if (ps.image == SPR_EMPTY_BOUNDING_BOX && ps.xmax - ps.xmin == TILE_SIZE - 1 && ps.ymax - ps.ymin == TILE_SIZE - 1 && ps.zmax == ps.zmin) bridge = true;
+			if (ps.image == SPR_EMPTY_BOUNDING_BOX || ps.sub != nullptr || HasBit(ps.image, PALETTE_MODIFIER_TRANSPARENT)) continue;
+			boxes->push_back({ps.image, ps.pal, ps.x, ps.y, ps.xmin, ps.ymin, ps.zmin, ps.xmax, ps.ymax, ps.zmax, false, bridge});
+			for (int child = ps.first_child; child >= 0; child = _vd.child_screen_sprites_to_draw[child].next) {
+				const ChildScreenSpriteToDraw &cs = _vd.child_screen_sprites_to_draw[child];
+				if (cs.sub != nullptr || HasBit(cs.image, PALETTE_MODIFIER_TRANSPARENT)) continue;
+				boxes->push_back({cs.image, cs.pal, (cs.relative ? ps.left : ps.x) + cs.x, (cs.relative ? ps.top : ps.y) + cs.y,
+					ps.xmin, ps.ymin, ps.zmin, ps.xmax, ps.ymax, ps.zmax, true, bridge});
+			}
+		}
+	}
+}
+
+/** Regression seam: exercise the real collector with a partially assembled viewport draw. */
+bool CabViewCollectorPreservesPendingStateForTest(TileIndex tile)
+{
+	if (!IsValidTile(tile)) return false;
+	AutoRestoreBackup dpi_backup(_cur_dpi, _cur_dpi);
+	AutoRestoreBackup ti_backup(_cur_ti, _cur_ti);
+	AutoRestoreBackup transparency_backup(_transparency_opt, _transparency_opt);
+	AutoRestoreBackup invisibility_backup(_invisibility_opt, _invisibility_opt);
+	ScopedCabViewportDrawer fixture;
+	_vd.dpi.left = 123;
+	_vd.dpi.top = 456;
+	_vd.dpi.zoom = ZoomLevel::Normal;
+	_vd.tile_sprites_to_draw.push_back({SPR_EMPTY_BOUNDING_BOX, PAL_NONE, nullptr, 3, 4});
+	_vd.parent_sprites_to_draw.emplace_back();
+	_vd.parent_sprites_to_sort.push_back(&_vd.parent_sprites_to_draw.front());
+	_vd.child_screen_sprites_to_draw.push_back({SPR_EMPTY_BOUNDING_BOX, PAL_NONE, nullptr, 7, 8, false, -1});
+	_vd.string_sprites_to_draw.emplace_back();
+	_vd.last_child = 23;
+	_vd.combine_sprites = SpriteCombineMode::Pending;
+	_vd.foundation_part = FoundationPart::Normal;
+	_vd.foundation[FoundationPart::Normal] = 0;
+	_vd.last_foundation_child[FoundationPart::Normal] = 0;
+	_vd.foundation_offset[FoundationPart::Normal] = {9, 11};
+	_cur_dpi = &_vd.dpi;
+	_cur_ti.tile = tile;
+	_cur_ti.x = 999;
+	_cur_ti.y = 888;
+	TransparencyOptions opts;
+	opts.Set(TransparencyOption::Trees);
+	_transparency_opt = opts;
+	_invisibility_opt = opts;
+	const auto *parent = _vd.parent_sprites_to_draw.data();
+	const auto *child = _vd.child_screen_sprites_to_draw.data();
+	std::vector<GroundSpriteToDraw> ground;
+	std::vector<BoxSpriteToDraw> boxes;
+	CollectTileGroundSprites(tile, ground, &boxes);
+	return !ground.empty() && _vd.dpi.left == 123 && _vd.dpi.top == 456 && _vd.dpi.zoom == ZoomLevel::Normal &&
+		_vd.tile_sprites_to_draw.size() == 1 && _vd.tile_sprites_to_draw.front().x == 3 &&
+		_vd.parent_sprites_to_draw.data() == parent && _vd.parent_sprites_to_sort.size() == 1 && _vd.parent_sprites_to_sort.front() == parent &&
+		_vd.child_screen_sprites_to_draw.data() == child && _vd.child_screen_sprites_to_draw.size() == 1 &&
+		_vd.string_sprites_to_draw.size() == 1 && _vd.last_child == 23 && _vd.combine_sprites == SpriteCombineMode::Pending &&
+		_vd.foundation_part == FoundationPart::Normal && _vd.foundation[FoundationPart::Normal] == 0 &&
+		_vd.last_foundation_child[FoundationPart::Normal] == 0 && _vd.foundation_offset[FoundationPart::Normal].x == 9 &&
+		_vd.foundation_offset[FoundationPart::Normal].y == 11 && _cur_dpi == &_vd.dpi &&
+		_cur_ti.tile == tile && _cur_ti.x == 999 && _cur_ti.y == 888 &&
+		_transparency_opt == opts && _invisibility_opt == opts;
+}
+#endif
 
 /**
  * Add a string to draw in the current viewport.

@@ -1,0 +1,297 @@
+{
+  "recorded_utc": "2026-10-14T11:46:48.690034+00:00",
+  "baseline": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "upstream_tag": "15.3-cabview-alpha1",
+  "upstream": "b7bd17b04dde3379b2be33be40ba4d6fc9f5d391",
+  "scope": "Stage 1 native graphical proof only; no Stage 2 or publication",
+  "source_sha256": {
+    "CMakeLists.txt": "5e22a87384cc708cd0db966972ea1f864a146ebb425f470bc50a670854bf7467",
+    "cmake/Options.cmake": "982b404fe0df64c9961f871f60d2f435c7400f3815c74f705dd3420ba178e236",
+    "src/CMakeLists.txt": "095eed94f4b6153a0b62c8f133a4a7a652c861eff6dfead706ea99388e1ea3bd",
+    "src/cab_view.h": "3ae4bce6fdd83b2b6ad615eef52b78873dea0d3defb9ac7d2325d9c39a9715c6",
+    "src/cab_view_3d.cpp": "359ccc808ddee8078f51669914a32e0e9cfe8dc0cfaa2ab3b1ec28a07e11a088",
+    "src/cab_view_3d.h": "9a8cf50096bcded87843ae0c5ae90e40f939e2c753899e386b1d92d63a52815b",
+    "src/cab_view_gui.cpp": "b8792910b986eee7d336cc68b2857eac8065546369baddf55c6d5afb196b7f68",
+    "src/gfx.cpp": "0a1c84b017553514c182cec8dd07877afd198fe7ed266dd67910549250a29e27",
+    "src/gfx_func.h": "57595c9cec5af854ee8b85613a6c9a3529841b5d679d5dce2741d99fa08fc523",
+    "src/gfxinit.cpp": "6c1230b254acadb2598a01ec1ec72a3e80f42f90ed66747730f7426d9d79ab89",
+    "src/lang/english.txt": "c19ede7fd3b5180ea7b080321a4e897751278348298ff0d7e4d8488e47ee611e",
+    "src/tests/CMakeLists.txt": "2a818f800745f4fe5a06328bad0b00dd05eb4d1947361838d7ff14e55d536612",
+    "src/tests/test_cab_view.cpp": "e6d2e81fb3f3c8639f010d925c5d29511f3b11f8c2a1512a0706f4488c5219ce",
+    "src/train_cmd.cpp": "a5d7529ca41b77c6d52f97c1554f3844367d23cfdb07f14ab89831f59a9f785e",
+    "src/vehicle.cpp": "47e5def255929a568bf9837f65e7baa9b9749faaf1d2a4849a288c3198807905",
+    "src/vehicle_gui.cpp": "c8866367abf5de822abac56188100ca81548798e3e426ba34f60cecd592ff06d",
+    "src/viewport.cpp": "46a07fe2c56ecadce2f071f85cac5ff59dd3deba2742a3ca1d2c9b3bf76c9616",
+    "src/viewport_func.h": "35ff3caee540ecd4eb0830df7dd62f1d01f46852f08da65c04c85ad2b5d8fea9",
+    "src/widgets/cab_view_widget.h": "98b97a044dca6af2d6f95cb33eebe33add588e339eddeb4b3189df2aede9abc7",
+    "src/widgets/vehicle_widget.h": "55732c2a8aba44202241b85a808b840e26a566c67bd66e34c20700277ab69fcc",
+    "src/window_type.h": "b4654f5ddea60a05e0d42f42c25343e4746a748e4638fd3e2a023029fad1eff7",
+    "src/tests/test_cab_view_native.cpp": "2435d64ce79f943a2c9f7c2da1d3fa9f74867e9f855abbc08e3c470d081bcffa",
+    "scripts/test_cab_view_native.py": "ad50d5cae1b344f24a50a00d5727d0fce2841df97d89afc4a49de0cbc0189c63"
+  },
+  "final_binaries_sha256": {
+    "openttd": "898241736dfd0ab82d131ed6b779ee13fd65126b0774f867247c686483b3d735",
+    "openttd_test": "87e45da53a55da44648e16959fed50cf8e6fce25db52d627f83a64eb7d133c0e"
+  },
+  "english_lng_sha256": "02dcc0bb5e8521bcafbca1ef28b1b94d3b4020c2b9939441996370003148efcb",
+  "fixture": {
+    "path": "fixture-02/cab-native-fixture.sav",
+    "sha256": "20b7fd7aa3cb513839370c2ee3f0d5e1eebce0acb560104a836d6727000bf21b",
+    "builder_binary_sha256": "7ad4dce70ff96f8c3013adfa0c64da41089e7c74702ec68d2835715f427e7a3c",
+    "builder_native_ticks": 1024,
+    "funding": "Assisted WP11 rendering fixture starts with 100000000; not economy acceptance."
+  },
+  "final_native_proof": {
+    "passed": true,
+    "command": [
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/build/openttd_test",
+      "Native SDL offscreen cab window paints moves masks and closes"
+    ],
+    "source_save": "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/build/cab-native/fixture-02/cab-native-fixture.sav",
+    "source_save_sha256": "20b7fd7aa3cb513839370c2ee3f0d5e1eebce0acb560104a836d6727000bf21b",
+    "binary_sha256": "87e45da53a55da44648e16959fed50cf8e6fce25db52d627f83a64eb7d133c0e",
+    "config_sha256": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+    "display": "SDL offscreen / software",
+    "human_uat": "Pending",
+    "timeout_seconds": 120,
+    "content_sha256": {
+      "/usr/share/games/openttd/baseset/opengfx/license.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "/usr/share/games/openttd/baseset/opengfx/ogfx1_base.grf": "f8201e87c7210493aaf525993013dc94dd4b7a801c4bb27df47544786bf8eaa9",
+      "/usr/share/games/openttd/baseset/opengfx/ogfxc_arctic.grf": "17cf3be5a9410d6807347a13b5655cf534f3b10f19d1bb7a43080f7c226817ce",
+      "/usr/share/games/openttd/baseset/opengfx/ogfxe_extra.grf": "d440ee74584bcd4534889e1210e83addfcdaadd557503116ca330eeec700188a",
+      "/usr/share/games/openttd/baseset/opengfx/ogfxh_tropical.grf": "b9aa39877daccd417ee1b248010bc8891648accf1680d1443f58a8589189238c",
+      "/usr/share/games/openttd/baseset/opengfx/ogfxi_logos.grf": "20644db32d97b2e1d7d7d9b73b0484b904a86f9e91752d9fc5f86bebb7706e5a",
+      "/usr/share/games/openttd/baseset/opengfx/ogfxt_toyland.grf": "d01320fdcfc94cf4ef637ec72e892314dc5dc682b949e6957c3fb72cb9385986",
+      "/usr/share/games/openttd/baseset/opengfx/opengfx.obg": "0ef7ae7620420d1c8040be1e387b99ceb7d5a7050cc3503c2f5ba28c6f1df3ef",
+      "/usr/share/games/openttd/baseset/opengfx/readme.txt.gz": "ee56220cc594957af4304a21214adf3f6d8c3e6b5f5d30ea344159c282b8ee0d"
+    },
+    "newgrf_sha256": {
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_equipment_v1.grf": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_gates_v1.grf": "268b9b705504c3d081b35459c39e1c952dbec10c2ff56ba330d20063b5b576b2",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_industry.grf": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_industry_v3.grf": "02744d1689144a8618fe6a3aa8732b41aa724e77ef5c9648364eb8594b0dbf56",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_industry_v4.grf": "7f709d575d4ae1507865bf94351a698c5106be3c4f8099a6753c12f35960823d",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_integrated_v1.grf": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_platforms_v1.grf": "0ea503e0667bff7f4dc4733d5053ade456a4f2598f935d7b7efb7ea9bb767202",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_rail.grf": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87",
+      "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_rail_v3.grf": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea"
+    },
+    "exit_code": 0,
+    "native_manifest_pass": true,
+    "elapsed_seconds": 1.0158393899910152,
+    "source_save_unchanged": true,
+    "copy_sha256_after": "20b7fd7aa3cb513839370c2ee3f0d5e1eebce0acb560104a836d6727000bf21b",
+    "screenshots": {
+      "cab_native_cab_ahead.png": {
+        "bytes": 308897,
+        "sha256": "62949be84bcbbb02f697c3a4b225d8f3a154d38d40e06df446069284fe0cb0a7"
+      },
+      "cab_native_closed_normal_viewport.png": {
+        "bytes": 120869,
+        "sha256": "f24ab2792b91566d514203ff200fb797e09425f64f6895236e00bd7b97a1a4cf"
+      },
+      "cab_native_look_left.png": {
+        "bytes": 285923,
+        "sha256": "520496bbb0002344cf392b91bd1af1defaf9d3e2901d46277dd5f5a031ea43a1"
+      },
+      "cab_native_look_right.png": {
+        "bytes": 317087,
+        "sha256": "d2ce74380f33c81e3ad391803cce45244c6844a6020bd43e8b696ea9330be9b8"
+      },
+      "cab_native_moving_train_cab.png": {
+        "bytes": 257421,
+        "sha256": "0bf1f056ce0a7f476df8c46dff1d42200332d5d511590be01ebb5788f7b07ac8"
+      },
+      "cab_native_normal_viewport.png": {
+        "bytes": 120848,
+        "sha256": "09420a5f5d01fdbce76662bdc7c69c768158b8e2819f9f593a0fc895abca1166"
+      },
+      "cab_native_owner_loss_closed.png": {
+        "bytes": 120869,
+        "sha256": "f24ab2792b91566d514203ff200fb797e09425f64f6895236e00bd7b97a1a4cf"
+      },
+      "cab_native_reopened_cab.png": {
+        "bytes": 305768,
+        "sha256": "b2ffc6365a1f8dcfc5b2fda8bf09cb51e6e54424c33ad40cf6762457aaef22c1"
+      },
+      "cab_native_resized_ahead.png": {
+        "bytes": 412436,
+        "sha256": "99b58b7891bd26a6c5dcca330276531c5ebb407acf30675c96abda94a7e36472"
+      }
+    }
+  },
+  "image_analysis": {
+    "native_dimensions": [
+      1280,
+      800
+    ],
+    "normal_before_vs_closed": {
+      "diff_bbox": [
+        293,
+        0,
+        315,
+        22
+      ],
+      "changed_pixels": 202,
+      "viewport_below_toolbar_equal": true
+    },
+    "owner_loss_matches_closed_full_image": true,
+    "look_content_region": [
+      14,
+      52,
+      490,
+      320
+    ],
+    "look_changed_pixels": {
+      "look_left": 95075,
+      "look_right": 111961
+    },
+    "visual_result": "PASS after root and independent Astra review: left looks toward open land on the left; right looks toward station building on the right; native cab paints resized and after four-tile movement; adjacent normal viewport remains intact. This is automated visual inspection, not human UAT.",
+    "capture_queue_to_file_ms": {
+      "normal_viewport": 44,
+      "cab_ahead": 51,
+      "look_left": 39,
+      "look_right": 44,
+      "resized_ahead": 43,
+      "closed_normal_viewport": 32,
+      "reopened_cab": 43,
+      "owner_loss_closed": 30,
+      "moving_train_cab": 49
+    },
+    "timing_limit": "Includes native painting and PNG encoding/IO; stepped offscreen run, not interactive frame-rate or latency qualification."
+  },
+  "native_checks": {
+    "assertions": 14,
+    "screenshots": 9,
+    "callbacks": 30,
+    "cab_size_before": [
+      480,
+      300
+    ],
+    "cab_size_after": [
+      640,
+      400
+    ],
+    "train_start": [
+      332,
+      648
+    ],
+    "train_end": [
+      396,
+      648
+    ],
+    "explicit_state_game_loop_calls": 128,
+    "maximum_explicit_calls": 1040,
+    "normal_timer_ticks_also_possible": true,
+    "fixture_movement_command": "Native SkipToOrder, separately recorded after paused camera proof",
+    "foreign_world_policy_checked": true,
+    "rendered_mask_proof": "Separate final Cab_view_local_scene_mask CTest with real baseset"
+  },
+  "final_tests": {
+    "catch": {
+      "cases": 8,
+      "assertions": 10334,
+      "exit": 0,
+      "log": "logs/native-desktop-final-catch.log"
+    },
+    "ctest": {
+      "cases": 7,
+      "assertions": 110,
+      "exit": 0,
+      "log": "logs/native-desktop-final-ctest-v2.log"
+    },
+    "linters": [
+      {
+        "command": [
+          "python3",
+          ".github/file-descriptions.py"
+        ],
+        "returncode": 0,
+        "output": "OK\n"
+      },
+      {
+        "command": [
+          "python3",
+          ".github/unused-strings.py"
+        ],
+        "returncode": 0,
+        "output": "OK\n"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "returncode": 0,
+        "output": ""
+      }
+    ],
+    "compile_guard": {
+      "OFF": {
+        "returncode": 0,
+        "macro_sources": [],
+        "cab_sources": []
+      },
+      "ON": {
+        "returncode": 0,
+        "macro_sources": [
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp"
+        ],
+        "cab_sources": [
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+          "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp"
+        ]
+      }
+    },
+    "OFF_full_build": "Retained earlier verification.json; latest guard configuration rechecked, no repeated full OFF build",
+    "ON_final_build": "native-desktop-build-04.log and native-desktop-on-final-uptodate.log"
+  },
+  "independent_review": "CLEAR for Stage 1 automated acceptance after source, screenshot and hash review",
+  "prior_attempts": {
+    "fixture-01": "sandbox loopback socket denial before game launch; retained",
+    "fixture-02": "native builder succeeded after bounded approved escalation",
+    "desktop-01": "14 assertions passed but visual resize failed; retained",
+    "desktop-02": "14 assertions passed but visual left/right orientation failed; retained",
+    "desktop-03": "14 assertions and independent visual review passed"
+  },
+  "owner_repositories": {
+    "primary": {
+      "path": "/home/flax/games/openspacettd",
+      "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+      "status": ""
+    },
+    "prior": {
+      "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line",
+      "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+      "status": ""
+    }
+  },
+  "limits": [
+    "Human UAT pending",
+    "No Windows/macOS runtime or build proof",
+    "Stepped offscreen timings are not performance qualification",
+    "Short straight station departure only; no graphical slope/curve/portal/bridge/network-transfer journey",
+    "Purity compares order count and front-engine cargo, not full orders/consist/custom-state serialization",
+    "No exhaustive native graphics-reload/session/replacement lifecycle matrix",
+    "Stages 2-3 unstarted; no commits, PRs, merges or publication"
+  ],
+  "archive_sha256": "7c40e10b81d63f57c8792c7dbe015e795a02dfcc3bcf88806f70894afe4ba20d",
+  "archive_bytes": 6136315,
+  "representative_images_sha256": {
+    "native-resized.png": "99b58b7891bd26a6c5dcca330276531c5ebb407acf30675c96abda94a7e36472",
+    "native-moving.png": "0bf1f056ce0a7f476df8c46dff1d42200332d5d511590be01ebb5788f7b07ac8"
+  }
+}

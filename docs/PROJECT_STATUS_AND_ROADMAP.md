@@ -94,6 +94,169 @@ Delivered comprehensive correction across the Sprint 1–3 stack on `codex/capac
    - Binary SHA256: `build/openttd`: `fb5692a3d28299269ef9703779cdc0f386290186e6f909ef87b51a718ed02d19`, `build/openttd_test`: `1e84a79ed7803367fcc66edbdd12a945370f5328e9212ccf16f0054e66f8ca57`.
    - Native Reserve simulation envelope proposed and frozen pending explicit renewed owner approval.
 
+## Cab-view integration sequence — 14 October 2026
+
+The owner requested a three-stage native cab integration and accepted bounded
+Stage 1/2 engineering evidence, then authorized the event-horizon Stage 3A slice
+and bounded Stage 3B vehicle layers/palettes. This is a presentation feature alongside the
+existing economy roadmap; it does not reorder or accept pending Commonwealth
+work. The single [active plan](ACTIVE_EXECUTION_PLAN.md)
+contains the implementation authority. [Provenance and verification](audit/2026-10-14/cab-view/README.md)
+remain separate from historical evidence below.
+
+### Stage 1 — Local native train cab (engineering evidence accepted)
+
+The isolated local implementation and automated native SDL offscreen proof are
+accepted as engineering evidence. Nine screenshots verify painting, look controls, resize,
+a four-tile journey and cleanup; the adjacent viewport remains unchanged below
+the toolbar. Independent review is clear. Human UAT, cross-platform support and
+performance qualification remain Pending; this is not a published release.
+
+Player outcome: open one experimental native desktop cab on an owned train and
+observe a journey within its current accessible world. Default-OFF
+`WITH_CAB_VIEW` contains the port of the pinned upstream CPU renderer and a
+minimal read-only GUI. Transient camera state, main-thread snapshot collection,
+complete shared viewport-state restoration, tile and vehicle world masks, and
+safe lifecycle closure are prerequisites to accepting a usable render.
+
+Normal entry is the train's existing vehicle window. Validate default OFF and
+explicit ON, native pixels, resize/reopen, existing 2D drawing and simulation
+purity. Portal/tunnel transit and session/world transfer close or disable the
+view. No save format, simulation, network protocol, production chain or map layout
+changes. Source review, builds and automated tests do not imply human acceptance.
+
+Dependencies: isolated live-main baseline, pinned source provenance, current GUI
+API adaptation, a supported desktop pixel output and adequate build resources.
+The current unmerged economy branch is not a dependency. Stop and review if the
+source port cannot preserve these boundaries. Completion requires independent
+review plus an honest status for each automated/native/human gate.
+
+### Stage 2 — World and gate transition (authorized)
+
+Current authorized slice: one local two-world pair and one consist on the same
+isolated lineage. The cab follows actual native train state through entry,
+opaque hidden transit and accessible arrival, then a reverse traversal. It
+resets before presenting discontinuous position/world/direction/height changes,
+masks each wagon independently during mixed-world transit and closes safely on
+invalid access, identity, session or unsupported gate classes. Ordinary tunnels,
+bridges, federation continuity and complete Commonwealth gate artwork remain
+outside this slice. No movement, economy, network or save-format change is needed.
+
+The [current contract and exact Sol handoff](ACTIVE_EXECUTION_PLAN.md)
+define state transitions, permitted files, negative tests, native captures,
+disposable cold reload and the independent review gate. Stage 2 implementation
+and automated verification are now complete with independent Astra review CLEAR:
+OFF/ON builds, 36/36 focused tests (11,160 assertions), a native four-car round
+trip and fresh-process reload (47 assertions), three actual mixed-car render
+probes, and zero normal-viewport pixel changes. The
+[Stage 2 audit](audit/2026-10-14/cab-view-stage2/README.md) retains all failures,
+including a repaired missing local gate floor. Stage 1's exact patch and audit
+remain preserved; human acceptance stays Pending. The bounded Stage 3A effects slice below is now verified; broader graphics remain
+separately scoped.
+
+#### Original Stage 2 planning proposal (historical)
+
+The proposal below records the earlier dependency decision; its instruction to
+seek Stage 2 authorization has now been satisfied by the current active slice.
+
+Player outcome: the cab handles a local gate journey predictably, identifying
+departure, unsupported/hidden transit, arrival and any inability to continue.
+Begin only after reviewing Stage 1 evidence and approving a concrete transition
+contract. Preserve one global `TileIndex` map and immutable logical world regions;
+reuse native portal/wormhole and existing vehicle identity paths. Camera state
+must reset discontinuously at a gate, never fly across void or reveal a closed
+world. Re-evaluate destination access and rendering caches before first arrival
+frame. Handle reversal, interrupted transit, invalid gate and sold/replaced train.
+
+First scope should be one local gate pair and one consist. External federation
+continuation is a separate decision: the client changes its active session/map,
+and server-local `VehicleID` is not stable cross-host identity. Default safe
+behavior remains closure unless the existing global consist identity/reconnect
+path is explicitly included and tested. Do not change custody, routing,
+reconnection protocol, train movement or persistent simulation for camera needs.
+
+Acceptance: controlled pre-entry/hidden/arrival/reversal captures; repeated
+round trip without stale/smoothed camera or inaccessible geometry/vehicles;
+normal 2D view unchanged; deleted/missing destination safe failure; native gate,
+save/load and multiplayer regression coverage matching any touched hooks.
+Independent review and human gate-travel mission are distinct. No seamless
+external-server claim follows from a successful local gate trip.
+
+Suggested later prompt:
+
+> Review the completed Stage 1 evidence and current live source using ost-plan.
+> Propose one bounded local-gate cab transition contract and update only the
+> canonical active plan for approval. Preserve one-map TileIndex, world access,
+> deterministic native movement and custom saves. Explicitly decide whether
+> external-session continuation stays out of scope. Do not implement Stage 2
+> until the concrete plan is authorized.
+
+### Stage 3A — Gate crossing effects and measured budget (engineering complete)
+
+Full / Reduced / Off effects now cover bounded local edge lensing, opaque animated
+transit and a <=250 ms settle into the actual destination. The choice is transient;
+new windows start Full, while the build feature remains default OFF. The
+[Stage 3A audit](audit/2026-10-14/cab-view-stage3a/README.md) records final OFF/ON
+builds, 37 focused tests, 231 native screenshots across three repeats and an
+independently verified 216-cell performance matrix. Maximum Full added median is
+0.629 ms, added p95 0.808 ms and scene ratio 1.3398 against the 1.35 limit. All Off
+and ordinary-viewport image comparisons are exact. This is one-machine,
+fixed-scale diagnostic evidence; human comfort and cross-platform UAT stay Pending.
+No simulation, save, network or owner-state change accompanied this presentation.
+
+### Stage 3B — Vehicle layers and palettes (bounded engineering complete)
+
+All three vehicle consumers now compose up to eight ordered layers with checked
+union bounds and native palette fallback, override, crash, brightness and
+remap-zero handling. Seven explicit installed-asset sequences match native
+Normal-zoom pixels, including visibly reversed overlapping train colours.
+Final OFF/ON builds, 37 focused tests (11,438 assertions), default Catch and all
+564 CTest cases have passing evidence after five targeted setup reruns.
+Independent source/image/data review is CLEAR. The final 270-cell matrix passes
+unchanged budgets; 72 fixed Off and six normal-viewport comparisons are exact.
+
+The [Stage 3B audit](audit/2026-10-14/cab-view-stage3b/README.md) preserves an earlier
+failed Reduced p95 budget (1,114 us against 500 us), with cause unproven. The final
+pass is separate evidence. Actual journey assets are single-layer; real
+SpriteStack GRFs, animated palettes, arbitrary translucent assets, human comfort
+and other platforms remain Pending. No publication, default-ON or broader scenery
+work follows automatically from this bounded checkpoint.
+
+### Remaining Stage 3 — Commonwealth graphics and broader performance (planned)
+
+Player outcome: existing Commonwealth terrain, infrastructure and rolling stock
+look recognizable in cab view at a measured, usable frame rate. Start after the
+Stage 1 safety contract and approved Stage 2 behavior are reviewed; confirm the
+current NewGRF versions and display/blitter matrix before promising coverage.
+Prioritize native sprite projection correctness: gate rear/front layers, custom
+station and industry geometry, terrain/biome treatments, catenary and bridges,
+vehicle consists/liveries and actual layered `Vehicle::GetImage` content. Stage
+3B's ordered compositor proof is not acceptance of untested composite NewGRFs.
+
+Record reproducible source/binary/content hashes, CPU, resolution, render size,
+view distance, tile/triangle counts, cache memory and prepare/raster/output frame
+times on the same representative routes. Compare baseline and candidate; choose
+budgets from measurements and human usability, not an invented universal FPS.
+Only then adjust bounded culling, texture caches, detail levels or worker use.
+Workers must remain independent of live simulation and mutable sprite collection.
+Use existing art/assets first; new assets or a GPU/backend redesign need an
+explicit scope decision and asset provenance/reproducible exports.
+
+Acceptance: side-by-side native captures of the agreed content matrix; no missing
+front/rear/composite layers or world leaks; documented speed/memory tradeoffs;
+repeatable measurements; UI responsiveness and human comfort check. Persistent
+settings, wide platform rollout, external federation, new assets or a default-ON
+release are separately approved changes rather than automatic consequences.
+
+Suggested later prompt:
+
+> Audit Stage 1/2 cab safety and current Commonwealth assets. Prepare an approved
+> Stage 3 slice targeting the smallest demonstrated graphics defect and measured
+> bottleneck. Define native comparison captures, profiling route and machine,
+> memory/frame budgets and regression gates before implementation. Keep simulation,
+> save formats and one-map worlds unchanged; do not enable cab view by default or
+> publish a release without a separate decision.
+
 ## A World Worth Connecting (Sprint 3) — 11 October 2026
 
 Delivered Sprint 3 ("A World Worth Connecting") of the Commonwealth design study on isolated branch `codex/capacity-or-reserve-pilot` for Codex and Astra review:
