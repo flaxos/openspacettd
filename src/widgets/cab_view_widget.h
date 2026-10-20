@@ -10,6 +10,7 @@ enum CabViewWidgets : WidgetID {
 	WID_CV_AHEAD,
 	WID_CV_RIGHT,
 	WID_CV_EFFECT,
+	WID_CV_HELP,
 };
 
 #endif

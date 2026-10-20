@@ -96,6 +96,10 @@ add_test_files(
     utf8.cpp
 )
 
+if(NOT OPTION_DEDICATED AND NOT EMSCRIPTEN)
+    add_test_files(test_agent_uat_native.cpp)
+endif()
+
 if(WITH_CAB_VIEW AND NOT OPTION_DEDICATED AND NOT EMSCRIPTEN)
     add_test_files(test_cab_view.cpp test_cab_view_native.cpp test_cab_view_gate_native.cpp)
     add_test(NAME Cab_view_native_pixel_buffer

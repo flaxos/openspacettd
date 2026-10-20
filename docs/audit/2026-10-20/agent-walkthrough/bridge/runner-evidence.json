@@ -1,0 +1,61 @@
+{
+  "passed": true,
+  "command": [
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/build/openttd_test",
+    "Agent UAT walkthrough captures player-facing windows"
+  ],
+  "source_save": "/home/flax/games/openspacettd/demo/OpenSpaceTTD-Sustained-Growth-UAT.sav",
+  "source_save_sha256": "957f169d2583530a6f9be0ed3874dbb18e75042ea96f38f901eddc0c4ab3416f",
+  "binary_sha256": "a61bb4e50565e17fc255bbcb41606023e4bf213581efe92c100f092a575b30bc",
+  "config_sha256": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+  "display": "SDL offscreen / software, 1920x1200",
+  "review": "agent",
+  "human_uat": "Pending",
+  "timeout_seconds": 300,
+  "exit_code": 0,
+  "manifest_pass": true,
+  "elapsed_seconds": 2.71974735398544,
+  "source_save_unchanged": true,
+  "screenshots": {
+    "agent_uat_cab_after_bridge.png": {
+      "bytes": 577722,
+      "sha256": "64a4d1e276985df09265c9fd89c02fc30a4415ef3199759b683a2c7371a07654"
+    },
+    "agent_uat_cab_ahead.png": {
+      "bytes": 592989,
+      "sha256": "6a02ff0078b90bb60d0b11d64e1165d98885cc98a3caa383a48f3c704eb160ab"
+    },
+    "agent_uat_cab_drag_right_and_up.png": {
+      "bytes": 654220,
+      "sha256": "5e1295af5972b7af0cfdd6d9fc930213350791dd74b128550af9438e6661a2fb"
+    },
+    "agent_uat_cab_keys_look_left.png": {
+      "bytes": 610828,
+      "sha256": "41903e9b78c07fc5ea600215a60447d99ce37c2e27df157ed1ae4f56fe33edec"
+    },
+    "agent_uat_cab_on_bridge.png": {
+      "bytes": 413528,
+      "sha256": "9dc7fc191fd5101c74311b242152caf240c2b5ee87cfe3945716b4d62b89b3da"
+    },
+    "agent_uat_cab_wheel_zoom_in.png": {
+      "bytes": 614497,
+      "sha256": "58ecd9c5d4288b8e585d5749e8489529313d7d325c1b35d615b04f074cb69075"
+    },
+    "agent_uat_facilities_1x.png": {
+      "bytes": 390292,
+      "sha256": "ba34515cda3bf42a0b805ec4ef7e902de5fc7a04e72a8a3523f4c23b8a42fd71"
+    },
+    "agent_uat_facilities_2x.png": {
+      "bytes": 171485,
+      "sha256": "7313713d09c27fe9f989360214943aa6da77e10327e2578039598151810e42d7"
+    },
+    "agent_uat_megacity_1x.png": {
+      "bytes": 436836,
+      "sha256": "55964a445961cbb8c2ac1622560fbe52de65f7cf2ee1951336f46c38a21b7b50"
+    },
+    "agent_uat_megacity_2x.png": {
+      "bytes": 246926,
+      "sha256": "3a7bf416d781a75468fff076f784a1b5025458b70a75538362182553ab15ef97"
+    }
+  }
+}

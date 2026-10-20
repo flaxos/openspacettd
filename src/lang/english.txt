@@ -4576,6 +4576,9 @@ STR_CAB_VIEW_LOOK_RIGHT                                         :Look right
 STR_CAB_VIEW_VIEW_TOOLTIP                                       :{BLACK}Drag to look around, use the mouse wheel to zoom. While this window is selected: A/D look left/right, W/S look up/down, R looks ahead, B looks behind, +/- zoom, E changes effects
 STR_CAB_VIEW_LOCAL_TRANSIT                                      :Local gate transit
 STR_CAB_VIEW_BRIDGE                                             :Bridge: the view resumes after the crossing
+STR_CAB_VIEW_HELP                                               :Controls
+STR_CAB_VIEW_HELP_TOOLTIP                                       :{BLACK}Show how to look around and zoom
+STR_CAB_VIEW_HELP_TEXT                                          :Drag the view to look around, with the mouse button that scrolls the map.{}Mouse wheel: zoom in and out.{}{}Keys, while this window is selected:{}A / D: look left / right{}W / S: look up / down{}R: look ahead     B: look behind{}+ / -: zoom     E: effects
 STR_CAB_VIEW_EFFECT_FULL                                        :Effects: Full
 STR_CAB_VIEW_EFFECT_REDUCED                                     :Effects: Reduced
 STR_CAB_VIEW_EFFECT_OFF                                         :Effects: Off
@@ -6193,6 +6196,9 @@ STR_MEGACITY_GROWTH_HYPERGROWTH                                 :{LTBLUE}HyperGr
 STR_MEGACITY_TIER1_SUSTENANCE                                   :Tier 1: Sustenance (Food, Water)
 STR_MEGACITY_TIER2_EXPANSION                                    :Tier 2: Expansion (Alloys, Goods)
 STR_MEGACITY_TIER3_PROSPERITY                                   :Tier 3: Prosperity (Data Crystals, Valuables)
+STR_MEGACITY_TIER1_FOOD_SERVICE                                 :Tier 1: Food service
+STR_MEGACITY_TIER2_RESIDENTIAL                                  :Tier 2: Residential district
+STR_MEGACITY_TIER3_PROSPERITY_PILOT                             :Tier 3: Prosperity
 STR_MEGACITY_BUTTON_PREV                                        :Previous
 STR_MEGACITY_BUTTON_PREV_TOOLTIP                                :Switch to previous registered megacity
 STR_MEGACITY_BUTTON_NEXT                                        :Next
@@ -6363,6 +6369,7 @@ STR_EMPIRE_FACILITIES_TAB_PIPE_D                             :D: Data Crystals
 STR_EMPIRE_FACILITIES_REFRESH                                :Refresh
 STR_EMPIRE_FACILITIES_REFRESH_TOOLTIP                        :Refresh industrial metrics and buffer levels
 STR_EMPIRE_FACILITIES_UPGRADE_ALL                            :Upgrade All Facilities (+50 t/mo)
+STR_EMPIRE_FACILITIES_UPGRADE_ALL_BATCHES                       :Upgrade All Facilities (+50 batches/mo)
 STR_EMPIRE_FACILITIES_UPGRADE_ALL_TOOLTIP                    :Upgrade monthly processing capacity for all matching industrial facilities
 STR_MAP_MENU_INDUSTRIAL_FACILITIES                           :Industrial Facilities & Supply Chain
 STR_ERROR_CAN_T_UPGRADE_FACILITY                             :Can't upgrade processing facility capacity
@@ -6487,8 +6494,8 @@ STR_ERROR_OWNED_BY_ANOTHER_COMPANY                              :Service slot ow
 STR_MEGACITY_GROWTH_CORE_STABLE                                 :{GREEN}Stable (No Expansion Commissioned)
 STR_WORKS_CAPACITY_BTN                                          :Capacity
 STR_WORKS_RESERVE_BTN                                           :Reserve
-STR_WORKS_STATUS_CAPACITY                                       :{GREEN}[Capacity Works: 150 batches/mo]
-STR_WORKS_STATUS_RESERVE                                        :{GREEN}[Reserve Works: 600 batch storage]
+STR_WORKS_STATUS_CAPACITY                                       :{GREEN}Capacity Works
+STR_WORKS_STATUS_RESERVE                                        :{GREEN}Reserve Works
 
 # OpenSpaceTTD Commonwealth Works: Freight You Can Read (C1)
 STR_EMPIRE_FACILITIES_LOCATE_PLANT                               :Locate Plant

@@ -22,6 +22,7 @@
 #include "portal/portal_registry.h"
 #include "portal/planet_manager.h"
 #include "gfx_func.h"
+#include "zoom_func.h"
 #include "core/geometry_func.hpp"
 #include "video/video_driver.hpp"
 #include "blitter/factory.hpp"
@@ -29,6 +30,7 @@
 #include "hotkeys.h"
 #include "settings_type.h"
 #include "widgets/cab_view_widget.h"
+#include "table/sprites.h"
 #include "table/strings.h"
 
 #include <array>
@@ -132,7 +134,8 @@ static constexpr std::initializer_list<NWidgetPart> _nested_cab_view_widgets = {
 		NWidget(WWT_TEXTBTN, Colours::Grey, WID_CV_AHEAD), SetStringTip(STR_CAB_VIEW_LOOK_AHEAD, STR_CAB_VIEW_LOOK_AHEAD),
 		NWidget(WWT_TEXTBTN, Colours::Grey, WID_CV_RIGHT), SetStringTip(STR_CAB_VIEW_LOOK_RIGHT, STR_CAB_VIEW_LOOK_RIGHT),
 		NWidget(WWT_TEXTBTN, Colours::Grey, WID_CV_EFFECT), SetStringTip(STR_CAB_VIEW_EFFECT_FULL, STR_CAB_VIEW_EFFECT_FULL),
-		NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
+		NWidget(WWT_TEXTBTN, Colours::Grey, WID_CV_HELP), SetStringTip(STR_CAB_VIEW_HELP, STR_CAB_VIEW_HELP_TOOLTIP),
+		NWidget(WWT_PANEL, Colours::Grey), SetFill(1, 1), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, Colours::Grey),
 	EndContainer(),
 };
@@ -175,6 +178,33 @@ CabViewTransitStats DrawCabViewTransit(const Rect &r, CabViewEffectMode mode, ui
 	return {effect_us, static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count())};
 }
 
+/**
+ * Draw a short message centred on the view, on a dark box so it reads over any scene.
+ * @param r The view.
+ * @param text Message.
+ */
+static void DrawCabViewLabel(const Rect &r, std::string_view text)
+{
+	const Dimension size = GetStringBoundingBox(text);
+	const int pad = ScaleGUITrad(4);
+	const int x = (r.left + r.right - static_cast<int>(size.width)) / 2;
+	const int y = CentreBounds(r.top, r.bottom, size.height);
+	GfxFillRect(x - pad, y - pad, x + size.width + pad, y + size.height + pad, PC_BLACK);
+	DrawString(x, x + size.width, y, text, TextColour::White);
+}
+
+/**
+ * Draw the controls panel over the view.
+ * @param r The view.
+ */
+static void DrawCabViewHelp(const Rect &r)
+{
+	const Rect box = r.Shrink(ScaleGUITrad(12));
+	GfxFillRect(box, PALETTE_TO_TRANSPARENT, FillRectMode::Recolour);
+	GfxFillRect(box, PALETTE_TO_TRANSPARENT, FillRectMode::Recolour);
+	DrawStringMultiLine(box.Shrink(ScaleGUITrad(8)), GetString(STR_CAB_VIEW_HELP_TEXT), TextColour::White, AlignmentH::Start);
+}
+
 /** Keyboard look controls; they act only while the cab window has focus. */
 enum class CabViewHotkey : int {
 	LookLeft,
@@ -199,6 +229,10 @@ struct CabViewWindow : Window {
 	mutable CabViewPresentation previous{};
 	CabViewEffectMode effect_mode = CabViewEffectMode::Full; ///< Fresh window default; never persisted.
 	mutable CabViewEffectTimeline timeline;
+	mutable CabViewCamera held_camera{}; ///< Last scene camera, shown dimmed while the train is on a bridge.
+	mutable uint32_t held_frame = 0; ///< Frame number of #held_camera, so the renderer can reuse its picture.
+	mutable bool has_held = false;
+	bool show_help = false; ///< Whether the controls panel covers the view.
 
 	CabViewWindow(WindowDesc &desc, WindowNumber number) : Window(desc), vehicle_id(static_cast<VehicleID>(number))
 	{
@@ -265,9 +299,15 @@ struct CabViewWindow : Window {
 			return;
 		}
 		if (state.phase == CabViewPhase::Bridge) {
-			GfxFillRect(r, PC_BLACK);
-			DrawString(r.left, r.right, CentreBounds(r.top, r.bottom, GetCharacterHeight(FontSize::Normal)),
-				GetString(STR_CAB_VIEW_BRIDGE), TextColour::White, AlignmentH::Centre);
+			/* Keep the last view of the line, dimmed, so passing a bridge is not a black blink. */
+			if (this->has_held && this->held_camera.world == state.world) {
+				DrawCabView3D(r, this->held_camera, this->held_frame, 12.0f);
+				GfxFillRect(r, PALETTE_TO_TRANSPARENT, FillRectMode::Recolour);
+			} else {
+				GfxFillRect(r, PC_BLACK);
+			}
+			DrawCabViewLabel(r, GetString(STR_CAB_VIEW_BRIDGE));
+			if (this->show_help) DrawCabViewHelp(r);
 			return;
 		}
 		/* The camera is transient. Neither vehicle state nor game time is adjusted. */
@@ -288,6 +328,10 @@ struct CabViewWindow : Window {
 			(camera.scene_effect == CabViewSceneEffect::Arrival ? this->timeline.PhaseElapsed() :
 				static_cast<uint32_t>(std::min<uint64_t>(this->timeline.clock_ms, UINT32_MAX))) : 0;
 		DrawCabView3D(r, camera, this->frame_id, 12.0f);
+		this->held_camera = camera;
+		this->held_frame = this->frame_id;
+		this->has_held = true;
+		if (this->show_help) DrawCabViewHelp(r);
 	}
 
 	std::string GetWidgetString(WidgetID widget, StringID stringid) const override
@@ -314,6 +358,11 @@ struct CabViewWindow : Window {
 			case WID_CV_AHEAD: this->look.ResetDirection(); break;
 			case WID_CV_RIGHT: this->look.yaw = -CabViewLook::SIDE; break;
 			case WID_CV_EFFECT: this->CycleEffect(); break;
+			case WID_CV_HELP:
+				this->show_help = !this->show_help;
+				this->SetWidgetLoweredState(WID_CV_HELP, this->show_help);
+				this->SetWidgetDirty(WID_CV_HELP);
+				break;
 			default: return;
 		}
 		this->LookChanged();

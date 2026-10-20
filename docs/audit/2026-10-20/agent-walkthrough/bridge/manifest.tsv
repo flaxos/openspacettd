@@ -1,0 +1,20 @@
+event	elapsed_ms	detail
+owned_facilities	445	0
+capture	446	facilities_1x
+retire	556	skipped: no facility owned by the local company
+capture	556	megacity_1x
+gui_scale	653	200
+capture	659	facilities_2x
+capture	706	megacity_2x
+gui_scale	773	100
+capture	780	cab_ahead
+capture	907	cab_keys_look_left
+capture	1011	cab_drag_right_and_up
+capture	1112	cab_wheel_zoom_in
+bridge_train	1240	24
+capture	1240	cab_on_bridge
+capture	2520	cab_after_bridge
+walkthrough_complete	2631
+result	PASS
+callbacks	94
+bridge	held on the bridge, resumed after it

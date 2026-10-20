@@ -890,7 +890,8 @@ std::string IntegratedEconomy::Save()
 		json services = json::array();
 		for (auto &[id, s] : town_food_services) {
 			services.push_back({id.base(), s.owner.base(), s.selected_rate, s.market_ceiling, s.receiver_capacity,
-			                    s.consumed_history, s.requested_history, s.history_cursor, s.fractional_passenger_remainder});
+			                    s.consumed_history, s.requested_history, s.history_cursor, s.fractional_passenger_remainder,
+			                    s.delivered_this_period, s.delivered_last_period});
 		}
 		j["town_food_services"] = services;
 
@@ -990,7 +991,8 @@ bool IntegratedEconomy::Load(const std::string &data)
 		}
 		if (version == 2 && j.contains("town_food_services")) {
 			for (const auto &v : j.at("town_food_services")) {
-				if (v.size() != 9) return false;
+				/* Saves before the delivery counters were persisted have 9 fields; they load with zero counters. */
+				if (v.size() != 9 && v.size() != 11) return false;
 				TownID town_id{static_cast<uint16_t>(number(v.at(0), UINT16_MAX - 1))};
 				TownFoodService s;
 				s.owner = CompanyID{static_cast<uint8_t>(number(v.at(1), UINT8_MAX))};
@@ -1012,6 +1014,10 @@ bool IntegratedEconomy::Load(const std::string &data)
 				}
 				s.history_cursor = static_cast<uint8_t>(number(v.at(7), 3));
 				s.fractional_passenger_remainder = static_cast<uint32_t>(number(v.at(8), 639));
+				if (v.size() == 11) {
+					s.delivered_this_period = static_cast<uint32_t>(number(v.at(9), UINT32_MAX));
+					s.delivered_last_period = static_cast<uint32_t>(number(v.at(10), UINT32_MAX));
+				}
 				if (s.owner == CompanyID::Invalid()) {
 					if (s.selected_rate != 0 || s.fractional_passenger_remainder != 0) return false;
 					for (size_t idx = 0; idx < 4; ++idx) {

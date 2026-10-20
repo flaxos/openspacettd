@@ -1,0 +1,65 @@
+{
+  "passed": true,
+  "command": [
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/build/openttd_test",
+    "Agent UAT walkthrough captures player-facing windows"
+  ],
+  "source_save": "/home/flax/games/openspacettd/docs/audit/2026-10-20/reserve-pilot/checkpoint-24.sav",
+  "source_save_sha256": "c43318f38d109c4d129e678c429c078e7a47a3e5b244579e7977ebe294ceceef",
+  "binary_sha256": "f9de91889fb8565138c2c0400a9238e04838ad8ce3ab387db6408dff6e86efa3",
+  "config_sha256": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+  "display": "SDL offscreen / software, 1920x1200",
+  "review": "agent",
+  "human_uat": "Pending",
+  "timeout_seconds": 300,
+  "exit_code": 0,
+  "manifest_pass": true,
+  "elapsed_seconds": 26.37666052102577,
+  "source_save_unchanged": true,
+  "screenshots": {
+    "agent_uat_cab_ahead.png": {
+      "bytes": 400075,
+      "sha256": "cab16e80f643f4d04509e981a951fa6bd6008363726a0f037d48a8570f2f5bc6"
+    },
+    "agent_uat_cab_controls_help.png": {
+      "bytes": 359851,
+      "sha256": "8a3f705a8693c17b4dc49d33d4a4dc424d087f5f57d0a21ef16ac566450c2591"
+    },
+    "agent_uat_cab_drag_right_and_up.png": {
+      "bytes": 426697,
+      "sha256": "a528b5d803ba5bd42602b1bb522785285312660b4a39b2722567dc75427ff783"
+    },
+    "agent_uat_cab_keys_look_left.png": {
+      "bytes": 395961,
+      "sha256": "49c3aaffe9d852ee9ef508897bc5e4a3592fb32d34e8fa48c4308b99b1bf34e0"
+    },
+    "agent_uat_cab_wheel_zoom_in.png": {
+      "bytes": 411701,
+      "sha256": "6eb3f67e305fe8ef37b00c9555f6b2f3e45d4d1808488083d4528a9ccf42e5d1"
+    },
+    "agent_uat_facilities_1x.png": {
+      "bytes": 248605,
+      "sha256": "0f22b75be5ba80dd34df7743f745bf0ffef3bc8b793f8e29c87807130c4beb0f"
+    },
+    "agent_uat_facilities_2x.png": {
+      "bytes": 163396,
+      "sha256": "9dd8365e969dc1d2473eae7453435501671ec7265f7ff6c7441ab159bb424ff7"
+    },
+    "agent_uat_megacity_1x.png": {
+      "bytes": 268697,
+      "sha256": "34e8a2b375d8cf8ada4813e20793b0a7eec6233f2367dc98eb41344b5f8865e2"
+    },
+    "agent_uat_megacity_2x.png": {
+      "bytes": 207604,
+      "sha256": "c9b89441958d3536e8fd3dcc9b840e2e52650061449956e3da35260edd4f6238"
+    },
+    "agent_uat_retire_confirmation.png": {
+      "bytes": 257491,
+      "sha256": "907318e723be35b254d31c77753b19a346733305cfe266138c146f44c687a81e"
+    },
+    "agent_uat_retire_declined.png": {
+      "bytes": 248630,
+      "sha256": "08a42ed389d47b9fed5cbe201f8565b2187d01737ba3be9812c32869c880b033"
+    }
+  }
+}

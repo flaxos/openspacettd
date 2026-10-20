@@ -1,0 +1,61 @@
+{
+  "passed": true,
+  "command": [
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/build/openttd_test",
+    "Agent UAT walkthrough captures player-facing windows"
+  ],
+  "source_save": "/home/flax/games/openspacettd/docs/audit/2026-10-20/reserve-pilot/checkpoint-24.sav",
+  "source_save_sha256": "c43318f38d109c4d129e678c429c078e7a47a3e5b244579e7977ebe294ceceef",
+  "binary_sha256": "c0dbc402b3fdd76365c7d0a8ce7e17faa3f938f1b1ce4c9b4a5999fe79847bbc",
+  "config_sha256": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+  "display": "SDL offscreen / software, 1920x1200",
+  "review": "agent",
+  "human_uat": "Pending",
+  "timeout_seconds": 300,
+  "exit_code": 0,
+  "manifest_pass": true,
+  "elapsed_seconds": 26.27340208500391,
+  "source_save_unchanged": true,
+  "screenshots": {
+    "agent_uat_cab_ahead.png": {
+      "bytes": 399912,
+      "sha256": "841b1dacc41521cb047248459222541518c1b6ec7914ec2167ca6c8ca4bccc15"
+    },
+    "agent_uat_cab_drag_right_and_up.png": {
+      "bytes": 426745,
+      "sha256": "8e40900815d8426a6612af419aef35d66f1a376b6acf320bef70bb11420f7b70"
+    },
+    "agent_uat_cab_keys_look_left.png": {
+      "bytes": 395786,
+      "sha256": "e6b410a39afc700eba0c2ce366941a02ad255c407ca8f64b6396acfea903c92a"
+    },
+    "agent_uat_cab_wheel_zoom_in.png": {
+      "bytes": 411598,
+      "sha256": "b509db5ecf2d1d7e77532e656180687b68e89247fbd4fb768e743128e4d419bb"
+    },
+    "agent_uat_facilities_1x.png": {
+      "bytes": 255044,
+      "sha256": "2758e284c7cf6e50146ecdd44a44b17b2863710284da59ecfa701da78d13e24b"
+    },
+    "agent_uat_facilities_2x.png": {
+      "bytes": 181019,
+      "sha256": "4f283b79fc7ab4063219ac0fa93a50368f7d3da4a4cc876622e0b7399020a7d5"
+    },
+    "agent_uat_megacity_1x.png": {
+      "bytes": 276019,
+      "sha256": "dc9e3a08c9d58445b11d38182b4814ec181ea1ab0128dfa1581b595a21ef31ae"
+    },
+    "agent_uat_megacity_2x.png": {
+      "bytes": 218958,
+      "sha256": "40e4593cbb326090bfa8cc293d3f3837ee70a0dbd1a42f055b907c3b32d97091"
+    },
+    "agent_uat_retire_confirmation.png": {
+      "bytes": 263326,
+      "sha256": "fda40ef72584e51dc0778f25862ea0994c600ff4c96f7178752abb3d5451fa2c"
+    },
+    "agent_uat_retire_declined.png": {
+      "bytes": 255066,
+      "sha256": "9cc651dadd3f8bc4904532a27b4829e117cfd3ba2758079e4dfacf5c9f784ace"
+    }
+  }
+}
