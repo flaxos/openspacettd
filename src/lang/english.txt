@@ -4575,6 +4575,7 @@ STR_CAB_VIEW_LOOK_AHEAD                                         :Look ahead
 STR_CAB_VIEW_LOOK_RIGHT                                         :Look right
 STR_CAB_VIEW_VIEW_TOOLTIP                                       :{BLACK}Drag to look around, use the mouse wheel to zoom. While this window is selected: A/D look left/right, W/S look up/down, R looks ahead, B looks behind, +/- zoom, E changes effects
 STR_CAB_VIEW_LOCAL_TRANSIT                                      :Local gate transit
+STR_CAB_VIEW_BRIDGE                                             :Bridge: the view resumes after the crossing
 STR_CAB_VIEW_EFFECT_FULL                                        :Effects: Full
 STR_CAB_VIEW_EFFECT_REDUCED                                     :Effects: Reduced
 STR_CAB_VIEW_EFFECT_OFF                                         :Effects: Off
@@ -6368,6 +6369,8 @@ STR_ERROR_CAN_T_UPGRADE_FACILITY                             :Can't upgrade proc
 STR_ERROR_FACILITY_MAX_CAPACITY                              :Facility has already reached maximum capacity
 STR_ERROR_CAN_T_SET_PLATFORM_CAP                             :Can't set station platform holding target
 STR_EMPIRE_FACILITIES_RETIRE_BTN                                :Retire
+STR_EMPIRE_FACILITIES_RETIRE_CAPTION                            :{WHITE}Retire facility
+STR_EMPIRE_FACILITIES_RETIRE_QUERY                              :{WHITE}Retire {RAW_STRING}?{}The plant is demolished and the cargo in its buffers is lost. This cannot be undone.
 STR_ERROR_CAN_T_REMOVE_FACILITY                                 :Can't decommission processing facility
 STR_VIEWPORT_FACILITY_ACTIVE                                    :{GREEN}[Active]{BLACK} {STATION} {STATION_FEATURES}
 STR_VIEWPORT_FACILITY_STARVED                                   :{RED}[Starved]{BLACK} {STATION} {STATION_FEATURES}

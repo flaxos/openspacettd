@@ -13,6 +13,7 @@
 #include "../portal/production_chain.h"
 #include "../portal/empire_facilities_gui.h"
 #include "../widgets/empire_facilities_widget.h"
+#include "../widgets/misc_widget.h"
 #include "../portal/planet_manager.h"
 #include "../portal/corporate_hq.h"
 #include "../portal/company_stockpile.h"
@@ -934,8 +935,9 @@ TEST_CASE("Sprint 43 / C1 - Legacy platform target button cycles the holding tar
 	NWidgetBase *nwi = w->GetWidget<NWidgetBase>(WID_EF_LIST_PANEL);
 	REQUIRE(nwi != nullptr);
 	Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
-	/* First row, fourth text line, inside the button that ends where the action column's gutter starts. */
-	Point pt_platform{r.right - 156 - 60, r.top + 56};
+	/* First row: the platform button at the end of the fourth text line. */
+	const FacilityRowLayout layout(r.left, r.right, r.top, GetCharacterHeight(FontSize::Normal));
+	Point pt_platform{(layout.platform.left + layout.platform.right) / 2, (layout.platform.top + layout.platform.bottom) / 2};
 
 	for (uint32_t expected : {50u, 100u, 200u, 0u}) {
 		w->OnClick(pt_platform, WID_EF_LIST_PANEL, 1);
@@ -946,6 +948,87 @@ TEST_CASE("Sprint 43 / C1 - Legacy platform target button cycles the holding tar
 	_local_company = COMPANY_SPECTATOR;
 	w->OnClick(pt_platform, WID_EF_LIST_PANEL, 1);
 	CHECK(fac->platform_capacity == 0);
+	_local_company = CompanyID{0};
+
+	w->Close();
+	UnInitWindowSystem();
+}
+
+TEST_CASE("Sprint 43 / C1 - Facility row layout scales with the interface", "[empire-facilities][sprint43][gui]")
+{
+	AutoRestoreBackup scale(_gui_scale, 100);
+	for (int factor : {1, 2}) {
+		_gui_scale = 100 * factor;
+		const int line_height = 13 * factor;
+		const FacilityRowLayout l(0, 738 * factor, 10, line_height);
+		CAPTURE(factor);
+
+		/* The 1x row keeps its original 68 pixel pitch; 2x doubles it. */
+		CHECK(FacilityRowLayout::Height(line_height) == 68 * factor);
+
+		/* Every text line fits the font and stays left of the action column. */
+		for (const Rect &line : l.lines) {
+			CHECK(line.Height() >= line_height);
+			CHECK(line.top >= l.row.top);
+			CHECK(line.bottom <= l.row.bottom);
+			CHECK(line.right < l.works_first.left);
+		}
+
+		/* Buttons stay inside the row and never overlap each other or the text. */
+		const std::array<Rect, 6> buttons{l.works_first, l.works_second, l.retire, l.plant, l.station, l.platform};
+		auto inside = [&](const Rect &b) { return b.left >= l.row.left && b.right <= l.row.right && b.top >= l.row.top && b.bottom <= l.row.bottom; };
+		auto overlap = [](const Rect &a, const Rect &b) { return a.left <= b.right && b.left <= a.right && a.top <= b.bottom && b.top <= a.bottom; };
+		for (size_t a = 0; a < buttons.size(); ++a) {
+			CHECK(inside(buttons[a]));
+			CHECK(buttons[a].Height() >= line_height);
+			for (size_t b = a + 1; b < buttons.size(); ++b) CHECK_FALSE(overlap(buttons[a], buttons[b]));
+		}
+		CHECK(l.works_span.left == l.works_first.left);
+		CHECK(l.works_span.right == l.works_second.right);
+		CHECK_FALSE(overlap(l.works_span, l.retire));
+		CHECK(l.platform.left >= l.text.left);
+		CHECK(l.platform.right <= l.text.right);
+	}
+}
+
+TEST_CASE("Sprint 43 / C1 - Retire asks before demolishing a facility", "[empire-facilities][sprint43][gui]")
+{
+	Station *station = SetupSprint43Environment();
+	IntegratedEconomy::Reset();
+	_current_company = CompanyID{0};
+	_local_company = CompanyID{0};
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	REQUIRE(ProductionChainManager::GetFacilityForStation(station->index) != nullptr);
+
+	ShowEmpireFacilitiesWindow(_local_company);
+	Window *w = FindWindowById(WindowClass::EmpireFacilities, 0);
+	REQUIRE(w != nullptr);
+	Rect r = w->GetWidget<NWidgetBase>(WID_EF_LIST_PANEL)->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
+	const FacilityRowLayout layout(r.left, r.right, r.top, GetCharacterHeight(FontSize::Normal));
+	const Point retire{(layout.retire.left + layout.retire.right) / 2, (layout.retire.top + layout.retire.bottom) / 2};
+
+	/* One click only asks; answering No keeps the facility. */
+	w->OnClick(retire, WID_EF_LIST_PANEL, 1);
+	CHECK(ProductionChainManager::GetFacilityForStation(station->index) != nullptr);
+	Window *query = FindWindowByClass(WindowClass::ConfirmPopupQuery);
+	REQUIRE(query != nullptr);
+	query->OnClick({}, WID_Q_NO, 1);
+	Window::DeleteClosedWindows();
+	CHECK(ProductionChainManager::GetFacilityForStation(station->index) != nullptr);
+
+	/* Answering Yes retires it through the normal command. */
+	w->OnClick(retire, WID_EF_LIST_PANEL, 1);
+	query = FindWindowByClass(WindowClass::ConfirmPopupQuery);
+	REQUIRE(query != nullptr);
+	query->OnClick({}, WID_Q_YES, 1);
+	CHECK(ProductionChainManager::GetFacilityForStation(station->index) == nullptr);
+
+	/* Spectators get no dialog. */
+	REQUIRE(Command<Commands::BuildProcessingFacility>::Do(DoCommandFlag::Execute, station->index, RECIPE_STEEL_SMELTING).Succeeded());
+	Window::DeleteClosedWindows();
+	_local_company = COMPANY_SPECTATOR;
+	w->OnClick(retire, WID_EF_LIST_PANEL, 1);
+	CHECK(FindWindowByClass(WindowClass::ConfirmPopupQuery) == nullptr);
 	_local_company = CompanyID{0};
 
 	w->Close();

@@ -15,7 +15,12 @@
 struct Vehicle;
 
 /** An immutable snapshot of the authoritative train pose for one GUI sample. */
-enum class CabViewPhase : uint8_t { Unsupported, Scene, LocalTransit };
+enum class CabViewPhase : uint8_t {
+	Unsupported,
+	Scene,
+	LocalTransit,
+	Bridge, ///< On or under an ordinary bridge, which the scene does not draw; the view waits for the train to come out.
+};
 /** Transient visual preference of one cab window; never saved or sent to the game. */
 enum class CabViewEffectMode : uint8_t { Full, Reduced, Off };
 

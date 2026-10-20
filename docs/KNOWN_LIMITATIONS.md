@@ -130,7 +130,7 @@ persistent camera/settings, complete composite NewGRF fidelity and platform-wide
 performance acceptance are outside Stage 1. World/access/session/vehicle changes
 must close or disable safely. The initial port suppresses complete tunnel, bridge
 and gate tiles and tiles below bridges, including their ground contribution;
-these can appear as gaps. The cab also closes when its train is beneath a bridge.
+these can appear as gaps. On or under an ordinary bridge the cab now shows a holding screen and resumes afterwards (20 October 2026); bridges themselves are still not drawn.
 This conservative Stage 1 boundary prevents native tunnel reconstruction from
 using a cross-world or invalid gate endpoint; complete appearance is deferred.
 Native SDL offscreen painting, horizontal/vertical resize, look controls, a
