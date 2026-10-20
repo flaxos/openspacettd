@@ -6363,6 +6363,7 @@ STR_EMPIRE_FACILITIES_TAB_PIPE_D                             :D: Data Crystals
 STR_EMPIRE_FACILITIES_REFRESH                                :Refresh
 STR_EMPIRE_FACILITIES_REFRESH_TOOLTIP                        :Refresh industrial metrics and buffer levels
 STR_EMPIRE_FACILITIES_UPGRADE_ALL                            :Upgrade All Facilities (+50 t/mo)
+STR_EMPIRE_FACILITIES_UPGRADE_ALL_BATCHES                       :Upgrade All Facilities (+50 batches/mo)
 STR_EMPIRE_FACILITIES_UPGRADE_ALL_TOOLTIP                    :Upgrade monthly processing capacity for all matching industrial facilities
 STR_MAP_MENU_INDUSTRIAL_FACILITIES                           :Industrial Facilities & Supply Chain
 STR_ERROR_CAN_T_UPGRADE_FACILITY                             :Can't upgrade processing facility capacity
@@ -6487,8 +6488,8 @@ STR_ERROR_OWNED_BY_ANOTHER_COMPANY                              :Service slot ow
 STR_MEGACITY_GROWTH_CORE_STABLE                                 :{GREEN}Stable (No Expansion Commissioned)
 STR_WORKS_CAPACITY_BTN                                          :Capacity
 STR_WORKS_RESERVE_BTN                                           :Reserve
-STR_WORKS_STATUS_CAPACITY                                       :{GREEN}[Capacity Works: 150 batches/mo]
-STR_WORKS_STATUS_RESERVE                                        :{GREEN}[Reserve Works: 600 batch storage]
+STR_WORKS_STATUS_CAPACITY                                       :{GREEN}Capacity Works
+STR_WORKS_STATUS_RESERVE                                        :{GREEN}Reserve Works
 
 # OpenSpaceTTD Commonwealth Works: Freight You Can Read (C1)
 STR_EMPIRE_FACILITIES_LOCATE_PLANT                               :Locate Plant
