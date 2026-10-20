@@ -1,5 +1,14 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Cab look controls — 20 October 2026
+
+**TESTED automated; human UAT Pending.** The cab view gains drag-to-look, wheel zoom
+(field of view in the camera, used by the renderer's projection and culling) and
+focused-window hotkeys, replacing three fixed look buttons as the only control. A pure
+`CabViewLook` holds the window-local state and has a unit test. The window lifecycle
+fixture covers hotkeys, focus, wheel, scroll and recentring. Full Catch and CTest pass,
+and the native SDL cab and gate proofs pass on the new build.
+
 ## Vehicle layers and palettes, Stage 3B — 14 October 2026
 
 **LOCAL bounded engineering acceptance complete; human/content UAT Pending.**

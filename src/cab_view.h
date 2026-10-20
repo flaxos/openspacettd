@@ -65,6 +65,56 @@ struct CabViewEffectTimeline {
 	void CancelCue() { this->arrival_active = false; this->phase_epoch_ms = this->clock_ms; }
 };
 
+/** Window-local look direction and zoom; never saved or sent to the game. */
+struct CabViewLook {
+	static constexpr float MAX_PITCH = 0.5f; ///< Furthest look up or down from the default view, in radians.
+	static constexpr float DEFAULT_FOV = 64.0f; ///< Horizontal field of view in degrees.
+	static constexpr float MIN_FOV = 32.0f; ///< Narrowest zoom, in degrees.
+	static constexpr float MAX_FOV = 96.0f; ///< Widest zoom, in degrees.
+	static constexpr float FOV_STEP = 8.0f; ///< Degrees per wheel notch or zoom key.
+	static constexpr float KEY_STEP = 0.15f; ///< Radians per look key press.
+	static constexpr float SIDE = 0.45f; ///< Yaw of the Look left/right buttons, in radians.
+	static constexpr float PI = 3.14159265358979f;
+
+	float yaw = 0; ///< Offset from the direction of travel in (-pi, pi]; positive looks left.
+	float pitch = 0; ///< Offset from the default view; positive looks up.
+	float fov = DEFAULT_FOV;
+
+	/** Turn by a relative amount, wrapping the yaw and limiting the pitch. */
+	void Turn(float yaw_delta, float pitch_delta)
+	{
+		this->yaw += yaw_delta;
+		while (this->yaw > PI) this->yaw -= 2 * PI;
+		while (this->yaw <= -PI) this->yaw += 2 * PI;
+		this->pitch = std::clamp(this->pitch + pitch_delta, -MAX_PITCH, MAX_PITCH);
+	}
+
+	/**
+	 * Apply a window scroll event, so the scene follows the pointer like a map drag.
+	 * @param dx Horizontal scroll delta from Window::OnScroll.
+	 * @param dy Vertical scroll delta from Window::OnScroll.
+	 * @param view_width Width of the view in pixels; one view width turns by the field of view.
+	 */
+	void Scroll(int dx, int dy, int view_width)
+	{
+		const float per_pixel = this->fov * PI / 180.0f / std::max(view_width, 1);
+		this->Turn(-dx * per_pixel, -dy * per_pixel);
+	}
+
+	/** Zoom by wheel notches; negative zooms in, like the map. */
+	void Zoom(int notches)
+	{
+		this->fov = std::clamp(this->fov + notches * FOV_STEP, MIN_FOV, MAX_FOV);
+	}
+
+	/** Look along the track again, keeping the zoom. */
+	void ResetDirection()
+	{
+		this->yaw = 0;
+		this->pitch = 0;
+	}
+};
+
 /** Classify a physically linked local head and both worlds without retaining a registry pointer. */
 bool CabViewLocalGateVisible(TileIndex tile, WorldID selected_world);
 /** Resolve current presentation from live authoritative state, without game mutation. */
@@ -76,6 +126,8 @@ bool CabViewTransitionResetsLook(const CabViewPresentation &before, const CabVie
 
 bool CanShowCabView(const Vehicle *v);
 void ShowCabViewWindow(const Vehicle *v);
+/** Look state of the open cab on a vehicle, or the default when none is open. */
+CabViewLook GetCabViewLook(VehicleID vehicle);
 /** Opaque local transit drawing, shared by the live widget and isolated profiling. */
 CabViewTransitStats DrawCabViewTransit(const Rect &r, CabViewEffectMode mode, uint32_t elapsed_ms);
 

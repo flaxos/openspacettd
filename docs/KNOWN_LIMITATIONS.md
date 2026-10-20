@@ -1,5 +1,16 @@
 # OpenSpaceTTD Known Limitations
 
+## Cab look controls — 20 October 2026
+
+The cab view now has continuous look controls. Drag the view to look around (right
+button, or left in left-button scroll mode, following the map scroll setting). Use the
+wheel to zoom between 32 and 96 degrees. While the cab window has focus, A/D, W/S, R, B,
++/- and E look, recentre, look behind, zoom and cycle effects. Arrow keys are left to the
+map because OpenTTD scrolls it from key state regardless of focus. Pitch is limited to
+about 29 degrees each way. Look state stays local to the window and is never saved. A
+teleport or world change recentres the direction but keeps the zoom. Wider zoom draws
+more tiles and has not been performance-qualified; human UAT remains **Pending**.
+
 ## Vehicle layers and palettes — Stage 3B, 14 October 2026
 
 The [Stage 3B audit](audit/2026-10-14/cab-view-stage3b/README.md) establishes ordered

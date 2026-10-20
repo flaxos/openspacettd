@@ -44,6 +44,7 @@
 #include "../strings_func.h"
 #include "../table/strings.h"
 #include "../widgets/cab_view_widget.h"
+#include "../hotkeys.h"
 #include "../safeguards.h"
 #include "../window_func.h"
 #include "../window_gui.h"
@@ -194,6 +195,45 @@ TEST_CASE("Cab window is singleton and closes on session change or train deletio
 	CHECK(first->GetWidgetString(WID_CV_EFFECT, STR_NULL) == GetString(STR_CAB_VIEW_EFFECT_REDUCED));
 	first->OnClick({0, 0}, WID_CV_EFFECT, 1);
 	CHECK(first->GetWidgetString(WID_CV_EFFECT, STR_NULL) == GetString(STR_CAB_VIEW_EFFECT_OFF));
+	first->OnClick({0, 0}, WID_CV_EFFECT, 1);
+	CHECK(first->GetWidgetString(WID_CV_EFFECT, STR_NULL) == GetString(STR_CAB_VIEW_EFFECT_FULL));
+
+	/* Keyboard look controls act only while the cab window has focus. */
+	REQUIRE(first->window_desc.hotkeys != nullptr);
+	auto key = [&](uint16_t keycode) { return first->OnHotkey(first->window_desc.hotkeys->CheckMatch(keycode)); };
+	REQUIRE(_focused_window == first);
+	CHECK(key('A') == EventState::Handled);
+	CHECK(GetCabViewLook(train->index).yaw == Approx(CabViewLook::KEY_STEP));
+	CHECK(key('W') == EventState::Handled);
+	CHECK(GetCabViewLook(train->index).pitch == Approx(CabViewLook::KEY_STEP));
+	CHECK(key(WKC_EQUALS) == EventState::Handled);
+	CHECK(GetCabViewLook(train->index).fov == CabViewLook::DEFAULT_FOV - CabViewLook::FOV_STEP);
+	CHECK(key('B') == EventState::Handled);
+	CHECK(GetCabViewLook(train->index).yaw == Approx(CabViewLook::PI));
+	CHECK(key('E') == EventState::Handled);
+	CHECK(first->GetWidgetString(WID_CV_EFFECT, STR_NULL) == GetString(STR_CAB_VIEW_EFFECT_REDUCED));
+	CHECK(key('R') == EventState::Handled);
+	CHECK(GetCabViewLook(train->index).yaw == 0);
+	CHECK(GetCabViewLook(train->index).pitch == 0);
+	CHECK(GetCabViewLook(train->index).fov == CabViewLook::DEFAULT_FOV - CabViewLook::FOV_STEP);
+	SetFocusedWindow(nullptr);
+	CHECK(key('A') == EventState::NotHandled);
+	CHECK(GetCabViewLook(train->index).yaw == 0);
+	SetFocusedWindow(first);
+
+	/* The wheel zooms and a scroll event turns the view; the Look ahead button recentres it. */
+	first->OnMouseWheel(1, WID_CV_VIEW);
+	CHECK(GetCabViewLook(train->index).fov == CabViewLook::DEFAULT_FOV);
+	first->OnMouseWheel(1, WID_CV_EFFECT);
+	CHECK(GetCabViewLook(train->index).fov == CabViewLook::DEFAULT_FOV);
+	first->OnScroll({-20, 0});
+	CHECK(GetCabViewLook(train->index).yaw > 0);
+	first->OnClick({0, 0}, WID_CV_AHEAD, 1);
+	CHECK(GetCabViewLook(train->index).yaw == 0);
+	CHECK(first->OnRightClick({0, 0}, WID_CV_VIEW) == (_settings_client.gui.scroll_mode != ViewportScrollMode::MapLMB));
+	_scrolling_viewport = false;
+	_cursor.fix_at = false;
+	first->OnClick({0, 0}, WID_CV_EFFECT, 1);
 	first->OnClick({0, 0}, WID_CV_EFFECT, 1);
 	CHECK(first->GetWidgetString(WID_CV_EFFECT, STR_NULL) == GetString(STR_CAB_VIEW_EFFECT_FULL));
 	ShowCabViewWindow(train);
@@ -402,6 +442,58 @@ TEST_CASE("Cab sprite collection preserves pending viewport state", "[cab-view]"
 	std::vector<GroundSpriteToDraw> ground;
 	CollectTileGroundSprites(INVALID_TILE, ground);
 	CHECK(ground.empty());
+}
+
+TEST_CASE("Cab look turns wraps clamps and zooms locally", "[cab-view]")
+{
+	CabViewLook look;
+	CHECK(look.fov == CabViewLook::DEFAULT_FOV);
+
+	/* Dragging the pointer right by one view width (scroll delta -width) turns left by the field of view. */
+	look.Scroll(-400, 0, 400);
+	CHECK(look.yaw == Approx(CabViewLook::DEFAULT_FOV * CabViewLook::PI / 180.0f));
+	/* Dragging up (scroll delta +y) pulls the scene up, so the view tilts down. */
+	look.Scroll(0, 40, 400);
+	CHECK(look.pitch < 0);
+
+	/* Yaw wraps into (-pi, pi]; pitch stops at the limit. */
+	look.Turn(CabViewLook::PI, 0);
+	CHECK(look.yaw > -CabViewLook::PI);
+	CHECK(look.yaw <= CabViewLook::PI);
+	CHECK(look.yaw == Approx(CabViewLook::DEFAULT_FOV * CabViewLook::PI / 180.0f - CabViewLook::PI));
+	look.Turn(0, -10);
+	CHECK(look.pitch == -CabViewLook::MAX_PITCH);
+	look.Turn(0, 20);
+	CHECK(look.pitch == CabViewLook::MAX_PITCH);
+
+	/* Wheel notches zoom like the map and stop at the limits. */
+	look.Zoom(-1);
+	CHECK(look.fov == CabViewLook::DEFAULT_FOV - CabViewLook::FOV_STEP);
+	look.Zoom(-100);
+	CHECK(look.fov == CabViewLook::MIN_FOV);
+	look.Zoom(100);
+	CHECK(look.fov == CabViewLook::MAX_FOV);
+
+	/* A wider view turns further per pixel, so the scene still follows the pointer. */
+	CabViewLook wide;
+	wide.Zoom(2);
+	CabViewLook narrow;
+	narrow.Zoom(-2);
+	wide.Scroll(-10, 0, 400);
+	narrow.Scroll(-10, 0, 400);
+	CHECK(wide.yaw > narrow.yaw);
+
+	/* Looking ahead again recentres the direction but keeps the zoom. */
+	look.ResetDirection();
+	CHECK(look.yaw == 0);
+	CHECK(look.pitch == 0);
+	CHECK(look.fov == CabViewLook::MAX_FOV);
+
+	/* The renderer's frame cache must notice a zoom change. */
+	CabViewCamera camera;
+	CabViewCamera zoomed = camera;
+	zoomed.fov = look.fov;
+	CHECK_FALSE(camera == zoomed);
 }
 
 TEST_CASE("Cab effect clock handles paint-first tick-first and missed-transit arrival", "[cab-view]")

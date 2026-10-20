@@ -26,6 +26,8 @@
 #include "video/video_driver.hpp"
 #include "blitter/factory.hpp"
 #include "strings_func.h"
+#include "hotkeys.h"
+#include "settings_type.h"
 #include "widgets/cab_view_widget.h"
 #include "table/strings.h"
 
@@ -119,7 +121,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_cab_view_widgets = {
 		NWidget(WWT_STICKYBOX, Colours::Grey),
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Grey), SetFill(1, 1), SetResize(1, 1),
-		NWidget(WWT_EMPTY, Colours::Invalid, WID_CV_VIEW), SetMinimalSize(400, 240), SetResize(1, 1), SetFill(1, 1),
+		NWidget(WWT_EMPTY, Colours::Invalid, WID_CV_VIEW), SetMinimalSize(400, 240), SetResize(1, 1), SetFill(1, 1), SetToolTip(STR_CAB_VIEW_VIEW_TOOLTIP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_TEXTBTN, Colours::Grey, WID_CV_LEFT), SetStringTip(STR_CAB_VIEW_LOOK_LEFT, STR_CAB_VIEW_LOOK_LEFT),
@@ -169,12 +171,25 @@ CabViewTransitStats DrawCabViewTransit(const Rect &r, CabViewEffectMode mode, ui
 	return {effect_us, static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count())};
 }
 
+/** Keyboard look controls; they act only while the cab window has focus. */
+enum class CabViewHotkey : int {
+	LookLeft,
+	LookRight,
+	LookUp,
+	LookDown,
+	LookAhead,
+	LookBehind,
+	ZoomIn,
+	ZoomOut,
+	Effect,
+};
+
 struct CabViewWindow : Window {
 	VehicleID vehicle_id;
 	CompanyID company;
 	std::chrono::steady_clock::time_point session_start;
 	std::string savegame_id;
-	mutable float look_offset = 0;
+	mutable CabViewLook look; ///< Transient; a teleport or world change recentres it.
 	mutable uint32_t frame_id = 0;
 	mutable bool has_previous = false;
 	mutable CabViewPresentation previous{};
@@ -210,7 +225,7 @@ struct CabViewWindow : Window {
 		const bool transition = this->has_previous && CabViewTransitionRequiresReset(this->previous, state);
 		this->timeline.Observe(this->previous, state, this->has_previous, transition);
 		if (transition) {
-			if (CabViewTransitionResetsLook(this->previous, state)) this->look_offset = 0;
+			if (CabViewTransitionResetsLook(this->previous, state)) this->look.ResetDirection();
 			ResetCabView3D();
 			this->frame_id = 0;
 		}
@@ -252,7 +267,9 @@ struct CabViewWindow : Window {
 		camera.x = static_cast<float>(state.x);
 		camera.y = static_cast<float>(state.y);
 		camera.z = static_cast<float>(state.z) + 4.0f;
-		camera.yaw = std::atan2(dy, dx) + this->look_offset;
+		camera.yaw = std::atan2(dy, dx) + this->look.yaw;
+		camera.pitch = this->look.pitch;
+		camera.fov = this->look.fov;
 		camera.vehicle = this->vehicle_id;
 		camera.world = state.world;
 		camera.effect_mode = this->effect_mode;
@@ -277,20 +294,90 @@ struct CabViewWindow : Window {
 	{
 		if (this->CurrentPresentation().phase == CabViewPhase::Unsupported) { this->Close(); return; }
 		switch (widget) {
-			case WID_CV_LEFT: this->look_offset = 0.45f; break;
-			case WID_CV_AHEAD: this->look_offset = 0; break;
-			case WID_CV_RIGHT: this->look_offset = -0.45f; break;
-			case WID_CV_EFFECT:
-				this->effect_mode = this->effect_mode == CabViewEffectMode::Full ? CabViewEffectMode::Reduced :
-					this->effect_mode == CabViewEffectMode::Reduced ? CabViewEffectMode::Off : CabViewEffectMode::Full;
-				this->timeline.CancelCue();
-				this->SetWidgetDirty(WID_CV_EFFECT);
-				break;
+			case WID_CV_VIEW:
+				/* Left-drag looks around only where it also scrolls the map. */
+				if (_settings_client.gui.scroll_mode != ViewportScrollMode::MapLMB) return;
+				_scrolling_viewport = true;
+				_cursor.fix_at = false;
+				return;
+			case WID_CV_LEFT: this->look.yaw = CabViewLook::SIDE; break;
+			case WID_CV_AHEAD: this->look.ResetDirection(); break;
+			case WID_CV_RIGHT: this->look.yaw = -CabViewLook::SIDE; break;
+			case WID_CV_EFFECT: this->CycleEffect(); break;
 			default: return;
 		}
+		this->LookChanged();
+	}
+
+	bool OnRightClick([[maybe_unused]] Point pt, WidgetID widget) override
+	{
+		if (widget != WID_CV_VIEW || _scrolling_viewport || _settings_client.gui.scroll_mode == ViewportScrollMode::MapLMB) return false;
+		_scrolling_viewport = true;
+		_cursor.fix_at = _settings_client.gui.scroll_mode == ViewportScrollMode::ViewportRMBFixed ||
+			_settings_client.gui.scroll_mode == ViewportScrollMode::MapRMBFixed;
+		return true;
+	}
+
+	void OnScroll(Point delta) override
+	{
+		if (this->CurrentPresentation().phase == CabViewPhase::Unsupported) { this->Close(); return; }
+		this->look.Scroll(delta.x, delta.y, this->GetWidget<NWidgetBase>(WID_CV_VIEW)->current_x);
+		this->LookChanged();
+	}
+
+	void OnMouseWheel(int wheel, WidgetID widget) override
+	{
+		if (widget != WID_CV_VIEW || _settings_client.gui.scrollwheel_scrolling == ScrollWheelScrolling::Off) return;
+		this->look.Zoom(wheel);
+		this->LookChanged();
+	}
+
+	EventState OnHotkey(int hotkey) override
+	{
+		if (_focused_window != this) return EventState::NotHandled;
+		switch (static_cast<CabViewHotkey>(hotkey)) {
+			case CabViewHotkey::LookLeft: this->look.Turn(CabViewLook::KEY_STEP, 0); break;
+			case CabViewHotkey::LookRight: this->look.Turn(-CabViewLook::KEY_STEP, 0); break;
+			case CabViewHotkey::LookUp: this->look.Turn(0, CabViewLook::KEY_STEP); break;
+			case CabViewHotkey::LookDown: this->look.Turn(0, -CabViewLook::KEY_STEP); break;
+			case CabViewHotkey::LookAhead: this->look.ResetDirection(); break;
+			case CabViewHotkey::LookBehind: this->look.yaw = CabViewLook::PI; this->look.pitch = 0; break;
+			case CabViewHotkey::ZoomIn: this->look.Zoom(-1); break;
+			case CabViewHotkey::ZoomOut: this->look.Zoom(1); break;
+			case CabViewHotkey::Effect: this->CycleEffect(); break;
+			default: return EventState::NotHandled;
+		}
+		this->LookChanged();
+		return EventState::Handled;
+	}
+
+	/** Step the arrival effect through Full, Reduced and Off. */
+	void CycleEffect()
+	{
+		this->effect_mode = this->effect_mode == CabViewEffectMode::Full ? CabViewEffectMode::Reduced :
+			this->effect_mode == CabViewEffectMode::Reduced ? CabViewEffectMode::Off : CabViewEffectMode::Full;
+		this->timeline.CancelCue();
+		this->SetWidgetDirty(WID_CV_EFFECT);
+	}
+
+	/** Repaint the view after a local look, zoom or effect change. */
+	void LookChanged()
+	{
 		this->frame_id++;
 		this->SetWidgetDirty(WID_CV_VIEW);
 	}
+
+	static inline HotkeyList hotkeys{"cab_view", {
+		Hotkey('A', "look_left", CabViewHotkey::LookLeft),
+		Hotkey('D', "look_right", CabViewHotkey::LookRight),
+		Hotkey('W', "look_up", CabViewHotkey::LookUp),
+		Hotkey('S', "look_down", CabViewHotkey::LookDown),
+		Hotkey('R', "look_ahead", CabViewHotkey::LookAhead),
+		Hotkey('B', "look_behind", CabViewHotkey::LookBehind),
+		Hotkey({WKC_EQUALS, WKC_NUM_PLUS}, "zoom_in", CabViewHotkey::ZoomIn),
+		Hotkey({WKC_MINUS, WKC_NUM_MINUS}, "zoom_out", CabViewHotkey::ZoomOut),
+		Hotkey('E', "effect", CabViewHotkey::Effect),
+	}};
 
 	void OnRealtimeTick(uint delta_ms) override
 	{
@@ -306,7 +393,8 @@ struct CabViewWindow : Window {
 static WindowDesc _cab_view_desc(
 	WindowPosition::Automatic, "cab_view_train", 480, 300,
 	WindowClass::VehicleCabView, WindowClass::VehicleView,
-	{}, _nested_cab_view_widgets
+	{}, _nested_cab_view_widgets,
+	&CabViewWindow::hotkeys
 );
 
 void ShowCabViewWindow(const Vehicle *v)
@@ -314,4 +402,10 @@ void ShowCabViewWindow(const Vehicle *v)
 	if (!CanShowCabView(v)) return;
 	CloseWindowByClass(WindowClass::VehicleCabView);
 	AllocateWindowDescFront<CabViewWindow>(_cab_view_desc, v->index);
+}
+
+CabViewLook GetCabViewLook(VehicleID vehicle)
+{
+	const CabViewWindow *w = dynamic_cast<const CabViewWindow *>(FindWindowById(WindowClass::VehicleCabView, vehicle));
+	return w != nullptr ? w->look : CabViewLook{};
 }

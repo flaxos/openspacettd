@@ -90,7 +90,8 @@ constexpr float MAX_FOG_LIFT = 15.0f * TILE; ///< How much further away the haze
 constexpr float AIRCRAFT_UNITS = 0.4f; ///< Size of a sprite pixel of an aircraft, in world units.
 constexpr float SHIP_UNITS = 0.4f; ///< Size of a sprite pixel of a ship, in world units.
 constexpr float SHIP_MIN_UPRIGHT = 0.4f; ///< How much the sprite of a ship seen from straight ahead or behind is shrunk upwards, see #Renderer::AddShip.
-constexpr float FOV_DEG = 64.0f; ///< Horizontal field of view.
+constexpr float MIN_FOV_DEG = 10.0f; ///< Narrowest horizontal field of view the projection accepts.
+constexpr float MAX_FOV_DEG = 120.0f; ///< Widest horizontal field of view the projection accepts.
 constexpr float PITCH_DEG = -6.0f; ///< How much the camera looks down.
 constexpr float NEAR = 0.5f; ///< Near clipping distance.
 constexpr float DETAIL_DIST = 6.0f * TILE; ///< Distance where the fine pattern on walls and roofs has faded out.
@@ -5275,7 +5276,8 @@ void Renderer::Draw(const Rect &r, const CabViewCamera &camera, uint32_t frame_i
 	this->cam.right = flat_fwd.Cross(world_up);
 	this->cam.fwd = flat_fwd * std::cos(pitch) + world_up * std::sin(pitch);
 	this->cam.up = world_up * std::cos(pitch) - flat_fwd * std::sin(pitch);
-	this->cam.focal = (this->width / 2.0f) / std::tan(FOV_DEG / 2 * static_cast<float>(M_PI) / 180.0f);
+	const float fov = std::clamp(camera.fov, MIN_FOV_DEG, MAX_FOV_DEG);
+	this->cam.focal = (this->width / 2.0f) / std::tan(fov / 2 * static_cast<float>(M_PI) / 180.0f);
 	this->cam.cx = this->width / 2.0f;
 	this->cam.cy = this->height / 2.0f;
 

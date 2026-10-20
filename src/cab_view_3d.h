@@ -39,6 +39,7 @@ struct CabViewCamera {
 	float z = 0; ///< Height of the eye, in world coordinates.
 	float yaw = 0; ///< Direction of view in radians; 0 looks towards +x, pi/2 towards +y.
 	float pitch = 0; ///< Tilt of the view in radians, upwards positive, on top of the slight look down of the 3D view.
+	float fov = 64.0f; ///< Horizontal field of view in degrees.
 	float altitude = 0; ///< How high above the ground an aircraft flies; the haze then starts further away, as the ground is seen from above.
 	VehicleID vehicle = VehicleID::Invalid(); ///< The vehicle the camera rides on, which is not drawn.
 	WorldID world = INVALID_WORLD; ///< World selected when this cab window opened.
