@@ -139,6 +139,12 @@ bool PrepareWorks();
 /** Commission alternative raw-resource connection on World 3 with independent portal link. */
 bool ConnectWorldSource(nlohmann::json &report);
 
+/** Commission Pipeline B research freight chain and surveyed Rare Earth opportunity. */
+bool CommissionResearchChain(nlohmann::json &report);
+
+/** Test atomic escrow reservation, insufficient kit rejection, and refund negative paths. */
+bool TestResearchNegativePaths(nlohmann::json &report);
+
 /** Control closure of primary World 2 silica corridor. */
 bool SetPrimaryCorridorClosed(bool closed);
 

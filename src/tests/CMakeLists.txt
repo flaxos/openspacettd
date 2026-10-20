@@ -1,4 +1,13 @@
 add_test_files(
+    test_commonwealth_construction_policy.cpp
+    test_first_line_funding.cpp
+    test_first_line_approach.cpp
+    test_first_permanent_line.cpp
+    test_world0_opening.cpp
+    test_world0_startup.cpp
+    test_world0_routes.cpp
+    test_world0_script.cpp
+    test_train_purchase_compatibility.cpp
     test_commonwealth_works.cpp
     test_core_construction_basket.cpp
     test_fleet_shuttle_growth.cpp
@@ -124,6 +133,29 @@ foreach(case IN ITEMS
     endif()
 endforeach()
 
+# Vale FIFO cases install a test-local video driver. Keep each in its own
+# process so the native graphics singleton cannot leak into other fixtures.
+if(UNIX)
+    foreach(case IN ITEMS
+        "Vale startup bridge defers a real FIFO exec beyond modal cleanup"
+        "Vale bridge rejects malformed paths and unrelated startup states without mutation"
+        "Vale queued bridge rechecks native admission before opening its FIFO"
+        "Vale bridge admits only a validated loaded World 0 opening"
+        "Vale completion emits its native briefing and receipt without a main viewport"
+        "Vale completion replaces editor chrome and scrolls a real main viewport"
+    )
+        string(MAKE_C_IDENTIFIER "${case}" case_name)
+        add_test(NAME "${case_name}" COMMAND openttd_test "${case}")
+        set_tests_properties("${case_name}" PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+            TIMEOUT 30 LABELS "integration;world0-startup")
+        if(case STREQUAL "Vale completion replaces editor chrome and scrolls a real main viewport")
+            set_tests_properties("${case_name}" PROPERTIES
+                ENVIRONMENT "OSTTD_TEST_BINARY=$<TARGET_FILE:openttd_test>"
+                LABELS "integration;requires-baseset;world0-startup")
+        endif()
+    endforeach()
+endif()
+
 add_test(NAME WP09_GUI_establishment_and_process_reload
     COMMAND "${CMAKE_COMMAND}"
         "-DTEST_BINARY=$<TARGET_FILE:openttd_test>"
@@ -134,9 +166,21 @@ set_tests_properties(WP09_GUI_establishment_and_process_reload PROPERTIES
 
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
+    add_test(NAME Commonwealth_construction_policy_cold_process_reload
+        COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_commonwealth_construction_policy.py"
+            "$<TARGET_FILE:openttd_test>" --artifact-root "${CMAKE_BINARY_DIR}/Testing/construction-policy")
+    set_tests_properties(Commonwealth_construction_policy_cold_process_reload PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" TIMEOUT 280 LABELS "integration;requires-baseset;construction-policy")
     add_test(NAME Stellar_directory_authentication_and_restart
         COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_stellar_directory.py")
     if(UNIX)
+        foreach(mode IN ITEMS classic v1 v2)
+            add_test(NAME Commonwealth_construction_policy_native_relay_${mode}
+                COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_command_authority_network.py"
+                    "$<TARGET_FILE:openttd_test>" --construction-policy ${mode})
+            set_tests_properties(Commonwealth_construction_policy_native_relay_${mode} PROPERTIES
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" TIMEOUT 90 LABELS "integration;construction-policy")
+        endforeach()
         add_test(NAME Megacity_designation_native_relay_and_reload
             COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/test_command_authority_network.py"
                 "$<TARGET_FILE:openttd_test>" --megacity-designation)

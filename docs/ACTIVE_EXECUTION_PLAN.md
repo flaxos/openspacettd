@@ -463,6 +463,113 @@ wording. The Stage 3A section above is the current authority for its bounded sco
 
 # Owner decision, 2026-10-03: unlimited offline development money
 
+## Vale Railway publication — source and automated proof
+
+The optional Aster Vale founding scenario is ready for draft review, stacked on
+PR83. It adds a native persistent objective observer, pure GameScript queries,
+empty-stock authored assistance and isolated bounded preparation/proof tools.
+The freight purchase list now accepts physically compatible unpowered wagons;
+locomotive power checks remain. Native LORE and purchase-test fixtures repair
+base-graphics and stale signal-buffer prerequisites without weakening assertions.
+
+Prior local proof passed preparation/service/fresh reload at 0/9/4 evaluations and
+actual SDL purchase of one empty 40 BALL wagon for93GBP with zero added evaluations.
+Publication integration and exact-head CI are separately recorded. Human desktop
+comprehension, enjoyment and pacing remain pending; inherited modular car artwork
+is cosmetic and unchanged. The broader Reserve/FOOD pilot is not accepted.
+[Scenario guide](VALE_RAILWAY.md) and [sanitised engineering evidence](audit/2026-10-12/vale-railway-publication/README.md).
+
+
+## Active execution slice — One Material-Funded Research Unlock: P1 (11 October 2026)
+
+Owner authorized the "One Material-Funded Research Unlock" (Card P1) execution slice from `/home/flax/Documents/Codex/2026-10-11/task/feature-delivery/OPENSPACETTD-FEATURE-DELIVERY-PLAN.md` on branch `codex/capacity-or-reserve-pilot` following C0/C1 delivery and preflight approval:
+- **Principle**: The railway physically manufactures a capability the player can point to: real delivered materials complete Materials III and expose an existing advanced resource opportunity.
+- **Ruleset**: Opt-in experimental V2 rules (`EconomyRulesVersion::V2`) on the connected 4-world fixture. V1 and legacy rules remain default; existing saves and normal new games are 100% preserved.
+- **Scope & Implementation**:
+  - **Corporate HQ & Baseline Prerequisites**: Corporate HQ founded on World 0 (`TileXY(70, 60)`, £2.5M capital expenditure). Baseline Materials I (100 RP) authored; baseline Materials II (250 RP, £250,000 cash budget) unlocked via server research commands, unlocking legal extraction of Copper (`COPR`) and Silica (`SAND`), plus recipes for Wire (`RECIPE_COPPER_SMELTING`) and Chips (`RECIPE_SILICON_ARC`).
+  - **Feedstock Acceleration**: Explicitly turned OFF (`CmdSetResearchAcceleration(false)`) so delivered `CHIP` cannot be burned for monthly RP.
+  - **Physical Kit Freight Delivery**:
+    * Iron mine (14) -> Steel furnace (5) -> HQ warehouse (0): 40 `STEL`.
+    * Copper mine (15) -> Copper smelter (7): `COPR -> WIRE`.
+    * Silica dunes (16) -> Silicon works (8): `SAND`.
+    * Copper smelter (7) -> Silicon works (8): `WIRE`.
+    * Silicon works (8) -> HQ warehouse (0): `2 SAND + 1 WIRE -> 1 CHIP` (20 `CHIP`).
+    * Both cargos physically delivered and unloaded at Stop 0 into the World 0 company stockpile.
+  - **Negative Paths & Atomic Escrow**:
+    * Calling `PrepareResearch(CompanyID{0}, TECH_MATERIALS_3)` when stock < 40 STEL or < 20 CHIP fails/rejected.
+    * With kit present, selecting `TECH_MATERIALS_3` reserves 40 STEL + 20 CHIP into escrow (`research[company].reserved`).
+    * Cancelling/switching project restores 40 STEL + 20 CHIP back into World 0 stockpile without loss or duplication.
+  - **Unlock & Site Visibility**:
+    * Funding 600 RP (£600,000 cash budget) consumes the escrowed kit via `FinishResearch()`, unlocks `TECH_MATERIALS_3`.
+    * Surveyed 16x16 Rare Earth site on World 2 at Node 17 changes from undiscovered (`Discovered() == false`) to discoverable (`Discovered() == true`).
+  - **Cold Reload Equality**: Fresh-process reload at completion checkpoint, 4 subsequent monthly evaluations, verifying identical state, persistent unlock, persistent site discovery, and 100% cargo conservation.
+- **Execution Budget & Non-Goals**:
+  - Run capped at 36 actual economy evaluations or 45 execution minutes; reload probe capped at 4 evaluations/5 minutes.
+  - No new recipe, city HyperGrowth basket, Materials IV, maglev, full A–D campaign, normal-new-game rollout, price tuning or federation.
+  - Delivery boundary: Local review-ready delivery on `codex/capacity-or-reserve-pilot`. No remote push, no PR creation, no merge.
+
+## Active execution slice — Freight You Can Read: C1 (11 October 2026)
+
+Owner authorized the "Freight You Can Read" (Card C1) execution slice from `/home/flax/Documents/Codex/2026-10-11/task/feature-delivery/OPENSPACETTD-FEATURE-DELIVERY-PLAN.md` on branch `codex/capacity-or-reserve-pilot` following C0 pilot correction and acceptance:
+- **Principle**: Clear, honest, and actionable understanding of owned industrial facilities and physical logistics directly within the existing game UI.
+- **Ruleset**: Applied to the existing Facilities window (`empire_facilities_gui.cpp`) across all modes, with enhanced V2 works integration and strict preservation of legacy/V1 fallbacks.
+- **Scope & Implementation**:
+  - **Active Recipe & Units**: Displays recipe name, exact input/output cargo ratios (e.g. `2 Silica Sand -> 2 Trackbed Ballast`), rated throughput (`Rated: X batches/mo`), and observed completed-period production (`Last mo: Y batches` or `[Unavailable]`). Eliminates misleading `t/mo` units in integrated modes.
+  - **First Limiting Bottleneck**: Diagnoses and displays the first limiting constraint on the plant using authoritative rules: technology locked (`[Locked: Requires ...]`), blocked output (`[Blocked: Output <Cargo> Full (<amt>/<cap>)]`), missing input (`[Starved: Missing <Cargo> (0/<req> per batch)]`), partial input (`[Starved: Insufficient <Cargo> (<amt>/<req> for batch)]`), operational production (`[Active: <last>/<cap> batches/mo]`), or buffered ready (`[Ready: <batches> batches buffered]`).
+  - **Factory Buffers vs World Stockpile**: Explicitly distinguishes machine input/output buffers from company planetary construction stockpiles. Shows exact buffer quantities, capacities, and complete batches permitted (`permits X batches`) without speculative forecasting.
+  - **Works Effects & Queried Cost**: In V2 rules, displays works bill (`160 STEL + 80 BALL`), queried command cost via `DoCommandFlag::Query` (£50,000), active Capacity (+50% throughput, 150 batches/mo) or Reserve (2x input buffer, 600 batch storage) effects, and local planetary warehouse stock.
+  - **Role vs Phase Separation**: Queries and displays world economic role (`Core`, `Industrial`, `Frontier`) distinctly from development phase (`Phase 1 Core`, `Phase 2 Developed`, `Phase 3 Frontier`, `Phase 4 Expansion`).
+  - **Asset Navigation & Controls**: Interactive `[Locate Plant]` (centers on factory tile `f.tile`) and `[Locate Station]` / `[Locate Hub]` (centers on station `st->xy` or planetary logistics hub `hub.tile`). Preserves V2 commissioning buttons (`[Capacity]`, `[Reserve]`, `[Retire]`) with foreign/spectator disablement.
+  - **Query Purity Contract**: Opening, painting, resizing, tooltips, and navigation clicks strictly execute pure reads; zero simulation commands dispatched and zero game state mutated.
+- **Verification & Non-Goals**:
+  - No new telemetry database, notification system, dispatch AI, timetable optimizer, or economic balance modifications.
+  - Unit & GUI regressions in `src/tests/test_sprint43_empire_facilities.cpp`.
+  - Delivery boundary: Local review-ready patch on `codex/capacity-or-reserve-pilot`. No remote push, no PR creation, no merge, and no starting P1.
+
+## Commonwealth Pilot Correction and Acceptance Supplement (11 October 2026)
+
+Owner authorized the "Commonwealth Pilot Correction and Acceptance" task on the PR #82 stack (`codex/capacity-or-reserve-pilot`, reviewed checkpoint `20ede820d0b9ac1670dd1ed3606df68d50073d1b`), resolving the five correction packages from `/home/flax/Documents/Codex/2026-10-10/task-4/OpenSpaceTTD-Sprint1-five-issue-takeover-plan-20261011.md` without reverting Sprint 2 or 3 features:
+
+### 1. Corrected Packages on Current Source
+- **Package 1 (Food Service Retirement & Lifecycle Resets)**:
+  - Distinct company deletion vs acquisition vs owner Off handling in `IntegratedEconomy::ChangeCompany`. Deletion resets `TownFoodService` state (wiping history, cursor, and fractional remainder) while preserving town-level food reserves; acquisition transfers ownership cleanly.
+  - Recommissioning uncommissioned or retired slots (`CmdSetTownFoodServiceRate`) resets to baseline (four zero periods).
+  - Foreign company commands fail with `STR_ERROR_OWNED_BY_ANOTHER_COMPANY`; spectators fail with `CMD_ERROR`.
+- **Package 2 (Strict V2 Save Invariants)**:
+  - Strict validation in `IntegratedEconomy::Load`: enforces exact `(work, throughput, input_cap, output_cap)` tuples for None `(0, 100, 300, 300)`, Capacity `(1, 150, 300, 300)`, and Reserve `(2, 100, 600, 300)`.
+  - Rates strictly restricted to `{0, 10, 20, 40}`; market ceiling 40; receiver capacity 60; history bounds `0 <= consumed[i] <= requested[i] <= 40`; history cursor 0–3; remainder 0–639.
+  - Invalid owner inactive defaults supported; neutral factory ownership preserved.
+  - Transactional rollback on parse or invariant failure.
+  - Cross-reference and Core world role validation in `IntegratedEconomy::ValidateAfterLoad`. Bounded passenger bonus (+25% max); unaffected mail generation.
+- **Package 3 (Reconciled GUI Controls & Feedback)**:
+  - `megacity_gui.cpp`: Button-only hit testing for rate cycling; disabled styling for spectator and foreign company contexts; chronological history display with fraction met; explicit received vs consumed displays; evaluation boundary (`Evaluates 1st of month`) noted.
+  - `empire_facilities_gui.cpp`: `Upgrade All` button visibly disabled in V2; displays explicit works bill (`£50k + 160 STEL/80 BALL`), throughput and capacities (`Cap: .../mo | Buffers: ... in, ... out`), and local stockpile stock.
+- **Package 4 (Truthful Runner & Offline Guards)**:
+  - `scripts/verify_commonwealth_works.py`: Reconciled advance count with monthly evaluation events using a monotonic identifier; records V2 service history (`food_rate`, `food_consumed_history`, `food_requested_history`, `food_reserve`, `food_delivered_last`, `evaluations_observed`); validates £50k commissioning cash debit; retains partial/error reports on failure in cleanup path.
+  - `scripts/test_verify_runner_guards.py`: 7/7 offline unit tests passing in 0.001s with zero engine processes launched.
+- **Package 5 (Physical Pilot Preparation)**:
+  - In `src/portal/connected_economy.cpp`, removed direct `StockpileManager::AddCargo` seed of 160 STEL / 80 BALL; routed TrainRoute 2 (BALL) and 7 (STEL) to Industrial warehouse Stop(30) in World 1.
+  - Exposed V2 service fields in `Snapshot().cities` and `advance` audit output (`city_months`).
+
+### 2. Truthful Acceptance Checks for Sprints 2 & 3
+- Added Catch2 automated test cases in `src/tests/test_commonwealth_works.cpp` verifying:
+  - **Sprint 2**: Material debit, legal road frontage requirement, house shell construction at stage 0, tile progression through native ticks to `TOWN_HOUSE_COMPLETED`, population credit (+232 citizens), and permanent demolition immunity (`IsHousePlayerProtected`) under food service shutoff.
+  - **Sprint 3**: Commissioning of alternate Silica extraction on World 3, direct portal delivery to Ballast Crusher in World 1, BALL production from alternate supply, and continuous BALL output during primary corridor feeder interruption.
+
+### 3. Historical Headless Evidence & Consumed Budget
+- The two historical headless runs in `docs/audit/2026-10-11/capacity-or-reserve/` are raw 22-calendar-month advance/reload/conservation traces with incomplete pilot acceptance (they did not record V2 service history or count evaluation boundaries). Their initial simulation run budget was consumed and is not silently renewed.
+
+### 4. Reserve Execution Envelope (Approved and Executed 20 October 2026)
+- **Recommendation**: Reserve Works pilot execution (validating 600-batch buffer, transported commissioning kit, real food consumption/passengers, and cold equality).
+- **Proposed Run Envelope**:
+  - Run 1 (Main Simulation): 1 process, exactly 24 monthly evaluations (max 30 execution minutes).
+  - Run 2 (Reload Probe): 1 reload process, exactly 4 monthly evaluations (max 5 execution minutes).
+- **Stop Condition**: Immediate halt and artifact retention on first defect or invariant violation.
+- **Approval Gate**: Owner approved on 20 October 2026; the single run was executed and is
+  closed. Integrity PASSED (24 + 4 evaluations, conservation, exact kit debit, cold reload).
+  The Reserve buffer was never used in this fixture. See the
+  [run record](audit/2026-10-20/reserve-pilot/README.md); no further runs are authorized.
+
 ## Active execution slice — Local gate cab, Stage 2 (14 October 2026)
 
 The owner accepted Stage 1 as engineering evidence and authorized this bounded

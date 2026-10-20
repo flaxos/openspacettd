@@ -439,14 +439,15 @@ static CommandCost BuildBridgeInternal(DoCommandFlags flags, TileIndex tile_end,
 				return CommandCost(STR_ERROR_ALREADY_BUILT);
 			}
 
-			/* Do not replace town bridges with lower speed bridges, unless in scenario editor. */
+			/* Classic protects town bridge speed; integrated games retain the actual replacement speed and cost. */
 			if (IsTileOwner(tile_start, OWNER_TOWN) && _game_mode != GameMode::Editor) {
 				Town *t = ClosestTownFromTile(tile_start, UINT_MAX);
 				if (t == nullptr) return CMD_ERROR;
 
 				if (GetBridgeSpec(bridge_type)->speed < GetBridgeSpec(GetBridgeType(tile_start))->speed) {
-					return CommandCostWithParam(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS, t->index);
+					if (!UsesCommonwealthConstructionRules()) return CommandCostWithParam(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS, t->index);
 				} else {
+					/* A speed downgrade must not receive the existing replacement-improvement reward. */
 					ChangeTownRating(t, RATING_TUNNEL_BRIDGE_UP_STEP, RATING_MAXIMUM, flags);
 				}
 			}
@@ -838,7 +839,8 @@ static inline CommandCost CheckAllowRemoveTunnelBridge(TileIndex tile)
 			if (tram_rt != INVALID_ROADTYPE) tram_owner = GetRoadOwner(tile, RoadTramType::Tram);
 
 			/* We can remove unowned road and if the town allows it */
-			if (road_owner == OWNER_TOWN && _current_company != OWNER_TOWN && !(_settings_game.construction.extra_dynamite || _cheats.magic_bulldozer.value)) {
+			if (road_owner == OWNER_TOWN && _current_company != OWNER_TOWN &&
+					!UsesCommonwealthConstructionRules() && !(_settings_game.construction.extra_dynamite || _cheats.magic_bulldozer.value)) {
 				/* Town does not allow */
 				return CheckTileOwnership(tile);
 			}

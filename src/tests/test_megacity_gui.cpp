@@ -56,10 +56,10 @@ extern const ChunkHandlerTable _planet_chunk_handlers;
 namespace {
 struct MegacityCommandFixture {
 	TownID town;
-	MegacityCommandFixture()
+	MegacityCommandFixture(WorldPhase phase = WorldPhase::Phase3_Frontier)
 	{
 		IntegratedEconomy::Reset();
-		SetupCommandAuthorityWorld(WorldPhase::Phase3_Frontier, 0);
+		SetupCommandAuthorityWorld(phase, 0);
 		CorporateHQManager::Reset();
 		town = (*Town::Iterate().begin())->index;
 		Company::Get(CompanyID{0})->money = 0;
@@ -226,6 +226,65 @@ TEST_CASE("Megacity saved growth restores integrated outcomes after economy chun
 	handler->get().FixPointers();
 	CHECK(MegacityManager::GetProfile(fixture.town)->growth_multiplier == growth[index]);
 	CHECK(IntegratedEconomy::Save() == economy_before);
+}
+
+TEST_CASE("V2 Core megacity reload derives subsistence without consuming saved food", "[first-line-load-derivation][megacity-save-growth]")
+{
+	MegacityCommandFixture fixture{WorldPhase::Phase1_Core};
+	IntegratedEconomy::SetEnabled(true);
+	IntegratedEconomy::SetRulesVersion(EconomyRulesVersion::V2);
+	IntegratedEconomy::RegisterRole(WorldID{0}, EconomicRole::Core);
+	REQUIRE(Command<Commands::DesignateMegacity>::Post(fixture.town));
+	const MegacityProfile *registered = MegacityManager::GetProfile(fixture.town);
+	REQUIRE(registered != nullptr);
+	REQUIRE(registered->world_id == WorldID{0});
+	REQUIRE(registered->growth_state == MegacityGrowthState::Starvation);
+	REQUIRE(registered->growth_multiplier == 0.0f);
+	REQUIRE(registered->passenger_multiplier == 0.5f);
+	auto economy = nlohmann::json::parse(IntegratedEconomy::Save());
+	REQUIRE(economy["version"] == 2);
+	REQUIRE(economy["town_food_services"].empty());
+	REQUIRE(economy["cities"].empty());
+	REQUIRE(economy["town_residential_districts"].empty());
+
+	float expected_passengers = 1.0f;
+	SECTION("empty opening has no food service") {
+		CHECK(economy["town_food_services"].empty());
+	}
+	SECTION("saved food history contributes exactly its native passenger fraction") {
+		MegacityProfile profile = *registered;
+		profile.delivered_current = {5, 7, 11};
+		profile.delivered_last = {13, 17, 19};
+		MegacityManager::RestoreMegacity(profile);
+		economy["cities"] = {{fixture.town.base(), {{0u, 73u}}, {{0u, 50u}}}};
+		economy["town_food_services"] = {{fixture.town.base(), CompanyID{0}.base(), 20, 40, 60,
+			{20, 0, 10, 0}, {20, 0, 10, 0}, 0, 0}};
+		expected_passengers = 1.0f + 30.0f / 640.0f;
+	}
+	REQUIRE(IntegratedEconomy::Load(economy.dump()));
+	const std::string economy_before = IntegratedEconomy::Save();
+	const MegacityProfile profile_before = *MegacityManager::GetProfile(fixture.town);
+	IntegratedEconomy::Reset();
+	SaveReloadCommandAuthority();
+	const MegacityProfile *saved = MegacityManager::GetProfile(fixture.town);
+	REQUIRE(saved != nullptr);
+	CHECK(saved->growth_state == MegacityGrowthState::Starvation);
+	CHECK(saved->passenger_multiplier == 0.5f);
+	REQUIRE(IntegratedEconomy::Load(economy_before));
+	const auto handler = std::ranges::find_if(_planet_chunk_handlers, [](const ChunkHandler &chunk) { return chunk.id == ChunkId{"MEGA"}; });
+	REQUIRE(handler != _planet_chunk_handlers.end());
+	for (int callback = 0; callback < 2; ++callback) {
+		handler->get().FixPointers();
+		const MegacityProfile *restored = MegacityManager::GetProfile(fixture.town);
+		REQUIRE(restored != nullptr);
+		CHECK(restored->growth_state == MegacityGrowthState::Subsistence);
+		CHECK(restored->growth_multiplier == 0.0f);
+		CHECK(restored->passenger_multiplier == expected_passengers);
+		CHECK(restored->delivered_current == profile_before.delivered_current);
+		CHECK(restored->delivered_last == profile_before.delivered_last);
+		CHECK(restored->monthly_quota == profile_before.monthly_quota);
+		CHECK(IntegratedEconomy::Save() == economy_before);
+	}
 }
 
 TEST_CASE("Megacity growth restoration leaves Classic and non-Core profiles unchanged", "[megacity-save-growth]")

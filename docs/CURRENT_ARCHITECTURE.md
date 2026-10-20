@@ -1,5 +1,24 @@
 # OpenSpaceTTD Current Architecture
 
+## Optional Vale founding observer
+
+`World0Opening` observes native input deliveries, subsequent crusher batches,
+warehouse deposits and per-train source/yard visits. OptionalW0OP persistence is
+validated against actual native company, industry, station and vehicle identities.
+Absent chunks leave ordinary games inactive. GSWorld0 exposes pure saved facts;
+its optional story script reuses native pages/goals after reload. The named authorer
+uses normal commands in one declared 256×256 Frontier region; starter assistance
+and the exact crusher-plot role exception are explicit. Existing FLIN observers
+and approach/funding helpers remain dormant development dependencies; their older
+multi-world campaign is not accepted or resumed by this publication.
+
+Integrated municipal construction removes only rating vetoes and public road
+remodelling restrictions; Classic, physical ownership, occupancy, terrain,
+technology, cargo and cash checks remain. These construction prerequisites are
+included with native regressions and do not change ordinary New Game generation.
+[Current scenario](VALE_RAILWAY.md).
+
+
 ## Pipeline B electronics and megacity prosperity architecture — 10 October 2026
 
 `test_electronics_loop.cpp` and `verify_electronics_loop.py` establish the authoritative specification and

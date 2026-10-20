@@ -1,5 +1,83 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Reserve Works pilot run — 20 October 2026
+
+**TESTED headless; integrity PASSED; desktop UAT Pending.** The owner approved the frozen
+Reserve envelope and the single run executed on `codex/capacity-or-reserve-pilot`.
+The runner now hauls the works kit by train before commissioning, checks the exact cash and
+World 1 kit debit, counts exactly 24 (then 4 post-reload) monthly evaluations with strictly
+increasing dates, schedules the SILC and FOOD cuts by evaluation, and checks the crusher's
+SILC buffer against its enforced cap. Its offline guards now import the runner's own checks
+(13 tests). Finding: the Reserve buffer was never used (SILC peak 270 of 1,200), so Reserve
+gives no visible benefit in this fixture. [Run record](audit/2026-10-20/reserve-pilot/README.md).
+
+## Facilities window corrections (Card C1) — 20 October 2026
+
+Three review defects in the C1 Facilities window are fixed on PR83. Legacy
+(non-Commonwealth) rows now show their own machine buffers; before, they showed
+cargo from whichever industry had the facility ID minus one. The legacy platform holding
+target is clickable again on line 4 (0 -> 50 -> 100 -> 200 -> 0 t), restoring the
+only GUI path to `SetFacilityPlatformCapacity`. The works price is a real
+`DoCommandFlag::QueryCost` query that restores the current company without logging
+"Backed-up value was not restored!" on each repaint, and reads "unavailable"
+instead of a hard-coded £50,000 when commissioning would be rejected. The Sprint 43
+fixture rebuilds the viewport sign kd-tree so stale station signs from earlier
+cases cannot abort later ones. Focused, full Catch, CTest, linters and diff checks
+pass; human desktop UAT of the window remains Pending.
+
+## Vale Railway publication — source and automated proof
+
+The optional Aster Vale founding scenario is ready for draft review, stacked on
+PR83. It adds a native persistent objective observer, pure GameScript queries,
+empty-stock authored assistance and isolated bounded preparation/proof tools.
+The freight purchase list now accepts physically compatible unpowered wagons;
+locomotive power checks remain. Native LORE and purchase-test fixtures repair
+base-graphics and stale signal-buffer prerequisites without weakening assertions.
+
+Prior local proof passed preparation/service/fresh reload at 0/9/4 evaluations and
+actual SDL purchase of one empty 40 BALL wagon for93GBP with zero added evaluations.
+Publication integration and exact-head CI are separately recorded. Human desktop
+comprehension, enjoyment and pacing remain pending; inherited modular car artwork
+is cosmetic and unchanged. The broader Reserve/FOOD pilot is not accepted.
+[Scenario guide](VALE_RAILWAY.md) and [sanitised engineering evidence](audit/2026-10-12/vale-railway-publication/README.md).
+
+
+## One Material-Funded Research Unlock (Card P1) — 11 October 2026
+
+**TESTED Pipeline B freight delivery, Tier III kit escrow/unlock, and rare resource discovery on codex/capacity-or-reserve-pilot; desktop UAT Pending.**
+Delivered Card P1 ("One Material-Funded Research Unlock") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot`:
+- **Physical Kit Logistics & 2-Input CHIP Haulage**: Dedicated 5-consist freight network hauling genuine physical materials: Iron mine (14) -> Steel furnace (5) -> HQ warehouse (0) delivering 40 `STEL`; Copper mine (15) -> Copper smelter (7) converting `COPR -> WIRE`; Silica dunes (16) -> Silicon works (8) delivering `SAND`; Copper smelter (7) -> Silicon works (8) delivering `WIRE`; Silicon works (8) -> HQ warehouse (0) delivering 20 `CHIP` produced via `RECIPE_SILICON_ARC` (`2 SAND + 1 WIRE -> 1 CHIP`). Physical unloading into company stockpile at World 0 warehouse.
+- **Corporate HQ & Feedstock Acceleration Invariant**: Corporate HQ established at Core World 0 (`TileXY(70, 60)`, £2.5M capital expenditure). Research feedstock acceleration explicitly disabled (`CmdSetResearchAcceleration(false)` / `IntegratedEconomy::SetAcceleration(false)`), ensuring delivered chips cannot be burned for passive RP. Baseline Materials I (100 RP) and Materials II (250 RP, £250k budget) prerequisites verified.
+- **Atomic Kit Escrow & Negative Paths**: Missing kit rejection when company stockpile has insufficient materials (< 40 STEL or < 20 CHIP); rejection of foreign/unstocked companies. Selecting `TECH_MATERIALS_3` (303) debits 40 STEL + 20 CHIP atomically into `research[c0].reserved`. Cancelling or switching research cleanly refunds 100% of escrowed cargo back to the stockpile without leakage or duplication.
+- **Materials III Unlock & Advanced Resource Discovery**: Funding 600 RP (£600k budget) consumes the escrowed kit into `research_consumed` upon research completion, unlocking `TECH_MATERIALS_3`. Surveyed 16x16 Rare Earth extraction site (0x14, producing `RARE`) on World 2 at Node 17 transitions from undiscovered (`Discovered() == false`) to discoverable (`Discovered() == true`).
+- **Verification & Native Simulation Proof**: Catch2 test in `test_commonwealth_works.cpp` (`[commonwealth-works]`, 416 assertions across 14 cases passing 100%). Full CTest suite (564/564 tests passing 100%). Headless simulation runner (`scripts/verify_commonwealth_research.py`) completed 15 native economy periods on seed 11 (accumulating 80 STEL and 35 CHIP), verified negative paths and atomic escrow, executed Materials III unlock, verified Rare Earth discovery revelation, ran 6 post-unlock periods with 100% cargo conservation, and completed a fresh-process cold reload probe with 100% state match and 4 additional conserved periods. Evidence recorded at `docs/audit/2026-10-11/material-research/evidence.json` (checkpoint SHA-256 `0ddfdb3c4423868f0c096b4aa3b100c4d2f2306fcd4dd1bacd2e66b029df7c02`).
+- **Quality & Linters**: Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` clean.
+
+
+## Freight You Can Read (Card C1) — 11 October 2026
+
+**TESTED facility presentation & authoritative bottleneck diagnosis on codex/capacity-or-reserve-pilot; desktop UAT Pending.**
+Delivered Card C1 ("Freight You Can Read") from the OpenSpaceTTD Feature Delivery Plan on branch `codex/capacity-or-reserve-pilot`:
+- **Understandable Facility Presentation**: 4-line row architecture in `empire_facilities_gui.cpp`:
+  * Line 1: World Name, Economic Role (`Core` / `Industrial` / `Frontier`), Development Phase (`Phase 1 Core` .. `Phase 4 Expansion`), and Station/tile name.
+  * Line 2: Prominent bottleneck badge, recipe name with exact cargo conversion ratio, rated throughput (`Rated: X batches/mo`), and observed completed-period production (`Last mo: Y batches` or `[Unavailable]`).
+  * Line 3: Machine input buffers with complete batches permitted (`permits X batches`) and output buffers with remaining clearance (`space for Y batches`).
+  * Line 4: Works Bill (`£50k + 160 STEL / 80 BALL`), pure queried price via `DoCommandFlag::Query`, active Works effects (Capacity +50% throughput / Reserve 2x input buffer), and local warehouse stockpile inventory.
+- **First Limiting Bottleneck Diagnosis**: Authoritative diagnosis hierarchy implemented in `DiagnoseFacilityBottleneck`: tech lock -> blocked output -> starved input (missing/insufficient) -> active -> ready -> idle.
+- **Query Purity & Asset Navigation**: Pure read navigation buttons `[Locate Plant]` and `[Locate Station]` / `[Locate Hub]`. Zero state, money, date, or RNG mutations on opening, painting, tab cycling, refresh clicks, or navigation clicks. Distinct separation of factory machine buffers from company planetary construction stock.
+- **Verification & Quality**: Catch2 unit & GUI tests in `src/tests/test_sprint43_empire_facilities.cpp`: `[empire-facilities]` (86 assertions across 5 cases) and `[sprint43]` (274 assertions across 12 cases) passing 100%. Full CTest suite (563/563 tests passing 100%). Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` clean. Local review packet; zero remote push, zero PR creation, no merge, and P1 blocked until C1 review is approved.
+
+## Commonwealth Pilot Correction and Truthful Acceptance — 11 October 2026
+
+**TESTED correction packages & truthful acceptance on codex/capacity-or-reserve-pilot; physical native pilot campaign pending renewed approval.**
+Delivered comprehensive correction across the Sprint 1–3 stack addressing the five takeover packages without reverting Sprint 2 or 3 features:
+- **Engine Resets & Invariants**: Fixed food service retirement and lifecycle resets (company deletion vs acquisition vs owner Off, 4 zero periods on recommissioning); enforced strict V2 save invariants in `IntegratedEconomy::Load` and `ValidateAfterLoad` (factory tuples `(0,100,300,300)`, `(1,150,300,300)`, `(2,100,600,300)`; rates in `{0,10,20,40}`; ceilings 40/60; history bounds `0 <= consumed <= requested <= 40`; remainder `0..639`; Core town validation and invalid-owner inactive defaults; neutral factory preservation; transactional rollback on failure).
+- **GUI Controls & Truthful Feedback**: Rate cycling confined to dedicated button bounds in `megacity_gui.cpp`; disabled styling for spectator and foreign companies; chronological history display with fraction met; explicit received vs consumed displays; evaluation boundary noted; `empire_facilities_gui.cpp` Upgrade All visibly disabled under V2; explicit works bill (`£50k + 160 STEL/80 BALL`), throughput and capacities (`Cap: .../mo | Buffers: ... in, ... out`), and local stockpile stock.
+- **Truthful Runner & Physical Pilot**: `scripts/verify_commonwealth_works.py` reconciled advance count with monthly evaluation events using a monotonic identifier; records V2 service history; validates £50k commissioning cash debit; retains partial/error reports on failure in cleanup path. Authoritative offline runner guards (`scripts/test_verify_runner_guards.py`, 7/7 passing in 0.001s, 0 engine processes). Direct commissioning-kit seed removed from `connected_economy.cpp`; trains routed to World 1 warehouse Stop(30); V2 service audit metrics (`city_months`) exposed.
+- **Sprint 2 & 3 Truthful Acceptance Regressions**: Catch2 tests in `src/tests/test_commonwealth_works.cpp` verify Sprint 2 native house shell staged growth, completion, population credit (+232 citizens), permanent demolition immunity (`IsHousePlayerProtected`), and food service decoupling; and Sprint 3 alternate-source SILC delivery, BALL production, and uninterrupted output during primary feeder interruption.
+- **Verification & Evidence**: Catch2 unit suites `[commonwealth-works]` (374 assertions in 13 cases) and `[integrated-economy]` (490 assertions in 17 cases) passing 100%. Full Catch2 suite (307,709 assertions in 543 cases) and CTest suite (558/558 tests) passing 100%. Linters (`file-descriptions.py`, `unused-strings.py`) and `git diff --check` clean. Binaries: `build/openttd` SHA256 `fb5692a3d28299269ef9703779cdc0f386290186e6f909ef87b51a718ed02d19`, `build/openttd_test` SHA256 `1e84a79ed7803367fcc66edbdd12a945370f5328e9212ccf16f0054e66f8ca57`.
+- **Handoff Status**: Review-ready locally on `codex/capacity-or-reserve-pilot`. Native Reserve simulation envelope proposed and frozen pending explicit renewed owner approval.
+
 ## Cab look controls — 20 October 2026
 
 **TESTED automated; human UAT Pending.** The cab view gains drag-to-look, wheel zoom

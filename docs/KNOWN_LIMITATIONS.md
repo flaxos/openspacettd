@@ -1,5 +1,58 @@
 # OpenSpaceTTD Known Limitations
 
+## Reserve Works pilot run — 20 October 2026
+
+- **Reserve gives no visible benefit in the pilot fixture.** Each SILC delivery (210–270) is
+  consumed within a month by the crusher's 200 SILC/month, so the 1,200 SILC reserve cap is
+  never approached (peak 270), and production stops about two evaluations into a feeder cut.
+  Reserve can only matter with bursty or oversupplied inputs (longer consists, a second source).
+  This is a design finding, not a defect; balancing is deferred.
+- **BALL accumulates in the World 1 warehouse** (1,360 after 24 evaluations) because only works
+  commissioning consumes it.
+- **Headless only.** The run proves integrity (24 + 4 evaluations, conservation, exact kit debit,
+  cold reload). Human desktop UAT remains **Pending**.
+  [Run record](audit/2026-10-20/reserve-pilot/README.md).
+
+## Vale Railway publication — source and automated proof
+
+The optional Aster Vale founding scenario is ready for draft review, stacked on
+PR83. It adds a native persistent objective observer, pure GameScript queries,
+empty-stock authored assistance and isolated bounded preparation/proof tools.
+The freight purchase list now accepts physically compatible unpowered wagons;
+locomotive power checks remain. Native LORE and purchase-test fixtures repair
+base-graphics and stale signal-buffer prerequisites without weakening assertions.
+
+Prior local proof passed preparation/service/fresh reload at 0/9/4 evaluations and
+actual SDL purchase of one empty 40 BALL wagon for93GBP with zero added evaluations.
+Publication integration and exact-head CI are separately recorded. Human desktop
+comprehension, enjoyment and pacing remain pending; inherited modular car artwork
+is cosmetic and unchanged. The broader Reserve/FOOD pilot is not accepted.
+[Scenario guide](VALE_RAILWAY.md) and [sanitised engineering evidence](audit/2026-10-12/vale-railway-publication/README.md).
+
+
+## One Material-Funded Research Unlock Boundaries (Card P1) — 11 October 2026
+
+- **Progression Slice & Single Rare Earth Discovery**: Card P1 implements the single progression bridge from physical freight delivery (40 STEL + 20 CHIP) to Materials III research unlock and one advanced rare earth resource opportunity on World 2. Additional research tiers (Materials IV, Maglev), full A–D electronics chains, city consumer baskets (CCRY), market pricing, and dynamic galaxy generation remain deferred.
+- **Disabled Feedstock Acceleration**: Feedstock acceleration is explicitly disabled (`CmdSetResearchAcceleration(false)`) during Card P1 to maintain absolute accounting separation between material kit escrow/consumption and research rate boosts.
+- **Authored Baseline Prerequisites**: Corporate HQ is founded at `TileXY(70, 60)` with £2.5M capital, Materials I is authored at 100 RP baseline, and Materials II is funded with £250k budget to unlock prerequisite recipes and extraction rights. This tests the Tier III bridge, not bootstrap from year zero.
+- **Human Desktop UAT Pending**: Automated unit testing, full CTest suite, and headless native simulation runs (15 periods + 4 reload periods with 100% cargo conservation) prove freight haulage, escrow atomicity, unlock, and site discovery. Desktop interactive human acceptance (Track 14 in `demo/UAT-RESULTS.md`) remains **Pending**.
+
+
+
+## Freight You Can Read Boundaries (Card C1) — 11 October 2026
+
+- **Truth-in-Advertising Metrics & No Speculative ETAs**: The Facilities window displays exact buffered units, completed-period production, and complete batches permitted (`permits X batches`). It intentionally avoids speculative arrival estimates, average burn rates, or predictive delivery timers.
+- **Pure Query Contract**: Facility window interactions (opening, painting, tab switching, and clicking `[Locate Plant]` or `[Locate Station]`) are guaranteed pure reads. Commissioning works actions (`[Capacity]`, `[Reserve]`, `[Retire]`) remain server-authoritative replicated commands restricted to the facility owner.
+- **Local Review Scope**: Delivered on isolated branch `codex/capacity-or-reserve-pilot`. P1 ("Portals That Don't Lie") remains blocked and deferred until C1 local review is approved by the owner. Zero remote push or PR creation.
+- **Human Desktop UAT Pending**: Automated verification proves query purity, bottleneck diagnosis, 4-line presentation, and works price querying. Human graphical acceptance of the Facilities window against live gameplay scenarios remains **Pending**.
+
+## Commonwealth Pilot Correction and Truthful Acceptance Boundaries — 11 October 2026
+
+- **Historical Headless Traces & Consumed Budget**: The two earlier headless simulation runs staged at `docs/audit/2026-10-11/capacity-or-reserve/` represent 22-month advance/reload/conservation traces with incomplete pilot acceptance (they did not record V2 service history or count evaluation boundaries). Their initial simulation run budget was consumed and is not silently renewed.
+- **Physical Native Proof Executed**: The corrected physical Reserve pilot runner (`scripts/verify_commonwealth_works.py`) and fixture adjustments (routing trains to World 1 warehouse Stop(30) without direct material injection) are prepared and verified with offline unit guards (`scripts/test_verify_runner_guards.py`). The approved single run executed on 20 October 2026; see the Reserve pilot entry above.
+- **Sprint 2 & 3 Non-Reversion & Truthful Acceptance**: Sprints 2 and 3 features remain active on the branch; automated regressions now truthfully verify native residential shell completion/demolition immunity and alternate-source delivery/production resilience without substituting unit tests for native or human acceptance.
+- **Human Desktop UAT Pending**: Desktop GUI verification (Megacity FOOD controls, works commissioning buttons, status displays, and physical multi-world route traversal) remains **Pending** for human play.
+
 ## Cab look controls — 20 October 2026
 
 The cab view now has continuous look controls. Drag the view to look around (right
