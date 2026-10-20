@@ -57,7 +57,7 @@ CabViewPresentation ResolveCabViewPresentation(const Vehicle *v, CompanyID owner
 	CabViewPresentation result;
 	if (_game_mode != GameMode::Normal || _switch_mode != SwitchMode::None || v == nullptr) return result;
 	if (v->type != VehicleType::Train || !v->IsPrimaryVehicle() || v->owner != owner || owner != _local_company) return result;
-	if (!IsValidTile(v->tile) || v->IsInDepot() || IsBridgeAbove(v->tile)) return result;
+	if (!IsValidTile(v->tile) || v->IsInDepot()) return result;
 	const WorldID world = PlanetManager::GetTileWorld(v->tile);
 	if (!CabViewTileVisible(v->tile, world)) return result;
 	const Direction moving = v->GetMovingDirection();
@@ -65,21 +65,23 @@ CabViewPresentation ResolveCabViewPresentation(const Vehicle *v, CompanyID owner
 	const bool hidden = v->vehstatus.Test(VehState::Hidden);
 	const bool wormhole = Train::From(v)->track == Track::Wormhole;
 	const PortalGateClassification gate = PortalRegistry::ClassifyGate(v->tile);
-	if (hidden || wormhole) {
+	/* The scene does not draw bridges or the ground below them, so on or under an
+	 * ordinary bridge the cab waits instead of closing. Gates keep their own rules. */
+	const bool bridge = !hidden && gate.kind == PortalGateKind::None && !PortalRegistry::IsPortalTile(v->tile) &&
+		(IsBridgeTile(v->tile) || IsBridgeAbove(v->tile));
+	if (!bridge && (hidden || wormhole)) {
 		if (!hidden || !wormhole || gate.kind != PortalGateKind::LocalLinked ||
 			!CabViewLocalGateVisible(v->tile, world)) return result;
 		result.phase = CabViewPhase::LocalTransit;
 	} else {
-		if (IsTunnelTile(v->tile) || PortalRegistry::IsPortalTile(v->tile) || gate.kind != PortalGateKind::None) {
+		if (!bridge && (IsTunnelTile(v->tile) || PortalRegistry::IsPortalTile(v->tile) || gate.kind != PortalGateKind::None)) {
 			if (!CabViewLocalGateVisible(v->tile, world)) return result;
-		} else if (IsBridgeTile(v->tile) || IsBridgeAbove(v->tile)) {
-			return result;
 		}
 		if (v->x_pos < 0 || v->y_pos < 0 ||
 			v->x_pos >= static_cast<int>(Map::SizeX() * TILE_SIZE) ||
 			v->y_pos >= static_cast<int>(Map::SizeY() * TILE_SIZE)) return result;
 		if (!CabViewTileVisible(TileVirtXY(v->x_pos, v->y_pos), world)) return result;
-		result.phase = CabViewPhase::Scene;
+		result.phase = bridge ? CabViewPhase::Bridge : CabViewPhase::Scene;
 	}
 	result.world = world;
 	result.tile = v->tile;
@@ -99,7 +101,9 @@ bool CabViewTransitionRequiresReset(const CabViewPresentation &before, const Cab
 
 bool CabViewTransitionResetsLook(const CabViewPresentation &before, const CabViewPresentation &after)
 {
-	return before.phase != after.phase || before.world != after.world ||
+	/* Passing over or under a bridge is part of the same journey; keep the player's view. */
+	const bool bridge = before.phase == CabViewPhase::Bridge || after.phase == CabViewPhase::Bridge;
+	return (before.phase != after.phase && !bridge) || before.world != after.world ||
 		std::abs(static_cast<int64_t>(before.x) - after.x) > 2 * TILE_SIZE ||
 		std::abs(static_cast<int64_t>(before.y) - after.y) > 2 * TILE_SIZE;
 }
@@ -258,6 +262,12 @@ struct CabViewWindow : Window {
 		if (state.phase == CabViewPhase::Unsupported) { GfxFillRect(r, PixelColour{0}); return; }
 		if (state.phase == CabViewPhase::LocalTransit) {
 			DrawCabViewTransit(r, this->effect_mode, this->timeline.PhaseElapsed());
+			return;
+		}
+		if (state.phase == CabViewPhase::Bridge) {
+			GfxFillRect(r, PC_BLACK);
+			DrawString(r.left, r.right, CentreBounds(r.top, r.bottom, GetCharacterHeight(FontSize::Normal)),
+				GetString(STR_CAB_VIEW_BRIDGE), TextColour::White, AlignmentH::Centre);
 			return;
 		}
 		/* The camera is transient. Neither vehicle state nor game time is adjusted. */

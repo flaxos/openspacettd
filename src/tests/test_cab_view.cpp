@@ -11,6 +11,7 @@
 #include "../void_map.h"
 #include "../direction_func.h"
 #include "../tunnel_map.h"
+#include "../bridge_map.h"
 #include "../portal/portal_registry.h"
 #include "../portal/planet_manager.h"
 #include "../portal/stellar_network.h"
@@ -230,6 +231,17 @@ TEST_CASE("Cab window is singleton and closes on session change or train deletio
 	CHECK(GetCabViewLook(train->index).yaw > 0);
 	first->OnClick({0, 0}, WID_CV_AHEAD, 1);
 	CHECK(GetCabViewLook(train->index).yaw == 0);
+
+	/* Passing under a bridge keeps the window open and the player's look direction. */
+	CHECK(key('A') == EventState::Handled);
+	SetBridgeMiddle(train->tile, Axis::Y);
+	first->OnRealtimeTick(0);
+	CHECK(FindWindowById(WindowClass::VehicleCabView, train->index) == first);
+	ClearBridgeMiddle(train->tile);
+	first->OnRealtimeTick(0);
+	CHECK(FindWindowById(WindowClass::VehicleCabView, train->index) == first);
+	CHECK(GetCabViewLook(train->index).yaw == Approx(CabViewLook::KEY_STEP));
+	first->OnClick({0, 0}, WID_CV_AHEAD, 1);
 	CHECK(first->OnRightClick({0, 0}, WID_CV_VIEW) == (_settings_client.gui.scroll_mode != ViewportScrollMode::MapLMB));
 	_scrolling_viewport = false;
 	_cursor.fix_at = false;
@@ -442,6 +454,52 @@ TEST_CASE("Cab sprite collection preserves pending viewport state", "[cab-view]"
 	std::vector<GroundSpriteToDraw> ground;
 	CollectTileGroundSprites(INVALID_TILE, ground);
 	CHECK(ground.empty());
+}
+
+TEST_CASE("Cab waits on and under ordinary bridges instead of closing", "[cab-view]")
+{
+	SetupCabMap();
+	AutoRestoreBackup mode(_game_mode, GameMode::Normal);
+	AutoRestoreBackup switch_mode(_switch_mode, SwitchMode::None);
+	AutoRestoreBackup company(_local_company, CompanyID{0});
+	REQUIRE(Vehicle::CanAllocateItem());
+	Train *train = Vehicle::Create<Train>();
+	train->SetFrontEngine();
+	train->owner = CompanyID{0};
+	train->tile = TileXY(8, 8);
+	train->x_pos = train->y_pos = 8 * TILE_SIZE + 8;
+	train->direction = Direction::SW;
+	train->track = Track::X;
+	train->vehstatus.Reset(VehState::Hidden);
+	const CabViewPresentation open_line = ResolveCabViewPresentation(train, CompanyID{0});
+	REQUIRE(open_line.phase == CabViewPhase::Scene);
+
+	/* An ordinary bridge along Y passes over the train's tile. */
+	MakeRailBridgeRamp(TileXY(8, 6), Owner{0}, 0, DiagDirection::SE, RAILTYPE_BEGIN);
+	MakeRailBridgeRamp(TileXY(8, 10), Owner{0}, 0, DiagDirection::NW, RAILTYPE_BEGIN);
+	for (uint y = 7; y <= 9; ++y) SetBridgeMiddle(TileXY(8, y), Axis::Y);
+	const CabViewPresentation under = ResolveCabViewPresentation(train, CompanyID{0});
+	CHECK(under.phase == CabViewPhase::Bridge);
+	CHECK(under.world == open_line.world);
+	CHECK(CabViewTransitionRequiresReset(open_line, under));
+	CHECK_FALSE(CabViewTransitionResetsLook(open_line, under));
+	CHECK_FALSE(CabViewTransitionResetsLook(under, open_line));
+
+	/* On the ramp, then on the deck inside the bridge's wormhole. */
+	train->tile = TileXY(8, 6);
+	train->x_pos = 8 * TILE_SIZE + 8;
+	train->y_pos = 6 * TILE_SIZE + 8;
+	train->direction = Direction::SE;
+	train->track = Track::Y;
+	CHECK(ResolveCabViewPresentation(train, CompanyID{0}).phase == CabViewPhase::Bridge);
+	train->track = Track::Wormhole;
+	train->y_pos = 7 * TILE_SIZE + 8;
+	CHECK(ResolveCabViewPresentation(train, CompanyID{0}).phase == CabViewPhase::Bridge);
+
+	/* A hidden train is not on a bridge: ordinary tunnels still close the view. */
+	train->vehstatus.Set(VehState::Hidden);
+	CHECK(ResolveCabViewPresentation(train, CompanyID{0}).phase == CabViewPhase::Unsupported);
+	_vehicle_pool.CleanPool();
 }
 
 TEST_CASE("Cab look turns wraps clamps and zooms locally", "[cab-view]")

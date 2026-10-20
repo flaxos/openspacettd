@@ -1,5 +1,18 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Small GUI fixes — 20 October 2026
+
+**TESTED automated; human UAT Pending.** Three small fixes:
+- **Retire asks first.** The Facilities window opens a confirmation before demolishing a
+  plant and discarding its buffered cargo; No keeps it.
+- **Facilities rows scale with the interface.** Row, line and button geometry comes from one
+  layout, sized from the font height and interface scale, used by both drawing and clicks.
+  At 1x it keeps the previous 68-pixel rows; at 2x text and buttons stay inside each row.
+  The list scrollbar now knows how many rows fit.
+- **The cab waits at bridges.** On or under an ordinary bridge the cab shows a holding
+  screen instead of closing, keeps the look direction and zoom, and resumes afterwards.
+  Bridges are still not drawn, and gates, tunnels and depots keep their previous rules.
+
 ## Reserve Works pilot run — 20 October 2026
 
 **TESTED headless; integrity PASSED; desktop UAT Pending.** The owner approved the frozen
