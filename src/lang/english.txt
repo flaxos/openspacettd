@@ -6193,6 +6193,9 @@ STR_MEGACITY_GROWTH_HYPERGROWTH                                 :{LTBLUE}HyperGr
 STR_MEGACITY_TIER1_SUSTENANCE                                   :Tier 1: Sustenance (Food, Water)
 STR_MEGACITY_TIER2_EXPANSION                                    :Tier 2: Expansion (Alloys, Goods)
 STR_MEGACITY_TIER3_PROSPERITY                                   :Tier 3: Prosperity (Data Crystals, Valuables)
+STR_MEGACITY_TIER1_FOOD_SERVICE                                 :Tier 1: Food service
+STR_MEGACITY_TIER2_RESIDENTIAL                                  :Tier 2: Residential district
+STR_MEGACITY_TIER3_PROSPERITY_PILOT                             :Tier 3: Prosperity
 STR_MEGACITY_BUTTON_PREV                                        :Previous
 STR_MEGACITY_BUTTON_PREV_TOOLTIP                                :Switch to previous registered megacity
 STR_MEGACITY_BUTTON_NEXT                                        :Next

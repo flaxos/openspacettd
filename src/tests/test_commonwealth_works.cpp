@@ -488,10 +488,11 @@ TEST_CASE("Works prototype save and load round-trip and version boundary", "[com
 	MegacityManager::RegisterMegacity(town->index, WorldID{0}, "SaveTown", 5000);
 	REQUIRE(Command<Commands::SetTownFoodServiceRate>::Do(DoCommandFlag::Execute, town->index, 40).Succeeded());
 
-	// Evaluate city once to populate history
+	// Evaluate city once to populate history, then deliver again so both delivery counters are set
 	IntegratedEconomy::AcceptCity(town->index, C("FOOD"), 40, true);
 	float g = 0, p = 0;
 	IntegratedEconomy::EvaluateCity(town->index, g, p);
+	IntegratedEconomy::AcceptCity(town->index, C("FOOD"), 20, true);
 
 	// Also commission residential district on town
 	StockpileManager::AddCargo(WorldID{0}, CompanyID{0}, C("STEL"), 160);
@@ -524,6 +525,24 @@ TEST_CASE("Works prototype save and load round-trip and version boundary", "[com
 	REQUIRE(svc != nullptr);
 	CHECK(svc->selected_rate == 40);
 	CHECK(svc->consumed_history[0] == 40);
+	CHECK(svc->delivered_this_period == 20);
+	CHECK(svc->delivered_last_period == 40);
+
+	// Saves from before the delivery counters were persisted still load, with zero counters
+	{
+		auto legacy = nlohmann::json::parse(saved_data);
+		legacy["town_food_services"][0].erase(10);
+		legacy["town_food_services"][0].erase(9);
+		REQUIRE(IntegratedEconomy::Load(legacy.dump()));
+		auto old_svc = IntegratedEconomy::GetTownFoodService(town->index);
+		REQUIRE(old_svc != nullptr);
+		CHECK(old_svc->selected_rate == 40);
+		CHECK(old_svc->delivered_this_period == 0);
+		CHECK(old_svc->delivered_last_period == 0);
+		legacy["town_food_services"][0].push_back(0);
+		CHECK_FALSE(IntegratedEconomy::Load(legacy.dump()));
+		REQUIRE(IntegratedEconomy::Load(saved_data));
+	}
 
 	// Verify town residential district preserved
 	auto dist = IntegratedEconomy::GetTownResidentialDistrict(town->index);

@@ -35,7 +35,7 @@ static constexpr std::initializer_list<NWidgetPart> _nested_megacity_overview_wi
 	NWidget(WWT_STICKYBOX, Colours::Brown),
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_HEADER_PANEL),
-	SetMinimalSize(440, 92),
+	SetMinimalSize(520, 92),
 	SetFill(1, 0),
 	SetResize(1, 0),
 	EndContainer(),
@@ -54,23 +54,23 @@ static constexpr std::initializer_list<NWidgetPart> _nested_megacity_overview_wi
 	SetStringTip(STR_MEGACITY_BUTTON_DESIGNATE, STR_MEGACITY_BUTTON_DESIGNATE_TOOLTIP),
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER1_PANEL),
-	SetMinimalSize(440, 74),
+	SetMinimalSize(520, 74),
 	SetFill(1, 0),
 	SetResize(1, 0),
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER2_PANEL),
-	SetMinimalSize(440, 74),
+	SetMinimalSize(520, 74),
 	SetFill(1, 0),
 	SetResize(1, 0),
 	EndContainer(),
 	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_TIER3_PANEL),
-	SetMinimalSize(440, 74),
+	SetMinimalSize(520, 74),
 	SetFill(1, 0),
 	SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 	NWidget(WWT_PANEL, Colours::Brown, WID_MCO_STATUS_BAR),
-	SetMinimalSize(428, 24),
+	SetMinimalSize(508, 24),
 	SetFill(1, 0),
 	SetResize(1, 0),
 	EndContainer(),
@@ -79,11 +79,55 @@ static constexpr std::initializer_list<NWidgetPart> _nested_megacity_overview_wi
 };
 
 static WindowDesc _megacity_overview_desc(
-	WindowPosition::Automatic, "view_megacity", 440, 310,
+	WindowPosition::Automatic, "view_megacity", 520, 420,
 	WindowClass::MegacityOverview, WindowClass::None,
 	{},
 	_nested_megacity_overview_widgets
 );
+
+/**
+ * Get the action button on the line below a tier panel's title, right-aligned and sized to its label.
+ * Drawing and click handling both use this, so the clickable area always matches what is drawn.
+ * @param r Panel rectangle.
+ * @param label Button text.
+ * @return Button rectangle.
+ */
+static Rect TierButtonRect(const Rect &r, std::string_view label)
+{
+	const Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
+	const int line = GetCharacterHeight(FontSize::Normal);
+	const int width = std::max<int>(ScaleGUITrad(120), GetStringBoundingBox(label).width + 2 * WidgetDimensions::scaled.framerect.Horizontal());
+	const int top = tr.top + line + ScaleGUITrad(2);
+	return Rect{tr.right - width, top, tr.right, top + line + WidgetDimensions::scaled.framerect.Vertical()};
+}
+
+/**
+ * Text of the FOOD rate button as the local player sees it.
+ * @param town Town whose service is shown.
+ * @param[out] interactive Whether the local player may change the rate.
+ * @return Button label.
+ */
+static std::string FoodRateButtonLabel(TownID town, bool &interactive)
+{
+	const TownFoodService *svc = IntegratedEconomy::GetTownFoodService(town);
+	const uint32_t rate = svc ? svc->selected_rate : 0;
+	const CompanyID owner = svc ? svc->owner : CompanyID::Invalid();
+	const std::string rate_str = rate == 0 ? "Off" : fmt::format("{}/mo", rate);
+	interactive = false;
+	if (_current_company == COMPANY_SPECTATOR) return fmt::format("Rate: {} (spectator)", rate_str);
+	if (owner != CompanyID::Invalid() && owner != _current_company) return fmt::format("Rate: {} (company {})", rate_str, owner.base() + 1);
+	interactive = true;
+	return fmt::format("Rate: {} (click to change)", rate_str);
+}
+
+/**
+ * Text of the residential district button as the local player sees it.
+ * @return Button label.
+ */
+static std::string CommissionButtonLabel()
+{
+	return _current_company == COMPANY_SPECTATOR ? "Spectator: view only" : "Commission district";
+}
 
 /** Window class for displaying and managing Megacity commodity profiles and growth status. */
 struct MegacityOverviewWindow : Window {
@@ -113,6 +157,23 @@ struct MegacityOverviewWindow : Window {
 			return GetString(STR_MEGACITY_VIEW_CAPTION);
 		}
 		return this->Window::GetWidgetString(widget, stringid);
+	}
+
+	void UpdateWidgetSize(WidgetID widget, Dimension &size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension &fill, [[maybe_unused]] Dimension &resize) override
+	{
+		const bool works = IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2;
+		uint lines = 0;
+		switch (widget) {
+			case WID_MCO_HEADER_PANEL: lines = 6; break;
+			case WID_MCO_TIER1_PANEL: lines = works ? 8 : 0; break;
+			case WID_MCO_TIER2_PANEL: lines = works ? 5 : 0; break;
+			case WID_MCO_TIER3_PANEL: lines = works ? 2 : 0; break;
+			case WID_MCO_STATUS_BAR: lines = 2; break;
+			default: return;
+		}
+		/* The button line is taller than a text line by the button's frame. */
+		const uint button = (widget == WID_MCO_TIER1_PANEL || widget == WID_MCO_TIER2_PANEL) && works ? WidgetDimensions::scaled.framerect.Vertical() + ScaleGUITrad(4) : 0;
+		size.height = std::max<uint>(size.height, lines * (GetCharacterHeight(FontSize::Normal) + ScaleGUITrad(2)) + button + WidgetDimensions::scaled.framerect.Vertical());
 	}
 
 	void OnPaint() override
@@ -241,99 +302,81 @@ struct MegacityOverviewWindow : Window {
 					tier_label = STR_MEGACITY_TIER3_PROSPERITY;
 				}
 
+				const bool works = IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2;
+				if (works) tier_label = tier_idx == 0 ? STR_MEGACITY_TIER1_FOOD_SERVICE : tier_idx == 1 ? STR_MEGACITY_TIER2_RESIDENTIAL : STR_MEGACITY_TIER3_PROSPERITY_PILOT;
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
 				DrawString(tr, tier_label, TextColour::Gold);
 				tr.top += GetCharacterHeight(FontSize::Normal) + 2;
+				const int line_step = GetCharacterHeight(FontSize::Normal) + ScaleGUITrad(2);
 
-				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+				if (works) {
 					if (tier_idx == 0) {
 						auto svc = town != nullptr ? IntegratedEconomy::GetTownFoodService(town->index) : nullptr;
 						auto city = town != nullptr ? IntegratedEconomy::City(town->index) : nullptr;
 						CargoType food_cargo = GetCargoTypeByLabel(CargoLabel{"FOOD"});
 						uint32_t stock = (city && city->reserves.contains(food_cargo)) ? city->reserves.at(food_cargo) : 0;
-						uint32_t rate = svc ? svc->selected_rate : 0;
 						uint32_t total_consumed = svc ? (svc->consumed_history[0] + svc->consumed_history[1] + svc->consumed_history[2] + svc->consumed_history[3]) : 0;
 						float bonus_pct = (static_cast<float>(total_consumed) / 640.0f) * 100.0f;
 
-						CompanyID owner = svc ? svc->owner : CompanyID::Invalid();
-						bool is_spectator = (_current_company == COMPANY_SPECTATOR);
-						bool is_foreign = (owner != CompanyID::Invalid() && owner != _current_company);
-						bool can_interact = !is_spectator && !is_foreign;
+						bool interactive = false;
+						const std::string rate_label = town != nullptr ? FoodRateButtonLabel(town->index, interactive) : "Rate: Off";
+						const Rect rate_btn = TierButtonRect(r, rate_label);
+						GfxFillRect(rate_btn, GetColourGradient(Colours::Grey, interactive ? Shade::Normal : Shade::Dark));
+						DrawString(rate_btn.Shrink(WidgetDimensions::scaled.framerect), rate_label, interactive ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
+						tr.top = rate_btn.bottom + ScaleGUITrad(2);
 
-						std::string rate_str;
-						TextColour btn_text_col = TextColour::Yellow;
-						if (is_spectator) {
-							rate_str = rate == 0 ? "Rate: Off (Spectator)" : fmt::format("Rate: {}/mo (Spectator)", rate);
-							btn_text_col = TextColour::Grey;
-						} else if (is_foreign) {
-							rate_str = rate == 0 ? fmt::format("Rate: Off (Co. {})", owner.base()) : fmt::format("Rate: {}/mo (Co. {})", rate, owner.base());
-							btn_text_col = TextColour::Grey;
-						} else {
-							rate_str = rate == 0 ? "Rate: Off [Click to cycle]" : fmt::format("Rate: {}/mo [Click to cycle]", rate);
-						}
-						Rect rate_btn = Rect{tr.right - 190, tr.top - 2, tr.right - 4, tr.top + 16};
-						GfxFillRect(rate_btn, GetColourGradient(Colours::Grey, can_interact ? Shade::Normal : Shade::Dark));
-						DrawString(rate_btn, rate_str, btn_text_col, AlignmentH::Centre);
-
-						tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-						uint32_t delivered_now = svc ? svc->delivered_this_period : 0;
-						uint32_t delivered_last = svc ? svc->delivered_last_period : 0;
-						uint32_t last_consumed = 0;
+						DrawString(tr, fmt::format("Reserve: {} / 60 FOOD{}", stock, stock >= 60 ? " (full)" : ""), TextColour::White);
+						tr.top += line_step;
+						DrawString(tr, fmt::format("Delivered: {} since the last check, {} in the month before",
+							svc ? svc->delivered_this_period : 0, svc ? svc->delivered_last_period : 0), TextColour::White);
+						tr.top += line_step;
 						if (svc != nullptr) {
-							size_t last_slot = (svc->history_cursor + 3) % 4;
-							last_consumed = svc->consumed_history[last_slot];
-						}
-						DrawString(tr, fmt::format("Reserve: {} / 60 units (Free: {}) | Delivered: {} (this mo), {} (last mo) | Consumed: {} (last mo)",
-							stock, stock < 60 ? 60 - stock : 0, delivered_now, delivered_last, last_consumed), TextColour::White);
-						tr.top += GetCharacterHeight(FontSize::Normal);
-						if (svc != nullptr) {
-							std::string hist_str = "History (oldest->newest): [";
+							const size_t last_slot = (svc->history_cursor + 3) % 4;
+							const uint32_t last_ate = svc->consumed_history[last_slot];
+							const uint32_t last_wanted = svc->requested_history[last_slot];
+							std::string last_check = last_wanted == 0 ? "Last check: service was off"
+								: fmt::format("Last check: ate {} of {}{}", last_ate, last_wanted, last_ate < last_wanted ? ", not enough food in reserve then" : "");
+							DrawString(tr, last_check, last_ate < last_wanted ? TextColour::Orange : TextColour::White);
+							tr.top += line_step;
+							std::string hist_str = "Last 4 checks, oldest first: ";
 							for (int i = 0; i < 4; ++i) {
 								if (i > 0) hist_str += ", ";
 								size_t slot = (svc->history_cursor + i) % 4;
-								uint32_t cons = svc->consumed_history[slot];
-								uint32_t req = svc->requested_history[slot];
-								if (req == 0) {
-									hist_str += "Off";
-								} else {
-									hist_str += fmt::format("{}/{} ({:.0f}%)", cons, req, (static_cast<float>(cons) / req) * 100.0f);
-								}
+								hist_str += svc->requested_history[slot] == 0 ? std::string("off") : fmt::format("{}/{}", svc->consumed_history[slot], svc->requested_history[slot]);
 							}
-							hist_str += "]";
 							DrawString(tr, hist_str, TextColour::Silver);
-							tr.top += GetCharacterHeight(FontSize::Normal);
+							tr.top += line_step;
 						}
-						DrawString(tr, fmt::format("Passenger Bonus: +{:.1f}% (Baseline 1.0x preserved | Evaluates 1st of month)", bonus_pct), TextColour::Green);
+						DrawString(tr, fmt::format("Passenger bonus: +{:.1f}% (checked on the 1st of each month)", bonus_pct), TextColour::Green);
 					} else if (tier_idx == 1) {
 						auto r_dist = town != nullptr ? IntegratedEconomy::GetTownResidentialDistrict(town->index) : nullptr;
 						bool can_commission = (r_dist == nullptr || !r_dist->commissioned);
 
 						if (can_commission) {
 							bool is_spectator = (_current_company == COMPANY_SPECTATOR);
-							Rect comm_btn = Rect{tr.right - 190, tr.top - 2, tr.right - 4, tr.top + 16};
+							const std::string label = CommissionButtonLabel();
+							const Rect comm_btn = TierButtonRect(r, label);
 							GfxFillRect(comm_btn, GetColourGradient(Colours::Grey, is_spectator ? Shade::Dark : Shade::Normal));
-							DrawString(comm_btn, is_spectator ? "Spectator (Read-Only)" : "Commission District", is_spectator ? TextColour::Grey : TextColour::Yellow, AlignmentH::Centre);
+							DrawString(comm_btn.Shrink(WidgetDimensions::scaled.framerect), label, is_spectator ? TextColour::Grey : TextColour::Yellow, AlignmentH::Centre);
 
-							tr.top += GetCharacterHeight(FontSize::Normal) + 2;
-							DrawString(tr, "Kit: 160 STEL + 80 BALL | Cash: £50,000", TextColour::White);
-							tr.top += GetCharacterHeight(FontSize::Normal);
-							DrawString(tr, "Residential Expansion: Stable / Ready for commissioning", TextColour::Silver);
+							tr.top = comm_btn.bottom + ScaleGUITrad(2);
+							DrawString(tr, fmt::format("Kit: 160 STEL + 80 BALL and {}", GetString(STR_JUST_CURRENCY_LONG, Money{50000})), TextColour::White);
+							tr.top += line_step;
+							DrawString(tr, "Adds 4 protected houses where roads give access", TextColour::Silver);
 						} else {
-							tr.top += GetCharacterHeight(FontSize::Normal) + 2;
 							if (r_dist->buildings_completed >= 4) {
-								DrawString(tr, fmt::format("Residential Works: Completed ({} permanent houses)", r_dist->buildings_completed), TextColour::Green);
+								DrawString(tr, fmt::format("Residential works complete: {} protected houses", r_dist->buildings_completed), TextColour::Green);
 							} else if (r_dist->site_blocked) {
-								DrawString(tr, fmt::format("Residential Works: Awaiting site access ({} remaining, frontage blocked)", r_dist->building_opportunities), TextColour::Orange);
+								DrawString(tr, fmt::format("Waiting for road access: {} houses left", r_dist->building_opportunities), TextColour::Orange);
 							} else {
-								DrawString(tr, fmt::format("Residential Works: Building ({} remaining, {} placed, {} completed)",
+								DrawString(tr, fmt::format("Building: {} left, {} placed, {} finished",
 									r_dist->building_opportunities, r_dist->buildings_placed, r_dist->buildings_completed), TextColour::White);
 							}
-							tr.top += GetCharacterHeight(FontSize::Normal);
-							DrawString(tr, "Protected houses: Permanent immunity to redevelopment demolition", TextColour::Silver);
+							tr.top += line_step;
+							DrawString(tr, "Finished houses are never demolished by town redevelopment", TextColour::Silver);
 						}
 					} else {
-						tr.top += GetCharacterHeight(FontSize::Normal);
-						DrawString(tr, "Prosperity: None Active (Sprint 2 Scope)", TextColour::Silver);
+						DrawString(tr, "Not part of this pilot", TextColour::Silver);
 					}
 					break;
 				}
@@ -371,7 +414,10 @@ struct MegacityOverviewWindow : Window {
 
 			case WID_MCO_STATUS_BAR: {
 				Rect tr = r.Shrink(WidgetDimensions::scaled.framerect);
-				DrawString(tr, "Monthly supply cycles evaluate on the 1st of each month. Balanced delivery across all 3 tiers drives HyperGrowth.", TextColour::Silver, AlignmentH::Centre);
+				const std::string note = IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2
+					? "Food service is checked on the 1st of each month."
+					: "Monthly supply cycles evaluate on the 1st of each month. Balanced delivery across all 3 tiers drives HyperGrowth.";
+				DrawStringMultiLine(tr, note, TextColour::Silver, AlignmentH::Centre);
 				break;
 			}
 		}
@@ -433,11 +479,9 @@ struct MegacityOverviewWindow : Window {
 			case WID_MCO_TIER1_PANEL: {
 				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && this->current_town != TownID::Invalid()) {
 					if (_current_company == COMPANY_SPECTATOR) break;
-					NWidgetBase *nwi = this->GetWidget<NWidgetBase>(WID_MCO_TIER1_PANEL);
-					Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
-					int title_h = GetCharacterHeight(FontSize::Normal) + 2;
-					Rect rate_btn = Rect{r.right - 190, r.top + title_h - 2, r.right - 4, r.top + title_h + 16};
-					if (!rate_btn.Contains(pt)) break;
+					bool interactive = false;
+					const std::string label = FoodRateButtonLabel(this->current_town, interactive);
+					if (!TierButtonRect(this->GetWidget<NWidgetBase>(WID_MCO_TIER1_PANEL)->GetCurrentRect(), label).Contains(pt)) break;
 
 					auto svc = IntegratedEconomy::GetTownFoodService(this->current_town);
 					if (svc != nullptr && svc->owner != CompanyID::Invalid() && svc->owner != _current_company) break;
@@ -453,11 +497,7 @@ struct MegacityOverviewWindow : Window {
 			case WID_MCO_TIER2_PANEL: {
 				if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 && this->current_town != TownID::Invalid()) {
 					if (_current_company == COMPANY_SPECTATOR) break;
-					NWidgetBase *nwi = this->GetWidget<NWidgetBase>(WID_MCO_TIER2_PANEL);
-					Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
-					int title_h = GetCharacterHeight(FontSize::Normal) + 2;
-					Rect comm_btn = Rect{r.right - 190, r.top + title_h - 2, r.right - 4, r.top + title_h + 16};
-					if (!comm_btn.Contains(pt)) break;
+					if (!TierButtonRect(this->GetWidget<NWidgetBase>(WID_MCO_TIER2_PANEL)->GetCurrentRect(), CommissionButtonLabel()).Contains(pt)) break;
 
 					auto r_dist = IntegratedEconomy::GetTownResidentialDistrict(this->current_town);
 					if (r_dist == nullptr || !r_dist->commissioned) {
