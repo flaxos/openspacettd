@@ -1,0 +1,21 @@
+event	elapsed_ms	detail
+owned_facilities	486	1
+capture	487	facilities_1x
+capture	572	retire_confirmation
+capture	638	retire_declined
+retire_no_kept_facility	702
+capture	702	megacity_1x
+gui_scale	779	200
+capture	785	facilities_2x
+capture	828	megacity_2x
+gui_scale	887	100
+capture	894	cab_ahead
+capture	984	cab_keys_look_left
+capture	1060	cab_drag_right_and_up
+capture	1136	cab_wheel_zoom_in
+capture	1212	cab_controls_help
+walkthrough_complete	26293
+result	PASS
+callbacks	1517
+bridge	no owned train reached a bridge within 12000 ticks
+bridge_return	not attempted

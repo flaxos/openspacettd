@@ -41,6 +41,28 @@ Human desktop UAT remains Pending.
 | 10 | Cab | The bridge holding screen is plain black, so a short bridge reads as a blink | UX |
 | 11 | Cab | Drag, wheel and keys are only explained in the hover tooltip | UX |
 
+## After the fixes — 21 October 2026
+
+All findings were addressed on branch `codex/walkthrough-fixes` and the walkthrough re-run
+([`after-fixes/reserve-pilot/`](after-fixes/reserve-pilot/manifest.tsv),
+[`after-fixes/bridge/`](after-fixes/bridge/manifest.tsv)):
+
+| # | Outcome |
+|---|---|
+| 1 | Rows have seven short lines in a larger default window; nothing is cut off at 1× or 2× |
+| 2 | Works badges read `Capacity Works` / `Reserve Works`; the action column fits `Locate Station` |
+| 3 | Spacers have backgrounds in the Facilities tab and bottom rows and the cab button row |
+| 4 | Summary and Upgrade All count batches in Commonwealth economies |
+| 5 | Megacity text is split into short lines; panel heights follow the font; the footer wraps |
+| 6 | Megacity buttons are sized to their labels, for drawing and clicks alike |
+| 7 | Pilot tier titles; no developer wording |
+| 8 | The panel explains the monthly check; the delivery counters are now saved (they reset to 0 on load before, which is why the original save showed `Delivered: 0`) |
+| 9 | Not a window bug: the demo fixture cuts each station name to 12 characters to fit OpenTTD's 31-character train names. The cab window size is unchanged |
+| 10 | On a bridge the cab shows its last view, dimmed to 60 %, with the message; it is black only if the cab was opened on the bridge |
+| 11 | A Controls button shows the drag, wheel and key controls |
+
+The Reserve-pilot save predates the saved counters, so its `Delivered` line still loads as 0.
+
 ## Agent opinion (not acceptance)
 
 The Facilities and Megacity windows carry the right information but read like debug panels:

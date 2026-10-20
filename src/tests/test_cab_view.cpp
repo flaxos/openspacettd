@@ -199,6 +199,12 @@ TEST_CASE("Cab window is singleton and closes on session change or train deletio
 	first->OnClick({0, 0}, WID_CV_EFFECT, 1);
 	CHECK(first->GetWidgetString(WID_CV_EFFECT, STR_NULL) == GetString(STR_CAB_VIEW_EFFECT_FULL));
 
+	/* The Controls button toggles the help panel. */
+	first->OnClick({0, 0}, WID_CV_HELP, 1);
+	CHECK(first->IsWidgetLowered(WID_CV_HELP));
+	first->OnClick({0, 0}, WID_CV_HELP, 1);
+	CHECK_FALSE(first->IsWidgetLowered(WID_CV_HELP));
+
 	/* Keyboard look controls act only while the cab window has focus. */
 	REQUIRE(first->window_desc.hotkeys != nullptr);
 	auto key = [&](uint16_t keycode) { return first->OnHotkey(first->window_desc.hotkeys->CheckMatch(keycode)); };

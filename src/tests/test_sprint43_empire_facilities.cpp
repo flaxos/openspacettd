@@ -451,8 +451,8 @@ TEST_CASE("Sprint 43 - Empire Facility Dashboard WindowDesc, Tree & Filtering", 
 
 	REQUIRE(empire_desc != nullptr);
 	CHECK(empire_desc->ini_key == "view_empire_facilities");
-	CHECK(empire_desc->GetDefaultWidth() == 760);
-	CHECK(empire_desc->GetDefaultHeight() == 440);
+	CHECK(empire_desc->GetDefaultWidth() == 860);
+	CHECK(empire_desc->GetDefaultHeight() == 520);
 
 	NWidgetStacked *shade_select = nullptr;
 	std::unique_ptr<NWidgetBase> root = nullptr;
@@ -960,11 +960,11 @@ TEST_CASE("Sprint 43 / C1 - Facility row layout scales with the interface", "[em
 	for (int factor : {1, 2}) {
 		_gui_scale = 100 * factor;
 		const int line_height = 13 * factor;
-		const FacilityRowLayout l(0, 738 * factor, 10, line_height);
+		const FacilityRowLayout l(0, 838 * factor, 10, line_height);
 		CAPTURE(factor);
 
-		/* The 1x row keeps its original 68 pixel pitch; 2x doubles it. */
-		CHECK(FacilityRowLayout::Height(line_height) == 68 * factor);
+		/* Seven 16 pixel lines plus padding at 1x; 2x doubles it. */
+		CHECK(FacilityRowLayout::Height(line_height) == 116 * factor);
 
 		/* Every text line fits the font and stays left of the action column. */
 		for (const Rect &line : l.lines) {

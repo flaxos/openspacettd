@@ -451,7 +451,7 @@ TEST_CASE_METHOD(MegacityGuiFixture, "Sprint 18 GUI - WindowDesc Registration & 
 	{
 		REQUIRE(megacity_desc != nullptr);
 		CHECK(megacity_desc->ini_key == "view_megacity");
-		CHECK(megacity_desc->GetDefaultWidth() == 440);
+		CHECK(megacity_desc->GetDefaultWidth() == 520);
 
 		NWidgetStacked *shade_select = nullptr;
 		std::unique_ptr<NWidgetBase> root = nullptr;

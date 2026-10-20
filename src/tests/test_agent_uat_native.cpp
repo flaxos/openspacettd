@@ -42,7 +42,7 @@ using Clock = std::chrono::steady_clock;
 enum class UatStage {
 	WaitGame, WaitPause, Facilities, RetireAsked, RetireDeclined, Megacity, ScaleUp, FacilitiesLarge, MegacityLarge, ScaleDown,
 #ifdef WITH_CAB_VIEW
-	CabAhead, CabLookLeft, CabDrag, CabZoom, BridgeSearch, BridgeFound, BridgeHeld, BridgeLeaving, BridgeExited,
+	CabAhead, CabLookLeft, CabDrag, CabZoom, CabHelp, BridgeSearch, BridgeFound, BridgeHeld, BridgeLeaving, BridgeExited, ReturnStart, ReturnSearch, ReturnFound,
 #endif
 	Finish,
 };
@@ -65,6 +65,7 @@ struct AgentUat {
 	VehicleID bridge_train = VehicleID::Invalid();
 	unsigned bridge_callbacks = 0;
 	std::string bridge_result = "not attempted";
+	std::string return_result = "not attempted";
 #endif
 
 	void Record(std::string_view event, std::string_view detail = {})
@@ -83,6 +84,7 @@ struct AgentUat {
 		file << "callbacks\t" << this->callbacks << '\n';
 #ifdef WITH_CAB_VIEW
 		file << "bridge\t" << this->bridge_result << '\n';
+		file << "bridge_return\t" << this->return_result << '\n';
 #else
 		file << "bridge\tcab view not built\n";
 #endif
@@ -309,6 +311,13 @@ struct AgentUat {
 
 			case UatStage::CabZoom:
 				this->Cab()->OnMouseWheel(3, WID_CV_VIEW);
+				this->Cab()->OnClick({}, WID_CV_HELP, 1);
+				this->stage = UatStage::CabHelp;
+				this->Capture("cab_controls_help");
+				return;
+
+			case UatStage::CabHelp:
+				this->Cab()->OnClick({}, WID_CV_HELP, 1);
 				IConsoleCmdExec("unpause");
 				this->stage = UatStage::BridgeSearch;
 				this->Schedule();
@@ -374,12 +383,52 @@ struct AgentUat {
 
 			case UatStage::BridgeExited:
 				if (!_pause_mode.Test(PauseMode::Normal)) { this->Schedule(); return; }
-				this->stage = UatStage::Finish;
-				if (this->Cab() != nullptr) {
-					this->Capture("cab_after_bridge");
+				if (this->Cab() == nullptr) { this->stage = UatStage::Finish; this->Schedule(); return; }
+				this->stage = UatStage::ReturnStart;
+				this->Capture("cab_after_bridge");
+				return;
+
+			/* Keep riding the same train so its cab already has a view when it next reaches a bridge. */
+			case UatStage::ReturnStart:
+				IConsoleCmdExec("unpause");
+				this->bridge_callbacks = 0;
+				this->stage = UatStage::ReturnSearch;
+				this->Schedule();
+				return;
+
+			case UatStage::ReturnSearch: {
+				if (_pause_mode.Any()) { this->Schedule(); return; }
+				const Train *v = Train::GetIfValid(this->bridge_train);
+				if (v == nullptr || this->Cab() == nullptr) {
+					this->return_result = "cab closed before the next bridge";
+					IConsoleCmdExec("pause");
+					this->stage = UatStage::Finish;
+					this->Schedule();
 					return;
 				}
+				if (ResolveCabViewPresentation(v, _local_company).phase == CabViewPhase::Bridge) {
+					IConsoleCmdExec("pause");
+					this->return_result = "reached a bridge with the cab already open";
+					this->stage = UatStage::ReturnFound;
+					this->Schedule();
+					return;
+				}
+				if (++this->bridge_callbacks > 1500) {
+					this->return_result = "train did not reach another bridge within 12000 ticks";
+					IConsoleCmdExec("pause");
+					this->stage = UatStage::Finish;
+					this->Schedule();
+					return;
+				}
+				this->Advance();
 				this->Schedule();
+				return;
+			}
+
+			case UatStage::ReturnFound:
+				if (!_pause_mode.Test(PauseMode::Normal)) { this->Schedule(); return; }
+				this->stage = UatStage::Finish;
+				this->Capture("cab_on_bridge_held_view");
 				return;
 #else
 				this->stage = UatStage::Finish;
