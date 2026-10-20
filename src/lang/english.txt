@@ -6368,6 +6368,8 @@ STR_ERROR_CAN_T_UPGRADE_FACILITY                             :Can't upgrade proc
 STR_ERROR_FACILITY_MAX_CAPACITY                              :Facility has already reached maximum capacity
 STR_ERROR_CAN_T_SET_PLATFORM_CAP                             :Can't set station platform holding target
 STR_EMPIRE_FACILITIES_RETIRE_BTN                                :Retire
+STR_EMPIRE_FACILITIES_RETIRE_CAPTION                            :{WHITE}Retire facility
+STR_EMPIRE_FACILITIES_RETIRE_QUERY                              :{WHITE}Retire {RAW_STRING}?{}The plant is demolished and the cargo in its buffers is lost. This cannot be undone.
 STR_ERROR_CAN_T_REMOVE_FACILITY                                 :Can't decommission processing facility
 STR_VIEWPORT_FACILITY_ACTIVE                                    :{GREEN}[Active]{BLACK} {STATION} {STATION_FEATURES}
 STR_VIEWPORT_FACILITY_STARVED                                   :{RED}[Starved]{BLACK} {STATION} {STATION_FEATURES}

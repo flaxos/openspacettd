@@ -26,6 +26,7 @@
 #include "../command_func.h"
 #include "../company_func.h"
 #include "../company_base.h"
+#include "../textbuf_gui.h"
 #include "../cargotype.h"
 #include "../widgets/empire_facilities_widget.h"
 #include "../table/strings.h"
@@ -40,8 +41,6 @@ enum class EmpireFacilityFilter : uint8_t {
 	Propulsion = 3,
 	DataCrystals = 4,
 };
-
-static constexpr uint ROW_HEIGHT = 68;
 
 static void SafeScrollMainWindowToTile(TileIndex tile)
 {
@@ -107,15 +106,60 @@ std::optional<Money> QueryWorksCommissionPrice(IndustryID industry, CompanyID co
 }
 
 /**
- * Get the legacy platform target button, right-aligned at the end of the fourth text line.
- * @param row_right Right edge of the row.
- * @param row_top Top of the row.
- * @return Button rectangle.
+ * Distance between text lines; at least 16 traditional pixels, more when the font needs it.
+ * @param line_height Normal font height.
+ * @return Line pitch in pixels.
  */
-static Rect PlatformTargetButtonRect(int row_right, int row_top)
+int FacilityRowLayout::LineStep(int line_height)
 {
-	int right = row_right - 156;
-	return Rect{right - 120, row_top + 48, right, row_top + 64};
+	return std::max(line_height + ScaleGUITrad(2), ScaleGUITrad(16));
+}
+
+/**
+ * Height of one facility row: four text lines plus padding.
+ * @param line_height Normal font height.
+ * @return Row pitch in pixels.
+ */
+int FacilityRowLayout::Height(int line_height)
+{
+	return 4 * LineStep(line_height) + ScaleGUITrad(4);
+}
+
+/**
+ * Lay out one facility row: four text lines on the left, then a 150 traditional pixel action
+ * column with three works/retire buttons over two navigation buttons.
+ * @param left Left edge of the list.
+ * @param right Right edge of the list.
+ * @param top Top of this row.
+ * @param line_height Normal font height.
+ */
+FacilityRowLayout::FacilityRowLayout(int left, int right, int top, int line_height)
+{
+	const int pad = ScaleGUITrad(2);
+	const int gap = ScaleGUITrad(4);
+	const int step = LineStep(line_height);
+	this->row = {left, top, right, top + Height(line_height) - pad};
+
+	const int col_left = right - ScaleGUITrad(150);
+	const int col_right = right - gap;
+	this->text = {left + gap, top + pad, col_left - ScaleGUITrad(6), this->row.bottom};
+	for (int i = 0; i < 4; ++i) this->lines[i] = {this->text.left, top + pad + i * step, this->text.right, top + (i + 1) * step};
+
+	const int third = (col_right - col_left - 2 * gap) / 3;
+	const int upper_top = top + gap;
+	const int upper_bottom = top + pad + 2 * step - gap;
+	this->works_first = {col_left, upper_top, col_left + third, upper_bottom};
+	this->works_second = {this->works_first.right + gap, upper_top, this->works_first.right + gap + third, upper_bottom};
+	this->works_span = {col_left, upper_top, this->works_second.right, upper_bottom};
+	this->retire = {this->works_second.right + gap, upper_top, col_right, upper_bottom};
+
+	const int half = (col_right - col_left - gap) / 2;
+	const int lower_top = top + pad + 2 * step;
+	const int lower_bottom = top + pad + 4 * step - gap;
+	this->plant = {col_left, lower_top, col_left + half, lower_bottom};
+	this->station = {this->plant.right + gap, lower_top, col_right, lower_bottom};
+
+	this->platform = {this->text.right - ScaleGUITrad(120), this->lines[3].top - pad, this->text.right, this->lines[3].bottom};
 }
 
 FacilityBottleneck DiagnoseFacilityBottleneck(const ProcessingFacility &f, const ProductionRecipe *rec, uint32_t throughput, uint32_t in_cap, uint32_t out_cap)
@@ -297,6 +341,58 @@ struct EmpireFacilitiesWindow : Window {
 		this->SetWidgetDisabledState(WID_EF_UPGRADE_ALL_BTN, IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2);
 	}
 
+	IndustryID retire_industry = IndustryID::Invalid(); ///< Integrated factory awaiting retirement confirmation.
+	StationID retire_station = StationID::Invalid(); ///< Legacy facility station awaiting retirement confirmation.
+
+	/**
+	 * Ask before retiring a facility; retiring demolishes it and discards its buffered cargo.
+	 * @param f Facility to retire.
+	 */
+	void ConfirmRetire(const ProcessingFacility &f)
+	{
+		std::string place;
+		if (const Industry *ind = GetFacilityIndustry(f)) {
+			this->retire_industry = ind->index;
+			this->retire_station = StationID::Invalid();
+			place = GetString(STR_INDUSTRY_NAME, ind->index);
+		} else if (!IntegratedEconomy::Enabled() && Station::IsValidID(f.linked_station)) {
+			this->retire_industry = IndustryID::Invalid();
+			this->retire_station = f.linked_station;
+			place = GetString(STR_STATION_NAME, f.linked_station);
+		} else {
+			return;
+		}
+		const ProductionRecipe *rec = ProductionChainManager::GetRecipe(f.recipe_id);
+		std::string name = (rec != nullptr) ? fmt::format("{} at {}", rec->name, place) : place;
+		ShowQuery(GetEncodedString(STR_EMPIRE_FACILITIES_RETIRE_CAPTION), GetEncodedString(STR_EMPIRE_FACILITIES_RETIRE_QUERY, std::move(name)),
+			this, EmpireFacilitiesWindow::RetireConfirmed);
+	}
+
+	/**
+	 * Retire the facility chosen in ConfirmRetire once the player agrees.
+	 * @param w The facilities window.
+	 * @param confirmed Whether the player chose Yes.
+	 */
+	static void RetireConfirmed(Window *w, bool confirmed)
+	{
+		auto *window = static_cast<EmpireFacilitiesWindow *>(w);
+		if (confirmed && window->retire_industry != IndustryID::Invalid()) {
+			Command<Commands::ManageEconomyFactory>::Post(window->retire_industry, true);
+		} else if (confirmed && window->retire_station != StationID::Invalid()) {
+			Command<Commands::RemoveProcessingFacility>::Post(STR_ERROR_CAN_T_REMOVE_FACILITY, window->retire_station);
+		}
+		window->retire_industry = IndustryID::Invalid();
+		window->retire_station = StationID::Invalid();
+		window->SetDirty();
+	}
+
+	void OnResize() override
+	{
+		const NWidgetBase *nwi = this->GetWidget<NWidgetBase>(WID_EF_LIST_PANEL);
+		const int height = static_cast<int>(nwi->current_y) - WidgetDimensions::scaled.framerect.Vertical();
+		this->vscroll->SetCapacity(std::max(0, height) / FacilityRowLayout::Height(GetCharacterHeight(FontSize::Normal)));
+	}
+
 	void OnInit() override
 	{
 		this->SetWidgetDisabledState(WID_EF_UPGRADE_ALL_BTN, IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2);
@@ -363,8 +459,10 @@ struct EmpireFacilitiesWindow : Window {
 					return;
 				}
 
+				const int line_height = GetCharacterHeight(FontSize::Normal);
+				const int row_height = FacilityRowLayout::Height(line_height);
 				size_t start = this->vscroll->GetPosition();
-				size_t end = std::min(filtered.size(), start + (tr.Height() / ROW_HEIGHT));
+				size_t end = std::min(filtered.size(), start + (tr.Height() / row_height));
 
 				int y = tr.top;
 				for (size_t i = start; i < end; ++i) {
@@ -373,12 +471,10 @@ struct EmpireFacilitiesWindow : Window {
 					const Station *st = Station::GetIfValid(f.linked_station);
 					const PlanetRegion *region = PlanetManager::GetRegion(f.world_id);
 
-					Rect row_rect = Rect{tr.left, y, tr.right, y + static_cast<int>(ROW_HEIGHT) - 2};
-					GfxFillRect(row_rect, (i % 2 == 0) ? GetColourGradient(Colours::DarkGreen, Shade::Darkest) : GetColourGradient(Colours::DarkGreen, Shade::Dark));
+					const FacilityRowLayout layout(tr.left, tr.right, y, line_height);
+					GfxFillRect(layout.row, (i % 2 == 0) ? GetColourGradient(Colours::DarkGreen, Shade::Darkest) : GetColourGradient(Colours::DarkGreen, Shade::Dark));
 
-					int x_btn_left = row_rect.right - 150;
-					int x_btn_right = row_rect.right - 4;
-					Rect tr_text = Rect{row_rect.left + 4, y + 2, x_btn_left - 6, y + static_cast<int>(ROW_HEIGHT) - 2};
+					const Rect &tr_text = layout.text;
 
 					uint32_t throughput = f.monthly_capacity;
 					uint32_t in_cap = 300, out_cap = 300;
@@ -434,12 +530,11 @@ struct EmpireFacilitiesWindow : Window {
 						: fmt::format("Tile [{}, {}]", TileX(f.tile), TileY(f.tile));
 
 					std::string line1 = fmt::format("{}  >>  {}", world_str, st_name);
-					Rect line1_r = Rect{tr_text.left, y + 2, tr_text.right, y + 16};
-					DrawString(line1_r, line1, TextColour::Yellow);
+					DrawString(layout.lines[0], line1, TextColour::Yellow);
 
 					/* Line 2: Status Badge + Recipe with exact ratios + Rated throughput + Last month completed-period production */
 					int badge_width = GetStringBoundingBox(bottleneck.badge).width;
-					Rect badge_r = Rect{tr_text.left, y + 18, std::min(tr_text.right, tr_text.left + badge_width), y + 32};
+					Rect badge_r = Rect{tr_text.left, layout.lines[1].top, std::min(tr_text.right, tr_text.left + badge_width), layout.lines[1].bottom};
 					DrawString(badge_r, bottleneck.badge, bottleneck.colour);
 
 					std::string in_ratio;
@@ -473,9 +568,9 @@ struct EmpireFacilitiesWindow : Window {
 							: fmt::format("Recipe: {} ({}) | Cap: {} t/mo | {}", rec->name, ratio_str, throughput, last_prod_str))
 						: fmt::format("Recipe: None | {}", last_prod_str);
 
-					int recipe_x = tr_text.left + badge_width + 8;
+					int recipe_x = tr_text.left + badge_width + ScaleGUITrad(8);
 					if (recipe_x < tr_text.right) {
-						Rect recipe_r = Rect{recipe_x, y + 18, tr_text.right, y + 32};
+						Rect recipe_r = Rect{recipe_x, layout.lines[1].top, tr_text.right, layout.lines[1].bottom};
 						DrawString(recipe_r, line2, TextColour::White);
 					}
 
@@ -510,8 +605,7 @@ struct EmpireFacilitiesWindow : Window {
 						}
 					}
 					std::string line3 = fmt::format("Factory Buffers: {} | {}", in_desc, out_desc);
-					Rect line3_r = Rect{tr_text.left, y + 34, tr_text.right, y + 48};
-					DrawString(line3_r, line3, TextColour::Silver);
+					DrawString(layout.lines[2], line3, TextColour::Silver);
 
 					/* Line 4: Works Bill & Queried Price + Planetary Warehouse Construction Stock */
 					WorldID world = (f.tile != INVALID_TILE) ? PlanetManager::GetTileWorld(f.tile) : WorldID{0};
@@ -521,7 +615,7 @@ struct EmpireFacilitiesWindow : Window {
 					uint32_t ball_stock = (ball_c != INVALID_CARGO) ? StockpileManager::GetStock(world, _local_company, ball_c) : 0;
 
 					bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
-					Rect line4_r = Rect{tr_text.left, y + 50, tr_text.right, y + 64};
+					Rect line4_r = layout.lines[3];
 					std::string line4;
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
 						if (work == FactoryWorkType::None) {
@@ -541,55 +635,53 @@ struct EmpireFacilitiesWindow : Window {
 					}
 					if (!IntegratedEconomy::Enabled()) {
 						/* Legacy station facilities: platform holding target cycles 0 -> 50 -> 100 -> 200 t. */
-						Rect btn_platform = PlatformTargetButtonRect(row_rect.right, y);
+						const Rect &btn_platform = layout.platform;
 						GfxFillRect(btn_platform, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
 						std::string platform_label = (f.platform_capacity == 0) ? "Platform: 0 (Hub)" : fmt::format("Platform: {} t", f.platform_capacity);
 						DrawString(btn_platform, platform_label, is_owner ? TextColour::White : TextColour::Grey, AlignmentH::Centre);
-						line4_r.right = btn_platform.left - 6;
+						line4_r.right = btn_platform.left - ScaleGUITrad(6);
 					}
 					DrawString(line4_r, line4, TextColour::Silver);
 
 					/* Right Action Column: Upper half works/controls, Lower half navigation */
 					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
 						if (work == FactoryWorkType::None) {
-							Rect btn_cap = Rect{x_btn_left, y + 4, x_btn_left + 46, y + 26};
+							const Rect &btn_cap = layout.works_first;
 							GfxFillRect(btn_cap, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
 							DrawString(btn_cap, GetString(STR_WORKS_CAPACITY_BTN), is_owner ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
 
-							Rect btn_res = Rect{x_btn_left + 50, y + 4, x_btn_left + 94, y + 26};
+							const Rect &btn_res = layout.works_second;
 							GfxFillRect(btn_res, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
 							DrawString(btn_res, GetString(STR_WORKS_RESERVE_BTN), is_owner ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
 						} else if (work == FactoryWorkType::Capacity) {
-							Rect badge_work = Rect{x_btn_left, y + 4, x_btn_left + 94, y + 26};
-							DrawString(badge_work, GetString(STR_WORKS_STATUS_CAPACITY), TextColour::Green, AlignmentH::Centre);
+							DrawString(layout.works_span, GetString(STR_WORKS_STATUS_CAPACITY), TextColour::Green, AlignmentH::Centre);
 						} else {
-							Rect badge_work = Rect{x_btn_left, y + 4, x_btn_left + 94, y + 26};
-							DrawString(badge_work, GetString(STR_WORKS_STATUS_RESERVE), TextColour::Green, AlignmentH::Centre);
+							DrawString(layout.works_span, GetString(STR_WORKS_STATUS_RESERVE), TextColour::Green, AlignmentH::Centre);
 						}
 
-						Rect btn_retire = Rect{x_btn_left + 98, y + 4, x_btn_right, y + 26};
+						const Rect &btn_retire = layout.retire;
 						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, is_owner ? Shade::Normal : Shade::Dark));
 						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), is_owner ? TextColour::White : TextColour::Grey, AlignmentH::Centre);
 					} else {
-						Rect btn_upgrade = Rect{x_btn_left, y + 4, x_btn_left + 94, y + 26};
+						const Rect &btn_upgrade = layout.works_span;
 						GfxFillRect(btn_upgrade, GetColourGradient(Colours::Grey, is_owner ? Shade::Normal : Shade::Dark));
 						DrawString(btn_upgrade, "Upgrade (+50)", is_owner ? TextColour::Yellow : TextColour::Grey, AlignmentH::Centre);
 
-						Rect btn_retire = Rect{x_btn_left + 98, y + 4, x_btn_right, y + 26};
+						const Rect &btn_retire = layout.retire;
 						GfxFillRect(btn_retire, GetColourGradient(Colours::Red, is_owner ? Shade::Normal : Shade::Dark));
 						DrawString(btn_retire, GetString(STR_EMPIRE_FACILITIES_RETIRE_BTN), is_owner ? TextColour::White : TextColour::Grey, AlignmentH::Centre);
 					}
 
 					/* Navigation buttons */
-					Rect btn_plant = Rect{x_btn_left, y + 34, x_btn_left + 72, y + 58};
+					const Rect &btn_plant = layout.plant;
 					GfxFillRect(btn_plant, GetColourGradient(Colours::Grey, Shade::Normal));
 					DrawString(btn_plant, GetString(STR_EMPIRE_FACILITIES_LOCATE_PLANT), TextColour::White, AlignmentH::Centre);
 
-					Rect btn_station = Rect{x_btn_left + 76, y + 34, x_btn_right, y + 58};
+					const Rect &btn_station = layout.station;
 					GfxFillRect(btn_station, GetColourGradient(Colours::Grey, Shade::Normal));
 					DrawString(btn_station, target_st != nullptr ? GetString(STR_EMPIRE_FACILITIES_LOCATE_STATION) : GetString(STR_EMPIRE_FACILITIES_LOCATE_HUB), TextColour::White, AlignmentH::Centre);
 
-					y += ROW_HEIGHT;
+					y += row_height;
 				}
 				break;
 			}
@@ -674,12 +766,16 @@ struct EmpireFacilitiesWindow : Window {
 				Rect r = nwi->GetCurrentRect().Shrink(WidgetDimensions::scaled.framerect);
 				if (pt.y < r.top || pt.y >= r.bottom) return;
 
-				size_t idx = this->vscroll->GetPosition() + (pt.y - r.top) / ROW_HEIGHT;
+				const int line_height = GetCharacterHeight(FontSize::Normal);
+				const int row_height = FacilityRowLayout::Height(line_height);
+				const int row = (pt.y - r.top) / row_height;
+				size_t idx = this->vscroll->GetPosition() + row;
 				auto filtered = this->GetFilteredFacilities();
 				if (idx >= filtered.size()) return;
 
 				const auto &f = filtered[idx];
-				int rel_y = (pt.y - r.top) % ROW_HEIGHT;
+				const FacilityRowLayout layout(r.left, r.right, r.top + row * row_height, line_height);
+				bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
 
 				const Station *st = Station::GetIfValid(f.linked_station);
 				if (st == nullptr) {
@@ -693,8 +789,7 @@ struct EmpireFacilitiesWindow : Window {
 				}
 
 				/* Legacy platform holding target: 0 -> 50 -> 100 -> 200 -> 0 */
-				if (!IntegratedEconomy::Enabled() && PlatformTargetButtonRect(r.right, pt.y - rel_y).Contains(pt)) {
-					bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
+				if (!IntegratedEconomy::Enabled() && layout.platform.Contains(pt)) {
 					if (is_owner && f.linked_station != StationID::Invalid()) {
 						uint32_t next_target = (f.platform_capacity == 0) ? 50 : (f.platform_capacity == 50) ? 100 : (f.platform_capacity == 100) ? 200 : 0;
 						Command<Commands::SetFacilityPlatformCapacity>::Post(STR_ERROR_CAN_T_SET_PLATFORM_CAP, f.linked_station, next_target);
@@ -703,73 +798,54 @@ struct EmpireFacilitiesWindow : Window {
 					return;
 				}
 
-				/* Check button clicks on right side */
-				if (pt.x >= r.right - 150 && pt.x <= r.right - 4) {
-					if (rel_y >= 4 && rel_y <= 28) {
-						bool is_owner = (Company::IsValidID(_local_company) && f.owner == _local_company);
-						if (!is_owner) return;
+				if (layout.retire.Contains(pt)) {
+					if (is_owner) this->ConfirmRetire(f);
+					return;
+				}
 
-						if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
-							IndustryID ind_id{uint16_t(f.id - 1)};
-							FactoryWorkType work = FactoryWorkType::None;
-							auto f_it = IntegratedEconomy::Factories().find(ind_id);
-							if (f_it != IntegratedEconomy::Factories().end()) work = f_it->second.work;
+				if (layout.works_span.Contains(pt)) {
+					if (!is_owner) return;
+					if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) {
+						IndustryID ind_id{uint16_t(f.id - 1)};
+						auto f_it = IntegratedEconomy::Factories().find(ind_id);
+						FactoryWorkType work = (f_it != IntegratedEconomy::Factories().end()) ? f_it->second.work : FactoryWorkType::None;
+						if (work == FactoryWorkType::None && layout.works_first.Contains(pt)) {
+							Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Capacity);
+						} else if (work == FactoryWorkType::None && layout.works_second.Contains(pt)) {
+							Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Reserve);
+						}
+					} else if (IntegratedEconomy::Enabled()) {
+						Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, false);
+					} else if (f.linked_station != StationID::Invalid()) {
+						Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
+					}
+					this->SetDirty();
+					return;
+				}
 
-							if (work == FactoryWorkType::None) {
-								if (pt.x <= r.right - 104) {
-									Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Capacity);
-								} else if (pt.x <= r.right - 56) {
-									Command<Commands::CommissionEconomyWork>::Post(ind_id, FactoryWorkType::Reserve);
-								} else if (pt.x >= r.right - 52) {
-									Command<Commands::ManageEconomyFactory>::Post(ind_id, true);
-								}
-							} else {
-								if (pt.x >= r.right - 52) {
-									Command<Commands::ManageEconomyFactory>::Post(ind_id, true);
-								}
-							}
-						} else {
-							if (pt.x <= r.right - 56) {
-								if (IntegratedEconomy::Enabled()) {
-									Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, false);
-								} else if (f.linked_station != StationID::Invalid()) {
-									Command<Commands::UpgradeProcessingFacility>::Post(STR_ERROR_CAN_T_UPGRADE_FACILITY, f.linked_station, 50);
-								}
-							} else {
-								if (IntegratedEconomy::Enabled()) {
-									Command<Commands::ManageEconomyFactory>::Post(IndustryID{uint16_t(f.id - 1)}, true);
-								} else if (f.linked_station != StationID::Invalid()) {
-									Command<Commands::RemoveProcessingFacility>::Post(STR_ERROR_CAN_T_REMOVE_FACILITY, f.linked_station);
-								}
-							}
-						}
-						this->SetDirty();
-						return;
-					} else if (rel_y >= 32 && rel_y <= 62) {
-						if (pt.x <= r.right - 78) {
-							/* Locate Plant */
-							if (f.tile != INVALID_TILE) SafeScrollMainWindowToTile(f.tile);
-						} else {
-							/* Locate Station / Hub */
-							if (st != nullptr && st->xy != INVALID_TILE) {
-								SafeScrollMainWindowToTile(st->xy);
-							} else {
-								TileIndex hub_tile = INVALID_TILE;
-								for (const auto &hub : LogisticsHubManager::GetAllHubs()) {
-									if (hub.world_id == f.world_id && hub.company_id == _local_company) {
-										hub_tile = hub.tile;
-										break;
-									}
-								}
-								if (hub_tile != INVALID_TILE) {
-									SafeScrollMainWindowToTile(hub_tile);
-								} else if (f.tile != INVALID_TILE) {
-									SafeScrollMainWindowToTile(f.tile);
-								}
-							}
-						}
+				if (layout.plant.Contains(pt)) {
+					if (f.tile != INVALID_TILE) SafeScrollMainWindowToTile(f.tile);
+					return;
+				}
+
+				if (layout.station.Contains(pt)) {
+					if (st != nullptr && st->xy != INVALID_TILE) {
+						SafeScrollMainWindowToTile(st->xy);
 						return;
 					}
+					TileIndex hub_tile = INVALID_TILE;
+					for (const auto &hub : LogisticsHubManager::GetAllHubs()) {
+						if (hub.world_id == f.world_id && hub.company_id == _local_company) {
+							hub_tile = hub.tile;
+							break;
+						}
+					}
+					if (hub_tile != INVALID_TILE) {
+						SafeScrollMainWindowToTile(hub_tile);
+					} else if (f.tile != INVALID_TILE) {
+						SafeScrollMainWindowToTile(f.tile);
+					}
+					return;
 				}
 
 				/* Click elsewhere on row: scroll viewport to plant */
