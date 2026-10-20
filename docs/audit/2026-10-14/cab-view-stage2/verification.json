@@ -1,0 +1,370 @@
+{
+  "recorded_utc": "2026-10-14T20:30:47.330376+00:00",
+  "baseline": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "upstream": {
+    "repository": "vaclavloubek/OpenTTD",
+    "tag": "15.3-cabview-alpha1",
+    "commit": "b7bd17b04dde3379b2be33be40ba4d6fc9f5d391"
+  },
+  "status": "bounded Stage 2 automated engineering complete",
+  "checks": {
+    "feature_off": {
+      "configuration": "OFF",
+      "cab_compile_units": [],
+      "feature_definitions": [],
+      "binary_hashes": {
+        "openttd": "c6e50ee9113939072ee67e660e80c436d90954b6a821879eb942ea4699612ff9",
+        "openttd_test": "b5336a9d22e192cc6f8e54de4749feaf669a2d68893d5235b5ac6354d24525d0"
+      }
+    },
+    "feature_on": {
+      "configuration": "ON, Release, assertions enabled",
+      "cab_compile_units": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp"
+      ],
+      "feature_definitions": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp"
+      ],
+      "binary_hashes": {
+        "openttd": "ae8d4567d157d28538fd076061bc98a5ce7259a08bd9ab19cb7d456f2e161ce1",
+        "openttd_test": "9a9519f395c8f2fd4629592385125ef7ab98f8c23d68b2b4891ab9ef91812863"
+      },
+      "english_lng_sha256": "ed7070216e8634b91d6ae3fd06b5b210690a5be208b56fbf56d51fe18b02ebca"
+    },
+    "regressions": {
+      "passed": 36,
+      "total": 36,
+      "assertions": 11160,
+      "log": "logs/stage2-regressions-05.log"
+    },
+    "source": {
+      "checks": {
+        "python3 .github/file-descriptions.py": {
+          "exit_code": 0,
+          "output": "OK\n"
+        },
+        "python3 .github/unused-strings.py": {
+          "exit_code": 0,
+          "output": "OK\n"
+        },
+        "git diff --check": {
+          "exit_code": 0,
+          "output": ""
+        }
+      },
+      "source_hashes": {
+        "src/cab_view.h": "f357924c58f7d8f25348ab5347e17637e8a29a7986990071b028eb5a2e19aa92",
+        "src/cab_view_gui.cpp": "65e4deeeab693d453580747674b18abba2a015837100ab5e7194d764bb0a5421",
+        "src/cab_view_3d.cpp": "97b9ff3a1f72bfacdbde04c117209a0b7a4562327c1ec770822e42db7db5fd0a",
+        "src/cab_view_3d.h": "6e74b9050d58399286e89c21247d81444958fe030a5d7797f2deac461c1dc2fb",
+        "src/tests/test_cab_view.cpp": "fbe1c32ee332f08bca514279976893e06eb71af2fe5365219fcac345eb4793e8",
+        "src/tests/test_cab_view_native.cpp": "2435d64ce79f943a2c9f7c2da1d3fa9f74867e9f855abbc08e3c470d081bcffa",
+        "src/tests/test_cab_view_gate_native.cpp": "bce146f1eaea356f103c60a2becbd40dc9639ca33d11c3543cffbabf71095af0",
+        "scripts/test_cab_view_gate_native.py": "c5b4ed831dacad0600492dbdfab648dfb1891db4d0f4835e04788676513d3f5b",
+        "CMakeLists.txt": "969f27df6d3a68da3fe867a63cc5c51eee7f319e2bdc5d91dba4fd3d17aded55",
+        "src/tests/CMakeLists.txt": "b04993b16a4d494b9c18baf0ffc2701af24d366e1fbe273fecd9c02c876950d7",
+        "src/lang/english.txt": "a5354ead7dba98f64b10a606adff4ab5975d917f700494d41682a8c73d5ba75c"
+      }
+    }
+  },
+  "native": {
+    "passing_attempt": "attempt-02",
+    "first_attempt": "runtime-pass/visual-fail; missing local floor, preserved",
+    "assertions": 47,
+    "explicit_calls": 2519,
+    "explicit_call_limit": 24576,
+    "phases": [
+      {
+        "name": "roundtrip",
+        "seconds": 5.652340118999973,
+        "calls": 2183,
+        "start_game_tick": 1280,
+        "end_game_tick": 3641,
+        "normal_viewport": {
+          "passed": true,
+          "screenshots": [
+            "gate_roundtrip_normal_before_reopen.png",
+            "gate_roundtrip_normal_after_reopen_close.png"
+          ],
+          "region_reason": "Main viewport below the 22-pixel toolbar; same paused endpoint and scroll position.",
+          "region": [
+            0,
+            22,
+            1280,
+            800
+          ],
+          "difference_bbox_in_region": null,
+          "changed_pixels": 0
+        },
+        "png_count": 12,
+        "mixed_render_proof": [
+          {
+            "height": 100,
+            "masked_car_count": 3,
+            "pass": 0,
+            "visible_positive_control": 0,
+            "width": 160
+          },
+          {
+            "height": 100,
+            "masked_car_count": 3,
+            "pass": 1,
+            "visible_positive_control": 0,
+            "width": 160
+          }
+        ]
+      },
+      {
+        "name": "cold",
+        "seconds": 1.062480528999913,
+        "calls": 336,
+        "start_game_tick": 3295,
+        "end_game_tick": 3641,
+        "normal_viewport": {
+          "passed": true,
+          "screenshots": [
+            "gate_cold_normal_before_reopen.png",
+            "gate_cold_normal_after_reopen_close.png"
+          ],
+          "region_reason": "Main viewport below the 22-pixel toolbar; same paused endpoint and scroll position.",
+          "region": [
+            0,
+            22,
+            1280,
+            800
+          ],
+          "difference_bbox_in_region": null,
+          "changed_pixels": 0
+        },
+        "png_count": 8,
+        "mixed_render_proof": [
+          {
+            "height": 100,
+            "masked_car_count": 3,
+            "pass": 1,
+            "visible_positive_control": 0,
+            "width": 160
+          }
+        ]
+      }
+    ],
+    "fixture_sha256": "6ba5845f8f8c0be70bb33ac53db2efab65527776704cdae84b6671f81132afab",
+    "checkpoint_sha256": "ea39f05ed3c978355a1a629d6e3b1e382495e732809bfa44a6dc941c65ad644c",
+    "checkpoint_snapshot_sha256": "3c15c6205683fc23198a60d800074442c232ee4ac216636d06b5e51f8140d1f3",
+    "input_save_unchanged": true,
+    "content_hashes": "native/attempt-02/gate-runner-evidence.json in archive",
+    "automatic_ticks_note": "Explicit calls are not all native ticks. Other native timer ticks occur between controller callbacks. Harness wall time is not interactive frame performance."
+  },
+  "preserved_checkpoints": {
+    "owner_repositories": {
+      "primary": {
+        "path": "/home/flax/games/openspacettd",
+        "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+        "status": ""
+      },
+      "prior": {
+        "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line",
+        "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+        "status": ""
+      }
+    },
+    "checkpoints": {
+      "cab-view-stage1.patch": "42754c64b80c8d2b7d892af4f3177180be81e33ba7fcfddca665145d531748fe",
+      "cab-view-stage2-source-ready.patch": "ef0a93a41c6235da72b9afbda820714826647b9f3c6a87e216126ea5409f62a8",
+      "cab-view-stage2-incomplete.patch": "5378ebcc86a1cbd368b396f487d74c0535fdebb51a376b973cd2353fc166e134",
+      "stage1_audit_files": {
+        "docs/audit/2026-10-14/cab-view/README.md": "9463fa17db6cb3cc69f8a7c1159c2420fb997b6fe96ada3546c8f6455ad7eaaf",
+        "docs/audit/2026-10-14/cab-view/native-desktop-proof.tar.gz": "7c40e10b81d63f57c8792c7dbe015e795a02dfcc3bcf88806f70894afe4ba20d",
+        "docs/audit/2026-10-14/cab-view/native-desktop-verification.json": "030ccc08f4c95e8425354eacb08f2edd75e3345591ebf5561c01fcce3cef9aef",
+        "docs/audit/2026-10-14/cab-view/native-moving.png": "0bf1f056ce0a7f476df8c46dff1d42200332d5d511590be01ebb5788f7b07ac8",
+        "docs/audit/2026-10-14/cab-view/native-resized.png": "99b58b7891bd26a6c5dcca330276531c5ebb407acf30675c96abda94a7e36472",
+        "docs/audit/2026-10-14/cab-view/verification-logs.tar.gz": "006b2237fcb16b42fbca7c4644a77434e72e13e51650adfccd8afe31389bfb17",
+        "docs/audit/2026-10-14/cab-view/verification.json": "b4aa818f80b579a85655e0ddb7649d4e2eed14e317523a59d178b602d1e53a85"
+      },
+      "historical_active_plan_sha256": "968df9e79e2ead096616c28aa1b7c719eecb1afa4c0785d82d225d28a20582a3"
+    }
+  },
+  "archive": {
+    "path": "verification-evidence.tar.gz",
+    "bytes": 6651445,
+    "sha256": "6b1612aef1798221760158a79e6ae0680dd329cddfba96f41b2d026da6cd5a2e",
+    "files": {
+      "current-source/scripts/test_cab_view_gate_native.py": "c5b4ed831dacad0600492dbdfab648dfb1891db4d0f4835e04788676513d3f5b",
+      "current-source/src/cab_view.h": "f357924c58f7d8f25348ab5347e17637e8a29a7986990071b028eb5a2e19aa92",
+      "current-source/src/cab_view_3d.cpp": "97b9ff3a1f72bfacdbde04c117209a0b7a4562327c1ec770822e42db7db5fd0a",
+      "current-source/src/cab_view_3d.h": "6e74b9050d58399286e89c21247d81444958fe030a5d7797f2deac461c1dc2fb",
+      "current-source/src/cab_view_gui.cpp": "65e4deeeab693d453580747674b18abba2a015837100ab5e7194d764bb0a5421",
+      "current-source/src/tests/test_cab_view.cpp": "fbe1c32ee332f08bca514279976893e06eb71af2fe5365219fcac345eb4793e8",
+      "current-source/src/tests/test_cab_view_gate_native.cpp": "bce146f1eaea356f103c60a2becbd40dc9639ca33d11c3543cffbabf71095af0",
+      "handoff/cab-view-stage2-attempt-01-review.json": "8089ecd832f66a19ad72dae327e9dcb689328cddf5e94e840af52c7b83e0173b",
+      "handoff/cab-view-stage2-final-source-review.json": "0d4f591521d8ffbe5d5132c00ca4948ff30ca118196793c80c2af8ee3d292635",
+      "handoff/cab-view-stage2-native-review.md": "994380983cd133f7d53434651fedbc325a0e75426e5ab4c40fbbcdaf33ccfde9",
+      "handoff/cab-view-stage2-source-evidence.json": "9705715b29ce8e013df19357959a38c51dcd40a3e9dc8c0a3f56a01a03193b5f",
+      "handoff/cab-view-stage2-source-evidence.tar.gz": "7711bf6166613b4d7024d6988d661495305217ad51dc09a1625d79e20f77f4f1",
+      "handoff/cab-view-stage2-source-ready-delivery.json": "dd497ba02e289aebdc6733212dcc9966d930392eafd0f02fc723960488394afd",
+      "handoff/cab-view-stage2-source-review.md": "a02681f77c666532fa1ee070da2832ea64d0214b3dc4673d73730c81e12e926b",
+      "handoff/prepare-cab-gate-native-fixture.py": "e0f014540de4c901e62b2fca00ba6b1e123d5c43ad221b32e2636e300e1b8691",
+      "handoff/run-cab-stage2-build.py": "34be48a4487adf34a2c469bd79fc75199270307707a51e831e5516c8505cc3c9",
+      "handoff/run-cab-stage2-regressions.py": "bfc133410b834ca27fbc0882782588d8d65477705acca157f665f3969a4bd5e5",
+      "logs/stage2-build-01.log": "ab3de001d963e9dbccb54594c3c16f22f5905724f98f30baaf22f466f49e36a8",
+      "logs/stage2-build-02.log": "bbb7268723796c62c9b1c13c677d81618beab359f1a69a56a4acbf19518787ba",
+      "logs/stage2-build-03.log": "f3445d3a877fd6ce8a6c6ef16b0bfac4b7afdd6d5cb0667b2f2c50fe0e3ef99f",
+      "logs/stage2-build-04.log": "ccf4f2ca64445b7b13cc96aef36df972b8b736241de08c46b614a138273fa0d2",
+      "logs/stage2-build-05.log": "4f3d76f16a989164b4b2f4e40e137476c6b29e5bbd50b26682927fd517295550",
+      "logs/stage2-build-06.log": "a8cebf59020a415fc8da8169e01d57daba303fa6b49419343ed9fcc7e99149b6",
+      "logs/stage2-final-off-build.json": "661feeeba684f3fb74952af933ef01e64f673858b8a9b7558ca49fbb05ee686d",
+      "logs/stage2-final-off-build.log": "d84ff6edf2073b7c65cef3e0b2fafe33b31c1e3e026691cab685d9d4126d27b9",
+      "logs/stage2-final-off-configure.json": "73def032ea9971d47450abed0caa219a1bc9d24e38b52638eab0f478649ea0d6",
+      "logs/stage2-final-off-configure.log": "3429b7fa234c06a7538e89691a0e31e212683b193fd9ca2a9020a437519602eb",
+      "logs/stage2-final-off-manifest.json": "194fedb4ca319957d994b6e48f112df04fe02e966f8eb0bd8104ce3cd3f1d430",
+      "logs/stage2-final-on-build.json": "44cc26a59832655ce5974d16f2b70d3f1a446b62503a5ea2d87f934b508d21a3",
+      "logs/stage2-final-on-build.log": "14caf2d06ad0002a8ddbf0a82d8f3e12f790ac67be17ea6a1a2e0e87c0064d7e",
+      "logs/stage2-final-on-configure.json": "bc5d93a88e6e15e945ad1aaab824ed2d3396a96276b871106fd34a653deb73af",
+      "logs/stage2-final-on-configure.log": "9fba46e6f1dd349ef195777d4cb3915aecd6750600ab05874889352547a2d6e6",
+      "logs/stage2-final-on-manifest.json": "ae82c8f1c975cd87ec7036fef14a00601c530582b203d9ba180e9bf22d35dabc",
+      "logs/stage2-final-source-checks.json": "cb3262672c9ab009b71bae44560f3da892958ad594f502728f24bc2c75df28db",
+      "logs/stage2-floor-build-01.json": "415e8986b6816112c0cec6181b41b4ce18ea35b59bdcb0397278fb07762060d8",
+      "logs/stage2-floor-build-01.log": "4df8b32774fcfb0ac66fb63ac1fb575022b0842580a1a4240d53f02e8d52458c",
+      "logs/stage2-floor-build-02.json": "b293c1d6b0b89e35ca9f94096bb48607dc69e1b03993ffbbcbb632145f282f45",
+      "logs/stage2-floor-build-02.log": "72082d7dad7856e1553f4610dc2c7683b8db8dea3e72559ba5c19328fda2c754",
+      "logs/stage2-floor-scene-01.json": "e4a40b0a22e6d90925849bab4932d537603d0c3c0dbdf7e12ef89de539aa1e20",
+      "logs/stage2-floor-scene-01.log": "675171d4586fd319a1be4ebe295e5d30a3ee7370687d91b7099cc4a0cdd504a4",
+      "logs/stage2-frozen-source-05.json": "f53a9c5c9ade704201d88baa5d53fdf641c81a8d52650452fb2a3324527de0c0",
+      "logs/stage2-frozen-source-06.json": "c00471213adc410acce83461c8e16332fd0fe760e99f23d2ebfe8677600ca540",
+      "logs/stage2-regressions-01.json": "1ed81dbb0fa36a1542f41ee282e63913c70a86908120afdf7c92ab0135a64680",
+      "logs/stage2-regressions-01.log": "1dc9d4ed5aa52a4cf638b437f55cd334412c677a9122eb0f243181c9af27c106",
+      "logs/stage2-regressions-02.json": "8bb4009df710ee1334a087c2c069176c8b102311159575737c85b652a030e328",
+      "logs/stage2-regressions-02.log": "fcbb0e446b9949a9229252447f770985a4333cf99bc0e7a724dcd8ca9079a7b8",
+      "logs/stage2-regressions-03.json": "46ca23b574c3213e808b9169cae43521aeee8976b2f99d1788be0941af9b1477",
+      "logs/stage2-regressions-03.log": "e310974f5c7396b9bddcae718ae4e3942687a0d246965852cbcc947773c89fae",
+      "logs/stage2-regressions-04.json": "6f4ed264d6611dc2481d5df6493ffc746e75bda67da161ecda637b507e5fd87c",
+      "logs/stage2-regressions-04.log": "ba72c7081ebcb7ebb2ad203b629c5b2e4347c680a12472ffdc1210f382245cf7",
+      "logs/stage2-regressions-05.json": "930fcdaa4e918da87b9837ed88b54d1f146bb5c9f42882e72eb6f8eb14109b33",
+      "logs/stage2-regressions-05.log": "947e74b81f34532575f10f37cad1446df804ddf9243c18b83dd31e8ea69a2c67",
+      "logs/stage2-source-checks-01.json": "0a9a61f0602b37f940f206171981c92c73f59439a10540802d8d08f826e660ce",
+      "logs/stage2-source-checks-02.json": "0a9a61f0602b37f940f206171981c92c73f59439a10540802d8d08f826e660ce",
+      "logs/stage2-test-selection.json": "b00abf5f9bda70ad1c3f5cbd751900620fcbca4cb3a3efd8ae6280eff660390f",
+      "native/attempt-01/cold/fixture-copy.sav": "d794c06f42b0a3f2732b33c4311942ce1d78aea629d561f7d0f2131a34bb5a9e",
+      "native/attempt-01/cold/gate-native-manifest.json": "ff8916c1dbec796bc23e9adaf29f2166f09d7cd7ea5ed7120e563982267ce692",
+      "native/attempt-01/cold/gate_cold_back_approach.png": "1beef06d8a69a80e73db90b5599090c6e170c26b02227f7c2f7c07cb2799b566",
+      "native/attempt-01/cold/gate_cold_back_arrival_mixed.png": "38e1eaa46d6c64d10d9bd7f61d9adcc465f1bfd6c119cce5c327173b76bc9c28",
+      "native/attempt-01/cold/gate_cold_back_safe.png": "3f87c6ac03ab3d8e74356d717743cda82e35aa781e3370ed35d0da9043c3f264",
+      "native/attempt-01/cold/gate_cold_back_transit.png": "3f79e5d5ef6b4e7df2cf42bb53c97ce74bcfcc0037fb567e1bde68aa711988ff",
+      "native/attempt-01/cold/gate_cold_cold_reopened.png": "93f54234403d8770d907c4bd846a82dd9ab727fc2c7be83b130158e9215425a6",
+      "native/attempt-01/cold/gate_cold_normal_after_reopen_close.png": "1215f553530237213355495bd0fd761af829e1c60c25a915058ac3e66057f418",
+      "native/attempt-01/cold/gate_cold_normal_before_reopen.png": "1215f553530237213355495bd0fd761af829e1c60c25a915058ac3e66057f418",
+      "native/attempt-01/cold/gate_cold_reopened_for_recovery.png": "77db30cd0366faea00d8487041efa1c19bb02800157038cd8b677e4734b26c2d",
+      "native/attempt-01/cold/native-process.log": "3f48fc6e87aadc2b196714a8f3209b521b729c96adcf53b7be5e3dedaccadbcb",
+      "native/attempt-01/cold/platform-art.cfg": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+      "native/attempt-01/cold/runner-evidence.json": "878e75037eb1a8f32ca2e18f79ffea0845372b84ee8fb0e147e7caa6b6db57aa",
+      "native/attempt-01/cold/scripts/game_start.scr": "8a3e0ad1822777e2db4b521d18ff7bcd451cd28ac1a5a4934fe56a330ab3285b",
+      "native/attempt-01/gate-runner-evidence.json": "59155f580c71dbd4ca3b72f0f0c2a8cd25d0d1645cfcadfc37c8bbf6cd1d150b",
+      "native/attempt-01/roundtrip/fixture-copy.sav": "6ba5845f8f8c0be70bb33ac53db2efab65527776704cdae84b6671f81132afab",
+      "native/attempt-01/roundtrip/gate-checkpoint.json": "3c15c6205683fc23198a60d800074442c232ee4ac216636d06b5e51f8140d1f3",
+      "native/attempt-01/roundtrip/gate-checkpoint.sav": "d794c06f42b0a3f2732b33c4311942ce1d78aea629d561f7d0f2131a34bb5a9e",
+      "native/attempt-01/roundtrip/gate-native-manifest.json": "081658ddef3f1b5a7b184db7e27d47992c1c62186bc569bfca2dad8bbacaa79c",
+      "native/attempt-01/roundtrip/gate_roundtrip_back_approach.png": "f6192405c37983f008ce5a375e4adce5d3be94a97b24d7344d6d80f0c242df6c",
+      "native/attempt-01/roundtrip/gate_roundtrip_back_arrival_mixed.png": "5096b9cc494b30d5b9e0267d140059bba87159f8cd2cac27fe20bf41c122d206",
+      "native/attempt-01/roundtrip/gate_roundtrip_back_safe.png": "9fc2d08da6f8a4d184c0416a890fb169d619a458976a323776aeade4c0116595",
+      "native/attempt-01/roundtrip/gate_roundtrip_back_transit.png": "013eb5eacdef7f3b14f16be1911d8763e32a20eb6df30f0067da75385ff92645",
+      "native/attempt-01/roundtrip/gate_roundtrip_initial_cab.png": "58c7528918dedd4d258e75aa2075897820e7ccb2238d75bd8e78bcb5810aa1a9",
+      "native/attempt-01/roundtrip/gate_roundtrip_normal_after_reopen_close.png": "223038cfce0ceeb89031c2c07661d40e395422d8dc2871a9f498c4d7dd9787f4",
+      "native/attempt-01/roundtrip/gate_roundtrip_normal_before_reopen.png": "223038cfce0ceeb89031c2c07661d40e395422d8dc2871a9f498c4d7dd9787f4",
+      "native/attempt-01/roundtrip/gate_roundtrip_out_approach.png": "504169ccb8ae1bfb2ad148c5d936af88382f3f86b187cf6e495f5919fd2b0fa7",
+      "native/attempt-01/roundtrip/gate_roundtrip_out_arrival_mixed.png": "c38e3aa75c2e1f1aa77c1348e5978170c6d1b249e47da1049277c0d1dfe5ac9e",
+      "native/attempt-01/roundtrip/gate_roundtrip_out_safe.png": "654a900fd96977315997539b6b25f5de49490814f0176988c3689fe701bc8259",
+      "native/attempt-01/roundtrip/gate_roundtrip_out_transit.png": "6cf65e620d5165c306ee57368ae4519a7d365c6bf34ee9f0ed0f0ab19c34356b",
+      "native/attempt-01/roundtrip/gate_roundtrip_reopened_for_recovery.png": "a08bb362ab77d93e4d6dd1dbd07eb277580e69abca7d5fc3c71fe8cfb3c6edeb",
+      "native/attempt-01/roundtrip/native-process.log": "c22dd5962355006bd934054f78a2f1c39eda0d933f9ed65c23d600e31f7e49c8",
+      "native/attempt-01/roundtrip/platform-art.cfg": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+      "native/attempt-01/roundtrip/runner-evidence.json": "4ce91b84dd4290e6c3b880c45393e0374fe4ca3800c59caf74b03900d370db6d",
+      "native/attempt-01/roundtrip/scripts/game_start.scr": "8a3e0ad1822777e2db4b521d18ff7bcd451cd28ac1a5a4934fe56a330ab3285b",
+      "native/attempt-02/cold/fixture-copy.sav": "ea39f05ed3c978355a1a629d6e3b1e382495e732809bfa44a6dc941c65ad644c",
+      "native/attempt-02/cold/gate-native-manifest.json": "607f2bbfa3e23a8a5cdc0f0deeab4083e22b78f175fa3c6a55a6d8d741f3c117",
+      "native/attempt-02/cold/gate_cold_back_approach.png": "c114633f1a8addd5db18f492c69ca370a10c70195e93fb01a2206634bae9bb59",
+      "native/attempt-02/cold/gate_cold_back_arrival_mixed.png": "38e1eaa46d6c64d10d9bd7f61d9adcc465f1bfd6c119cce5c327173b76bc9c28",
+      "native/attempt-02/cold/gate_cold_back_safe.png": "702ff672713719af916d9c1b92028523beedbe42c5a78c15a3ac330b5a76509f",
+      "native/attempt-02/cold/gate_cold_back_transit.png": "42815b676df65aef80cc894f7ef0187fe0614d8ef879dbeba68dcd59840eb85a",
+      "native/attempt-02/cold/gate_cold_cold_reopened.png": "93f54234403d8770d907c4bd846a82dd9ab727fc2c7be83b130158e9215425a6",
+      "native/attempt-02/cold/gate_cold_normal_after_reopen_close.png": "1215f553530237213355495bd0fd761af829e1c60c25a915058ac3e66057f418",
+      "native/attempt-02/cold/gate_cold_normal_before_reopen.png": "1215f553530237213355495bd0fd761af829e1c60c25a915058ac3e66057f418",
+      "native/attempt-02/cold/gate_cold_reopened_for_recovery.png": "77db30cd0366faea00d8487041efa1c19bb02800157038cd8b677e4734b26c2d",
+      "native/attempt-02/cold/native-process.log": "3f48fc6e87aadc2b196714a8f3209b521b729c96adcf53b7be5e3dedaccadbcb",
+      "native/attempt-02/cold/platform-art.cfg": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+      "native/attempt-02/cold/runner-evidence.json": "14616d95ac17b4bf27da992a20cfaa496cd9b0b553e5ffc834da0abd6ef48229",
+      "native/attempt-02/cold/scripts/game_start.scr": "8a3e0ad1822777e2db4b521d18ff7bcd451cd28ac1a5a4934fe56a330ab3285b",
+      "native/attempt-02/gate-runner-evidence.json": "ef84f095d5bf2abd4793cde160aa195a7345d8c422ffd634083775d2f4a225e3",
+      "native/attempt-02/roundtrip/fixture-copy.sav": "6ba5845f8f8c0be70bb33ac53db2efab65527776704cdae84b6671f81132afab",
+      "native/attempt-02/roundtrip/gate-checkpoint.json": "3c15c6205683fc23198a60d800074442c232ee4ac216636d06b5e51f8140d1f3",
+      "native/attempt-02/roundtrip/gate-checkpoint.sav": "ea39f05ed3c978355a1a629d6e3b1e382495e732809bfa44a6dc941c65ad644c",
+      "native/attempt-02/roundtrip/gate-native-manifest.json": "b784a57a0023af3d31c230f78e993d9153cd6f233cf1654e17c654989df109fd",
+      "native/attempt-02/roundtrip/gate_roundtrip_back_approach.png": "925acf4b978d58281b551f8ed223c43b661c1d808bb87b0419741ece3643c1ff",
+      "native/attempt-02/roundtrip/gate_roundtrip_back_arrival_mixed.png": "5096b9cc494b30d5b9e0267d140059bba87159f8cd2cac27fe20bf41c122d206",
+      "native/attempt-02/roundtrip/gate_roundtrip_back_safe.png": "9fc2d08da6f8a4d184c0416a890fb169d619a458976a323776aeade4c0116595",
+      "native/attempt-02/roundtrip/gate_roundtrip_back_transit.png": "da7ca5e8e6882f06b22e341095d4e517ce28e3f5969f301316a0a85d08cfd4b5",
+      "native/attempt-02/roundtrip/gate_roundtrip_initial_cab.png": "474e655b493addef036764e61df72840cad13f0414daa06f7195abacbf9b04eb",
+      "native/attempt-02/roundtrip/gate_roundtrip_normal_after_reopen_close.png": "223038cfce0ceeb89031c2c07661d40e395422d8dc2871a9f498c4d7dd9787f4",
+      "native/attempt-02/roundtrip/gate_roundtrip_normal_before_reopen.png": "223038cfce0ceeb89031c2c07661d40e395422d8dc2871a9f498c4d7dd9787f4",
+      "native/attempt-02/roundtrip/gate_roundtrip_out_approach.png": "bed12a2970089eb91217f7a7c3f5bc64074033f071660993420fa392511c977f",
+      "native/attempt-02/roundtrip/gate_roundtrip_out_arrival_mixed.png": "afd00a2e8991535e3ebf6794983fea825a29d3b9a3c0bd45e640291b1e6652b0",
+      "native/attempt-02/roundtrip/gate_roundtrip_out_safe.png": "0113630c5843eff2687abc5711e3824c5a4221454e83b39aefaafb674730fc92",
+      "native/attempt-02/roundtrip/gate_roundtrip_out_transit.png": "5269899e18d6ce449d2e8180e23a66f139885557bf57d71ec4159547d4bfa3d3",
+      "native/attempt-02/roundtrip/gate_roundtrip_reopened_for_recovery.png": "a08bb362ab77d93e4d6dd1dbd07eb277580e69abca7d5fc3c71fe8cfb3c6edeb",
+      "native/attempt-02/roundtrip/native-process.log": "c22dd5962355006bd934054f78a2f1c39eda0d933f9ed65c23d600e31f7e49c8",
+      "native/attempt-02/roundtrip/platform-art.cfg": "2c47565f9c5c4c8f135c6d4367bb69ac068460a2aa2a2a335034425f511dbab6",
+      "native/attempt-02/roundtrip/runner-evidence.json": "25a639644431d63c42da39a8a013d141d6e82b59537bf1907a5da96579ba7d51",
+      "native/attempt-02/roundtrip/scripts/game_start.scr": "8a3e0ad1822777e2db4b521d18ff7bcd451cd28ac1a5a4934fe56a330ab3285b",
+      "native/fixture-01/cab-gate-depot-fixture.sav": "6ba5845f8f8c0be70bb33ac53db2efab65527776704cdae84b6671f81132afab",
+      "native/fixture-01/fixture-evidence.json": "6b703ec2cdaeecd50f6108376bac4f439147c72887df54779ad7966ad7ba1442",
+      "native/fixture-01/platform-art.cfg": "2a49d9235af1a8046ffbafe68286c2dbe0a1cad50a15c97d2c6116d2cb86043a",
+      "native/fixture-01/prepare.log": "59290b9476b540e0b07e3f3b4cbf5ffc867e852f002d434296fa7c49bdbe0d82"
+    }
+  },
+  "images": {
+    "gate-approach.png": "925acf4b978d58281b551f8ed223c43b661c1d808bb87b0419741ece3643c1ff",
+    "gate-arrival.png": "afd00a2e8991535e3ebf6794983fea825a29d3b9a3c0bd45e640291b1e6652b0",
+    "gate-transit.png": "5269899e18d6ce449d2e8180e23a66f139885557bf57d71ec4159547d4bfa3d3"
+  },
+  "scope_limits": [
+    "One flat SW/NE local pair",
+    "One four-car OpenGFX train",
+    "Linux SDL offscreen/software",
+    "Simple gate frame/floor, not full Commonwealth art",
+    "Human UAT, cross-platform and performance qualification pending",
+    "No federation continuation, simulation/economy/save-format/network changes",
+    "Uncommitted and unpublished; feature defaults OFF"
+  ],
+  "independent_review": {
+    "reviewer": "Astra",
+    "outcome": "CLEAR for bounded Stage 2 engineering acceptance",
+    "verified": [
+      "Floor stays inside validated current gate tile; tests face away from gate frames",
+      "Final arrival image has opaque ground/rails; cyan gap removed",
+      "20 PNG hashes, checkpoint hashes, source/binary hashes",
+      "Both normal viewport pairs have zero pixel changes",
+      "47 native assertions, 2519 explicit calls, three mixed-car samples",
+      "Final OFF/ON builds and 36 focused tests"
+    ],
+    "limits": [
+      "One flat local gate pair",
+      "One four-car OpenGFX train",
+      "SDL offscreen",
+      "Human gameplay, cross-platform and Stage 3 graphics/performance remain separate"
+    ]
+  }
+}

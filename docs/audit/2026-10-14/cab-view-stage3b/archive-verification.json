@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "archive_sha256": "a198f685dac5cff05bbc436e3b812c43df590479dbdac8c19f32fa360b6fd4b0",
+  "verified_members": 2832,
+  "every_member_read_back": true,
+  "archive_bytes": 43861738,
+  "deduplication": {
+    "logical_members": 2832,
+    "unique_contents": 393,
+    "identical_content_hardlinks": 2439
+  }
+}

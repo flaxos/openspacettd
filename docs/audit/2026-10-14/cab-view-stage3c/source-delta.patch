@@ -1,0 +1,876 @@
+diff --git a/src/cab_view_3d.cpp b/src/cab_view_3d.cpp
+--- a/src/cab_view_3d.cpp
++++ b/src/cab_view_3d.cpp
+@@ -74,6 +74,9 @@
+ #include <functional>
+ #include <map>
+ #include <tuple>
++#if defined(__unix__) || defined(__APPLE__)
++#include <sys/resource.h>
++#endif
+ 
+ #include "safeguards.h"
+ 
+@@ -608,6 +611,7 @@
+ 	CabViewVehicleTextureProfile ProfileVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen, uint32_t warm_lookups);
+ 	CabViewVehicleCacheIdentity ProbeVehicleCacheIdentity(const VehicleSpriteSeq &first, const VehicleSpriteSeq &variant,
+ 		PaletteID default_pal, bool crashed, bool first_widen, bool variant_widen);
++	CabViewAnimatedSequenceProbe ProbeAnimatedSequence(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed);
+ 
+ 	/**
+ 	 * Get how long making a picture takes, on average.
+@@ -1804,6 +1808,80 @@
+ 	texture = std::move(canvas.texture);
+ 	if (!canvas.alpha.empty()) FinishTexture(texture, std::move(canvas.alpha), 4, true, {0, 0}, widen);
+ 	return texture;
++}
++
++/** Inspect only the caller's already-world-masked vehicle sequence. These are
++ * source contributions surviving later source layers, not proof of a changed
++ * palette epoch or of a visible cab pixel after projection. */
++CabViewAnimatedSequenceProbe Renderer::ProbeAnimatedSequence(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed)
++{
++	CabViewAnimatedSequenceProbe result;
++	if (seq.count > seq.seq.size()) { result.complete = false; result.rejected_oversize = true; return result; }
++	struct Layer { const RawSprite *raw = nullptr; const uint8_t *remap = nullptr; bool black = false; };
++	std::array<Layer, 8> sources{};
++	int64_t left = INT64_MAX, top = INT64_MAX, right = INT64_MIN, bottom = INT64_MIN;
++	for (uint i = 0; i < seq.count; ++i) {
++		const SpriteID image = seq.seq[i].sprite;
++		const PaletteID pal = (crashed || seq.seq[i].pal == 0) ? default_pal : seq.seq[i].pal;
++		CabViewAnimatedLayerProbe &out = result.layers.emplace_back();
++		out.sprite = image;
++		out.palette = pal;
++		out.black = pal == PALETTE_ALL_BLACK;
++		if (HasBit(image, PALETTE_MODIFIER_TRANSPARENT)) {
++			out.skipped_destination_dependent = true; result.complete = false; continue;
++		}
++		if (HasBit(pal, PALETTE_TEXT_RECOLOUR)) {
++			out.skipped_text_recolour = true; result.complete = false; continue;
++		}
++		const RawSprite &raw = this->GetRawSprite(image & SPRITE_MASK);
++		out.left = raw.x_offs; out.top = raw.y_offs; out.width = raw.width; out.height = raw.height;
++		if (raw.width <= 0 || raw.height <= 0 || raw.pixels.empty() ||
++			static_cast<int64_t>(raw.width) * raw.height > static_cast<int64_t>(raw.pixels.size())) {
++			out.raw_missing = true; result.complete = false; continue;
++		}
++		left = std::min(left, static_cast<int64_t>(raw.x_offs));
++		top = std::min(top, static_cast<int64_t>(raw.y_offs));
++		right = std::max(right, static_cast<int64_t>(raw.x_offs) + raw.width);
++		bottom = std::max(bottom, static_cast<int64_t>(raw.y_offs) + raw.height);
++		sources[i] = {&raw, pal != PAL_NONE && !out.black ? GetNonSprite(GB(pal, 0, PALETTE_WIDTH), SpriteType::Recolour) + 1 : nullptr, out.black};
++	}
++	if (left == INT64_MAX) return result;
++	if (!CabViewVehicleUnionSupported(left, top, right, bottom)) {
++		result.complete = false; result.rejected_oversize = true; return result;
++	}
++	const int64_t width = right - left;
++	std::vector<float> later_transmission(static_cast<size_t>(width * (bottom - top)), 1.0f);
++	for (size_t layer = seq.count; layer-- > 0;) {
++		const Layer &source = sources[layer];
++		if (source.raw == nullptr) continue;
++		CabViewAnimatedLayerProbe &out = result.layers[layer];
++		for (int y = 0; y < source.raw->height; ++y) {
++			for (int x = 0; x < source.raw->width; ++x) {
++				const SpriteLoader::CommonPixel &p = source.raw->pixels[static_cast<size_t>(y) * source.raw->width + x];
++				if (p.a == 0) continue;
++				const size_t at = static_cast<size_t>(source.raw->y_offs + y - top) * width + (source.raw->x_offs + x - left);
++				if (p.m >= PALETTE_ANIM_START && p.m < PALETTE_ANIM_START + PALETTE_ANIM_SIZE) ++out.raw_animated_pixels;
++				if (source.black) { later_transmission[at] = 0; continue; }
++				float opacity = p.a / 255.0f;
++				if (p.m != 0) {
++					const uint8_t index = source.remap != nullptr ? source.remap[p.m] : p.m;
++					if (source.remap != nullptr && index == 0) { ++out.zero_remap_pixels; continue; }
++					if (index >= PALETTE_ANIM_START && index < PALETTE_ANIM_START + PALETTE_ANIM_SIZE) {
++						const Colour adjusted = AdjustBrightness(_cur_palette.palette[index], GetColourBrightness(Colour(p.r, p.g, p.b)));
++						if (adjusted.r == 0 && adjusted.g == 0 && adjusted.b == 0) ++out.brightness_zero_pixels;
++						if (later_transmission[at] > 0) {
++							++out.eligible_animated_pixels;
++							++out.eligible_slot_counts[index - PALETTE_ANIM_START];
++						}
++					}
++				}
++				later_transmission[at] *= 1.0f - opacity;
++			}
++		}
++		result.raw_animated_pixels += out.raw_animated_pixels;
++		result.eligible_animated_pixels += out.eligible_animated_pixels;
++	}
++	return result;
+ }
+ 
+ CabViewVehicleCompositeProbe Renderer::ProbeVehicleComposite(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed)
+@@ -5441,6 +5519,91 @@
+ 	return batch;
+ }
+ 
++/** Private, non-mutating eight-block scheduler diagnostic. The output scope is
++ * supplied by the native test, so no live renderer or GUI clock is touched. */
++CabViewCounterbalancedProbe ProbeCabViewCounterbalanced(const Rect &r, const CabViewCamera &camera, const std::function<bool()> &frozen_check)
++{
++	using Clock = std::chrono::steady_clock;
++	auto process_counters = [] {
++		CabViewProcessCounters counters;
++#if defined(__unix__) || defined(__APPLE__)
++		rusage use{};
++		if (getrusage(RUSAGE_SELF, &use) == 0) {
++			counters.supported = true;
++			counters.user_cpu_us = static_cast<uint64_t>(use.ru_utime.tv_sec) * 1000000 + use.ru_utime.tv_usec;
++			counters.system_cpu_us = static_cast<uint64_t>(use.ru_stime.tv_sec) * 1000000 + use.ru_stime.tv_usec;
++			counters.voluntary_context_switches = use.ru_nvcsw;
++			counters.involuntary_context_switches = use.ru_nivcsw;
++		}
++#endif
++		return counters;
++	};
++	CabViewCounterbalancedProbe result;
++	Renderer off, reduced;
++	CabViewCamera off_camera = camera, reduced_camera = camera;
++	off_camera.effect_mode = CabViewEffectMode::Off;
++	reduced_camera.effect_mode = CabViewEffectMode::Reduced;
++	uint32_t frame_id = 1;
++	const size_t pixel_count = static_cast<size_t>(r.Width()) * r.Height();
++	auto *output = static_cast<const Colour *>(_cur_dpi->dst_ptr);
++	std::array<std::vector<Colour>, 2> reference_images;
++	std::array<CabViewCacheStats, 2> reference_caches;
++	for (int mode = 0; mode < 2; ++mode) {
++		Renderer &renderer = mode == 0 ? off : reduced;
++		const CabViewCamera &current_camera = mode == 0 ? off_camera : reduced_camera;
++		for (int i = 0; i < 20; ++i) renderer.Draw(r, current_camera, frame_id++, 0);
++		reference_images[mode].assign(output, output + pixel_count);
++		reference_caches[mode] = renderer.GetCacheStats();
++	}
++	const auto start = Clock::now();
++	static constexpr std::array<int, 8> ORDER = {0, 1, 1, 0, 1, 0, 0, 1};
++	result.blocks.reserve(ORDER.size());
++	std::optional<CabViewFrameStats> geometry;
++	for (int mode : ORDER) {
++		Renderer &renderer = mode == 0 ? off : reduced;
++		const CabViewCamera &current_camera = mode == 0 ? off_camera : reduced_camera;
++		CabViewCounterbalancedBlock block;
++		block.mode = current_camera.effect_mode;
++		block.before = process_counters();
++		block.relative_start_us = std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count();
++		block.exact_same_mode_image = true;
++		block.exact_geometry = true;
++		block.samples.reserve(25);
++		for (int i = 0; i < 25; ++i) {
++			const auto begin = Clock::now();
++			const uint64_t relative_start_us = std::chrono::duration_cast<std::chrono::microseconds>(begin - start).count();
++			renderer.Draw(r, current_camera, frame_id++, 0);
++			const auto end = Clock::now();
++			const CabViewFrameStats frame = renderer.GetLastFrameStats();
++			block.samples.push_back({frame, relative_start_us,
++				static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())});
++			block.exact_same_mode_image &= std::equal(output, output + pixel_count, reference_images[mode].begin());
++			if (!geometry.has_value()) geometry = frame;
++			const bool same_geometry = frame.rendered && !frame.cache_hit && frame.scale == 1.0f &&
++				frame.internal_width == r.Width() && frame.internal_height == r.Height() &&
++				frame.visible_tiles == geometry->visible_tiles && frame.triangles == geometry->triangles && frame.threads == geometry->threads;
++			block.exact_geometry &= same_geometry;
++			result.exact_cross_mode_geometry = result.blocks.empty() && i == 0 ? same_geometry : result.exact_cross_mode_geometry && same_geometry;
++		}
++		block.end_pixels.assign(output, output + pixel_count);
++		block.cache = renderer.GetCacheStats();
++		block.exact_same_mode_cache = block.cache == reference_caches[mode];
++		block.after = process_counters();
++		block.frozen_state_unchanged = frozen_check();
++		result.blocks.push_back(std::move(block));
++		if (!result.blocks.back().frozen_state_unchanged) break;
++	}
++	result.exact_cross_mode_scene_cache = off.GetCacheStats() == reduced.GetCacheStats();
++	result.exact_cross_mode_image = reference_images[0] == reference_images[1];
++	return result;
++}
++
++CabViewAnimatedSequenceProbe ProbeCabViewAnimatedSequence(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed)
++{
++	Renderer renderer;
++	return renderer.ProbeAnimatedSequence(seq, default_pal, crashed);
++}
++
+ /**
+  * Get how long drawing a new picture of the 3D view from the cab takes, on average.
+  * @param scale Size of the picture compared to the view; the picture is made smaller when there is not enough time.
+diff --git a/src/cab_view_3d.h b/src/cab_view_3d.h
+--- a/src/cab_view_3d.h
++++ b/src/cab_view_3d.h
+@@ -17,8 +17,10 @@
+ #include "portal/planet_type.h"
+ #include "cab_view.h"
+ 
++#include <array>
+ #include <cstddef>
+ #include <cstdint>
++#include <functional>
+ #include <vector>
+ 
+ struct VehicleSpriteSeq;
+@@ -89,6 +91,7 @@
+ 	size_t depth_capacity_bytes = 0;
+ 	size_t scratch_capacity_bytes = 0;
+ 	size_t effect_scratch_capacity_bytes = 0;
++	bool operator==(const CabViewCacheStats &) const = default;
+ };
+ 
+ /** Premultiplied colour and coverage before mip generation or alpha widening. */
+@@ -149,6 +152,72 @@
+ 	CabViewProfileSample cached; ///< One identical-frame output after the fresh samples.
+ 	CabViewCacheStats cache;
+ };
++
++/** One measured fresh frame in the Stage 3C private, counterbalanced probe. */
++struct CabViewCounterbalancedSample {
++	CabViewFrameStats frame;
++	uint64_t relative_start_us = 0;
++	uint64_t wall_us = 0;
++};
++
++/** Process counters sampled at block boundaries, outside frame timing. */
++struct CabViewProcessCounters {
++	bool supported = false;
++	uint64_t user_cpu_us = 0;
++	uint64_t system_cpu_us = 0;
++	uint64_t voluntary_context_switches = 0;
++	uint64_t involuntary_context_switches = 0;
++};
++
++struct CabViewCounterbalancedBlock {
++	CabViewEffectMode mode = CabViewEffectMode::Off;
++	uint64_t relative_start_us = 0;
++	CabViewProcessCounters before, after;
++	std::vector<CabViewCounterbalancedSample> samples;
++	std::vector<Colour> end_pixels; ///< Private block-end image, copied outside frame timing.
++	CabViewCacheStats cache;
++	bool exact_same_mode_image = false;
++	bool exact_geometry = false;
++	bool exact_same_mode_cache = false;
++	bool frozen_state_unchanged = false;
++};
++
++struct CabViewCounterbalancedProbe {
++	std::vector<CabViewCounterbalancedBlock> blocks;
++	bool exact_cross_mode_geometry = false;
++	bool exact_cross_mode_scene_cache = false;
++	bool exact_cross_mode_image = false;
++};
++
++/** Caller scopes a private 640x372 screen/DPI and canonical static palette. */
++CabViewCounterbalancedProbe ProbeCabViewCounterbalanced(const Rect &r, const CabViewCamera &camera, const std::function<bool()> &frozen_check);
++
++/** Eligible source contributions, not a claim that a palette epoch changed. */
++struct CabViewAnimatedLayerProbe {
++	SpriteID sprite = 0;
++	PaletteID palette = 0;
++	int left = 0, top = 0, width = 0, height = 0;
++	uint32_t raw_animated_pixels = 0;
++	uint32_t eligible_animated_pixels = 0;
++	uint32_t zero_remap_pixels = 0;
++	uint32_t brightness_zero_pixels = 0;
++	std::array<uint32_t, 28> eligible_slot_counts{};
++	bool skipped_destination_dependent = false;
++	bool skipped_text_recolour = false;
++	bool raw_missing = false;
++	bool black = false;
++};
++
++struct CabViewAnimatedSequenceProbe {
++	std::vector<CabViewAnimatedLayerProbe> layers;
++	bool complete = true;
++	bool rejected_oversize = false;
++	uint32_t raw_animated_pixels = 0;
++	uint32_t eligible_animated_pixels = 0;
++};
++
++/** Inspect only a caller-provided, world-validated vehicle sequence at Normal zoom. */
++CabViewAnimatedSequenceProbe ProbeCabViewAnimatedSequence(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed);
+ 
+ void DrawCabView3D(const Rect &r, const CabViewCamera &camera, uint32_t frame_id, float budget_ms);
+ CabViewFrameStats GetLastCabViewFrameStats();
+diff --git a/src/tests/test_cab_view_gate_native.cpp b/src/tests/test_cab_view_gate_native.cpp
+--- a/src/tests/test_cab_view_gate_native.cpp
++++ b/src/tests/test_cab_view_gate_native.cpp
+@@ -212,7 +212,8 @@
+ 	unsigned callbacks = 0, total_calls = 0, pass_calls = 0;
+ 	unsigned pass = 0;
+ 	bool pass_started[2]{};
+-	bool cold = false, started = false, finished = false, profile = false, vehicle_profile = false;
++	bool cold = false, started = false, finished = false, profile = false, vehicle_profile = false, stage3c_diagnostic = false;
++	bool pending_stage3c_timing = false, pending_stage3c_palette = false;
+ 	unsigned profile_rotation = 0;
+ 	bool approach[2]{}, near_approach[2]{}, hidden[2]{}, arrived[2]{}, mixed[2]{};
+ 	bool cab_opened = false, grew_consist = false, cold_equal = false;
+@@ -291,6 +292,10 @@
+ 		if (this->Cab() != nullptr) this->Cab()->OnRealtimeTick(0);
+ 		if (!this->Pure()) return false;
+ 		this->check_pending_purity = true;
++		if (this->cold && this->stage3c_diagnostic) {
++			if (name == "back_arrival_mixed") this->pending_stage3c_timing = true;
++			if (name == "back_safe") this->pending_stage3c_palette = true;
++		}
+ 		if (this->profile && (name == "out_approach" || name == "out_near_approach" || name == "out_transit" || name == "out_arrival_mixed" ||
+ 			name == "back_approach" || name == "back_near_approach" || name == "back_transit" || name == "back_arrival_mixed")) this->pending_profile = name;
+ 		if (name == "out_near_approach" || name == "out_transit" || name == "out_arrival_mixed" ||
+@@ -343,6 +348,188 @@
+ 	{
+ 		if (!_pause_mode.Test(PauseMode::Normal) || this->Front() == nullptr || FrozenState(this->Front()) != this->paused_baseline) {
+ 			this->Fail("paused camera changed train/orders/cargo, gate/world, RNG/date/tick or cash"); return false;
++		}
++		return true;
++	}
++	/** One fixed-pose diagnostic at the naturally paused cold mixed arrival. */
++	bool Stage3CTiming()
++	{
++		Train *front = this->Front();
++		if (!this->cold || front == nullptr || this->Cab() == nullptr || !this->Pure()) return false;
++		const CabViewPresentation state = ResolveCabViewPresentation(front, front->owner);
++		if (state.phase != CabViewPhase::Scene || state.world != this->source) {
++			this->Fail("Stage 3C timing did not observe the cold return scene"); return false;
++		}
++		static constexpr std::array<std::pair<float, float>, 8> heading =
++			{{{-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}}};
++		const auto [dx, dy] = heading[to_underlying(state.moving)];
++		CabViewCamera camera;
++		camera.x = state.x; camera.y = state.y; camera.z = state.z + 4.0f;
++		camera.yaw = std::atan2(dy, dx); camera.vehicle = this->id; camera.world = state.world;
++		camera.scene_effect = CabViewSceneEffect::Arrival; camera.effect_elapsed_ms = 0;
++		constexpr int width = 640, height = 372;
++		const Rect rect{0, 0, width - 1, height - 1};
++		std::vector<Colour> pixels(static_cast<size_t>(width) * height);
++		DrawPixelInfo dpi{pixels.data(), 0, 0, width, height, width, ZoomLevel::Min};
++		const DrawPixelInfo old_screen = _screen;
++		DrawPixelInfo *const old_dpi = _cur_dpi;
++		const bool old_anim = _screen_disable_anim;
++		const Palette old_palette = _cur_palette;
++		const Json frozen = FrozenState(front);
++		Json diagnostic = {{"capture_label", "back_arrival_mixed"}, {"view_width", width}, {"view_height", height},
++			{"scene_effect", "arrival"}, {"effect_elapsed_ms", 0}, {"warmup_per_mode", 20}, {"frames_per_block", 25},
++			{"process_counter_scope", "block wall interval includes out-of-frame pixel comparisons, image copies and cache scans"},
++			{"block_order", {"off", "reduced", "reduced", "off", "reduced", "off", "off", "reduced"}},
++			{"palette_scope", "canonical_static_private"}, {"incoming_palette_rgba", PaletteRGBA(old_palette)},
++			{"canonical_palette_rgba", PaletteRGBA(_palette)}, {"frozen_snapshot", frozen},
++			{"pose", {{"x", state.x}, {"y", state.y}, {"z", state.z}, {"tile", state.tile.base()},
++				{"moving", static_cast<int>(state.moving)}, {"yaw", camera.yaw}, {"world", state.world.base()}}},
++			{"blocks", Json::array()}};
++		bool valid = true;
++		bool unique_frame_ids = true;
++		uint32_t previous_frame_id = 0;
++		{
++			AutoRestoreBackup palette_backup(_cur_palette, _palette);
++			AutoRestoreBackup screen_backup(_screen, dpi);
++			AutoRestoreBackup dpi_backup(_cur_dpi, &dpi);
++			AutoRestoreBackup anim_backup(_screen_disable_anim, true);
++			const CabViewCounterbalancedProbe probe = ProbeCabViewCounterbalanced(rect, camera,
++				[&] { return _pause_mode.Test(PauseMode::Normal) && FrozenState(front) == frozen &&
++					_cur_dpi == &dpi && _screen.dst_ptr == dpi.dst_ptr && _screen.pitch == dpi.pitch &&
++					_screen.left == dpi.left && _screen.top == dpi.top && _screen.width == dpi.width &&
++					_screen.height == dpi.height && _screen.zoom == dpi.zoom && _screen_disable_anim; });
++			valid = probe.blocks.size() == 8 && probe.exact_cross_mode_geometry && probe.exact_cross_mode_scene_cache && probe.exact_cross_mode_image;
++			diagnostic["exact_cross_mode_geometry"] = probe.exact_cross_mode_geometry;
++			diagnostic["exact_cross_mode_scene_cache"] = probe.exact_cross_mode_scene_cache;
++			diagnostic["exact_cross_mode_image"] = probe.exact_cross_mode_image;
++			for (size_t i = 0; i < probe.blocks.size(); ++i) {
++				const CabViewCounterbalancedBlock &block = probe.blocks[i];
++				const char *mode = block.mode == CabViewEffectMode::Off ? "off" : "reduced";
++				const std::string filename = fmt::format("stage3c_block_{}_{}.ppm", i, mode);
++				if (!WriteVehicleProfileImage(this->output / filename, block.end_pixels, width, height)) {
++					this->Fail("Stage 3C block image could not be written"); return false;
++				}
++				auto counters = [](const CabViewProcessCounters &c) -> Json {
++					return {{"supported", c.supported}, {"user_cpu_us", c.user_cpu_us}, {"system_cpu_us", c.system_cpu_us},
++						{"voluntary_context_switches", c.voluntary_context_switches},
++						{"involuntary_context_switches", c.involuntary_context_switches}};
++				};
++				Json samples = Json::array();
++				for (const CabViewCounterbalancedSample &sample : block.samples) {
++					unique_frame_ids &= sample.frame.frame_id > previous_frame_id;
++					previous_frame_id = sample.frame.frame_id;
++					samples.push_back({{"relative_start_us", sample.relative_start_us}, {"wall_us", sample.wall_us},
++						{"frame", FrameStatsJson(sample.frame)}});
++				}
++				diagnostic["blocks"].push_back({{"index", i}, {"mode", mode}, {"relative_start_us", block.relative_start_us},
++					{"before", counters(block.before)}, {"after", counters(block.after)}, {"samples", std::move(samples)},
++					{"image", filename}, {"cache", CacheStatsJson(block.cache)},
++					{"exact_same_mode_image", block.exact_same_mode_image}, {"exact_geometry", block.exact_geometry},
++					{"exact_same_mode_cache", block.exact_same_mode_cache},
++					{"frozen_state_unchanged", block.frozen_state_unchanged}});
++				valid &= block.samples.size() == 25 && block.exact_same_mode_image && block.exact_geometry &&
++					block.exact_same_mode_cache && block.frozen_state_unchanged;
++			}
++		}
++		diagnostic["unique_measured_frame_ids"] = unique_frame_ids;
++		valid &= unique_frame_ids;
++		diagnostic["palette_restored"] = SamePalette(_cur_palette, old_palette);
++		diagnostic["dpi_restored"] = _cur_dpi == old_dpi && _screen.dst_ptr == old_screen.dst_ptr &&
++			_screen.pitch == old_screen.pitch && _screen.left == old_screen.left && _screen.top == old_screen.top &&
++			_screen.width == old_screen.width && _screen.height == old_screen.height && _screen.zoom == old_screen.zoom;
++		diagnostic["animation_restored"] = _screen_disable_anim == old_anim;
++		diagnostic["frozen_state_unchanged"] = FrozenState(front) == frozen;
++		this->manifest["stage3c_diagnostic"]["timing"] = std::move(diagnostic);
++		if (!valid || !this->manifest["stage3c_diagnostic"]["timing"]["palette_restored"].get<bool>() ||
++			!this->manifest["stage3c_diagnostic"]["timing"]["dpi_restored"].get<bool>() ||
++			!this->manifest["stage3c_diagnostic"]["timing"]["animation_restored"].get<bool>() || !this->Pure()) {
++			if (this->failure.empty()) this->Fail("Stage 3C timing changed pixels, geometry, cache, state or render globals");
++			return false;
++		}
++		return true;
++	}
++	/** Inspect only naturally visible cars at the cold return safe endpoint. */
++	bool Stage3CPalettePreflight()
++	{
++		Train *front = this->Front();
++		if (!this->cold || front == nullptr || this->Cab() == nullptr || !this->Pure()) return false;
++		const CabViewPresentation state = ResolveCabViewPresentation(front, front->owner);
++		if (state.phase != CabViewPhase::Scene || state.world != this->source) {
++			this->Fail("Stage 3C palette preflight lost the cold safe scene"); return false;
++		}
++		const Json frozen = FrozenState(front);
++		const Palette incoming_palette = _cur_palette;
++		Json cars = Json::array();
++		bool complete = true, candidate_actual_sw = false, candidate_other_direction = false;
++		unsigned visible_cars = 0;
++		for (const Train *car = front; car != nullptr; car = car->Next()) {
++			/* This predicate must precede every NewGRF callback and raw decode. */
++			if (!CabViewVehicleVisible(car, state.world)) continue;
++			++visible_cars;
++			Json directions = Json::array();
++			for (unsigned ordinal = 0; ordinal < 8; ++ordinal) {
++				const Direction query = static_cast<Direction>(ordinal);
++				VehicleSpriteSeq seq;
++				car->GetImage(query, EngineImageType::OnMap, &seq);
++				if (seq.count > seq.seq.size()) {
++					this->Fail("Stage 3C native sprite sequence exceeded eight layers"); return false;
++				}
++				PaletteID default_pal = PAL_NONE;
++				if (car->vehstatus.Test(VehState::DefaultPalette)) {
++					default_pal = car->vehstatus.Test(VehState::Crashed) ? PALETTE_CRASH : GetVehiclePalette(car);
++				}
++				const bool crashed = car->vehstatus.Test(VehState::Crashed);
++				const CabViewAnimatedSequenceProbe probe = ProbeCabViewAnimatedSequence(seq, default_pal, crashed);
++				complete &= probe.complete;
++				Json layers = Json::array();
++				for (size_t i = 0; i < probe.layers.size(); ++i) {
++					const CabViewAnimatedLayerProbe &layer = probe.layers[i];
++					layers.push_back({{"sprite", layer.sprite}, {"base_sprite", layer.sprite & SPRITE_MASK},
++						{"palette_override", seq.seq[i].pal}, {"effective_palette", layer.palette},
++						{"raw_bounds", {{"left", layer.left}, {"top", layer.top}, {"width", layer.width}, {"height", layer.height}}},
++						{"raw_animated_pixels", layer.raw_animated_pixels},
++						{"eligible_source_contributions", layer.eligible_animated_pixels},
++						{"eligible_slot_counts_227_254", layer.eligible_slot_counts},
++						{"zero_remap_pixels", layer.zero_remap_pixels},
++						{"current_brightness_zero_pixels", layer.brightness_zero_pixels},
++						{"all_black", layer.black}, {"destination_dependent", layer.skipped_destination_dependent},
++						{"text_recolour", layer.skipped_text_recolour}, {"raw_missing", layer.raw_missing}});
++				}
++				const bool is_actual_sw = query == Direction::SW;
++				if (probe.eligible_animated_pixels > 0) {
++					if (is_actual_sw) candidate_actual_sw = true;
++					else candidate_other_direction = true;
++				}
++				directions.push_back({{"query_direction", ordinal}, {"is_actual_cab_sw", is_actual_sw},
++					{"image_type", "on_map"}, {"raw_sequence_count", seq.count}, {"default_palette", default_pal},
++					{"complete", probe.complete}, {"rejected_oversize", probe.rejected_oversize},
++					{"raw_animated_pixels", probe.raw_animated_pixels},
++					{"eligible_source_contributions", probe.eligible_animated_pixels},
++					{"layers", std::move(layers)}});
++				if (FrozenState(front) != frozen || !SamePalette(_cur_palette, incoming_palette)) {
++					this->Fail("Stage 3C vehicle callback or raw inspection changed frozen game or palette state"); return false;
++				}
++			}
++			cars.push_back({{"vehicle_id", car->index.base()}, {"engine_id", car->engine_type.base()},
++				{"world", PlanetManager::GetTileWorld(car->tile).base()}, {"tile", car->tile.base()},
++				{"actual_vehicle_direction", static_cast<int>(car->direction)},
++				{"actual_renderer_query_direction", static_cast<int>(Direction::SW)},
++				{"default_palette_enabled", car->vehstatus.Test(VehState::DefaultPalette)},
++				{"crashed", car->vehstatus.Test(VehState::Crashed)}, {"directions", std::move(directions)}});
++		}
++		Json diagnostic = {{"capture_label", "back_safe"}, {"world", state.world.base()},
++			{"visible_car_count", visible_cars}, {"scan_complete", complete && visible_cars > 0},
++			{"candidate_actual_sw", candidate_actual_sw}, {"candidate_other_direction", candidate_other_direction},
++			{"eligible_count_semantics", "source contributions surviving later supported layer alpha; not projected cab pixels or observed palette change"},
++			{"negative_scope", "this visible consist, current livery and cargo state, eight OnMap query directions only"},
++			{"palette_anim_start", PALETTE_ANIM_START}, {"palette_anim_size", PALETTE_ANIM_SIZE},
++			{"incoming_palette_rgba", PaletteRGBA(incoming_palette)}, {"frozen_snapshot", frozen},
++			{"cars", std::move(cars)}, {"frozen_state_unchanged", FrozenState(front) == frozen},
++			{"palette_state_unchanged", SamePalette(_cur_palette, incoming_palette)}};
++		this->manifest["stage3c_diagnostic"]["vehicle_palette_preflight"] = std::move(diagnostic);
++		if (visible_cars == 0 || !this->Pure()) {
++			if (this->failure.empty()) this->Fail("Stage 3C preflight found no visible consist cars");
++			return false;
+ 		}
+ 		return true;
+ 	}
+@@ -819,6 +1006,14 @@
+ 			this->check_pending_purity = false;
+ 		}
+ 		if (this->CaptureEffectSequence()) return;
++		if (this->pending_stage3c_timing) {
++			this->pending_stage3c_timing = false;
++			if (!this->Stage3CTiming()) return;
++		}
++		if (this->pending_stage3c_palette) {
++			this->pending_stage3c_palette = false;
++			if (!this->Stage3CPalettePreflight()) return;
++		}
+ 		if (!this->pending_profile.empty()) {
+ 			const std::string label = std::exchange(this->pending_profile, {});
+ 			if (!this->ProfilePaused(label)) return;
+@@ -986,6 +1181,9 @@
+ 	proof.profile = profile != nullptr && std::string_view(profile) == "1";
+ 	const char *vehicle_profile = std::getenv("OSTTD_CAB_VEHICLE_PROFILE");
+ 	proof.vehicle_profile = vehicle_profile != nullptr && std::string_view(vehicle_profile) == "1";
++	const char *stage3c_diagnostic = std::getenv("OSTTD_CAB_STAGE3C_DIAGNOSTIC");
++	proof.stage3c_diagnostic = stage3c_diagnostic != nullptr && std::string_view(stage3c_diagnostic) == "1";
++	if (proof.stage3c_diagnostic) proof.manifest["stage3c_diagnostic"] = Json::object();
+ 	REQUIRE((!proof.vehicle_profile || proof.profile));
+ 	if (proof.profile) {
+ 		proof.manifest["profiles"] = Json::array();
+diff --git a/scripts/test_cab_view_gate_native.py b/scripts/test_cab_view_gate_native.py
+--- a/scripts/test_cab_view_gate_native.py
++++ b/scripts/test_cab_view_gate_native.py
+@@ -27,6 +27,167 @@
+ 
+ def no_core_dump():
+     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
++
++
++def validate_stage3c(manifest, phase, output):
++    """Validate the declared diagnostic shape without turning timing into acceptance."""
++    errors, images = [], {}
++    diagnostic = manifest.get("stage3c_diagnostic")
++    if phase != "cold":
++        return {"passed": diagnostic is None, "errors": [] if diagnostic is None else ["Diagnostic ran outside cold phase"]}
++    if not isinstance(diagnostic, dict):
++        return {"passed": False, "errors": ["Cold diagnostic missing"]}
++    timing = diagnostic.get("timing", {})
++    order = ["off", "reduced", "reduced", "off", "reduced", "off", "off", "reduced"]
++    expected = {"capture_label": "back_arrival_mixed", "view_width": 640, "view_height": 372,
++                "scene_effect": "arrival", "effect_elapsed_ms": 0, "warmup_per_mode": 20,
++                "frames_per_block": 25, "block_order": order, "palette_scope": "canonical_static_private"}
++    for key, value in expected.items():
++        if timing.get(key) != value:
++            errors.append(f"Incorrect timing contract: {key}")
++    for key in ("exact_cross_mode_geometry", "exact_cross_mode_scene_cache", "exact_cross_mode_image", "palette_restored",
++                "dpi_restored", "animation_restored", "frozen_state_unchanged"):
++        if timing.get(key) is not True:
++            errors.append(f"Timing guard failed: {key}")
++    if not isinstance(timing.get("frozen_snapshot"), dict) or not isinstance(timing.get("pose"), dict):
++        errors.append("Missing timing state/camera identity")
++    for key in ("incoming_palette_rgba", "canonical_palette_rgba"):
++        values = timing.get(key, [])
++        if len(values) != 256 or any(not isinstance(c, list) or len(c) != 4 or
++                                   any(type(v) is not int or not 0 <= v <= 255 for v in c) for c in values):
++            errors.append(f"Invalid palette: {key}")
++    blocks = timing.get("blocks", [])
++    if len(blocks) != 8:
++        errors.append("Expected exactly eight timing blocks")
++    frame_ids, previous_start, reference_geometry, reference_cache = set(), -1, None, None
++    count_by_mode = {"off": 0, "reduced": 0}
++    geometry_keys = ("view_width", "view_height", "internal_width", "internal_height", "scale",
++                     "visible_tiles", "triangles", "threads")
++    for i, block in enumerate(blocks):
++        if i >= 8 or block.get("index") != i or block.get("mode") != order[i]:
++            errors.append(f"Invalid block order/index: {i}")
++        for key in ("exact_same_mode_image", "exact_geometry", "exact_same_mode_cache", "frozen_state_unchanged"):
++            if block.get(key) is not True:
++                errors.append(f"Block {i} guard failed: {key}")
++        cache = block.get("cache")
++        if not isinstance(cache, dict):
++            errors.append(f"Missing cache snapshot: {i}")
++        elif reference_cache is None:
++            reference_cache = cache
++        elif cache != reference_cache:
++            errors.append(f"Cache differs within/across modes: {i}")
++        if isinstance(cache, dict) and cache.get("effect_scratch_capacity_bytes") != 0:
++            errors.append(f"Unexpected effect scratch in mode-null scene: {i}")
++        samples = block.get("samples", [])
++        if len(samples) != 25:
++            errors.append(f"Expected exactly 25 samples in block {i}")
++        for sample in samples:
++            frame = sample.get("frame", {})
++            start, wall, frame_id = sample.get("relative_start_us"), sample.get("wall_us"), frame.get("frame_id")
++            if (type(start) is not int or start <= previous_start or type(wall) is not int or wall <= 0
++                    or type(frame_id) is not int or frame_id in frame_ids):
++                errors.append(f"Invalid ordered timing/frame identity: block {i}")
++            if type(start) is int:
++                previous_start = start
++            frame_ids.add(frame_id)
++            if block.get("mode") in count_by_mode:
++                count_by_mode[block["mode"]] += 1
++            if (frame.get("rendered") is not True or frame.get("cache_hit") is not False
++                    or (block.get("mode") == "off" and frame.get("effect_us") != 0) or frame.get("scale") != 1.0
++                    or frame.get("view_width") != 640 or frame.get("internal_width") != 640
++                    or frame.get("view_height") != 372 or frame.get("internal_height") != 372):
++                errors.append(f"Frame was not a fresh full-scale mode-null render: block {i}")
++            if any(type(frame.get(k)) is not int or frame[k] < 0 for k in ("prepare_us", "raster_us", "effect_us", "output_us", "total_us")):
++                errors.append(f"Invalid stage timing: block {i}")
++            geometry = {k: frame.get(k) for k in geometry_keys}
++            if reference_geometry is None:
++                reference_geometry = geometry
++            elif geometry != reference_geometry:
++                errors.append(f"Geometry/work changed: block {i}")
++        before, after = block.get("before", {}), block.get("after", {})
++        if type(before.get("supported")) is not bool or before.get("supported") != after.get("supported"):
++            errors.append(f"Invalid process-counter availability: {i}")
++        if before.get("supported") is True:
++            for key in ("user_cpu_us", "system_cpu_us", "voluntary_context_switches", "involuntary_context_switches"):
++                if type(before.get(key)) is not int or type(after.get(key)) is not int or not 0 <= before[key] <= after[key]:
++                    errors.append(f"Invalid process counter {key}: {i}")
++        name = block.get("image")
++        path = output / name if isinstance(name, str) else None
++        if path is None or path.parent != output or not path.is_file():
++            errors.append(f"Missing/unsafe block image: {i}")
++        else:
++            with Image.open(path) as picture:
++                if picture.size != (640, 372):
++                    errors.append(f"Incorrect block image size: {i}")
++            images[name] = {"sha256": sha256(path), "bytes": path.stat().st_size}
++    if count_by_mode != {"off": 100, "reduced": 100} or len(frame_ids) != 200:
++        errors.append("Diagnostic did not contain exactly 100 distinct fresh frames per mode")
++    if len(images) != 8 or len({i["sha256"] for i in images.values()}) != 1:
++        errors.append("Block-end images differ within/across modes")
++    preflight = diagnostic.get("vehicle_palette_preflight")
++    if not isinstance(preflight, dict):
++        errors.append("Vehicle palette preflight missing")
++    else:
++        if (preflight.get("capture_label") != "back_safe" or preflight.get("palette_anim_start") != 227
++                or preflight.get("palette_anim_size") != 28):
++            errors.append("Incorrect palette preflight scope/range")
++        for key in ("frozen_state_unchanged", "palette_state_unchanged"):
++            if preflight.get(key) is not True:
++                errors.append(f"Palette preflight guard failed: {key}")
++        cars = preflight.get("cars", [])
++        frozen_cars = {c["id"]: c for c in preflight.get("frozen_snapshot", {}).get("cars", [])}
++        if len(cars) != 4 or preflight.get("visible_car_count") != 4 or {c.get("vehicle_id") for c in cars} != set(frozen_cars):
++            errors.append("Palette preflight did not cover the four-car safe consist")
++        complete, actual_candidate, other_candidate = bool(cars), False, False
++        for car in cars:
++            original = frozen_cars.get(car.get("vehicle_id"), {})
++            if (original.get("hidden") is not False or original.get("world") != preflight.get("world")
++                    or car.get("world") != original.get("world") or car.get("engine_id") != original.get("engine")
++                    or car.get("actual_vehicle_direction") != original.get("direction")):
++                errors.append("Palette preflight car was hidden, foreign or mismatched")
++            directions = car.get("directions", [])
++            if len(directions) != 8 or {d.get("query_direction") for d in directions} != set(range(8)):
++                errors.append("Missing/duplicate palette query direction")
++            for direction in directions:
++                actual = direction.get("query_direction") == car.get("actual_renderer_query_direction")
++                if direction.get("is_actual_cab_sw") is not actual or direction.get("image_type") != "on_map":
++                    errors.append("Palette query identity differs from recorded cab direction")
++                layers = direction.get("layers", [])
++                if len(layers) != direction.get("raw_sequence_count") or not 1 <= len(layers) <= 8:
++                    errors.append("Missing/invalid recorded sprite layers")
++                layer_complete = not direction.get("rejected_oversize")
++                raw_total, eligible_total = 0, 0
++                for layer in layers:
++                    counts = layer.get("eligible_slot_counts_227_254", [])
++                    raw, eligible = layer.get("raw_animated_pixels"), layer.get("eligible_source_contributions")
++                    if (len(counts) != 28 or any(type(n) is not int or n < 0 for n in counts)
++                            or type(raw) is not int or raw < 0 or type(eligible) is not int or eligible < 0
++                            or sum(counts) != eligible):
++                        errors.append("Invalid eligible animated-slot histogram")
++                        continue
++                    raw_total += raw
++                    eligible_total += eligible
++                    override = layer.get("palette_override")
++                    effective = direction.get("default_palette") if car.get("crashed") or override == 0 else override
++                    if layer.get("effective_palette") != effective:
++                        errors.append("Recorded effective palette violates native precedence")
++                    if any(layer.get(k) is not False for k in ("destination_dependent", "text_recolour", "raw_missing")):
++                        layer_complete = False
++                if (direction.get("raw_animated_pixels") != raw_total
++                        or direction.get("eligible_source_contributions") != eligible_total
++                        or direction.get("complete") is not layer_complete):
++                    errors.append("Palette sequence totals/completeness are inconsistent")
++                complete &= layer_complete
++                if eligible_total:
++                    if actual:
++                        actual_candidate = True
++                    else:
++                        other_candidate = True
++        if (preflight.get("scan_complete") is not complete or preflight.get("candidate_actual_sw") is not actual_candidate
++                or preflight.get("candidate_other_direction") is not other_candidate):
++            errors.append("Palette aggregate candidate/completeness claims are inconsistent")
++    return {"passed": not errors, "errors": errors, "timing_scope": "diagnostic only; no acceptance threshold applied",
++            "sample_count_by_mode": count_by_mode, "geometry": reference_geometry, "block_images": images}
+ 
+ 
+ def validate_profiles(manifest, phase, rotation, vehicle=False, static_palette=False):
+@@ -261,7 +422,7 @@
+     return result
+ 
+ 
+-def run_phase(binary, source, output, phase, baseline, expected=None, profile=False, profile_rotation=0, vehicle_profile=False, fixed_baseline=None):
++def run_phase(binary, source, output, phase, baseline, expected=None, profile=False, profile_rotation=0, vehicle_profile=False, fixed_baseline=None, stage3c_diagnostic=False):
+     output.mkdir(parents=True, exist_ok=False)
+     save = output / "fixture-copy.sav"
+     shutil.copyfile(source, save)
+@@ -274,13 +435,15 @@
+            "OSTTD_CAB_NATIVE_CONFIG": str(config), "OSTTD_CAB_NATIVE_SAVE": str(save),
+            "OSTTD_CAB_NATIVE_OUTPUT": str(output), "OSTTD_CAB_NATIVE_BINARY": str(binary),
+            "OSTTD_CAB_GATE_PHASE": phase}
+-    for key in ("DISPLAY", "WAYLAND_DISPLAY", "OSTTD_CAB_GATE_EXPECTED", "OSTTD_CAB_PROFILE", "OSTTD_CAB_PROFILE_ROTATION", "OSTTD_CAB_VEHICLE_PROFILE"):
++    for key in ("DISPLAY", "WAYLAND_DISPLAY", "OSTTD_CAB_GATE_EXPECTED", "OSTTD_CAB_PROFILE", "OSTTD_CAB_PROFILE_ROTATION", "OSTTD_CAB_VEHICLE_PROFILE", "OSTTD_CAB_STAGE3C_DIAGNOSTIC"):
+         env.pop(key, None)
+     if profile:
+         env["OSTTD_CAB_PROFILE"] = "1"
+         env["OSTTD_CAB_PROFILE_ROTATION"] = str(profile_rotation)
+     if vehicle_profile:
+         env["OSTTD_CAB_VEHICLE_PROFILE"] = "1"
++    if stage3c_diagnostic and phase == "cold":
++        env["OSTTD_CAB_STAGE3C_DIAGNOSTIC"] = "1"
+     if expected is not None:
+         env["OSTTD_CAB_GATE_EXPECTED"] = str(expected)
+     baseset = Path(env["XDG_DATA_HOME"]) / "openttd/baseset"
+@@ -297,10 +460,11 @@
+               "binary_sha256": sha256(binary), "config_sha256": sha256(config),
+               "display": "SDL offscreen / software", "human_uat": "Pending", "profiling_requested": profile,
+               "profile_rotation": profile_rotation, "vehicle_profiling_requested": vehicle_profile,
++              "stage3c_diagnostic_requested": stage3c_diagnostic and phase == "cold",
+               "hard_timeout_seconds": 240, "minimum_free_bytes": 100 * 1024 * 1024,
+               "content_sha256": {str(p): sha256(p) for p in sorted(installed.iterdir()) if p.is_file()},
+               "newgrf_sha256": {str(p): sha256(p) for p in sorted((ROOT / "bin/newgrf").glob("*.grf"))}}
+-    if profile:
++    if profile or stage3c_diagnostic:
+         cpu_lines = Path("/proc/cpuinfo").read_text().splitlines()
+         report["machine"] = {"platform": platform.platform(), "logical_cpus": os.cpu_count(),
+                              "cpu_model": next((line.split(":", 1)[1].strip() for line in cpu_lines
+@@ -313,7 +477,7 @@
+                                    stdout=log, stderr=subprocess.STDOUT, preexec_fn=no_core_dump)
+         try:
+             while process.poll() is None:
+-                if profile:
++                if profile or stage3c_diagnostic:
+                     try:
+                         lines = Path(f"/proc/{process.pid}/status").read_text().splitlines()
+                         values = {line.split(":", 1)[0]: int(line.split()[1]) for line in lines
+@@ -347,6 +511,9 @@
+             report["passed"] = report["passed"] and report["normal_viewport_comparison"]["passed"]
+             report["effect_pixel_comparisons"] = compare_effect_pixels(output, phase, report.get("native_manifest", {}), baseline)
+             report["passed"] = report["passed"] and report["effect_pixel_comparisons"]["passed"]
++            if stage3c_diagnostic:
++                report["stage3c_validation"] = validate_stage3c(report.get("native_manifest", {}), phase, output)
++                report["passed"] = report["passed"] and report["stage3c_validation"]["passed"]
+             if fixed_baseline is not None:
+                 report["fixed_image_comparisons"] = compare_fixed_images(output, phase, report.get("native_manifest", {}), fixed_baseline)
+                 report["passed"] = report["passed"] and report["fixed_image_comparisons"]["passed"]
+@@ -390,6 +557,7 @@
+     parser.add_argument("--output", required=True, type=Path, help="New evidence directory")
+     parser.add_argument("--test-binary", type=Path, default=ROOT / "build/openttd_test")
+     parser.add_argument("--profile", action="store_true", help="Measure naturally paused gate phases without simulation advancement")
++    parser.add_argument("--stage3c-diagnostic", action="store_true", help="One cold counterbalanced timing diagnostic and current-fixture vehicle palette preflight; excludes the acceptance matrix")
+     parser.add_argument("--vehicle-profile", action="store_true", help="Also profile a private camera beside a naturally arrived visible vehicle; requires --profile")
+     parser.add_argument("--profile-rotation", type=int, choices=(0, 1, 2), default=0,
+                         help="Rotate Off/Reduced/Full measurement order across fresh-process repeats")
+@@ -397,6 +565,8 @@
+     parser.add_argument("--baseline", type=Path, default=ROOT / "build/cab-stage3-baseline/near-repeat-01",
+                         help="Preserved pre-effect native images, containing roundtrip and cold directories")
+     args = parser.parse_args()
++    if args.stage3c_diagnostic and (args.profile or args.vehicle_profile or args.fixed_image_baseline):
++        parser.error("--stage3c-diagnostic is separate from acceptance-matrix profiling")
+     if args.vehicle_profile and not args.profile:
+         parser.error("--vehicle-profile requires --profile")
+     if args.fixed_image_baseline and not args.vehicle_profile:
+@@ -409,7 +579,7 @@
+     output.mkdir(parents=True, exist_ok=False)
+     report = {"passed": False, "phases": [], "source_save_sha256": sha256(source)}
+     try:
+-        first = run_phase(binary, source, output / "roundtrip", "roundtrip", baseline, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline)
++        first = run_phase(binary, source, output / "roundtrip", "roundtrip", baseline, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline, stage3c_diagnostic=args.stage3c_diagnostic)
+         report["phases"].append(first)
+         if not first["passed"]:
+             raise RuntimeError("Initial native round trip failed; cold phase not started")
+@@ -419,7 +589,7 @@
+             raise RuntimeError("Initial proof omitted its native save or frozen comparison snapshot")
+         report["checkpoint_sha256"] = sha256(checkpoint)
+         report["expected_snapshot_sha256"] = sha256(expected)
+-        cold = run_phase(binary, checkpoint, output / "cold", "cold", baseline, expected, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline)
++        cold = run_phase(binary, checkpoint, output / "cold", "cold", baseline, expected, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline, stage3c_diagnostic=args.stage3c_diagnostic)
+         report["phases"].append(cold)
+         report["explicit_state_game_loop_calls"] = sum(
+             p.get("native_manifest", {}).get("explicit_state_game_loop_calls", 0)
+diff --git a/docs/ACTIVE_EXECUTION_PLAN.md b/docs/ACTIVE_EXECUTION_PLAN.md
+--- a/docs/ACTIVE_EXECUTION_PLAN.md
++++ b/docs/ACTIVE_EXECUTION_PLAN.md
+@@ -1,3 +1,81 @@
++# Active execution slice — Existing graphics qualification, Stage 3C (14 October 2026)
++
++This is the **sole current implementation handoff**. The owner authorized the
++smallest evidence-closing slice before scenery: identify installed assets, check
++real multilayer vehicles and animated palettes where existing content permits,
++and investigate the retained Stage 3B timing failure without changing thresholds.
++Stage 3B is sealed by `../cab-view-stage3c-start.json`; its patch, delivery, audit,
++source and binaries remain preserved. Work stays isolated, default OFF and
++unpublished. Owner repositories, saves and applications remain untouched.
++
++**Current gate: bounded diagnostic complete; graphics qualification remains blocked
++and the timing cause unresolved.** One independently reviewed run retained 200
++frames and eight identical images, with exact historical scene/state/cache identity.
++Off/Reduced median was 4,177/4,224.5 us and p95 5,650/6,321 us. The 671-us diagnostic
++p95 difference does not replace the original Stage 3B failed 1,114-us result or its
++500-us threshold. Four cars queried in eight directions yielded 32 single-layer
++sequences and zero animated-index contributions. This bounds the current fixture;
++it does not establish absence across every installed engine, livery or cargo state.
++No production rendering behavior was repaired or changed. Feature OFF/ON builds,
++focused/default tests, all 564 CTest cases (one sandbox loopback rerun), and
++independent evidence review have passing records. See the
++[Stage 3C audit](audit/2026-10-14/cab-view-stage3c/README.md).
++
++Installed OpenGFX and the project vehicle GRFs provide no demonstrated real
++SpriteStack vehicle. Those GRFs declare properties only. Real-stack and animated
++vehicle qualification require a suitable existing asset/state; dependent two-epoch
++comparison stopped. Do not create art, compile a GRF or download content to turn
++diagnostic stacks into acceptance evidence. Further causal timing instrumentation
++or a rendering design change requires a new bounded slice, not repeated runs until
++a threshold passes. The contract below records this completed diagnostic.
++
++## Bounded comparison and stop rules
++
++- Extend only the existing native fixture/controller and private renderer probes.
++  At the naturally reached cold return safe endpoint, inspect each visible car's
++  actual OnMap GetImage sequence in eight directions. Record engine/car/world,
++  complete layer IDs, effective palettes and referenced Normal sprite pixels.
++  Count visible indexed pixels whose effective colour lies in animated slots
++  227–254, honoring source alpha, zero-remap transparency and all-black handling.
++  Do not query hidden or other-world vehicles. A used animated index is a content
++  candidate, not proof of an observed animated colour or cab/native fidelity.
++- If that bounded scan finds no animated vehicle pixels, stop the dependent
++  two-epoch vehicle comparison and state the asset/coverage limitation. Water or
++  lighthouse movement must not substitute for vehicle proof. If it does find a
++  candidate, define a source-backed, bounded two-epoch comparison before changing
++  rendering; require actual colour change and native output, with all temporary
++  visual state restored. No production repair without a concrete reproduction
++  and independent review; stop at a material design choice.
++- Investigate only cold `back_arrival_mixed`, 640 x 372, canonical private palette,
++  Arrival at elapsed 0, fixed full scale. Use two persistent private renderers,
++  one Off and one Reduced, with 20 warmups each. Run exactly eight 25-frame blocks
++  in order Off, Reduced, Reduced, Off, Reduced, Off, Off, Reduced: 100 measured
++  fresh frames per mode. Unique frame IDs force new scenes. Preserve ordered raw
++  wall/stage times and relative start times; record block CPU/context switches
++  outside frame timing where supported. Require exact image, geometry, cache and
++  full FrozenState equality and restore DPI/palette/animation state.
++- This single counterbalanced run is diagnostic, not a replacement acceptance
++  matrix. Retain the failed Stage 3B matrix and unchanged 500-us Reduced p95 limit;
++  do not extend runs until green, change worker policy/priority/affinity or infer
++  causes by subtracting independently ranked stage percentiles. Scheduling,
++  frequency, thread setup and allocation remain hypotheses until isolated.
++- Keep existing process/controller/call/disk limits. Sol owns narrow C++ probes;
++  Root owns controller, execution and records; Astra reviews plan, source and
++  measured evidence independently. No new renderer, asset/dependency download,
++  asset build, scenery, simulation/save/network change, commit, PR or merge.
++
++## Delivery boundary
++
++Record installed content hashes, scan coverage/blockers, timing distributions and
++correlated raw tails. Rebuild changed diagnostic code, run focused and required
++final checks once after the last relevant source change, independently review the
++result, and retain reproducible source/binary hashes. Human comfort, untested
++content/platforms and any unresolved timing cause remain explicitly Pending.
++
++---
++
++## Historical Stage 3B and earlier records (preserved below)
++
+ # Active execution slice — Vehicle layers and palettes, Stage 3B (14 October 2026)
+ 
+ This is the **sole current implementation handoff**. Following delivery of the

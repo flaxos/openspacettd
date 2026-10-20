@@ -55,6 +55,7 @@ function(set_options)
     option(OPTION_FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." OFF)
 
     option(OPTION_DEDICATED "Build dedicated server only (no GUI)" OFF)
+    option(WITH_CAB_VIEW "Build the experimental native train cab view" OFF)
     option(OPTION_INSTALL_FHS "Install with Filesystem Hierarchy Standard folders" ${DEFAULT_OPTION_INSTALL_FHS})
     option(OPTION_USE_ASSERTS "Use assertions; leave enabled for nightlies, betas, and RCs" ON)
     option(OPTION_USE_NSIS "Use NSIS to create windows installer; enable only for stable releases" OFF)

@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "actual_report_accepted": true,
+  "malformed_reports_rejected": 12,
+  "cases": {
+    "missing_block": [
+      "Expected exactly eight timing blocks",
+      "Diagnostic did not contain exactly 100 distinct fresh frames per mode",
+      "Block-end images differ within/across modes"
+    ],
+    "duplicate_frame_id": [
+      "Invalid ordered timing/frame identity: block 1",
+      "Diagnostic did not contain exactly 100 distinct fresh frames per mode"
+    ],
+    "wrong_mode_order": [
+      "Invalid block order/index: 0",
+      "Diagnostic did not contain exactly 100 distinct fresh frames per mode"
+    ],
+    "changed_geometry": [
+      "Geometry/work changed: block 2"
+    ],
+    "changed_cache": [
+      "Cache differs within/across modes: 2"
+    ],
+    "missing_block_image": [
+      "Missing/unsafe block image: 3",
+      "Block-end images differ within/across modes"
+    ],
+    "state_mutation": [
+      "Timing guard failed: frozen_state_unchanged"
+    ],
+    "missing_car": [
+      "Palette preflight did not cover the four-car safe consist"
+    ],
+    "missing_direction": [
+      "Missing/duplicate palette query direction"
+    ],
+    "false_candidate": [
+      "Palette aggregate candidate/completeness claims are inconsistent"
+    ],
+    "unsupported_claimed_complete": [
+      "Palette sequence totals/completeness are inconsistent",
+      "Palette aggregate candidate/completeness claims are inconsistent"
+    ],
+    "false_histogram": [
+      "Invalid eligible animated-slot histogram"
+    ]
+  },
+  "scope": "Controller integrity checks using copies of the recorded manifest; no native rerun or original evidence edits"
+}

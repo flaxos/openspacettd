@@ -1,0 +1,1289 @@
+--- a/src/cab_view_3d.cpp
++++ b/src/cab_view_3d.cpp
+@@ -172,6 +172,9 @@
+ }}};
+ 
+ constexpr size_t MAX_TEXTURES = 4096; ///< Clear the texture cache when it grows beyond this.
++constexpr int32_t VEHICLE_TEXTURE_KEY = INT32_MIN + 1; ///< Separate ordered vehicle composites from bridge and ground keys.
++constexpr int64_t MAX_VEHICLE_TEXTURE_AXIS = 512; ///< Bound a malformed sprite stack before allocating its union.
++constexpr int64_t MAX_VEHICLE_TEXTURE_PIXELS = 65536;
+ constexpr size_t MAX_NEW_TEXTURES_TIMED = 32; ///< Pictures that make more new textures don't count for the average time of a picture.
+ constexpr int MAX_THREADS = 8; ///< At most this many threads draw the picture.
+ constexpr int PICTURES_PER_SCALE = 10; ///< Pictures to draw at a size before changing it again, so it does not keep changing.
+@@ -460,6 +463,15 @@
+ 	}
+ };
+ 
++/** Ordered sprite layers and their pre-mipmap, premultiplied composition. */
++struct VehicleCanvas {
++	GroundTexture texture;
++	std::vector<float> alpha;
++	size_t skipped_destination_layers = 0;
++	size_t skipped_text_layers = 0;
++	bool rejected_oversize = false;
++};
++
+ /** Hash of the key of a ground texture. */
+ struct TextureKeyHash {
+ 	size_t operator()(const std::vector<int32_t> &key) const
+@@ -592,6 +604,10 @@
+ 	void Draw(const Rect &r, const CabViewCamera &camera, uint32_t frame_id, float budget_ms);
+ 	CabViewFrameStats GetLastFrameStats() const { return this->last_frame_stats; }
+ 	CabViewCacheStats GetCacheStats() const;
++	CabViewVehicleCompositeProbe ProbeVehicleComposite(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed);
++	CabViewVehicleTextureProfile ProfileVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen, uint32_t warm_lookups);
++	CabViewVehicleCacheIdentity ProbeVehicleCacheIdentity(const VehicleSpriteSeq &first, const VehicleSpriteSeq &variant,
++		PaletteID default_pal, bool crashed, bool first_widen, bool variant_widen);
+ 
+ 	/**
+ 	 * Get how long making a picture takes, on average.
+@@ -652,6 +668,8 @@
+ 	const RawSprite &GetRawSprite(SpriteID sprite);
+ 	const GroundTexture &GetGroundTexture(TileIndex tile, int tile_z, bool boxes, std::pair<float, float> smooth);
+ 	const GroundTexture &GetBoxTexture(SpriteID image, PaletteID pal, bool widen = true);
++	const GroundTexture &GetVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen = true);
++	VehicleCanvas BuildVehicleCanvas(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed);
+ 	const GroundTexture &GetCompositeTexture(std::span<const BoxSpriteToDraw *const> boxes, Point origin);
+ 	const GroundTexture &GetSideTexture(SpriteID image, PaletteID pal, Axis axis, float climb = 0);
+ 	RGB Fog(const RGB &colour, float dist) const;
+@@ -773,7 +791,16 @@
+ 	};
+ 	for (const auto &[key, texture] : this->textures) {
+ 		stats.texture_key_payload_bytes += key.capacity() * sizeof(int32_t);
+-		stats.texture_payload_bytes += texture_bytes(texture);
++		const size_t bytes = texture_bytes(texture);
++		stats.texture_payload_bytes += bytes;
++		if (!key.empty() && key.front() == VEHICLE_TEXTURE_KEY) {
++			++stats.vehicle_textures;
++			stats.vehicle_texture_payload_bytes += bytes;
++			const Picture &pic = texture.levels[0];
++			stats.max_vehicle_union_width = std::max(stats.max_vehicle_union_width, static_cast<size_t>(std::max(0, pic.width)));
++			stats.max_vehicle_union_height = std::max(stats.max_vehicle_union_height, static_cast<size_t>(std::max(0, pic.height)));
++			stats.max_vehicle_union_pixels = std::max(stats.max_vehicle_union_pixels, static_cast<size_t>(std::max(0, pic.width)) * std::max(0, pic.height));
++		}
+ 	}
+ 	for (const auto &[key, texture] : this->box_textures) {
+ 		(void)key;
+@@ -1429,6 +1456,41 @@
+ 	}
+ }
+ 
++/** Draw one normal vehicle layer into a transparent, premultiplied picture.
++ * Native ColourRemap skips remap index zero and keeps the source pixel's
++ * brightness; the shared terrain painter deliberately has different rules. */
++static void PaintVehicleSprite(Picture &pic, std::vector<float> &alpha, const RawSprite &raw, PaletteID pal, int ox, int oy,
++	const uint8_t *synthetic_remap = nullptr)
++{
++	const bool black = pal == PALETTE_ALL_BLACK;
++	const bool crashed = pal == PALETTE_CRASH;
++	const uint8_t *remap = (pal != PAL_NONE && !black) ? (synthetic_remap != nullptr ? synthetic_remap :
++		GetNonSprite(GB(pal, 0, PALETTE_WIDTH), SpriteType::Recolour) + 1) : nullptr;
++	for (int y = 0; y < raw.height; ++y) {
++		for (int x = 0; x < raw.width; ++x) {
++			const SpriteLoader::CommonPixel &p = raw.pixels[static_cast<size_t>(y) * raw.width + x];
++			if (p.a == 0) continue;
++			RGB colour{static_cast<float>(p.r), static_cast<float>(p.g), static_cast<float>(p.b)};
++			float opacity = p.a / 255.0f;
++			if (black) {
++				colour = {0, 0, 0};
++				opacity = 1.0f; // Native BlackRemap writes black wherever source alpha is nonzero.
++			} else if (p.m != 0) {
++				const uint8_t index = remap != nullptr ? remap[p.m] : p.m;
++				if (remap != nullptr && index == 0) continue;
++				const Colour adjusted = AdjustBrightness(_cur_palette.palette[index], GetColourBrightness(Colour(p.r, p.g, p.b)));
++				colour = {static_cast<float>(adjusted.r), static_cast<float>(adjusted.g), static_cast<float>(adjusted.b)};
++			} else if (crashed && p.m == 0) {
++				const uint8_t grey = static_cast<uint8_t>((p.r * 13063 + p.g * 25647 + p.b * 4981) / 65536);
++				colour = {static_cast<float>(grey), static_cast<float>(grey), static_cast<float>(grey)};
++			}
++			const size_t at = static_cast<size_t>(oy + y) * pic.width + ox + x;
++			pic.pixels[at] = pic.pixels[at] * (1.0f - opacity) + colour * opacity;
++			alpha[at] = opacity + alpha[at] * (1.0f - opacity);
++		}
++	}
++}
++
+ /** How the 3D view draws a road tile, see Renderer::AddRoad. */
+ struct RoadLook {
+ 	RoadBits road = RoadBits{}; ///< Pieces of road.
+@@ -1666,6 +1728,143 @@
+ 	PaintSprite(pic, alpha, raw, pal, 0, 0);
+ 	FinishTexture(tex, std::move(alpha), 4, true, {0, 0}, widen);
+ 	return tex;
++}
++
++/** Build the unfiltered union of every supported vehicle layer. The caller
++ * applies FinishTexture only after a probe can inspect the actual blend. */
++VehicleCanvas Renderer::BuildVehicleCanvas(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed)
++{
++	VehicleCanvas canvas;
++	/* A rejected or all-destination-dependent sequence has no union and must
++	 * never be mistaken for the GroundTexture default one-pixel picture. */
++	canvas.texture.levels[0].width = canvas.texture.levels[0].height = 0;
++	canvas.texture.levels[0].pixels.clear();
++	if (seq.count > seq.seq.size()) { canvas.rejected_oversize = true; return canvas; }
++	struct Layer { const RawSprite *raw; PaletteID pal; };
++	std::array<Layer, 8> layers{};
++	size_t count = 0;
++	int64_t left = INT64_MAX, top = INT64_MAX, right = INT64_MIN, bottom = INT64_MIN;
++	for (uint i = 0; i < seq.count; ++i) {
++		const SpriteID image = seq.seq[i].sprite;
++		const PaletteID pal = (crashed || seq.seq[i].pal == 0) ? default_pal : seq.seq[i].pal;
++		/* A transparent modifier changes the framebuffer already behind this
++		 * sprite. A source-only texture cannot reproduce that operation. */
++		if (HasBit(image, PALETTE_MODIFIER_TRANSPARENT)) { ++canvas.skipped_destination_layers; continue; }
++		if (HasBit(pal, PALETTE_TEXT_RECOLOUR)) { ++canvas.skipped_text_layers; continue; }
++		const RawSprite &raw = this->GetRawSprite(image & SPRITE_MASK);
++		if (raw.width <= 0 || raw.height <= 0 || raw.pixels.empty() ||
++			static_cast<int64_t>(raw.width) * raw.height > static_cast<int64_t>(raw.pixels.size())) continue;
++		left = std::min(left, static_cast<int64_t>(raw.x_offs));
++		top = std::min(top, static_cast<int64_t>(raw.y_offs));
++		right = std::max(right, static_cast<int64_t>(raw.x_offs) + raw.width);
++		bottom = std::max(bottom, static_cast<int64_t>(raw.y_offs) + raw.height);
++		layers[count++] = {&raw, pal};
++	}
++	if (count == 0) return canvas;
++	if (!CabViewVehicleUnionSupported(left, top, right, bottom)) {
++		canvas.rejected_oversize = true;
++		return canvas;
++	}
++	const int64_t width = right - left, height = bottom - top;
++	GroundTexture &texture = canvas.texture;
++	texture.left = static_cast<int>(left);
++	texture.top = static_cast<int>(top);
++	Picture &pic = texture.levels[0];
++	pic.width = static_cast<int>(width);
++	pic.height = static_cast<int>(height);
++	pic.pixels.assign(static_cast<size_t>(width * height), {0, 0, 0});
++	canvas.alpha.assign(pic.pixels.size(), 0.0f);
++	for (size_t i = 0; i < count; ++i) {
++		const RawSprite &raw = *layers[i].raw;
++		PaintVehicleSprite(pic, canvas.alpha, raw, layers[i].pal,
++			static_cast<int>(static_cast<int64_t>(raw.x_offs) - left),
++			static_cast<int>(static_cast<int64_t>(raw.y_offs) - top));
++	}
++	return canvas;
++}
++
++/** Cache identity includes the entire ordered sequence and every effective
++ * palette. Cache clearing remains at frame start, before triangles reference
++ * their textures; this function never evicts while building a scene. */
++const GroundTexture &Renderer::GetVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen)
++{
++	this->key.clear();
++	this->key.push_back(VEHICLE_TEXTURE_KEY);
++	this->key.push_back(static_cast<int32_t>(seq.count));
++	this->key.push_back(widen ? 1 : 0);
++	this->key.push_back(crashed ? 1 : 0);
++	for (uint i = 0; i < std::min<size_t>(seq.count, seq.seq.size()); ++i) {
++		this->key.push_back(static_cast<int32_t>(seq.seq[i].sprite));
++		this->key.push_back(static_cast<int32_t>((crashed || seq.seq[i].pal == 0) ? default_pal : seq.seq[i].pal));
++	}
++	auto found = this->textures.find(this->key);
++	if (found != this->textures.end()) return found->second;
++	VehicleCanvas canvas = this->BuildVehicleCanvas(seq, default_pal, crashed);
++	GroundTexture &texture = this->textures[this->key];
++	texture = std::move(canvas.texture);
++	if (!canvas.alpha.empty()) FinishTexture(texture, std::move(canvas.alpha), 4, true, {0, 0}, widen);
++	return texture;
++}
++
++CabViewVehicleCompositeProbe Renderer::ProbeVehicleComposite(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed)
++{
++	VehicleCanvas canvas = this->BuildVehicleCanvas(seq, default_pal, crashed);
++	const Picture &pic = canvas.texture.levels[0];
++	CabViewVehicleCompositeProbe probe;
++	probe.left = canvas.texture.left;
++	probe.top = canvas.texture.top;
++	probe.width = pic.width;
++	probe.height = pic.height;
++	probe.skipped_destination_layers = canvas.skipped_destination_layers;
++	probe.skipped_text_layers = canvas.skipped_text_layers;
++	probe.rejected_oversize = canvas.rejected_oversize;
++	if (canvas.alpha.empty()) { probe.width = probe.height = 0; return probe; }
++	probe.pixels.reserve(pic.pixels.size());
++	for (size_t i = 0; i < pic.pixels.size(); ++i) {
++		const RGB &c = pic.pixels[i];
++		probe.pixels.push_back({c.r, c.g, c.b, canvas.alpha[i]});
++	}
++	return probe;
++}
++
++CabViewVehicleTextureProfile Renderer::ProfileVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen, uint32_t warm_lookups)
++{
++	using Clock = std::chrono::steady_clock;
++	auto ns = [](auto elapsed) { return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count()); };
++	CabViewVehicleTextureProfile profile;
++	auto cold_start = Clock::now();
++	const GroundTexture *cold = &this->GetVehicleTexture(seq, default_pal, crashed, widen);
++	profile.cold_build_ns = ns(Clock::now() - cold_start);
++	profile.cold_level0_pixels = cold->levels[0].pixels.size();
++	profile.cache_after_cold = this->GetCacheStats();
++	for (int i = 0; i < 20; ++i) (void)this->GetVehicleTexture(seq, default_pal, crashed, widen);
++	const auto warm_start = Clock::now();
++	size_t observed_pixels = 0;
++	bool stable = true;
++	for (uint32_t i = 0; i < warm_lookups; ++i) {
++		const GroundTexture *hit = &this->GetVehicleTexture(seq, default_pal, crashed, widen);
++		observed_pixels += hit->levels[0].pixels.size();
++		stable &= hit == cold;
++	}
++	profile.warm_lookup_total_ns = ns(Clock::now() - warm_start);
++	profile.warm_lookups = warm_lookups;
++	profile.warm_texture_stable = stable && observed_pixels == profile.cold_level0_pixels * warm_lookups;
++	profile.cache = this->GetCacheStats(); // Deep scan belongs outside both timed sections.
++	profile.composition = this->ProbeVehicleComposite(seq, default_pal, crashed);
++	return profile;
++}
++
++CabViewVehicleCacheIdentity Renderer::ProbeVehicleCacheIdentity(const VehicleSpriteSeq &first, const VehicleSpriteSeq &variant,
++	PaletteID default_pal, bool crashed, bool first_widen, bool variant_widen)
++{
++	CabViewVehicleCacheIdentity result;
++	const GroundTexture *original = &this->GetVehicleTexture(first, default_pal, crashed, first_widen);
++	result.after_first = this->GetCacheStats();
++	result.repeated_key_reused = original == &this->GetVehicleTexture(first, default_pal, crashed, first_widen);
++	result.after_repeat = this->GetCacheStats();
++	result.variant_key_distinct = original != &this->GetVehicleTexture(variant, default_pal, crashed, variant_widen);
++	result.after_variant = this->GetCacheStats();
++	return result;
+ }
+ 
+ /**
+@@ -4387,6 +4586,13 @@
+ 	}
+ }
+ 
++/** Match the viewport's fallback palette before individual stack overrides. */
++static PaletteID CabVehicleDefaultPalette(const Vehicle *v)
++{
++	if (!v->vehstatus.Test(VehState::DefaultPalette)) return PAL_NONE;
++	return v->vehstatus.Test(VehState::Crashed) ? PALETTE_CRASH : GetVehiclePalette(v);
++}
++
+ /**
+  * Add the vehicles around the camera: trains and road vehicles as boxes dressed in their sprites, aircraft as cut-outs.
+  * @param own The vehicle the camera rides on, which is left out.
+@@ -4396,6 +4602,7 @@
+ 	for (const Vehicle *v : Vehicle::Iterate()) {
+ 		if (!CabViewVehicleVisible(v, this->world)) continue;
+ 		if (v->type != VehicleType::Train && v->type != VehicleType::Road && v->type != VehicleType::Ship && v->type != VehicleType::Aircraft) continue;
++		if (v->vehstatus.Test(VehState::Shadow)) continue; // Native shadow blending depends on the scene behind the sprite.
+ 		if (v->index == own) continue;
+ 		float dx = v->x_pos - this->cam.pos.x;
+ 		float dy = v->y_pos - this->cam.pos.y;
+@@ -4416,8 +4623,7 @@
+ 		VehicleSpriteSeq seq;
+ 		v->GetImage(Direction::SW, EngineImageType::OnMap, &seq);
+ 		if (!seq.IsValid()) continue;
+-		PaletteID pal = seq.seq[0].pal != 0 ? seq.seq[0].pal : GetVehiclePalette(v);
+-		const GroundTexture &tex = this->GetBoxTexture(seq.seq[0].sprite, pal);
++		const GroundTexture &tex = this->GetVehicleTexture(seq, CabVehicleDefaultPalette(v), v->vehstatus.Test(VehState::Crashed));
+ 		const Picture &pic = tex.levels[0];
+ 		if (pic.alpha.empty()) continue;
+ 		std::optional<int> top = TopRow(tex);
+@@ -4485,8 +4691,8 @@
+ 	VehicleSpriteSeq seq;
+ 	v->GetImage(this->GetShownDirection(v->rotation), EngineImageType::InDetails, &seq);
+ 	if (!seq.IsValid()) return;
+-	PaletteID pal = seq.seq[0].pal != 0 ? seq.seq[0].pal : GetVehiclePalette(v);
+-	const GroundTexture &tex = this->GetBoxTexture(seq.seq[0].sprite, pal, false);
++	const GroundTexture &tex = this->GetVehicleTexture(seq, CabVehicleDefaultPalette(v), v->vehstatus.Test(VehState::Crashed), false);
++	if (tex.levels[0].alpha.empty()) return;
+ 	/* The game draws the sprites of ships well away from their position; stand the middle of the hull on the position.
+ 	 * The sprite is 2 (length + width) wide, and the hull (length + width) / 2 high; its nearer half sinks into the water. */
+ 	auto [left, right, top, bottom] = OpaqueBounds(tex);
+@@ -4513,7 +4719,6 @@
+ 	VehicleSpriteSeq seq;
+ 	v->GetImage(shown, EngineImageType::OnMap, &seq);
+ 	if (!seq.IsValid()) return;
+-	PaletteID pal = seq.seq[0].pal != 0 ? seq.seq[0].pal : GetVehiclePalette(v);
+ 	/* The map draws the sprite with its origin at the position of the aircraft. */
+ 	Vec3 at = {static_cast<float>(v->x_pos), static_cast<float>(v->y_pos), static_cast<float>(v->z_pos)};
+ 	/* The map looks down at 30 degrees, so the length of an aircraft going away from it shows upwards in the sprite.
+@@ -4521,7 +4726,9 @@
+ 	Vec3 d = this->cam.pos - at;
+ 	float seen = std::abs(d.z) / std::max(std::hypot(d.x, d.y, d.z), 1.0f);
+ 	float vertical = AIRCRAFT_UNITS * std::clamp(seen / 0.5f, 0.35f, 1.0f);
+-	this->AddCutout(this->GetBoxTexture(seq.seq[0].sprite, pal, false), at, 0, 0, AIRCRAFT_UNITS, vertical);
++	const GroundTexture &tex = this->GetVehicleTexture(seq, CabVehicleDefaultPalette(v), v->vehstatus.Test(VehState::Crashed), false);
++	if (tex.levels[0].alpha.empty()) return;
++	this->AddCutout(tex, at, 0, 0, AIRCRAFT_UNITS, vertical);
+ }
+ 
+ /**
+@@ -5168,6 +5375,46 @@
+ 	return _renderer.GetCacheStats();
+ }
+ 
++CabViewVehicleCompositeProbe ProbeCabViewVehicleComposite(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed)
++{
++	Renderer renderer;
++	return renderer.ProbeVehicleComposite(seq, default_pal, crashed);
++}
++
++CabViewVehicleProbePixel ProbeCabViewVehiclePixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t m, PaletteID pal,
++	const uint8_t *synthetic_remap)
++{
++	RawSprite raw;
++	raw.width = raw.height = 1;
++	raw.pixels.push_back({r, g, b, a, m});
++	Picture pic;
++	std::vector<float> alpha(1, 0.0f);
++	PaintVehicleSprite(pic, alpha, raw, pal, 0, 0, synthetic_remap);
++	return {pic.pixels[0].r, pic.pixels[0].g, pic.pixels[0].b, alpha[0]};
++}
++
++bool CabViewVehicleUnionSupported(int64_t left, int64_t top, int64_t right, int64_t bottom)
++{
++	if (right <= left || bottom <= top) return false;
++	const uint64_t width = static_cast<uint64_t>(right) - static_cast<uint64_t>(left);
++	const uint64_t height = static_cast<uint64_t>(bottom) - static_cast<uint64_t>(top);
++	return width <= MAX_VEHICLE_TEXTURE_AXIS && height <= MAX_VEHICLE_TEXTURE_AXIS &&
++		width * height <= MAX_VEHICLE_TEXTURE_PIXELS;
++}
++
++CabViewVehicleTextureProfile ProfileCabViewVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen, uint32_t warm_lookups)
++{
++	Renderer renderer;
++	return renderer.ProfileVehicleTexture(seq, default_pal, crashed, widen, warm_lookups);
++}
++
++CabViewVehicleCacheIdentity ProbeCabViewVehicleCacheIdentity(const VehicleSpriteSeq &first, const VehicleSpriteSeq &variant,
++	PaletteID default_pal, bool crashed, bool first_widen, bool variant_widen)
++{
++	Renderer renderer;
++	return renderer.ProbeVehicleCacheIdentity(first, variant, default_pal, crashed, first_widen, variant_widen);
++}
++
+ /** Benchmark the same drawing path without touching the live cab's frame,
+  * texture caches or adaptive scale. The caller owns the temporary framebuffer.
+  * Cold and measured samples all force a new scene through distinct frame IDs. */
+--- a/src/cab_view_3d.h
++++ b/src/cab_view_3d.h
+@@ -13,12 +13,15 @@
+ #include "core/geometry_type.hpp"
+ #include "tile_type.h"
+ #include "vehicle_type.h"
++#include "gfx_type.h"
+ #include "portal/planet_type.h"
+ #include "cab_view.h"
+ 
+ #include <cstddef>
+ #include <cstdint>
+ #include <vector>
++
++struct VehicleSpriteSeq;
+ 
+ /** Smallest size of the picture of the 3D view compared to the view, when drawing at full size takes too long. */
+ constexpr float CAB_VIEW_3D_MIN_SCALE = 0.5f;
+@@ -69,19 +72,70 @@
+ /** Vector-capacity payload estimates, excluding container/node overhead. */
+ struct CabViewCacheStats {
+ 	size_t raw_sprites = 0;
+-	size_t ground_textures = 0;
++	size_t ground_textures = 0; ///< Legacy count of the shared ground/composite map, including vehicle entries.
++	size_t vehicle_textures = 0; ///< Subset of ground_textures, not an additional cache.
+ 	size_t box_textures = 0;
+ 	size_t building_shapes = 0;
+ 	size_t cache_entries = 0;
+ 	size_t raw_sprite_payload_bytes = 0;
+ 	size_t texture_payload_bytes = 0;
++	size_t vehicle_texture_payload_bytes = 0; ///< Subset of texture_payload_bytes.
+ 	size_t texture_key_payload_bytes = 0;
++	size_t max_vehicle_union_width = 0;
++	size_t max_vehicle_union_height = 0;
++	size_t max_vehicle_union_pixels = 0;
+ 	size_t cache_capacity_payload_bytes = 0;
+ 	size_t frame_capacity_bytes = 0;
+ 	size_t depth_capacity_bytes = 0;
+ 	size_t scratch_capacity_bytes = 0;
+ 	size_t effect_scratch_capacity_bytes = 0;
+ };
++
++/** Premultiplied colour and coverage before mip generation or alpha widening. */
++struct CabViewVehicleProbePixel {
++	float r = 0, g = 0, b = 0, a = 0;
++};
++
++/** Focused inspection of the same vehicle-layer compositor used by the renderer. */
++struct CabViewVehicleCompositeProbe {
++	int left = 0, top = 0, width = 0, height = 0;
++	size_t skipped_destination_layers = 0;
++	size_t skipped_text_layers = 0;
++	bool rejected_oversize = false;
++	std::vector<CabViewVehicleProbePixel> pixels;
++};
++
++/** Offscreen composer probe; does not draw into the live cab or retain its cache. */
++CabViewVehicleCompositeProbe ProbeCabViewVehicleComposite(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed);
++/** One synthetic source pixel through the same layer painter, before FinishTexture. */
++CabViewVehicleProbePixel ProbeCabViewVehiclePixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t m, PaletteID pal,
++	const uint8_t *synthetic_remap = nullptr);
++/** The same finite signed-union guard used before allocating a vehicle picture. */
++bool CabViewVehicleUnionSupported(int64_t left, int64_t top, int64_t right, int64_t bottom);
++
++/** Times one fresh build and aggregate same-key cache lookups in a private renderer. */
++struct CabViewVehicleTextureProfile {
++	uint64_t cold_build_ns = 0;
++	uint64_t warm_lookup_total_ns = 0;
++	uint32_t warm_lookups = 0;
++	size_t cold_level0_pixels = 0;
++	bool warm_texture_stable = false;
++	CabViewCacheStats cache_after_cold;
++	CabViewCacheStats cache;
++	CabViewVehicleCompositeProbe composition;
++};
++CabViewVehicleTextureProfile ProfileCabViewVehicleTexture(const VehicleSpriteSeq &seq, PaletteID default_pal, bool crashed, bool widen, uint32_t warm_lookups);
++
++/** Compare ordered composite keys in one private cache; does not alter live rendering. */
++struct CabViewVehicleCacheIdentity {
++	bool repeated_key_reused = false;
++	bool variant_key_distinct = false;
++	CabViewCacheStats after_first;
++	CabViewCacheStats after_repeat;
++	CabViewCacheStats after_variant;
++};
++CabViewVehicleCacheIdentity ProbeCabViewVehicleCacheIdentity(const VehicleSpriteSeq &first, const VehicleSpriteSeq &variant,
++	PaletteID default_pal, bool crashed, bool first_widen, bool variant_widen);
+ 
+ /** Fixed-camera offscreen baseline from an isolated renderer (not the live cab). */
+ struct CabViewProfileSample {
+--- a/src/tests/test_cab_view.cpp
++++ b/src/tests/test_cab_view.cpp
+@@ -16,6 +16,8 @@
+ #include "../portal/stellar_network.h"
+ #include "../blitter/factory.hpp"
+ #include "../gfx_func.h"
++#include "../spritecache.h"
++#include "../palette_func.h"
+ #include "../gfxinit.h"
+ #include "../base_media_graphics.h"
+ #include "../engine_base.h"
+@@ -46,6 +48,8 @@
+ #include "../window_func.h"
+ #include "../window_gui.h"
+ #include <filesystem>
++#include <fstream>
++#include <cstdlib>
+ 
+ extern EnumIndexArray<std::string, Searchpath, Searchpath::End> _searchpaths;
+ 
+@@ -544,13 +548,260 @@
+ 	_engine_mngr.ResetToDefaultMapping();
+ 	SetupEngines();
+ 	GfxLoadSprites();
++	/* The simple blitter downsamples only its root sprite; its Normal image is
++	 * not the Normal source decoded by the cab. The optimized native blitter
++	 * encodes each zoom variant, so this is a like-for-like draw oracle. */
++	Blitter *blitter = BlitterFactory::SelectBlitter("32bpp-optimized");
++	REQUIRE(blitter != nullptr);
++	GfxClearSpriteCache(); // retain base-file locations, re-encode under the selected blitter
+ 	/* MockEnvironment installs a width-only font whose GetGlyph returns null.
+ 	 * Native DrawString needs the sprite font backed by the loaded base set. */
+ 	for (FontSize fs : EnumRange(FontSize::End)) Layouter::ResetFontCache(fs);
+ 	FontCache::UninitializeFontCaches();
+ 	FontCache::InitializeFontCaches();
+-	Blitter *blitter = BlitterFactory::SelectBlitter("32bpp-simple");
+-	REQUIRE(blitter != nullptr);
++	/* The installed base graphics give the native viewport and the cab's raw
++	 * decoder the same actual source sprites. Compare the ordered compositor
++	 * before mip generation against VehicleSpriteSeq::Draw at Normal zoom. */
++	VehicleSpriteSeq two{};
++	two.count = 2;
++	two.seq[0] = {SPR_ARROW_LEFT, PAL_NONE};
++	two.seq[1] = {SPR_ARROW_RIGHT, PALETTE_TO_RED};
++	VehicleSpriteSeq eight{};
++	eight.count = 8;
++	const std::array<SpriteID, 4> images{SPR_ARROW_LEFT, SPR_ARROW_RIGHT, SPR_BOX_EMPTY, SPR_BOX_CHECKED};
++	for (uint i = 0; i < eight.count; ++i) eight.seq[i] = {images[i % images.size()], i % 2 == 0 ? PAL_NONE : PALETTE_TO_BLUE};
++	const char *sprite_output = std::getenv("OSTTD_CAB_SPRITE_OUTPUT");
++	const std::filesystem::path sprite_dir = sprite_output != nullptr ? std::filesystem::path(sprite_output) : std::filesystem::path();
++	if (sprite_output != nullptr) REQUIRE(std::filesystem::is_directory(sprite_dir));
++	std::vector<std::string> sprite_metrics;
++	auto write_ppm = [&](const std::string &name, const std::vector<Colour> &pixels, int w, int h) {
++		if (sprite_output == nullptr) return;
++		const std::filesystem::path file = sprite_dir / name;
++		REQUIRE_FALSE(std::filesystem::exists(file));
++		std::ofstream out(file, std::ios::binary);
++		REQUIRE(out.good());
++		out << "P6\n" << w << ' ' << h << "\n255\n";
++		for (Colour c : pixels) {
++			const char rgb[3]{static_cast<char>(c.r), static_cast<char>(c.g), static_cast<char>(c.b)};
++			out.write(rgb, 3);
++		}
++		REQUIRE(out.good());
++	};
++	auto verify_layers = [&](const VehicleSpriteSeq &seq, std::string_view label, PaletteID default_pal, bool force_pal) {
++		const auto probe = ProbeCabViewVehicleComposite(seq, default_pal, force_pal);
++		REQUIRE(probe.width > 0);
++		REQUIRE(probe.height > 0);
++		REQUIRE(probe.pixels.size() == static_cast<size_t>(probe.width) * probe.height);
++		constexpr int w = 256, h = 192, anchor_x = 128, anchor_y = 96;
++		REQUIRE(anchor_x + probe.left >= 0);
++		REQUIRE(anchor_y + probe.top >= 0);
++		REQUIRE(anchor_x + probe.left + probe.width <= w);
++		REQUIRE(anchor_y + probe.top + probe.height <= h);
++		auto native = [&](Colour background) {
++			std::vector<Colour> pixels(static_cast<size_t>(w) * h, background);
++			DrawPixelInfo dpi{pixels.data(), 0, 0, w, h, w, ZoomLevel::Normal};
++			{
++				AutoRestoreBackup screen_backup(_screen, dpi);
++				AutoRestoreBackup dpi_backup(_cur_dpi, &dpi);
++				AutoRestoreBackup anim_backup(_screen_disable_anim, true);
++				AutoRestoreBackup zoom_backup(_gui_zoom, ZoomLevel::Normal);
++				seq.Draw(anchor_x, anchor_y, default_pal, force_pal);
++			}
++			return pixels;
++		};
++		const auto black = native(Colour(0, 0, 0));
++		const auto white = native(Colour(255, 255, 255));
++		std::vector<Colour> composition(static_cast<size_t>(w) * h, Colour(0, 0, 0));
++		std::vector<Colour> expected_white(static_cast<size_t>(w) * h, Colour(255, 255, 255));
++		int max_error = 0;
++		uint covered_pixels = 0;
++		for (int y = 0; y < probe.height; ++y) for (int x = 0; x < probe.width; ++x) {
++			const auto &p = probe.pixels[static_cast<size_t>(y) * probe.width + x];
++			const size_t dst = static_cast<size_t>(anchor_y + probe.top + y) * w + anchor_x + probe.left + x;
++			auto channel = [&](float value) { return static_cast<int>(std::lround(std::clamp(value, 0.0f, 255.0f))); };
++			composition[dst] = Colour(channel(p.r), channel(p.g), channel(p.b));
++			expected_white[dst] = Colour(channel(p.r + (1 - p.a) * 255), channel(p.g + (1 - p.a) * 255), channel(p.b + (1 - p.a) * 255));
++			if (p.a > 0) ++covered_pixels;
++		}
++		for (size_t i = 0; i < black.size(); ++i) {
++			const std::array<int, 3> actual_black{black[i].r, black[i].g, black[i].b};
++			const std::array<int, 3> actual_white{white[i].r, white[i].g, white[i].b};
++			const std::array<int, 3> expect_black{composition[i].r, composition[i].g, composition[i].b};
++			const std::array<int, 3> expect_white{expected_white[i].r, expected_white[i].g, expected_white[i].b};
++			for (int k = 0; k < 3; ++k) max_error = std::max({max_error, std::abs(actual_black[k] - expect_black[k]), std::abs(actual_white[k] - expect_white[k])});
++		}
++		INFO(label << " native oracle maximum channel error " << max_error);
++		CHECK(covered_pixels > 0);
++		CHECK(max_error <= 1);
++		const std::string stem(label);
++		write_ppm(stem + "-native-black.ppm", black, w, h);
++		write_ppm(stem + "-native-white.ppm", white, w, h);
++		write_ppm(stem + "-cab-composite.ppm", composition, w, h);
++		const auto timed = ProfileCabViewVehicleTexture(seq, default_pal, force_pal, true, 100);
++		CHECK(timed.warm_lookups == 100);
++		CHECK(timed.warm_texture_stable);
++		CHECK(timed.cache.vehicle_textures == 1);
++		CHECK(timed.cache.vehicle_texture_payload_bytes > 0);
++		CHECK(timed.cache.vehicle_texture_payload_bytes <= timed.cache.texture_payload_bytes);
++		CHECK(timed.cache_after_cold.vehicle_textures == timed.cache.vehicle_textures);
++		CHECK(timed.cache_after_cold.vehicle_texture_payload_bytes == timed.cache.vehicle_texture_payload_bytes);
++		std::string entries;
++		for (uint i = 0; i < seq.count; ++i) {
++			const PaletteID effective = force_pal || seq.seq[i].pal == 0 ? default_pal : seq.seq[i].pal;
++			entries += fmt::format("{}{{\"sprite_id\":{},\"palette_id\":{},\"effective_palette_id\":{}}}",
++				i == 0 ? "" : ",", seq.seq[i].sprite, seq.seq[i].pal, effective);
++		}
++		sprite_metrics.push_back(fmt::format("{{\"case\":\"{}\",\"layers\":{},\"entries\":[{}],\"zoom\":\"normal\",\"max_channel_error\":{},\"cold_build_ns\":{},\"warm_lookup_total_ns\":{},\"warm_lookups\":{},\"vehicle_payload_bytes\":{}}}",
++			label, seq.count, entries, max_error, timed.cold_build_ns, timed.warm_lookup_total_ns, timed.warm_lookups, timed.cache.vehicle_texture_payload_bytes));
++	};
++	verify_layers(two, "two", PAL_NONE, false);
++	verify_layers(eight, "eight", PAL_NONE, false);
++	/* Find a recolourable sprite among the installed original train images;
++	 * UI arrows alone need not contain any company-colour pixels. */
++	SpriteID recolourable_train = 0;
++	auto visibly_different = [&](const CabViewVehicleCompositeProbe &a, const CabViewVehicleCompositeProbe &b) {
++		if (a.width != b.width || a.height != b.height || a.left != b.left || a.top != b.top) return true;
++		for (size_t i = 0; i < a.pixels.size(); ++i) {
++			if (std::abs(a.pixels[i].r - b.pixels[i].r) > 0.5f || std::abs(a.pixels[i].g - b.pixels[i].g) > 0.5f ||
++				std::abs(a.pixels[i].b - b.pixels[i].b) > 0.5f) return true;
++		}
++		return false;
++	};
++	for (SpriteID id : {0x0B59U, 0x0B61U, 0x0B69U, 0x0BE1U, 0x0B71U}) {
++		VehicleSpriteSeq one{};
++		one.Set(id);
++		if (visibly_different(ProbeCabViewVehicleComposite(one, PAL_NONE, false),
++			ProbeCabViewVehicleComposite(one, PALETTE_TO_BLUE, false))) { recolourable_train = id; break; }
++	}
++	REQUIRE(recolourable_train != 0);
++	VehicleSpriteSeq mixed_palette{};
++	mixed_palette.count = 2;
++	mixed_palette.seq[0] = {SPR_ARROW_LEFT, PALETTE_TO_RED}; // independent layer override
++	mixed_palette.seq[1] = {recolourable_train, PAL_NONE}; // nonzero default must be used
++	CHECK(visibly_different(ProbeCabViewVehicleComposite(mixed_palette, PAL_NONE, false),
++		ProbeCabViewVehicleComposite(mixed_palette, PALETTE_TO_BLUE, false)));
++	verify_layers(mixed_palette, "mixed-fallback", PALETTE_TO_BLUE, false);
++	VehicleSpriteSeq red_over_blue{};
++	red_over_blue.count = 2;
++	red_over_blue.seq[0] = {recolourable_train, PALETTE_TO_BLUE};
++	red_over_blue.seq[1] = {recolourable_train, PALETTE_TO_RED};
++	VehicleSpriteSeq blue_over_red = red_over_blue;
++	std::swap(blue_over_red.seq[0], blue_over_red.seq[1]);
++	CHECK(visibly_different(ProbeCabViewVehicleComposite(red_over_blue, PAL_NONE, false),
++		ProbeCabViewVehicleComposite(blue_over_red, PAL_NONE, false)));
++	verify_layers(red_over_blue, "red-over-blue", PAL_NONE, false);
++	verify_layers(blue_over_red, "blue-over-red", PAL_NONE, false);
++	verify_layers(two, "crash", PALETTE_CRASH, true);
++	verify_layers(two, "black", PALETTE_ALL_BLACK, true);
++	VehicleSpriteSeq reversed = two;
++	std::swap(reversed.seq[0], reversed.seq[1]);
++	const auto ordered_key = ProbeCabViewVehicleCacheIdentity(two, reversed, PAL_NONE, false, true, true);
++	CHECK(ordered_key.repeated_key_reused);
++	CHECK(ordered_key.variant_key_distinct);
++	CHECK(ordered_key.after_first.vehicle_textures == 1);
++	CHECK(ordered_key.after_repeat.vehicle_textures == 1);
++	CHECK(ordered_key.after_repeat.vehicle_texture_payload_bytes == ordered_key.after_first.vehicle_texture_payload_bytes);
++	CHECK(ordered_key.after_variant.vehicle_textures == 2);
++	const auto widened_key = ProbeCabViewVehicleCacheIdentity(two, two, PAL_NONE, false, true, false);
++	CHECK(widened_key.variant_key_distinct);
++	CHECK(widened_key.after_variant.vehicle_textures == 2);
++	VehicleSpriteSeq recoloured = two;
++	recoloured.seq[1].pal = PALETTE_TO_BLUE;
++	const auto palette_key = ProbeCabViewVehicleCacheIdentity(two, recoloured, PAL_NONE, false, true, true);
++	CHECK(palette_key.variant_key_distinct);
++	CHECK(palette_key.after_variant.vehicle_textures == 2);
++	CHECK(CabViewVehicleUnionSupported(-256, -128, 0, 128));
++	CHECK_FALSE(CabViewVehicleUnionSupported(-257, -128, 256, 128));
++	CHECK_FALSE(CabViewVehicleUnionSupported(0, 0, 257, 256));
++	CHECK_FALSE(CabViewVehicleUnionSupported(INT64_MIN, 0, INT64_MAX, 1));
++	CHECK_FALSE(CabViewVehicleUnionSupported(0, 0, 0, 1));
++	VehicleSpriteSeq unsupported = two;
++	unsupported.seq[1].sprite |= 1U << PALETTE_MODIFIER_TRANSPARENT;
++	const auto partly_supported = ProbeCabViewVehicleComposite(unsupported, PAL_NONE, false);
++	CHECK(partly_supported.skipped_destination_layers == 1);
++	CHECK(partly_supported.width > 0);
++	unsupported.seq[0].sprite |= 1U << PALETTE_MODIFIER_TRANSPARENT;
++	const auto all_unsupported = ProbeCabViewVehicleComposite(unsupported, PAL_NONE, false);
++	CHECK(all_unsupported.skipped_destination_layers == 2);
++	CHECK(all_unsupported.pixels.empty());
++	unsupported.count = 9;
++	CHECK(ProbeCabViewVehicleComposite(unsupported, PAL_NONE, false).rejected_oversize);
++	const auto source = ProbeCabViewVehiclePixel(91, 73, 42, 128, 0, PAL_NONE);
++	CHECK(source.a == Approx(128.0f / 255.0f));
++	CHECK(source.r == Approx(91.0f * 128.0f / 255.0f));
++	const auto black_pixel = ProbeCabViewVehiclePixel(91, 73, 42, 128, 0, PALETTE_ALL_BLACK);
++	CHECK(black_pixel.a == 1.0f);
++	CHECK(black_pixel.r == 0.0f);
++	const auto crash_pixel = ProbeCabViewVehiclePixel(91, 73, 42, 128, 0, PALETTE_CRASH);
++	CHECK(crash_pixel.r == crash_pixel.g);
++	CHECK(crash_pixel.g == crash_pixel.b);
++	CHECK(crash_pixel.r < source.r);
++	CHECK(crash_pixel.a == source.a);
++	const auto clear_pixel = ProbeCabViewVehiclePixel(91, 73, 42, 0, 0, PALETTE_ALL_BLACK);
++	CHECK(clear_pixel.a == 0.0f);
++	uint8_t palette_index = 0;
++	for (int i = 1; i < 256; ++i) {
++		const Colour c = _cur_palette.palette[i];
++		if (c.r > 100 && c.g > 10 && c.b > 10) { palette_index = static_cast<uint8_t>(i); break; }
++	}
++	REQUIRE(palette_index != 0);
++	const auto indexed_pixel = ProbeCabViewVehiclePixel(0, 0, 0, 255, palette_index, PAL_NONE);
++	CHECK(indexed_pixel.a == 1.0f);
++	const Colour indexed_expected = AdjustBrightness(_cur_palette.palette[palette_index], GetColourBrightness(Colour(0, 0, 0)));
++	CHECK(indexed_pixel.r == Approx(indexed_expected.r)); // indexed source without explicit recolour still uses palette brightness
++	CHECK(indexed_pixel.g == Approx(indexed_expected.g));
++	CHECK(indexed_pixel.b == Approx(indexed_expected.b));
++	auto indexed_brightness = [&](uint8_t brightness) {
++		const auto actual = ProbeCabViewVehiclePixel(brightness, brightness / 2, brightness / 4, 128, palette_index, PAL_NONE);
++		const Colour expected = AdjustBrightness(_cur_palette.palette[palette_index], brightness);
++		CHECK(actual.a == Approx(128.0f / 255.0f));
++		CHECK(actual.r == Approx(expected.r * actual.a));
++		CHECK(actual.g == Approx(expected.g * actual.a));
++		CHECK(actual.b == Approx(expected.b * actual.a));
++		return actual;
++	};
++	const auto indexed_dim = indexed_brightness(64);
++	const auto indexed_bright = indexed_brightness(200);
++	CHECK((indexed_dim.r != indexed_bright.r || indexed_dim.g != indexed_bright.g || indexed_dim.b != indexed_bright.b));
++	const uint8_t *red_remap = GetNonSprite(PALETTE_TO_RED, SpriteType::Recolour) + 1;
++	uint8_t nonzero_mapped = 0;
++	for (int i = 1; i < 256; ++i) {
++		if (red_remap[i] != 0 && red_remap[i] != i && nonzero_mapped == 0) nonzero_mapped = static_cast<uint8_t>(i);
++	}
++	REQUIRE(nonzero_mapped != 0);
++	const auto remapped_pixel = ProbeCabViewVehiclePixel(0, 0, 0, 255, nonzero_mapped, PALETTE_TO_RED);
++	CHECK(remapped_pixel.a == 1.0f);
++	const Colour remapped_expected = AdjustBrightness(_cur_palette.palette[red_remap[nonzero_mapped]], GetColourBrightness(Colour(0, 0, 0)));
++	CHECK(remapped_pixel.r == Approx(remapped_expected.r));
++	CHECK(remapped_pixel.g == Approx(remapped_expected.g));
++	CHECK(remapped_pixel.b == Approx(remapped_expected.b));
++	auto remapped_brightness = [&](uint8_t brightness) {
++		const auto actual = ProbeCabViewVehiclePixel(brightness, brightness / 2, brightness / 4, 128, nonzero_mapped, PALETTE_TO_RED);
++		const Colour expected = AdjustBrightness(_cur_palette.palette[red_remap[nonzero_mapped]], brightness);
++		CHECK(actual.a == Approx(128.0f / 255.0f));
++		CHECK(actual.r == Approx(expected.r * actual.a));
++		CHECK(actual.g == Approx(expected.g * actual.a));
++		CHECK(actual.b == Approx(expected.b * actual.a));
++		return actual;
++	};
++	const auto remapped_dim = remapped_brightness(64);
++	const auto remapped_bright = remapped_brightness(200);
++	CHECK((remapped_dim.r != remapped_bright.r || remapped_dim.g != remapped_bright.g || remapped_dim.b != remapped_bright.b));
++	std::array<uint8_t, 256> zero_remap{};
++	zero_remap[nonzero_mapped] = 0;
++	CHECK(ProbeCabViewVehiclePixel(0, 0, 0, 255, nonzero_mapped, PALETTE_TO_RED, zero_remap.data()).a == 0.0f);
++	if (sprite_output != nullptr) {
++		const std::filesystem::path file = sprite_dir / "sprite-proof.json";
++		REQUIRE_FALSE(std::filesystem::exists(file));
++		std::ofstream out(file);
++		REQUIRE(out.good());
++		out << "{\"base_graphics\":\"" << BaseGraphics::GetUsedSet()->name << "\",\"blitter\":\"" << blitter->GetName()
++			<< "\",\"palette_source\":\"_cur_palette\",\"max_channel_error_allowed\":1,\"order_positive_control\":true,\"cases\":[";
++		for (size_t i = 0; i < sprite_metrics.size(); ++i) out << (i == 0 ? "" : ",") << sprite_metrics[i];
++		out << "]}\n";
++		REQUIRE(out.good());
++	}
++
+ 	/* The shared opaque transit path must never touch the pixels around a
+ 	 * resized cab rectangle. Off is time-invariant; Reduced has no motion. */
+ 	auto transit = [&](const Rect &rect, CabViewEffectMode mode, uint32_t elapsed) {
+--- a/src/tests/test_cab_view_gate_native.cpp
++++ b/src/tests/test_cab_view_gate_native.cpp
+@@ -21,12 +21,15 @@
+ #include "../openttd.h"
+ #include "../order_base.h"
+ #include "../order_cmd.h"
++#include "../palette_func.h"
+ #include "../portal/planet_manager.h"
+ #include "../portal/portal_registry.h"
+ #include "../portal/stellar_network.h"
+ #include "../saveload/saveload_func.h"
+ #include "../screenshot.h"
+ #include "../string_func.h"
++#include "../table/sprites.h"
++#include "../table/palettes.h"
+ #include "../safeguards.h"
+ #include "../timer/timer_game_calendar.h"
+ #include "../timer/timer_game_tick.h"
+@@ -35,6 +38,7 @@
+ #include "../tunnel_map.h"
+ #include "../tunnelbridge_map.h"
+ #include "../vehicle_cmd.h"
++#include "../vehicle_func.h"
+ #include "../vehicle_gui.h"
+ #include "../video/video_driver.hpp"
+ #include "../viewport_func.h"
+@@ -79,11 +83,45 @@
+ Json CacheStatsJson(const CabViewCacheStats &s)
+ {
+ 	return {{"raw_sprites", s.raw_sprites}, {"ground_textures", s.ground_textures},
+-		{"box_textures", s.box_textures}, {"building_shapes", s.building_shapes}, {"cache_entries", s.cache_entries},
++		{"vehicle_textures", s.vehicle_textures}, {"box_textures", s.box_textures},
++		{"building_shapes", s.building_shapes}, {"cache_entries", s.cache_entries},
+ 		{"raw_sprite_payload_bytes", s.raw_sprite_payload_bytes}, {"texture_payload_bytes", s.texture_payload_bytes},
++		{"vehicle_texture_payload_bytes", s.vehicle_texture_payload_bytes},
+ 		{"texture_key_payload_bytes", s.texture_key_payload_bytes}, {"cache_capacity_payload_bytes", s.cache_capacity_payload_bytes},
++		{"max_vehicle_union_width", s.max_vehicle_union_width}, {"max_vehicle_union_height", s.max_vehicle_union_height},
++		{"max_vehicle_union_pixels", s.max_vehicle_union_pixels},
+ 		{"frame_capacity_bytes", s.frame_capacity_bytes}, {"depth_capacity_bytes", s.depth_capacity_bytes},
+ 		{"scratch_capacity_bytes", s.scratch_capacity_bytes}, {"effect_scratch_capacity_bytes", s.effect_scratch_capacity_bytes}};
++}
++
++/** Save an offscreen diagnostic render without changing the SDL framebuffer. */
++bool WriteVehicleProfileImage(const fs::path &path, const std::vector<Colour> &pixels, int width, int height)
++{
++	std::ofstream image(path, std::ios::binary | std::ios::trunc);
++	if (!image) return false;
++	image << "P6\n" << width << ' ' << height << "\n255\n";
++	for (const Colour &pixel : pixels) {
++		const char rgb[3] = {static_cast<char>(pixel.r), static_cast<char>(pixel.g), static_cast<char>(pixel.b)};
++		image.write(rgb, sizeof(rgb));
++	}
++	return image.good();
++}
++
++Json PaletteRGBA(const Palette &palette)
++{
++	Json colours = Json::array();
++	for (const Colour &c : palette.palette) colours.push_back({c.r, c.g, c.b, c.a});
++	return colours;
++}
++
++bool SamePalette(const Palette &a, const Palette &b)
++{
++	if (a.first_dirty != b.first_dirty || a.count_dirty != b.count_dirty) return false;
++	for (size_t i = 0; i < std::size(a.palette); ++i) {
++		const Colour &x = a.palette[i], &y = b.palette[i];
++		if (x.r != y.r || x.g != y.g || x.b != y.b || x.a != y.a) return false;
++	}
++	return true;
+ }
+ 
+ Json OrderState(const Order &o)
+@@ -169,12 +207,12 @@
+ 	WorldID source = INVALID_WORLD, destination = INVALID_WORLD;
+ 	Json manifest = {{"passed", false}, {"events", Json::array()}, {"screenshots", Json::array()}};
+ 	Json paused_baseline;
+-	std::string pending_shot, pending_profile, pending_effect_label, failure;
++	std::string pending_shot, pending_profile, pending_vehicle_profile, pending_effect_label, failure;
+ 	unsigned effect_capture_step = 0;
+ 	unsigned callbacks = 0, total_calls = 0, pass_calls = 0;
+ 	unsigned pass = 0;
+ 	bool pass_started[2]{};
+-	bool cold = false, started = false, finished = false, profile = false;
++	bool cold = false, started = false, finished = false, profile = false, vehicle_profile = false;
+ 	unsigned profile_rotation = 0;
+ 	bool approach[2]{}, near_approach[2]{}, hidden[2]{}, arrived[2]{}, mixed[2]{};
+ 	bool cab_opened = false, grew_consist = false, cold_equal = false;
+@@ -232,6 +270,16 @@
+ 		fs::copy_file(source_path, target, fs::copy_options::overwrite_existing, error);
+ 		if (error || fs::file_size(target) == 0) { this->Fail("native screenshot copy failed"); return false; }
+ 		this->manifest["screenshots"].push_back(target.filename().string());
++		const Train *front = this->Front();
++		if (this->Cab() != nullptr && front != nullptr &&
++			ResolveCabViewPresentation(front, front->owner).phase == CabViewPhase::Scene) {
++			/* A GUI-scale clue for the last painted cab frame, not an assertion
++			 * that this was the framebuffer's exact screenshot render. */
++			this->manifest["capture_frame_stats"][this->pending_shot] = FrameStatsJson(GetLastCabViewFrameStats());
++		} else {
++			/* Opaque transit has no scene frame; after close there is no cab. */
++			this->manifest["capture_frame_stats"][this->pending_shot] = nullptr;
++		}
+ 		this->pending_shot.clear();
+ 		return true;
+ 	}
+@@ -352,14 +400,21 @@
+ 					{"pose", {{"x", state.x}, {"y", state.y}, {"z", state.z},
+ 						{"tile", state.tile.base()}, {"moving", static_cast<int>(state.moving)},
+ 						{"camera_yaw", camera.yaw}}}, {"samples", Json::array()}};
++				const Palette incoming_palette = _cur_palette;
++				cell["palette_scope"] = this->vehicle_profile ? "canonical_static_private" : "actual_current";
++				cell["incoming_palette_rgba"] = PaletteRGBA(incoming_palette);
++				cell["palette_rgba"] = PaletteRGBA(this->vehicle_profile ? _palette : incoming_palette);
++				cell["incoming_palette_dirty"] = {{"first", incoming_palette.first_dirty}, {"count", incoming_palette.count_dirty}};
+ 				/* The private framebuffer and blitter state are restored before
+ 				 * checking the frozen simulation snapshot. Scene samples use a
+ 				 * separate renderer, with its own initially full-size scale/cache. */
+ 				{
++					AutoRestoreBackup palette_backup(_cur_palette, this->vehicle_profile ? _palette : incoming_palette);
+ 					AutoRestoreBackup screen_backup(_screen, dpi);
+ 					AutoRestoreBackup dpi_backup(_cur_dpi, &dpi);
+ 					AutoRestoreBackup anim_backup(_screen_disable_anim, true);
+ 					if (transit) {
++						cell["diagnostic_image"] = nullptr;
+ 						auto draw = [&]() -> Json {
+ 							auto external_start = Clock::now();
+ 							const CabViewTransitStats stats = DrawCabViewTransit(rect, mode, elapsed_ms);
+@@ -387,8 +442,19 @@
+ 							}
+ 							cell["samples"].push_back(ProfileSampleJson(sample));
+ 						}
++						if (mode == CabViewEffectMode::Off) {
++							const std::string filename = fmt::format("scene_{}_{}_{}x{}_off.ppm", this->cold ? "cold" : "roundtrip", label, width, height);
++							if (!WriteVehicleProfileImage(this->output / filename, pixels, width, height)) {
++								this->Fail("fixed-scale scene diagnostic image could not be written"); return false;
++							}
++							cell["diagnostic_image"] = filename;
++						} else {
++							cell["diagnostic_image"] = nullptr;
++						}
+ 					}
+ 				}
++				if (!SamePalette(_cur_palette, incoming_palette)) { this->Fail("private scene profile did not restore full palette"); return false; }
++				cell["palette_state_restored"] = true;
+ 				if (FrozenState(front) != frozen || !this->Pure()) {
+ 					if (this->failure.empty()) this->Fail("profiling changed frozen game state");
+ 					return false;
+@@ -396,6 +462,142 @@
+ 				cell["frozen_state_unchanged"] = true;
+ 				this->manifest["profiles"].push_back(std::move(cell));
+ 			}
++		}
++		return true;
++	}
++	/** Measure the existing single-layer vehicle path beside a naturally arrived car.
++	 * This diagnostic camera includes that car; it never changes the live cab. */
++	bool ProfileVisibleVehicle(std::string_view label)
++	{
++		Train *front = this->Front();
++		const WorldID target = this->pass == 0 ? this->destination : this->source;
++		if (front == nullptr || this->Cab() == nullptr || !_pause_mode.Test(PauseMode::Normal) ||
++			ResolveCabViewPresentation(front, front->owner).phase != CabViewPhase::Scene) {
++			this->Fail("vehicle profiling lost paused arrival scene"); return false;
++		}
++		Train *visible = nullptr;
++		for (Train *car = front; car != nullptr; car = car->Next()) {
++			if (CabViewVehicleVisible(car, target)) { visible = car; break; }
++		}
++		if (visible == nullptr) { this->Fail("vehicle profiling has no visible arrived car"); return false; }
++		const Json frozen = FrozenState(front);
++		CabViewCamera camera;
++		camera.x = static_cast<float>(visible->x_pos);
++		camera.y = static_cast<float>(visible->y_pos) + 2.5f * TILE_SIZE;
++		camera.z = static_cast<float>(visible->z_pos) + 7.0f;
++		camera.yaw = -static_cast<float>(M_PI) / 2;
++		camera.world = target;
++		camera.vehicle = VehicleID::Invalid(); // Include the selected car in the diagnostic scene.
++		static constexpr std::array<CabViewEffectMode, 3> modes = {CabViewEffectMode::Off, CabViewEffectMode::Reduced, CabViewEffectMode::Full};
++		Json cells = Json::array();
++		for (const auto &[width, height] : {std::pair{480, 272}, std::pair{640, 372}}) {
++			const Rect rect{0, 0, width - 1, height - 1};
++			for (unsigned order = 0; order < modes.size(); ++order) {
++				const CabViewEffectMode mode = modes[(order + this->profile_rotation) % modes.size()];
++				const char *mode_name = mode == CabViewEffectMode::Off ? "off" : mode == CabViewEffectMode::Reduced ? "reduced" : "full";
++				camera.effect_mode = mode;
++				camera.scene_effect = CabViewSceneEffect::None;
++				camera.effect_elapsed_ms = 0;
++				std::vector<Colour> pixels(static_cast<size_t>(width) * height);
++				DrawPixelInfo dpi{pixels.data(), 0, 0, width, height, width, ZoomLevel::Min};
++				Json cell = {{"capture_label", label}, {"phase", "scene"}, {"mode", mode_name},
++					{"mode_rotation", this->profile_rotation}, {"effect_elapsed_ms", 0},
++					{"view_width", width}, {"view_height", height}, {"warmup_count", 20}, {"sample_count", 100},
++					{"selected_world", target.base()}, {"visible_car_id", visible->index.base()},
++					{"pose", {{"x", camera.x}, {"y", camera.y}, {"z", camera.z}, {"camera_yaw", camera.yaw},
++						{"tile", visible->tile.base()}, {"direction", static_cast<int>(visible->direction)}}},
++					{"diagnostic_camera", {{"x", camera.x}, {"y", camera.y}, {"z", camera.z},
++						{"yaw", camera.yaw}, {"world", target.base()}, {"own_exclusion", nullptr},
++						{"offset_from_visible_car", {0.0f, 2.5f * TILE_SIZE, 7.0f}}}},
++					{"observed_train_pose", {{"front_x", front->x_pos}, {"front_y", front->y_pos},
++						{"front_z", front->z_pos}, {"visible_x", visible->x_pos}, {"visible_y", visible->y_pos},
++						{"visible_z", visible->z_pos}, {"visible_direction", static_cast<int>(visible->direction)}}},
++					{"frozen_snapshot", frozen}, {"samples", Json::array()}};
++				const Palette incoming_palette = _cur_palette;
++				cell["palette_scope"] = "canonical_static_private";
++				cell["incoming_palette_rgba"] = PaletteRGBA(incoming_palette);
++				cell["palette_rgba"] = PaletteRGBA(_palette);
++				cell["incoming_palette_dirty"] = {{"first", incoming_palette.first_dirty}, {"count", incoming_palette.count_dirty}};
++				{
++					AutoRestoreBackup palette_backup(_cur_palette, _palette);
++					AutoRestoreBackup screen_backup(_screen, dpi);
++					AutoRestoreBackup dpi_backup(_cur_dpi, &dpi);
++					AutoRestoreBackup anim_backup(_screen_disable_anim, true);
++					CabViewProfileBatch batch = ProfileCabView3D(rect, camera, 20, 100);
++					cell["cold_sample"] = ProfileSampleJson(batch.cold);
++					cell["cached_sample"] = ProfileSampleJson(batch.cached);
++					cell["cache"] = CacheStatsJson(batch.cache);
++					if (!batch.cached.frame.cache_hit || batch.cached.frame.rendered ||
++						batch.cached.frame.prepare_us != 0 || batch.cached.frame.raster_us != 0 || batch.cached.frame.effect_us != 0) {
++						this->Fail("vehicle profile did not reuse the final scene frame"); return false;
++					}
++					for (const CabViewProfileSample &sample : batch.samples) {
++						const CabViewFrameStats &s = sample.frame;
++						if (!s.rendered || s.cache_hit || s.internal_width != width || s.internal_height != height || s.scale != 1.0f) {
++							this->Fail("vehicle profile did not render a new full-size scene frame"); return false;
++						}
++						cell["samples"].push_back(ProfileSampleJson(sample));
++					}
++					const std::vector<Colour> included = pixels;
++					if (mode == CabViewEffectMode::Off) {
++						const std::string filename = fmt::format("vehicle_{}_{}_{}x{}_off.ppm", this->cold ? "cold" : "roundtrip", label, width, height);
++						if (!WriteVehicleProfileImage(this->output / filename, included, width, height)) {
++							this->Fail("vehicle diagnostic image could not be written"); return false;
++						}
++						cell["diagnostic_image"] = filename;
++					} else {
++						cell["diagnostic_image"] = nullptr;
++					}
++					camera.vehicle = visible->index;
++					(void)ProfileCabView3D(rect, camera, 0, 1); // Positive control: omit this one visible car.
++					camera.vehicle = VehicleID::Invalid();
++					size_t changed = 0;
++					for (size_t i = 0; i < pixels.size(); ++i) changed += pixels[i] != included[i];
++					if (changed == 0) { this->Fail("vehicle profile cannot see its selected car"); return false; }
++					cell["visible_pixel_control"] = {{"omitted_car_id", visible->index.base()}, {"different_pixels", changed}};
++				}
++				if (!SamePalette(_cur_palette, incoming_palette)) { this->Fail("vehicle profile did not restore full palette"); return false; }
++				cell["palette_state_restored"] = true;
++				if (FrozenState(front) != frozen || !this->Pure()) {
++					if (this->failure.empty()) this->Fail("vehicle profiling changed frozen game state");
++					return false;
++				}
++				cell["frozen_state_unchanged"] = true;
++				cells.push_back(std::move(cell));
++			}
++		}
++		/* Query only visible cars, and only after the cold image timings. A masked
++		 * car's NewGRF GetImage callback must not run for this evidence. */
++		Json sequences = Json::array();
++		for (const Train *car = front; car != nullptr; car = car->Next()) {
++			if (!CabViewVehicleVisible(car, target)) continue;
++			VehicleSpriteSeq seq;
++			car->GetImage(Direction::SW, EngineImageType::OnMap, &seq);
++			if (seq.count > seq.seq.size()) { this->Fail("vehicle sprite sequence exceeds native capacity"); return false; }
++			PaletteID default_pal = PAL_NONE;
++			if (car->vehstatus.Test(VehState::DefaultPalette)) {
++				default_pal = car->vehstatus.Test(VehState::Crashed) ? PALETTE_CRASH : GetVehiclePalette(car);
++			}
++			Json layers = Json::array();
++			for (uint i = 0; i < seq.count; ++i) {
++				const PaletteID effective = (seq.seq[i].pal == 0 || car->vehstatus.Test(VehState::Crashed)) ? default_pal : seq.seq[i].pal;
++				layers.push_back({{"sprite", seq.seq[i].sprite}, {"base_sprite", seq.seq[i].sprite & SPRITE_MASK},
++					{"palette_override", seq.seq[i].pal}, {"effective_palette", effective}});
++			}
++			sequences.push_back({{"id", car->index.base()}, {"type", "train"}, {"engine", car->engine_type.base()},
++				{"tile", car->tile.base()}, {"world", PlanetManager::GetTileWorld(car->tile).base()},
++				{"direction", static_cast<int>(car->direction)}, {"sprite_direction", static_cast<int>(Direction::SW)},
++				{"image_type", "on_map"}, {"default_palette_enabled", car->vehstatus.Test(VehState::DefaultPalette)},
++				{"crashed", car->vehstatus.Test(VehState::Crashed)}, {"default_palette", default_pal},
++				{"raw_sequence_count", seq.count}, {"layers", std::move(layers)}});
++		}
++		if (FrozenState(front) != frozen || !this->Pure()) {
++			if (this->failure.empty()) this->Fail("vehicle sequence lookup changed frozen game state");
++			return false;
++		}
++		for (Json &cell : cells) {
++			cell["vehicle_sequence"] = sequences;
++			this->manifest["vehicle_profiles"].push_back(std::move(cell));
+ 		}
+ 		return true;
+ 	}
+@@ -589,7 +791,9 @@
+ 			const std::string_view name = this->pass == 0 ?
+ 				(new_arrival && new_mixed ? "out_arrival_mixed" : new_arrival ? "out_arrival" : "out_mixed") :
+ 				(new_arrival && new_mixed ? "back_arrival_mixed" : new_arrival ? "back_arrival" : "back_mixed");
+-			this->PauseAndCapture(name);
++			if (this->PauseAndCapture(name) && new_mixed && this->vehicle_profile) {
++				this->pending_vehicle_profile = this->pass == 0 ? "out_vehicle_arrival" : "back_vehicle_arrival";
++			}
+ 			return;
+ 		}
+ 		if (!this->approach[this->pass] || !this->hidden[this->pass] || !this->arrived[this->pass] || !this->mixed[this->pass]) return;
+@@ -618,6 +822,10 @@
+ 		if (!this->pending_profile.empty()) {
+ 			const std::string label = std::exchange(this->pending_profile, {});
+ 			if (!this->ProfilePaused(label)) return;
++		}
++		if (!this->pending_vehicle_profile.empty()) {
++			const std::string label = std::exchange(this->pending_vehicle_profile, {});
++			if (!this->ProfileVisibleVehicle(label)) return;
+ 		}
+ 		if (this->phase == Phase::Start) {
+ 			if (_game_mode != GameMode::Normal || _switch_mode != SwitchMode::None) { this->Schedule(); return; }
+@@ -773,14 +981,19 @@
+ 	proof.manifest["mixed_world_mask"] = Json::array();
+ 	proof.manifest["mixed_render_proof"] = Json::array();
+ 	proof.manifest["effect_captures"] = Json::array();
++	proof.manifest["capture_frame_stats"] = Json::object();
+ 	const char *profile = std::getenv("OSTTD_CAB_PROFILE");
+ 	proof.profile = profile != nullptr && std::string_view(profile) == "1";
++	const char *vehicle_profile = std::getenv("OSTTD_CAB_VEHICLE_PROFILE");
++	proof.vehicle_profile = vehicle_profile != nullptr && std::string_view(vehicle_profile) == "1";
++	REQUIRE((!proof.vehicle_profile || proof.profile));
+ 	if (proof.profile) {
+ 		proof.manifest["profiles"] = Json::array();
+ 		const char *rotation = std::getenv("OSTTD_CAB_PROFILE_ROTATION");
+ 		if (rotation != nullptr && std::string_view(rotation).size() == 1 && rotation[0] >= '0' && rotation[0] <= '2') proof.profile_rotation = rotation[0] - '0';
+ 		proof.manifest["mode_rotation"] = proof.profile_rotation;
+ 	}
++	if (proof.vehicle_profile) proof.manifest["vehicle_profiles"] = Json::array();
+ 	active_gate_proof = &proof;
+ 	IConsole::CmdRegister("cab_gate_native_start", StartGateProof);
+ 	std::array<std::string, 14> arguments = {binary, "-v", "sdl", "-b", "32bpp-anim", "-s", "null", "-m", "null", "-r", "1280x800", "-x", "-c", config};
+--- a/scripts/test_cab_view_gate_native.py
++++ b/scripts/test_cab_view_gate_native.py
+@@ -29,18 +29,22 @@
+     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+ 
+ 
+-def validate_profiles(manifest, phase, rotation):
++def validate_profiles(manifest, phase, rotation, vehicle=False, static_palette=False):
+     """Reject incomplete or adaptive data before treating a profiling run as evidence."""
+     labels = {"back_approach", "back_near_approach", "back_transit", "back_arrival_mixed"}
+     if phase == "roundtrip":
+         labels |= {"out_approach", "out_near_approach", "out_transit", "out_arrival_mixed"}
++    if vehicle:
++        labels = {"back_vehicle_arrival"}
++        if phase == "roundtrip":
++            labels.add("out_vehicle_arrival")
+     expected = {(label, width, height, mode) for label in labels
+                 for width, height in ((480, 272), (640, 372))
+                 for mode in ("off", "reduced", "full")}
+     found = set()
+     mode_groups = {}
+     errors = []
+-    for cell in manifest.get("profiles", []):
++    for cell in manifest.get("vehicle_profiles" if vehicle else "profiles", []):
+         key = (cell.get("capture_label"), cell.get("view_width"), cell.get("view_height"), cell.get("mode"))
+         if key not in expected or key in found:
+             errors.append(f"Unexpected or duplicate cell: {key}")
+@@ -58,6 +62,46 @@
+             errors.append(f"Missing or incorrect phase/pose: {key}")
+         if cell.get("frozen_state_unchanged") is not True or not isinstance(cell.get("frozen_snapshot"), dict):
+             errors.append(f"Missing frozen-state proof: {key}")
++        if static_palette:
++            if cell.get("palette_scope") != "canonical_static_private" or cell.get("palette_state_restored") is not True:
++                errors.append(f"Missing private static palette scope/restoration: {key}")
++            for field in ("palette_rgba", "incoming_palette_rgba"):
++                colours = cell.get(field)
++                if not isinstance(colours, list) or len(colours) != 256 or any(not isinstance(v, list) or len(v) != 4 or any(type(channel) is not int or not 0 <= channel <= 255 for channel in v) for v in colours):
++                    errors.append(f"Missing/invalid recorded palette: {key}")
++            if not transit and key[3] == "off" and not isinstance(cell.get("diagnostic_image"), str):
++                errors.append(f"Missing full-scale static-palette scene image: {key}")
++        if vehicle:
++            camera, observed = cell.get("diagnostic_camera", {}), cell.get("observed_train_pose", {})
++            control, sequences = cell.get("visible_pixel_control", {}), cell.get("vehicle_sequence", [])
++            if (not camera or camera.get("world") != cell.get("selected_world") or camera.get("own_exclusion", "missing") is not None
++                    or camera.get("offset_from_visible_car") != [0.0, 40.0, 7.0]
++                    or any(type(camera.get(k)) not in (int, float) for k in ("x", "y", "z", "yaw")) or not observed):
++                errors.append(f"Missing/incorrect separate diagnostic camera and observed train pose: {key}")
++            else:
++                if any(abs(camera[axis] - observed[f"visible_{axis}"] - offset) > 1e-5
++                       for axis, offset in zip(("x", "y", "z"), camera["offset_from_visible_car"])):
++                    errors.append(f"Diagnostic camera differs from recorded vehicle offset: {key}")
++            if (type(control.get("different_pixels")) is not int or not 0 < control["different_pixels"] <= key[1] * key[2]
++                    or control.get("omitted_car_id") != cell.get("visible_car_id")):
++                errors.append(f"Missing positive visible-car pixel control: {key}")
++            if (not isinstance(sequences, list) or not sequences
++                    or not any(v.get("id") == cell.get("visible_car_id") for v in sequences)):
++                errors.append(f"Missing actual visible vehicle sequences: {key}")
++            else:
++                for v in sequences:
++                    count, layers = v.get("raw_sequence_count"), v.get("layers", [])
++                    if type(count) is not int or not 0 < count <= 8 or count != len(layers) or v.get("world") != cell.get("selected_world"):
++                        errors.append(f"Invalid or wrong-world vehicle sequence: {key}")
++                        continue
++                    for layer in layers:
++                        if any(type(layer.get(k)) is not int for k in ("sprite", "base_sprite", "palette_override", "effective_palette")):
++                            errors.append(f"Missing layer identity or palette: {key}")
++                        expected_pal = v.get("default_palette") if v.get("crashed") or not layer.get("palette_override") else layer["palette_override"]
++                        if layer.get("effective_palette") != expected_pal:
++                            errors.append(f"Incorrect recorded native palette precedence: {key}")
++            if (key[3] == "off") != isinstance(cell.get("diagnostic_image"), str):
++                errors.append(f"Missing or unexpected diagnostic image: {key}")
+         if key[0].endswith("near_approach"):
+             gate = cell.get("gate", {})
+             if not 0 < gate.get("signed_face_distance", 999) <= 16 or not 0 <= gate.get("lateral_offset", 999) <= 8 or gate.get("world") != cell.get("selected_world"):
+@@ -105,7 +149,7 @@
+             errors.append(f"Incorrect rotated mode order: {key}")
+         first = cells[0]
+         for cell in cells[1:]:
+-            if any(cell.get(field) != first.get(field) for field in ("pose", "selected_world", "frozen_snapshot")):
++            if any(cell.get(field) != first.get(field) for field in ("pose", "selected_world", "frozen_snapshot", "diagnostic_camera", "observed_train_pose", "vehicle_sequence", "palette_rgba", "palette_scope")):
+                 errors.append(f"Modes measured different game/camera states: {key}")
+         if first.get("phase") == "scene":
+             geometry = lambda cell: [(s.get("renderer", {}).get("visible_tiles"), s.get("renderer", {}).get("triangles")) for s in cell.get("samples", [])]
+@@ -186,7 +230,38 @@
+     return result
+ 
+ 
+-def run_phase(binary, source, output, phase, baseline, expected=None, profile=False, profile_rotation=0):
++def compare_fixed_images(output, phase, manifest, baseline_root):
++    """Exact full-size Off comparisons, separated from adaptive GUI screenshots."""
++    result = {"passed": True, "comparisons": [], "scope": "Private native renderer, fixed scale 1; not a live GUI screenshot."}
++    try:
++        baseline_dir = baseline_root / phase
++        previous = json.loads((baseline_dir / "gate-native-manifest.json").read_text())
++        for collection in ("profiles", "vehicle_profiles"):
++            key = lambda cell: (cell["capture_label"], cell["view_width"], cell["view_height"], cell["mode"])
++            old = {key(c): c for c in previous.get(collection, []) if c.get("diagnostic_image")}
++            new = {key(c): c for c in manifest.get(collection, []) if c.get("diagnostic_image")}
++            if not new or set(old) != set(new):
++                raise ValueError(f"Missing/mismatched fixed image cells in {collection}")
++            for k, cell in new.items():
++                before = old[k]
++                identity = ("pose", "selected_world", "diagnostic_camera", "observed_train_pose", "vehicle_sequence", "palette_rgba", "palette_scope")
++                if any(cell.get(field) != before.get(field) for field in identity):
++                    raise ValueError(f"Different camera/world/vehicle state for {k}")
++                with Image.open(output / cell["diagnostic_image"]) as a, Image.open(baseline_dir / before["diagnostic_image"]) as b:
++                    if a.size != b.size or a.size != (cell["view_width"], cell["view_height"]):
++                        raise ValueError(f"Different fixed image dimensions for {k}")
++                    diff = ImageChops.difference(a.convert("RGB"), b.convert("RGB"))
++                    changed = sum(pixel != (0, 0, 0) for pixel in diff.getdata())
++                row = {"collection": collection, "cell": k, "changed_pixels": changed, "passed": changed == 0,
++                       "candidate": str(output / cell["diagnostic_image"]), "baseline": str(baseline_dir / before["diagnostic_image"])}
++                result["comparisons"].append(row)
++                result["passed"] = result["passed"] and row["passed"]
++    except (OSError, ValueError, KeyError) as exc:
++        result.update(passed=False, error=f"{type(exc).__name__}: {exc}")
++    return result
++
++
++def run_phase(binary, source, output, phase, baseline, expected=None, profile=False, profile_rotation=0, vehicle_profile=False, fixed_baseline=None):
+     output.mkdir(parents=True, exist_ok=False)
+     save = output / "fixture-copy.sav"
+     shutil.copyfile(source, save)
+@@ -199,11 +274,13 @@
+            "OSTTD_CAB_NATIVE_CONFIG": str(config), "OSTTD_CAB_NATIVE_SAVE": str(save),
+            "OSTTD_CAB_NATIVE_OUTPUT": str(output), "OSTTD_CAB_NATIVE_BINARY": str(binary),
+            "OSTTD_CAB_GATE_PHASE": phase}
+-    for key in ("DISPLAY", "WAYLAND_DISPLAY", "OSTTD_CAB_GATE_EXPECTED", "OSTTD_CAB_PROFILE", "OSTTD_CAB_PROFILE_ROTATION"):
++    for key in ("DISPLAY", "WAYLAND_DISPLAY", "OSTTD_CAB_GATE_EXPECTED", "OSTTD_CAB_PROFILE", "OSTTD_CAB_PROFILE_ROTATION", "OSTTD_CAB_VEHICLE_PROFILE"):
+         env.pop(key, None)
+     if profile:
+         env["OSTTD_CAB_PROFILE"] = "1"
+         env["OSTTD_CAB_PROFILE_ROTATION"] = str(profile_rotation)
++    if vehicle_profile:
++        env["OSTTD_CAB_VEHICLE_PROFILE"] = "1"
+     if expected is not None:
+         env["OSTTD_CAB_GATE_EXPECTED"] = str(expected)
+     baseset = Path(env["XDG_DATA_HOME"]) / "openttd/baseset"
+@@ -219,7 +296,7 @@
+               "source_save": str(source), "source_save_sha256": sha256(source),
+               "binary_sha256": sha256(binary), "config_sha256": sha256(config),
+               "display": "SDL offscreen / software", "human_uat": "Pending", "profiling_requested": profile,
+-              "profile_rotation": profile_rotation,
++              "profile_rotation": profile_rotation, "vehicle_profiling_requested": vehicle_profile,
+               "hard_timeout_seconds": 240, "minimum_free_bytes": 100 * 1024 * 1024,
+               "content_sha256": {str(p): sha256(p) for p in sorted(installed.iterdir()) if p.is_file()},
+               "newgrf_sha256": {str(p): sha256(p) for p in sorted((ROOT / "bin/newgrf").glob("*.grf"))}}
+@@ -270,9 +347,15 @@
+             report["passed"] = report["passed"] and report["normal_viewport_comparison"]["passed"]
+             report["effect_pixel_comparisons"] = compare_effect_pixels(output, phase, report.get("native_manifest", {}), baseline)
+             report["passed"] = report["passed"] and report["effect_pixel_comparisons"]["passed"]
++            if fixed_baseline is not None:
++                report["fixed_image_comparisons"] = compare_fixed_images(output, phase, report.get("native_manifest", {}), fixed_baseline)
++                report["passed"] = report["passed"] and report["fixed_image_comparisons"]["passed"]
+             if profile:
+-                report["profile_validation"] = validate_profiles(report.get("native_manifest", {}), phase, profile_rotation)
++                report["profile_validation"] = validate_profiles(report.get("native_manifest", {}), phase, profile_rotation, static_palette=vehicle_profile)
+                 report["passed"] = report["passed"] and report["profile_validation"]["passed"]
++            if vehicle_profile:
++                report["vehicle_profile_validation"] = validate_profiles(report.get("native_manifest", {}), phase, profile_rotation, vehicle=True, static_palette=True)
++                report["passed"] = report["passed"] and report["vehicle_profile_validation"]["passed"]
+         finally:
+             if process.poll() is None:
+                 process.kill()
+@@ -281,6 +364,21 @@
+             report["source_save_unchanged"] = sha256(source) == report["source_save_sha256"]
+             report["copy_sha256_after"] = sha256(save)
+             report["screenshots"] = {p.name: {"bytes": p.stat().st_size, "sha256": sha256(p)} for p in sorted(output.glob("*.png"))}
++            if vehicle_profile:
++                report["fixed_diagnostic_images"] = {}
++                for cell in report.get("native_manifest", {}).get("profiles", []) + report.get("native_manifest", {}).get("vehicle_profiles", []):
++                    name = cell.get("diagnostic_image")
++                    if name is None:
++                        continue
++                    path = output / name
++                    valid = path.parent == output and path.is_file()
++                    entry = {"passed": False}
++                    if valid:
++                        with Image.open(path) as picture:
++                            valid = picture.size == (cell["view_width"], cell["view_height"])
++                        entry.update(bytes=path.stat().st_size, sha256=sha256(path), passed=valid)
++                    report["fixed_diagnostic_images"][name] = entry
++                    report["passed"] = report["passed"] and valid
+             report["passed"] = report["passed"] and report["source_save_unchanged"]
+             (output / "runner-evidence.json").write_text(json.dumps(report, indent=2) + "\n")
+     return report
+@@ -292,11 +390,18 @@
+     parser.add_argument("--output", required=True, type=Path, help="New evidence directory")
+     parser.add_argument("--test-binary", type=Path, default=ROOT / "build/openttd_test")
+     parser.add_argument("--profile", action="store_true", help="Measure naturally paused gate phases without simulation advancement")
++    parser.add_argument("--vehicle-profile", action="store_true", help="Also profile a private camera beside a naturally arrived visible vehicle; requires --profile")
+     parser.add_argument("--profile-rotation", type=int, choices=(0, 1, 2), default=0,
+                         help="Rotate Off/Reduced/Full measurement order across fresh-process repeats")
++    parser.add_argument("--fixed-image-baseline", type=Path, help="Additionally require exact private full-scale scene/vehicle Off images against this Stage3B baseline run")
+     parser.add_argument("--baseline", type=Path, default=ROOT / "build/cab-stage3-baseline/near-repeat-01",
+                         help="Preserved pre-effect native images, containing roundtrip and cold directories")
+     args = parser.parse_args()
++    if args.vehicle_profile and not args.profile:
++        parser.error("--vehicle-profile requires --profile")
++    if args.fixed_image_baseline and not args.vehicle_profile:
++        parser.error("--fixed-image-baseline requires --vehicle-profile")
++    fixed_baseline = args.fixed_image_baseline.resolve(strict=True) if args.fixed_image_baseline else None
+     source = args.save.resolve(strict=True)
+     binary = args.test_binary.resolve(strict=True)
+     baseline = args.baseline.resolve(strict=True)
+@@ -304,7 +409,7 @@
+     output.mkdir(parents=True, exist_ok=False)
+     report = {"passed": False, "phases": [], "source_save_sha256": sha256(source)}
+     try:
+-        first = run_phase(binary, source, output / "roundtrip", "roundtrip", baseline, profile=args.profile, profile_rotation=args.profile_rotation)
++        first = run_phase(binary, source, output / "roundtrip", "roundtrip", baseline, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline)
+         report["phases"].append(first)
+         if not first["passed"]:
+             raise RuntimeError("Initial native round trip failed; cold phase not started")
+@@ -314,7 +419,7 @@
+             raise RuntimeError("Initial proof omitted its native save or frozen comparison snapshot")
+         report["checkpoint_sha256"] = sha256(checkpoint)
+         report["expected_snapshot_sha256"] = sha256(expected)
+-        cold = run_phase(binary, checkpoint, output / "cold", "cold", baseline, expected, profile=args.profile, profile_rotation=args.profile_rotation)
++        cold = run_phase(binary, checkpoint, output / "cold", "cold", baseline, expected, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline)
+         report["phases"].append(cold)
+         report["explicit_state_game_loop_calls"] = sum(
+             p.get("native_manifest", {}).get("explicit_state_game_loop_calls", 0)

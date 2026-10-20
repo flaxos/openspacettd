@@ -1,0 +1,105 @@
+{
+  "scope": "Read-only inventory of installed and project graphics; no downloads/asset builds/art",
+  "files": {
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_equipment_v1.grf": {
+      "bytes": 467,
+      "sha256": "afc62b4ea9ba8733be4010dd390d30b98acbb668184b09f00561227c1644cf21"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_gates_v1.grf": {
+      "bytes": 41303,
+      "sha256": "268b9b705504c3d081b35459c39e1c952dbec10c2ff56ba330d20063b5b576b2"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_industry.grf": {
+      "bytes": 2398,
+      "sha256": "1314fd8dd5622bdcf1fc55621119dea4b8b31668dbe768e578829788205b438d"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_industry_v3.grf": {
+      "bytes": 2424,
+      "sha256": "02744d1689144a8618fe6a3aa8732b41aa724e77ef5c9648364eb8594b0dbf56"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_industry_v4.grf": {
+      "bytes": 2502,
+      "sha256": "7f709d575d4ae1507865bf94351a698c5106be3c4f8099a6753c12f35960823d"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_integrated_v1.grf": {
+      "bytes": 4867,
+      "sha256": "b9a6a1c42cbfb46fe29aef7ca105342e62035431bc0788742321e8a747db3605"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_platforms_v1.grf": {
+      "bytes": 9422,
+      "sha256": "0ea503e0667bff7f4dc4733d5053ade456a4f2598f935d7b7efb7ea9bb767202"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_rail.grf": {
+      "bytes": 1695,
+      "sha256": "b2a9783c55d8b1f95db68958d5e48dacfd35bed309d192264356844b709a0d87"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/bin/newgrf/openspacettd_rail_v3.grf": {
+      "bytes": 1820,
+      "sha256": "1561bc45c46c356d897dd92d81327445a0edd3107731506dd5db726d8d3c1eea"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/pkg/commonwealth_equipment/commonwealth_equipment.nml": {
+      "bytes": 1265,
+      "sha256": "c738b0bbbeb0a55a52c0481842020c1e1419ab5fa207886eaf304a1f77879f13"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/pkg/commonwealth_gates/commonwealth_gates.nml": {
+      "bytes": 2356,
+      "sha256": "653e1c36673fe4edd22a9980d20e2eea152d94862a48ed80e41c233c870e9484"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/pkg/commonwealth_industry/commonwealth_industry.nml": {
+      "bytes": 12061,
+      "sha256": "f6c2eca05e9a9cbdb05fc27ca429eefc4307f271fd800c5a16109f29e6cee5c8"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/pkg/commonwealth_integrated/commonwealth_integrated.nml": {
+      "bytes": 18828,
+      "sha256": "0540622ec4845d497b5c184e8bdfb058c7509129e64eb5fb45aa7c9d08f2a853"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/pkg/commonwealth_platforms/commonwealth_platforms.nml": {
+      "bytes": 996,
+      "sha256": "70bfb9d503c33b4cb565f5fed8d023549b4943d6fba5b994eee6d41cf73e1db4"
+    },
+    "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/pkg/commonwealth_rail/commonwealth_rail.nml": {
+      "bytes": 8148,
+      "sha256": "acfc56506930d932269b67010992f45ff607c17b872b4e6235dca96e21ba3c98"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/license.txt": {
+      "bytes": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/ogfx1_base.grf": {
+      "bytes": 2693610,
+      "sha256": "f8201e87c7210493aaf525993013dc94dd4b7a801c4bb27df47544786bf8eaa9"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/ogfxc_arctic.grf": {
+      "bytes": 287331,
+      "sha256": "17cf3be5a9410d6807347a13b5655cf534f3b10f19d1bb7a43080f7c226817ce"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/ogfxe_extra.grf": {
+      "bytes": 928861,
+      "sha256": "d440ee74584bcd4534889e1210e83addfcdaadd557503116ca330eeec700188a"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/ogfxh_tropical.grf": {
+      "bytes": 472020,
+      "sha256": "b9aa39877daccd417ee1b248010bc8891648accf1680d1443f58a8589189238c"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/ogfxi_logos.grf": {
+      "bytes": 249673,
+      "sha256": "20644db32d97b2e1d7d7d9b73b0484b904a86f9e91752d9fc5f86bebb7706e5a"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/ogfxt_toyland.grf": {
+      "bytes": 622079,
+      "sha256": "d01320fdcfc94cf4ef637ec72e892314dc5dc682b949e6957c3fb72cb9385986"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/opengfx.obg": {
+      "bytes": 9215,
+      "sha256": "0ef7ae7620420d1c8040be1e387b99ceb7d5a7050cc3503c2f5ba28c6f1df3ef"
+    },
+    "/usr/share/games/openttd/baseset/opengfx/readme.txt.gz": {
+      "bytes": 5788,
+      "sha256": "ee56220cc594957af4304a21214adf3f6d8c3e6b5f5d30ea344159c282b8ee0d"
+    }
+  },
+  "local_user_newgrf_files": [],
+  "real_sprite_stack_status": "BLOCKED: property-only vehicle NML; no demonstrated installed loadable SpriteStack vehicle. Stage3B actual sequences all count1. Diagnostic stacks do not close this gap.",
+  "animated_vehicle_status": "UNRESOLVED: bounded runtime inspection of existing fixture requested; no claim about all engines or cargo/livery states.",
+  "reviewer": "Sol inventory independently inspected project NML/GRF and installed paths"
+}

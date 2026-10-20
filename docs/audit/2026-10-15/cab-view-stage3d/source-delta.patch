@@ -1,0 +1,602 @@
+diff --git a/src/cab_view_3d.cpp b/src/cab_view_3d.cpp
+--- a/src/cab_view_3d.cpp
++++ b/src/cab_view_3d.cpp
+@@ -5604,6 +5604,97 @@
+ 	return renderer.ProbeAnimatedSequence(seq, default_pal, crashed);
+ }
+ 
++/** Adjacent-pair Stage 3D diagnostic. No result growth, image validation,
++ * cache scan or game-state callback occurs between the two members of a pair. */
++CabViewPairedProbe ProbeCabViewPaired(const Rect &r, const CabViewCamera &camera, const std::function<bool()> &frozen_check)
++{
++	using Clock = std::chrono::steady_clock;
++	CabViewPairedProbe result;
++	Renderer renderer;
++	CabViewCamera draw_camera = camera;
++	const size_t pixel_count = static_cast<size_t>(r.Width()) * r.Height();
++	auto *output = static_cast<const Colour *>(_cur_dpi->dst_ptr);
++	std::vector<Colour> reference(pixel_count), first_image(pixel_count), second_image(pixel_count);
++	for (std::vector<Colour> &image : result.representative_images) image.resize(pixel_count);
++	/* Fault in every diagnostic image page before warmups or measured pairs. */
++	const Colour touch(1, 2, 3);
++	std::fill(reference.begin(), reference.end(), touch);
++	std::fill(first_image.begin(), first_image.end(), touch);
++	std::fill(second_image.begin(), second_image.end(), touch);
++	for (std::vector<Colour> &image : result.representative_images) std::fill(image.begin(), image.end(), touch);
++	std::array<bool, 4> representative_written{};
++	uint32_t frame_id = 1;
++	draw_camera.effect_mode = CabViewEffectMode::Off;
++	for (int i = 0; i < 20; ++i) renderer.Draw(r, draw_camera, frame_id++, 0);
++	draw_camera.effect_mode = CabViewEffectMode::Reduced;
++	for (int i = 0; i < 20; ++i) renderer.Draw(r, draw_camera, frame_id++, 0);
++	std::copy_n(output, pixel_count, reference.begin());
++	const CabViewFrameStats geometry = renderer.GetLastFrameStats();
++	result.warm_cache = renderer.GetCacheStats();
++	static constexpr std::array<CabViewPairLabel, 4> EVEN = {
++		CabViewPairLabel::OR, CabViewPairLabel::AB, CabViewPairLabel::RO, CabViewPairLabel::BA};
++	const auto started = Clock::now();
++	uint32_t previous_frame_id = 0;
++	result.unique_measured_frame_ids = true;
++	for (uint32_t cycle = 0; cycle < 50; ++cycle) {
++		for (uint8_t position = 0; position < 4; ++position) {
++			const CabViewPairLabel label = EVEN[cycle % 2 == 0 ? position : 3 - position];
++			CabViewPairedPair &pair = result.pairs[cycle * 4 + position];
++			pair.cycle = cycle;
++			pair.position = position;
++			pair.label = label;
++			const std::array<char, 2> names = label == CabViewPairLabel::OR ? std::array{'O', 'R'} :
++				label == CabViewPairLabel::AB ? std::array{'A', 'B'} :
++				label == CabViewPairLabel::RO ? std::array{'R', 'O'} : std::array{'B', 'A'};
++			for (int arm = 0; arm < 2; ++arm) {
++				CabViewPairedArm &member = pair.arms[arm];
++				member.label = names[arm];
++				member.actual_mode = names[arm] == 'R' ? CabViewEffectMode::Reduced : CabViewEffectMode::Off;
++				draw_camera.effect_mode = member.actual_mode;
++				const auto begin = Clock::now();
++				const uint64_t relative_start_us = std::chrono::duration_cast<std::chrono::microseconds>(begin - started).count();
++				renderer.Draw(r, draw_camera, frame_id++, 0);
++				const auto end = Clock::now();
++				member.sample = {renderer.GetLastFrameStats(), relative_start_us,
++					static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())};
++				result.unique_measured_frame_ids &= member.sample.frame.frame_id > previous_frame_id;
++				previous_frame_id = member.sample.frame.frame_id;
++				/* Both arms copy into preallocated storage after their timer stops.
++				 * Between members there is no validation, growth or state query. */
++				std::copy_n(output, pixel_count, arm == 0 ? first_image.begin() : second_image.begin());
++			}
++			const auto image_equal = [&](const Colour *image, const std::vector<Colour> &expected) {
++				return std::equal(image, image + pixel_count, expected.begin());
++			};
++			pair.first_image_exact = image_equal(first_image.data(), reference);
++			pair.second_image_exact = image_equal(second_image.data(), reference);
++			pair.pair_images_equal = first_image == second_image;
++			for (int arm = 0; arm < 2; ++arm) {
++				const CabViewFrameStats &s = pair.arms[arm].sample.frame;
++				const bool same = s.rendered && !s.cache_hit && s.scale == 1.0f &&
++					s.internal_width == r.Width() && s.internal_height == r.Height() &&
++					s.visible_tiles == geometry.visible_tiles && s.triangles == geometry.triangles &&
++					s.threads == geometry.threads;
++				if (arm == 0) pair.first_geometry_exact = same;
++				else pair.second_geometry_exact = same;
++			}
++			const size_t index = static_cast<size_t>(label);
++			if (!representative_written[index]) {
++				std::copy_n(second_image.begin(), pixel_count, result.representative_images[index].begin());
++				representative_written[index] = true;
++			}
++			++result.completed_pairs;
++		}
++		CabViewPairedCycle &check = result.cycles[cycle];
++		check.cache = renderer.GetCacheStats();
++		check.cache_unchanged = check.cache == result.warm_cache;
++		check.frozen_state_unchanged = frozen_check();
++		++result.completed_cycles;
++		if (!check.cache_unchanged || !check.frozen_state_unchanged) break;
++	}
++	return result;
++}
++
+ /**
+  * Get how long drawing a new picture of the 3D view from the cab takes, on average.
+  * @param scale Size of the picture compared to the view; the picture is made smaller when there is not enough time.
+diff --git a/src/cab_view_3d.h b/src/cab_view_3d.h
+--- a/src/cab_view_3d.h
++++ b/src/cab_view_3d.h
+@@ -192,6 +192,46 @@
+ /** Caller scopes a private 640x372 screen/DPI and canonical static palette. */
+ CabViewCounterbalancedProbe ProbeCabViewCounterbalanced(const Rect &r, const CabViewCamera &camera, const std::function<bool()> &frozen_check);
+ 
++/** Fixed Stage 3D pair schedule; A and B are physically Off controls. */
++enum class CabViewPairLabel : uint8_t { OR, AB, RO, BA };
++
++struct CabViewPairedArm {
++	char label = 'O';
++	CabViewEffectMode actual_mode = CabViewEffectMode::Off;
++	CabViewCounterbalancedSample sample;
++};
++
++struct CabViewPairedPair {
++	uint32_t cycle = 0;
++	uint8_t position = 0;
++	CabViewPairLabel label = CabViewPairLabel::OR;
++	std::array<CabViewPairedArm, 2> arms;
++	bool first_image_exact = false;
++	bool second_image_exact = false;
++	bool pair_images_equal = false;
++	bool first_geometry_exact = false;
++	bool second_geometry_exact = false;
++};
++
++struct CabViewPairedCycle {
++	bool cache_unchanged = false;
++	bool frozen_state_unchanged = false;
++	CabViewCacheStats cache;
++};
++
++struct CabViewPairedProbe {
++	std::array<CabViewPairedPair, 200> pairs;
++	std::array<CabViewPairedCycle, 50> cycles;
++	std::array<std::vector<Colour>, 4> representative_images;
++	CabViewCacheStats warm_cache;
++	bool unique_measured_frame_ids = false;
++	uint32_t completed_pairs = 0;
++	uint32_t completed_cycles = 0;
++};
++
++/** One renderer/framebuffer, fixed schedule and immutable camera; caller owns private scope. */
++CabViewPairedProbe ProbeCabViewPaired(const Rect &r, const CabViewCamera &camera, const std::function<bool()> &frozen_check);
++
+ /** Eligible source contributions, not a claim that a palette epoch changed. */
+ struct CabViewAnimatedLayerProbe {
+ 	SpriteID sprite = 0;
+diff --git a/src/tests/test_cab_view_gate_native.cpp b/src/tests/test_cab_view_gate_native.cpp
+--- a/src/tests/test_cab_view_gate_native.cpp
++++ b/src/tests/test_cab_view_gate_native.cpp
+@@ -212,8 +212,9 @@
+ 	unsigned callbacks = 0, total_calls = 0, pass_calls = 0;
+ 	unsigned pass = 0;
+ 	bool pass_started[2]{};
+-	bool cold = false, started = false, finished = false, profile = false, vehicle_profile = false, stage3c_diagnostic = false;
++	bool cold = false, started = false, finished = false, profile = false, vehicle_profile = false, stage3c_diagnostic = false, stage3d_paired = false;
+ 	bool pending_stage3c_timing = false, pending_stage3c_palette = false;
++	bool pending_stage3d_paired = false;
+ 	unsigned profile_rotation = 0;
+ 	bool approach[2]{}, near_approach[2]{}, hidden[2]{}, arrived[2]{}, mixed[2]{};
+ 	bool cab_opened = false, grew_consist = false, cold_equal = false;
+@@ -296,6 +297,7 @@
+ 			if (name == "back_arrival_mixed") this->pending_stage3c_timing = true;
+ 			if (name == "back_safe") this->pending_stage3c_palette = true;
+ 		}
++		if (this->cold && this->stage3d_paired && name == "back_arrival_mixed") this->pending_stage3d_paired = true;
+ 		if (this->profile && (name == "out_approach" || name == "out_near_approach" || name == "out_transit" || name == "out_arrival_mixed" ||
+ 			name == "back_approach" || name == "back_near_approach" || name == "back_transit" || name == "back_arrival_mixed")) this->pending_profile = name;
+ 		if (name == "out_near_approach" || name == "out_transit" || name == "out_arrival_mixed" ||
+@@ -444,6 +446,113 @@
+ 			!this->manifest["stage3c_diagnostic"]["timing"]["dpi_restored"].get<bool>() ||
+ 			!this->manifest["stage3c_diagnostic"]["timing"]["animation_restored"].get<bool>() || !this->Pure()) {
+ 			if (this->failure.empty()) this->Fail("Stage 3C timing changed pixels, geometry, cache, state or render globals");
++			return false;
++		}
++		return true;
++	}
++	/** One same-renderer paired mode/control experiment, at the cold mixed return. */
++	bool Stage3DPaired()
++	{
++		Train *front = this->Front();
++		if (!this->cold || front == nullptr || this->Cab() == nullptr || !this->Pure()) return false;
++		const CabViewPresentation state = ResolveCabViewPresentation(front, front->owner);
++		if (state.phase != CabViewPhase::Scene || state.world != this->source) {
++			this->Fail("Stage 3D pair experiment lost the cold return scene"); return false;
++		}
++		static constexpr std::array<std::pair<float, float>, 8> heading =
++			{{{-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}}};
++		const auto [dx, dy] = heading[to_underlying(state.moving)];
++		CabViewCamera camera;
++		camera.x = state.x; camera.y = state.y; camera.z = state.z + 4.0f;
++		camera.yaw = std::atan2(dy, dx); camera.vehicle = this->id; camera.world = state.world;
++		camera.scene_effect = CabViewSceneEffect::Arrival; camera.effect_elapsed_ms = 0;
++		constexpr int width = 640, height = 372;
++		const Rect rect{0, 0, width - 1, height - 1};
++		std::vector<Colour> pixels(static_cast<size_t>(width) * height);
++		DrawPixelInfo dpi{pixels.data(), 0, 0, width, height, width, ZoomLevel::Min};
++		const DrawPixelInfo old_screen = _screen;
++		DrawPixelInfo *const old_dpi = _cur_dpi;
++		const bool old_anim = _screen_disable_anim;
++		const Palette old_palette = _cur_palette;
++		const Json frozen = FrozenState(front);
++		Json diagnostic = {{"capture_label", "back_arrival_mixed"}, {"view_width", width}, {"view_height", height},
++			{"scene_effect", "arrival"}, {"effect_elapsed_ms", 0}, {"warmup_off", 20}, {"warmup_reduced", 20},
++			{"cycles_declared", 50}, {"pairs_declared", 200}, {"frames_declared", 400},
++			{"even_pair_order", {"OR", "AB", "RO", "BA"}}, {"odd_pair_order", {"BA", "RO", "AB", "OR"}},
++			{"palette_scope", "canonical_static_private"}, {"incoming_palette_rgba", PaletteRGBA(old_palette)},
++			{"canonical_palette_rgba", PaletteRGBA(_palette)}, {"frozen_snapshot", frozen},
++			{"pose", {{"x", state.x}, {"y", state.y}, {"z", state.z}, {"tile", state.tile.base()},
++				{"moving", static_cast<int>(state.moving)}, {"yaw", camera.yaw}, {"world", state.world.base()}}},
++			{"pairs", Json::array()}, {"cycles", Json::array()}, {"representative_images", Json::object()}};
++		bool valid = true;
++		{
++			AutoRestoreBackup palette_backup(_cur_palette, _palette);
++			AutoRestoreBackup screen_backup(_screen, dpi);
++			AutoRestoreBackup dpi_backup(_cur_dpi, &dpi);
++			AutoRestoreBackup anim_backup(_screen_disable_anim, true);
++			const CabViewPairedProbe probe = ProbeCabViewPaired(rect, camera,
++				[&] { return _pause_mode.Test(PauseMode::Normal) && FrozenState(front) == frozen &&
++					SamePalette(_cur_palette, _palette) &&
++					_cur_dpi == &dpi && _screen.dst_ptr == dpi.dst_ptr && _screen.pitch == dpi.pitch &&
++					_screen.left == dpi.left && _screen.top == dpi.top && _screen.width == dpi.width &&
++					_screen.height == dpi.height && _screen.zoom == dpi.zoom && _screen_disable_anim; });
++			auto pair_name = [](CabViewPairLabel label) -> const char * {
++				switch (label) {
++					case CabViewPairLabel::OR: return "OR";
++					case CabViewPairLabel::AB: return "AB";
++					case CabViewPairLabel::RO: return "RO";
++					case CabViewPairLabel::BA: return "BA";
++				}
++				return "";
++			};
++			diagnostic["completed_pairs"] = probe.completed_pairs;
++			diagnostic["completed_cycles"] = probe.completed_cycles;
++			diagnostic["unique_measured_frame_ids"] = probe.unique_measured_frame_ids;
++			diagnostic["warm_cache"] = CacheStatsJson(probe.warm_cache);
++			valid = probe.completed_pairs == 200 && probe.completed_cycles == 50 && probe.unique_measured_frame_ids;
++			for (uint32_t i = 0; i < probe.completed_pairs; ++i) {
++				const CabViewPairedPair &pair = probe.pairs[i];
++				Json arms = Json::array();
++				for (const CabViewPairedArm &arm : pair.arms) {
++					arms.push_back({{"label", std::string(1, arm.label)},
++						{"actual_mode", arm.actual_mode == CabViewEffectMode::Reduced ? "reduced" : "off"},
++						{"relative_start_us", arm.sample.relative_start_us}, {"wall_us", arm.sample.wall_us},
++						{"frame", FrameStatsJson(arm.sample.frame)}});
++				}
++				diagnostic["pairs"].push_back({{"cycle", pair.cycle}, {"position", pair.position},
++					{"label", pair_name(pair.label)}, {"arms", std::move(arms)},
++					{"first_image_exact", pair.first_image_exact}, {"second_image_exact", pair.second_image_exact},
++					{"pair_images_equal", pair.pair_images_equal},
++					{"first_geometry_exact", pair.first_geometry_exact}, {"second_geometry_exact", pair.second_geometry_exact}});
++				valid &= pair.first_image_exact && pair.second_image_exact && pair.pair_images_equal &&
++					pair.first_geometry_exact && pair.second_geometry_exact;
++			}
++			for (uint32_t i = 0; i < probe.completed_cycles; ++i) {
++				const CabViewPairedCycle &cycle = probe.cycles[i];
++				diagnostic["cycles"].push_back({{"index", i}, {"cache_unchanged", cycle.cache_unchanged},
++					{"frozen_state_unchanged", cycle.frozen_state_unchanged}, {"cache", CacheStatsJson(cycle.cache)}});
++				valid &= cycle.cache_unchanged && cycle.frozen_state_unchanged;
++			}
++			for (unsigned i = 0; i < probe.representative_images.size(); ++i) {
++				const char *label = pair_name(static_cast<CabViewPairLabel>(i));
++				const std::string filename = fmt::format("stage3d_pair_{}.ppm", label);
++				if (!WriteVehicleProfileImage(this->output / filename, probe.representative_images[i], width, height)) {
++					this->Fail("Stage 3D representative image could not be written"); return false;
++				}
++				diagnostic["representative_images"][label] = filename;
++			}
++		}
++		diagnostic["palette_restored"] = SamePalette(_cur_palette, old_palette);
++		diagnostic["dpi_restored"] = _cur_dpi == old_dpi && _screen.dst_ptr == old_screen.dst_ptr &&
++			_screen.pitch == old_screen.pitch && _screen.left == old_screen.left && _screen.top == old_screen.top &&
++			_screen.width == old_screen.width && _screen.height == old_screen.height && _screen.zoom == old_screen.zoom;
++		diagnostic["animation_restored"] = _screen_disable_anim == old_anim;
++		diagnostic["frozen_state_unchanged"] = FrozenState(front) == frozen;
++		valid &= diagnostic["palette_restored"].get<bool>() && diagnostic["dpi_restored"].get<bool>() &&
++			diagnostic["animation_restored"].get<bool>() && diagnostic["frozen_state_unchanged"].get<bool>();
++		this->manifest["stage3d_paired"] = std::move(diagnostic);
++		if (!valid || !this->Pure()) {
++			if (this->failure.empty()) this->Fail("Stage 3D paired experiment changed image, work, cache, state or render globals");
+ 			return false;
+ 		}
+ 		return true;
+@@ -1014,6 +1123,10 @@
+ 			this->pending_stage3c_palette = false;
+ 			if (!this->Stage3CPalettePreflight()) return;
+ 		}
++		if (this->pending_stage3d_paired) {
++			this->pending_stage3d_paired = false;
++			if (!this->Stage3DPaired()) return;
++		}
+ 		if (!this->pending_profile.empty()) {
+ 			const std::string label = std::exchange(this->pending_profile, {});
+ 			if (!this->ProfilePaused(label)) return;
+@@ -1184,6 +1297,9 @@
+ 	const char *stage3c_diagnostic = std::getenv("OSTTD_CAB_STAGE3C_DIAGNOSTIC");
+ 	proof.stage3c_diagnostic = stage3c_diagnostic != nullptr && std::string_view(stage3c_diagnostic) == "1";
+ 	if (proof.stage3c_diagnostic) proof.manifest["stage3c_diagnostic"] = Json::object();
++	const char *stage3d_paired = std::getenv("OSTTD_CAB_STAGE3D_PAIRED");
++	proof.stage3d_paired = stage3d_paired != nullptr && std::string_view(stage3d_paired) == "1";
++	if (proof.stage3d_paired) proof.manifest["stage3d_paired"] = Json::object();
+ 	REQUIRE((!proof.vehicle_profile || proof.profile));
+ 	if (proof.profile) {
+ 		proof.manifest["profiles"] = Json::array();
+diff --git a/scripts/test_cab_view_gate_native.py b/scripts/test_cab_view_gate_native.py
+--- a/scripts/test_cab_view_gate_native.py
++++ b/scripts/test_cab_view_gate_native.py
+@@ -27,6 +27,111 @@
+ 
+ def no_core_dump():
+     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
++
++
++def validate_stage3d(manifest, phase, output):
++    """Require the single declared paired/control experiment; timing is diagnostic."""
++    diagnostic = manifest.get("stage3d_paired")
++    if phase != "cold":
++        return {"passed": diagnostic is None, "errors": [] if diagnostic is None else ["Paired diagnostic ran outside cold phase"]}
++    if not isinstance(diagnostic, dict):
++        return {"passed": False, "errors": ["Cold paired diagnostic missing"]}
++    errors, images = [], {}
++    expected = {"capture_label": "back_arrival_mixed", "view_width": 640, "view_height": 372,
++                "scene_effect": "arrival", "effect_elapsed_ms": 0, "warmup_off": 20, "warmup_reduced": 20,
++                "cycles_declared": 50, "pairs_declared": 200, "frames_declared": 400,
++                "completed_pairs": 200, "completed_cycles": 50,
++                "even_pair_order": ["OR", "AB", "RO", "BA"], "odd_pair_order": ["BA", "RO", "AB", "OR"],
++                "palette_scope": "canonical_static_private"}
++    for key, value in expected.items():
++        if diagnostic.get(key) != value:
++            errors.append(f"Incorrect paired contract: {key}")
++    for key in ("unique_measured_frame_ids", "palette_restored", "dpi_restored", "animation_restored", "frozen_state_unchanged"):
++        if diagnostic.get(key) is not True:
++            errors.append(f"Paired guard failed: {key}")
++    if not isinstance(diagnostic.get("frozen_snapshot"), dict) or not isinstance(diagnostic.get("pose"), dict):
++        errors.append("Missing paired state/camera identity")
++    for key in ("incoming_palette_rgba", "canonical_palette_rgba"):
++        values = diagnostic.get(key, [])
++        if len(values) != 256 or any(not isinstance(c, list) or len(c) != 4 or
++                                   any(type(v) is not int or not 0 <= v <= 255 for v in c) for c in values):
++            errors.append(f"Invalid paired palette: {key}")
++    warm_cache = diagnostic.get("warm_cache")
++    if not isinstance(warm_cache, dict) or warm_cache.get("effect_scratch_capacity_bytes") != 0:
++        errors.append("Missing warm cache or unexpected effect scratch")
++    cycles = diagnostic.get("cycles", [])
++    if len(cycles) != 50:
++        errors.append("Expected exactly 50 paired cycle checks")
++    for i, cycle in enumerate(cycles):
++        if (cycle.get("index") != i or cycle.get("cache_unchanged") is not True or
++                cycle.get("frozen_state_unchanged") is not True or cycle.get("cache") != warm_cache):
++            errors.append(f"Paired cycle state/cache changed: {i}")
++    pairs = diagnostic.get("pairs", [])
++    if len(pairs) != 200:
++        errors.append("Expected exactly 200 adjacent pairs")
++    previous_start, previous_end, previous_id, reference_geometry = -1, -1, -1, None
++    labels = {label: 0 for label in "ORAB"}
++    orders = {label: 0 for label in ("OR", "AB", "RO", "BA")}
++    geometry_keys = ("view_width", "view_height", "internal_width", "internal_height", "scale",
++                     "visible_tiles", "triangles", "threads")
++    for i, pair in enumerate(pairs):
++        cycle, position = divmod(i, 4)
++        order = expected["odd_pair_order" if cycle % 2 else "even_pair_order"][position]
++        if pair.get("cycle") != cycle or pair.get("position") != position or pair.get("label") != order:
++            errors.append(f"Incorrect pair identity/order: {i}")
++        orders[order] += 1
++        for key in ("first_image_exact", "second_image_exact", "pair_images_equal", "first_geometry_exact", "second_geometry_exact"):
++            if pair.get(key) is not True:
++                errors.append(f"Pair {i} guard failed: {key}")
++        arms = pair.get("arms", [])
++        if len(arms) != 2:
++            errors.append(f"Expected exactly two members: pair {i}")
++        for j, arm in enumerate(arms):
++            if j >= 2:
++                continue
++            label = order[j]
++            actual_mode = "reduced" if label == "R" else "off"
++            if arm.get("label") != label or arm.get("actual_mode") != actual_mode:
++                errors.append(f"Incorrect member label/physical mode: pair {i}/{j}")
++            labels[label] += 1
++            frame = arm.get("frame", {})
++            start, wall, frame_id = arm.get("relative_start_us"), arm.get("wall_us"), frame.get("frame_id")
++            if (type(start) is not int or start <= previous_start or start < previous_end or
++                    type(wall) is not int or wall <= 0 or type(frame_id) is not int or frame_id <= previous_id):
++                errors.append(f"Invalid chronological timing/frame identity: pair {i}/{j}")
++            if type(start) is int and type(wall) is int:
++                previous_start, previous_end = start, start + wall
++            if type(frame_id) is int:
++                previous_id = frame_id
++            if (frame.get("rendered") is not True or frame.get("cache_hit") is not False or
++                    (actual_mode == "off" and frame.get("effect_us") != 0) or frame.get("scale") != 1.0 or
++                    frame.get("view_width") != 640 or frame.get("internal_width") != 640 or
++                    frame.get("view_height") != 372 or frame.get("internal_height") != 372):
++                errors.append(f"Member was not a fresh full-scale mode-null render: pair {i}/{j}")
++            if any(type(frame.get(k)) is not int or frame[k] < 0 for k in ("prepare_us", "raster_us", "effect_us", "output_us", "total_us")):
++                errors.append(f"Invalid member stage timing: pair {i}/{j}")
++            geometry = {k: frame.get(k) for k in geometry_keys}
++            if reference_geometry is None:
++                reference_geometry = geometry
++            elif geometry != reference_geometry:
++                errors.append(f"Geometry/work changed: pair {i}/{j}")
++    if labels != {label: 100 for label in "ORAB"} or orders != {label: 50 for label in orders}:
++        errors.append("Expected 100 samples per label and 50 pairs per order")
++    for label in ("OR", "AB", "RO", "BA"):
++        name = diagnostic.get("representative_images", {}).get(label)
++        path = output / name if isinstance(name, str) else None
++        if path is None or path.parent != output or not path.is_file():
++            errors.append(f"Missing/unsafe paired image: {label}")
++        else:
++            with Image.open(path) as picture:
++                if picture.size != (640, 372):
++                    errors.append(f"Incorrect paired image size: {label}")
++            images[label] = {"file": name, "sha256": sha256(path), "bytes": path.stat().st_size}
++    if len(images) != 4 or len({i["file"] for i in images.values()}) != 4 or len({i["sha256"] for i in images.values()}) != 1:
++        errors.append("Representative images missing, reused or different")
++    return {"passed": not errors, "errors": errors, "timing_scope": "one diagnostic; no acceptance threshold applied",
++            "sample_count_by_label": labels, "pair_count_by_order": orders, "geometry": reference_geometry,
++            "representative_images": images}
+ 
+ 
+ def validate_stage3c(manifest, phase, output):
+@@ -422,7 +527,7 @@
+     return result
+ 
+ 
+-def run_phase(binary, source, output, phase, baseline, expected=None, profile=False, profile_rotation=0, vehicle_profile=False, fixed_baseline=None, stage3c_diagnostic=False):
++def run_phase(binary, source, output, phase, baseline, expected=None, profile=False, profile_rotation=0, vehicle_profile=False, fixed_baseline=None, stage3c_diagnostic=False, stage3d_paired=False):
+     output.mkdir(parents=True, exist_ok=False)
+     save = output / "fixture-copy.sav"
+     shutil.copyfile(source, save)
+@@ -435,7 +540,7 @@
+            "OSTTD_CAB_NATIVE_CONFIG": str(config), "OSTTD_CAB_NATIVE_SAVE": str(save),
+            "OSTTD_CAB_NATIVE_OUTPUT": str(output), "OSTTD_CAB_NATIVE_BINARY": str(binary),
+            "OSTTD_CAB_GATE_PHASE": phase}
+-    for key in ("DISPLAY", "WAYLAND_DISPLAY", "OSTTD_CAB_GATE_EXPECTED", "OSTTD_CAB_PROFILE", "OSTTD_CAB_PROFILE_ROTATION", "OSTTD_CAB_VEHICLE_PROFILE", "OSTTD_CAB_STAGE3C_DIAGNOSTIC"):
++    for key in ("DISPLAY", "WAYLAND_DISPLAY", "OSTTD_CAB_GATE_EXPECTED", "OSTTD_CAB_PROFILE", "OSTTD_CAB_PROFILE_ROTATION", "OSTTD_CAB_VEHICLE_PROFILE", "OSTTD_CAB_STAGE3C_DIAGNOSTIC", "OSTTD_CAB_STAGE3D_PAIRED"):
+         env.pop(key, None)
+     if profile:
+         env["OSTTD_CAB_PROFILE"] = "1"
+@@ -444,6 +549,8 @@
+         env["OSTTD_CAB_VEHICLE_PROFILE"] = "1"
+     if stage3c_diagnostic and phase == "cold":
+         env["OSTTD_CAB_STAGE3C_DIAGNOSTIC"] = "1"
++    if stage3d_paired and phase == "cold":
++        env["OSTTD_CAB_STAGE3D_PAIRED"] = "1"
+     if expected is not None:
+         env["OSTTD_CAB_GATE_EXPECTED"] = str(expected)
+     baseset = Path(env["XDG_DATA_HOME"]) / "openttd/baseset"
+@@ -461,10 +568,11 @@
+               "display": "SDL offscreen / software", "human_uat": "Pending", "profiling_requested": profile,
+               "profile_rotation": profile_rotation, "vehicle_profiling_requested": vehicle_profile,
+               "stage3c_diagnostic_requested": stage3c_diagnostic and phase == "cold",
++              "stage3d_paired_requested": stage3d_paired and phase == "cold",
+               "hard_timeout_seconds": 240, "minimum_free_bytes": 100 * 1024 * 1024,
+               "content_sha256": {str(p): sha256(p) for p in sorted(installed.iterdir()) if p.is_file()},
+               "newgrf_sha256": {str(p): sha256(p) for p in sorted((ROOT / "bin/newgrf").glob("*.grf"))}}
+-    if profile or stage3c_diagnostic:
++    if profile or stage3c_diagnostic or stage3d_paired:
+         cpu_lines = Path("/proc/cpuinfo").read_text().splitlines()
+         report["machine"] = {"platform": platform.platform(), "logical_cpus": os.cpu_count(),
+                              "cpu_model": next((line.split(":", 1)[1].strip() for line in cpu_lines
+@@ -477,7 +585,7 @@
+                                    stdout=log, stderr=subprocess.STDOUT, preexec_fn=no_core_dump)
+         try:
+             while process.poll() is None:
+-                if profile or stage3c_diagnostic:
++                if profile or stage3c_diagnostic or stage3d_paired:
+                     try:
+                         lines = Path(f"/proc/{process.pid}/status").read_text().splitlines()
+                         values = {line.split(":", 1)[0]: int(line.split()[1]) for line in lines
+@@ -514,6 +622,9 @@
+             if stage3c_diagnostic:
+                 report["stage3c_validation"] = validate_stage3c(report.get("native_manifest", {}), phase, output)
+                 report["passed"] = report["passed"] and report["stage3c_validation"]["passed"]
++            if stage3d_paired:
++                report["stage3d_validation"] = validate_stage3d(report.get("native_manifest", {}), phase, output)
++                report["passed"] = report["passed"] and report["stage3d_validation"]["passed"]
+             if fixed_baseline is not None:
+                 report["fixed_image_comparisons"] = compare_fixed_images(output, phase, report.get("native_manifest", {}), fixed_baseline)
+                 report["passed"] = report["passed"] and report["fixed_image_comparisons"]["passed"]
+@@ -558,6 +669,7 @@
+     parser.add_argument("--test-binary", type=Path, default=ROOT / "build/openttd_test")
+     parser.add_argument("--profile", action="store_true", help="Measure naturally paused gate phases without simulation advancement")
+     parser.add_argument("--stage3c-diagnostic", action="store_true", help="One cold counterbalanced timing diagnostic and current-fixture vehicle palette preflight; excludes the acceptance matrix")
++    parser.add_argument("--stage3d-paired", action="store_true", help="One cold same-renderer Off/Reduced experiment with Off/Off controls; excludes other profiling")
+     parser.add_argument("--vehicle-profile", action="store_true", help="Also profile a private camera beside a naturally arrived visible vehicle; requires --profile")
+     parser.add_argument("--profile-rotation", type=int, choices=(0, 1, 2), default=0,
+                         help="Rotate Off/Reduced/Full measurement order across fresh-process repeats")
+@@ -565,6 +677,8 @@
+     parser.add_argument("--baseline", type=Path, default=ROOT / "build/cab-stage3-baseline/near-repeat-01",
+                         help="Preserved pre-effect native images, containing roundtrip and cold directories")
+     args = parser.parse_args()
++    if args.stage3d_paired and (args.stage3c_diagnostic or args.profile or args.vehicle_profile or args.fixed_image_baseline):
++        parser.error("--stage3d-paired is separate from other diagnostics and acceptance-matrix profiling")
+     if args.stage3c_diagnostic and (args.profile or args.vehicle_profile or args.fixed_image_baseline):
+         parser.error("--stage3c-diagnostic is separate from acceptance-matrix profiling")
+     if args.vehicle_profile and not args.profile:
+@@ -579,7 +693,7 @@
+     output.mkdir(parents=True, exist_ok=False)
+     report = {"passed": False, "phases": [], "source_save_sha256": sha256(source)}
+     try:
+-        first = run_phase(binary, source, output / "roundtrip", "roundtrip", baseline, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline, stage3c_diagnostic=args.stage3c_diagnostic)
++        first = run_phase(binary, source, output / "roundtrip", "roundtrip", baseline, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline, stage3c_diagnostic=args.stage3c_diagnostic, stage3d_paired=args.stage3d_paired)
+         report["phases"].append(first)
+         if not first["passed"]:
+             raise RuntimeError("Initial native round trip failed; cold phase not started")
+@@ -589,7 +703,7 @@
+             raise RuntimeError("Initial proof omitted its native save or frozen comparison snapshot")
+         report["checkpoint_sha256"] = sha256(checkpoint)
+         report["expected_snapshot_sha256"] = sha256(expected)
+-        cold = run_phase(binary, checkpoint, output / "cold", "cold", baseline, expected, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline, stage3c_diagnostic=args.stage3c_diagnostic)
++        cold = run_phase(binary, checkpoint, output / "cold", "cold", baseline, expected, profile=args.profile, profile_rotation=args.profile_rotation, vehicle_profile=args.vehicle_profile, fixed_baseline=fixed_baseline, stage3c_diagnostic=args.stage3c_diagnostic, stage3d_paired=args.stage3d_paired)
+         report["phases"].append(cold)
+         report["explicit_state_game_loop_calls"] = sum(
+             p.get("native_manifest", {}).get("explicit_state_game_loop_calls", 0)
+diff --git a/docs/ACTIVE_EXECUTION_PLAN.md b/docs/ACTIVE_EXECUTION_PLAN.md
+--- a/docs/ACTIVE_EXECUTION_PLAN.md
++++ b/docs/ACTIVE_EXECUTION_PLAN.md
+@@ -1,3 +1,81 @@
++# Active execution slice — Reduced timing attribution, Stage 3D (15 October 2026)
++
++This is the **sole current implementation handoff**. The owner authorized a bounded
++diagnosis and evidenced repair of the Reduced-mode timing regression within the
++performance stage. Retain the original failed results and unchanged 500-us added
++p95 allowance. Stop if the measurement cannot isolate implementation cost or a
++material design change is needed. Stage 3C is sealed by
++`../cab-view-stage3d-start.json` and `build/cab-stage3d-baseline/`.
++
++**Current gate: bounded diagnosis complete; stop without a production repair.**
++The one declared 400-frame experiment preserved exact state, images and cache.
++Experimental Off/Reduced p95 was 6,202/6,627 us: +425 us, within the unchanged
++500-us allowance for this diagnostic only. Paired R-O medians were -61 us in OR
++order and +64 us in RO order; physical Off/Off controls also varied. Slow frames
++accumulated time in shared preparation/raster paths, with zero measured effect
++time. Independent source and raw-data review found no attributable Reduced-specific
++cost that justifies a narrow repair. The earlier 1,114-us failed matrix and 671-us
++diagnostic remain unresolved; this is not broader performance acceptance.
++
++Stage 3C's separate renderer/framebuffer comparison confounded mode with context
++identity. The same-context run reduces that confound; it does not prove allocator,
++thread startup, scheduling or CPU-frequency causation. Those remain hypotheses.
++No further timing runs or production optimization are authorized by this bounded
++slice. See the [Stage 3D audit](audit/2026-10-15/cab-view-stage3d/README.md).
++
++## One declared paired experiment
++
++- Use the existing naturally reached cold `back_arrival_mixed` scene at 640 x 372,
++  canonical private palette, Arrival elapsed 0, fixed full scale, one persistent
++  private renderer and one framebuffer. Preserve camera/world, full FrozenState,
++  palette/DPI/animation state and the ordinary native journey/recovery guards.
++- Warm the same renderer for 20 Off frames followed by 20 Reduced frames. Run
++  exactly 50 cycles of four adjacent pairs: even cycles use OR, AB, RO, BA; odd
++  cycles reverse that list to BA, RO, AB, OR. O/R are experimental Off/Reduced;
++  A/B are recording labels that both physically execute Off. This yields exactly
++  100 experimental pairs (50 OR/50 RO) and 100 Off/Off pairs (50 AB/50 BA), or
++  400 measured fresh frames. Unique increasing frame IDs prevent cached output.
++- Preallocate result and image storage. Between pair members, only capture the
++  first member's output in preallocated storage and record its already-computed
++  statistics; no file writes, deep cache scans, FrozenState serialization or
++  allocations are permitted there. Record raw chronological starts/wall/stage
++  times and actual mode/label/order. Apply identical capture/validation overhead
++  in both arms. Validate both images after each pair; check full state/cache at
++  cycle boundaries. Retain representative raw images and exact equality flags.
++- Report original-style p95(Reduced)-p95(Off) using only the experimental 100+100
++  samples, not all 300 physically Off frames. Also report signed paired R-O values
++  split by OR/RO, Off/Off A/B contrasts and first/second position effects. Use
++  nearest-rank p95 consistently. No alternative statistic can rescue a failed
++  original metric; this one diagnostic does not replace a three-repeat acceptance
++  matrix. If its original-style difference exceeds 500 us, state that clearly;
++  otherwise it is only this diagnostic being within that numerical allowance.
++- Run this declared experiment once. A state/image/work/cache failure invalidates
++  interpretation. A mode-linked cost is only a candidate if it survives both
++  pair orders on the same context, exceeds comparable control/position effects,
++  and paired stage timings plus source inspection identify differential code work.
++  If attribution remains inconclusive, stop and report it. Do not add a broad
++  profiler, optimize shared rendering blindly, change thread policy, or cycle runs
++  until a threshold passes. Any narrow evidenced repair requires independent
++  review and a separately declared baseline/candidate paired validation.
++
++## Boundaries and delivery
++
++Sol owns narrow C++ diagnostic changes after source review; Root owns controller,
++execution, analysis and records; Astra independently reviews method, source and
++results. Existing process/call/disk limits remain. Code changes require the focused
++and final repository checks. Keep the original 1,114-us Stage 3B failure, later
++passing matrix, and 671-us Stage 3C diagnostic separate and immutable.
++
++Real multilayer/animated-palette vehicle qualification stays explicitly blocked
++for lack of a qualified installed asset; do not download replacements or repeat
++that scan. Preserve owner checkouts/saves/apps, earlier checkpoints, default OFF,
++and the uncommitted/unpublished state. No scenery, renderer architecture, simulation,
++save-format or network changes are part of this slice.
++
++---
++
++## Historical Stage 3C and earlier records (preserved below)
++
+ # Active execution slice — Existing graphics qualification, Stage 3C (14 October 2026)
+ 
+ This is the **sole current implementation handoff**. The owner authorized the

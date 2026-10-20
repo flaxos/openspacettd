@@ -1,0 +1,31 @@
+{
+  "status": "CLEAR for bounded diagnostic completion; graphics qualification blocked and timing cause unproven",
+  "reviewer": "Astra independent agent",
+  "source_review": [
+    "No production Draw/cache/painter change",
+    "World/hidden mask precedes actual GetImage and raw decoding",
+    "Native palette precedence, alpha, zero-remap, all-black and later-layer coverage accounted for",
+    "Incomplete scan cannot support absence; eligible source contributions are not projected pixels or observed colour change",
+    "Persistent private renderers, 20 warmups each, 8 declared blocks of25, unique fresh frames, immutable simulation and restored render globals"
+  ],
+  "evidence_checks": [
+    "Independently recomputed all200 samples, quantiles, correlated tails and counter deltas",
+    "Verified all8PPMs exact to each other and to retained failed scene image",
+    "Verified historical fullFrozenState, camera, world, palette and cache exactness",
+    "Verified measured source/archive/binary/content hashes,77PNGhashes and2normal viewport pairs",
+    "Recomputed4cars\u00d78directions:32single-layer sequences, zero raw/effective animated indices"
+  ],
+  "findings": {
+    "off_median_us": 4177,
+    "off_p95_us": 5650,
+    "reduced_median_us": 4224.5,
+    "reduced_p95_us": 6321,
+    "descriptive_added_median_us": 47.5,
+    "descriptive_added_p95_us": 671
+  },
+  "limits": [
+    "671-us diagnostic difference does not replace the original failed1114-us matrix or unchanged500-us budget",
+    "Process counters include housekeeping; no render-only utilization or per-frame causal claim",
+    "Other engines/liveries/cargo states, real SpriteStack, animated vehicle epochs, human UAT and other platforms remain unqualified"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "reviewer": "Astra",
+  "outcome": "CLEAR for bounded Stage 2 engineering acceptance",
+  "verified": [
+    "Floor stays inside validated current gate tile; tests face away from gate frames",
+    "Final arrival image has opaque ground/rails; cyan gap removed",
+    "20 PNG hashes, checkpoint hashes, source/binary hashes",
+    "Both normal viewport pairs have zero pixel changes",
+    "47 native assertions, 2519 explicit calls, three mixed-car samples",
+    "Final OFF/ON builds and 36 focused tests"
+  ],
+  "limits": [
+    "One flat local gate pair",
+    "One four-car OpenGFX train",
+    "SDL offscreen",
+    "Human gameplay, cross-platform and Stage 3 graphics/performance remain separate"
+  ]
+}

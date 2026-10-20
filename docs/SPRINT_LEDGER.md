@@ -1,5 +1,96 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Cab look controls — 20 October 2026
+
+**TESTED automated; human UAT Pending.** The cab view gains drag-to-look, wheel zoom
+(field of view in the camera, used by the renderer's projection and culling) and
+focused-window hotkeys, replacing three fixed look buttons as the only control. A pure
+`CabViewLook` holds the window-local state and has a unit test. The window lifecycle
+fixture covers hotkeys, focus, wheel, scroll and recentring. Full Catch and CTest pass,
+and the native SDL cab and gate proofs pass on the new build.
+
+## Vehicle layers and palettes, Stage 3B — 14 October 2026
+
+**LOCAL bounded engineering acceptance complete; human/content UAT Pending.**
+One shared compositor replaces three first-layer consumers, preserving vehicle
+projection policies and world masking while handling up to eight ordered layers,
+palette precedence/brightness/transparency and checked union allocation.
+Seven native sprite-oracle cases are exact. OFF/ON builds, 37 focused tests
+(11,438 assertions), default Catch (545 cases/307,645 assertions) and all 564
+CTest cases have passing evidence; five initial setup failures passed targeted
+reruns. Independent source/image/data review is CLEAR.
+
+Final native proof has 270 cells/27,000 frames, 54 visible-vehicle cells, 231 PNGs,
+72 exact fixed Off baseline images and six exact normal-viewport pairs. Budgets
+pass unchanged. The earlier matrix remains failed for Reduced added p95 1,114 us
+against 500 us, cause unproven. Both matrices and all source/test failures are
+preserved in the [Stage 3B audit](audit/2026-10-14/cab-view-stage3b/README.md).
+Stage 1/2/3A checkpoints are exact; default OFF, uncommitted/unpublished status
+and owner-state preservation remain. Real stacked GRFs, animated palettes,
+translucent content, human comfort and cross-platform acceptance stay Pending.
+
+## Gate crossing effects, Stage 3A — 14 October 2026
+
+**LOCAL automated engineering complete; human UAT Pending.** Bounded edge lensing,
+opaque animated transit and <=250 ms actual-arrival settling are implemented
+with window-local Full / Reduced / Off controls. Final OFF/ON builds, 37 focused
+tests (11,198 assertions), three native repeats and independent review pass.
+The 216-cell matrix passes the frozen time/memory budget; maximum Full median
+added time is 0.629 ms and scene ratio 1.3398. All 27 Off baseline crops and six
+normal-viewport comparisons are exact. Raw failures and every repeat remain in
+the [Stage 3A audit](audit/2026-10-14/cab-view-stage3a/README.md).
+
+Stage 1/2 checkpoints remain immutable. Work stays uncommitted, unpublished and
+default OFF in the isolated clone. Owner repositories, saves and running apps
+were untouched. Human comfort, interactive performance, other platforms and
+broader Commonwealth sprite fidelity remain Pending. The current
+[active plan](ACTIVE_EXECUTION_PLAN.md) is the canonical handoff.
+
+## Local gate cab, Stage 2 — 14 October 2026
+
+**LOCAL engineering evidence complete; human UAT Pending.** The same isolated
+`codex/cab-view-stage1` lineage now handles a four-car local gate round trip,
+opaque transit, actual-world arrival, reversal and fresh-process reload. Each
+car is masked before image lookup; the camera resets across discontinuities.
+The final builds pass OFF/ON; 36/36 focused tests pass with 11,160 assertions;
+47 native assertions and independent Astra review pass. Both normal-viewport
+comparisons have zero changed pixels. A missing arrival floor and two fixture
+issues were repaired, with failed evidence retained.
+
+The [Stage 2 audit](audit/2026-10-14/cab-view-stage2/README.md) records source,
+binary/content/save hashes, 20 final screenshots, command/tick budgets and
+limitations. The Stage 1 patch/audit remain immutable. No commit, publication,
+owner-state change, simulation/economy/save-format/network change or Stage 3
+implementation is implied. The [current handoff](ACTIVE_EXECUTION_PLAN.md)
+remains canonical; older entries below preserve their dated status.
+
+
+## Experimental native train cab, Stage 1 — 14 October 2026
+
+**LOCAL implementation and automated native proof available; human UAT Pending; later stages planned only.**
+The owner approved an isolated default-OFF source port from
+`vaclavloubek/OpenTTD` `15.3-cabview-alpha1` (`b7bd17b04dde3379b2be33be40ba4d6fc9f5d391`)
+on live main `8182b3903f9a231d81b1823e82e6ec77e8a6a6ce`, branch
+`codex/cab-view-stage1`. The bounded loop is one native desktop cab on an owned
+train, read-only local controls, current accessible world, and safe close/disable
+at unsupported transit or lifecycle changes. Preserve native shared render state,
+one-map TileIndex, deterministic simulation and custom saves.
+
+Astra planned and independently reviewed the source; Sol implemented the bounded
+port. The parent executed OFF/ON builds and scoped fixtures, retaining failures
+and final results in the audit packet. A private SDL offscreen continuation
+produced nine verified screenshots and exposed two repaired GUI defects: fixed
+horizontal resizing and corrected left/right look direction. The final native
+run passed 14 assertions; 8 focused Catch cases and 7 CTest entries also passed.
+Independent source/image review is clear. This local handoff is uncommitted and
+unpublished. It does not accept visual fidelity, performance or the later stages.
+
+[Active contract and Sol handoff](ACTIVE_EXECUTION_PLAN.md#active-execution-slice--experimental-train-cab-stage-1-14-october-2026)
+· [three-stage roadmap](PROJECT_STATUS_AND_ROADMAP.md#cab-view-integration-sequence--14-october-2026)
+· [actual checks and remaining gates](audit/2026-10-14/cab-view/README.md).
+This entry adds no sprint number and grants no Stage 2/3 execution. Existing
+Commonwealth delivery and Pending records below retain their dated scope.
+
 ## A World Worth Connecting (Sprint 3) — 11 October 2026
 
 **TESTED isolated prototype on branch codex/capacity-or-reserve-pilot; human graphical UAT Pending.**

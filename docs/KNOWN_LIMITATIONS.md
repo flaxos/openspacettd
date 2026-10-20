@@ -1,5 +1,104 @@
 # OpenSpaceTTD Known Limitations
 
+## Cab look controls — 20 October 2026
+
+The cab view now has continuous look controls. Drag the view to look around (right
+button, or left in left-button scroll mode, following the map scroll setting). Use the
+wheel to zoom between 32 and 96 degrees. While the cab window has focus, A/D, W/S, R, B,
++/- and E look, recentre, look behind, zoom and cycle effects. Arrow keys are left to the
+map because OpenTTD scrolls it from key state regardless of focus. Pitch is limited to
+about 29 degrees each way. Look state stays local to the window and is never saved. A
+teleport or world change recentres the direction but keeps the zoom. Wider zoom draws
+more tiles and has not been performance-qualified; human UAT remains **Pending**.
+
+## Vehicle layers and palettes — Stage 3B, 14 October 2026
+
+The [Stage 3B audit](audit/2026-10-14/cab-view-stage3b/README.md) establishes ordered
+composition of up to eight supported vehicle layers and native palette semantics
+in all three cab consumers. Seven explicit installed-asset sequences match the
+native Normal-zoom renderer exactly; actual journey vehicles still have one layer.
+This does not accept a real SpriteStack NewGRF, arbitrary translucent 32bpp art,
+animated palette caching, human appearance/comfort or cross-platform behavior.
+Destination-dependent transparent modifiers and text-colour layers are skipped;
+aircraft shadow/rotor limits remain. The union limit is 512 pixels per axis and
+65,536 pixels in area; 4,096 cache entries are not a hard process-memory cap.
+
+The final three-repeat matrix passes unchanged budgets and all 72 fixed Off
+baseline comparisons are exact. An earlier matrix remains failed at Reduced
+added p95 1,114 us versus 500 us; its cause is unproven. Final passing evidence
+does not guarantee stable tails or interactive FPS. Default OFF, unpublished
+status, static-palette diagnostic scope and owner-state preservation remain.
+The Stage 3A/2/1 entries below are historical checkpoints.
+
+## Gate crossing effects — Stage 3A, 14 October 2026
+
+[Stage 3A automated engineering evidence](audit/2026-10-14/cab-view-stage3a/README.md)
+now covers bounded local lensing, opaque animated transit and actual-arrival
+settling. New cab windows default to Full effects; Reduced is static and Off
+matches Stage 2 pixels. The window-local choice is unsaved, and WITH_CAB_VIEW
+still defaults OFF. No simulation, save-format or network behavior changed.
+
+The frozen median-of-three budget passes at diagnostic 480×272 and 640×372 on
+one i7-7700K Linux SDL-offscreen fixture. Maximum Full scene ratio is 1.3398
+against a 1.35 limit: headroom is modest, and individual runs vary. These timings
+are private fixed-scale measurements, not interactive FPS or broad performance
+acceptance. The actual native screenshot widget is 480×270. Human comfort,
+other platforms/content and broader Commonwealth graphics remain Pending;
+composite vehicle sequences still use only seq[0]. Earlier dated entries below
+retain their original checkpoint scope.
+
+## Local gate cab boundary — Stage 2, 14 October 2026
+
+Stage 2 now has [automated engineering proof](audit/2026-10-14/cab-view-stage2/README.md)
+for one flat SW/NE local gate pair and one four-car train on Linux SDL offscreen.
+The cab shows a bounded local frame/floor, opaque transit and the authoritative
+arrival pose; it masks each car independently and resets on discontinuities.
+Native round trip, fresh-process reload and exact normal-viewport restoration
+pass. Human UAT, comfortable real-time use, cross-platform behavior and measured
+performance remain Pending. The simple gate surface is not full Commonwealth
+artwork; composite train/station/industry fidelity remains Stage 3.
+
+Ordinary tunnels, bridges/underbridges, stale/unlinked/external/conduit heads and
+server continuity remain unsupported. Camera state stays transient and unsaved.
+No production movement, economy, save-format or network-protocol change was
+needed. Default-OFF and single-owned-train boundaries remain. The Stage 1 entry
+below is a historical checkpoint, including its narrower portal suppression and
+purity coverage; the Stage 2 audit records the current full-consist/order proof.
+
+
+## Experimental cab-view boundary — 14 October 2026
+
+Stage 1 is implemented locally on isolated `codex/cab-view-stage1`; its actual
+verification must be read from the [current audit packet](audit/2026-10-14/cab-view/README.md),
+not inferred from the plan or upstream alpha. The feature is default OFF and
+limited to one owned native train cab within its current accessible world.
+Portal/tunnel/bridge travel, automatic world/server continuation, other vehicle types,
+persistent camera/settings, complete composite NewGRF fidelity and platform-wide
+performance acceptance are outside Stage 1. World/access/session/vehicle changes
+must close or disable safely. The initial port suppresses complete tunnel, bridge
+and gate tiles and tiles below bridges, including their ground contribution;
+these can appear as gaps. The cab also closes when its train is beneath a bridge.
+This conservative Stage 1 boundary prevents native tunnel reconstruction from
+using a cross-world or invalid gate endpoint; complete appearance is deferred.
+Native SDL offscreen painting, horizontal/vertical resize, look controls, a
+four-tile movement and cleanup now have automated screenshot proof. The ordinary
+viewport is pixel-identical below the toolbar after closure. Human acceptance,
+rolling-stock fidelity, comfortable camera behavior and cross-platform support
+remain Pending. The stepped offscreen timing is not interactive performance
+qualification. Native masking checks policy; the separate real-baseset CPU scene
+proves foreign terrain/vehicle pixel suppression. Purity snapshots cover RNG,
+date, cash, position, order count and front-engine cargo, not full serialization.
+
+Stage 2 and Stage 3 are [planned only](PROJECT_STATUS_AND_ROADMAP.md#cab-view-integration-sequence--14-october-2026).
+The main hazards are shared viewport state, access leaks through terrain/vehicle
+sampling or caches, reused vehicle identities, fork API drift, and CPU/memory
+cost. Upstream tunnel detection also matches native portal tiles; camera distance
+reset is not proof of portal support. Gate layer and multi-sprite vehicle fidelity
+need dedicated later captures. No custom save chunk, one-map architecture,
+simulation/network/economy rule or pending historical acceptance is changed by
+this presentation plan. Build storage is constrained; an unexecuted check must
+remain reported as blocked, never replaced by historical pass counts.
+
 ## A World Worth Connecting Boundaries (Sprint 3) — 11 October 2026
 
 - **Concrete Pilot Slice & Single Consumer Focus**: Sprint 3 expansion focuses on a single concrete raw resource connection (World 3 Silica extraction feeding Ballast Crusher at Node 4 in World 1) to prove bottleneck bypass and independent route redundancy. Additional resource chains, multi-stop distribution networks, or higher-tier expansion worlds remain deferred to subsequent Commonwealth milestones.

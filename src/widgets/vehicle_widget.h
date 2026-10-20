@@ -29,6 +29,8 @@ enum VehicleViewWidgets : WidgetID {
 	WID_VV_FORCE_PROCEED,      ///< Force this vehicle to pass a signal at danger.
 	WID_VV_FORCE_PROCEED_SEL,  ///< Container for 'force proceed' button, which can be hidden.
 	WID_VV_HONK_HORN,          ///< Honk the vehicles horn (not drawn on UI, only used for hotkey).
+	WID_VV_CAB_SELECT,         ///< Cab button container (feature-enabled native builds only).
+	WID_VV_CAB_VIEW,           ///< Open the local train cab view.
 };
 
 /** Widgets of the #RefitWindow class. */

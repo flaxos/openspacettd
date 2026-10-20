@@ -1,0 +1,486 @@
+{
+  "recorded_utc": "2026-10-14 22:20:07 UTC",
+  "status": "Bounded Stage3B engineering acceptance complete; human and real-content UAT Pending",
+  "baseline_commit": "8182b3903f9a231d81b1823e82e6ec77e8a6a6ce",
+  "branch": "codex/cab-view-stage1",
+  "publication": "none; uncommitted and default OFF",
+  "upstream": {
+    "repository": "vaclavloubek/OpenTTD",
+    "tag": "15.3-cabview-alpha1",
+    "commit": "b7bd17b04dde3379b2be33be40ba4d6fc9f5d391"
+  },
+  "builds": {
+    "off": {
+      "configuration": "OFF",
+      "cab_compile_units": [],
+      "feature_definitions": [],
+      "binary_hashes": {
+        "openttd": "478269d21778be7ddf66135c7fe61153f7b134dd42201f4982d714bb0ae4ab65",
+        "openttd_test": "0298152ba195dec0807521627d06c62e2eb0a64b129151a9db7c9dc2d2f701b8",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    },
+    "on": {
+      "configuration": "ON",
+      "cab_compile_units": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp"
+      ],
+      "feature_definitions": [
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_3d.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/cab_view_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfx.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/gfxinit.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_gate_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/tests/test_cab_view_native.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/train_cmd.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/vehicle_gui.cpp",
+        "/home/flax/Documents/Codex/2026-10-14/task/openspacettd-cabview/src/viewport.cpp"
+      ],
+      "binary_hashes": {
+        "openttd": "042a8995424f8e7ff2ecbb458c0abf006d8a8863971b6a884a8522741c44827f",
+        "openttd_test": "71478595cd950122c247fdf0cc6d8ec9e205384d8ed2cf44c8cf15e53621d01e",
+        "lang/english.lng": "84afa8fa909a0fbfc4dadf35037f9cc3a1122c5ae2b3a22be76fec14562d4138"
+      },
+      "compiler": "g++13.3.0",
+      "build_type": "Release",
+      "with_assert_defined": true
+    }
+  },
+  "source_checks": {
+    "recorded_utc": "2026-10-14 22:20:07 UTC",
+    "checks": [
+      {
+        "command": "python3 .github/file-descriptions.py",
+        "chunk_id": "49a5a6",
+        "wall_time_seconds": 0.100183485,
+        "exit_code": 0,
+        "original_token_count": 1,
+        "output": "OK\n"
+      },
+      {
+        "command": "python3 .github/unused-strings.py",
+        "chunk_id": "709248",
+        "wall_time_seconds": 0.973598468,
+        "exit_code": 0,
+        "original_token_count": 1,
+        "output": "OK\n"
+      },
+      {
+        "command": "git diff --check",
+        "chunk_id": "b2de2d",
+        "wall_time_seconds": 0.040595951,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    ],
+    "owner_repositories": {
+      "primary": {
+        "head": "c602e0f67ee53d8672a6118af3d0aedcad5bf4a7",
+        "status": "",
+        "path": "/home/flax/games/openspacettd"
+      },
+      "prior": {
+        "head": "e45efe79e0160674486c0be28bfca767f38abebc",
+        "status": "",
+        "path": "/home/flax/Documents/Codex/2026-10-11/task-2/ost-first-permanent-line"
+      }
+    }
+  },
+  "source_snapshot": "candidate/final-source.tar.gz",
+  "source_snapshot_sha256": "40e21af38ce97856eb19d04a8f65accf056efd13977a6d60d374b2155d7e1e2a",
+  "runtime_source_hashes": {
+    "CMakeLists.txt": "969f27df6d3a68da3fe867a63cc5c51eee7f319e2bdc5d91dba4fd3d17aded55",
+    "cmake/Options.cmake": "982b404fe0df64c9961f871f60d2f435c7400f3815c74f705dd3420ba178e236",
+    "scripts/test_cab_view_gate_native.py": "4fbae1d9e9c27ccd86b65b42c2582dd3b652548f4ac844333e27f2e00ea21587",
+    "src/CMakeLists.txt": "095eed94f4b6153a0b62c8f133a4a7a652c861eff6dfead706ea99388e1ea3bd",
+    "src/cab_view.h": "330eb6c0f54321bbe5b680fe5291576ef1c49543c48a08bc9f317ec2721f671b",
+    "src/cab_view_3d.cpp": "088a7d768833f77be957cc92b167c62b1ec71623f8ab442641da903ba2a8cbfb",
+    "src/cab_view_3d.h": "0dd7785f11039be84e6d4ded4bb84d1922ae1760426115dad33f4dbb70e7766b",
+    "src/cab_view_gui.cpp": "0a7b57724e5a1a05c8838f64028b7559d34510cab1acace0a0d9cfd5c7556e97",
+    "src/lang/english.txt": "6fe08501a7988b785d276c3528752ecd780a4eb52c48480c58c8ddba4c768581",
+    "src/tests/CMakeLists.txt": "b04993b16a4d494b9c18baf0ffc2701af24d366e1fbe273fecd9c02c876950d7",
+    "src/tests/test_cab_view.cpp": "a40a85c86a5ca57d89347292b2661b5edef00b03134c6e09df90c6512fc5a76c",
+    "src/tests/test_cab_view_gate_native.cpp": "d39b589b915a84af5db16bbacda3c20d604a9f686a2a48aaa5b3c259972e2868",
+    "src/tests/test_cab_view_native.cpp": "2435d64ce79f943a2c9f7c2da1d3fa9f74867e9f855abbc08e3c470d081bcffa",
+    "src/widgets/cab_view_widget.h": "4a14807fcc3f7207c1a5b44ecee3d6646115e80d97ca44f8d6de6b4d6cfdaa06"
+  },
+  "final_runtime_matches_measured_source_and_binaries": true,
+  "regressions": {
+    "focused_tests": 37,
+    "focused_assertions": 11438,
+    "default_catch": {
+      "passed": 545,
+      "assertions": 307645
+    },
+    "ctest": {
+      "total": 564,
+      "initial_passed": 559,
+      "initial_failed": 5,
+      "passing_targeted_reruns": 5,
+      "preparation": "Existing regression_files target copies four missing local test fixtures; private127.0.0.1 Megacity test rerun with sandbox socket restriction lifted.",
+      "aggregate_all_cases_have_passing_evidence": true,
+      "logs": [
+        "logs/stage3b-final-ctest.log",
+        "logs/stage3b-final-regression-ctest.log",
+        "logs/stage3b-final-loopback-ctest.log"
+      ]
+    }
+  },
+  "native_and_budget": {
+    "passed": true,
+    "runs": [
+      {
+        "repeat": 1,
+        "report_sha256": "d3b8bc7223d17e175d8fdca566e98821a488e71d61354ef2494a0f5d8c87acbd",
+        "explicit_calls": 2494,
+        "native_pngs": 77,
+        "fixed_comparisons": 24,
+        "normal_changed_pixels": [
+          0,
+          0
+        ],
+        "profile_cells": 90
+      },
+      {
+        "repeat": 2,
+        "report_sha256": "7da669af590d55567115fd810e9cd4950e8307186738d937ec4885d782f20de2",
+        "explicit_calls": 2495,
+        "native_pngs": 77,
+        "fixed_comparisons": 24,
+        "normal_changed_pixels": [
+          0,
+          0
+        ],
+        "profile_cells": 90
+      },
+      {
+        "repeat": 3,
+        "report_sha256": "42ca3e08d4c70f6ed682d91ba0b14262aa70bb544d3ac621074c26e83fe35cc7",
+        "explicit_calls": 2494,
+        "native_pngs": 77,
+        "fixed_comparisons": 24,
+        "normal_changed_pixels": [
+          0,
+          0
+        ],
+        "profile_cells": 90
+      }
+    ],
+    "profile_cells": 270,
+    "measured_frames": 27000,
+    "vehicle_cells": 54,
+    "fixed_image_comparisons": 72,
+    "actual_sequence_counts": [
+      1
+    ],
+    "max_sampled_rss_kib": 246404,
+    "max_vehicle_texture_payload_bytes": 6816,
+    "max_vehicle_union_pixels": 320,
+    "max_cache_payload_bytes": 1824532,
+    "max_vehicle_cold_us": 9778,
+    "measured_test_binary_sha256": "71478595cd950122c247fdf0cc6d8ec9e205384d8ed2cf44c8cf15e53621d01e",
+    "content_matches_baseline": true,
+    "modes": {
+      "off": {
+        "median_added_us": 0.0,
+        "median_added_p95_us": 0,
+        "median_direct_effect_us": 0.0,
+        "median_direct_effect_p95_us": 0,
+        "max_scene_total_ratio": 1.0
+      },
+      "reduced": {
+        "median_added_us": 157.0,
+        "median_added_p95_us": 317,
+        "median_direct_effect_us": 117.0,
+        "median_direct_effect_p95_us": 129,
+        "max_scene_total_ratio": 1.1035665294924555
+      },
+      "full": {
+        "median_added_us": 535.0,
+        "median_added_p95_us": 971,
+        "median_direct_effect_us": 524.0,
+        "median_direct_effect_p95_us": 555,
+        "max_scene_total_ratio": 1.29637234770705
+      }
+    },
+    "budget_sha256": "d537a3845871b328b8fff84a32ead0933cdd802370412247276068cc4eee7a49",
+    "positive_control_pixels_range": [
+      1419,
+      2594
+    ],
+    "vehicle_off_warm_medians_us_range": [
+      1932.5,
+      3444.0
+    ],
+    "max_off_delta_median_us": 128.0,
+    "scope": "One Linux SDL-offscreen fixture; private static-palette fixed-scale measurements; human, real SpriteStack NewGRF and animated-palette UAT Pending."
+  },
+  "native_sprite_oracle": {
+    "base_graphics": "OpenGFX",
+    "blitter": "32bpp-optimized",
+    "palette_source": "_cur_palette",
+    "max_channel_error_allowed": 1,
+    "order_positive_control": true,
+    "cases": [
+      {
+        "case": "two",
+        "layers": 2,
+        "entries": [
+          {
+            "sprite_id": 4943,
+            "palette_id": 0,
+            "effective_palette_id": 0
+          },
+          {
+            "sprite_id": 4944,
+            "palette_id": 779,
+            "effective_palette_id": 779
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 22030,
+        "warm_lookup_total_ns": 3565,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 1328
+      },
+      {
+        "case": "eight",
+        "layers": 8,
+        "entries": [
+          {
+            "sprite_id": 4943,
+            "palette_id": 0,
+            "effective_palette_id": 0
+          },
+          {
+            "sprite_id": 4944,
+            "palette_id": 783,
+            "effective_palette_id": 783
+          },
+          {
+            "sprite_id": 4937,
+            "palette_id": 0,
+            "effective_palette_id": 0
+          },
+          {
+            "sprite_id": 4938,
+            "palette_id": 783,
+            "effective_palette_id": 783
+          },
+          {
+            "sprite_id": 4943,
+            "palette_id": 0,
+            "effective_palette_id": 0
+          },
+          {
+            "sprite_id": 4944,
+            "palette_id": 783,
+            "effective_palette_id": 783
+          },
+          {
+            "sprite_id": 4937,
+            "palette_id": 0,
+            "effective_palette_id": 0
+          },
+          {
+            "sprite_id": 4938,
+            "palette_id": 783,
+            "effective_palette_id": 783
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 39171,
+        "warm_lookup_total_ns": 4781,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 2208
+      },
+      {
+        "case": "mixed-fallback",
+        "layers": 2,
+        "entries": [
+          {
+            "sprite_id": 4943,
+            "palette_id": 779,
+            "effective_palette_id": 779
+          },
+          {
+            "sprite_id": 2905,
+            "palette_id": 0,
+            "effective_palette_id": 783
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 23212,
+        "warm_lookup_total_ns": 2580,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 3632
+      },
+      {
+        "case": "red-over-blue",
+        "layers": 2,
+        "entries": [
+          {
+            "sprite_id": 2905,
+            "palette_id": 783,
+            "effective_palette_id": 783
+          },
+          {
+            "sprite_id": 2905,
+            "palette_id": 779,
+            "effective_palette_id": 779
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 25705,
+        "warm_lookup_total_ns": 3660,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 3632
+      },
+      {
+        "case": "blue-over-red",
+        "layers": 2,
+        "entries": [
+          {
+            "sprite_id": 2905,
+            "palette_id": 779,
+            "effective_palette_id": 779
+          },
+          {
+            "sprite_id": 2905,
+            "palette_id": 783,
+            "effective_palette_id": 783
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 18772,
+        "warm_lookup_total_ns": 2526,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 3632
+      },
+      {
+        "case": "crash",
+        "layers": 2,
+        "entries": [
+          {
+            "sprite_id": 4943,
+            "palette_id": 0,
+            "effective_palette_id": 804
+          },
+          {
+            "sprite_id": 4944,
+            "palette_id": 779,
+            "effective_palette_id": 804
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 17560,
+        "warm_lookup_total_ns": 2450,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 1328
+      },
+      {
+        "case": "black",
+        "layers": 2,
+        "entries": [
+          {
+            "sprite_id": 4943,
+            "palette_id": 0,
+            "effective_palette_id": 6140
+          },
+          {
+            "sprite_id": 4944,
+            "palette_id": 779,
+            "effective_palette_id": 6140
+          }
+        ],
+        "zoom": "normal",
+        "max_channel_error": 0,
+        "cold_build_ns": 18875,
+        "warm_lookup_total_ns": 2366,
+        "warm_lookups": 100,
+        "vehicle_payload_bytes": 1328
+      }
+    ]
+  },
+  "retained_failed_matrix": {
+    "status": "Failed frozen end-to-end p95 budget; not corrected or waived",
+    "cell": [
+      "profiles",
+      "cold",
+      "back_arrival_mixed",
+      640,
+      372,
+      "reduced"
+    ],
+    "limit_us": 500,
+    "median_added_p95_us": 1114,
+    "added_p95_us_by_repeat": [
+      1569,
+      866,
+      1114
+    ],
+    "added_median_us_by_repeat": [
+      24.5,
+      20.0,
+      130.0
+    ],
+    "direct_effect_us_all_samples": 0,
+    "off_regression_investigations": [],
+    "cause": "Unproven. Per-frame prepare/raster/output timing retained; zero direct effect does not erase end-to-end failure.",
+    "next": "One predeclared final three-repeat matrix after final test-only ordering control and OFF/ON builds. Production renderer unchanged. Preserve both matrices; do not loosen budgets or rerun until green."
+  },
+  "independent_review": "independent-review.json",
+  "preserved": {
+    "stage1_patch_sha256": "42754c64b80c8d2b7d892af4f3177180be81e33ba7fcfddca665145d531748fe",
+    "stage2_patch_sha256": "973c7f924ac1019703d8c853463ca0c44f5a0b98890fa0870015ac42c0ed6ccf",
+    "stage3a_patch_sha256": "ce6e3df04a7f30ddc31ab8fb946f31fb7ef114959f227912b4deaa4eafd17a08",
+    "stage3a_delivery_sha256": "4f2a833244cf441a7f63d1e207ec985cc3e3ee5691e297dd497f7077d98f1988",
+    "stage3a_audit_files_exact": true
+  },
+  "canonical_documents": {
+    "docs/ACTIVE_EXECUTION_PLAN.md": "d12513beba80c1b41891d0af73baf155eca4205020d8b3ef7a5266f2b9a96532",
+    "docs/KNOWN_LIMITATIONS.md": "61f8a879b5f9c440aee4e26726c3ea9dd97d17be13800008894a61eef937ceab",
+    "docs/PROJECT_STATUS_AND_ROADMAP.md": "be7a35de487e707e9847caab1d7822a3de5ad0f17cd80ff7e92a3885915c6860",
+    "docs/SPRINT_LEDGER.md": "cc6d763cdd30aa85fbe240328ce24e4e9e615e3ef0fb82f75d5f12e62623182c",
+    "demo/UAT-RESULTS.md": "bb30b6f165982bc698c9d5aea8c3759ab59291fa64f2dcb3e2f9e4a533626230"
+  },
+  "limitations": [
+    "One Linux offscreen fixture and installed content set",
+    "Actual journey sequences are single-layer; explicit diagnostic stacks establish composer behavior before mips",
+    "Real SpriteStack NewGRF, arbitrary translucent32bpp art, human comfort and cross-platform UAT Pending",
+    "Static-palette private profiling; live animated-palette cache fidelity unverified",
+    "Destination-dependent transparent modifiers and text-colour layers skipped; aircraft shadow/rotor limits retained",
+    "Initial matrix failed Reduced end-to-end p95; cause unproven, final pass does not guarantee stable tails",
+    "Per-union allocation limit and4096-entry policy are not a hardRSS bound"
+  ],
+  "archive": {
+    "file": "verification-evidence.tar.gz",
+    "passed": true,
+    "archive_sha256": "a198f685dac5cff05bbc436e3b812c43df590479dbdac8c19f32fa360b6fd4b0",
+    "verified_members": 2832,
+    "every_member_read_back": true,
+    "archive_bytes": 43861738,
+    "deduplication": {
+      "logical_members": 2832,
+      "unique_contents": 393,
+      "identical_content_hardlinks": 2439
+    },
+    "manifest": "archive-manifest.json"
+  }
+}
