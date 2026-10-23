@@ -1,5 +1,16 @@
 # OpenSpaceTTD Known Limitations
 
+## Works for new games — 23 October 2026
+
+- **No in-game choice of rules.** Only the config setting `commonwealth_classic_economy`
+  picks the classic rules; the new-game window does not show it.
+- **No off-world supply in Works games.** New spaceports, spaceport bridges and edge
+  conduits are refused. A Works save that already holds one keeps it, but it no longer
+  trades or extracts.
+- **Not played yet.** Generation, paid construction and reloads are proven headless only.
+  Whether an ordinary generated Works map is playable and well paced is human UAT,
+  still **Pending**.
+
 ## Reserve Works pilot run — 20 October 2026
 
 - **Reserve gives no visible benefit in the pilot fixture.** Each SILC delivery (210–270) is

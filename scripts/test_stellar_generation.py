@@ -13,6 +13,7 @@ def main():
     parser.add_argument('--legacy-industry-toggle', action='store_true', help='Verify integrated rules override the old random-industry preference')
     parser.add_argument('--seed', type=int, default=11, help='Native generation seed')
     parser.add_argument('--integrated', action='store_true', help='Verify the versioned Integrated Commonwealth content and saved rules')
+    parser.add_argument('--classic', action='store_true', help='With --integrated, generate under the classic monthly-basket rules instead of Works')
     args=parser.parse_args(); output=args.output.resolve(); output.mkdir(parents=True,exist_ok=False)
     text=(ROOT/'demo/wp11_slice.cfg').read_text().split('[newgrf]')[0]
     text=text.replace('generation_seed = 11', f'generation_seed = {args.seed}')
@@ -21,6 +22,7 @@ def main():
     text+='\n[newgrf]\nopenspacettd_industry_v4.grf =\nopenspacettd_rail_v3.grf =\nopenspacettd_equipment_v1.grf =\n'
     if args.integrated: text=text.replace('openspacettd_industry_v4.grf', 'openspacettd_integrated_v1.grf')
     if args.legacy_industry_toggle: text=text.replace('player_built_economy = true', 'player_built_economy = false')
+    if args.classic: text=text.replace('cst_sector = true', 'cst_sector = true\ncommonwealth_classic_economy = true')
     config=output/'stellar.cfg'; config.write_text(text)
     binary=args.binary.resolve(); engine=Engine(binary,config,output,'generation',world_count=7,seed=args.seed)
     try:
@@ -28,7 +30,7 @@ def main():
         require(len(initial['stellar_worlds'])==7,'Wrong stellar catalogue')
         if args.integrated:
             economy = initial['integrated_economy']
-            require(economy['version'] == 1, 'Integrated economy did not activate')
+            require(economy['version'] == (1 if args.classic else 2), 'Integrated economy did not activate with the configured rules')
             require(initial['player_built'], 'Integrated economy allowed legacy random industry expansion')
             require([row[1] for row in economy['roles']] == [2,1,0,0,0,1,0], 'Incorrect stable economic roles')
             require(not economy['cities'], 'Cities must start without injected reserves')

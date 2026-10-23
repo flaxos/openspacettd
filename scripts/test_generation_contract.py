@@ -72,7 +72,7 @@ class GenerationEvidenceTests(unittest.TestCase):
         for runner in (generation_contract, first_freight):
             with self.subTest(mode=runner.__name__), tempfile.TemporaryDirectory() as folder:
                 output = Path(folder) / 'evidence'
-                args = SimpleNamespace(output=output, binary=Path('/unused/openttd'), seeds=[11, 101, 2026], steps=500)
+                args = SimpleNamespace(output=output, binary=Path('/unused/openttd'), seeds=[11, 101, 2026], steps=500, classic=False)
                 with patch('test_integrated_economy.acceptance_inputs', return_value={}), \
                      patch('test_integrated_economy.ordinary_config', return_value='ordinary-config'), \
                      patch('test_integrated_economy.Engine', side_effect=RuntimeError('native generation failed')) as launch:

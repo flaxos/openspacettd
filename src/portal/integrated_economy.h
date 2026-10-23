@@ -74,7 +74,7 @@ class IntegratedEconomy
 	static void RestoreAccounting(const EconomyAccounting &value);
 	static bool Enabled();
 	static bool ContentReady();
-	static bool StartNewGame();
+	static bool StartNewGame(EconomyRulesVersion rules);
 	/** Activate v2 only for a staged, populated, one-region Aster Vale profile.
 	 * @param towns Existing Greybank, Stonecross and Merefield towns in profile order.
 	 * @return Whether the native authored profile was admitted and v2 activated.

@@ -1505,6 +1505,7 @@ struct StationViewWindow : public Window {
 		this->GetWidget<NWidgetCore>(WID_SV_SPACEPORT_ACTION)->colour = spaceport_colour;
 		this->SetWidgetDisabledState(WID_SV_SPACEPORT_ACTION,
 				!has_airport || st->owner != _local_company || st->owner == OWNER_NONE ||
+				IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2 ||
 				(spaceport != nullptr && spaceport->offworld_trade_tier >= 3));
 
 		extern const Station *_viewport_highlight_station;

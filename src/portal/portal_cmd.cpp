@@ -463,6 +463,8 @@ CommandCost CmdDesignateMegacity(DoCommandFlags flags, TownID town_id)
 
 CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
 {
+	/* Works materials come from real industries by rail; off-world supply would bypass them. */
+	if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) return CommandCost(STR_ERROR_NOT_IN_WORKS_ECONOMY);
 	if (!Station::IsValidID(station)) return CMD_ERROR;
 
 	Station *st = Station::GetIfValid(station);
@@ -507,6 +509,8 @@ CommandCost CmdDesignateSpaceport(DoCommandFlags flags, StationID station)
 
 CommandCost CmdBuildEdgeConduit(DoCommandFlags flags, TileIndex tile, DiagDirection dir, CargoType cargo, RailType railtype)
 {
+	/* Works materials come from real industries by rail; off-world supply would bypass them. */
+	if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) return CommandCost(STR_ERROR_NOT_IN_WORKS_ECONOMY);
 	CommandCost placement_result = PlanetManager::CheckConstructionPlacement(tile);
 	if (placement_result.Failed()) return placement_result;
 	if (!ValParamRailType(railtype)) return CMD_ERROR;
@@ -588,6 +592,8 @@ CommandCost CmdDestroyEdgeConduit(DoCommandFlags flags, TileIndex tile)
 
 CommandCost CmdConfigureSpaceportBridge(DoCommandFlags flags, StationID station, WorldID dest_world, uint32_t route_id, bool auto_dispatch)
 {
+	/* Works materials come from real industries by rail; off-world supply would bypass them. */
+	if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) return CommandCost(STR_ERROR_NOT_IN_WORKS_ECONOMY);
 	if (!Station::IsValidID(station)) return CMD_ERROR;
 
 	Station *st = Station::GetIfValid(station);

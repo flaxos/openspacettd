@@ -1,5 +1,16 @@
 # OpenSpaceTTD Current Architecture
 
+## New-game ruleset — 23 October 2026
+
+`IntegratedEconomy::StartNewGame(rules)` takes the ruleset from generation:
+Works (2) by default, or classic (1) when the config-only, not-saved
+`game_creation.commonwealth_classic_economy` is set. `ECON` still stores the ruleset,
+so loaded games keep theirs. Under Works the spaceport designation, spaceport bridge
+and edge-conduit build commands are refused, and the monthly off-world trade and
+conduit extraction do not run, so materials come only from native industries.
+Demolishing an existing conduit is still allowed. The connected authoring harness
+keeps choosing its ruleset explicitly.
+
 ## Optional Vale founding observer
 
 `World0Opening` observes native input deliveries, subsequent crusher batches,

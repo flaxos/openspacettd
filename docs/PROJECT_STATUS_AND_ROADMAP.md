@@ -1,5 +1,13 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Works for new games — 23 October 2026
+
+New Commonwealth maps start on the Works rules; the classic monthly-basket rules remain
+available through the config-only `commonwealth_classic_economy` setting, and saves keep
+their ruleset. Works games have no off-world supply. Automated generation, paid
+construction and reload proof passes under both rulesets; human play is **Pending**.
+[Ledger](SPRINT_LEDGER.md) and [limitations](KNOWN_LIMITATIONS.md).
+
 ## Vale Railway publication — source and automated proof
 
 The optional Aster Vale founding scenario is ready for draft review, stacked on

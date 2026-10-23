@@ -446,6 +446,7 @@ struct NetworkSettings {
 struct GameCreationSettings {
 	bool cst_sector; ///< Authored seven-world CST start, persisted through STLR.
 	bool player_built_economy; ///< New maps use surveyed primary sites. Saved in RSRC.
+	bool commonwealth_classic_economy; ///< New Commonwealth maps use the classic monthly-basket rules instead of Works. Config only; the ruleset itself is saved in ECON.
 	IndustryDensity resource_density; ///< Starter primary industry density in player-built maps.
 	uint32_t generation_seed; ///< noise seed for world generation
 	TimerGameCalendar::Year starting_year; ///< starting date

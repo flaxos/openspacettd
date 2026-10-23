@@ -91,7 +91,7 @@ def functional_campaign(args):
     def attempt(folder, result):
         folder.mkdir()
         config = folder / 'functional.cfg'
-        config.write_text(ordinary_config(11) + '\n[misc]\nlanguage = english.lng\n')
+        config.write_text(ordinary_config(11, classic=True) + '\n[misc]\nlanguage = english.lng\n')
         result.update(status='PARTIAL', assistance=[], native_transactions=[], samples=[], trace=[],
                       phases={name: 'NOT RUN' for name in ('preflight', 'setup', 'initial', 'cold')}, negative_control={'status': 'NOT RUN'}, cold_before={'status': 'NOT RUN'},
                       cold_after={'status': 'NOT RUN'})
@@ -435,9 +435,12 @@ def acceptance_inputs(binary):
                        for name in PACKS}}
 
 
-def ordinary_config(seed):
+def ordinary_config(seed, classic=False):
+    """Ordinary new-game config: Works rules, or the classic monthly-basket rules when classic."""
     text = (ROOT / 'demo/integrated_economy.cfg').read_text().replace(
         'min_active_clients = 0', 'min_active_clients = 1')
+    if classic:
+        text = text.replace('[game_creation]\n', '[game_creation]\ncommonwealth_classic_economy = true\n', 1)
     for name in PACKS:
         text = text.replace(f'openspacettd_{name}.grf =', f'{ROOT}/bin/newgrf/openspacettd_{name}.grf =')
     return text.replace('generation_seed = 11', f'generation_seed = {seed}')
@@ -496,10 +499,10 @@ def rejected_generation_mutation(engine, command, expected_error, expected_state
     return observed
 
 
-def validate_generated_state(state, seed):
+def validate_generated_state(state, seed, version):
     require(state['seed'] == seed, 'Resolved generator seed differs')
     require(state['money'] == state['loan'] == 100000 and state['max_loan'] == 300000, 'Nonordinary initial finances')
-    require(len(state['worlds']) == 7 and state['economy']['version'] == 1, 'Integrated seven-world rules inactive')
+    require(len(state['worlds']) == 7 and state['economy']['version'] == version, 'Integrated seven-world rules inactive')
     require(not state['trains'] and not state['stations'] and not state['research'] and not state['stocks'] and not state['hubs'],
             'Unexpected starting player assets or grants')
     require(all(tile[1] == 16 for tile in state['rail']), 'Player rail at start')
@@ -575,8 +578,9 @@ def generation_contract(args):
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     binary = args.binary.resolve()
+    version = 1 if args.classic else 2
     report = {'passed': False, 'human_uat': 'Pending', 'mode': 'ordinary-generation-contract',
-        'repetitions_per_seed': 2, 'simulation_advances': 0, 'seeds': [
+        'ruleset': 'classic' if args.classic else 'works', 'repetitions_per_seed': 2, 'simulation_advances': 0, 'seeds': [
             {'requested_seed': seed, 'passed': None, 'status': 'not_run', 'repetitions': [
                 {'repetition': repetition, 'passed': None, 'status': 'not_run'} for repetition in (1, 2)]}
             for seed in args.seeds], **acceptance_inputs(binary)}
@@ -589,7 +593,7 @@ def generation_contract(args):
             folder = output / str(seed) / str(repetition)
             folder.mkdir(parents=True)
             config = folder / 'newgame.cfg'
-            config.write_text(ordinary_config(seed))
+            config.write_text(ordinary_config(seed, args.classic))
             row.update(passed=False, status='running', config_sha256=hashlib.sha256(config.read_bytes()).hexdigest())
             engine = loaded = None
             try:
@@ -603,7 +607,7 @@ def generation_contract(args):
                     row['unowned_sha256'] = hashlib.sha256(unowned_save.read_bytes()).hexdigest()
                 initial = json.loads(engine.command('connected_economy generation-contract-start', 'CONNECTED generation-state '))
                 row['initial'] = initial
-                validate_generated_state(initial, seed)
+                validate_generated_state(initial, seed, version)
                 if reference is None:
                     reference = initial
                 else:
@@ -726,7 +730,7 @@ def first_freight(args):
         folder = output / str(seed)
         folder.mkdir()
         config = folder / 'newgame.cfg'
-        config.write_text(ordinary_config(seed))
+        config.write_text(ordinary_config(seed, classic=True))
         row.update(passed=False, status='running', plans=[], samples=[], config_sha256=hashlib.sha256(config.read_bytes()).hexdigest())
         engine = None
         try:
@@ -884,9 +888,10 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--steps', type=int, default=500)
     modes = parser.add_mutually_exclusive_group()
-    modes.add_argument('--first-freight', action='store_true', help='Ordinary generated IRON start; at most 240 advances/30 minutes per phase')
+    modes.add_argument('--first-freight', action='store_true', help='Classic-rules generated IRON start; at most 240 advances/30 minutes per phase')
     modes.add_argument('--generation-contract', action='store_true', help='Twice-fresh generation, ordinary paid joins/Core station and cold reloads; no progression')
     modes.add_argument('--functional-core', action='store_true', help='Reviewed seed11 ASSISTED FUNCTIONAL Core supply/Materials I; one GBP6m offline grant')
+    parser.add_argument('--classic', action='store_true', help='Generation contract under the classic monthly-basket rules instead of Works')
     parser.add_argument('--functional-recovery-from', type=Path, help='Preserved startup-only failure; explicit recovery handoff required')
     parser.add_argument('--functional-campaign-start-utc', help='Original campaign start, including UTC offset; preserves the four-hour deadline')
     parser.add_argument('--functional-startup-used-seconds', type=float, help='Prior startup wall usage carried into the 30-minute preflight cap')

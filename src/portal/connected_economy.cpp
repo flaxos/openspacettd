@@ -546,7 +546,7 @@ bool Prepare(bool resources = false, bool integrated = false)
 	}
 	if (integrated) {
 		IntegratedEconomy::Reset();
-		if (!IntegratedEconomy::StartNewGame()) return false;
+		if (!IntegratedEconomy::StartNewGame(EconomyRulesVersion::V1)) return false;
 	}
 	ConfigureIntegratedNodes();
 	for (uint y = 50; y <= 230; ++y)

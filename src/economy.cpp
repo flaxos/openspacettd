@@ -2156,8 +2156,11 @@ static const IntervalTimer<TimerGameEconomy> _economy_companies_monthly({ TimerG
  */
 static const IntervalTimer<TimerGameEconomy> _economy_spaceports_conduits_monthly({ TimerGameEconomy::Trigger::Month, TimerGameEconomy::Priority::None }, [](auto)
 {
-	SpaceportManager::ProcessOffWorldTrade();
-	EdgeConduitManager::ProduceAllConduits();
+	/* Off-world trade and edge extraction are not part of the Works economy. */
+	if (IntegratedEconomy::ActiveRules() != EconomyRulesVersion::V2) {
+		SpaceportManager::ProcessOffWorldTrade();
+		EdgeConduitManager::ProduceAllConduits();
+	}
 	for (const auto &city : MegacityManager::GetAllMegacities()) {
 		if (const Town *town = Town::GetIfValid(city.town_id)) MegacityManager::UpdatePopulation(city.town_id, town->cache.population);
 	}

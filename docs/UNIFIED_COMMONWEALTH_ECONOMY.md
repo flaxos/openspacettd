@@ -7,8 +7,11 @@ immutable logical world rectangles. Human graphical acceptance is Pending.
 ## Activation and compatibility
 
 New Commonwealth games with two or more worlds and the integrated content pack
-enable saved economy ruleset 1 and surveyed, player-built expansion, even when
-an older configuration has the random-industry preference selected. Use `openspacettd_integrated_v1.grf` together with
+enable the Works rules (saved economy ruleset 2; ruleset 1 before 23 October 2026)
+and surveyed, player-built expansion, even when an older configuration has the
+random-industry preference selected. The config-only `[game_creation]` setting
+`commonwealth_classic_economy = true` selects the classic monthly-basket ruleset 1
+for new maps instead. A loaded game keeps the ruleset saved in `ECON`. Use `openspacettd_integrated_v1.grf` together with
 rail v3 and equipment v1. Integrated content has OST01 version 5 / minimum
 compatible version 5; it replaces the industry pack in a **new game's** content
 selection. Do not add it to an existing save. The published industry v4, rail v3
