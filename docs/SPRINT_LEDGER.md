@@ -1,5 +1,23 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Alien Frontiers: The Hollowfrost Survey — 23 October 2026
+
+**TESTED automated; human UAT Pending.** The first authored alien map and mission:
+Hollowfrost, a crater-pocked ice frontier, joined by a public CST gate to Kestrel
+Forge, a basalt industrial world. Rare earths and silica go out through the gate to
+a monocrystal fab; blank crystals come back to an observatory and leave again as
+quantum crystals for a warehouse. A two-choice contract and a bonus round it off.
+Added the `alienworld` authoring and proof adapter with a slope-safe terrain toolkit,
+the read-only `GSPlanet` script API, the mission GameScript, `scripts/alien_worlds.py`
+(prepare, prove, shots, play), and the published opening
+`demo/alien_worlds/Hollowfrost-Survey.sav`. `MultiWorldGen::BuildPublicGatePair` is
+factored out of world generation unchanged. Volcanic worlds now draw ground in the
+charcoal palette from their visual profile. Proof: four new Catch cases, a native
+prepare with identical cold reload, and a full-speed one-train service that
+completes all three goals in about 600 game days and reloads identically. The
+generation contract passes for seeds 11, 101 and 2026.
+[Design](ALIEN_FRONTIERS.md) and [run record](audit/2026-10-23/hollowfrost/README.md).
+
 ## Small GUI fixes — 20 October 2026
 
 **TESTED automated; human UAT Pending.** Three small fixes:

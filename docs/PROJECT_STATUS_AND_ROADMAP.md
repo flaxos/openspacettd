@@ -1,5 +1,14 @@
 # OpenSpaceTTD Project Status and Roadmap
 
+## Alien Frontiers: The Hollowfrost Survey — 23 October 2026
+
+The first authored alien map and mission is ready for review: a crater-pocked ice
+frontier and a basalt forge world joined by a CST gate, with a crystal chain that
+crosses the gate both ways. Automated authoring, a full one-train run and reloads
+pass; human play is **Pending**. Next maps (Cinder Reach, Glass Rift) can reuse the
+same terrain toolkit, adapter and proof runner.
+[Design](ALIEN_FRONTIERS.md) · [run record](audit/2026-10-23/hollowfrost/README.md).
+
 ## Vale Railway publication — source and automated proof
 
 The optional Aster Vale founding scenario is ready for draft review, stacked on

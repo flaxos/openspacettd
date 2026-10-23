@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "portal/first_line_scenario.h"
 #include "portal/world0_scenario.h"
+#include "portal/alien_worlds.h"
 #include "train_cmd.h"
 #include "vehicle_cmd.h"
 #include "portal/portal_cmd.h"
@@ -4337,6 +4338,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("connected_economy", ConConnectedEconomy);
 	IConsole::CmdRegister("first_line", ConFirstLineScenario);
 	IConsole::CmdRegister("vale", ConWorld0Scenario);
+	IConsole::CmdRegister("alienworld", ConAlienWorld);
 	IConsole::CmdRegister("federation_test_fixture", ConFederationTestFixture);
 	IConsole::CmdRegister("resource_sites", ConResourceSites);
 	IConsole::CmdRegister("wp11_slice",              ConCommonwealthSlice);

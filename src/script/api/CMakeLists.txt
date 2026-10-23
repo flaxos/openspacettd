@@ -170,6 +170,7 @@ add_files(
     script_execmode.hpp
     script_firstline.hpp
     script_world0.hpp
+    script_planet.hpp
     script_game.hpp
     script_gamesettings.hpp
     script_goal.hpp
@@ -246,6 +247,7 @@ add_files(
     script_execmode.cpp
     script_firstline.cpp
     script_world0.cpp
+    script_planet.cpp
     script_game.cpp
     script_gamesettings.cpp
     script_goal.cpp

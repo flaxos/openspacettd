@@ -11,8 +11,10 @@
 #define CLEAR_FUNC_H
 
 #include "tile_cmd.h"
+#include "gfx_type.h"
 
-void DrawRoughLandTile(const TileInfo *ti);
+void DrawRoughLandTile(const TileInfo *ti, PaletteID pal);
+PaletteID GetBiomeGroundPalette(TileIndex tile);
 void DrawClearLandTile(const TileInfo *ti, uint8_t density);
 void GenerateRocks(TileIndex tile, uint32_t count);
 

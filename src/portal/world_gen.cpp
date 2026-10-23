@@ -435,33 +435,32 @@ bool MultiWorldGen::GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, c
 			ClaimGeneratedFootprint(pair_claims, *terminal_b);
 			claimed = std::move(pair_claims);
 
-			/* Construct gateway portal and high-capacity terminal for world A. */
-			MakeClear(t_a, ClearGround::Grass, 3);
-			MakeRailTunnel(t_a, OWNER_NONE, dir_a, RAILTYPE_BEGIN);
-			for (const PortalTerminalTile &part : terminal_a->tiles) MakeClear(part.tile, ClearGround::Grass, 3);
-			PortalTerminal::Build(*terminal_a, RAILTYPE_BEGIN, OWNER_NONE);
-
-			/* Construct gateway portal and high-capacity terminal for world B. */
-			MakeClear(t_b, ClearGround::Grass, 3);
-			MakeRailTunnel(t_b, OWNER_NONE, dir_b, RAILTYPE_BEGIN);
-			for (const PortalTerminalTile &part : terminal_b->tiles) MakeClear(part.tile, ClearGround::Grass, 3);
-			PortalTerminal::Build(*terminal_b, RAILTYPE_BEGIN, OWNER_NONE);
-
-			/* Register the bidirectional wormhole portal link */
 			uint32_t virt_dist = split_y ? (reg_b.min_y - reg_a.max_y - 1) : (reg_b.min_x - reg_a.max_x - 1);
-			virt_dist = std::max(2u, virt_dist);
-
-			if (config.cst_sector) { StellarNetwork::RegisterCSTGate(t_a); StellarNetwork::RegisterCSTGate(t_b); }
-			PortalRegistry::RegisterPortalPair(
-				t_a, dir_a, reg_a.id,
-				t_b, dir_b, reg_b.id,
-				virt_dist, true
-			);
+			BuildPublicGatePair(*terminal_a, *terminal_b, virt_dist, config.cst_sector);
 		}
 		UpdateSignalsInBuffer();
 	}
 
 	return true;
+}
+
+void MultiWorldGen::BuildPublicGatePair(const PortalTerminalLayout &terminal_a, const PortalTerminalLayout &terminal_b, uint32_t virtual_distance, bool cst_gate)
+{
+	for (const PortalTerminalLayout *terminal : {&terminal_a, &terminal_b}) {
+		/* Construct the gateway portal and its high-capacity terminal. */
+		MakeClear(terminal->gate_tile, ClearGround::Grass, 3);
+		MakeRailTunnel(terminal->gate_tile, OWNER_NONE, terminal->gate_dir, RAILTYPE_BEGIN);
+		for (const PortalTerminalTile &part : terminal->tiles) MakeClear(part.tile, ClearGround::Grass, 3);
+		PortalTerminal::Build(*terminal, RAILTYPE_BEGIN, OWNER_NONE);
+	}
+
+	/* Register the bidirectional wormhole portal link */
+	if (cst_gate) { StellarNetwork::RegisterCSTGate(terminal_a.gate_tile); StellarNetwork::RegisterCSTGate(terminal_b.gate_tile); }
+	PortalRegistry::RegisterPortalPair(
+		terminal_a.gate_tile, terminal_a.gate_dir, terminal_a.world_id,
+		terminal_b.gate_tile, terminal_b.gate_dir, terminal_b.world_id,
+		std::max(2u, virtual_distance), true
+	);
 }
 
 bool MultiWorldGen::FinalizeStellarZones()

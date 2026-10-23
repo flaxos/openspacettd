@@ -1,5 +1,16 @@
 # Human UAT results — recovery / v1.1
 
+## The Hollowfrost Survey — automated proof passed; human UAT pending (23 October 2026)
+
+**Human desktop status: Pending.** [Play guide](alien_worlds/PLAY.md).
+
+- **Desktop mission (about 30 minutes)**: run
+  `python3 scripts/alien_worlds.py play --profile /path/to/new/folder`. Read the Story
+  Book, lay rail along the graded line and through each gate terminal, order the survey
+  train as the guide says and unpause. Success: the three goals complete and the
+  closing page appears. Report whether the craters, lakes, snowy rock walls and
+  basalt read as alien worlds, whether the warehouse rule was clear, and how long it took.
+
 ## Reserve Works pilot — native run passed; human UAT pending (20 October 2026)
 
 **Human desktop status: Pending.** One approved headless run passed integrity: exactly 24 + 4
