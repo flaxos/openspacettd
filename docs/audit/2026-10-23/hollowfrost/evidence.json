@@ -1,0 +1,187 @@
+{
+  "human_uat": "Pending",
+  "published_opening": {
+    "path": "demo/alien_worlds/Hollowfrost-Survey.sav",
+    "sha256": "fbd5baee60d407393fe2039d0828927c40a768a49724a1cb9e5e000d655bcbcc"
+  },
+  "binary_sha256": "ca991d56a2f21c85ccac8773e1668b7a8b795e02d08980d3815d1d62afb6d6a8",
+  "prepare": {
+    "passed": true,
+    "audit": {
+      "invalid_slopes": 0,
+      "language": "en_US",
+      "rocks": 31539,
+      "rough": 43068,
+      "snow": 58525,
+      "trees": 2851,
+      "void": 6588,
+      "water": 1037
+    },
+    "cargo_text": [
+      {
+        "abbreviation": "SAND",
+        "label": "SAND",
+        "name": "Silica Sand & Quartz",
+        "quantity": "100\u00a0tonnes of silica sand",
+        "units": "100\u00a0tonnes"
+      },
+      {
+        "abbreviation": "RARE",
+        "label": "RARE",
+        "name": "Rare Earth Minerals",
+        "quantity": "100\u00a0tonnes of rare earth minerals",
+        "units": "100\u00a0tonnes"
+      },
+      {
+        "abbreviation": "BCRY",
+        "label": "BCRY",
+        "name": "Blank Data Crystals",
+        "quantity": "100 blank data crystals",
+        "units": "100\u00a0items"
+      },
+      {
+        "abbreviation": "QCRY",
+        "label": "QCRY",
+        "name": "Enriched Quantum Crystals",
+        "quantity": "100 quantum data crystals",
+        "units": "100\u00a0items"
+      }
+    ],
+    "worlds": [
+      {
+        "biome": 1,
+        "id": 0,
+        "name": "Hollowfrost",
+        "phase": 3,
+        "role": 0
+      },
+      {
+        "biome": 4,
+        "id": 1,
+        "name": "Kestrel Forge",
+        "phase": 2,
+        "role": 1
+      }
+    ],
+    "industries": [
+      {
+        "local": 20,
+        "world": 0,
+        "founder": 0
+      },
+      {
+        "local": 24,
+        "world": 0,
+        "founder": 0
+      },
+      {
+        "local": 28,
+        "world": 0,
+        "founder": 0
+      },
+      {
+        "local": 27,
+        "world": 1,
+        "founder": 0
+      }
+    ],
+    "stations": [
+      "Hollow Mine",
+      "Glass Flats",
+      "Rimehold Observatory",
+      "Kestrel Fab",
+      "Kestrel Survey Institute"
+    ],
+    "money": 2000000,
+    "portals": 1,
+    "pages": [
+      "The Hollowfrost Survey"
+    ],
+    "goals": [
+      {
+        "completed": false,
+        "progress": "SAND 0/180, RARE 0/90",
+        "text": "Deliver 180 silica and 90 rare earths to Kestrel Fab"
+      },
+      {
+        "completed": false,
+        "progress": "BCRY 0/60",
+        "text": "Deliver 60 blank data crystals to Rimehold Observatory"
+      },
+      {
+        "completed": false,
+        "progress": "QCRY 0/40",
+        "text": "Store 40 quantum crystals at Kestrel Survey Institute"
+      }
+    ],
+    "cold_reload_equal": true
+  },
+  "prove": {
+    "passed": true,
+    "reference_build": {
+      "debit": 13905,
+      "rail_cost": 13905,
+      "train": 0
+    },
+    "goal_days_first_seen": [
+      310,
+      231,
+      601
+    ],
+    "final_money": 2427927,
+    "pages": [
+      "The Hollowfrost Survey",
+      "A contract from the Survey Institute",
+      "The survey is complete"
+    ],
+    "goals": [
+      {
+        "completed": true,
+        "progress": "Done",
+        "text": "Deliver 180 silica and 90 rare earths to Kestrel Fab"
+      },
+      {
+        "completed": true,
+        "progress": "Done",
+        "text": "Deliver 60 blank data crystals to Rimehold Observatory"
+      },
+      {
+        "completed": true,
+        "progress": "Done",
+        "text": "Store 40 quantum crystals at Kestrel Survey Institute"
+      }
+    ],
+    "kestrel_stock": {
+      "BCRY": 0,
+      "MACH": 0,
+      "QCRY": 60,
+      "RARE": 0,
+      "SAND": 0,
+      "STEL": 0
+    },
+    "train": {
+      "crashed": false,
+      "id": 0,
+      "load": {
+        "BCRY": 30,
+        "PASS": 0,
+        "QCRY": 0,
+        "RARE": 0,
+        "SAND": 0
+      },
+      "lost": false,
+      "orders": 6,
+      "stopped": false,
+      "tile": 65869,
+      "world": 1
+    },
+    "cold_reload_equal": true
+  },
+  "screenshots": {
+    "hollowfrost-breach.png": "e582558ca7b47dba95294653322bf21f7770355fcb4fd3b78463a9929b42c35b",
+    "hollowfrost-hollow.png": "ca5e283d3aaa3de31136851a4cc14e53b1e1a27de9eb40b3cf6269fdfa6360be",
+    "hollowfrost-kestrel-fab.png": "c56279d2484c353f7d866efb4472ea7296d82f1d95910ce1483101713204ada7",
+    "hollowfrost-minimap.png": "bd517a6b52e34db7800a92dbf076683afb607ac45277bdecf10dade9aec21b01",
+    "hollowfrost-rimehold.png": "68bb72929e75af5ccdba1d257382bf375a6b4045db76dbf0a7208f5e66a38797"
+  }
+}

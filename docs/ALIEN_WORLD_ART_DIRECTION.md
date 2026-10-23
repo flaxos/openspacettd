@@ -64,6 +64,14 @@ remain unauthored. This does not reopen or renumber historical Sprint 38.
 - Validate at normal play zoom before reviewing close-up detail.
 - Ship fallback sprites for missing optional content and emit a clear content-manifest diagnostic in federation mode.
 
+## Wired so far
+
+Volcanic worlds draw bare, rough and rocky ground, including under trees, with the
+charcoal palette of their visual profile (23 October 2026). The Hollowfrost Survey
+shows it beside snow, snowy rock walls and icy gravel shores; see the
+[run record](audit/2026-10-23/hollowfrost/README.md). Other biome palettes stay
+unwired: in a temperate game their recolours do not reach ground colours.
+
 ## Outstanding visual acceptance
 
 Sprint 24 supplied procedural differentiation and portal palette states, but the specified comparison captures and signed visual review are not present. Sprint 38 must capture comparable overview and close gameplay views of all six biomes, including terrain, a junction, a station, an industry, a settlement and active/inactive portal gates. Acceptance requires immediate world recognition without reading the label, clear track and signal states, and no visible seams.

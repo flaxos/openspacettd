@@ -17,6 +17,8 @@
 #include <vector>
 #include <string>
 
+struct PortalTerminalLayout;
+
 /**
  * Procedural generator for multi-world planetary layouts.
  * Partitions the contiguous coordinate map into distinct planetary regions
@@ -80,6 +82,16 @@ public:
 	static bool ValidateGeneratedTerminals(std::string *error = nullptr);
 	static bool GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y);
 	static bool GenerateMultiWorldLayout(uint32_t size_x, uint32_t size_y, const Config &config);
+
+	/**
+	 * Build two planned public gate heads with their terminals and link them as one wormhole.
+	 * Every footprint tile must already be clear, flat and level; the caller flushes signals.
+	 * @param terminal_a Validated terminal plan in the first world.
+	 * @param terminal_b Validated terminal plan in the second world.
+	 * @param virtual_distance Virtual tunnel length between the heads; at least 2 is used.
+	 * @param cst_gate Whether both heads are also registered as CST sector gates.
+	 */
+	static void BuildPublicGatePair(const PortalTerminalLayout &terminal_a, const PortalTerminalLayout &terminal_b, uint32_t virtual_distance, bool cst_gate);
 
 	static std::vector<PlanetRegion> CalculateLayout(uint32_t size_x, uint32_t size_y);
 	static std::vector<PlanetRegion> CalculateLayout(uint32_t size_x, uint32_t size_y, const Config &config);

@@ -103,3 +103,19 @@ foreach(VALE_FILE info.nut main.nut)
 endforeach()
 add_custom_target(vale_files DEPENDS ${VALE_BINARY_FILES})
 add_dependencies(openttd vale_files)
+
+# Optional Alien Frontier mission; normal New Game continues to select no script.
+set(HOLLOWFROST_BINARY_FILES)
+foreach(HOLLOWFROST_FILE info.nut main.nut)
+    set(HOLLOWFROST_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/openspacettd_hollowfrost/${HOLLOWFROST_FILE})
+    set(HOLLOWFROST_BINARY ${CMAKE_BINARY_DIR}/game/openspacettd_hollowfrost/${HOLLOWFROST_FILE})
+    add_custom_command(OUTPUT ${HOLLOWFROST_BINARY}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/game/openspacettd_hollowfrost
+            COMMAND ${CMAKE_COMMAND} -E copy ${HOLLOWFROST_SOURCE} ${HOLLOWFROST_BINARY}
+            MAIN_DEPENDENCY ${HOLLOWFROST_SOURCE}
+            COMMENT "Copying The Hollowfrost Survey ${HOLLOWFROST_FILE}"
+    )
+    list(APPEND HOLLOWFROST_BINARY_FILES ${HOLLOWFROST_BINARY})
+endforeach()
+add_custom_target(hollowfrost_files DEPENDS ${HOLLOWFROST_BINARY_FILES})
+add_dependencies(openttd hollowfrost_files)

@@ -1,5 +1,23 @@
 # OpenSpaceTTD Known Limitations
 
+## Alien Frontiers: The Hollowfrost Survey — 23 October 2026
+
+- **Not played by a human yet.** Authoring, one reference train and reloads are proven
+  headless; pacing, readability and fun are **Pending** human UAT.
+- **Base graphics limit the palette.** In a temperate game, rock and rough ground draw
+  green and desert draws as snow. Hollowfrost uses snow, snowy rock and icy gravel;
+  Kestrel Forge uses the volcanic charcoal palette. Rail verges stay green, and mesa
+  cliffs read only faintly on basalt.
+- **The charcoal palette applies to every volcanic world**, including generated ones.
+  Their simulation is unchanged.
+- **One surveyed line.** Two trains on it need passing loops and signals that the
+  player builds; the reference proof uses one mixed train.
+- **The opening is not byte-reproducible.** A fresh preparation differs only in its
+  random savegame and federation identities.
+- **Mid-command saves.** If a player saves in the tick after the script creates the
+  contract page, its buttons can stop responding after a reload; the standard
+  contract then applies. Rewards and goals cannot repeat.
+
 ## Reserve Works pilot run — 20 October 2026
 
 - **Reserve gives no visible benefit in the pilot fixture.** Each SILC delivery (210–270) is

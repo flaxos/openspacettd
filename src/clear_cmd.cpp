@@ -22,6 +22,7 @@
 #include "table/clear_land.h"
 
 #include "portal/planet_manager.h"
+#include "portal/visual_overhaul.h"
 
 #include "safeguards.h"
 
@@ -69,13 +70,24 @@ void DrawClearLandTile(const TileInfo *ti, uint8_t density)
  * Draw a ClearGround::Rough tile.
  * @param ti The tile to draw.
  */
-void DrawRoughLandTile(const TileInfo *ti)
+void DrawRoughLandTile(const TileInfo *ti, PaletteID pal)
 {
 	if (ti->tileh != SLOPE_FLAT) {
-		DrawGroundSprite(SPR_FLAT_ROUGH_LAND + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
+		DrawGroundSprite(SPR_FLAT_ROUGH_LAND + SlopeToSpriteOffset(ti->tileh), pal);
 	} else {
-		DrawGroundSprite(_landscape_clear_sprites_rough[GB(TileHash(ti->x, ti->y), 0, 3)], PAL_NONE);
+		DrawGroundSprite(_landscape_clear_sprites_rough[GB(TileHash(ti->x, ti->y), 0, 3)], pal);
 	}
+}
+
+/**
+ * Recolour for bare ground in a world whose biome has its own crust: charcoal basalt on volcanic worlds.
+ * Other biomes keep the base set's own ground colours.
+ * @param tile Tile whose world decides the ground colour.
+ * @return Ground recolour palette, or PAL_NONE.
+ */
+PaletteID GetBiomeGroundPalette(TileIndex tile)
+{
+	return VisualOverhaulManager::ShouldRenderBasaltGlow(tile) ? VisualOverhaulManager::GetBiomeTerrainPalette(WorldBiome::Volcanic) : PAL_NONE;
 }
 
 /**
@@ -151,7 +163,7 @@ static void DrawTile_Clear(TileInfo *ti)
 			if (biome == WorldBiome::AridDesert || biome == WorldBiome::SubArctic) {
 				DrawGroundSprite(_clear_land_sprites_snow_desert[GetClearDensity(ti->tile)] + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
 			} else if (biome == WorldBiome::Volcanic) {
-				DrawRoughLandTile(ti);
+				DrawRoughLandTile(ti, GetBiomeGroundPalette(ti->tile));
 			} else {
 				DrawClearLandTile(ti, GetClearDensity(ti->tile));
 			}
@@ -159,7 +171,7 @@ static void DrawTile_Clear(TileInfo *ti)
 		}
 
 		case ClearGround::Rough:
-			DrawRoughLandTile(ti);
+			DrawRoughLandTile(ti, GetBiomeGroundPalette(ti->tile));
 			break;
 
 		case ClearGround::Rocks:
@@ -167,7 +179,7 @@ static void DrawTile_Clear(TileInfo *ti)
 				DrawGroundSprite(_clear_land_sprites_snow_desert[GetClearDensity(ti->tile)] + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
 				DrawGroundSprite(SPR_OVERLAY_ROCKS_BASE + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
 			} else {
-				DrawGroundSprite((HasGrfMiscBit(GrfMiscBit::SecondRockyTileSet) && (TileHash(ti->x, ti->y) & 1) ? SPR_FLAT_ROCKY_LAND_2 : SPR_FLAT_ROCKY_LAND_1) + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
+				DrawGroundSprite((HasGrfMiscBit(GrfMiscBit::SecondRockyTileSet) && (TileHash(ti->x, ti->y) & 1) ? SPR_FLAT_ROCKY_LAND_2 : SPR_FLAT_ROCKY_LAND_1) + SlopeToSpriteOffset(ti->tileh), GetBiomeGroundPalette(ti->tile));
 			}
 			break;
 

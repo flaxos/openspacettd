@@ -1,5 +1,17 @@
 # OpenSpaceTTD Current Architecture
 
+## Alien Frontier maps — 23 October 2026
+
+`alien_worlds.cpp` authors complete maps over a fresh, isolated, unowned game: it
+removes generated towns with native `DeleteTown`, registers immutable worlds,
+writes slope-safe corner heights from `AlienTerrain::Field`, and builds gates
+through `MultiWorldGen::BuildPublicGatePair`. Towns and signs are founded as deity,
+and everything company-owned is built with ordinary commands. No new save chunk: an
+authored map is ordinary regions, portals, industries and stations, and its mission
+script keeps its own state. `ScriptPlanet` (GSPlanet) exposes read-only world facts
+and company world stock. Volcanic clear and tree ground draws with the biome's
+charcoal palette via `GetBiomeGroundPalette`. [Details](ALIEN_FRONTIERS.md).
+
 ## Optional Vale founding observer
 
 `World0Opening` observes native input deliveries, subsequent crusher batches,

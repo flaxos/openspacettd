@@ -432,6 +432,8 @@ add_files(
     portal/world0_opening.h
     portal/world0_scenario.cpp
     portal/world0_scenario.h
+    portal/alien_worlds.cpp
+    portal/alien_worlds.h
     portal/connected_economy.cpp
     portal/connected_economy.h
     portal/commonwealth_slice.h

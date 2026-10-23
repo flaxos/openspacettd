@@ -3,6 +3,7 @@ add_test_files(
     test_first_line_funding.cpp
     test_first_line_approach.cpp
     test_first_permanent_line.cpp
+    test_alien_worlds.cpp
     test_world0_opening.cpp
     test_world0_startup.cpp
     test_world0_routes.cpp
