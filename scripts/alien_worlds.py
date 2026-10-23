@@ -216,14 +216,24 @@ def shots(args):
 
 
 def play(args):
+    """Open a fresh copy of the opening in a new or empty profile, or resume the newest save of an earlier one."""
     binary = args.binary.resolve()
     profile = args.profile.resolve()
-    profile.mkdir(parents=True, exist_ok=False)
-    config = write_config(binary, profile)
-    save = profile / 'save' / 'Hollowfrost-Survey.sav'
-    save.parent.mkdir()
-    shutil.copyfile(args.opening, save)
-    print(f'Profile {profile}; your copy of the opening is {save}', flush=True)
+    config = profile / 'hollowfrost.cfg'
+    saves = profile / 'save'
+    if config.is_file() and saves.is_dir():
+        save = max(saves.glob('*.sav'), key=lambda path: path.stat().st_mtime, default=None)
+        require(save is not None, f'{saves} has no saves to resume')
+        print(f'Resuming {save}', flush=True)
+    else:
+        require(not profile.exists() or (profile.is_dir() and not any(profile.iterdir())),
+                f'{profile} already holds other files; choose a new or empty folder')
+        profile.mkdir(parents=True, exist_ok=True)
+        config = write_config(binary, profile)
+        saves.mkdir()
+        save = saves / 'Hollowfrost-Survey.sav'
+        shutil.copyfile(args.opening, save)
+        print(f'New profile {profile}; your copy of the opening is {save}', flush=True)
     subprocess.run([str(binary), '-c', str(config), '-g', str(save)], cwd=ROOT, check=False)
 
 

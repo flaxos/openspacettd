@@ -11,8 +11,9 @@ From the repository root, after building:
 python3 scripts/alien_worlds.py play --profile /path/to/a/new/folder
 ```
 
-This copies `demo/alien_worlds/Hollowfrost-Survey.sav` into a fresh profile and
-opens it. Use Save As for your own progress. The game starts paused; read the Story
+This copies `demo/alien_worlds/Hollowfrost-Survey.sav` into a new or empty folder
+and opens it. Use Save As for your own progress; running the same command again
+resumes the newest save in that folder. The game starts paused; read the Story
 Book, then unpause.
 
 1. **Lay the line.** A graded line runs along row 128: from Hollow Mine inside the
