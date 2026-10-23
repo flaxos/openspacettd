@@ -54,6 +54,7 @@
 #include "portal/portal_registry.h"
 #include "portal/portal_terminal.h"
 #include "portal/planet_manager.h"
+#include "portal/integrated_economy.h"
 #include "portal/edge_conduit.h"
 #include "blueprint/blueprint_gui.h"
 
@@ -535,6 +536,8 @@ struct BuildRailToolbarWindow : Window {
 
 		bool can_build = CanBuildVehicleInfrastructure(VehicleType::Train);
 		for (const WidgetID widget : can_build_widgets) this->SetWidgetDisabledState(widget, !can_build);
+		/* Edge conduits produce cargo from the map edge, which the Works economy does not allow. */
+		if (IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2) this->SetWidgetDisabledState(WID_RAT_BUILD_CONDUIT, true);
 		if (!can_build) {
 			CloseWindowById(WindowClass::BuildSignal, TransportType::Rail);
 			CloseWindowById(WindowClass::BuildStation, TransportType::Rail);

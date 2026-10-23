@@ -1,5 +1,19 @@
 # OpenSpaceTTD Sprint Ledger & Index
 
+## Works for new games — 23 October 2026
+
+**TESTED automated; human UAT Pending.** Newly generated Commonwealth maps now start on
+the Works rules (ruleset 2) instead of the classic monthly-basket rules (ruleset 1).
+Saves keep their own ruleset. `commonwealth_classic_economy = true` under
+`[game_creation]` brings back the classic rules for new maps. Works games refuse
+spaceports, spaceport bridges and edge conduits with "Not part of the Works economy",
+grey out their buttons, and skip monthly off-world trade and conduit extraction.
+Proof: a Catch case covers the refusals and the classic fallback. The generation contract
+passes for seeds 11, 101 and 2026 under Works and for seed 11 under classic. The integrated
+stellar generation passes and cold-reloads under both rulesets. The IRON first-freight
+and functional-core runners now generate with the classic setting, so their recorded
+classic results still mean the same thing.
+
 ## Small GUI fixes — 20 October 2026
 
 **TESTED automated; human UAT Pending.** Three small fixes:

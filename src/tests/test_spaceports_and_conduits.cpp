@@ -11,6 +11,7 @@
 #include "../3rdparty/catch2/catch.hpp"
 
 #include "../map_func.h"
+#include "../portal/integrated_economy.h"
 #include "../portal/planet_manager.h"
 #include "../portal/spaceport_manager.h"
 #include "../portal/edge_conduit.h"
@@ -430,6 +431,60 @@ TEST_CASE("Edge Conduit - Construction and Demolition Commands")
 	UpdateSignalsInBuffer();
 	CHECK(!EdgeConduitManager::IsConduitTile(auto_tile));
 	CHECK(IsTileType(auto_tile, TileType::Clear));
+}
+
+TEST_CASE("Works economy refuses off-world supply and classic rules keep it", "[spaceport][edge-conduit][commonwealth-works]")
+{
+	SetupSprint9Environment();
+
+	TileIndex airport_tile = TileXY(40, 40);
+	REQUIRE(Station::CanAllocateItem());
+	Station *st = Station::Create(airport_tile);
+	REQUIRE(st != nullptr);
+	StationID sid = st->index;
+	st->owner = _current_company;
+	st->AddFacility(StationFacility::Airport, airport_tile);
+	st->airport.tile = airport_tile;
+	st->airport.w = 5;
+	st->airport.h = 5;
+	st->airport.type = AT_SMALL;
+
+	TileIndex conduit_tile = TileXY(51, 50);
+	MakeVoid(TileXY(50, 50));
+
+	IntegratedEconomy::Reset();
+	IntegratedEconomy::SetRulesVersion(EconomyRulesVersion::V2);
+	IntegratedEconomy::SetEnabled(true);
+	REQUIRE(IntegratedEconomy::ActiveRules() == EconomyRulesVersion::V2);
+
+	CommandCost spaceport = CmdDesignateSpaceport(DoCommandFlag::Execute, sid);
+	CHECK(spaceport.Failed());
+	CHECK(spaceport.GetErrorMessage() == STR_ERROR_NOT_IN_WORKS_ECONOMY);
+	CHECK(!SpaceportManager::IsSpaceport(sid));
+
+	CommandCost conduit = CmdBuildEdgeConduit(DoCommandFlag::Execute, conduit_tile, DiagDirection::NE, CargoType{0}, RAILTYPE_BEGIN);
+	CHECK(conduit.Failed());
+	CHECK(conduit.GetErrorMessage() == STR_ERROR_NOT_IN_WORKS_ECONOMY);
+	CHECK(!EdgeConduitManager::IsConduitTile(conduit_tile));
+	CHECK(IsTileType(conduit_tile, TileType::Clear));
+
+	/* A spaceport carried over from elsewhere still cannot open a supply bridge. */
+	REQUIRE(SpaceportManager::RegisterSpaceport(sid, WorldID{0}));
+	CommandCost bridge = CmdConfigureSpaceportBridge(DoCommandFlag::Execute, sid, WorldID{1}, 0, true);
+	CHECK(bridge.Failed());
+	CHECK(bridge.GetErrorMessage() == STR_ERROR_NOT_IN_WORKS_ECONOMY);
+	CHECK(!SpaceportManager::GetSpaceport(sid)->auto_dispatch);
+	CHECK(SpaceportManager::UnregisterSpaceport(sid));
+
+	/* The classic monthly-basket rules keep spaceports and conduits. */
+	IntegratedEconomy::SetRulesVersion(EconomyRulesVersion::V1);
+	CHECK(CmdDesignateSpaceport(DoCommandFlag::Execute, sid).Succeeded());
+	CHECK(SpaceportManager::IsSpaceport(sid));
+	CHECK(CmdBuildEdgeConduit(DoCommandFlag::Execute, conduit_tile, DiagDirection::NE, CargoType{0}, RAILTYPE_BEGIN).Succeeded());
+	UpdateSignalsInBuffer();
+	CHECK(EdgeConduitManager::IsConduitTile(conduit_tile));
+
+	IntegratedEconomy::Reset();
 }
 
 TEST_CASE("Edge Conduit - Frontier World Extraction Multiplier")

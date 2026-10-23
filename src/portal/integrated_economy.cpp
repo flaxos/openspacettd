@@ -158,10 +158,15 @@ bool IntegratedEconomy::ContentReady()
 		if (Cargo(label) == INVALID_CARGO) return false;
 	return CommonwealthPackManager::GetContentStatus().mode == CommonwealthContentMode::Active;
 }
-bool IntegratedEconomy::StartNewGame()
+/**
+ * Start the integrated economy for a newly generated map with at least two worlds.
+ * @param rules Ruleset: Works (V2) for ordinary new games, or the classic monthly-basket rules (V1).
+ * @return Whether the integrated economy started.
+ */
+bool IntegratedEconomy::StartNewGame(EconomyRulesVersion rules)
 {
-	if (!ContentReady() || PlanetManager::Count() < 2) return false;
-	SetRulesVersion(EconomyRulesVersion::V1);
+	if (!ContentReady() || PlanetManager::Count() < 2 || (rules != EconomyRulesVersion::V1 && rules != EconomyRulesVersion::V2)) return false;
+	SetRulesVersion(rules);
 	SetEnabled(true);
 	/* Surveyed, player-built expansion is part of this ruleset, not a legacy toggle. */
 	_settings_game.game_creation.player_built_economy = true;
@@ -195,19 +200,7 @@ bool IntegratedEconomy::StartAuthoredWorld0(const std::array<TownID, 3> &towns)
 }
 bool IntegratedEconomy::StartNewWorksPrototype()
 {
-	if (!ContentReady() || PlanetManager::Count() < 2) return false;
-	SetRulesVersion(EconomyRulesVersion::V2);
-	SetEnabled(true);
-	_settings_game.game_creation.player_built_economy = true;
-	ResourceSiteManager::SetEnabled(true);
-	for (auto &world : PlanetManager::GetAllRegions()) {
-		auto role = world.phase == WorldPhase::Phase1_Core		  ? EconomicRole::Core
-					: world.phase == WorldPhase::Phase2_Developed ? EconomicRole::Industrial
-																  : EconomicRole::Frontier;
-		if (world.name == "Tandil") role = EconomicRole::Industrial;
-		RegisterRole(world.id, role);
-	}
-	return true;
+	return StartNewGame(EconomyRulesVersion::V2);
 }
 void IntegratedEconomy::RegisterRole(WorldID world, EconomicRole role)
 {

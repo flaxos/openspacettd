@@ -51,6 +51,15 @@
 
 #include "safeguards.h"
 
+/**
+ * Ruleset for a newly generated Commonwealth map: Works, unless the classic monthly-basket rules were configured.
+ * @return Economy rules version.
+ */
+static EconomyRulesVersion NewGameEconomyRules()
+{
+	return _settings_game.game_creation.commonwealth_classic_economy ? EconomyRulesVersion::V1 : EconomyRulesVersion::V2;
+}
+
 
 void GenerateClearTile();
 void GenerateIndustries();
@@ -164,7 +173,7 @@ static void _GenerateWorld()
 			if (_game_mode != GameMode::Menu) FlatEmptyWorld(_settings_game.game_creation.se_flat_world_height);
 
 			ConvertGroundTilesIntoWaterTiles();
-			IntegratedEconomy::StartNewGame();
+			IntegratedEconomy::StartNewGame(NewGameEconomyRules());
 			Map::CountLandTiles();
 			IncreaseGeneratingWorldProgress(GenWorldProgress::Objects);
 
@@ -179,7 +188,7 @@ static void _GenerateWorld()
 					return;
 				}
 			}
-			IntegratedEconomy::StartNewGame();
+			IntegratedEconomy::StartNewGame(NewGameEconomyRules());
 			Map::CountLandTiles();
 
 			/* Only generate towns, tree and industries in newgame mode. */

@@ -5226,6 +5226,7 @@ STR_ERROR_CANNOT_BUILD_FARM_ON_VOLCANIC_WORLD                   :cannot construc
 STR_ERROR_CAN_T_BUILD_EDGE_CONDUIT                              :Can't build Edge Conduit here...
 STR_ERROR_CAN_T_REMOVE_EDGE_CONDUIT                             :Can't remove Edge Conduit...
 STR_ERROR_EDGE_CONDUIT_REQUIRES_VOID                            :Edge Conduit must be placed on a world boundary tile directly beside the void
+STR_ERROR_NOT_IN_WORKS_ECONOMY                                  :{WHITE}Not part of the Works economy: materials must come from real industries by rail
 STR_ERROR_CANNOT_BUILD_HQ_NOT_CORE_WORLD                     :Corporate Headquarters must be founded on a Phase 1 Core World
 STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_FUNDS                 :insufficient capital: Corporate Headquarters requires at least 5,000,000 Cr
 STR_ERROR_CANNOT_BUILD_HQ_INSUFFICIENT_PRESENCE              :corporate rail network must operate across at least 3 distinct world phases

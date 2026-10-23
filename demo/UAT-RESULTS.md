@@ -1,5 +1,17 @@
 # Human UAT results — recovery / v1.1
 
+## Works for new games — automated proof passed; human UAT pending (23 October 2026)
+
+**Human desktop status: Pending.** New Commonwealth maps now start on the Works rules.
+
+- **Desktop mission (5 minutes)**: launch `./build/openttd -x -c demo/integrated_economy.cfg`
+  and start a **New Game** with the integrated content. Success: in the rail toolbar the
+  edge-conduit button is greyed out, and a small airport's station window has its Spaceport
+  button greyed out. Then add
+  `commonwealth_classic_economy = true` under `[game_creation]` in a copy of the config
+  and start another new game: the edge-conduit button is available again.
+  Report anything that disagrees, and whether a Works map felt playable from the start.
+
 ## Reserve Works pilot — native run passed; human UAT pending (20 October 2026)
 
 **Human desktop status: Pending.** One approved headless run passed integrity: exactly 24 + 4
